@@ -893,3 +893,16 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .gf-name { clear: both; margin-top: 6px; }
 .pack > .btn { margin-top: auto; }
 .pack .ptags .x2 { text-transform: none; }
+/* v1.36.8: home side icons: one plate of old stone with a single bronze rim (no double frame);
+   important ones (offers, rewards waiting, events) get a soft pulsing ember glow */
+.sidebtn .ic { width: 46px; height: 46px; border: 2px solid #050308;
+  background: radial-gradient(circle at 50% 38%, rgba(70,52,64,.25), transparent 70%), linear-gradient(180deg, rgba(30,22,34,.45), rgba(10,6,12,.72)), var(--tex-stone, none) 0 0 / 64px 64px, #1a1220;
+  box-shadow: inset 0 0 0 1.5px #7a5c34, inset 0 2px 0 1.5px rgba(255,220,170,.08), 0 3px 0 #000; outline: none; animation: none; filter: none; }
+.sidebtn .ic img { filter: drop-shadow(0 1px 0 #000); }
+.sidebtn.hot .ic { box-shadow: inset 0 0 0 1.5px #d6a446, inset 0 2px 0 1.5px rgba(255,220,170,.12), 0 3px 0 #000; outline: none;
+  animation: sideglow 2.4s ease-in-out infinite; }
+@keyframes sideglow { 0%, 100% { filter: drop-shadow(0 0 2px rgba(255,170,70,.25)); } 50% { filter: drop-shadow(0 0 9px rgba(255,170,70,.75)); } }
+/* the picture inside carries the class .ic too: it must not get a second frame of its own */
+.sidebtn .ic > img, .sidebtn.hot .ic > img { border: 0; background: none; box-shadow: none; animation: none; outline: none; filter: drop-shadow(0 1px 0 #000); width: 32px; height: 32px; }
+.sidebtn > .ic { border: 2px solid #050308; }
+.sidebtn.hot > .ic { border-color: #050308; }
