@@ -126,16 +126,8 @@
       if (k.type !== 'xp' && k.type !== 'coin') lights.push({ x: k.x, y: k.y, r: k.type === 'tome' || k.type.startsWith('chest') ? 34 : 20, kind: 'item', color: k.type === 'artifact' ? '#ff70ff' : k.type === 'ulcer' ? '#8040c0' : k.type === 'chest_red' && k.sub ? '#60e070' : k.type === 'chest_red' ? '#ff3040' : k.type === 'chest_gold' ? '#ffd35a' : k.type === 'tome' ? '#80a0ff' : k.type === 'shard' ? '#ff40a0' : k.type.startsWith('rune_') ? DH.content.BUFFS[k.type.slice(5)].color : null });
       else if (k.type === 'xp' && (k.val >= 10 || k.cluster)) lights.push({ x: k.x, y: k.y, r: 12, kind: 'gem', color: GEM_COL[k.val] || '#ff3040' });
     }
-    // shadows
-    g.fillStyle = 'rgba(0,0,0,0.38)';
-    for (const e of this.enemies) {
-      const x = e.x - cx, y = e.y - cy; if (x < -60 || y < -60 || x > W + 60 || y > H + 60) continue;
-      g.beginPath(); g.ellipse(x, y + e.r * 0.9 * (e.scale > 1 || e.boss ? 1.3 : 1), e.r * 0.95, e.r * 0.35, 0, 0, TAU); g.fill();
-    }
-    for (const al of this.allies) if (al.kind !== 'spirit') { g.beginPath(); g.ellipse(al.x - cx, al.y - cy + 6, 6, 2, 0, 0, TAU); g.fill(); }
-    g.beginPath(); g.ellipse(p.x - cx, p.y - cy + 8, 6, 2.5, 0, 0, TAU); g.fill();
-    // projected shadows from braziers / candles / crystals
-    { const vis = [p]; for (const e of this.enemies) { const x = e.x - cx, y = e.y - cy; if (x > -40 && y > -40 && x < W + 40 && y < H + 40) vis.push(e); } for (const al of this.allies) vis.push(al); this.renderCastShadows(g, vis, lights, cx, cy); }
+    // shadows: soft contact blobs and silhouettes thrown by nearby lights (vfx.js)
+    this.renderShadows(g, cx, cy, W, H, lights);
     // power-up auras under the hero
     for (const bk in this.buffs) if (this.buffs[bk] > 0) {
       const col = DH.content.BUFFS[bk].color, a = this.buffs[bk] < 3 ? (Math.sin(now * 20) > 0 ? 0.7 : 0.2) : 0.7, rr = 11 + Math.sin(now * 6 + bk.length) * 1.5;

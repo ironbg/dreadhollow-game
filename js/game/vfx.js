@@ -100,16 +100,62 @@
   /* ---------------- projected shadows ---------------- */
   const SHADOW_LIGHTS = { brazier: 1, candle: 0.55, crystal: 0.6, lava: 0.7, torch: 1 };
   const silhouetteCache = new WeakMap();
+  /** A sprite's shadow shape, made once per frame image: black, fading from the feet toward the head (the far end of
+   *  a real shadow is lighter and blurrier), its edge softened by a pixel. */
   function silhouette(img) {
     let s = silhouetteCache.get(img);
-    if (!s) { s = G.canvas(img.width, img.height); const g = s.getContext('2d'); g.drawImage(img, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#000'; g.fillRect(0, 0, s.width, s.height); silhouetteCache.set(img, s); }
+    if (!s) {
+      const w = img.width, h = img.height, t = G.canvas(w, h), tg = t.getContext('2d');
+      tg.drawImage(img, 0, 0); tg.globalCompositeOperation = 'source-in';
+      const gr = tg.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(0,0,0,0.45)'); gr.addColorStop(0.7, 'rgba(0,0,0,0.9)'); gr.addColorStop(1, '#000');
+      tg.fillStyle = gr; tg.fillRect(0, 0, w, h);
+      s = G.canvas(w, h); const g = s.getContext('2d');
+      g.filter = 'blur(' + Math.max(0.6, w / 60).toFixed(1) + 'px)'; g.drawImage(t, 0, 0); g.filter = 'none';
+      silhouetteCache.set(img, s);
+    }
     return s;
   }
-  /** Sprites lean away from the nearest static light: a flattened, skewed black silhouette anchored at the feet. */
+  /* Contact shadows: a soft blob (dense under the feet, fading out) pre-drawn at the exact pixel size it is shown at,
+   * so each foe costs one unscaled image copy instead of a path fill, and the edge is soft instead of a hard ring. */
   const MAX_SHADOWS = 40;
-  R.renderCastShadows = function (g, ents, lights, cx, cy) {
+  const blobCache = new Map();
+  function blob(wp, hp) {
+    const key = wp * 1000 + hp; let c = blobCache.get(key);
+    if (c) return c;
+    c = G.canvas(wp, hp); const b = c.getContext('2d');
+    b.setTransform(wp / 2, 0, 0, hp / 2, wp / 2, hp / 2); // unit circle -> the ellipse
+    const gr = b.createRadialGradient(0, 0, 0, 0, 0, 1);
+    gr.addColorStop(0, 'rgba(0,0,0,0.64)'); gr.addColorStop(0.55, 'rgba(0,0,0,0.5)'); gr.addColorStop(0.85, 'rgba(0,0,0,0.18)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    b.fillStyle = gr; b.fillRect(-1, -1, 2, 2);
+    if (blobCache.size > 200) blobCache.clear();
+    blobCache.set(key, c); return c;
+  }
+  const near = []; // reused each frame: who may throw a projected shadow
+  R.renderShadows = function (g, cx, cy, W, H, lights) {
+    const px = DH.view.px, rd = this.rd, p = this.player;
+    const put = (x, y, rw, rh) => { // centred at x, y (world units), snapped to the buffer grid, drawn 1:1
+      const wp = Math.max(2, Math.round(rw * px)), hp = Math.max(2, Math.round(rh * px));
+      g.drawImage(blob(wp, hp), rd(x - rw / 2), rd(y - rh / 2), wp / px, hp / px);
+    };
+    // a flier's shadow is smaller, fainter and further below it: it is off the ground
+    for (const e of this.enemies) {
+      const x = e.x - cx, y = e.y - cy; if (x < -60 || y < -60 || x > W + 60 || y > H + 60) continue;
+      const fly = e.def.fly, big = e.scale > 1 || e.boss ? 1.3 : 1;
+      if (fly) { g.globalAlpha = 0.6; put(x, y + e.r * 1.6 * big, e.r * 1.5, e.r * 0.55); g.globalAlpha = 1; }
+      else put(x, y + e.r * 0.9 * big, e.r * 2.1, e.r * 0.8);
+    }
+    for (const al of this.allies) if (al.kind !== 'spirit') put(al.x - cx, al.y - cy + 6, 14, 4.5);
+    put(p.x - cx, p.y - cy + 8, 15, 5.5);
     if (this.settings.lowFx) return;
-    const L = lights.filter((l) => SHADOW_LIGHTS[l.kind] || l.cast);
+    near.length = 0; near.push(p);
+    for (const e of this.enemies) { const x = e.x - cx, y = e.y - cy; if (x > -40 && y > -40 && x < W + 40 && y < H + 40) near.push(e); }
+    for (const al of this.allies) near.push(al);
+    this.castShadows(g, near, lights, cx, cy);
+  };
+  /** Sprites lean away from the nearest static light: a flattened, skewed silhouette anchored at the feet. */
+  R.castShadows = function (g, ents, lights, cx, cy) {
+    const L = [];
+    for (const l of lights) if (SHADOW_LIGHTS[l.kind] || l.cast) L.push(l);
     // moving light: a lightning strike throws hard shadows for an instant, an explosion while it burns
     for (const f of this.fx) {
       const k = 1 - f.life / f.max;
@@ -119,8 +165,9 @@
     if (!L.length) return;
     const p = this.player;
     const cap = L.some((l) => l.flash) ? 20 : MAX_SHADOWS; // a lightning flash throws the nearest shadows only
-    if (ents.length > cap) { // only the ones nearest the hero
-      ents = ents.slice().sort((a, b) => ((a.x - p.x) ** 2 + (a.y - p.y) ** 2) - ((b.x - p.x) ** 2 + (b.y - p.y) ** 2)).slice(0, cap);
+    if (ents.length > cap) { // only the ones nearest the hero (the hero stays first)
+      for (const e of ents) e._sd = (e.x - p.x) * (e.x - p.x) + (e.y - p.y) * (e.y - p.y);
+      ents.sort((a, b) => a._sd - b._sd); ents.length = cap;
     }
     for (const e of ents) {
       let best = null, bd = Infinity, bw = 0;
@@ -138,7 +185,7 @@
       // project the sprite onto the floor: its "up" axis maps to the direction away from the light, flattened
       let sy = -dirY * len * 0.75; if (Math.abs(sy) < 0.38) sy = sy > 0 ? 0.38 : -0.38;
       g.save();
-      g.globalAlpha = Math.min(0.6, 0.75 * k);
+      g.globalAlpha = Math.min(0.7, 0.88 * k);
       g.translate(e.x - cx, feet - cy);
       g.transform(1, 0, -dirX * len, sy, 0, 0);
       g.drawImage(silhouette(face < 0 ? G.flip(img) : img), -(face < 0 ? s.w - s.ox : s.ox) * scale, -(h - 1.5 * scale), w, h);
