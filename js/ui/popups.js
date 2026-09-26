@@ -181,6 +181,82 @@
   };
 
   /* ---------------- Login calendar ---------------- */
+  /* ---------------- The Seven Nights (newcomer event) ---------------- */
+  const NB = E.NEWBIE, ROMAN = ['0', 'I', 'II', 'III', 'IV', 'V'];
+  /** A task's text: its own wording for a single one where there is one ('nb.t.runs1'). */
+  ui.nbText = (tk) => {
+    const k = 'nb.t.' + tk.k + (tk.n === 1 && DH.i18n.has('nb.t.' + tk.k + '1') ? '1' : '');
+    return t(k, { n: U.fmt(tk.n), m: Math.round(tk.n / 60), a: ROMAN[tk.n] || tk.n, stage: tk.st ? t('stage.' + tk.st + '.name') : '' });
+  };
+  /** A long countdown in days and hours ("6d 4h"); under a day, hours and minutes. */
+  ui.fmtDays = (ms) => ms >= 86400000 ? t('nb.dh', { d: Math.floor(ms / 86400000), h: Math.floor(ms % 86400000 / 3600000) }) : U.fmtDuration(ms);
+  const nbProg = (tk, v) => tk.k === 'survive' ? U.fmtTime(v) + '/' + U.fmtTime(tk.n) : tk.k === 'agony' ? ROMAN[v] + '/' + ROMAN[tk.n] : U.fmt(v) + '/' + U.fmt(tk.n);
+  /** Where "Go" takes the player for each kind of task. */
+  function nbGo(tk) {
+    const battle = ['runs', 'kills', 'bosses', 'elites', 'champions', 'tomes', 'wins', 'level', 'survive', 'clear', 'agony', 'acct'];
+    if (battle.includes(tk.k)) { if (tk.st && ui.stageUnlocked(tk.st)) { S().selectedStage = tk.st; DH.save.persist(); } ui.go('home'); }
+    else if (tk.k === 'shrine') ui.go('shrine', 'bless');
+    else if (tk.k === 'brew') ui.go('shrine', 'brew');
+    else if (['equip', 'gearLv', 'merge'].includes(tk.k)) ui.go('armory', 'gear');
+    else if (tk.k === 'heroes') ui.go('armory', 'heroes');
+    else if (tk.k === 'chests') ui.go('shop', 'chests');
+    else if (tk.k === 'ads') ui.go('shop', 'free');
+    else if (tk.k === 'deeds') ui.go('quests', 'deeds');
+  }
+  ui.openNights = () => {
+    const day = Math.min(NB.nights, M.nbDay());
+    let night = day;
+    for (let d = 1; d <= day; d++) if (M.nbClaimable(d)) { night = d; break; } // open on the first night with something to claim
+    const m = ui.modal({ title: t('nb.title'), cls: 'nights', onClose: () => ui.refresh(), body: () => h('div') });
+    const claimed = (title, r) => { DH.audio.play('reward'); ui.rewardPopup(title, r); draw(); };
+    const draw = () => {
+      const seals = M.nbSeals(), nb = M.newbie(), ms = NB.milestones;
+      // the track: seven rewards over a bar that fills segment by segment
+      let fill = 0;
+      for (let i = 0; i < ms.length; i++) {
+        const lo = i ? ms[i - 1].at : 0, f = Math.max(0, Math.min(1, (seals - lo) / (ms[i].at - lo)));
+        if (f <= 0) break;
+        fill = i === 0 ? f * 0.5 / ms.length : (i - 0.5 + f) / ms.length;
+      }
+      const track = h('div.nb-track',
+        h('div.nb-ms-row', ms.map((x, i) => {
+          const pv = M.rewardPreview(x.r)[0], got = !!nb.ms[i], ready = M.nbMilestoneReady(i);
+          return h('button.nb-ms' + (got ? '.got' : ready ? '.ready' : '') + (i === ms.length - 1 ? '.big' : '') + (pv.rarity != null ? '.rar' + pv.rarity : ''),
+            { onclick: () => { if (ready) { const r = M.nbClaimMilestone(i); if (r) claimed(t('nb.track'), r); } else { click(); ui.toast(ui.isWord(pv.text) ? pv.text : pv.text + ' · ' + t('nb.at', { n: x.at }), null); } } },
+            A.img(pv.icon), h('b', pv.rarity != null || ui.isWord(pv.text) ? '' : pv.text), got ? h('i.nb-tick', A.img('u_check', 'ci')) : !ready ? h('i.nb-lock', A.img('u_lock', 'ci')) : null);
+        })),
+        h('div.nb-bar', h('i', { style: { width: (fill * 100) + '%' } })),
+        h('div.nb-at-row', ms.map((x) => h('span' + (seals >= x.at ? '.on' : ''), x.at))));
+      const days = h('div.nb-days', Array.from({ length: NB.nights }, (_, i) => {
+        const d = i + 1, open = d <= M.nbDay(), n = open ? M.nbClaimable(d) : 0;
+        return h('button.nb-day' + (d === night ? '.on' : '') + (open ? '' : '.shut'), { onclick: () => { click(); night = d; draw(); } },
+          t('nb.night', { n: d }), !open ? h('i.nb-lock', A.img('u_lock', 'ci')) : n ? h('span.badge', n) : null);
+      }));
+      const list = h('div.nb-list', NB.tasks[night - 1].map((tk, i) => M.nbTask(night, i))
+        .map((x, i) => ({ x, i })).sort((a, b) => (b.x.done && !b.x.claimed && b.x.open) - (a.x.done && !a.x.claimed && a.x.open) || a.x.claimed - b.x.claimed)
+        .map(({ x, i }) => {
+          const ready = x.open && x.done && !x.claimed, pv = M.rewardPreview(x.tk.r)[0];
+          const act = x.claimed ? h('span.nb-got', A.img('u_check', 'ci'), t('nb.claimed'))
+            : !x.open ? h('span.nb-lockt', t('nb.locked'))
+            : ready ? h('button.btn.small.red.shine', { onclick: () => { const r = M.nbClaimTask(night, i); if (r) claimed(t('nb.title'), r); } }, t('common.claim'))
+            : x.tk.k === 'login' ? h('span.nb-lockt', t('nb.tomorrow'))
+            : h('button.btn.small.ghost', { onclick: () => { click(); m.close(); nbGo(x.tk); } }, t('nb.go'));
+          return h('div.nb-row' + (ready ? '.ready' : '') + (x.claimed ? '.claimed' : '') + (!x.open ? '.shut' : ''),
+            h('span.nb-seal', A.img('u_seal'), h('b', x.tk.s)),
+            h('div.nb-tx', h('span', ui.nbText(x.tk)), h('span.nb-p' + (x.done ? '.ok' : ''), ' (' + nbProg(x.tk, x.v) + ')')),
+            h('span.nb-rw', A.img(pv.icon), h('b', pv.text)),
+            act);
+        }));
+      const ends = M.nbEndsIn();
+      m.set(h('div',
+        h('div.nb-head', h('div.nb-medal', A.img('u_seal'), h('b', seals)), h('div.grow', h('div.small', t('nb.sub')), h('div.small.goldtxt', t('nb.ends', { t: ui.fmtDays(ends) })))),
+        track, days,
+        night > M.nbDay() ? h('div.center.small.muted', { style: { margin: '6px 0' } }, t('nb.opens', { n: night, t: ui.fmtDays(Math.max(0, new Date(nb.start + 'T00:00:00').getTime() + (night - 1) * 86400000 - Date.now())) })) : null,
+        list));
+    };
+    draw();
+  };
+
   ui.openLogin = () => {
     const s = S(), pending = M.loginPending();
     const cur = s.login.index % 7;

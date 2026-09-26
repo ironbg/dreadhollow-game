@@ -19,7 +19,7 @@
       energy: 30, energyTs: now,
       accountLevel: 1, accountXp: 0,
       heroes: { knight: true }, selectedHero: 'knight',
-      selectedStage: 'crypt', trackedDeed: null, cleared: {}, bestTime: {},
+      selectedStage: 'crypt', trackedDeed: null, newbie: null, cleared: {}, bestTime: {},
       shrine: {},
       gear: [], equipped: { head: null, neck: null, chest: null, hands: null, feet: null, ring1: null, ring2: null, mark: null }, nextGearId: 1,
       loadouts: {}, archiveBy: {}, // per hero: equipped gear + Mark, and Archive shards

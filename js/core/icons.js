@@ -421,6 +421,12 @@
       g.strokeStyle = 'rgba(240,200,110,0.8)'; g.lineWidth = 2; g.beginPath(); g.arc(16, 16, 8.6, 0, Math.PI * 2); g.stroke();
       P.circle(g, 16, 16, 5, P.vol(g, 16, 16, 5, '#f0c860')); },
     left(g) { P.path(g, [22, 5, 22, 27, 7, 16]); P.fill(g, '#1a1004'); P.path(g, [20.4, 8, 20.4, 24, 9.4, 16]); P.fill(g, P.lg(g, 0, 8, 0, 24, ['#fff0a0', '#e0b040', '#a06a10'])); },
+    seal(g) { // the Seven Nights' token: a bronze medallion with an eight-pointed star of blood
+      P.glow(g, 16, 16, 15, '#ff7030', 0.3); P.circle(g, 16, 16, 14, '#1a0c04'); P.circle(g, 16, 16, 12.6, P.lg(g, 0, 4, 0, 28, ['#f0c070', '#b07030', '#5a3010']));
+      P.circle(g, 16, 16, 9.6, '#2a1206'); P.circle(g, 16, 16, 8.6, P.vol(g, 16, 16, 8.6, '#6a3a1a'));
+      for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; P.circle(g, 16 + Math.cos(a) * 11.1, 16 + Math.sin(a) * 11.1, 0.8, '#fff0b0'); }
+      const pts = []; for (let i = 0; i < 16; i++) { const a = -Math.PI / 2 + i * Math.PI / 8, r = i % 2 ? 2.6 : 7.6; pts.push(16 + Math.cos(a) * r, 16 + Math.sin(a) * r); }
+      P.path(g, pts); P.fill(g, P.lg(g, 0, 8, 0, 24, ['#ff8a70', '#c0202e', '#6a0810'])); P.circle(g, 16, 16, 1.8, '#ffe0a0'); },
     pause(g) { for (const x of [8, 18.4]) { P.rrect(g, x - 1, 5, 7.6, 22, 2, '#1a1004'); P.rrect(g, x, 6.4, 5.6, 19.2, 1.4, P.lg(g, 0, 6, 0, 26, ['#d8ccb0', '#a8987a', '#5a4c3a'])); P.rrect(g, x + 0.8, 7.2, 1.4, 16, 0.7, 'rgba(255,255,255,0.25)'); } },
     full(g) { const c = (x, y, sx, sy) => { for (const [w, col] of [[5.4, '#0a0806'], [2.8, '#b8a888']]) { g.strokeStyle = col; g.lineWidth = w; g.beginPath(); g.moveTo(x, y + sy * 8); g.lineTo(x, y); g.lineTo(x + sx * 8, y); g.stroke(); } };
       c(6, 6, 1, 1); c(26, 6, -1, 1); c(6, 26, 1, -1); c(26, 26, -1, -1); },

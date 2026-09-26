@@ -701,6 +701,68 @@
   };
   meta.doubleRunGold = (res) => { S().gold += res.gold; S().stats.goldEarned += res.gold; changed(); };
 
+  /* ---------------- The Seven Nights (a newcomer event, see E.NEWBIE) ---------------- */
+  const NB = E.NEWBIE;
+  /** The event's state; it starts the first day a profile sees it and remembers each day the game was opened. */
+  meta.newbie = () => {
+    const s = S(), today = U.dayKey();
+    if (!s.newbie) { s.newbie = { start: today, seen: [], claimed: {}, ms: {} }; persist(); }
+    const nb = s.newbie;
+    if (!nb.seen.includes(today) && U.daysBetween(nb.start, today) < NB.lengthDays) { nb.seen.push(today); persist(); }
+    return nb;
+  };
+  /** Which night it is (1 on the first day); nights past the seventh only leave time to claim. */
+  meta.nbDay = () => U.daysBetween(meta.newbie().start, U.dayKey()) + 1;
+  meta.nbEndsIn = () => { const d = new Date(meta.newbie().start + 'T00:00:00'); d.setDate(d.getDate() + NB.lengthDays); return Math.max(0, d - Date.now()); };
+  meta.nbTaskId = (night, i) => 'n' + night + '_' + i;
+  meta.nbSeals = () => { const c = meta.newbie().claimed; let n = 0; NB.tasks.forEach((list, d) => list.forEach((tk, i) => { if (c[meta.nbTaskId(d + 1, i)]) n += tk.s; })); return n; };
+  /** What a task counts, from everything done so far. */
+  meta.nbValue = (tk) => {
+    const s = S(), st = s.stats;
+    switch (tk.k) {
+      case 'login': return meta.newbie().seen.length;
+      case 'runs': return st.runs; case 'kills': return st.kills; case 'bosses': return st.bossKills; case 'elites': return st.eliteKills;
+      case 'champions': return st.championKills || 0; case 'tomes': return st.tomes || 0; case 'wins': return st.wins; case 'brew': return st.brewed || 0;
+      case 'merge': return st.itemsMerged; case 'chests': return st.chestsOpened; case 'ads': return st.adsWatched;
+      case 'survive': return Math.floor(s.bestTime[tk.st] || 0);
+      case 'clear': return s.cleared[tk.st] ? 1 : 0;
+      case 'level': return st.maxLevel;
+      case 'shrine': return meta.shrineTotal();
+      case 'equip': { const eqp = meta.eq(); return E.slots.filter((sl) => eqp[sl] != null && meta.gearById(eqp[sl])).length; }
+      case 'gearLv': return s.gear.reduce((m, g) => Math.max(m, g.level || 1), 0);
+      case 'heroes': return meta.achValue({ stat: 'heroesOwned' });
+      case 'acct': return s.accountLevel;
+      case 'deeds': return meta.deedCount();
+      case 'agony': return Object.values(st.maxAgony || {}).reduce((m, v) => Math.max(m, v), 0);
+      default: return 0;
+    }
+  };
+  meta.nbTask = (night, i) => {
+    const tk = NB.tasks[night - 1][i], id = meta.nbTaskId(night, i), v = meta.nbValue(tk);
+    return { tk, id, v: Math.min(v, tk.n), done: v >= tk.n, claimed: !!meta.newbie().claimed[id], open: meta.nbDay() >= night && meta.nbDay() <= NB.lengthDays };
+  };
+  const sealEntry = (n) => ({ icon: 'u_seal', text: '+' + n, kind: 'seals' });
+  meta.nbClaimTask = (night, i) => {
+    const x = meta.nbTask(night, i); if (!x.open || !x.done || x.claimed) return null;
+    meta.newbie().claimed[x.id] = Date.now();
+    return [sealEntry(x.tk.s)].concat(meta.grant(x.tk.r));
+  };
+  meta.nbMilestoneReady = (i) => !meta.newbie().ms[i] && meta.nbSeals() >= NB.milestones[i].at && meta.nbDay() <= NB.lengthDays;
+  meta.nbClaimMilestone = (i) => { if (!meta.nbMilestoneReady(i)) return null; meta.newbie().ms[i] = Date.now(); return meta.grant(NB.milestones[i].r); };
+  /** Tasks and track rewards waiting to be claimed. */
+  meta.nbClaimable = (night) => {
+    let n = 0;
+    NB.tasks.forEach((list, d) => { if (night && night !== d + 1) return; list.forEach((tk, i) => { const x = meta.nbTask(d + 1, i); if (x.open && x.done && !x.claimed) n++; }); });
+    if (!night) NB.milestones.forEach((m, i) => { if (meta.nbMilestoneReady(i)) n++; });
+    return n;
+  };
+  /** Shown while its ten days last and something is left to claim. */
+  meta.nbActive = () => {
+    if (meta.nbDay() > NB.lengthDays) return false;
+    const nb = meta.newbie();
+    return NB.milestones.some((m, i) => !nb.ms[i]) || NB.tasks.some((list, d) => list.some((tk, i) => !nb.claimed[meta.nbTaskId(d + 1, i)]));
+  };
+
   /* ---------------- Badges (red dots) ---------------- */
   meta.badges = () => {
     const d = meta.ensureDaily();
@@ -713,7 +775,7 @@
     E.shrineOrder.forEach((id) => { const l = meta.shrineLevel(id); if (l < E.shrine[id].max && meta.shrineUnlocked(id) && S().gold >= E.shrineCost(id, l)) shrineAff++; });
     const well = S().wellkeeper.length;
     if (meta.archiveAffordable()) shrineAff++;
-    return { missions, ach, pass, quests: missions + ach + pass, login: meta.loginPending() ? 1 : 0, shop, gear: newGear + well, well, shrine: shrineAff };
+    return { missions, ach, pass, quests: missions + ach + pass, login: meta.loginPending() ? 1 : 0, shop, gear: newGear + well, well, shrine: shrineAff, nights: meta.nbActive() ? meta.nbClaimable() : 0 };
   };
 
   DH.meta = meta;

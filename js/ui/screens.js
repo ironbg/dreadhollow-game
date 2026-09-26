@@ -27,6 +27,7 @@
       if (!M.heroOwned(s.selectedHero)) s.selectedHero = 'knight';
       const root = h('div.home');
       const left = h('div.side.l'), right = h('div.side.r');
+      if (M.nbActive()) left.append(sideBtn('u_seal', t('nb.short'), () => ui.openNights(), b.nights, { hot: true, timer: ui.fmtDays(M.nbEndsIn()) }));
       left.append(sideBtn('n_calendar', t('home.login'), () => ui.openLogin(), b.login ? '!' : 0, { hot: b.login }));
       if (!s.purchases.once.starter) left.append(sideBtn('c_gold', t('home.offer'), () => ui.openStarter(), 0, { hot: true, timer: U.fmtDuration(U.msToMidnight()) }));
       left.append(sideBtn('n_ad', t('home.freeGems'), () => ui.go('shop', 'free')));

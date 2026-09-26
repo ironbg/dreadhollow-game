@@ -270,5 +270,42 @@
   /* Ads */
   E.INTERSTITIAL_EVERY = 3; // runs between interstitials (skipped with No Ads)
 
+  /* ---------- The Seven Nights: a newcomer event ----------
+   * Seven nights of tasks, one night opening per calendar day from a player's first visit (10 days in all to claim).
+   * Tasks count everything done so far, from the start; a night's tasks can be claimed once that night has opened.
+   * Each task pays Seals plus a small reward; Seals fill a track of seven rewards up to a Legendary relic.
+   * k = what is counted (see DH.meta.nbValue), n = target, st = hall, s = Seals, r = reward. */
+  E.NEWBIE = {
+    nights: 7, lengthDays: 10,
+    tasks: [
+      [{ k: 'login', n: 1, s: 5, r: { gold: 300 } }, { k: 'runs', n: 1, s: 5, r: { gold: 300 } }, { k: 'kills', n: 300, s: 10, r: { gold: 500 } },
+        { k: 'survive', st: 'crypt', n: 300, s: 10, r: { gems: 20 } }, { k: 'shrine', n: 1, s: 5, r: { gold: 300 } }, { k: 'equip', n: 1, s: 5, r: { gold: 300 } },
+        { k: 'ads', n: 1, s: 5, r: { gems: 10 } }],
+      [{ k: 'login', n: 2, s: 5, r: { gold: 400 } }, { k: 'clear', st: 'crypt', n: 1, s: 10, r: { gems: 30 } }, { k: 'level', n: 20, s: 10, r: { gold: 600 } },
+        { k: 'gearLv', n: 3, s: 10, r: { gold: 500 } }, { k: 'chests', n: 1, s: 5, r: { gold: 400 } }, { k: 'bosses', n: 3, s: 5, r: { energy: 10 } },
+        { k: 'shrine', n: 3, s: 5, r: { gold: 400 } }],
+      [{ k: 'login', n: 3, s: 5, r: { gold: 500 } }, { k: 'survive', st: 'abyss', n: 300, s: 10, r: { gems: 30 } }, { k: 'merge', n: 1, s: 10, r: { gold: 600 } },
+        { k: 'heroes', n: 2, s: 10, r: { gems: 40 } }, { k: 'level', n: 30, s: 10, r: { gold: 700 } }, { k: 'elites', n: 30, s: 5, r: { gold: 500 } },
+        { k: 'ads', n: 3, s: 5, r: { gems: 15 } }],
+      [{ k: 'login', n: 4, s: 5, r: { gold: 600 } }, { k: 'clear', st: 'abyss', n: 1, s: 10, r: { gems: 40 } }, { k: 'gearLv', n: 10, s: 10, r: { gold: 800 } },
+        { k: 'shrine', n: 8, s: 5, r: { gold: 600 } }, { k: 'tomes', n: 25, s: 5, r: { gold: 600 } }, { k: 'kills', n: 5000, s: 10, r: { energy: 15 } },
+        { k: 'deeds', n: 10, s: 10, r: { gems: 30 } }],
+      [{ k: 'login', n: 5, s: 5, r: { gold: 700 } }, { k: 'survive', st: 'aqueduct', n: 300, s: 10, r: { gems: 40 } }, { k: 'acct', n: 5, s: 10, r: { gold: 1000 } },
+        { k: 'agony', n: 1, s: 10, r: { gems: 40 } }, { k: 'brew', n: 1, s: 5, r: { gold: 700 } }, { k: 'champions', n: 10, s: 5, r: { gold: 700 } },
+        { k: 'ads', n: 5, s: 5, r: { gems: 20 } }],
+      [{ k: 'login', n: 6, s: 5, r: { gold: 800 } }, { k: 'clear', st: 'aqueduct', n: 1, s: 15, r: { gems: 50 } }, { k: 'gearLv', n: 15, s: 10, r: { gold: 1000 } },
+        { k: 'merge', n: 3, s: 10, r: { gold: 1000 } }, { k: 'shrine', n: 15, s: 5, r: { gold: 800 } }, { k: 'level', n: 40, s: 10, r: { energy: 20 } },
+        { k: 'wins', n: 5, s: 5, r: { gems: 30 } }],
+      [{ k: 'login', n: 7, s: 5, r: { gold: 1000 } }, { k: 'heroes', n: 3, s: 10, r: { gems: 60 } }, { k: 'runs', n: 30, s: 10, r: { gold: 1500 } },
+        { k: 'agony', n: 3, s: 15, r: { gems: 60 } }, { k: 'kills', n: 20000, s: 10, r: { gold: 1500 } }, { k: 'deeds', n: 25, s: 10, r: { gems: 40 } },
+        { k: 'acct', n: 8, s: 10, r: { gold: 1500 } }],
+    ],
+    // 385 Seals in all: the last reward asks for most of them, not every single task
+    milestones: [
+      { at: 40, r: { gold: 3000 } }, { at: 90, r: { energy: 30 } }, { at: 150, r: { chest: 'silver' } }, { at: 210, r: { gems: 200 } },
+      { at: 270, r: { gear: { rarity: 3 } } }, { at: 320, r: { chest: 'gold' } }, { at: 360, r: { gear: { rarity: 4 } } },
+    ],
+  };
+
   DH.economy = E;
 })(window.DH);
