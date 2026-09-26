@@ -871,3 +871,25 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
   font: 800 11px var(--body); letter-spacing: .04em; color: #ffe0c8; text-shadow: 0 1px 0 #000;
   background: linear-gradient(180deg, rgba(160,24,36,.8), rgba(90,8,16,.92)), var(--tex-stone, none) 0 0 / 64px 64px, #6a0c14;
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10px 50%); box-shadow: inset 0 -2px 0 #c9953a, inset 0 2px 0 rgba(255,200,170,.18); }
+/* v1.36.7: equal columns everywhere (content no longer widens one), equal chest buttons, promo tags inside the gem cards,
+   and the old stone on tabs, the power plate and the relic filters */
+.grid3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.chest > button:first-of-type { margin-top: auto; }
+.chest .btn { min-height: 34px; padding: 0 4px; gap: 4px; font-size: 13px; }
+.chest .btn img { width: 18px; height: 18px; }
+.pack .ptags { display: flex; flex-direction: column; gap: 2px; width: 100%; min-height: 34px; margin: -4px 0 2px; }
+.pack .ptags span { position: static; transform: none; display: block; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font: 800 9.5px/14px var(--body); letter-spacing: .05em; text-transform: uppercase; padding: 1px 4px; border: 1px solid #050308; border-radius: 0; box-shadow: none; }
+.pack .ptags .x2 { color: #ffe0c8; text-shadow: 0 1px 0 #000; background: linear-gradient(180deg, rgba(170,26,40,.82), rgba(90,8,16,.92)), var(--tex-stone, none) 0 0 / 64px 64px, #6a0c14; }
+.pack .ptags .tag { color: #ffdc8a; text-shadow: 0 1px 0 #000; background: linear-gradient(180deg, rgba(90,62,24,.7), rgba(36,22,8,.9)), var(--tex-stone, none) 0 0 / 64px 64px, #2a1a08; box-shadow: inset 0 0 0 1px #c9953a; }
+.tabs { background: linear-gradient(180deg, rgba(10,6,12,.55), rgba(6,4,8,.75)), var(--tex-stone, none) 0 0 / 64px 64px, #0c080e; }
+.tabs button.on { background: linear-gradient(180deg, rgba(255,240,220,.12) 0 2px, transparent 2px), linear-gradient(180deg, rgba(70,54,80,.4), rgba(30,22,36,.6)), var(--tex-stone, none) 0 0 / 64px 64px, #3e3046; }
+.power { background: linear-gradient(180deg, rgba(20,12,18,.5), rgba(8,4,8,.75)), var(--tex-stone, none) 0 0 / 64px 64px, #120c10; }
+.gfilters { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.gf { min-width: 0; padding: 0; background: linear-gradient(180deg, rgba(34,24,40,.45), rgba(12,8,14,.72)), var(--tex-stone, none) 0 0 / 64px 64px, #150e18; }
+.gf img { width: min(28px, 70%); height: auto; }
+.gf.on { background: radial-gradient(90% 120% at 50% 130%, rgba(255,170,70,.3), transparent 60%), linear-gradient(180deg, rgba(58,40,40,.3), rgba(20,12,16,.6)), var(--tex-stone, none) 0 0 / 64px 64px, #1a1018; }
+.gf-name { clear: both; margin-top: 6px; }
+.pack > .btn { margin-top: auto; }
+.pack .ptags .x2 { text-transform: none; }

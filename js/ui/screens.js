@@ -519,8 +519,7 @@
       E.gemPackOrder.forEach((id) => {
         const p = E.products[id], first = !s.purchases.firstGems[id];
         gp.append(h('div.panel.pack', { onclick: () => DH.iap.buy(id) },
-          first ? h('span.x2', t('shop.x2')) : null,
-          p.tag ? h('span.tag', t('shop.tag.' + p.tag)) : null,
+          h('div.ptags', p.tag ? h('span.tag', t('shop.tag.' + p.tag)) : null, first ? h('span.x2', t('shop.x2')) : null), // stacked inside the card, never cut
           h('div', { style: { position: 'relative' } }, A.img('i_gem')),
           h('div.amt', U.fmt(p.gems)),
           p.bonus ? h('div.bonus', t('shop.bonus', { v: p.bonus })) : h('div.bonus', ' '),
