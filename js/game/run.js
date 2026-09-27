@@ -45,6 +45,7 @@
       this.spawnAcc = 0; this.eventIdx = 0; this.bossIdx = 0; this.urnT = 4; this.wellT = 80; // the Strange Pendulum comes only with its Artifact (artifacts.js)
       this.state = 'playing'; this.pendingLevels = 0; this.queue = [];
       this.usedAdRevive = false; this.usedGemRevive = 0; this.usedAdReroll = false;
+      this.warns = []; // marked ground about to burst (volatile Champions)
       this.shake = 0; this.hurtFlash = 0; this.whiteFlash = 0; this.healGlow = 0; this.healAcc = 0; this.healT = 0; this.victoryT = -1;
       this.bosses = []; this.dmgByAb = {};
       this.bag = []; this.runGear = {}; this.wellSent = null; this.well = null; this.wellExtra = []; this.buckets = 0;
@@ -233,10 +234,33 @@
         DH.events.emit('run:warning', t('hud.surrounded'));
         const R = Math.max(v.w, v.h) * 0.55;
         for (let i = 0; i < ev.count; i++) { const a = i / ev.count * TAU; this.spawnEnemy(ev.enemy, p.x + Math.cos(a) * R, p.y + Math.sin(a) * R); }
+      } else if (ev.type === 'march') { // the Procession: ranks of spirits march across the hall through where the hero stands
+        DH.events.emit('run:warning', t('hud.march'));
+        const a = Math.random() * TAU, d = Math.hypot(v.w, v.h) / 2 + 10, ux = -Math.cos(a), uy = -Math.sin(a), px = -uy, py = ux;
+        const ox = p.x - ux * d, oy = p.y - uy * d;
+        for (let r = 0; r < ev.rows; r++) for (let c = 0; c < ev.cols; c++) {
+          const off = (c - (ev.cols - 1) / 2) * 13, back = r * 15;
+          const e = this.spawnEnemy('marcher', ox + px * off - ux * back, oy + py * off - uy * back);
+          if (e) { e.mdx = ux; e.mdy = uy; e.face = ux >= 0 ? 1 : -1; e.spd = e.def.spd; } // one pace for all: the ranks stay straight
+        }
       } else if (ev.type === 'swarm') {
         DH.events.emit('run:warning', t('hud.swarm'));
         const a = Math.random() * TAU, d = Math.hypot(v.w, v.h) / 2 + 20, cx = p.x + Math.cos(a) * d, cy = p.y + Math.sin(a) * d;
         for (let i = 0; i < ev.count; i++) { const e = this.spawnEnemy(ev.enemy, cx + U.rand(-30, 30), cy + U.rand(-30, 30)); if (e) e.spd *= 1.35; }
+      }
+    }
+    /** A Champion's affixes (C.HALL_AFFIX) and its health, which grows with the hall's progress. */
+    champAffix(e) {
+      const list = (C.HALL_AFFIX[this.stageId] || C.HALL_AFFIX.crypt).slice(), n = this.agonyOn && this.agony >= 3 ? 2 : 1;
+      e.affix = U.shuffle(list).slice(0, n);
+      const prog = Math.min(1, this.time / this.runLength), k = 0.7 + 0.6 * prog;
+      e.hp *= k; e.maxHp *= k;
+      for (const a of e.affix) {
+        const A = C.CHAMP_AFFIX[a];
+        if (a === 'swift') e.spd *= 1.55;
+        else if (a === 'ironclad') e.armor = Math.min(0.8, e.armor + 0.25);
+        else if (a === 'regen') e.regen = 0.02; // of its health each second
+        if (A.move && !e.move) { e.move = A.move; e.noBlink = true; }
       }
     }
     /** A pack of hounds: they fan out to circle the hero, then rush in together. Returns how many came. */
@@ -273,6 +297,7 @@
         st: { fragile: 0, affl: 0, burn: 0, burnPS: 0, burnT: 0, spark: 0, sparkPS: 0, sparkT: 0, frost: 0, frostMax: 0, frostPS: 0, decay: 0, decayPS: 0 },
       };
       if (def.scale && !def.boss) e.scale *= def.scale;
+      if (o.champion && !def.boss) this.champAffix(e);
       this.hallSpawn(e);
       if (fx.accolade && !rank && !def.boss && !def.prop && Math.random() < fx.accolade) { e.special = true; e.hp *= 4; e.maxHp *= 4; e.scale *= 1.25; e.xp *= 5; }
       this.enemies.push(e);
@@ -282,6 +307,12 @@
     /* ---------------- enemies ---------------- */
     updateEnemies(dt) {
       const p = this.player, v = DH.view;
+      for (let i = this.warns.length - 1; i >= 0; i--) {
+        const w = this.warns[i]; w.t -= dt; if (w.t > 0) continue;
+        this.warns.splice(i, 1);
+        if (U.dist2(w.x, w.y, p.x, p.y) < (w.R + p.r) * (w.R + p.r)) this.hurtPlayer(w.dmg, null);
+        this.fx.push({ k: 'explosion', x: w.x, y: w.y, R: w.R, life: 0.45, max: 0.45 }); this.shake = Math.max(this.shake, 5); DH.audio.play('boom');
+      }
       const farD = Math.hypot(v.w, v.h) * 0.62 + 40;
       for (const e of this.enemies) {
         if (e.dead) continue;
@@ -297,6 +328,10 @@
         e.anim += dt;
         this.tickStatus(e, dt);
         if (e.dead) continue;
+        if (e.regen && e.hp < e.maxHp) e.hp = Math.min(e.maxHp, e.hp + e.maxHp * e.regen * dt);
+        if (e.affix && !e.affixShown && U.dist2(e.x, e.y, p.x, p.y) < 150 * 150) { // a Champion names its affixes as it comes into view
+          e.affixShown = true; this.text(e.x, e.y - 16 * e.scale, e.affix.map((a) => t('affix.' + a)).join(' · '), C.CHAMP_AFFIX[e.affix[0]].color, true);
+        }
         if (e.stun > 0) { e.stun -= dt; e.x += e.kx * dt; e.y += e.ky * dt; const kd0 = Math.pow(0.0005, dt); e.kx *= kd0; e.ky *= kd0; continue; }
         const slowK = this.slowFactor(e); // Slow stacks: x0.91 each
         let dx = p.x - e.x, dy = p.y - e.y; const dist = Math.hypot(dx, dy) || 1; dx /= dist; dy /= dist;
@@ -313,6 +348,7 @@
           e.life -= dt; e.trail = (e.trail || 0) - dt;
           if (e.trail <= 0) { e.trail = 0.45; this.drop('coin', e.x, e.y, Math.ceil(this.stage.goldMult)); }
           if (e.life <= 0) { e.dead = true; this.burst(e.x, e.y, 16, ['#ffd35a', '#fff0a0'], 60); this.text(e.x, e.y - 12, t('hud.oozeEscaped'), '#ffd35a', true); continue; }
+        } else if (ai === 'march') { mx = e.mdx; my = e.mdy; e.kx = e.ky = 0; // in step, never turning aside nor knocked back
         } else if (ai === 'hop') { // oozes: a lurch, a pause, never quite straight at you
           const n = Math.floor(e.t / 1.1); if (n !== e.hopN) { e.hopN = n; e.hopA = U.rand(-0.9, 0.9); }
           const ca = Math.cos(e.hopA), sa = Math.sin(e.hopA), c = e.t % 1.1; mx = dx * ca - dy * sa; my = dx * sa + dy * ca; spd *= c < 0.38 ? 2.6 : 0.12;
@@ -332,6 +368,7 @@
           if (e.fuse == null && dist < B.R * 0.8) { e.fuse = B.fuse; DH.audio.play('fire'); }
           if (e.fuse != null) { spd = 0; e.fuse -= dt; e.flash = Math.sin(e.fuse * 32) > 0 ? 0.06 : 0; if (e.fuse <= 0) { this.bloaterBoom(e); continue; } }
         } else if (ai && ai.startsWith('b_')) { this.bossAI(e, dt, dx, dy, dist); mx = e.mx; my = e.my; spd = e.cspd * slowK; }
+        if ((e.elite || e.move) && !e.boss) { const o = this.eliteMove(e, dt, dx, dy, dist); if (o) { mx = o.x; my = o.y; spd = o.s * slowK; } }
         e.x += (mx * spd + e.kx) * dt; e.y += (my * spd + e.ky) * dt;
         const kd = Math.pow(0.0005, dt); e.kx *= kd; e.ky *= kd;
         if (Math.abs(mx) > 0.05) e.face = mx > 0 ? 1 : -1;
@@ -364,6 +401,53 @@
       const rank = (this.dread || 0) + (this.agonyOn ? Math.floor(this.agony || 0) : 0), ch = Math.min(0.6, C.SCROLL_DROP + 0.04 * rank) + 0.15 * (this.scrollMiss || 0);
       if ((this.scrolls || 0) < 9 && Math.random() < ch) { this.scrolls = (this.scrolls || 0) + 1; this.scrollMiss = 0; this.drop('tome', x, y); }
       else { this.scrollMiss = (this.scrollMiss || 0) + 1; for (let i = 0; i < 4; i++) this.drop('coin', x, y, Math.ceil(3 * this.stage.goldMult)); }
+    }
+    /** An Elite's signature move (C.ELITE_MOVES). Returns a movement override { x, y, s } while it acts, else null.
+     *  Every move is announced first: a marked line, a glowing circle or a raised cast, so it can be dodged. */
+    eliteMove(e, dt, dx, dy, dist) {
+      const mv = e.move || (e.move = C.ELITE_MOVES[e.id] || 'charge'), p = this.player;
+      e.mvT = (e.mvT == null ? U.rand(1.5, 2.5) : e.mvT) - dt;
+      const tel = e.tele;
+      if (tel) {
+        tel.t -= dt;
+        if (mv === 'charge') {
+          if (tel.t > 0) return { x: 0, y: 0, s: 0 }; // winding up along the marked line
+          if (!tel.go) { tel.go = true; tel.run = 0.7; DH.audio.play('roar'); }
+          tel.run -= dt; if (tel.run <= 0) { e.tele = null; e.mvT = U.rand(3.5, 5); }
+          return { x: Math.cos(tel.ang), y: Math.sin(tel.ang), s: Math.max(170, e.spd * 5) };
+        }
+        if (mv === 'slam') {
+          if (tel.t > 0) return { x: 0, y: 0, s: 0 };
+          const R = tel.R; e.tele = null; e.mvT = U.rand(4, 5.5);
+          if (U.dist2(tel.x, tel.y, p.x, p.y) < (R + p.r) * (R + p.r)) this.hurtPlayer(e.dmg * 1.6, e);
+          this.fx.push({ k: 'ring', x: tel.x, y: tel.y, life: 0.35, max: 0.35, r0: 4, r1: R, color: '#ffb070' });
+          this.burst(tel.x, tel.y, 16, ['#c8a070', '#6a4a2a'], 90); this.shake = Math.max(this.shake, 4); DH.audio.play('boom');
+          this.enemyAttackAnim(e); return null;
+        }
+        if (mv === 'volley') {
+          if (tel.t > 0) return { x: 0, y: 0, s: 0 }; // raising its hands
+          e.tele = null;
+          const a0 = Math.atan2(p.y - e.y, p.x - e.x);
+          for (const o of [-0.28, 0, 0.28]) this.enemyShot(e, a0 + o, 105, e.dmg * 0.7, '#9a70ff');
+          DH.audio.play('zap');
+          if (!e.noBlink && (e.blinks = (e.blinks || 0) + 1) % 2 === 0) { // every other volley it vanishes and reappears elsewhere around the hero
+            this.burst(e.x, e.y, 14, ['#9a70ff', '#2a1040'], 70);
+            const a = Math.random() * TAU, d = U.rand(70, 110); e.x = p.x + Math.cos(a) * d; e.y = p.y + Math.sin(a) * d;
+            this.burst(e.x, e.y, 14, ['#9a70ff', '#2a1040'], 70);
+          }
+          e.mvT = U.rand(2.6, 3.4); return null;
+        }
+      }
+      if (e.mvT > 0) return null;
+      if (mv === 'charge' && dist < 150) { e.tele = { k: 'line', x: e.x, y: e.y, ang: Math.atan2(dy, dx), len: 130, t: 0.8, max: 0.8 }; return { x: 0, y: 0, s: 0 }; }
+      if (mv === 'slam' && dist < 55) { e.tele = { k: 'circle', x: e.x, y: e.y, R: 38 * (e.scale > 1.4 ? 1.1 : 1), t: 0.9, max: 0.9 }; return { x: 0, y: 0, s: 0 }; }
+      if (mv === 'volley' && dist < 200) { e.tele = { k: 'cast', x: e.x, y: e.y, t: 0.45, max: 0.45 }; return { x: 0, y: 0, s: 0 }; }
+      if (mv === 'summon') {
+        e.mvT = U.rand(5, 6.5);
+        for (let i = 0; i < 4; i++) { const a = i / 4 * TAU; const m = this.spawnEnemy(e.id, e.x + Math.cos(a) * 14, e.y + Math.sin(a) * 14); if (m) m.xp = 0; }
+        this.burst(e.x, e.y, 18, ['#c070ff', '#2a1040'], 80); DH.audio.play('roar');
+      }
+      return null;
     }
     /** A Bloater bursts: it hurts the hero in reach and tears into the foes around it (lure them in). No experience. */
     bloaterBoom(e) {
@@ -508,6 +592,7 @@
       let xp = e.final && !this.bosses.some((b) => b.final && !b.dead && b !== e) ? 0 : e.xp; // the last Lord ends the hall: no pointless level-ups after victory
       for (const [v] of C.GEM_TIERS) { while (xp >= v) { this.drop('xp', e.x + U.rand(-5, 5), e.y + U.rand(-5, 5), v); xp -= v; } }
       this.mergeGems();
+      if (e.affix && e.affix.includes('volatile')) this.warns.push({ x: e.x, y: e.y, R: 46, t: 1, max: 1, dmg: e.dmg * 1.5 }); // bursts a moment after death
       if (e.def.split) for (const sx of [-1, 1]) { // an ooze splits in two
         const c = this.spawnEnemy(e.def.split, e.x + sx * 5, e.y + U.rand(-3, 3), { variant: e.variant }); if (c) { c.kx = sx * 70; c.ky = U.rand(-30, 30); }
       }

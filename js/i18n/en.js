@@ -108,6 +108,8 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'deeds.pinHint': 'Pin a deed to follow it on screen during battle',
   'loot.xpHint': 'The X refuses the pieces: +{v}% of a level in experience instead', 'loot.xpTaken': '+{v}% of a level in experience',
   'enemy.ooze': 'Carrion Ooze', 'enemy.oozelet': 'Ooze Spawn', 'enemy.shieldbearer': 'Shieldbearer', 'enemy.hound': 'Grave Hound', 'enemy.watcher': 'Watcher', 'enemy.bloater': 'Bloater',
+  'affix.swift': 'Swift', 'affix.gunner': 'Gunner', 'affix.summoner': 'Summoner', 'affix.ironclad': 'Ironclad', 'affix.regen': 'Regenerating', 'affix.volatile': 'Volatile', 'affix.charger': 'Charger',
+  'hud.march': 'The Procession marches! Step aside', 'enemy.marcher': 'Procession Spirit',
   'nb.dh': '{d}d {h}h', 'nb.title': 'The Seven Nights',
   'nb.short': '7 Nights',
   'nb.sub': 'A welcome for newcomers: each night opens new tasks. Tasks pay Seals; Seals fill the rewards track.',

@@ -108,6 +108,8 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'deeds.pinHint': 'Закачи подвиг, за да го следиш на екрана по време на битка',
   'loot.xpHint': 'С X отказваш предметите и вземаш опит: +{v}% от ниво', 'loot.xpTaken': '+{v}% от ниво опит',
   'enemy.ooze': 'Мършава маса', 'enemy.oozelet': 'Отломък от маса', 'enemy.shieldbearer': 'Щитоносец', 'enemy.hound': 'Гробищна хрътка', 'enemy.watcher': 'Наблюдател', 'enemy.bloater': 'Издут',
+  'affix.swift': 'Бърз', 'affix.gunner': 'Стрелец', 'affix.summoner': 'Призовател', 'affix.ironclad': 'Железен', 'affix.regen': 'Възстановяващ се', 'affix.volatile': 'Взривоопасен', 'affix.charger': 'Нападател',
+  'hud.march': 'Шествието идва! Отдръпни се', 'enemy.marcher': 'Дух от шествието',
   'nb.dh': '{d}д {h}ч', 'nb.title': 'Седемте нощи',
   'nb.short': '7 нощи',
   'nb.sub': 'Посрещане за новодошлите: всяка нощ отваря нови задачи. Задачите дават Печати, а Печатите пълнят наградите горе.',

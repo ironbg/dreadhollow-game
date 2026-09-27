@@ -128,6 +128,27 @@
     }
     // shadows: soft contact blobs and silhouettes thrown by nearby lights (vfx.js)
     this.renderShadows(g, cx, cy, W, H, lights);
+    // an Elite's announced move: the line it will charge along, the circle it will strike, the cast it is raising
+    for (const e of this.enemies) if (e.tele && !e.dead) {
+      const T = e.tele, k = 1 - Math.max(0, T.t) / T.max, x = T.x - cx, y = T.y - cy;
+      if (T.k === 'line' && !T.go) {
+        g.save(); g.translate(x, y); g.rotate(T.ang);
+        g.fillStyle = 'rgba(200,20,30,' + (0.14 + 0.16 * k) + ')'; g.fillRect(0, -e.r, T.len, e.r * 2);
+        g.fillStyle = 'rgba(255,80,60,0.55)'; g.fillRect(0, -e.r, T.len * k, 1); g.fillRect(0, e.r - 1, T.len * k, 1);
+        g.restore();
+      } else if (T.k === 'circle') {
+        g.fillStyle = 'rgba(200,60,20,' + (0.12 + 0.18 * k) + ')'; g.beginPath(); g.ellipse(x, y, T.R, T.R * 0.6, 0, 0, TAU); g.fill();
+        g.strokeStyle = 'rgba(255,150,70,0.85)'; g.lineWidth = 1; g.beginPath(); g.ellipse(x, y, T.R * k, T.R * 0.6 * k, 0, 0, TAU); g.stroke();
+      } else if (T.k === 'cast') {
+        g.fillStyle = 'rgba(154,112,255,' + (0.5 * k) + ')'; g.beginPath(); g.arc(e.x - cx, e.y - cy - 10 * e.scale, 2 + 3 * k, 0, TAU); g.fill();
+        lights.push({ x: e.x, y: e.y - 10, r: 24, kind: 'tint', color: '#9a70ff', a: 0.6 * k });
+      }
+    }
+    for (const w of this.warns) { // a volatile Champion's last breath: the ground that will burst
+      const k = 1 - Math.max(0, w.t) / w.max, x = w.x - cx, y = w.y - cy;
+      g.fillStyle = 'rgba(255,90,30,' + (0.12 + 0.2 * k) + ')'; g.beginPath(); g.ellipse(x, y, w.R, w.R * 0.6, 0, 0, TAU); g.fill();
+      g.strokeStyle = 'rgba(255,170,60,0.85)'; g.lineWidth = 1; g.beginPath(); g.ellipse(x, y, w.R * k, w.R * 0.6 * k, 0, 0, TAU); g.stroke();
+    }
     // a Bloater's fuse: the ground it will tear apart glows, filling as it burns
     for (const e of this.enemies) if (e.fuse != null && !e.dead) {
       const B = e.def.boom, R = B.R * (e.scale > 1 ? 1.4 : 1), k = 1 - Math.max(0, e.fuse) / B.fuse, x = e.x - cx, y = e.y - cy;
@@ -341,6 +362,7 @@
       g.fillStyle = '#1a0a0a'; g.fillRect(bx - 1, by - 1, bw + 2, 4);
       g.fillStyle = e.boss ? '#e02838' : e.champion ? '#ff4060' : '#f0b030'; g.fillRect(bx, by, Math.max(0, bw * e.hp / e.maxHp), 2);
     }
+    if (e.affix) e.affix.forEach((a, i) => { g.fillStyle = C.CHAMP_AFFIX[a].color; g.fillRect(this.rd(x - e.affix.length * 2 + i * 4 + 0.5), this.rd(top - 10), 3, 3); });
     if ((e.elite || e.champion || e.boss) && Math.random() < 0.25) { // swirling aura motes
       const an = this.time * 3 + Math.random() * TAU, rr = e.r * (e.boss ? 1.6 : 1.3);
       this.gpart({ x: e.x + Math.cos(an) * rr, y: e.y + Math.sin(an) * rr * 0.5, vx: -Math.sin(an) * 20, vy: -18, drag: 0.96, life: 0.7, max: 0.7, c: e.boss ? '#ff3040' : e.champion ? '#ff5070' : '#ffc850', r: 0.9 });

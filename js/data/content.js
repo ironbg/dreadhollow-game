@@ -385,6 +385,8 @@
   };
   // Gilded Ooze: a treasure champion. Every hit deals exactly 1 damage and knocks out gold; flees and escapes after 20s.
   /* Hall foes: behaviours the common horde lacks (see Run.updateEnemies). Each hall brings two or three (C.HALL_FOES). */
+  // the Procession: a column of hollow spirits marching straight across the hall; all but untouchable, step aside
+  C.enemies.marcher = { painter: 'ghost', variant: 'wraith', hp: 400, spd: 26, dmg: 12, xp: 0, r: 6, mass: 99, ai: 'march', fly: true, dmgFactor: 0.05, alpha: 0.8 };
   C.enemies.ooze = { painter: 'slime', hp: 34, spd: 30, dmg: 9, xp: 2, r: 8, mass: 1.4, ai: 'hop', split: 'oozelet', scale: 0.72, anim: 0.3, particles: ['#7ab040', '#d0ff80', '#2a4a10'] };
   C.enemies.oozelet = { painter: 'slime', hp: 10, spd: 40, dmg: 5, xp: 1, r: 5, mass: 0.6, ai: 'hop', scale: 0.45, anim: 0.25, particles: ['#7ab040', '#d0ff80'] };
   C.enemies.shieldbearer = { painter: 'shieldskel', hp: 34, spd: 26, dmg: 9, xp: 3, r: 7, mass: 2.2, def: 0.1, shield: 0.25 }; // shots from the front: a quarter of their damage, and they stop
@@ -398,7 +400,7 @@
     aqueduct: [['watcher', 90, 1.2], ['shieldbearer', 200, 1.4]],
     catacombs: [['hound', 70, 1.2], ['ooze', 160, 1.5]],
     discord: [['watcher', 80, 1.3], ['bloater', 170, 1.4]],
-    blightmire: [['ooze', 50, 1.6], ['bloater', 140, 1.3], ['hound', 230, 1]],
+    blightmire: [['ooze', 60, 1.2], ['bloater', 150, 1], ['hound', 240, 0.9]],
     reliquary: [['shieldbearer', 60, 1.4], ['watcher', 150, 1.2], ['hound', 240, 1]],
   };
   C.enemies.gildedooze = { painter: 'slime', variant: 'gold', hp: 1, hits: 45, spd: 40, dmg: 0, xp: 0, r: 8, mass: 99, ai: 'flee', life: 20, gilded: true, anim: 0.3 };
@@ -414,7 +416,24 @@
   C.HEX = { hp: 0.6, dmg: 0.8, enrageAt: 90, dist: [620, 860], firstShards: 2 };
   C.OOZE_EVERY = [150, 260];
   C.ELITE = { hp: 8, dmg: 1.4, scale: 1.5, def: 0.1 };
+  // an Elite's signature move, by the kind of foe it is (Run.eliteMove): volley = a fan of three bolts and a blink around the hero,
+  // charge = a marked line, then a rush along it, slam = a marked circle, then a blow, summon = calls a few of its kin
+  C.ELITE_MOVES = { skeleton: 'volley', ghost: 'volley', wraith: 'volley', imp: 'volley', cultist: 'volley', watcher: 'volley',
+    ghoul: 'charge', hknight: 'charge', rat: 'charge', spider: 'charge', hound: 'charge',
+    golem: 'slam', shieldbearer: 'slam', effigy: 'slam', ooze: 'slam', bloater: 'slam',
+    bat: 'summon' };
   C.CHAMPION = { hp: 18, dmg: 1.7, scale: 1.8, def: 0.2 };
+  // Champion affixes: one each (two from Agony III), from its hall's list. Their health also grows with the hall's progress:
+  // x0.7 at the start to x1.3 at the end (the hall's strength).
+  C.CHAMP_AFFIX = {
+    swift: { color: '#80e0ff' }, gunner: { color: '#b080ff', move: 'volley' }, summoner: { color: '#c070ff', move: 'summon' },
+    ironclad: { color: '#c8ccd8' }, regen: { color: '#70f070' }, volatile: { color: '#ff8030' }, charger: { color: '#ff5050', move: 'charge' },
+  };
+  C.HALL_AFFIX = {
+    crypt: ['swift', 'gunner', 'summoner', 'ironclad'], abyss: ['volatile', 'swift', 'gunner', 'regen'], aqueduct: ['ironclad', 'gunner', 'summoner', 'swift'],
+    catacombs: ['ironclad', 'regen', 'charger', 'volatile'], discord: ['gunner', 'summoner', 'volatile', 'swift'], blightmire: ['regen', 'summoner', 'volatile', 'charger'],
+    reliquary: ['ironclad', 'gunner', 'regen', 'charger'],
+  };
 
   /* ------------------------------------------------------------------ */
   /* Spawn timeline (shared); stages remap enemy types and tint them with a variant. */
@@ -441,6 +460,7 @@
     { t: 200, type: 'ring', enemy: 'skeleton', count: 34 },
     { t: 230, type: 'elite', enemy: 'spider' },
     { t: 270, type: 'champion', enemy: 'cultist' },
+    { t: 250, type: 'march', rows: 3, cols: 11 },
     { t: 360, type: 'swarm', enemy: 'bat', count: 40 },
     { t: 385, type: 'elite', enemy: 'wraith' },
     { t: 420, type: 'champion', enemy: 'hknight' },
@@ -448,6 +468,7 @@
     { t: 470, type: 'ring', enemy: 'ghoul', count: 40 },
     { t: 510, type: 'elite', enemy: 'wraith' },
     { t: 540, type: 'champion', enemy: 'golem' },
+    { t: 500, type: 'march', rows: 4, cols: 13 },
     { t: 560, type: 'swarm', enemy: 'bat', count: 50 },
     { t: 580, type: 'elite', enemy: 'hknight' },
   ];
