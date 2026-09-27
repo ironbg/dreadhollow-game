@@ -345,14 +345,16 @@
       const s = c.fur, sd = sh(s, -0.55), w = f ? 0.8 : -0.8, skin = '#9a7474';
       g.beginPath(); g.moveTo(3.2, 7.6); g.bezierCurveTo(0.6, 9.4 + w, -0.2, 6 - w, 0.8, 3.6 + w * 0.6); g.strokeStyle = skin; g.lineWidth = 0.8; g.stroke();
       g.strokeStyle = sh(skin, -0.45); g.lineWidth = 0.2; for (let i = 0; i < 5; i++) { const t = (i + 1) / 6, x = 3.2 - t * 2.6, y = 7.6 - t * 3.6 + (i % 2 ? w * 0.3 : 0); g.beginPath(); g.moveTo(x - 0.45, y - 0.2); g.lineTo(x + 0.45, y + 0.25); g.stroke(); }
-      limb(g, 5, 7.6, 4.4 + w, 11, 0.8, 0.45, sd); claws(g, 4.4 + w, 11.1, 0.3, 3, 0.8, 0.2, '#d8ccb0');
+      // far legs, in shadow; then the near hind leg with a pink paw
+      limb(g, 6.4, 7.6, 7 - w, 11, 0.7, 0.4, sh(sd, -0.3)); limb(g, 12, 8, 12.8 + w, 11, 0.6, 0.35, sh(sd, -0.3));
+      limb(g, 5, 7.4, 3.2 + w, 9.4, 1.3, 0.7, sd); limb(g, 3.2 + w, 9.4, 4.6 + w, 11, 0.6, 0.4, sd); P.ell(g, 5.2 + w, 11.1, 1, 0.4, skin); claws(g, 5.8 + w, 11.1, 0.2, 3, 0.7, 0.18, '#e8dcc0');
       // the hump of the body
       g.beginPath(); g.moveTo(2.8, 8); g.bezierCurveTo(2.2, 2.4, 9, 1.4, 12.4, 4.2); g.quadraticCurveTo(13.8, 7.4, 11.6, 9); g.quadraticCurveTo(6.8, 10, 2.8, 8); g.closePath();
       P.fill(g, P.lg(g, 3, 1.8, 12, 9.6, [sh(s, 0.3), s, sd]));
       g.strokeStyle = sh(s, 0.35); g.lineWidth = 0.18; for (let i = 0; i < 12; i++) { const x = 3.6 + (i % 6) * 1.5, y = 3.6 + Math.floor(i / 6) * 2 + (i % 2) * 0.4; g.beginPath(); g.moveTo(x, y); g.lineTo(x - 0.6, y + 0.9); g.stroke(); } // matted fur
       P.ell(g, 7.6, 6.4, 1.8, 1.1, skin); g.strokeStyle = sh(skin, -0.5); g.lineWidth = 0.22; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(7.6, 5.4 + i * 0.6, 1.3, 0.4, 2.6); g.stroke(); } // bald flank, ribs
       P.line(g, 9.8, 4.2, 11.2, 6.2, 0.3, '#5a1818'); // an old wound
-      limb(g, 10.8, 8, 12 - w, 11, 0.75, 0.42, s); claws(g, 12 - w, 11.1, 0.1, 3, 0.9, 0.22, '#d8ccb0');
+      limb(g, 10.8, 7.8, 11.6 - w, 9.8, 0.9, 0.55, s); limb(g, 11.6 - w, 9.8, 12.4 - w, 11, 0.55, 0.4, s); P.ell(g, 12.8 - w, 11.1, 0.9, 0.4, skin); claws(g, 13.4 - w, 11.1, 0.1, 3, 0.8, 0.2, '#e8dcc0');
       // the head: long, low, ears flat, eye burning, incisors bared
       P.path(g, [11.4, 4.2, 14.4, 4.6, 17.8, 6.6, 17.2, 7.6, 13.6, 7.8, 11.6, 8]); P.fill(g, P.lg(g, 11, 4, 17, 8, [sh(s, 0.15), sd]));
       P.ell(g, 12.2, 4.2, 1.1, 0.8, skin, -0.4); P.ell(g, 12.2, 4.2, 0.6, 0.4, sh(skin, -0.3), -0.4);
