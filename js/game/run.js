@@ -161,7 +161,10 @@
       const a = tl[i], b = tl[i + 1];
       let rate = a.rate; if (b) rate = U.lerp(a.rate, b.rate, (tt - a.t) / (b.t - a.t));
       if (late) rate *= 1 + Math.max(0, this.time - this.runLength) / 180;
-      return { rate: rate * (1 + this.stage.index * 0.1) * (1 + this.agony * 0.35) * (this.fx_.spawn || 1) * (this.fx_.giants ? 0.6 : 1), mix: a.mix };
+      // the hall's own foes join the mix from their hour on (C.HALL_FOES)
+      let mix = a.mix; const foes = C.HALL_FOES[this.stageId];
+      if (foes) { const n = foes.filter((f) => f[1] <= tt).length, k = i + ':' + n; if (this._mixK !== k) { this._mixK = k; this._mix = Object.assign({}, a.mix); foes.forEach((f) => { if (f[1] <= tt) this._mix[f[0]] = f[2]; }); } mix = this._mix; }
+      return { rate: rate * (1 + this.stage.index * 0.1) * (1 + this.agony * 0.35) * (this.fx_.spawn || 1) * (this.fx_.giants ? 0.6 : 1), mix };
     }
     updateSpawns(dt) {
       if (this.victoryT > 0) return;
@@ -171,8 +174,9 @@
       while (this.spawnAcc >= 1) {
         this.spawnAcc -= 1;
         if (this.enemies.length >= cap) continue;
-        const pt = this.edgePoint();
-        this.spawnEnemy(U.weighted(mix), pt.x, pt.y);
+        const pt = this.edgePoint(), type = U.weighted(mix), pk = C.enemies[type] && C.enemies[type].pack;
+        if (pk) this.spawnAcc -= this.spawnPack(type, pt, U.randi(pk[0], pk[1])) - 1; // hounds come as a pack
+        else this.spawnEnemy(type, pt.x, pt.y);
       }
       const scale = this.runLength / C.RUN_LENGTH;
       while (this.eventIdx < C.events.length && C.events[this.eventIdx].t * scale <= this.time) this.runEvent(C.events[this.eventIdx++]);
@@ -235,6 +239,16 @@
         for (let i = 0; i < ev.count; i++) { const e = this.spawnEnemy(ev.enemy, cx + U.rand(-30, 30), cy + U.rand(-30, 30)); if (e) e.spd *= 1.35; }
       }
     }
+    /** A pack of hounds: they fan out to circle the hero, then rush in together. Returns how many came. */
+    spawnPack(type, pt, n) {
+      const p = this.player, base = Math.atan2(pt.y - p.y, pt.x - p.x), T = U.rand(1.8, 2.6);
+      let k = 0;
+      for (let i = 0; i < n; i++) {
+        const e = this.spawnEnemy(type, pt.x + U.rand(-14, 14), pt.y + U.rand(-14, 14));
+        if (e) { e.slotA = base + (i - (n - 1) / 2) * (TAU / n); e.packT = T; k++; }
+      }
+      return k;
+    }
     spawnEnemy(type, x, y, o) {
       o = o || {};
       const id = type === 'urn' ? 'urn' : (o.boss || type === 'gildedooze' ? type : this.remap(type));
@@ -245,7 +259,8 @@
       const T = E.TORMENT, tr = def.prop ? 0 : this.dread, fx = this.fx_;
       const hpMult = def.prop ? 1 : this.stage.hpMult * (def.boss ? 1 + this.stage.index * 0.1 : ts) * (rank ? rank.hp : 1) * Math.pow(T.hp, tr) * (fx.giants && !def.boss ? 2 : 1)
         * (1 + this.agony * 0.25) * (this.fx_.enemyHp || 1);
-      const variant = def.variant || (this.stage.variant && DH.gfx.painters[def.painter] && DH.gfx.painters[def.painter].variants && DH.gfx.painters[def.painter].variants[this.stage.variant] ? this.stage.variant : null);
+      const fv = !def.variant && (C.HALL_FOES[this.stageId] || []).find((f) => f[0] === id && f[3]);
+      const variant = (o.variant || def.variant || (fv && fv[3])) || (this.stage.variant && DH.gfx.painters[def.painter] && DH.gfx.painters[def.painter].variants && DH.gfx.painters[def.painter].variants[this.stage.variant] ? this.stage.variant : null);
       const e = {
         id, def, x, y, kx: 0, ky: 0, hp: def.hp * hpMult, maxHp: def.hp * hpMult,
         r: def.r * (rank ? rank.scale * 0.85 : 1), spd: def.spd * (rank ? 0.9 : 1) * U.rand(0.92, 1.08) * (fx.enemySpeed || 1) * (fx.allSpeed || 1) * (1 + T.speed * tr) * (fx.giants && !def.boss ? 0.8 : 1),
@@ -257,6 +272,7 @@
         painter: def.painter, variant,
         st: { fragile: 0, affl: 0, burn: 0, burnPS: 0, burnT: 0, spark: 0, sparkPS: 0, sparkT: 0, frost: 0, frostMax: 0, frostPS: 0, decay: 0, decayPS: 0 },
       };
+      if (def.scale && !def.boss) e.scale *= def.scale;
       this.hallSpawn(e);
       if (fx.accolade && !rank && !def.boss && !def.prop && Math.random() < fx.accolade) { e.special = true; e.hp *= 4; e.maxHp *= 4; e.scale *= 1.25; e.xp *= 5; }
       this.enemies.push(e);
@@ -297,6 +313,24 @@
           e.life -= dt; e.trail = (e.trail || 0) - dt;
           if (e.trail <= 0) { e.trail = 0.45; this.drop('coin', e.x, e.y, Math.ceil(this.stage.goldMult)); }
           if (e.life <= 0) { e.dead = true; this.burst(e.x, e.y, 16, ['#ffd35a', '#fff0a0'], 60); this.text(e.x, e.y - 12, t('hud.oozeEscaped'), '#ffd35a', true); continue; }
+        } else if (ai === 'hop') { // oozes: a lurch, a pause, never quite straight at you
+          const n = Math.floor(e.t / 1.1); if (n !== e.hopN) { e.hopN = n; e.hopA = U.rand(-0.9, 0.9); }
+          const ca = Math.cos(e.hopA), sa = Math.sin(e.hopA), c = e.t % 1.1; mx = dx * ca - dy * sa; my = dx * sa + dy * ca; spd *= c < 0.38 ? 2.6 : 0.12;
+        } else if (ai === 'pack') { // hounds: circle the hero at a distance, then all rush in at once
+          if (e.rushT > 0) { e.rushT -= dt; spd *= 1.5; if (e.rushT <= 0) e.packT = U.rand(1.8, 2.8); }
+          else {
+            e.packT = (e.packT == null ? 2 : e.packT) - dt; e.slotA = (e.slotA == null ? Math.atan2(-dy, -dx) : e.slotA) + dt * 0.8;
+            const tx = p.x + Math.cos(e.slotA) * 58 - e.x, ty = p.y + Math.sin(e.slotA) * 58 - e.y, tl = Math.hypot(tx, ty) || 1;
+            mx = tx / tl; my = ty / tl; if (tl < 8) spd *= tl / 8;
+            if (e.packT <= 0) { e.rushT = 1.1; DH.audio.play('roar'); }
+          }
+        } else if (ai === 'watch') { // the Watcher: stone while the hero faces it, swift the moment they turn away
+          const seen = (p.dirX * -dx + p.dirY * -dy) > 0.3;
+          e.still = seen; if (seen) { spd = 0; e.anim -= dt; }
+        } else if (ai === 'fuse') { // the Bloater: close in, light up, burst
+          const B = e.def.boom;
+          if (e.fuse == null && dist < B.R * 0.8) { e.fuse = B.fuse; DH.audio.play('fire'); }
+          if (e.fuse != null) { spd = 0; e.fuse -= dt; e.flash = Math.sin(e.fuse * 32) > 0 ? 0.06 : 0; if (e.fuse <= 0) { this.bloaterBoom(e); continue; } }
         } else if (ai && ai.startsWith('b_')) { this.bossAI(e, dt, dx, dy, dist); mx = e.mx; my = e.my; spd = e.cspd * slowK; }
         e.x += (mx * spd + e.kx) * dt; e.y += (my * spd + e.ky) * dt;
         const kd = Math.pow(0.0005, dt); e.kx *= kd; e.ky *= kd;
@@ -330,6 +364,15 @@
       const rank = (this.dread || 0) + (this.agonyOn ? Math.floor(this.agony || 0) : 0), ch = Math.min(0.6, C.SCROLL_DROP + 0.04 * rank) + 0.15 * (this.scrollMiss || 0);
       if ((this.scrolls || 0) < 9 && Math.random() < ch) { this.scrolls = (this.scrolls || 0) + 1; this.scrollMiss = 0; this.drop('tome', x, y); }
       else { this.scrollMiss = (this.scrollMiss || 0) + 1; for (let i = 0; i < 4; i++) this.drop('coin', x, y, Math.ceil(3 * this.stage.goldMult)); }
+    }
+    /** A Bloater bursts: it hurts the hero in reach and tears into the foes around it (lure them in). No experience. */
+    bloaterBoom(e) {
+      const B = e.def.boom, p = this.player, R = B.R * (e.scale > 1 ? 1.4 : 1);
+      e.dead = true;
+      if (U.dist2(e.x, e.y, p.x, p.y) < (R + p.r) * (R + p.r)) this.hurtPlayer(B.dmg * this.stage.dmgMult * (1 + this.time / 60 * 0.07) * (e.champion ? 1.7 : 1), e);
+      for (const o of this.enemies) if (o !== e && !o.dead && !o.boss && !o.def.prop && U.dist2(e.x, e.y, o.x, o.y) < R * R) this.rawDamage(o, o.maxHp * 0.4, '#ff9040');
+      this.fx.push({ k: 'explosion', x: e.x, y: e.y, R, life: 0.45, max: 0.45 });
+      this.burst(e.x, e.y, 22, ['#ff7030', '#ffd060', '#401008'], 120); this.shake = Math.max(this.shake, 5); DH.audio.play('boom');
     }
     enemyAttackAnim(e) { const p = this.player; e.atkMax = e.boss ? 0.6 : 0.42; e.atkT = e.atkMax; e.atkCd = e.boss ? 1.2 : 0.8 + Math.random() * 0.3; e.atkAng = Math.atan2(p.y - e.y, p.x - e.x); }
     enemyShot(e, ang, spd, dmg, color, kind) {
@@ -465,6 +508,9 @@
       let xp = e.final && !this.bosses.some((b) => b.final && !b.dead && b !== e) ? 0 : e.xp; // the last Lord ends the hall: no pointless level-ups after victory
       for (const [v] of C.GEM_TIERS) { while (xp >= v) { this.drop('xp', e.x + U.rand(-5, 5), e.y + U.rand(-5, 5), v); xp -= v; } }
       this.mergeGems();
+      if (e.def.split) for (const sx of [-1, 1]) { // an ooze splits in two
+        const c = this.spawnEnemy(e.def.split, e.x + sx * 5, e.y + U.rand(-3, 3), { variant: e.variant }); if (c) { c.kx = sx * 70; c.ky = U.rand(-30, 30); }
+      }
       const gm = this.stage.goldMult;
       if (Math.random() < 0.08) this.drop('coin', e.x, e.y, Math.ceil(U.randi(1, 3) * gm));
       if (e.elite || e.champion || e.boss) { if (this.P.eliteHeal) this.heal(this.P.maxHp * this.P.eliteHeal); }

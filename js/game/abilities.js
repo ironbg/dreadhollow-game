@@ -718,6 +718,15 @@
           const sp = Math.hypot(b.vx, b.vy) || 1;
           if (b.k === 'fireball') { this.explode(b); remove = true; break; }
           if (b.k === 'fist') { this.hitCircle(b.x, b.y, 10 * b.a.s.area, b.a); this.fx.push({ k: 'pop', x: b.x, y: b.y, R: 10 * b.a.s.area, life: 0.2, max: 0.2, color: '#c8a8ff' }); remove = true; break; }
+          // a Shieldbearer's shield faces the hero: shots striking it from the front glance off for a quarter and stop there
+          if (e.def.shield && !(e.stun > 0)) {
+            const fx = this.player.x - e.x, fy = this.player.y - e.y;
+            if ((b.vx * fx + b.vy * fy) / (sp * (Math.hypot(fx, fy) || 1)) < -0.35) {
+              this.hit(e, b.a, (b.mult || 1) * e.def.shield, b.vx / sp, b.vy / sp);
+              this.burst(b.x, b.y, 5, ['#fff0c0', '#c8ccd8'], 60); if (Math.random() < 0.3) DH.audio.play('block');
+              remove = true; break;
+            }
+          }
           this.hit(e, b.a, (b.mult || 1) * (b.a.s.falloff ? Math.pow(b.a.s.falloff, b.nh || 0) : 1), b.vx / sp, b.vy / sp);
           b.nh = (b.nh || 0) + 1;
           if (b.fork && !b.forked) { b.forked = true; for (const o of [-0.5, 0.5]) { const ang = Math.atan2(b.vy, b.vx) + o; proj(this, { k: 'hex', a: b.a, x: b.x, y: b.y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, ang, r: 4, pierce: 999, life: 0.6, forked: true, hit: new Set([e]) }); } }

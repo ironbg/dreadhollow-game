@@ -128,6 +128,13 @@
     }
     // shadows: soft contact blobs and silhouettes thrown by nearby lights (vfx.js)
     this.renderShadows(g, cx, cy, W, H, lights);
+    // a Bloater's fuse: the ground it will tear apart glows, filling as it burns
+    for (const e of this.enemies) if (e.fuse != null && !e.dead) {
+      const B = e.def.boom, R = B.R * (e.scale > 1 ? 1.4 : 1), k = 1 - Math.max(0, e.fuse) / B.fuse, x = e.x - cx, y = e.y - cy;
+      g.fillStyle = 'rgba(255,90,30,' + (0.12 + 0.2 * k) + ')'; g.beginPath(); g.ellipse(x, y, R, R * 0.6, 0, 0, TAU); g.fill();
+      g.strokeStyle = 'rgba(255,170,60,0.8)'; g.lineWidth = 1; g.beginPath(); g.ellipse(x, y, R * k, R * 0.6 * k, 0, 0, TAU); g.stroke();
+      lights.push({ x: e.x, y: e.y, r: 30, kind: 'tint', color: '#ff7030', a: 0.5 * k });
+    }
     // power-up auras under the hero
     for (const bk in this.buffs) if (this.buffs[bk] > 0) {
       const col = DH.content.BUFFS[bk].color, a = this.buffs[bk] < 3 ? (Math.sin(now * 20) > 0 ? 0.7 : 0.2) : 0.7, rr = 11 + Math.sin(now * 6 + bk.length) * 1.5;

@@ -384,6 +384,23 @@
     custodian:   { painter: 'lich', variant: 'gold', hp: 6400, spd: 36, dmg: 34, xp: 700, r: 15, mass: 60, def: 0.3, ai: 'b_caster', boss: true, lord: true },
   };
   // Gilded Ooze: a treasure champion. Every hit deals exactly 1 damage and knocks out gold; flees and escapes after 20s.
+  /* Hall foes: behaviours the common horde lacks (see Run.updateEnemies). Each hall brings two or three (C.HALL_FOES). */
+  C.enemies.ooze = { painter: 'slime', hp: 34, spd: 30, dmg: 9, xp: 2, r: 8, mass: 1.4, ai: 'hop', split: 'oozelet', scale: 0.72, anim: 0.3, particles: ['#7ab040', '#d0ff80', '#2a4a10'] };
+  C.enemies.oozelet = { painter: 'slime', hp: 10, spd: 40, dmg: 5, xp: 1, r: 5, mass: 0.6, ai: 'hop', scale: 0.45, anim: 0.25, particles: ['#7ab040', '#d0ff80'] };
+  C.enemies.shieldbearer = { painter: 'shieldskel', hp: 34, spd: 26, dmg: 9, xp: 3, r: 7, mass: 2.2, def: 0.1, shield: 0.25 }; // shots from the front: a quarter of their damage, and they stop
+  C.enemies.hound = { painter: 'wolf', hp: 12, spd: 68, dmg: 7, xp: 1, r: 6, mass: 0.7, ai: 'pack', pack: [4, 6], anim: 0.14 };
+  C.enemies.watcher = { painter: 'effigy', hp: 36, spd: 66, dmg: 12, xp: 3, r: 7, mass: 2.5, def: 0.15, ai: 'watch', scale: 0.8 }; // still while the hero faces it
+  C.enemies.bloater = { painter: 'slime', variant: 'volatile', hp: 14, spd: 44, dmg: 0, xp: 2, r: 7, mass: 1, ai: 'fuse', boom: { R: 28, dmg: 15, fuse: 1.0 }, scale: 0.62, anim: 0.2, particles: ['#ff7030', '#ffd060', '#401008'] };
+  // [enemy, from (timeline s), weight, variant override]
+  C.HALL_FOES = {
+    crypt: [['ooze', 50, 1.6], ['shieldbearer', 150, 1.4], ['hound', 260, 0.8, 'crypt']],
+    abyss: [['bloater', 90, 0.9], ['hound', 200, 1]],
+    aqueduct: [['watcher', 90, 1.2], ['shieldbearer', 200, 1.4]],
+    catacombs: [['hound', 70, 1.2], ['ooze', 160, 1.5]],
+    discord: [['watcher', 80, 1.3], ['bloater', 170, 1.4]],
+    blightmire: [['ooze', 50, 1.6], ['bloater', 140, 1.3], ['hound', 230, 1]],
+    reliquary: [['shieldbearer', 60, 1.4], ['watcher', 150, 1.2], ['hound', 240, 1]],
+  };
   C.enemies.gildedooze = { painter: 'slime', variant: 'gold', hp: 1, hits: 45, spd: 40, dmg: 0, xp: 0, r: 8, mass: 99, ai: 'flee', life: 20, gilded: true, anim: 0.3 };
   /* Power-up runes smashed out of urns (duration in seconds) */
   /* Urns: one roll per urn, top to bottom; nothing special -> a single coin */

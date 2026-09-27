@@ -283,6 +283,8 @@
   /* ---------- Wolf (summon): a spectral dire wolf ---------- */
   def('wolf', { w: 24, h: 15, frames: 2,
     colors: { fur: '#2a3448', eye: '#8ff0ff' },
+    variants: { fire: { fur: '#3a1a12', eye: '#ffb040' }, bog: { fur: '#2a3018', eye: '#c0ff50' }, purple: { fur: '#2e1838', eye: '#ff60d0' },
+      drowned: { fur: '#16302e', eye: '#70ffd0' }, gold: { fur: '#3a3020', eye: '#fff0a0' }, crypt: { fur: '#2a2426', eye: '#ff3a2a' } },
     draw(g, f, c) {
       // a spirit wolf of shadow and frost: a heavy mane streaming like smoke, low and stalking, jaws half open
       const s = c.fur, sd = sh(s, -0.55), mist = G.rgba(c.eye, 0.35), w = f ? 1 : -1;
@@ -336,10 +338,27 @@
       g.strokeStyle = 'rgba(220,210,190,0.5)'; g.lineWidth = 0.15; g.beginPath(); g.moveTo(16.6, 6.8); g.lineTo(18, 5.9); g.moveTo(16.6, 7.1); g.lineTo(18, 7.7); g.stroke();
     } });
 
+  /* ---------- Shieldbearer: a skeleton behind a battered tower shield (stops what strikes it from the front) ---------- */
+  def('shieldskel', { w: 24, h: 22, cx: 10, cy: 13, frames: 2,
+    colors: G.painters.skeleton.colors, variants: G.painters.skeleton.variants,
+    draw(g, f, c) {
+      g.save(); g.translate(0, 1); G.painters.skeleton.draw(g, f, c); g.restore();
+      const x = 14.5 + (f ? 0.3 : 0), y = 5.5, wood = sh(c.rust, 0.05), iron = '#4a4e58';
+      P.rrect(g, x - 0.6, y - 0.6, 7.2, 13.2, 1.6, '#140e0a');
+      P.rrect(g, x, y, 6, 12, 1.2, P.lg(g, x, y, x + 6, y, [sh(wood, 0.25), wood, sh(wood, -0.35)]));
+      for (let i = 1; i < 3; i++) P.line(g, x + i * 2, y + 0.6, x + i * 2, y + 11.4, 0.25, sh(wood, -0.5));
+      P.line(g, x, y + 2.2, x + 6, y + 2.2, 0.9, iron); P.line(g, x, y + 9.6, x + 6, y + 9.6, 0.9, iron);
+      [[x + 0.9, y + 2.2], [x + 5.1, y + 2.2], [x + 0.9, y + 9.6], [x + 5.1, y + 9.6]].forEach(([a, b]) => P.circle(g, a, b, 0.4, '#c8ccd8'));
+      P.circle(g, x + 3, y + 6, 1.5, iron); P.circle(g, x + 3, y + 6, 0.9, P.vol(g, x + 3, y + 6, 0.9, '#8a8e9a')); P.circle(g, x + 3, y + 6, 0.35, c.eye);
+      g.strokeStyle = 'rgba(0,0,0,0.5)'; g.lineWidth = 0.3; g.beginPath(); g.moveTo(x + 4.6, y + 3.4); g.lineTo(x + 3.6, y + 5); g.lineTo(x + 4.4, y + 5.6); g.stroke(); // a gash
+    } });
   /* ---------- Gilded Ooze: a heavy, faceless mass of molten gold, coins and bones sinking in it ---------- */
   def('slime', { w: 24, h: 22, cy: 16, frames: 2,
     colors: { body: '#4a8a30', core: '#d0ff80', eye: '#102008' },
-    variants: { gold: { body: '#c89018', core: '#fff4a0', eye: '#3a2004' } },
+    variants: { gold: { body: '#c89018', core: '#fff4a0', eye: '#3a2004' }, fire: { body: '#a8341a', core: '#ffc050', eye: '#200604' },
+      ice: { body: '#4a86a8', core: '#d0f4ff', eye: '#081828' }, bog: { body: '#5a7a24', core: '#e0ff70', eye: '#101a04' },
+      purple: { body: '#6a2a8a', core: '#ffa0f0', eye: '#1a0624' }, drowned: { body: '#2a7a70', core: '#b0fff0', eye: '#041a18' },
+      volatile: { body: '#c0401a', core: '#fff080', eye: '#2a0804' } }, // the Bloater: swollen with fire, it bursts
     draw(g, f, c) {
       // a heaving mass of melted corpses: skulls and ribs half sunk in it, bony arms clawing up out of it
       const sq = f ? 0.93 : 1, w = 9 / sq, h = 6.8 * sq, cx = 12, by = 20.4, bone = '#e0d4b4';
@@ -370,6 +389,8 @@
   /* ---------- Snow Effigy (Frozen Catacombs): a bound idol of sticks and ice under a stitched sack ---------- */
   def('effigy', { w: 26, h: 35, cy: 25, frames: 2,
     colors: { straw: '#8a8470', ice: '#bfe6ff', eye: '#8ff0ff' },
+    variants: { fire: { ice: '#ffb070', eye: '#ffd040' }, bog: { ice: '#c8e890', eye: '#c0ff50' }, purple: { ice: '#e0b0ff', eye: '#ff60d0' },
+      drowned: { ice: '#a0e8dc', eye: '#70ffd0' }, gold: { ice: '#fff0b0', eye: '#fff0a0' } },
     draw(g, f, c) {
       // the Snow Bogeyman: a gangling scarecrow on stilt legs, hunched over; straw fingers, a frost-bleached rag, a crimson
       // scarf, a sack head with a crooked peak, one burning eye and a wide mouth sewn shut; a scythe rimed with ice
