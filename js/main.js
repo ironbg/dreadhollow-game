@@ -48,6 +48,7 @@
         await DH.ads.interstitial('post_run');
       }
       DH.cloud.flush('run');
+      if (win) setTimeout(() => DH.review.afterWin(), 1200); // the store's rating sheet, after a victory (app only)
       // gentle upsell after a defeat, at most once a day
       const today = DH.util.dayKey();
       if (!win && !s.purchases.once.starter && s.stats.runs >= 2 && s.seen.starterDay !== today) {

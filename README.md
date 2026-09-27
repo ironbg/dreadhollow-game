@@ -232,6 +232,8 @@ npx cap sync && npx cap open android
 
 The game already handles touch, safe areas (notches), pause on background, vibration, and offline assets (fonts are bundled).
 
+The store rating sheet (`js/services/review.js`) needs `npm i @capacitor-community/in-app-review && npx cap sync`; without the plugin it is skipped.
+
 ## Project layout
 
 ```

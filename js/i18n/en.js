@@ -106,6 +106,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'deeds.pinned': 'Quest pinned: it shows in battle',
   'deeds.unpinned': 'Quest unpinned',
   'deeds.pinHint': 'Pin a deed to follow it on screen during battle',
+  'loot.xp': 'Experience instead', 'loot.xpDesc': 'Leave the pieces and take +{v}% of a level',
   'nb.dh': '{d}d {h}h', 'nb.title': 'The Seven Nights',
   'nb.short': '7 Nights',
   'nb.sub': 'A welcome for newcomers: each night opens new tasks. Tasks pay Seals; Seals fill the rewards track.',

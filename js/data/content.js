@@ -31,6 +31,7 @@
   C.SHARD_TABLE = [[0, 0, 0, 0], [10, 1, 0.57, 0.1], [20, 1, 1, 0.62], [30, 1, 1, 1]];
   C.KILL_MODE = 2500;            // Kill Mode (Shrine): the Lord rises at this many kills instead of 10:00
   C.LOOT_TIERS = { champion: 11, lord: 16, all: 25 };
+  C.LOOT_XP = 0.5; // a chest can be taken as experience instead: this share of the current level
   /* Items waiting at fixed spots in each hall, 320-380 m out and far apart */
   C.STAGE_START = {
     crypt:      ['tome', 'tome'],

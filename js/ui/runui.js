@@ -210,6 +210,10 @@
             h('div.d', ui.fmtStats(L.st), L.sp ? h('div.goldtxt', ui.gearSpecialText(it.type, L.sp)) : null),
             h('div.small.' + (L.better ? 'good' : 'muted'), res ? t(res.equipped ? 'loot.equipped' : 'loot.bagged') : L.better ? t('loot.upgrade') : L.same ? t('loot.sidegrade') : t('loot.worse', { r: t('rarity.' + E.rarities[L.cur.rarity]) }))));
       })),
+      // or none of them: experience instead
+      d.auto ? null : h('div.choice.lootxp', { style: { animationDelay: (d.items.length * 0.06) + 's' }, onclick: () => { click(); run.takeLootXp(); DH.audio.play('levelup'); done(m); } },
+        h('div.slot', { style: { flex: 'none', width: '52px', height: '52px' } }, A.img('t_wisdom')),
+        h('div.grow', h('div.t', t('loot.xp')), h('div.d', t('loot.xpDesc', { v: Math.round(C.LOOT_XP * 100) })))),
       h('div.center.small', { style: { marginTop: '6px' } }, A.img('i_gold', 'ci'), ' +' + d.gold),
       h('div.note', t('loot.wellHint'))) });
   };

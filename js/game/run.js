@@ -661,6 +661,11 @@
       if (!fx.ivoryDice) this.player.inv = Math.max(this.player.inv, 0.5); // half a second of grace after choosing (not with Ivory Dice)
       return { item, equipped, overflow: this.bagOverflow() };
     }
+    /** Leave the chest's pieces and take experience instead (half a level). */
+    takeLootXp() {
+      this.gainXp(this.xpNext * C.LOOT_XP, 1);
+      this.player.inv = Math.max(this.player.inv, 0.5);
+    }
     bagOverflow() { return this.bag.length > C.BAG_SIZE; }
     /** Put on a piece from the bag; the found piece it replaces goes back into the bag (your own gear simply waits at home). */
     equipFromBag(item, slot) {
