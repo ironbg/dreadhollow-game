@@ -180,22 +180,37 @@
       P.circle(g, 15.4, 9 + (f ? 1.2 : 0), 0.4, c.ember);
     } });
 
-  /* ---------- Cinder Bloater: a swollen ember sac on stubby legs, venting sparks, about to burst ---------- */
-  def('cinderbloat', { w: 24, h: 22, cy: 15, frames: 2,
+  /* ---------- Cinder Bloater: a waddling thing swollen with embers, fire showing through its split belly,
+   *            a small head with a gaping mouth, stubby arms hugging the gut, about to burst ---------- */
+  def('cinderbloat', { w: 26, h: 26, cy: 21, frames: 2,
     colors: { hide: '#3a1810', core: '#ffb040', eye: '#fff0a0' },
     draw(g, f, c) {
-      const sw = f ? 1.06 : 1, hd = c.hide;
-      P.ell(g, 12, 20.6, 7, 1.2, 'rgba(0,0,0,0.45)');
-      for (const [x, d] of [[7.6, -1], [11, 1], [14, -1], [16.8, 1]]) limb(g, x, 16, x + d * 0.6 + (f ? d * 0.5 : 0), 20.2, 0.9, 0.7, sh(hd, -0.2));
-      // the bloated sac: taut hide over a molten core showing through cracks
-      P.ell(g, 12, 11.4, 8.4 * sw, 6.8 * sw, P.rg(g, 12, 11, 9, [[0, sh(c.core, 0.2)], [0.25, sh(c.core, -0.2)], [0.55, hd], [1, sh(hd, -0.5)]], 10.4, 9.4));
-      cracks(g, [[6, 9, 8, 11, 7, 13.4], [10, 5.4, 11.4, 8, 10.4, 10.6, 12, 12.4], [15.4, 7, 14.2, 9.6, 16.6, 11.4, 15.6, 14], [8.6, 15, 11, 16, 13.6, 15.2]], c.core, 0.55);
-      P.glow(g, 12, 11, 8, c.core, 0.35 * (f ? 1.3 : 1));
-      // chimney vents on its back spitting sparks
-      for (const [x, y] of [[8, 5.6], [12.4, 4.6], [16, 6]]) { P.rrect(g, x - 1, y - 1.8, 2, 2.4, 0.6, '#1a0a06'); P.circle(g, x, y - 1.8, 0.6, c.core); if (f) P.circle(g, x + 0.4, y - 3.4, 0.3, c.eye); }
-      // a small face lost in the swollen front: two slit eyes and a grinning split
-      evil(g, 17.4, 10.4, 0.55, c.eye); evil(g, 19.2, 10.6, 0.45, c.eye);
-      g.strokeStyle = '#1a0402'; g.lineWidth = 0.5; g.beginPath(); g.moveTo(16.4, 13); g.quadraticCurveTo(18.4, 14.4, 20, 12.6); g.stroke();
+      const hd = c.hide, lit = sh(hd, 0.5), dk = sh(hd, -0.55), w = f ? 1 : -1, sw = f ? 0.4 : -0.4;
+      P.ell(g, 12, 23.6, 9, 1.2, 'rgba(0,0,0,0.45)');
+      // short bowed legs with flat feet, waddling
+      for (const [x, d, col] of [[7.6, -w, dk], [16.4, w, hd]]) { limb(g, x, 17.6, x - 0.8 + d * 0.6, 20.4, 1.9, 1.5, col); limb(g, x - 0.8 + d * 0.6, 20.4, x + d * 0.6, 22.6, 1.5, 1.2, col); P.ell(g, x + 0.6 + d * 0.6, 23.1, 2, 0.9, sh(col, -0.2)); }
+      // the swollen gut: a heavy sack sagging low, lit top-left
+      g.beginPath(); g.moveTo(12, 5.8); g.bezierCurveTo(19.6, 5.8, 21.6, 12, 20.6, 16); g.bezierCurveTo(19.6, 19.8, 15.6, 20.4, 12, 20.4);
+      g.bezierCurveTo(8, 20.4, 3.6, 19.6, 3.2, 15.4); g.bezierCurveTo(2.8, 10.8, 5, 5.8, 12, 5.8); g.closePath();
+      P.fill(g, P.rg(g, 11, 12.4, 10, [[0, lit], [0.55, hd], [1, dk]], 8.6, 9));
+      // the split belly: a glowing core and cracks running out from it
+      P.glow(g, 12.6, 14.4, 7, c.core, 0.55);
+      P.ell(g, 12.6, 14.6, 2.6 + sw * 0.4, 3.2, P.rg(g, 12.6, 14.4, 3.2, [[0, '#fff6c8'], [0.5, c.core], [1, '#a02808']]));
+      g.strokeStyle = c.core; g.lineWidth = 0.5;
+      for (const [x1, y1, x2, y2, x3, y3] of [[11, 12, 8.6, 10, 7.6, 7.6], [14.4, 12.4, 16.8, 10.2, 18.4, 9.6], [10.6, 16.6, 7.6, 17.4, 5.4, 16.2], [14.8, 17, 17, 18.2, 18.6, 17.4], [12.4, 11.6, 12.2, 9.4, 13, 7.6]]) {
+        g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.lineTo(x3, y3); g.stroke();
+      }
+      // stubby arms hugging the gut
+      limb(g, 4.6, 10.4, 1.8, 13.2, 1.4, 1.1, dk); limb(g, 1.8, 13.2, 1.6, 16.2, 1.1, 0.9, dk); claws(g, 1.6, 16.6, 1.4, 3, 1.3, 0.4, '#1a0806');   // stubby arms held out from the gut
+      limb(g, 19.4, 10.2, 22.4, 12.6, 1.4, 1.1, hd); limb(g, 22.4, 12.6, 23.4, 15.4, 1.1, 0.9, hd); claws(g, 23.6, 15.8, 1.2, 3, 1.3, 0.4, '#1a0806');
+      // a small head sunk into the shoulders, pushed forward: glowing eyes, a gaping mouth with fire inside
+      const hx = 13.8, hy = 4.8;
+      P.circle(g, hx, hy, 4, P.vol(g, hx, hy, 4, sh(hd, 0.3)));
+      P.ell(g, hx + 1.3, hy + 1.6, 2, 1.5 + (f ? 0.3 : 0), '#1a0604'); P.ell(g, hx + 1.4, hy + 2, 1.1, 0.7 + (f ? 0.2 : 0), c.core); P.glow(g, hx + 1.4, hy + 2, 2.6, c.core, 0.9);
+      teeth(g, hx - 0.2, hy + 0.6, hx + 2.6, hy + 0.6, 4, 0.5, 1, '#e8d8b8');
+      evil(g, hx + 1.6, hy - 1.4, 0.55, c.eye, -0.1); evil(g, hx - 0.8, hy - 1.5, 0.45, c.eye, 0.2);
+      // smoke and flame venting from the back
+      for (const [x, y, h] of [[5.6, 8, 2.4], [8.4, 6.2, 3], [3.6, 11.2, 1.8]]) { P.circle(g, x, y + 0.4, 0.8, '#140604'); P.flame(g, x, y, h + (f ? 0.8 : 0), -0.4, 0.9); }
     } });
 
   /* ---------- Magma Crawler: a long lava slug under basalt plates, leaving a burning trail ---------- */
@@ -218,25 +233,42 @@
       for (let i = 0; i < 3; i++) P.circle(g, 8 + i * 7 + (f ? 1 : 0), 13.6 + (i % 2) * 0.4, 0.5, sh(c.lava, 0.3));
     } });
 
-  /* ---------- Ember Salamander: a lean black lizard, a crest of fire down its spine ---------- */
-  def('salamander', { w: 28, h: 14, cy: 9, frames: 2,
-    colors: { skin: '#1e1414', spot: '#ff8a20', eye: '#fff060' },
+  /* ---------- Ember Salamander: a soot-black fire lizard, head raised, legs splayed, a long curling tail,
+   *            ember blotches down its back and a crest of small flames ---------- */
+  def('salamander', { w: 30, h: 17, cy: 13, frames: 2,
+    colors: { skin: '#2a1c1a', spot: '#ff8a20', eye: '#fff060' },
     draw(g, f, c) {
-      const s = c.skin, w = f ? 1 : -1;
-      P.ell(g, 14, 12.6, 10, 1, 'rgba(0,0,0,0.4)');
-      // tail sweeping back
-      g.beginPath(); g.moveTo(8, 8); g.quadraticCurveTo(3, 7 + w * 1.4, 0.6, 9.6 - w); g.quadraticCurveTo(4, 9.4, 8, 10); g.closePath(); P.fill(g, P.lg(g, 0, 7, 0, 10, [sh(s, 0.3), sh(s, -0.3)]));
-      // splayed legs, low to the ground
-      for (const [x, d] of [[10, -1], [18, 1]]) { limb(g, x, 9.4, x - 2 + d * w, 11.4, 0.8, 0.6, sh(s, -0.2)); limb(g, x + 1, 9.4, x + 3 - d * w, 11.6, 0.8, 0.6, s); }
-      // a lean body and wedge head
-      P.ell(g, 14, 8.6, 7, 2.2, P.lg(g, 0, 6.4, 0, 10.8, [sh(s, 0.4), s, sh(s, -0.4)]));
-      g.beginPath(); g.moveTo(20, 7); g.quadraticCurveTo(25, 6.4, 27, 8.4); g.quadraticCurveTo(24, 10.2, 20, 10); g.closePath(); P.fill(g, P.lg(g, 20, 6, 20, 10, [sh(s, 0.45), sh(s, -0.3)]));
-      P.line(g, 22.6, 9.2, 26.4, 8.6, 0.35, '#0a0404');
-      evil(g, 23.2, 7.6, 0.5, c.eye);
-      for (let i = 0; i < 5; i++) P.circle(g, 10 + i * 2.2, 8.4 + (i % 2) * 0.8, 0.45, c.spot);
-      // the burning crest along the spine
-      for (let i = 0; i < 5; i++) flame(g, 9.4 + i * 2.4, 6.8 - (i === 2 ? 0.4 : 0), 2.4 + ((i + (f ? 1 : 0)) % 2) * 1.2, -0.5, 0.9);
-      P.glow(g, 14, 6, 7, c.spot, 0.25);
+      const s = c.skin, lit = sh(s, 0.55), dk = sh(s, -0.5), w = f ? 1 : -1;
+      P.ell(g, 15, 15, 11, 1.1, 'rgba(0,0,0,0.4)');
+      // far legs, behind the body (darker), stepping opposite the near pair
+      const leg = (x, y, d, col, toe) => {
+        const ex = x - 1.8 + d * 0.9, ey = y + 2.2, fx = x + 0.2 + d * 1.6, fy = y + 4.2;
+        limb(g, x, y, ex, ey, 1.1, 0.7, col); limb(g, ex, ey, fx, fy, 0.7, 0.5, col);
+        claws(g, fx + 0.2, fy + 0.1, 0.1, 3, 1.2, 0.35, toe);
+      };
+      leg(12.2, 10.2, -w, dk, dk); leg(21.2, 10, w, dk, dk);
+      // tail: thick at the root, sweeping back and curling up to a fine tip
+      g.beginPath(); g.moveTo(10, 8.2); g.bezierCurveTo(6, 8, 3.2, 7.6 + w * 0.4, 1.4, 4.6 + w * 0.3);
+      g.quadraticCurveTo(1.2, 3.6, 2, 3.8 + w * 0.3); g.bezierCurveTo(3, 7.2, 6, 10.6, 10.4, 11.2); g.closePath();
+      P.fill(g, P.lg(g, 0, 4, 0, 11, [lit, s, dk]));
+      // body: a long low barrel, back lit, belly in shadow
+      P.ell(g, 16, 9.6, 7.4, 2.7, P.lg(g, 0, 6.9, 0, 12.3, [lit, s, dk]));
+      // head raised on a short neck: a flat skull, a blunt snout, the jaw line, a bright slit eye
+      g.beginPath(); g.moveTo(21.4, 7.6); g.quadraticCurveTo(23.4, 5.4, 26.4, 6.2); g.quadraticCurveTo(29.4, 7, 29.6, 8.6);
+      g.quadraticCurveTo(28.6, 10, 25.6, 10.2); g.quadraticCurveTo(23, 10.6, 21.4, 11); g.closePath();
+      P.fill(g, P.lg(g, 0, 5.6, 0, 10.8, [lit, s, dk]));
+      P.line(g, 24.4, 9.2, 29.2, 8.7, 0.35, '#0a0404');                                   // the mouth
+      P.circle(g, 28.6, 7.4, 0.25, '#0a0404');                                            // nostril
+      P.ell(g, 25.4, 7.4, 1, 0.75, '#0a0404'); evil(g, 25.5, 7.35, 0.8, c.eye, -0.15);
+      // near legs, in front (lit)
+      leg(13.6, 10.8, w, s, lit); leg(22.4, 10.6, -w, s, lit);
+      // ember blotches down the back, the signature of a fire salamander
+      for (const [x, y, rx, ry, a] of [[10.8, 8.1, 1.1, 0.6, 0.2], [13.4, 7.4, 1.3, 0.7, -0.1], [16.4, 7.3, 1, 0.6, 0.1], [19, 7.6, 1.2, 0.65, -0.2], [23.4, 6.6, 0.8, 0.45, 0], [7.2, 8.4, 0.9, 0.5, 0.3], [4.2, 6.8, 0.6, 0.4, 0.8], [15, 9.8, 0.7, 0.4, 0]]) {
+        P.ell(g, x, y, rx, ry, c.spot, a); P.ell(g, x - rx * 0.25, y - ry * 0.3, rx * 0.45, ry * 0.4, sh(c.spot, 0.6), a);
+      }
+      P.glow(g, 15, 7.6, 8, c.spot, 0.22);
+      // a low crest of small flames along the spine, flickering between frames
+      for (let i = 0; i < 4; i++) P.flame(g, 11.6 + i * 2.8, 7.2 - (i === 1 ? 0.3 : 0), 1.6 + ((i + f) % 2) * 0.9, -0.6, 0.85);
     } });
 
   /* ---------- Flamedancer (boss): a slender horned dancer in a skirt of fire, ribbons of flame trailing her arms ---------- */
@@ -309,62 +341,97 @@
   /** Barnacles and moss spots scattered over an area. */
   function barnacles(g, pts, col) { for (const [x, y, r] of pts) { P.circle(g, x, y, r, sh(col, -0.35)); P.circle(g, x - r * 0.2, y - r * 0.2, r * 0.55, col); } }
 
-  /* ---------- Weeping Watcher: a hooded stone mourner, face hidden in its hands; eyes show when it moves ---------- */
-  def('weeper', { w: 20, h: 30, cy: 20, frames: 2,
+  /* ---------- Weeping Watcher: a weeping stone angel, wings folded high, hands over its face; unwatched
+   *            (frame 1) the hands drop to claws and the face shows: glowing eyes, a fanged mouth ---------- */
+  def('weeper', { w: 24, h: 32, cy: 21, frames: 2,
     colors: { stone: '#8a8a86', moss: '#4a6a3a', eye: '#9ff0ff' },
     draw(g, f, c) {
-      const st = c.stone, sd = sh(st, -0.45);
-      P.ell(g, 10, 28.4, 6, 1.2, 'rgba(0,0,0,0.45)');
-      // a plinth of cracked stone and the robe falling onto it
-      P.rrect(g, 3.4, 25, 13.2, 3.4, 0.8, P.lg(g, 0, 25, 0, 28.4, [sh(st, 0.1), sd]));
-      g.beginPath(); g.moveTo(6.4, 9); g.lineTo(13.6, 9); g.quadraticCurveTo(16, 17, 16.2, 25.4); g.lineTo(3.8, 25.4); g.quadraticCurveTo(4, 17, 6.4, 9); g.closePath();
-      P.fill(g, P.lg(g, 4, 9, 16, 25, [sh(st, 0.35), st, sd]));
-      g.strokeStyle = sh(st, -0.3); g.lineWidth = 0.4; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(7.4 + i * 1.6, 11); g.quadraticCurveTo(6.4 + i * 2.2, 18, 5.8 + i * 2.6, 25); g.stroke(); }
-      // cracks and moss
-      g.strokeStyle = '#2a2a28'; g.lineWidth = 0.35; g.beginPath(); g.moveTo(12.6, 14); g.lineTo(11.4, 17); g.lineTo(12.4, 19.4); g.moveTo(5.6, 21); g.lineTo(7.4, 22.6); g.stroke();
-      for (const [x, y, r] of [[5, 24.4, 1.4], [14.6, 23.6, 1.1], [7.6, 10.2, 0.8], [13.8, 9.8, 0.9]]) P.ell(g, x, y, r, r * 0.6, c.moss);
-      // a deep hood; the hands cover the face (lowered a little while it moves, and the eyes glare through)
-      g.beginPath(); g.moveTo(5.2, 10.4); g.quadraticCurveTo(4.6, 1.6, 10.4, 1); g.quadraticCurveTo(15.8, 1.8, 15, 10.4); g.quadraticCurveTo(10, 8.6, 5.2, 10.4); g.closePath();
-      P.fill(g, P.lg(g, 5, 1, 15, 10, [sh(st, 0.45), st, sd]));
-      P.ell(g, 10.6, 6.4, 3.4, 3.6, '#1a1a1a');
-      const low = f ? 1.2 : 0;
-      if (f) { P.glow(g, 11, 5.4, 3, c.eye, 0.7); P.circle(g, 9.6, 5.4, 0.45, c.eye); P.circle(g, 12.2, 5.4, 0.45, c.eye); }
-      for (const [x, d] of [[9, -1], [12, 1]]) { P.ell(g, x, 6.6 + low, 1.7, 2.2, P.vol(g, x, 6.4 + low, 2, sh(st, 0.2)), d * 0.2); for (let k = 0; k < 3; k++) P.line(g, x - 1 + k, 4.8 + low, x - 1.1 + k * 1.05, 6 + low, 0.25, sd); }
-      P.path(g, [7.6, 9 + low, 8.6, 12.4, 11.6, 12.4, 12.6, 9 + low]); P.fill(g, sh(st, 0.05)); // forearms
-      P.line(g, 10, 7.6 + low, 10.4, 9.6 + low, 0.35, 'rgba(120,200,220,0.55)'); // a stone tear
-    } });
-
-  /* ---------- Gargoyle: a horned stone imp; wings folded while it perches, spread when it swoops ---------- */
-  def('gargoyle', { w: 30, h: 24, cy: 15, frames: 2,
-    colors: { stone: '#6a7266', eye: '#ffb040' },
-    draw(g, f, c) {
-      const st = c.stone, sd = sh(st, -0.5);
-      P.ell(g, 15, 22.4, 7, 1.2, 'rgba(0,0,0,0.45)');
-      // wings: folded against the back (frame 0) or spread wide (frame 1)
-      const wing = (sx) => {
-        g.save(); g.translate(15 - sx * 3, 9); g.scale(sx, 1);
-        if (f) { g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(6, -9, 14, -6); g.lineTo(12, -2); g.lineTo(13, 2); g.lineTo(9, 1); g.lineTo(9, 5); g.lineTo(5, 3); g.lineTo(1, 5); g.closePath(); }
-        else { g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(4, -7, 7, -4); g.lineTo(6, 2); g.lineTo(4, 5); g.lineTo(1, 6); g.closePath(); }
-        P.fill(g, P.lg(g, 0, -8, 0, 6, [sh(st, 0.25), sd])); g.strokeStyle = sh(st, -0.65); g.lineWidth = 0.4; g.stroke();
+      const st = c.stone, lit = sh(st, 0.35), dk = sh(st, -0.45), dd = sh(st, -0.65);
+      const arm = (x1, y1, x2, y2, w1, w2, col) => { limb(g, x1, y1, x2, y2, w1 + 0.4, w2 + 0.4, dd); limb(g, x1, y1, x2, y2, w1, w2, col); }; // edged, so it reads over the robe
+      P.ell(g, 12, 30.6, 8, 1.3, 'rgba(0,0,0,0.45)');
+      // folded wings rising above the shoulders, feathers stepping down the outer edge
+      const wing = (sx, col, lcol) => {
+        g.save(); g.translate(12, 0); g.scale(sx, 1);
+        g.beginPath(); g.moveTo(2.6, 11.4); g.quadraticCurveTo(5.4, 4, 8.8, 1.6); g.quadraticCurveTo(9.8, 6, 9.4, 11);
+        for (let i = 0; i < 5; i++) { const y = 12 + i * 2.6; g.lineTo(9.6 - i * 0.5, y + 1.4); g.lineTo(8.4 - i * 0.6, y); }
+        g.lineTo(5.6, 25); g.quadraticCurveTo(3.6, 18, 2.6, 11.4); g.closePath(); P.fill(g, P.lg(g, 2, 2, 10, 25, [lcol, col, dd]));
+        g.strokeStyle = dd; g.lineWidth = 0.35; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(4 + i * 0.9, 9 + i * 2.8); g.quadraticCurveTo(6.6 + i * 0.4, 8 + i * 2.8, 8.8 - i * 0.3, 8.6 + i * 3.4); g.stroke(); }
         g.restore();
       };
-      wing(1); wing(-1);
-      // crouched haunches and clawed feet
-      limb(g, 12, 15, 10, 20, 1.6, 1.2, sd); limb(g, 18, 15, 20, 20, 1.6, 1.2, st);
-      claws(g, 10, 20.4, 1.2, 3, 1.3, 0.4, sh(st, 0.3)); claws(g, 20, 20.4, 1.2, 3, 1.3, 0.4, sh(st, 0.3));
-      // a hunched body, ridges down the spine
-      P.ell(g, 15, 13.4, 5.6, 5, P.vol(g, 15, 12.6, 5.6, st));
-      for (let i = 0; i < 4; i++) P.path(g, [11 + i * 2, 9.4 - i * 0.2, 11.8 + i * 2, 7.6 - i * 0.2, 12.6 + i * 2, 9.4 - i * 0.2]); P.fill(g, sd);
-      // arms and long claws resting forward
-      limb(g, 17.6, 12, 21, 16.4, 1.1, 0.9, st); claws(g, 21.2, 16.8, 1.1, 3, 1.4, 0.35, sh(st, 0.3));
-      // head: heavy brow, curling horns, a grinning maw
-      const hx = 20.4, hy = 8.2;
-      P.circle(g, hx, hy, 3.2, P.vol(g, hx, hy, 3.2, st));
-      horn(g, hx - 1.6, hy - 2.2, hx - 3.6, hy - 5.6, hx - 1.6, hy - 7, 0.7, sh(st, 0.1)); horn(g, hx + 1, hy - 2.6, hx + 2.6, hy - 6.2, hx + 4.6, hy - 6, 0.7, sh(st, 0.1));
-      P.path(g, [hx, hy + 1, hx + 3.8, hy + 0.6, hx + 3, hy + 2.6, hx + 0.4, hy + 2.8]); P.fill(g, '#141414');
-      teeth(g, hx + 0.2, hy + 1, hx + 3.6, hy + 0.7, 4, 0.6, 1, '#d8d4c4');
-      evil(g, hx + 1.4, hy - 0.8, 0.5, c.eye); evil(g, hx - 0.8, hy - 0.8, 0.4, c.eye);
-      g.strokeStyle = '#2a2e28'; g.lineWidth = 0.3; g.beginPath(); g.moveTo(13, 11); g.lineTo(14.4, 13.6); g.lineTo(13.4, 15.6); g.stroke();
+      wing(-1, dk, st); wing(1, st, lit);
+      // the robe falling to the floor in deep folds, a torn hem, moss creeping up it
+      g.beginPath(); g.moveTo(8.6, 11.2); g.lineTo(15.4, 11.2); g.quadraticCurveTo(17.6, 20, 18.8 + (f ? 0.4 : 0), 30); g.lineTo(5.2 - (f ? 0.4 : 0), 30); g.quadraticCurveTo(6.4, 20, 8.6, 11.2); g.closePath();
+      P.fill(g, P.lg(g, 5, 11, 19, 30, [lit, st, dk]));
+      for (const [x0, x1, col] of [[10, 8.2, dk], [12.2, 11.6, dd], [14.2, 15.6, dk]]) { g.beginPath(); g.moveTo(x0, 16); g.quadraticCurveTo(x0 - 0.4, 23, x1, 30); g.strokeStyle = col; g.lineWidth = 0.6; g.stroke(); }
+      P.rag(g, 5.2 - (f ? 0.4 : 0), 29.8, 18.8 + (f ? 0.4 : 0), 29.8, 6, 1, dk);
+      for (const [x, y, r] of [[6.6, 28.4, 1.4], [16.6, 28, 1.2], [9, 29.2, 1], [14.4, 22, 0.7]]) P.ell(g, x, y, r, r * 0.55, c.moss);
+      P.cracks(g, [[15.6, 14, 14.8, 17, 15.8, 19.4], [7.6, 22, 8.8, 24.2, 8.2, 26]], dd, 0.35);
+      // the bowed head under a veil
+      const hx = 12, hy = 8.2;
+      g.beginPath(); g.moveTo(hx - 3.6, hy + 3.2); g.quadraticCurveTo(hx - 3.8, hy - 3.4, hx, hy - 3.8); g.quadraticCurveTo(hx + 3.8, hy - 3.4, hx + 3.6, hy + 3.2); g.closePath();
+      P.fill(g, P.lg(g, hx - 3.6, hy - 3.8, hx + 3.6, hy + 3.2, [lit, st, dk]));
+      if (!f) {
+        // hands pressed over the face, elbows out
+        P.ell(g, hx, hy + 0.8, 2.7, 2.9, dd);                                           // the shadowed face under the veil
+        arm(8.6, 12, 6.4, 10.4, 1.1, 0.9, st); arm(6.4, 10.4, 10.6, 8.6, 0.9, 0.8, lit);
+        arm(15.4, 12, 17.6, 10.4, 1.1, 0.9, st); arm(17.6, 10.4, 13.4, 8.6, 0.9, 0.8, lit);
+        for (const [x, d] of [[10.7, -1], [13.3, 1]]) { P.ell(g, x + d * 0.3, hy + 0.5, 1.6, 2, dd); P.ell(g, x + d * 0.3, hy + 0.4, 1.3, 1.7, P.vol(g, x, hy, 1.8, sh(st, 0.5))); for (let k = 0; k < 3; k++) P.line(g, x - 0.7 + k * 0.7, hy - 1.1, x - 0.8 + k * 0.75, hy + 0.4, 0.25, dd); }
+        P.line(g, 12, hy + 1.6, 12, hy + 4.2, 0.3, 'rgba(140,210,230,0.7)'); // a stone tear running down
+      } else {
+        // unwatched: the hands drop to claws and the face is bared
+        P.ell(g, hx, hy + 0.8, 2.3, 2.6, '#101012');
+        evil(g, hx - 0.9, hy - 0.1, 0.6, c.eye, 0.1); evil(g, hx + 1.1, hy - 0.1, 0.6, c.eye, -0.1); P.glow(g, hx, hy, 4, c.eye, 0.5);
+        P.ell(g, hx + 0.1, hy + 2, 1.2, 0.9, '#050506'); teeth(g, hx - 1, hy + 1.5, hx + 1.2, hy + 1.5, 4, 0.6, 1, '#d8d8d0');
+        arm(8.6, 12, 5.8, 15.2, 1.1, 0.9, st); arm(5.8, 15.2, 4.2, 18.8, 0.9, 0.7, st); claws(g, 4.2, 19.2, 1.9, 4, 2, 0.45, lit);
+        arm(15.4, 12, 18.2, 15, 1.1, 0.9, lit); arm(18.2, 15, 19.8, 18.4, 0.9, 0.7, lit); claws(g, 19.8, 18.8, 1.2, 4, 2, 0.45, lit);
+      }
+    } });
+
+  /* ---------- Gargoyle: a horned stone gargoyle crouched on its haunches; frame 0 perched with the wings folded
+   *            high on its back, frame 1 swooping with them spread up and back; the head always clear in front ---------- */
+  def('gargoyle', { w: 30, h: 26, cy: 16, frames: 2,
+    colors: { stone: '#6a7266', eye: '#ffb040' },
+    draw(g, f, c) {
+      const st = c.stone, lit = sh(st, 0.5), mid = sh(st, 0.15), dk = sh(st, -0.45), dd = sh(st, -0.65);
+      P.ell(g, 15, 24.4, 9, 1.3, 'rgba(0,0,0,0.45)');
+      // wings: dark membranes on finger struts, behind the body and away from the head
+      const wing = (bx, by, pts, col) => {
+        g.beginPath(); g.moveTo(bx, by); for (const [x, y] of pts) g.lineTo(x, y); g.closePath();
+        P.fill(g, P.lg(g, bx, by - 12, bx, by + 4, [sh(col, 0.2), col, dd]));
+        g.strokeStyle = dd; g.lineWidth = 0.5; for (const [x, y] of pts.filter((_, i) => i % 2 === 0)) { g.beginPath(); g.moveTo(bx, by); g.lineTo(x, y); g.stroke(); }
+      };
+      if (f) {
+        wing(13, 11, [[6, 1.4], [3.6, 5.4], [1, 5.6], [2.4, 9.6], [0.6, 12], [4.6, 13.4], [7, 15]], dk);          // far wing, up and back
+        wing(15.6, 10.6, [[14, 0.6], [11.2, 3], [9.6, 2.8], [9.8, 6.6], [8, 8], [11.4, 10.2], [12.6, 13]], dk);     // near wing, raised
+      } else {
+        wing(12.6, 11, [[9, 3], [7.4, 6.4], [6, 7], [6.8, 10.6], [6, 13.4], [9.6, 15]], dk);                         // folded, high on the back
+        wing(15, 10.6, [[13.4, 2.4], [11.4, 5.2], [10.4, 5.4], [10.8, 9], [10.2, 11.6], [13, 13.6]], dk);
+      }
+      // a curling tail with a spade tip
+      g.beginPath(); g.moveTo(9, 17); g.bezierCurveTo(5, 19, 3.6, 21.6, 1.8, 20.8); g.strokeStyle = dk; g.lineWidth = 1.1; g.stroke();
+      P.path(g, [1.8, 19.4, 0.2, 21, 2.2, 22.2]); P.fill(g, dk);
+      // crouched body: haunch, hunched torso, a front arm reaching down with long claws
+      // far hind leg (darker), then the near haunch folded under the body: thigh, shin and a clawed foot
+      limb(g, 9.6, 17.4, 7.6, 20.4, 1.6, 1.1, dk); limb(g, 7.6, 20.4, 9.2, 23.2, 1.1, 0.8, dk); claws(g, 9.4, 23.6, 0.1, 3, 1.3, 0.45, dd);
+      P.ell(g, 12.4, 17.4, 3.8, 3.4, P.vol(g, 11.8, 16.4, 3.8, st));                                               // haunch
+      limb(g, 12.8, 19.2, 11.6, 21.6, 1.3, 0.9, st); limb(g, 11.6, 21.6, 13.6, 23.2, 0.9, 0.7, st); claws(g, 13.8, 23.6, 0.1, 3, 1.4, 0.45, '#2a2e28');
+      g.beginPath(); g.moveTo(10, 16); g.quadraticCurveTo(12.4, 9, 19, 9.6); g.quadraticCurveTo(22, 11.6, 20.6, 15.4); g.quadraticCurveTo(16, 18.6, 10, 16); g.closePath();
+      P.fill(g, P.lg(g, 11, 9, 20, 18, [lit, st, dk]));
+      for (let i = 0; i < 3; i++) P.line(g, 14.6 + i * 1.6, 12.6, 15.4 + i * 1.6, 15.6, 0.4, dk);                    // ribs
+      limb(g, 17.8, 13.6, 18.8, 18.4, 1.2, 0.9, dk); limb(g, 18.8, 18.4, 18.4, 22.6, 0.9, 0.7, dk); claws(g, 18.6, 23, 0.2, 3, 1.3, 0.45, dd);   // far arm
+      limb(g, 19.4, 13, 21.6, 18.2, 1.3, 1, lit); limb(g, 21.6, 18.2, 22, 22.4, 1, 0.8, st); claws(g, 22.2, 22.8, 0.2, 3, 1.5, 0.45, '#2a2e28');
+      // the head thrust forward, clear of the wings: heavy brow, horns sweeping back, a grinning fanged maw
+      const hx = 24, hy = 8.6;
+      g.beginPath(); g.moveTo(hx - 3.4, hy + 1.6); g.quadraticCurveTo(hx - 3, hy - 3.2, hx + 0.6, hy - 3); g.quadraticCurveTo(hx + 4.2, hy - 2, hx + 5, hy + 0.8);
+      g.quadraticCurveTo(hx + 4.4, hy + 3.4, hx + 1, hy + 3.6); g.quadraticCurveTo(hx - 2.4, hy + 3.4, hx - 3.4, hy + 1.6); g.closePath();
+      P.fill(g, P.lg(g, hx - 3, hy - 3, hx + 3, hy + 3.6, [lit, mid, dk]));
+      P.horn(g, hx - 1.4, hy - 2.4, hx - 4.6, hy - 5.4, hx - 6.8, hy - 4.4, 0.8, sh(st, 0.3));
+      P.horn(g, hx + 0.6, hy - 2.8, hx - 0.4, hy - 6.6, hx - 3, hy - 7.6, 0.7, lit);
+      P.path(g, [hx + 0.2, hy + 1.2, hx + 5, hy + 0.8, hx + 4.2, hy + 3, hx + 0.6, hy + 3]); P.fill(g, '#141410');
+      teeth(g, hx + 0.6, hy + 1.2, hx + 4.8, hy + 0.9, 5, 0.8, 1, '#e0dccc'); teeth(g, hx + 0.8, hy + 3, hx + 4.2, hy + 2.9, 4, 0.7, -1, '#e0dccc');
+      P.line(g, hx - 1, hy - 1.6, hx + 3, hy - 1.4, 0.6, dd);                                                   // the brow
+      evil(g, hx + 1.8, hy - 0.6, 0.7, c.eye, -0.2);
+      P.cracks(g, [[16, 11, 17.4, 12.6, 16.8, 14]], dd, 0.3);
     } });
 
   /* ---------- Arbalist: a skeletal crossbowman under a kettle helm, a heavy crossbow braced ---------- */
@@ -391,33 +458,44 @@
       P.line(g, 17.6 - w, 10.5, 25.4, 10.5, 0.5, '#3a2a1c'); P.path(g, [25.2, 9.8, 26.6, 10.5, 25.2, 11.2]); P.fill(g, '#c8ccd8');
     } });
 
-  /* ---------- Drowned: a bloated waterlogged corpse, weed hanging from it, dragging an anchor chain ---------- */
-  def('drowned', { w: 26, h: 28, cy: 17, frames: 2,
-    colors: { skin: '#7a98a0', weed: '#2e5a3a', eye: '#b0fff0' },
+  /* ---------- The Drowned: a bloated corpse risen from the water, hunched forward, lank hair over its face,
+   *            kelp on its shoulders, dragging an anchor on a chain behind it ---------- */
+  def('drowned', { w: 28, h: 30, cy: 18, frames: 2,
+    colors: { skin: '#9ab0a4', weed: '#2e5a3a', eye: '#b0fff0' },
     draw(g, f, c) {
-      const s = c.skin, sd = sh(s, -0.5), w = f ? 0.9 : -0.9;
-      P.ell(g, 13, 26.4, 8, 1.4, 'rgba(0,0,0,0.45)');
-      // a puddle it leaves as it walks
-      P.ell(g, 13, 26.2, 7, 1.2, 'rgba(90,150,170,0.35)');
-      limb(g, 10, 18, 9 - w, 22, 1.8, 1.5, sd); limb(g, 9 - w, 22, 9 - w, 25.6, 1.5, 1.4, sd);
-      limb(g, 16, 18, 17 + w, 22, 1.8, 1.5, s); limb(g, 17 + w, 22, 17 + w, 25.6, 1.5, 1.4, s);
-      // a swollen belly and hunched shoulders
-      P.ell(g, 13, 14, 7.2, 6.8, P.rg(g, 13, 13, 8, [[0, sh(s, 0.3)], [0.6, s], [1, sd]], 11, 11));
-      g.save(); g.globalAlpha = 0.5; P.ell(g, 12, 16, 3.4, 2.4, sh(s, -0.25)); g.restore();
-      for (const [x, y] of [[8, 11], [16, 17], [11, 18.4]]) P.circle(g, x, y, 0.6, '#3a4a50'); // sores
-      // weed draped over the shoulders, hanging in strands
-      for (let i = 0; i < 6; i++) { const x = 7 + i * 2.4; g.beginPath(); g.moveTo(x, 8.6 + (i % 2)); g.quadraticCurveTo(x + (f ? 0.8 : -0.4), 13, x - 0.4, 16 + (i % 3)); g.strokeStyle = c.weed; g.lineWidth = 0.8; g.stroke(); }
-      // arms: one dragging a rusted chain, one reaching
-      limb(g, 7, 11, 4.4, 17, 1.3, 1.1, sd); P.line(g, 4.4, 17.6, 3, 25, 0.5, '#5a4a3a');
-      for (let i = 0; i < 5; i++) { g.beginPath(); g.ellipse(3.6 - i * 0.1, 18.6 + i * 1.4, 0.5, 0.7, 0, 0, Math.PI * 2); g.strokeStyle = '#6a5a44'; g.lineWidth = 0.35; g.stroke(); }
-      limb(g, 19, 11, 22.6, 14 + w, 1.3, 1.1, s); claws(g, 22.8, 14.2 + w, 0.3, 3, 1.3, 0.35, sh(s, 0.3));
-      // a slumped head, lank hair, milky eyes
-      const hx = 14.6, hy = 6.6;
-      P.circle(g, hx, hy, 3.4, P.vol(g, hx, hy, 3.4, sh(s, 0.1)));
-      for (let i = 0; i < 5; i++) P.line(g, hx - 3 + i * 1.2, hy - 2.6, hx - 3.4 + i * 1.3, hy + 1.8, 0.5, '#1a2622');
-      P.circle(g, hx + 1.4, hy + 0.2, 0.7, sh(c.eye, 0.2)); P.circle(g, hx - 0.8, hy + 0.2, 0.6, sh(c.eye, 0.2)); P.glow(g, hx + 0.4, hy + 0.2, 2.2, c.eye, 0.35);
-      P.ell(g, hx + 1, hy + 2.2, 1.2, 0.7, '#0a1414');
-      for (let i = 0; i < 2; i++) P.circle(g, 12 + i * 5, 20 + (f ? 1 : 0) + i, 0.35, 'rgba(160,220,240,0.8)'); // drips
+      const s = c.skin, lit = sh(s, 0.3), dk = sh(s, -0.4), dd = sh(s, -0.62), bruise = '#5e5068', w = f ? 1 : -1;
+      P.ell(g, 14, 28.6, 10, 1.3, 'rgba(0,0,0,0.45)'); P.ell(g, 15, 28.4, 7, 1, 'rgba(90,150,170,0.35)');
+      // the anchor it drags: hanging from the far hand on a short chain, its flukes scraping the floor
+      const ax = 6, ay = 27.4;
+      for (let k = 0; k < 4; k++) { g.beginPath(); g.ellipse(7.8 - k * 0.45, 21.6 + k * 0.9, 0.55, 0.75, 0.4, 0, Math.PI * 2); g.strokeStyle = '#2a2420'; g.lineWidth = 0.55; g.stroke(); }
+      P.line(g, ax, ay - 1, ax, ay - 5.4, 1.1, '#3a3430'); P.line(g, ax - 1.8, ay - 4.4, ax + 1.8, ay - 4.4, 0.9, '#3a3430');
+      g.beginPath(); g.arc(ax, ay - 6.2, 0.9, 0, Math.PI * 2); g.strokeStyle = '#3a3430'; g.lineWidth = 0.6; g.stroke();
+      g.beginPath(); g.moveTo(ax - 3.2, ay - 2.6); g.quadraticCurveTo(ax - 2.8, ay + 0.6, ax, ay + 0.6); g.quadraticCurveTo(ax + 2.8, ay + 0.6, ax + 3.2, ay - 2.6); g.strokeStyle = '#3a3430'; g.lineWidth = 1.1; g.stroke();
+      P.path(g, [ax - 3.8, ay - 2.2, ax - 3.2, ay - 3.6, ax - 2.4, ay - 2.2]); P.fill(g, '#3a3430'); P.path(g, [ax + 3.8, ay - 2.2, ax + 3.2, ay - 3.6, ax + 2.4, ay - 2.2]); P.fill(g, '#3a3430');
+      // legs: bare, bent at the knee, the far one darker
+      for (const [hx0, d, col] of [[12, -w, dk], [16.6, w, s]]) { limb(g, hx0, 18.6, hx0 + 0.6 + d * 0.8, 23.2, 1.7, 1.2, col); limb(g, hx0 + 0.6 + d * 0.8, 23.2, hx0 + d * 0.4, 27.6, 1.2, 0.95, col); P.ell(g, hx0 + 0.9 + d * 0.4, 28, 1.6, 0.65, sh(col, -0.15)); }
+      // far arm hanging, gripping the chain
+      limb(g, 10, 11.2, 8.8, 16.4, 1.4, 1.1, dk); limb(g, 8.8, 16.4, 8.2, 20.4, 1.1, 0.9, dk); P.circle(g, 8.2, 20.8, 1.1, dd);
+      // a bloated, sagging torso leaning forward, bruised, a rag of shirt clinging
+      g.beginPath(); g.moveTo(9.4, 13); g.bezierCurveTo(9.2, 9, 12.6, 7.6, 15.6, 8.2); g.quadraticCurveTo(18, 8.6, 18.8, 10.2); g.bezierCurveTo(20.8, 13.4, 20.4, 16.6, 17.8, 18.2); g.quadraticCurveTo(14.6, 19.6, 11.6, 18.8); g.quadraticCurveTo(9, 16.6, 9.4, 13); g.closePath();
+      P.fill(g, P.rg(g, 14, 14, 9, [[0, lit], [0.6, s], [1, dk]], 12, 11));
+      P.ell(g, 16.4, 16.4, 2.4, 1.8, G.rgba(bruise, 0.55)); P.ell(g, 11.4, 13, 1.2, 0.9, G.rgba(bruise, 0.45));
+      P.path(g, [11, 17.4, 18.4, 17, 18.6, 20.4, 17, 19.6, 15.6, 21.2, 14.2, 19.8, 12.8, 21, 11.4, 19.8]); P.fill(g, P.lg(g, 0, 17, 0, 21, ['#4a5a60', '#1e2a2e']));   // torn breeches at the hips
+      // kelp draped over the shoulders, hanging in strands
+      for (let i = 0; i < 6; i++) { const x = 10 + i * 1.7; g.beginPath(); g.moveTo(x, 10.6 - Math.sin(i / 5 * Math.PI) * 1.8 + (i % 2) * 0.4); g.quadraticCurveTo(x + (f ? 0.8 : -0.4), 13, x - 0.4, 15.4 + (i % 3) * 1.4); g.strokeStyle = i % 2 ? c.weed : sh(c.weed, 0.25); g.lineWidth = 0.75; g.stroke(); }
+      // near arm reaching forward, palm open, fingers splayed
+      limb(g, 18.4, 11, 21.4, 14.2 + w * 0.3, 1.5, 1.2, s); limb(g, 21.4, 14.2 + w * 0.3, 24.2, 15.4 + w * 0.3, 1.2, 1, lit);
+      claws(g, 24.6, 15.6 + w * 0.3, 0.3, 4, 1.8, 0.4, lit);
+      // the head slumped forward on a thick neck: lank black hair over the face, one pale eye, a gaping mouth
+      const hx = 18.6, hy = 6;
+      limb(g, 16, 10, hx - 0.4, hy + 2, 1.6, 1.4, s);
+      P.circle(g, hx, hy, 3.8, P.vol(g, hx, hy, 3.8, lit));
+      P.ell(g, hx + 1.6, hy + 1.6, 1.1, 1.3 + (f ? 0.2 : 0), '#0a1010');                             // the mouth hanging open
+      P.circle(g, hx + 1.6, hy - 0.4, 0.9, '#0a1010'); evil(g, hx + 1.7, hy - 0.4, 0.55, c.eye, 0); P.glow(g, hx + 1.6, hy - 0.4, 2.4, c.eye, 0.4);
+      g.beginPath(); g.moveTo(hx - 3.6, hy + 1.4); g.quadraticCurveTo(hx - 3.4, hy - 4, hx + 1, hy - 3.7); g.quadraticCurveTo(hx + 3, hy - 3.3, hx + 2.6, hy - 2);
+      g.lineTo(hx - 0.2, hy - 1.7); g.lineTo(hx - 0.6, hy + 4.6); g.lineTo(hx - 2.2, hy + 5.6); g.closePath(); P.fill(g, '#141a1c');   // lank hair: crown and back
+      for (const [x0, x1] of [[hx + 0.6, hx + 0.2], [hx + 2.2, hx + 2.6]]) P.line(g, x0, hy - 2, x1 + w * 0.2, hy + 3.4, 0.4, '#1c2426'); // two strands across the face
+      for (const [x, y, l] of [[23, 16.2, 1.4], [13, 20.4, 1.4]]) { P.line(g, x, y, x, y + l, 0.35, 'rgba(150,215,235,0.8)'); P.circle(g, x, y + l, 0.35, 'rgba(170,230,245,0.9)'); }
     } });
 
   /* ---------- Procession Monk: a hooded chanting monk, a candle cupped in both hands ---------- */
@@ -784,23 +862,38 @@
       for (const [x, y] of [[9, 9.6], [19, 12.4]]) { P.circle(g, x, y, 1, '#f0e8d0'); P.circle(g, x + 0.2, y, 0.5, c.eye); }
     } });
 
-  /* ---------- Void Syphon: a floating orb of dark flesh ringed with feelers, a single slit maw that draws you in ---------- */
-  def('syphon', { w: 24, h: 24, cy: 13, frames: 2,
-    colors: { body: '#2a1a3a', vein: '#b050ff', eye: '#e0a0ff' },
+  /* ---------- Void Syphon: a floating void leech: a fleshy sac with a round lamprey mouth ringed with teeth,
+   *            three glowing eyes, tentacles trailing below and one reaching forward with a sucker ---------- */
+  def('syphon', { w: 26, h: 26, cy: 13, frames: 2,
+    colors: { body: '#3a2450', vein: '#b050ff', eye: '#e0a0ff' },
     draw(g, f, c) {
-      const b = c.body, w = f ? 1 : -1;
-      // dangling feelers
-      for (let i = 0; i < 6; i++) { const x = 7 + i * 2; g.beginPath(); g.moveTo(x, 16); g.quadraticCurveTo(x + (i % 2 ? w : -w), 19, x + (i % 2 ? -0.6 : 0.6), 22.6 - (i % 3)); g.strokeStyle = sh(b, 0.1); g.lineWidth = 0.8; g.lineCap = 'round'; g.stroke(); }
-      P.glow(g, 12, 11, 11, c.vein, 0.3);
-      P.circle(g, 12, 11, 7.2, P.rg(g, 10, 9, 8, [[0, sh(b, 0.45)], [0.6, b], [1, '#0a0410']]));
-      // glowing veins
-      g.strokeStyle = G.rgba(c.vein, 0.8); g.lineWidth = 0.4;
-      for (const [x0, y0, x1, y1] of [[6, 8, 9.6, 11], [7, 15, 10, 13], [17.6, 7, 14.4, 10], [18, 14, 14.6, 12.4]]) { g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo((x0 + x1) / 2, (y0 + y1) / 2 + 1, x1, y1); g.stroke(); }
-      // the vertical slit maw, glowing within, ringed by little teeth
-      P.ell(g, 12.6, 11, 1.8 + (f ? 0.4 : 0), 4.2, '#0a0210'); P.glow(g, 12.6, 11, 4, c.eye, 0.6); P.ell(g, 12.6, 11, 0.6, 3, c.eye);
-      for (let k = 0; k < 6; k++) { const y = 7.4 + k * 1.4; P.line(g, 10.6, y, 11.4, y + 0.2, 0.3, '#e8dcc8'); P.line(g, 14.6, y, 13.8, y + 0.2, 0.3, '#e8dcc8'); }
-      // spines on the crown
-      for (let k = 0; k < 5; k++) { const a = -2.4 + k * 0.4; horn(g, 12 + Math.cos(a) * 6.6, 11 + Math.sin(a) * 6.6, 12 + Math.cos(a) * 8.6, 11 + Math.sin(a) * 8.6, 12 + Math.cos(a) * 10, 11 + Math.sin(a) * 10, 0.5, sh(b, 0.2)); }
+      const b = c.body, lit = sh(b, 0.55), dk = sh(b, -0.55), w = f ? 1 : -1;
+      P.glow(g, 12, 11, 12, c.vein, 0.22);
+      // tentacles trailing down and back, swaying between frames
+      const ten = (x, y, cx1, cy1, tx, ty, wd, col) => {
+        g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(cx1, cy1, tx, ty); g.strokeStyle = col; g.lineWidth = wd; g.lineCap = 'round'; g.stroke();
+        g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(cx1, cy1, tx, ty); g.strokeStyle = G.rgba(c.vein, 0.5); g.lineWidth = wd * 0.3; g.stroke();
+      };
+      ten(8, 14.6, 5 + w, 19, 3.4 - w, 24, 1.3, dk); ten(10.4, 15.6, 9 - w, 20.6, 8 + w, 25, 1.4, dk);
+      ten(12.8, 15.8, 13.8 + w, 20, 12.4 - w, 24.4, 1.2, b); ten(6.2, 12.6, 2.4 - w, 15, 1, 19.4 + w, 1.1, dk);
+      // the sac: a teardrop, swollen at the front, drawn to a point behind
+      g.beginPath(); g.moveTo(1.6, 6.4 + w * 0.4); g.quadraticCurveTo(6, 2.4, 12.6, 2.8); g.bezierCurveTo(19, 3.2, 20.6, 8.6, 19.8, 12);
+      g.bezierCurveTo(18.8, 16, 14, 17, 10.6, 16.2); g.quadraticCurveTo(5.6, 14.8, 1.6, 6.4 + w * 0.4); g.closePath();
+      P.fill(g, P.rg(g, 11, 8, 11, [[0, lit], [0.55, b], [1, dk]], 9, 6));
+      // glowing veins over it
+      g.strokeStyle = G.rgba(c.vein, 0.85); g.lineWidth = 0.4;
+      for (const [x0, y0, x1, y1, x2, y2] of [[4, 7, 7.6, 7.8, 10, 6], [5, 10.6, 8.4, 11, 10.6, 13.4], [9.4, 4.4, 11, 6.4, 13.6, 5.4], [12.4, 14.6, 14, 13.2, 15.6, 14.8]]) { g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo(x1, y1, x2, y2); g.stroke(); }
+      // the round lamprey mouth on the front, a ring of hooked teeth around a glowing throat
+      const mx = 16.8, my = 10.2;
+      P.ell(g, mx, my, 3.2, 3.6, dk); P.ell(g, mx + 0.3, my, 2.4, 2.8, '#12041c');
+      P.glow(g, mx + 0.4, my, 3.4, c.vein, 0.9); P.ell(g, mx + 0.5, my, 0.7 + (f ? 0.3 : 0), 0.9 + (f ? 0.3 : 0), '#ff80e0');
+      for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2 + 0.2, x0 = mx + 0.3 + Math.cos(a) * 2.7, y0 = my + Math.sin(a) * 3.1; P.horn(g, x0, y0, x0 - Math.cos(a) * 0.7, y0 - Math.sin(a) * 0.7, mx + 0.3 + Math.cos(a) * 0.9, my + Math.sin(a) * 1.1, 0.6, '#efe4d0'); }
+      g.beginPath(); g.ellipse(mx, my, 3.3, 3.7, 0, -1.2, 1.2); g.strokeStyle = lit; g.lineWidth = 0.7; g.stroke();   // a fleshy lip catching the light
+      // three eyes above the mouth
+      for (const [x, y, r] of [[12.6, 5.4, 0.7], [15.2, 5, 0.8], [17.6, 6, 0.6]]) { P.circle(g, x, y, r + 0.35, '#12041c'); evil(g, x, y, r, c.eye, 0); }
+      // the reaching tentacle: forward and down, a sucker at its tip (the tether it latches on)
+      ten(18.4, 13.6, 23 + w, 14.4, 23.6, 19 - w * 0.6, 1.3, b);
+      P.circle(g, 23.6, 19.4 - w * 0.6, 1.2, lit); P.circle(g, 23.6, 19.4 - w * 0.6, 0.55, '#12041c'); P.glow(g, 23.6, 19.4 - w * 0.6, 1.8, c.vein, 0.6);
     } });
 
   /* ---------- Clockwork Construct: a brass automaton on a single wheel, gears in its chest, a lens eye that fires a beam ---------- */
@@ -1155,22 +1248,32 @@
   /** A gold coin seen edge-on-ish at (x,y), radius r. */
   function coin(g, x, y, r, tilt) { P.ell(g, x, y, r * (tilt || 1), r, P.rg(g, x - r * 0.3, y - r * 0.3, r * 1.2, [[0, '#fff4b0'], [0.5, '#e8b830'], [1, '#8a5a10']])); P.ell(g, x, y, r * 0.6 * (tilt || 1), r * 0.6, G.rgba('#8a5a10', 0.5)); }
 
-  /* ---------- Gold Scarab: a jewelled beetle, gilt shell, pincers; steals your gold and scuttles off ---------- */
-  def('scarab', { w: 20, h: 14, cy: 9, frames: 2,
+  /* ---------- Gold Scarab: a gilded beetle seen from above, scuttling off with a stolen coin in its mandibles:
+   *            two wing cases split down the middle, a shield of a thorax, six legs splayed with bent knees ---------- */
+  def('scarab', { w: 24, h: 18, cy: 9, frames: 2,
     colors: { shell: '#d0a030', dark: '#3a2a0a', gem: '#40e0c0' },
     draw(g, f, c) {
-      const sc = c.shell, w = f ? 0.8 : -0.8;
-      P.ell(g, 10, 12.6, 7, 1, 'rgba(0,0,0,0.45)');
-      for (let i = 0; i < 3; i++) { const x = 6 + i * 3.4; P.line(g, x, 8.6, x - 1.4 + (i % 2 ? w : -w), 12.4, 0.45, c.dark); P.line(g, x + 0.6, 8.6, x + 2 + (i % 2 ? -w : w), 12.4, 0.45, c.dark); }
-      // the domed shell split down the middle
-      P.ell(g, 9.4, 7.4, 6.4, 4.4, P.rg(g, 8, 5.4, 7, [[0, '#fff0a0'], [0.4, sc], [1, sh(sc, -0.55)]]));
-      P.line(g, 3.4, 7.4, 15.4, 7.4, 0.35, sh(sc, -0.6));
-      P.circle(g, 8.4, 5.6, 1.1, c.gem); P.circle(g, 8.1, 5.3, 0.4, '#e0fff8');
-      for (const [x, y] of [[5.4, 6.4], [11.4, 6], [6.4, 9], [11, 9]]) P.circle(g, x, y, 0.45, sh(sc, 0.5));
-      // head and pincers
-      P.ell(g, 16, 8, 2, 1.8, P.vol(g, 16, 7.6, 2, sh(sc, -0.25)));
-      horn(g, 17, 7, 19, 5.6 + w * 0.4, 19.6, 7, 0.4, c.dark); horn(g, 17, 9, 19, 10.4 - w * 0.4, 19.6, 9, 0.4, c.dark);
-      evil(g, 16.6, 7.4, 0.4, '#ff4a2a');
+      const sc = c.shell, lit = sh(sc, 0.45), dk = sh(sc, -0.5), dd = c.dark, w = f ? 0.8 : -0.8;
+      P.ell(g, 11, 16.4, 8, 0.9, 'rgba(0,0,0,0.4)');
+      // six legs splayed out to both sides, each bent at the knee; alternate tripods swing between frames
+      const leg = (x, y, sx, sy, d, col) => { const kx = x + sx * 1.6 + d, ky = y + sy * 2.4, fx = kx + sx * 1.4 + d * 0.6, fy = ky + sy * 1.2 - sy * 0.2;
+        limb(g, x, y, kx, ky, 0.55, 0.45, col); limb(g, kx, ky, fx, fy + sy * 1.4, 0.45, 0.3, col); P.line(g, fx, fy + sy * 1.4, fx + sx * 0.7, fy + sy * 1.7, 0.3, col); };
+      for (const [x, sx, d] of [[7, -1, w], [11, -0.2, -w], [14.6, 0.8, w]]) { leg(x, 5.6, sx, -1, d, dd); leg(x, 11, sx, 1, -d, dd); }
+      // the wing cases: an oval split lengthwise by the seam, lit on the upper-left half
+      P.ell(g, 9.4, 8.4, 7.4, 4.4, dk);
+      g.beginPath(); g.ellipse(9.2, 8.2, 7, 4, 0, Math.PI, Math.PI * 2); g.lineTo(16.2, 8.2); g.closePath(); P.fill(g, P.lg(g, 3, 4, 12, 8.2, [lit, '#fff2b0', sc]));
+      g.beginPath(); g.ellipse(9.2, 8.4, 7, 3.8, 0, 0, Math.PI); g.lineTo(2.2, 8.4); g.closePath(); P.fill(g, P.lg(g, 0, 8.4, 0, 12.2, [sc, dk]));
+      P.line(g, 2.4, 8.3, 16.2, 8.3, 0.5, dd);                                                                  // the seam
+      for (const y of [6.2, 10.4]) { g.beginPath(); g.moveTo(4, y); g.quadraticCurveTo(9, y + (y < 8 ? -0.8 : 0.8), 14.6, y); g.strokeStyle = G.rgba(dd, 0.45); g.lineWidth = 0.3; g.stroke(); } // ridges
+      // the thorax shield between shell and head, a jewel set in it
+      P.ell(g, 17, 8.3, 2.3, 3.2, P.rg(g, 16.6, 7.4, 3, [[0, lit], [0.6, sc], [1, dk]])); P.line(g, 16.2, 8.3, 18.8, 8.3, 0.3, dd);
+      P.circle(g, 16.8, 8.3, 0.75, c.gem); P.circle(g, 16.5, 8, 0.3, '#e0fff8');
+      // the head: dark, two glowing eyes, antennae swept back, mandibles closing on a big stolen coin
+      P.ell(g, 20, 8.3, 1.8, 2, P.vol(g, 19.6, 7.8, 2, sh(dd, 0.4)));
+      evil(g, 20.4, 6.9, 0.45, '#ff5a2a', 0); evil(g, 20.4, 9.7, 0.45, '#ff5a2a', 0);
+      P.line(g, 20.2, 6.6, 22.4, 3.4 + w * 0.3, 0.5, dd); P.line(g, 20.2, 10, 22.4, 13.2 - w * 0.3, 0.5, dd);  // antennae
+      P.coin(g, 23, 8.3, 1.9, 0.6);
+      P.horn(g, 21.2, 7.2, 22.6, 6.4, 23.4, 7.2, 0.4, dd); P.horn(g, 21.2, 9.4, 22.6, 10.2, 23.4, 9.4, 0.4, dd); // mandibles gripping it
     } });
 
   /* ---------- Mimic: a banded treasure chest; frame 0 shut and still, frame 1 the lid thrown back on a maw of teeth and a tongue ---------- */
@@ -1244,19 +1347,36 @@
       P.line(g, 10.4, 7.8, 12.4, 7.8, 0.35, sh(c.gold, -0.5));
     } });
 
-  /* ---------- Coin Wraith: a spirit of greed, a hooded shade whose body is a whirl of coins; hoards what lies about ---------- */
-  def('coinwraith', { w: 22, h: 26, cy: 16, frames: 2,
-    colors: { shade: '#3a2a10', eye: '#fff080' },
+  /* ---------- Coin Wraith: a greedy ghost: a hooded shade in a tattered robe, arms flung wide in grasping sleeves,
+   *            one hand holding up a coin, the other raking in a rain of coins; a heap of gold below ---------- */
+  def('coinwraith', { w: 28, h: 30, cy: 17, frames: 2,
+    colors: { shade: '#26302a', eye: '#fff080' },
     draw(g, f, c) {
-      P.glow(g, 11, 14, 10, '#ffd050', 0.3);
-      // a whirl of coins for a body
-      for (let k = 0; k < 14; k++) { const a = k * 0.9 + f * 0.5, rr = 2 + (k % 5) * 1.1, x = 11 + Math.cos(a) * rr, y = 20 - k * 0.8 + Math.sin(a) * 0.8; coin(g, x, y, 1.5 - k * 0.04, 0.4 + 0.6 * Math.abs(Math.cos(a))); }
-      // the hooded shade above
-      g.beginPath(); g.moveTo(6, 11); g.quadraticCurveTo(5.4, 2.6, 11, 2); g.quadraticCurveTo(16.6, 2.6, 16, 11); g.quadraticCurveTo(11, 13.4, 6, 11); g.closePath();
-      P.fill(g, P.lg(g, 6, 2, 16, 12, [sh(c.shade, 0.4), c.shade, sh(c.shade, -0.5)]));
-      P.ell(g, 11.4, 7, 3, 3.2, '#0a0602'); evil(g, 10.2, 6.8, 0.55, c.eye); evil(g, 12.8, 6.8, 0.55, c.eye);
-      // grasping hands
-      for (const [x, s] of [[5, -1], [17, 1]]) { P.line(g, 11 + s * 4, 10, x + s, 13.4, 0.9, c.shade); claws(g, x + s, 13.8, s * 0.5, 3, 1.2, 0.3, '#c8a040'); }
+      const sd = c.shade, lit = sh(sd, 0.55), dk = sh(sd, -0.55), bone = '#d8cfb4', w = f ? 1 : -1;
+      // a flat gold coin with a dark rim and a square hole: reads as a coin even when tiny
+      const coinQ = (x, y, r, t) => { P.ell(g, x, y, r * t + 0.3, r + 0.3, '#3a2204'); P.ell(g, x, y, r * t, r, P.lg(g, x - r, y - r, x + r, y + r, ['#fff4b0', '#e8b830', '#a87010'])); if (t > 0.45) P.rect(g, x - 0.35 * t, y - 0.35, 0.7 * t, 0.7, '#3a2204'); };
+      P.glow(g, 14, 16, 13, '#ffd050', 0.2);
+      // the heap below and the coins raining into it
+      for (const [x, y, r, t] of [[9.6, 27.4, 1.7, 1], [13, 27.8, 1.8, 1], [16.4, 27.4, 1.7, 0.9], [11.2, 25.8, 1.6, 0.8], [14.8, 25.8, 1.6, 1], [13, 24.2, 1.5, 0.9]]) coinQ(x, y, r, t);
+      for (const [x, y, r, t] of [[13.4 + w * 0.4, 21.6, 1.4, 0.3], [11.6, 22.6 - w * 0.4, 1.3, 1], [15.4, 22.2 + w * 0.4, 1.2, 0.6]]) coinQ(x, y, r, t);
+      // the robe: shoulders to torn tails spreading wide
+      g.beginPath(); g.moveTo(9.6, 9.6); g.quadraticCurveTo(14, 8, 18.4, 9.6); g.quadraticCurveTo(20.4, 15, 21.6 + w * 0.5, 20.6);
+      g.lineTo(18.8, 18.8); g.lineTo(17.2, 21.6); g.lineTo(15.4, 19); g.lineTo(13.6, 21.8 + w * 0.4); g.lineTo(11.8, 19); g.lineTo(10.2, 21.4); g.lineTo(8.4, 18.8); g.lineTo(6.4 - w * 0.5, 20.4);
+      g.quadraticCurveTo(7.6, 15, 9.6, 9.6); g.closePath(); P.fill(g, P.lg(g, 6, 8, 22, 21, [lit, sd, dk]));
+      g.strokeStyle = dk; g.lineWidth = 0.4; for (const x of [11.6, 14, 16.4]) { g.beginPath(); g.moveTo(x, 11); g.quadraticCurveTo(x - 0.3, 15.4, x - 0.2, 19); g.stroke(); }
+      // sleeves flung wide, ragged at the cuffs
+      const sleeve = (x0, y0, x1, y1, col) => { g.beginPath(); g.moveTo(x0, y0 - 1.4); g.quadraticCurveTo((x0 + x1) / 2, y0 - 2, x1, y1 - 2); g.lineTo(x1 + (x1 > x0 ? 0.6 : -0.6), y1 + 1.8); g.lineTo(x1 + (x1 > x0 ? -0.8 : 0.8), y1 + 0.8); g.lineTo(x1 + (x1 > x0 ? -1.6 : 1.6), y1 + 2.2); g.quadraticCurveTo((x0 + x1) / 2, y0 + 2, x0, y0 + 1.6); g.closePath(); P.fill(g, col); };
+      sleeve(9.8, 11.4, 3.6, 14.6 + w * 0.4, P.lg(g, 3, 9, 10, 15, [dk, sd]));
+      sleeve(18.2, 11.2, 23.8, 9.4 - w * 0.3, P.lg(g, 18, 8, 24, 13, [lit, sd]));
+      // bony hands: one raking at the falling coins, one holding a coin up high
+      claws(g, 3.2, 15.8 + w * 0.4, 1.9, 4, 1.8, 0.4, bone);
+      claws(g, 24.4, 8.6 - w * 0.3, -1.3, 4, 1.6, 0.4, bone); coinQ(25.2, 5.8 - w * 0.3, 1.9, 1);
+      // the hood, dark within, two eyes glowing like coins, a fanged grin
+      g.beginPath(); g.moveTo(9.4, 10.6); g.quadraticCurveTo(8.8, 2.4, 14, 1.8); g.quadraticCurveTo(19.2, 2.4, 18.6, 10.6); g.quadraticCurveTo(14, 8.8, 9.4, 10.6); g.closePath();
+      P.fill(g, P.lg(g, 9, 1.8, 19, 10.6, [lit, sd, dk]));
+      P.ell(g, 14.4, 6.6, 3, 3.1, '#050806'); P.glow(g, 14.4, 6.4, 4, c.eye, 0.45);
+      evil(g, 13.2, 6.2, 0.7, c.eye, 0); evil(g, 15.6, 6.2, 0.7, c.eye, 0);
+      teeth(g, 13, 8.1, 15.8, 8.1, 4, 0.6, 1, bone);
     } });
 
   /* ---------- Mimic King (boss): a vast chest-beast, lid for a jaw, a crown jammed on its lid, gold spilling from its maw, legs of a beast ---------- */
@@ -1454,4 +1574,5 @@
       // two dim eyes
       P.circle(g, 10, 11.4 + sq, 0.7, '#3a2004'); P.circle(g, 14.4, 11.4 + sq, 0.7, '#3a2004');
     } });
+  Object.assign(P, { horn, cracks, barnacles, icicle, crystal, drips, coin }); // shared helpers
 })(window.DH);
