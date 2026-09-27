@@ -1639,250 +1639,371 @@
   /** A gold coin seen edge-on-ish at (x,y), radius r. */
   function coin(g, x, y, r, tilt) { P.ell(g, x, y, r * (tilt || 1), r, P.rg(g, x - r * 0.3, y - r * 0.3, r * 1.2, [[0, '#fff4b0'], [0.5, '#e8b830'], [1, '#8a5a10']])); P.ell(g, x, y, r * 0.6 * (tilt || 1), r * 0.6, G.rgba('#8a5a10', 0.5)); }
 
-  /* ---------- Gold Scarab: a gilded beetle seen from above, scuttling off with a stolen coin in its mandibles:
-   *            two wing cases split down the middle, a shield of a thorax, six legs splayed with bent knees ---------- */
+  /* ---------- Gold Scarab: a horned gilded beetle scuttling off with a stolen coin in its mandibles: a high domed shell with a
+   *            hard shine, the dark wings buzzing out from under it, six jointed legs, a jewel set in its thorax ---------- */
   def('scarab', { w: 24, h: 18, cy: 9, frames: 2,
     colors: { shell: '#d0a030', dark: '#3a2a0a', gem: '#40e0c0' },
     draw(g, f, c) {
-      const sc = c.shell, lit = sh(sc, 0.45), dk = sh(sc, -0.5), dd = c.dark, w = f ? 0.8 : -0.8;
-      P.ell(g, 11, 16.4, 8, 0.9, 'rgba(0,0,0,0.4)');
-      // six legs splayed out to both sides, each bent at the knee; alternate tripods swing between frames
-      const leg = (x, y, sx, sy, d, col) => { const kx = x + sx * 1.6 + d, ky = y + sy * 2.4, fx = kx + sx * 1.4 + d * 0.6, fy = ky + sy * 1.2 - sy * 0.2;
-        limb(g, x, y, kx, ky, 0.55, 0.45, col); limb(g, kx, ky, fx, fy + sy * 1.4, 0.45, 0.3, col); P.line(g, fx, fy + sy * 1.4, fx + sx * 0.7, fy + sy * 1.7, 0.3, col); };
-      for (const [x, sx, d] of [[7, -1, w], [11, -0.2, -w], [14.6, 0.8, w]]) { leg(x, 5.6, sx, -1, d, dd); leg(x, 11, sx, 1, -d, dd); }
-      // the wing cases: an oval split lengthwise by the seam, lit on the upper-left half
-      P.ell(g, 9.4, 8.4, 7.4, 4.4, dk);
-      g.beginPath(); g.ellipse(9.2, 8.2, 7, 4, 0, Math.PI, Math.PI * 2); g.lineTo(16.2, 8.2); g.closePath(); P.fill(g, P.lg(g, 3, 4, 12, 8.2, [lit, '#fff2b0', sc]));
-      g.beginPath(); g.ellipse(9.2, 8.4, 7, 3.8, 0, 0, Math.PI); g.lineTo(2.2, 8.4); g.closePath(); P.fill(g, P.lg(g, 0, 8.4, 0, 12.2, [sc, dk]));
-      P.line(g, 2.4, 8.3, 16.2, 8.3, 0.5, dd);                                                                  // the seam
-      for (const y of [6.2, 10.4]) { g.beginPath(); g.moveTo(4, y); g.quadraticCurveTo(9, y + (y < 8 ? -0.8 : 0.8), 14.6, y); g.strokeStyle = G.rgba(dd, 0.45); g.lineWidth = 0.3; g.stroke(); } // ridges
-      // the thorax shield between shell and head, a jewel set in it
-      P.ell(g, 17, 8.3, 2.3, 3.2, P.rg(g, 16.6, 7.4, 3, [[0, lit], [0.6, sc], [1, dk]])); P.line(g, 16.2, 8.3, 18.8, 8.3, 0.3, dd);
-      P.circle(g, 16.8, 8.3, 0.75, c.gem); P.circle(g, 16.5, 8, 0.3, '#e0fff8');
-      // the head: dark, two glowing eyes, antennae swept back, mandibles closing on a big stolen coin
-      P.ell(g, 20, 8.3, 1.8, 2, P.vol(g, 19.6, 7.8, 2, sh(dd, 0.4)));
-      evil(g, 20.4, 6.9, 0.45, '#ff5a2a', 0); evil(g, 20.4, 9.7, 0.45, '#ff5a2a', 0);
-      P.line(g, 20.2, 6.6, 22.4, 3.4 + w * 0.3, 0.5, dd); P.line(g, 20.2, 10, 22.4, 13.2 - w * 0.3, 0.5, dd);  // antennae
-      P.coin(g, 23, 8.3, 1.9, 0.6);
-      P.horn(g, 21.2, 7.2, 22.6, 6.4, 23.4, 7.2, 0.4, dd); P.horn(g, 21.2, 9.4, 22.6, 10.2, 23.4, 9.4, 0.4, dd); // mandibles gripping it
+      const sc = sh(c.shell, -0.1), lit = sh(c.shell, 0.5), dk = sh(c.shell, -0.6), dd = c.dark, near = sh(dd, 0.35), far = sh(dd, -0.2), w = f ? 1 : -1;
+      P.ell(g, 11.5, 16.6, 9, 1, 'rgba(0,0,0,0.45)');
+      const leg = (x, y, kx, ky, fx, fy, col) => { limb(g, x, y, kx, ky, 0.75, 0.55, col); limb(g, kx, ky, fx, fy, 0.55, 0.35, col); P.line(g, fx, fy, fx + 0.9, fy + 0.2, 0.3, col); };
+      leg(8.4, 11.4, 6.4, 13, 5.4 - w, 16, far); leg(12, 11.6, 12.8, 13.8, 13.6 + w, 16, far); leg(15.6, 11.4, 18.6, 12.4, 20.4 - w, 16, far);
+      // the shell: a high dome, the hard shine on its crown, striations following it
+      P.ell(g, 9.8, 11.8, 7.4, 1.4, dd);
+      g.beginPath(); g.moveTo(2.6, 11.6); g.bezierCurveTo(2, 4, 8, 2.2, 11, 2.4); g.bezierCurveTo(15, 2.6, 17, 6, 16.8, 11.6); g.closePath();
+      P.fill(g, P.lg(g, 4, 3, 15, 12, [lit, sc, dk]));
+      g.strokeStyle = G.rgba(dk, 0.7); g.lineWidth = 0.3; for (const k of [0.3, 0.6]) { g.beginPath(); g.moveTo(3 + k * 3, 11.4); g.bezierCurveTo(3 + k * 3, 5 + k * 3, 8, 3 + k * 3.4, 11, 3.1 + k * 3.4); g.bezierCurveTo(14, 3.3 + k * 3.4, 16 - k * 2, 7, 16.2 - k * 2, 11.4); g.stroke(); }
+      P.ell(g, 7.6, 5, 3, 1, G.rgba('#fffbe0', 0.6), -0.35);
+      g.beginPath(); g.moveTo(15.4, 4.4); g.bezierCurveTo(11, 0.6 - w * 0.5, 5, 0.6 - w * 0.7, 2.4, 2.6 - w * 0.7); g.lineTo(4, 4.6); g.bezierCurveTo(7, 3, 11, 3, 15.4, 5.4); g.closePath(); P.fill(g, P.lg(g, 4, 1.6, 15, 5.4, [lit, sc])); // one wing case lifted
+      // the thorax with its jewel, the head, a horn curving up, eyes burning, the mandibles clamped on a coin
+      P.ell(g, 16.6, 8.6, 2.6, 3.2, P.lg(g, 14, 5.4, 19, 12, [sc, dk]));
+      P.circle(g, 16.6, 7.8, 0.6, sh(c.gem, -0.3)); P.circle(g, 16.4, 7.6, 0.25, '#e8fffa');
+      P.ell(g, 19.4, 9.8, 1.9, 1.7, P.vol(g, 19, 9.2, 1.9, sh(dd, 0.3)));
+      horn(g, 19, 8.6, 21.4, 5.4, 19.4, 2.4, 0.9, sh(dd, 0.5));
+            evil(g, 20.4, 9.4, 0.5, c.gem); P.glow(g, 20.4, 9.4, 1.4, c.gem, 0.45);
+      P.coin(g, 22, 11.4, 1.8, 0.55);
+      horn(g, 20.4, 10.4, 21.6, 9.8, 22.6, 10.4, 0.35, dd); horn(g, 20.4, 11.4, 21.6, 12.8, 22.6, 12.4, 0.35, dd);
+      // the near legs: back, middle, front, each jointed, alternate tripods swinging
+      leg(7, 12, 4.4, 13.6, 2.6 + w, 16.4, near); leg(11, 12.4, 10.2, 14.6, 9.4 - w, 16.6, near); leg(15, 12, 17.4, 13.4, 18.4 + w, 16.4, near);
     } });
 
-  /* ---------- Mimic: a banded treasure chest; frame 0 shut and still, frame 1 the lid thrown back on a maw of teeth and a tongue ---------- */
+  /* ---------- Mimic: an iron-bound chest; frame 0 shut and still (only the tips of fangs in the seam give it away), frame 1 the
+   *            lid flung up as a jaw, eyes glaring out of the dark inside, a tongue lolling over the rim, crooked legs under it ---------- */
   def('mimic', { w: 24, h: 22, cy: 16, frames: 2,
     colors: { wood: '#6a3a1a', band: '#c89a3a', tongue: '#c83050', eye: '#ffe060' },
     draw(g, f, c) {
-      const wd = c.wood, bd = c.band;
-      P.ell(g, 12, 20.4, 9, 1.4, 'rgba(0,0,0,0.45)');
-      // the chest body
-      P.rrect(g, 3, 11, 18, 9, 1, P.lg(g, 3, 0, 21, 0, [sh(wd, -0.4), sh(wd, 0.2), wd, sh(wd, -0.5)]));
-      for (const x of [3, 11, 19.4]) P.rect(g, x, 11, 1.6, 9, P.lg(g, 0, 11, 0, 20, [sh(bd, 0.4), sh(bd, -0.4)]));
+      const wd = sh(c.wood, -0.1), wl = sh(c.wood, 0.35), wk = sh(c.wood, -0.55), band = c.band, bd = sh(band, -0.45), fang = '#efe6cc';
+      P.ell(g, 12, 21, 10, 1.1, 'rgba(0,0,0,0.45)');
+      const box = (y0, y1) => {
+        P.rect(g, 3.6, y0, 17, y1 - y0, P.lg(g, 3.6, y0, 20.6, y1, [wl, wd, wk]));
+        g.strokeStyle = G.rgba(wk, 0.8); g.lineWidth = 0.3; for (let y = y0 + 2.6; y < y1 - 0.5; y += 2.6) { g.beginPath(); g.moveTo(3.8, y); g.lineTo(20.4, y); g.stroke(); }
+        for (const x of [7, 16.2]) { P.rect(g, x, y0, 1.3, y1 - y0, P.lg(g, x, 0, x + 1.3, 0, [sh(band, 0.3), bd])); P.circle(g, x + 0.65, y0 + 1.2, 0.3, sh(band, 0.5)); P.circle(g, x + 0.65, y1 - 1.2, 0.3, sh(band, 0.5)); }
+        for (const x of [3.6, 19.4]) { P.rect(g, x, y1 - 1.6, 1.2, 1.6, band); P.rect(g, x, y0, 1.2, 1.4, band); }
+      };
       if (!f) {
-        // shut: a curved lid and a lock; only a thin dark seam gives it away
-        g.beginPath(); g.moveTo(3, 11); g.quadraticCurveTo(12, 3.4, 21, 11); g.closePath(); P.fill(g, P.lg(g, 0, 5, 0, 11, [sh(wd, 0.35), wd]));
-        for (const x of [3.6, 11.6, 19.4]) P.line(g, x + 0.4, 11, x + (12 - x) * 0.15 + 0.4, 6.6, 1.4, bd);
-        P.rect(g, 3, 10.6, 18, 0.8, '#140804'); P.rrect(g, 10.6, 10.4, 2.8, 3.2, 0.6, P.lg(g, 0, 10, 0, 13.6, ['#fff0a0', bd])); P.circle(g, 12, 12, 0.5, '#140804');
-        P.glow(g, 12, 7, 5, '#ffd050', 0.25); coin(g, 6, 10.4, 1, 0.6); coin(g, 17.6, 10.6, 1, 0.5);
+        box(11, 20.6);
+        g.beginPath(); g.moveTo(3.4, 11); g.bezierCurveTo(3.4, 6.4, 7, 5.4, 12, 5.4); g.bezierCurveTo(17, 5.4, 20.8, 6.4, 20.8, 11); g.closePath();
+        P.fill(g, P.lg(g, 4, 5, 18, 11, [wl, wd, wk]));
+        for (const x of [7, 16.2]) { g.beginPath(); g.moveTo(x, 11); g.lineTo(x, 6); g.lineTo(x + 1.3, 5.8); g.lineTo(x + 1.3, 11); g.closePath(); P.fill(g, P.lg(g, x, 0, x + 1.3, 0, [sh(band, 0.3), bd])); }
+        P.line(g, 3.4, 11, 20.8, 11, 0.5, '#140806');
+        teeth(g, 9, 11.2, 11, 11.2, 2, 0.6, -1, fang); teeth(g, 14, 11.2, 15.6, 11.2, 2, 0.6, -1, fang); // fang tips in the seam
+        P.rrect(g, 10.8, 9.6, 2.4, 3.4, 0.4, P.lg(g, 10.8, 9.6, 13.2, 13, [sh(band, 0.4), bd])); P.rect(g, 11.8, 10.6, 0.5, 1.4, '#140806');
+        P.glow(g, 12, 11.2, 1.2, c.eye, 0.35);
         return;
       }
-      // open: the lid thrown back, teeth all round the rim, a long tongue, eyes in the dark
-      g.beginPath(); g.moveTo(3, 11); g.quadraticCurveTo(4, 0, 12, -0.4); g.quadraticCurveTo(20, 0, 21, 11); g.lineTo(19, 11); g.quadraticCurveTo(18, 3, 12, 2.4); g.quadraticCurveTo(6, 3, 5, 11); g.closePath(); P.fill(g, P.lg(g, 0, 0, 0, 11, [sh(wd, 0.2), sh(wd, -0.4)]));
-      P.ell(g, 12, 11, 7.4, 3, '#1a0408');
-      teeth(g, 4.4, 11.4, 19.6, 11.4, 9, 1.4, 1, '#efe4c8'); teeth(g, 5, 9.2, 19, 9.2, 8, -1.2, 1, '#efe4c8');
-      evil(g, 9.4, 7.4, 0.7, c.eye); evil(g, 14.6, 7.4, 0.7, c.eye); P.glow(g, 12, 7.4, 5, c.eye, 0.35);
-      g.beginPath(); g.moveTo(12, 11); g.quadraticCurveTo(18, 14, 22, 12); g.strokeStyle = c.tongue; g.lineWidth = 1.6; g.lineCap = 'round'; g.stroke();
+      // awake: crooked legs under the box, the lid flung up as a jaw
+      for (const [x, d, col] of [[6.4, -1, wk], [10.4, 1, sh(wk, -0.2)], [14.6, -1, sh(wk, -0.2)], [18.4, 1, wk]]) { limb(g, x, 17.6, x + d * 1.6, 19.4, 0.9, 0.7, col); limb(g, x + d * 1.6, 19.4, x + d * 0.8, 21, 0.7, 0.4, col); claws(g, x + d * 0.8, 21, d > 0 ? 0.2 : 2.9, 2, 1, 0.3, fang); }
+      box(10.6, 18);
+      // the dark inside, eyes glaring out of it
+      P.path(g, [4, 10.8, 19.2, 4.6, 20.8, 10.8]); P.fill(g, P.lg(g, 10, 5, 12, 11, ['#3a0a0e', '#0e0406']));
+      evil(g, 13.2, 8.6, 0.8, c.eye, 0.2); evil(g, 16, 7.6, 0.7, c.eye, -0.2); P.glow(g, 14.6, 8, 3, c.eye, 0.45);
+      // the lid: its inner edge a jaw of fangs, its outer face the planks and bands
+      P.path(g, [4, 10.8, 19.2, 4.6, 17.9, 1.4, 2.7, 7.6]); P.fill(g, P.lg(g, 3, 2, 18, 10, [wl, wd, wk]));
+      for (const k of [0.22, 0.72]) { const x = 4 + 15.2 * k, y = 10.8 - 6.2 * k; P.path(g, [x, y, x + 1.1, y - 0.46, x - 0.2, y - 3.6, x - 1.3, y - 3.1]); P.fill(g, P.lg(g, x - 1, 0, x + 1, 0, [sh(band, 0.3), bd])); }
+      P.line(g, 2.7, 7.6, 17.9, 1.4, 0.5, band);
+      [[5.6, 1.2], [8, 1.8], [10.6, 1.3], [13, 2], [15.6, 1.4], [18, 1.1]].forEach(([x, l]) => { const y = 10.8 - (x - 4) * 0.41; P.path(g, [x - 0.5, y + 0.2, x + 0.5, y - 0.2, x + 0.3, y + l]); P.fill(g, fang); });
+      [[5.4, 1.4], [8.4, 1.9], [11.6, 1.2], [14.6, 2], [17.8, 1.5], [20, 1.1]].forEach(([x, l]) => { P.path(g, [x - 0.55, 10.8, x + 0.55, 10.8, x, 10.8 - l]); P.fill(g, fang); });
+      // the tongue lolling out over the rim
+      g.beginPath(); g.moveTo(12, 10.6); g.bezierCurveTo(17, 9.6, 22.6, 10.6, 22.8, 13.6); g.bezierCurveTo(23, 16, 21.6, 17, 21, 16); g.bezierCurveTo(21.4, 13.6, 18, 12, 12, 12); g.closePath();
+      P.fill(g, P.lg(g, 12, 10, 23, 17, [sh(c.tongue, 0.25), c.tongue, sh(c.tongue, -0.4)]));
+      P.line(g, 21.6, 16.4, 21.6, 18, 0.3, G.rgba('#ffd0d0', 0.6));
     } });
 
-  /* ---------- Gilded Knight: a knight in gilt plate, a winged helm, a tall kite shield blazoned with a sun, a long mace ---------- */
+  /* ---------- Gilded Knight: a hollow knight in blackened plate edged with gold, a crowned great helm with a cross slit burning,
+   *            a tall kite shield blazoned with a sun, a flanged mace shouldered, a blood-red tabard ---------- */
   def('gildedknight', { w: 24, h: 30, cy: 20, frames: 2,
     colors: { plate: '#c8a040', dark: '#5a3a14', cloth: '#6a1a24', eye: '#ffe0a0' },
     draw(g, f, c) {
-      const pl = c.plate, w = f ? 0.8 : -0.8;
-      P.ell(g, 12, 28.4, 7, 1.2, 'rgba(0,0,0,0.45)');
-      P.rrect(g, 8.4 - w, 19, 2.8, 9, 1, P.lg(g, 8, 0, 12, 0, [sh(pl, 0.3), sh(pl, -0.45)])); P.rrect(g, 12.6 + w, 19, 2.8, 9, 1, P.lg(g, 12, 0, 16, 0, [sh(pl, 0.4), sh(pl, -0.3)]));
-      P.path(g, [8, 16, 16, 16, 16.6, 22, 12, 23.4, 7.4, 22]); P.fill(g, P.lg(g, 8, 16, 16, 23, [sh(c.cloth, 0.3), sh(c.cloth, -0.4)]));
-      P.rrect(g, 7.4, 9.4, 9.2, 8, 2.2, P.lg(g, 7, 9, 16, 17, [sh(pl, 0.5), pl, sh(pl, -0.45)]));
-      P.path(g, [12, 10.4, 13, 13, 12, 15.6, 11, 13]); P.fill(g, sh(pl, -0.4));
-      for (const x of [7.2, 16.8]) P.ell(g, x, 10.4, 2.6, 2, P.vol(g, x, 9.8, 2.6, pl));
-      // mace in the near hand
-      limb(g, 16.8, 11.6, 19, 16, 1.1, 1, pl); P.line(g, 19.4, 17, 21, 6, 0.8, c.dark);
-      P.circle(g, 21.2, 5.2, 1.8, P.vol(g, 21, 5, 1.8, pl)); for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; P.line(g, 21.2 + Math.cos(a) * 1.6, 5.2 + Math.sin(a) * 1.6, 21.2 + Math.cos(a) * 2.6, 5.2 + Math.sin(a) * 2.6, 0.5, sh(pl, 0.3)); }
-      // the kite shield, a sun on it
-      g.beginPath(); g.moveTo(2.2, 11.4); g.quadraticCurveTo(6, 10, 9.6, 11.4); g.lineTo(9.2, 18.6); g.quadraticCurveTo(6, 23.6, 5.8, 24.2); g.quadraticCurveTo(2.8, 21, 2.4, 18.6); g.closePath();
-      P.fill(g, P.lg(g, 2, 11, 10, 24, [sh(c.cloth, 0.2), sh(c.cloth, -0.5)])); g.strokeStyle = pl; g.lineWidth = 0.9; g.stroke();
-      P.circle(g, 5.9, 16, 1.6, pl); for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; P.line(g, 5.9 + Math.cos(a) * 1.8, 16 + Math.sin(a) * 1.8, 5.9 + Math.cos(a) * 2.8, 16 + Math.sin(a) * 2.8, 0.4, pl); }
-      // the helm with gilt wings
-      const hx = 12.4, hy = 5.8;
-      for (const s of [-1, 1]) { P.path(g, [hx + s * 2.4, hy - 1, hx + s * 7, hy - 5, hx + s * 6, hy - 2.6, hx + s * 7.4, hy - 2, hx + s * 3, hy + 0.6]); P.fill(g, P.lg(g, hx, hy - 5, hx + s * 7, hy, [sh(pl, 0.5), sh(pl, -0.2)])); }
-      P.rrect(g, hx - 3.2, hy - 3.6, 6.4, 7.2, 2.2, P.lg(g, hx - 3, 0, hx + 3, 0, [sh(pl, 0.5), pl, sh(pl, -0.4)]));
-      P.rect(g, hx - 2.2, hy - 0.2, 5, 0.9, '#140a04'); P.glow(g, hx + 0.4, hy + 0.2, 3, c.eye, 0.5); P.rect(g, hx - 1.2, hy + 0.05, 3.4, 0.4, c.eye);
+      const st = '#34302e', sl = sh(st, 0.5), sd = sh(st, -0.45), gold = c.plate, gd = sh(gold, -0.45), cl = c.cloth, w = f ? 0.9 : -0.9;
+      P.ell(g, 12.4, 29, 8, 1.1, 'rgba(0,0,0,0.45)');
+      // legs in greaves, gold at the knee
+      for (const [x, d, col] of [[10.4, -w, sd], [14, w, st]]) { limb(g, x, 19.6, x + d * 0.5, 24, 1.8, 1.5, col); limb(g, x + d * 0.5, 24, x + d, 28, 1.5, 1.3, col); P.circle(g, x + d * 0.5, 24, 1.1, P.vol(g, x + d * 0.5 - 0.3, 23.6, 1.1, gold)); P.path(g, [x + d - 1.4, 27.4, x + d + 2.2, 27.6, x + d + 2.2, 29, x + d - 1.4, 29]); P.fill(g, sd); }
+      // the torso: a plated cuirass, the tabard hanging from the belt
+      P.path(g, [8, 11, 16.4, 11, 16, 18, 14.6, 20.4, 9.6, 20.4, 8.4, 18]); P.fill(g, P.lg(g, 8, 11, 16, 20, [sl, st, sd]));
+      P.line(g, 12.2, 11.6, 12.2, 18, 0.35, gold); P.line(g, 8.4, 18, 16, 18, 0.7, gold);
+      P.path(g, [10, 18.4, 14.6, 18.4, 15.2, 24.6, 12.4, 23.6, 9.6, 24.6]); P.fill(g, P.lg(g, 10, 18, 15, 25, [sh(cl, 0.3), cl, sh(cl, -0.4)]));
+      // the mace arm behind, the flanged mace over the shoulder
+      limb(g, 15.4, 12, 18, 15.6, 1.5, 1.2, st); limb(g, 18, 15.6, 18.6, 12.6, 1.2, 1, sl);
+      P.line(g, 16.6, 17.6, 21, 5.6, 0.7, '#3a2a1a');
+      g.save(); g.translate(21.3, 4.6); g.rotate(0.35);
+      P.rrect(g, -1.1, -2.6, 2.2, 4.2, 0.6, P.lg(g, -1.1, 0, 1.1, 0, [sh(gold, 0.4), gold, gd]));
+      for (const x of [-1.8, 1.8]) { P.path(g, [0, -2.2, x, -1.4, x, 0.8, 0, 1.4]); P.fill(g, P.lg(g, -2, 0, 2, 0, [sh(gold, 0.2), gd])); }
+      g.restore();
+      P.circle(g, 18.6, 12.8, 0.9, st);
+      // pauldrons edged with gold
+      for (const [x, col] of [[8.4, sd], [15.8, st]]) { P.ell(g, x, 11.8, 2.6, 2, P.vol(g, x - 0.6, 11.2, 2.6, col)); g.beginPath(); g.ellipse(x, 11.8, 2.6, 2, 0, 0, Math.PI); g.strokeStyle = gold; g.lineWidth = 0.4; g.stroke(); }
+      // the great helm: flat-topped, a crown about its brow, a cross slit burning
+      const hx = 12.6, hy = 7;
+      P.rrect(g, hx - 2.8, hy - 3.8, 5.6, 6.6, 1, P.lg(g, hx - 2.8, hy - 3.8, hx + 2.8, hy + 2.8, [sl, st, sd]));
+      P.path(g, [hx - 3, hy - 3.2, hx - 3, hy - 5.2, hx - 1.6, hy - 4.2, hx, hy - 5.8, hx + 1.6, hy - 4.2, hx + 3, hy - 5.2, hx + 3, hy - 3.2]); P.fill(g, P.lg(g, 0, hy - 5.8, 0, hy - 3, [sh(gold, 0.5), gold, gd]));
+      P.rect(g, hx - 1.2, hy - 1.2, 4, 0.8, '#0a0604'); P.rect(g, hx + 0.8, hy - 2, 0.7, 3.4, '#0a0604');
+      P.rect(g, hx - 1, hy - 1.05, 3.6, 0.5, c.eye); P.glow(g, hx + 1, hy - 0.9, 2.4, c.eye, 0.55);
+      P.line(g, hx - 2.8, hy + 2.8, hx + 2.8, hy + 2.8, 0.5, gold);
+      // the kite shield on the near arm, dark enamel, a gold rim, a sun blazoned on it
+      g.beginPath(); g.moveTo(3, 11); g.lineTo(9.4, 11); g.quadraticCurveTo(9.8, 19, 6.2, 25.4); g.quadraticCurveTo(2.6, 19, 3, 11); g.closePath();
+      P.fill(g, P.lg(g, 3, 11, 9.4, 25, [sh(c.dark, 0.3), c.dark, sh(c.dark, -0.5)]));
+      g.strokeStyle = gold; g.lineWidth = 0.6; g.stroke();
+      P.circle(g, 6.2, 15.8, 1.7, P.vol(g, 5.8, 15.3, 1.7, gold));
+      for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; P.line(g, 6.2 + Math.cos(a) * 2, 15.8 + Math.sin(a) * 2, 6.2 + Math.cos(a) * 2.8, 15.8 + Math.sin(a) * 2.8, 0.4, gold); }
     } });
 
-  /* ---------- Vault Warden: a floating hooded warden, a golden mask, a lantern of ward-light on a chain ---------- */
+  /* ---------- Vault Warden: a tall hooded jailer drifting above the floor, a blank golden mask with burning slits,
+   *            chains wound about it, a ring of great keys at its belt, a caged lantern of ward-light swinging on a chain ---------- */
   def('vaultwarden', { w: 22, h: 28, cy: 18, frames: 2,
     colors: { robe: '#2a2440', gold: '#d8b050', light: '#fff0a0' },
     draw(g, f, c) {
-      const r = c.robe, sway = f ? 0.8 : -0.8;
-      P.glow(g, 11, 16, 11, c.light, 0.18);
-      g.beginPath(); g.moveTo(7, 9); g.lineTo(15, 9); g.quadraticCurveTo(17.6, 17, 16 + sway, 25); g.quadraticCurveTo(13, 23, 11, 26); g.quadraticCurveTo(9, 23, 6 - sway, 25); g.quadraticCurveTo(4.4, 17, 7, 9); g.closePath();
-      P.fill(g, P.lg(g, 0, 9, 0, 26, [sh(r, 0.35), r, G.rgba(r, 0.2)]));
-      P.line(g, 11, 10, 11, 22, 0.6, c.gold); P.line(g, 7.6, 12, 14.4, 12, 0.6, c.gold);
-      // the lantern on its chain, swinging
-      limb(g, 15, 11, 17.6, 14, 0.9, 0.8, r); P.line(g, 17.8, 14, 18.6 + sway, 18, 0.35, '#8a7a5a');
-      P.glow(g, 18.8 + sway, 20, 6, c.light, 0.7); P.rrect(g, 17.4 + sway, 18, 2.8, 3.8, 0.6, G.rgba(c.light, 0.9)); P.rect(g, 17.2 + sway, 17.6, 3.2, 0.7, c.gold); P.rect(g, 17.2 + sway, 21.6, 3.2, 0.7, c.gold);
-      limb(g, 7, 11, 4, 15, 0.9, 0.8, sh(r, -0.2)); claws(g, 3.8, 15.4, -0.4, 3, 1.2, 0.3, c.gold);
-      // hood and golden mask
-      g.beginPath(); g.moveTo(6.4, 10); g.quadraticCurveTo(6, 2, 11, 1.4); g.quadraticCurveTo(16, 2, 15.6, 10); g.quadraticCurveTo(11, 8.4, 6.4, 10); g.closePath();
-      P.fill(g, P.lg(g, 6, 1, 16, 10, [sh(r, 0.4), r, sh(r, -0.5)]));
-      P.ell(g, 11.4, 6, 2.6, 3, P.lg(g, 9, 3, 14, 9, ['#fff0b0', c.gold, sh(c.gold, -0.4)]));
-      P.path(g, [9.6, 5.4, 11, 5.8, 9.8, 6.2]); P.fill(g, '#0a0604'); P.path(g, [13.2, 5.4, 11.8, 5.8, 13, 6.2]); P.fill(g, '#0a0604');
-      P.line(g, 10.4, 7.8, 12.4, 7.8, 0.35, sh(c.gold, -0.5));
+      const r = sh(c.robe, 0.1), rl = sh(r, 0.5), rd = sh(r, -0.5), gold = c.gold, gd = sh(gold, -0.45), w = f ? 0.8 : -0.8, iron = '#5a5660';
+      P.ell(g, 11, 27, 6, 0.9, 'rgba(0,0,0,0.35)');
+      // the robe: narrow shoulders under the hood, falling long and ending in wisps above the floor
+      g.beginPath(); g.moveTo(7, 10.6); g.quadraticCurveTo(11, 9.4, 15.4, 10.6); g.quadraticCurveTo(17, 17, 17.6 + w, 23.4); g.lineTo(4.6 - w, 23.4); g.quadraticCurveTo(5.4, 17, 7, 10.6); g.closePath();
+      P.fill(g, P.lg(g, 5, 10, 17, 24, [rl, r, rd]));
+      rag(g, 4.6 - w, 23.2, 17.6 + w, 23.2, 5, 2.2, rd);
+      g.strokeStyle = rd; g.lineWidth = 0.5; for (const [x0, x1] of [[9, 7.4], [12.6, 13.4]]) { g.beginPath(); g.moveTo(x0, 12); g.quadraticCurveTo(x0, 18, x1 + w * 0.4, 23); g.stroke(); }
+      // chains wound about it
+      g.strokeStyle = '#8a8490'; g.lineWidth = 0.6; g.setLineDash([0.8, 0.4]);
+      g.beginPath(); g.moveTo(6.6, 12.6); g.quadraticCurveTo(11, 15.6, 16.4, 13.4); g.stroke(); g.beginPath(); g.moveTo(5.8, 17.4); g.quadraticCurveTo(11, 19.6, 17, 17); g.stroke(); g.setLineDash([]);
+      // the ring of keys at the belt
+      g.beginPath(); g.arc(8.6, 17.8, 1.3, 0, Math.PI * 2); g.strokeStyle = gold; g.lineWidth = 0.4; g.stroke();
+      for (const [a, l] of [[1.2, 3], [1.7, 3.6], [2.2, 2.8]]) { const x = 8.6 + Math.cos(a) * 1.3, y = 17.8 + Math.sin(a) * 1.3; P.line(g, x, y, x + Math.cos(a) * l, y + Math.sin(a) * l, 0.45, gold); P.rect(g, x + Math.cos(a) * l - 0.5, y + Math.sin(a) * l - 0.2, 1, 0.6, gd); }
+      // the hood, peaked, the golden mask in its dark: blank but for two burning slits
+      g.beginPath(); g.moveTo(6.4, 12); g.quadraticCurveTo(5.6, 5, 9.4, 2.4); g.lineTo(11.8, 0.8); g.quadraticCurveTo(16.4, 3.4, 16.2, 12); g.closePath();
+      P.fill(g, P.lg(g, 6, 1, 16, 12, [rl, r, rd]));
+      P.ell(g, 12.2, 7.4, 3, 3.8, '#08060c');
+      P.ell(g, 12.6, 7.2, 2.2, 3, P.lg(g, 10.4, 4.4, 14.8, 10, [sh(gold, 0.5), gold, gd]));
+      P.path(g, [10.6, 5.8, 12.4, 6.6, 12.4, 7.6, 10.6, 7]); P.fill(g, '#140a04'); P.path(g, [13, 6.6, 14.8, 5.8, 14.8, 7, 13, 7.6]); P.fill(g, '#140a04');
+      P.rect(g, 11, 6.5, 1.2, 0.5, c.light); P.rect(g, 13.2, 6.5, 1.2, 0.5, c.light); P.glow(g, 12.7, 6.8, 2, c.light, 0.45);
+      P.path(g, [11.4, 9, 14, 9, 13.4, 9.8, 12, 9.8]); P.fill(g, '#140a04');
+      // the near arm out of the sleeve, a lantern swinging from its chain
+      P.path(g, [14.6, 11.6, 18.6, 14.2, 18, 15.6, 14.4, 14.2]); P.fill(g, r);
+      P.circle(g, 18.8, 15, 0.8, '#b8b0a0');
+      const lx = 19 + w * 0.5, ly = 20.6;
+      g.strokeStyle = iron; g.lineWidth = 0.4; g.beginPath(); g.moveTo(18.8, 15.4); g.lineTo(lx, ly - 2); g.stroke();
+      P.glow(g, lx, ly, 5, c.light, 0.55);
+      P.rrect(g, lx - 1.4, ly - 1.8, 2.8, 3.6, 0.5, G.rgba(c.light, 0.9)); P.circle(g, lx, ly, 0.8, '#ffffff');
+      for (const x of [lx - 1.4, lx, lx + 1.4]) P.line(g, x, ly - 1.8, x, ly + 1.8, 0.35, gd);
+      P.path(g, [lx - 1.8, ly - 1.8, lx, ly - 3, lx + 1.8, ly - 1.8]); P.fill(g, gold); P.rect(g, lx - 1.8, ly + 1.8, 3.6, 0.6, gd);
     } });
 
-  /* ---------- Coin Wraith: a greedy ghost: a hooded shade in a tattered robe, arms flung wide in grasping sleeves,
-   *            one hand holding up a coin, the other raking in a rain of coins; a heap of gold below ---------- */
+  /* ---------- Coin Wraith: a greedy spectre rising out of a heap of gold: a gaunt hooded skull with burning eyes, a torn shroud
+   *            that pours down into the coins, one long claw clutching a coin up to its face, the other raking the hoard ---------- */
   def('coinwraith', { w: 28, h: 30, cy: 17, frames: 2,
     colors: { shade: '#26302a', eye: '#fff080' },
     draw(g, f, c) {
-      const sd = c.shade, lit = sh(sd, 0.55), dk = sh(sd, -0.55), bone = '#d8cfb4', w = f ? 1 : -1;
-      // a flat gold coin with a dark rim and a square hole: reads as a coin even when tiny
-      const coinQ = (x, y, r, t) => { P.ell(g, x, y, r * t + 0.3, r + 0.3, '#3a2204'); P.ell(g, x, y, r * t, r, P.lg(g, x - r, y - r, x + r, y + r, ['#fff4b0', '#e8b830', '#a87010'])); if (t > 0.45) P.rect(g, x - 0.35 * t, y - 0.35, 0.7 * t, 0.7, '#3a2204'); };
-      P.glow(g, 14, 16, 13, '#ffd050', 0.2);
-      // the heap below and the coins raining into it
-      for (const [x, y, r, t] of [[9.6, 27.4, 1.7, 1], [13, 27.8, 1.8, 1], [16.4, 27.4, 1.7, 0.9], [11.2, 25.8, 1.6, 0.8], [14.8, 25.8, 1.6, 1], [13, 24.2, 1.5, 0.9]]) coinQ(x, y, r, t);
-      for (const [x, y, r, t] of [[13.4 + w * 0.4, 21.6, 1.4, 0.3], [11.6, 22.6 - w * 0.4, 1.3, 1], [15.4, 22.2 + w * 0.4, 1.2, 0.6]]) coinQ(x, y, r, t);
-      // the robe: shoulders to torn tails spreading wide
-      g.beginPath(); g.moveTo(9.6, 9.6); g.quadraticCurveTo(14, 8, 18.4, 9.6); g.quadraticCurveTo(20.4, 15, 21.6 + w * 0.5, 20.6);
-      g.lineTo(18.8, 18.8); g.lineTo(17.2, 21.6); g.lineTo(15.4, 19); g.lineTo(13.6, 21.8 + w * 0.4); g.lineTo(11.8, 19); g.lineTo(10.2, 21.4); g.lineTo(8.4, 18.8); g.lineTo(6.4 - w * 0.5, 20.4);
-      g.quadraticCurveTo(7.6, 15, 9.6, 9.6); g.closePath(); P.fill(g, P.lg(g, 6, 8, 22, 21, [lit, sd, dk]));
-      g.strokeStyle = dk; g.lineWidth = 0.4; for (const x of [11.6, 14, 16.4]) { g.beginPath(); g.moveTo(x, 11); g.quadraticCurveTo(x - 0.3, 15.4, x - 0.2, 19); g.stroke(); }
-      // sleeves flung wide, ragged at the cuffs
-      const sleeve = (x0, y0, x1, y1, col) => { g.beginPath(); g.moveTo(x0, y0 - 1.4); g.quadraticCurveTo((x0 + x1) / 2, y0 - 2, x1, y1 - 2); g.lineTo(x1 + (x1 > x0 ? 0.6 : -0.6), y1 + 1.8); g.lineTo(x1 + (x1 > x0 ? -0.8 : 0.8), y1 + 0.8); g.lineTo(x1 + (x1 > x0 ? -1.6 : 1.6), y1 + 2.2); g.quadraticCurveTo((x0 + x1) / 2, y0 + 2, x0, y0 + 1.6); g.closePath(); P.fill(g, col); };
-      sleeve(9.8, 11.4, 3.6, 14.6 + w * 0.4, P.lg(g, 3, 9, 10, 15, [dk, sd]));
-      sleeve(18.2, 11.2, 23.8, 9.4 - w * 0.3, P.lg(g, 18, 8, 24, 13, [lit, sd]));
-      // bony hands: one raking at the falling coins, one holding a coin up high
-      claws(g, 3.2, 15.8 + w * 0.4, 1.9, 4, 1.8, 0.4, bone);
-      claws(g, 24.4, 8.6 - w * 0.3, -1.3, 4, 1.6, 0.4, bone); coinQ(25.2, 5.8 - w * 0.3, 1.9, 1);
-      // the hood, dark within, two eyes glowing like coins, a fanged grin
-      g.beginPath(); g.moveTo(9.4, 10.6); g.quadraticCurveTo(8.8, 2.4, 14, 1.8); g.quadraticCurveTo(19.2, 2.4, 18.6, 10.6); g.quadraticCurveTo(14, 8.8, 9.4, 10.6); g.closePath();
-      P.fill(g, P.lg(g, 9, 1.8, 19, 10.6, [lit, sd, dk]));
-      P.ell(g, 14.4, 6.6, 3, 3.1, '#050806'); P.glow(g, 14.4, 6.4, 4, c.eye, 0.45);
-      evil(g, 13.2, 6.2, 0.7, c.eye, 0); evil(g, 15.6, 6.2, 0.7, c.eye, 0);
-      teeth(g, 13, 8.1, 15.8, 8.1, 4, 0.6, 1, bone);
+      const s = sh(c.shade, 0.05), sl = sh(s, 0.6), sd = sh(s, -0.5), bone = '#c8c0a0', w = f ? 0.8 : -0.8;
+      P.ell(g, 14, 29, 11, 1.2, 'rgba(0,0,0,0.45)');
+      // the far arm raking down into the hoard
+      limb(g, 9.4, 12, 5.6, 16.6, 1.4, 1.1, s); limb(g, 5.6, 16.6, 4.4 - w * 0.4, 21.4, 1, 0.7, sh(bone, -0.3)); claws(g, 4.4 - w * 0.4, 21.6, 1.6, 4, 2, 0.3, bone);
+      // the shroud: a gaunt chest narrowing and pouring down into the gold
+      g.beginPath(); g.moveTo(8.4, 11.4); g.quadraticCurveTo(13, 9, 17.8, 11.4); g.quadraticCurveTo(18, 17, 19.6 + w, 24); g.lineTo(7.6 - w, 24); g.quadraticCurveTo(8.6, 17, 8.4, 11.4); g.closePath();
+      P.fill(g, P.lg(g, 8, 10, 19, 24, [sl, s, sd]));
+      rag(g, 7.6 - w, 23.6, 19.6 + w, 23.6, 5, 2.4, sd);
+      g.strokeStyle = G.rgba(sd, 0.8); g.lineWidth = 0.4; for (const x of [11, 14.4, 16.8]) { g.beginPath(); g.moveTo(x, 12.4); g.quadraticCurveTo(x + w * 0.4, 18, x - 0.4, 23); g.stroke(); }
+      // the heap of gold it rises out of
+      g.beginPath(); g.moveTo(3, 29); g.quadraticCurveTo(5, 22.4, 13.6, 21.8); g.quadraticCurveTo(22.6, 22.2, 25.4, 29); g.closePath();
+      P.fill(g, P.lg(g, 6, 22, 20, 29, ['#e8b830', '#b07a18', '#5a3a08']));
+      [[6.6, 26.4], [9.4, 24.4], [12.4, 23.4], [15.6, 23.6], [18.6, 25], [21.4, 27], [8, 28], [11.4, 26.6], [14.6, 26.4], [17.4, 27.6], [20.4, 28.4], [5, 28.4]].forEach(([x, y], i) => P.coin(g, x, y, 1.1, i % 2 ? 0.55 : 1));
+      P.coin(g, 13, 21.4, 1.3, 0.7); P.coin(g, 16.4, 21.8, 1.1, 1);
+      // the hood and the skull in it: sunken, the eyes burning
+      const hx = 13.6, hy = 7.6;
+      g.beginPath(); g.moveTo(8.6, 12.4); g.quadraticCurveTo(7.4, 4.6, 11.6, 2.4); g.quadraticCurveTo(16.6, 0.8, 19.4, 4.4); g.lineTo(20, 7.4); g.lineTo(18.4, 6.6); g.quadraticCurveTo(18.8, 10.6, 17.6, 12.4); g.closePath();
+      P.fill(g, P.lg(g, 8, 2, 18, 12, [sl, s, sd]));
+      P.ell(g, hx + 1.4, hy + 0.6, 3, 3.4, '#060806');
+      P.ell(g, hx + 1.6, hy, 2.2, 2.2, P.vol(g, hx + 1, hy - 0.8, 2.4, sh(bone, -0.2)));
+      P.path(g, [hx + 0.2, hy + 1.2, hx + 3.4, hy + 1.2, hx + 3, hy + 3.4, hx + 0.6, hy + 3.4]); P.fill(g, sh(bone, -0.35));
+      P.ell(g, hx + 0.8, hy - 0.1, 0.9, 1, '#060806'); P.ell(g, hx + 2.7, hy - 0.2, 0.85, 0.95, '#060806'); P.path(g, [hx + 1.6, hy + 1, hx + 2.1, hy + 1, hx + 1.85, hy + 0.3]); P.fill(g, '#060806');
+      evil(g, hx + 0.8, hy, 0.5, c.eye); evil(g, hx + 2.7, hy - 0.1, 0.45, c.eye); P.glow(g, hx + 1.7, hy, 2.4, c.eye, 0.45);
+      P.rect(g, hx + 0.6, hy + 2, 2.6, 0.5, '#060806'); teeth(g, hx + 0.6, hy + 2, hx + 3.2, hy + 2, 4, 0.5, 1, bone);
+      // the near arm: a long claw clutching a coin up to its face
+      limb(g, 16.6, 12.4, 21, 14.2, 1.3, 1, s); limb(g, 21, 14.2, 22.6, 10.4 + w * 0.3, 1, 0.7, sl);
+      P.coin(g, 23.4, 8.6 + w * 0.3, 1.6, 0.8); P.glow(g, 23.4, 8.6 + w * 0.3, 2.6, '#ffe070', 0.4);
+      claws(g, 22.8, 10 + w * 0.3, -1.4, 4, 1.6, 0.3, bone);
+      P.coin(g, 20.6, 17.6 + (f ? 1.4 : 0), 0.8, 0.5); // a coin slipping through its fingers
     } });
 
-  /* ---------- Mimic King (boss): a vast chest-beast, lid for a jaw, a crown jammed on its lid, gold spilling from its maw, legs of a beast ---------- */
+  /* ---------- Mimic King (boss): a vast iron-bound chest on four clawed beast legs, the lid flung up as a jaw of fangs, a crown
+   *            jammed on it, eyes glaring out of the dark inside, a tongue lolling out with a coin on it, gold spilling over the rim ---------- */
   def('mimicking', { w: 54, h: 48, cy: 34, frames: 2,
     colors: { wood: '#5a3016', band: '#d8a83a', tongue: '#c83050', eye: '#ffe060' },
     draw(g, f, c) {
-      const wd = c.wood, bd = c.band, w = f ? 1 : -1;
-      P.ell(g, 27, 45.6, 20, 2.6, 'rgba(0,0,0,0.5)');
-      // bestial legs beneath the chest
-      for (const [x, d, col] of [[12, -w, sh(wd, -0.4)], [20, w, sh(wd, -0.2)], [34, -w, sh(wd, -0.4)], [42, w, sh(wd, -0.2)]]) { limb(g, x, 34, x + d * 2, 44, 2.4, 2, col); claws(g, x + d * 2, 44.6, 0, 3, 1.8, 0.5, '#1a0a04'); }
-      // the chest
-      P.rrect(g, 6, 22, 42, 14, 2, P.lg(g, 6, 0, 48, 0, [sh(wd, -0.4), sh(wd, 0.2), wd, sh(wd, -0.5)]));
-      for (const x of [6, 18, 30, 44.6]) P.rect(g, x, 22, 3.4, 14, P.lg(g, 0, 22, 0, 36, [sh(bd, 0.4), sh(bd, -0.45)]));
-      // the maw between chest and lid: rows of teeth, the tongue, gold spilling
-      P.ell(g, 27, 22, 20, 5 + (f ? 1.2 : 0), '#1a0408');
-      teeth(g, 8, 22.6, 46, 22.6, 14, 2.6, 1, '#efe4c8'); teeth(g, 9, 19.6 - (f ? 1.2 : 0), 45, 19.6 - (f ? 1.2 : 0), 13, -2.2, 1, '#efe4c8');
-      g.beginPath(); g.moveTo(27, 22); g.quadraticCurveTo(38, 30, 48 + w * 2, 26); g.strokeStyle = c.tongue; g.lineWidth = 3; g.lineCap = 'round'; g.stroke();
-      for (const [x, y] of [[14, 27], [17, 30], [36, 29], [22, 31], [40, 33]]) coin(g, x, y, 1.4, 0.7);
-      // the lid, raised like a jaw, eyes glaring under it
-      g.beginPath(); g.moveTo(6, 19); g.quadraticCurveTo(8, 4, 27, 3); g.quadraticCurveTo(46, 4, 48, 19); g.quadraticCurveTo(27, 16, 6, 19); g.closePath();
-      P.fill(g, P.lg(g, 0, 3, 0, 19, [sh(wd, 0.35), wd, sh(wd, -0.4)]));
-      for (const x of [9, 20, 33, 44]) P.line(g, x, 18, x + (27 - x) * 0.15, 5, 2.4, bd);
-      evil(g, 19, 14, 1.4, c.eye); evil(g, 35, 14, 1.4, c.eye); P.glow(g, 27, 14, 12, c.eye, 0.3);
-      // a crown jammed on top
-      P.rect(g, 19, 1.4, 16, 3, P.lg(g, 0, 1, 0, 4, ['#fff0a0', bd]));
-      for (let i = 0; i < 5; i++) P.path(g, [19 + i * 3.6, 1.6, 20.8 + i * 3.6, -2.6, 22.6 + i * 3.6, 1.6]); P.fill(g, bd);
-      for (const [x, col] of [[23, '#e03040'], [27, '#40e0c0'], [31, '#e03040']]) P.circle(g, x, 2.8, 0.8, col);
+      const wd = sh(c.wood, -0.05), wl = sh(c.wood, 0.4), wk = sh(c.wood, -0.55), band = c.band, bd = sh(band, -0.45), fang = '#efe6cc', hide = '#3a2418', w = f ? 1.2 : -1.2, op = f ? 1.6 : 0;
+      P.ell(g, 27, 46.4, 22, 2.2, 'rgba(0,0,0,0.5)');
+      // four clawed beast legs under the box
+      const leg = (x, d, col) => { limb(g, x, 36, x + d * 2.4, 40.6, 3, 2.4, col); limb(g, x + d * 2.4, 40.6, x + d * 1.2, 45, 2.4, 1.8, col); claws(g, x + d * 1.2 + 1, 45.4, 0.1, 3, 2.2, 0.5, fang); };
+      leg(15, -1 - w * 0.3, sh(hide, -0.3)); leg(35, 1 - w * 0.3, sh(hide, -0.3)); leg(10, -1 + w * 0.3, hide); leg(40, 1 + w * 0.3, hide);
+      // the box: planks, bands, riveted corners, a padlock hanging loose on a chain
+      P.rect(g, 7, 20, 38, 17.6, P.lg(g, 7, 20, 45, 38, [wl, wd, wk]));
+      g.strokeStyle = G.rgba(wk, 0.8); g.lineWidth = 0.5; for (const y of [24.4, 28.8, 33.2]) { g.beginPath(); g.moveTo(7.2, y); g.lineTo(44.8, y); g.stroke(); }
+      for (const x of [14.4, 34.4]) { P.rect(g, x, 20, 2.6, 17.6, P.lg(g, x, 0, x + 2.6, 0, [sh(band, 0.35), bd])); for (const y of [22, 28.8, 35.6]) P.circle(g, x + 1.3, y, 0.5, sh(band, 0.5)); }
+      for (const [x, y] of [[7, 20], [42.4, 20], [7, 35], [42.4, 35]]) P.rect(g, x, y, 2.6, 2.6, P.lg(g, x, y, x + 2.6, y + 2.6, [sh(band, 0.4), bd]));
+      g.strokeStyle = '#6a6060'; g.lineWidth = 0.7; g.setLineDash([1, 0.5]); g.beginPath(); g.moveTo(25, 21); g.quadraticCurveTo(26 + w * 0.4, 26, 26.4 + w * 0.6, 29); g.stroke(); g.setLineDash([]);
+      P.rrect(g, 24.6 + w * 0.6, 29, 3.6, 3.6, 0.8, P.lg(g, 24.6, 29, 28, 33, [sh(band, 0.3), bd])); P.rect(g, 26.1 + w * 0.6, 30.4, 0.7, 1.4, '#140806');
+      // the dark inside, eyes glaring out of it
+      const tx = 43.6, ty = 6.4 - op;
+      P.path(g, [7.6, 20.2, tx, ty, 45, 20.2]); P.fill(g, P.lg(g, 20, 8, 22, 20, ['#4a0a10', '#100406']));
+      [[25, 16.4, 1.3], [30.4, 14.4, 1.2], [35.4, 15.6, 1], [28, 18.6, 0.8]].forEach(([x, y, r]) => { P.ell(g, x, y, r * 1.2, r, '#050102'); evil(g, x, y, r * 0.8, c.eye); });
+      P.glow(g, 30, 16, 8, c.eye, 0.4);
+      // gold spilling over the front rim
+      [[36, 20, 1.4], [39, 19.6, 1.2], [41.6, 21, 1.3], [44, 23.6, 1.1], [45.4, 27 + (f ? 1 : 0), 1.2], [46.6, 31 + (f ? 1.4 : 0), 1]].forEach(([x, y, r], i) => P.coin(g, x, y, r, i % 2 ? 0.5 : 1));
+      // the lid: a jaw of fangs along its edge, the crown jammed on its top
+      const nx = -0.37, ny = -0.93, T = 6.6;
+      P.path(g, [7.6, 20.2, tx, ty, tx + nx * T, ty + ny * T + 0.6, 7.6 + nx * T, 20.2 + ny * T]); P.fill(g, P.lg(g, 5, 10, 44, 18, [wl, wd, wk]));
+      for (const k of [0.2, 0.72]) { const x = 7.6 + (tx - 7.6) * k, y = 20.2 + (ty - 20.2) * k; P.path(g, [x, y, x + 2.4, y - 0.8, x + 2.4 + nx * T, y - 0.8 + ny * T, x + nx * T, y + ny * T]); P.fill(g, P.lg(g, x, 0, x + 2.4, 0, [sh(band, 0.35), bd])); }
+      P.line(g, 7.6 + nx * T, 20.2 + ny * T, tx + nx * T, ty + ny * T + 0.6, 1, band);
+      [[10, 2.4], [14.4, 3.4], [18.4, 2.6], [22.6, 3.8], [27, 2.8], [31.4, 3.6], [35.4, 2.4], [39.6, 3.2]].forEach(([x, l]) => { const k = (x - 7.6) / (tx - 7.6), y = 20.2 + (ty - 20.2) * k; P.path(g, [x - 1, y + 0.3, x + 1, y - 0.3, x + 0.4, y + l]); P.fill(g, P.lg(g, x, y, x, y + l, [fang, sh(fang, -0.3)])); });
+      [[10.6, 3], [15.4, 3.8], [20.6, 2.6], [25.4, 3.6], [30.4, 2.8], [35.6, 3.4], [40.4, 2.6], [43.6, 2]].forEach(([x, l]) => { P.path(g, [x - 1, 20.2, x + 1, 20.2, x - 0.2, 20.2 - l]); P.fill(g, P.lg(g, x, 20.2, x, 20.2 - l, [sh(fang, -0.3), fang])); });
+      const cx = 7.6 + nx * T + (tx - 7.6) * 0.5, cy = 20.2 + ny * T + (ty - 20.2) * 0.5;
+      g.save(); g.translate(cx, cy); g.rotate(-0.37);
+      P.path(g, [-5, 0.4, -5, -3.6, -3, -1.8, -1.2, -4.8, 0.6, -1.8, 2.6, -4.6, 3.8, -1.6, 5.4, -3.8, 5.4, 0.4]); P.fill(g, P.lg(g, 0, -5, 0, 0.4, [sh(band, 0.6), band, bd]));
+      P.circle(g, -1.2, -1.2, 0.7, '#e03040'); P.circle(g, 2.4, -1.2, 0.7, '#40c0e0'); g.restore();
+      // the tongue lolling out, a coin stuck on it
+      g.beginPath(); g.moveTo(24, 19.4); g.bezierCurveTo(36, 16, 50, 18, 51.4, 25); g.bezierCurveTo(52.4, 30, 50, 33.4, 48.4, 31.6); g.bezierCurveTo(49, 26, 42, 21.6, 24, 21.4); g.closePath();
+      P.fill(g, P.lg(g, 24, 17, 52, 33, [sh(c.tongue, 0.25), c.tongue, sh(c.tongue, -0.45)]));
+      P.coin(g, 46, 22.4, 1.6, 0.6);
+      P.line(g, 49, 32, 49, 34.4 + (f ? 1 : 0), 0.4, G.rgba('#ffd0d0', 0.6));
     } });
 
-  /* ---------- Gilded Sentinel (boss): a towering golden guardian, a tower shield and a long spear, a sunburst halo ---------- */
+  /* ---------- Gilded Sentinel (boss): a towering guardian of blackened bronze and gold, a smooth faceless helm with one slit of
+   *            white fire, a gold ring of light behind its head, a tower shield blazoned with the sun, a long halberd ---------- */
   def('sentinel', { w: 50, h: 62, cy: 40, frames: 2,
     colors: { plate: '#d0a840', dark: '#4a3010', light: '#fff4c0', cloth: '#1e2a5a' },
     draw(g, f, c) {
-      const pl = c.plate, w = f ? 0.8 : -0.8;
-      P.ell(g, 25, 59, 15, 2.6, 'rgba(0,0,0,0.5)');
-      // halo behind the head
-      P.glow(g, 25, 11, 16, c.light, 0.4);
-      for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2 + f * 0.1; P.line(g, 25 + Math.cos(a) * 8, 11 + Math.sin(a) * 8, 25 + Math.cos(a) * 12, 11 + Math.sin(a) * 12, 0.9, G.rgba(c.light, 0.8)); }
-      // a long tabard
-      P.path(g, [18, 30, 32, 30, 33, 55, 25, 57, 17, 55]); P.fill(g, P.lg(g, 17, 30, 33, 57, [sh(c.cloth, 0.3), sh(c.cloth, -0.5)])); P.line(g, 25, 32, 25, 54, 0.8, pl);
-      // legs in greaves
-      P.rrect(g, 18 - w, 38, 5, 20, 2, P.lg(g, 18, 0, 23, 0, [sh(pl, 0.35), sh(pl, -0.45)])); P.rrect(g, 27 + w, 38, 5, 20, 2, P.lg(g, 27, 0, 32, 0, [sh(pl, 0.45), sh(pl, -0.35)]));
-      // cuirass with a sun boss
-      P.rrect(g, 15, 18, 20, 16, 4, P.lg(g, 15, 18, 35, 34, [sh(pl, 0.55), pl, sh(pl, -0.45)]));
-      P.circle(g, 25, 25, 2.6, sh(pl, 0.4)); P.circle(g, 25, 25, 1.4, c.light);
-      for (const x of [14, 36]) P.ell(g, x, 20, 5, 3.6, P.vol(g, x, 19, 5, pl));
-      // the spear in the near hand, raised
-      limb(g, 36, 22, 39, 30, 2, 1.8, pl); P.line(g, 40, 58, 42, 0, 1.2, c.dark);
-      P.path(g, [40.4, 4, 42, -4, 43.6, 4, 42, 6]); P.fill(g, P.lg(g, 40, -4, 44, 6, [c.light, pl]));
-      // the tower shield in the far hand
-      P.rrect(g, 3, 20, 13, 26, 3, P.lg(g, 3, 20, 16, 46, [sh(pl, 0.3), sh(pl, -0.35)])); P.rrect(g, 5, 22, 9, 22, 2, P.lg(g, 5, 22, 14, 44, [sh(c.cloth, 0.2), sh(c.cloth, -0.4)]));
-      P.circle(g, 9.5, 33, 3, pl); for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; P.line(g, 9.5 + Math.cos(a) * 3.2, 33 + Math.sin(a) * 3.2, 9.5 + Math.cos(a) * 4.8, 33 + Math.sin(a) * 4.8, 0.7, pl); }
-      // a full helm, a crest, and a sliver of light for a face
-      const hx = 25, hy = 11;
-      P.rrect(g, hx - 5, hy - 6, 10, 12, 3.4, P.lg(g, hx - 5, 0, hx + 5, 0, [sh(pl, 0.55), pl, sh(pl, -0.45)]));
-      P.path(g, [hx - 1, hy - 6, hx, hy - 12, hx + 1, hy - 6]); P.fill(g, pl);
-      P.rect(g, hx - 0.6, hy - 3, 1.2, 7, '#0a0604'); P.rect(g, hx - 3.6, hy - 0.4, 7.2, 1.1, '#0a0604'); P.glow(g, hx, hy, 4, c.light, 0.6); P.rect(g, hx - 2.6, hy - 0.2, 5.2, 0.6, c.light);
+      const br = '#3e342a', bl = sh(br, 0.5), bk = sh(br, -0.45), gold = c.plate, gd = sh(gold, -0.45), cl = c.cloth, w = f ? 1 : -1;
+      P.ell(g, 25, 60.4, 16, 1.8, 'rgba(0,0,0,0.5)');
+      // the ring of light behind the head
+      P.glow(g, 26, 10, 11, c.light, 0.35);
+      g.beginPath(); g.arc(26, 10, 8, 0, Math.PI * 2); g.strokeStyle = gold; g.lineWidth = 1.2; g.stroke();
+      g.beginPath(); g.arc(26, 10, 8, Math.PI * 1.1, Math.PI * 1.6); g.strokeStyle = sh(gold, 0.6); g.lineWidth = 0.5; g.stroke();
+      // the halberd, planted
+      P.line(g, 41.6, 59, 42.6, 6, 1.1, '#2a2018');
+      P.path(g, [42.6, 0.6, 44, 5, 42.6, 8.4, 41.2, 5]); P.fill(g, P.lg(g, 41, 0, 44, 8, [sh(gold, 0.5), gold, gd]));
+      g.beginPath(); g.moveTo(42.8, 9); g.quadraticCurveTo(48.4, 9.6, 48.6, 15.4); g.quadraticCurveTo(45.4, 13.6, 42.8, 14.4); g.closePath(); P.fill(g, P.lg(g, 42, 9, 49, 15, [sh(gold, 0.4), gd]));
+      P.path(g, [42.4, 10, 39, 11.4, 42.4, 12.6]); P.fill(g, gd);
+      // legs: armoured, heavy, gold at the knee
+      for (const [x, d, col] of [[21, -w, bk], [29.4, w, br]]) { limb(g, x, 40, x + d * 0.8, 49, 3.6, 3, col); limb(g, x + d * 0.8, 49, x + d * 1.4, 57.6, 3, 2.6, col); P.circle(g, x + d * 0.8, 49, 2.2, P.vol(g, x + d * 0.8 - 0.6, 48.2, 2.2, gold)); P.path(g, [x + d * 1.4 - 2.6, 57, x + d * 1.4 + 4, 57.4, x + d * 1.4 + 4, 59.6, x + d * 1.4 - 2.6, 59.6]); P.fill(g, bk); }
+      // the tabard between the legs
+      P.path(g, [21.6, 36, 29.8, 36, 30.6, 50, 26, 48.4, 21, 50]); P.fill(g, P.lg(g, 21, 36, 30, 50, [sh(cl, 0.1), sh(cl, -0.3), sh(cl, -0.6)]));
+      g.strokeStyle = gold; g.lineWidth = 0.5; g.beginPath(); g.moveTo(21.6, 36); g.lineTo(21, 50); g.lineTo(26, 48.4); g.lineTo(30.6, 50); g.lineTo(29.8, 36); g.stroke();
+      // the torso: a massive cuirass, a sun embossed on it
+      P.path(g, [16, 20, 36, 20, 34.6, 32, 31.6, 38, 20, 38, 17.4, 32]); P.fill(g, P.lg(g, 16, 20, 36, 38, [bl, br, bk]));
+      P.line(g, 26, 21, 26, 36.4, 0.5, gd); P.line(g, 17.8, 33, 34.2, 33, 1, gold); P.line(g, 16.4, 20.6, 35.6, 20.6, 0.8, gold);
+      P.circle(g, 28.6, 26.4, 2.6, P.vol(g, 28, 25.6, 2.6, gold)); P.glow(g, 28.6, 26.4, 4, c.light, 0.35);
+      // the halberd arm
+      limb(g, 34, 22, 38.6, 28.6, 3, 2.4, br); limb(g, 38.6, 28.6, 41.4, 26, 2.4, 2, bl); P.circle(g, 42, 25.6, 1.8, P.vol(g, 41.4, 25, 1.8, gd));
+      // pauldrons, layered
+      for (const [x, col] of [[16.4, bk], [35.2, br]]) { P.ell(g, x, 21.6, 5, 3.6, P.vol(g, x - 1.4, 20.4, 5, col)); g.beginPath(); g.ellipse(x, 21.6, 5, 3.6, 0, 0.1, Math.PI - 0.1); g.strokeStyle = gold; g.lineWidth = 0.7; g.stroke(); P.ell(g, x, 24.4, 4, 1.6, G.rgba(bk, 0.8)); }
+      // the helm: smooth and faceless, a crest of gold, one slit of white fire
+      const hx = 26.4, hy = 12.4;
+      g.beginPath(); g.moveTo(hx - 4.4, hy + 5.6); g.lineTo(hx - 4.6, hy - 1); g.quadraticCurveTo(hx - 4.4, hy - 6.6, hx, hy - 6.8); g.quadraticCurveTo(hx + 4.8, hy - 6.6, hx + 4.8, hy - 1); g.lineTo(hx + 4.4, hy + 5.6); g.closePath();
+      P.fill(g, P.lg(g, hx - 4, hy - 7, hx + 4, hy + 6, [sh(gold, 0.45), gold, gd]));
+      P.path(g, [hx - 0.8, hy - 6.6, hx + 0.8, hy - 6.6, hx + 0.6, hy + 4, hx - 0.6, hy + 4]); P.fill(g, G.rgba(gd, 0.6));
+      P.rect(g, hx - 3.6, hy - 0.2, 8, 1.3, '#0a0604'); P.rect(g, hx - 3.2, hy + 0.1, 7.2, 0.7, c.light); P.glow(g, hx + 0.4, hy + 0.4, 4, c.light, 0.6);
+      // the tower shield, dark with a gold rim and a sun
+      P.rrect(g, 5, 22, 14, 28, 2, P.lg(g, 5, 22, 19, 50, [sh(c.dark, 0.4), c.dark, sh(c.dark, -0.5)]));
+      g.strokeStyle = gold; g.lineWidth = 1; g.strokeRect(5.5, 22.5, 13, 27);
+      P.circle(g, 12, 33, 3, P.vol(g, 11.2, 32.2, 3, gold)); P.glow(g, 12, 33, 5, c.light, 0.3);
+      for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; P.line(g, 12 + Math.cos(a) * 3.6, 33 + Math.sin(a) * 3.6, 12 + Math.cos(a) * (i % 2 ? 4.6 : 5.6), 33 + Math.sin(a) * (i % 2 ? 4.6 : 5.6), 0.6, gold); }
+      for (const [x, y] of [[6.6, 23.6], [17.4, 23.6], [6.6, 48.4], [17.4, 48.4]]) P.circle(g, x, y, 0.6, sh(gold, 0.4));
     } });
 
-  /* ---------- Hollow Magistrate (boss): an empty judge's robe floating upright, a powdered wig over nothing, scales in one hand and a gavel in the other ---------- */
+  /* ---------- Hollow Magistrate (boss): a gaunt dead judge risen out of his robes: a high stiff collar, a long wig of tight
+   *            curls framing a dried skull with red eyes, a gold chain of office, a gavel raised high, scales in the other
+   *            hand weighing a heart against a coin ---------- */
   def('magistrate', { w: 50, h: 60, cy: 40, frames: 2,
     colors: { robe: '#1e1a24', gold: '#d8b050', wig: '#d8d4c8', eye: '#ff5040' },
     draw(g, f, c) {
-      const r = c.robe, sway = f ? 1 : -1;
-      P.ell(g, 25, 57, 13, 2.4, 'rgba(0,0,0,0.4)');
-      // the robe: stiff folds, a golden chain of office, hollow inside
-      g.beginPath(); g.moveTo(17, 18); g.lineTo(33, 18); g.quadraticCurveTo(38, 36, 38 + sway, 52); g.lineTo(12 + sway, 52); g.quadraticCurveTo(12, 36, 17, 18); g.closePath();
-      P.fill(g, P.lg(g, 12, 18, 38, 52, [sh(r, 0.35), r, sh(r, -0.5)]));
-      rag(g, 12 + sway, 51.6, 38 + sway, 51.6, 8, 2.6, sh(r, -0.4));
-      g.strokeStyle = sh(r, -0.5); g.lineWidth = 0.7; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(20 + i * 3.4, 22); g.lineTo(17 + i * 5.4, 50); g.stroke(); }
-      g.beginPath(); g.moveTo(18, 20); g.quadraticCurveTo(25, 30, 32, 20); g.strokeStyle = c.gold; g.lineWidth = 1.2; g.stroke(); P.circle(g, 25, 26, 2, P.vol(g, 25, 25.4, 2, c.gold));
-      // arms: empty sleeves; scales held out, a gavel raised
-      limb(g, 17, 21, 9, 28, 2.4, 2.2, sh(r, -0.2));
-      P.line(g, 8, 28, 8, 36, 0.6, c.gold); P.line(g, 2, 32 - sway * 0.8, 14, 32 + sway * 0.8, 0.8, c.gold);
-      for (const [x, y] of [[2, 32 - sway * 0.8], [14, 32 + sway * 0.8]]) { P.line(g, x, y, x - 2, y + 4, 0.3, c.gold); P.line(g, x, y, x + 2, y + 4, 0.3, c.gold); P.ell(g, x, y + 4.4, 2.6, 0.9, P.lg(g, 0, y + 3.6, 0, y + 5.2, ['#fff0a0', c.gold])); }
-      limb(g, 33, 21, 40, 16, 2.4, 2.2, r); P.line(g, 40, 17, 44, 7, 1.2, '#3a2010'); P.rrect(g, 40, 3, 9, 5, 1.4, P.lg(g, 40, 3, 49, 8, ['#6a4a24', '#2a1a0a'])); P.rect(g, 42, 3, 1, 5, c.gold); P.rect(g, 46, 3, 1, 5, c.gold);
-      // no head: a powdered wig floating over the empty collar, two red points of light within
-      P.ell(g, 25, 18, 5, 1.8, '#050308');
-      const hx = 25, hy = 10;
-      for (const s of [-1, 1]) for (let k = 0; k < 3; k++) P.ell(g, hx + s * 5.4, hy + 1 + k * 3, 2, 1.6, P.vol(g, hx + s * 5.4, hy + k * 3, 2, c.wig));
-      P.ell(g, hx, hy - 1, 6, 4, P.vol(g, hx, hy - 2, 6, c.wig)); P.ell(g, hx, hy + 3, 4, 3.6, '#050308');
-      evil(g, hx - 1.4, hy + 3, 0.7, c.eye); evil(g, hx + 1.4, hy + 3, 0.7, c.eye); P.glow(g, hx, hy + 3, 5, c.eye, 0.35);
+      const r = sh(c.robe, 0.05), rl = sh(r, 0.35), rd = sh(r, -0.5), gold = c.gold, gd = sh(gold, -0.45), wig = c.wig, wd = sh(wig, -0.35), bone = '#c8b890', w = f ? 1 : -1;
+      P.ell(g, 25, 58.6, 12, 1.6, 'rgba(0,0,0,0.4)');
+      P.glow(g, 26, 30, 20, c.eye, 0.08);
+      // the robe: a tall column of black, sleeves wide, the hem torn and drifting above the floor
+      g.beginPath(); g.moveTo(18, 18); g.lineTo(34, 18); g.quadraticCurveTo(37, 36, 38.6 + w, 53); g.lineTo(13.4 - w, 53); g.quadraticCurveTo(15, 36, 18, 18); g.closePath();
+      P.fill(g, P.lg(g, 13, 18, 38, 53, [rl, r, rd]));
+      rag(g, 13.4 - w, 52.6, 38.6 + w, 52.6, 7, 3, rd);
+      g.strokeStyle = rd; g.lineWidth = 0.8; for (const [x0, x1] of [[22, 18], [26, 26.4], [30, 34]]) { g.beginPath(); g.moveTo(x0, 22); g.quadraticCurveTo(x0 + (x1 - x0) * 0.5, 38, x1 + w * 0.6, 52); g.stroke(); }
+      P.path(g, [24.8, 20, 27.2, 20, 27.6, 52, 24.4, 52]); P.fill(g, G.rgba(rl, 0.5)); // the band down the front
+      // the far arm, holding up the scales: a heart weighed against a coin
+      P.path(g, [18.6, 21, 11, 28, 9.6, 32, 13.4, 31.6, 20, 26]); P.fill(g, P.lg(g, 10, 21, 20, 32, [r, rd]));
+      P.line(g, 10.4, 31.6, 9.6, 34, 0.6, bone); P.circle(g, 9.8, 32.6, 0.9, bone);
+      const tilt = f ? 0.9 : 0.6;
+      P.line(g, 9.8, 33, 9.8, 36, 0.5, gold); P.line(g, 4, 36 + tilt, 15.6, 36 - tilt, 0.6, gold); P.circle(g, 9.8, 36, 0.7, gold);
+      for (const [x, y, s2] of [[4.4, 36 + tilt, 1], [15.2, 36 - tilt, -1]]) { g.strokeStyle = gd; g.lineWidth = 0.3; g.beginPath(); g.moveTo(x, y); g.lineTo(x - 2, y + 4.4); g.moveTo(x, y); g.lineTo(x + 2, y + 4.4); g.stroke(); g.beginPath(); g.ellipse(x, y + 4.6, 2.4, 0.9, 0, 0, Math.PI); P.fill(g, gold); }
+      P.path(g, [4.4, 40 + tilt, 3.2, 38.6 + tilt, 4, 37.8 + tilt, 4.4, 38.4 + tilt, 4.8, 37.8 + tilt, 5.6, 38.6 + tilt]); P.fill(g, '#9a1a1a'); // the heart
+      P.coin(g, 15.2, 40 - tilt, 1, 0.6);
+      // the high stiff collar standing up behind the head
+      P.path(g, [17, 19.6, 18.6, 10.6, 26, 15, 33.4, 10.6, 35, 19.6]); P.fill(g, P.lg(g, 17, 10, 35, 20, [rl, r, rd]));
+      // the head: a long wig of tight curls either side of a dried skull, red eyes deep in it
+      const hx = 26, hy = 12;
+      g.beginPath(); g.moveTo(hx - 5, hy + 7); g.quadraticCurveTo(hx - 6.4, hy - 6, hx, hy - 7.4); g.quadraticCurveTo(hx + 6.4, hy - 6, hx + 5, hy + 7); g.closePath(); P.fill(g, P.lg(g, hx - 5, hy - 7, hx + 5, hy + 7, [sh(wig, 0.3), wig, wd]));
+      for (const sx of [-1, 1]) for (let i = 0; i < 4; i++) P.ell(g, hx + sx * 4.2, hy - 1 + i * 2.2, 1.8, 1.1, P.lg(g, 0, hy - 2 + i * 2.2, 0, hy + i * 2.2, [sh(wig, 0.35), wd]));
+      P.ell(g, hx + 0.3, hy + 0.6, 3.2, 3.8, '#08060a');
+      P.ell(g, hx + 0.4, hy + 0.2, 2.6, 3, P.vol(g, hx - 0.4, hy - 0.8, 3, bone));
+      P.ell(g, hx - 0.7, hy - 0.2, 0.9, 1, '#08060a'); P.ell(g, hx + 1.5, hy - 0.2, 0.85, 1, '#08060a');
+      evil(g, hx - 0.7, hy - 0.1, 0.55, c.eye); evil(g, hx + 1.5, hy - 0.1, 0.5, c.eye); P.glow(g, hx + 0.4, hy - 0.1, 3.4, c.eye, 0.5);
+      P.path(g, [hx + 0.2, hy + 1, hx + 0.8, hy + 1, hx + 0.5, hy + 0.2]); P.fill(g, '#08060a');
+      P.rect(g, hx - 1.2, hy + 2, 3.4, 0.6, '#08060a'); teeth(g, hx - 1.2, hy + 2, hx + 2.2, hy + 2, 5, 0.5, 1, bone);
+      // the chain of office and its seal
+      g.beginPath(); g.moveTo(19.6, 19.4); g.quadraticCurveTo(26, 26, 32.4, 19.4); g.strokeStyle = gold; g.lineWidth = 0.8; g.setLineDash([0.9, 0.4]); g.stroke(); g.setLineDash([]);
+      P.circle(g, 26, 23.8, 1.8, P.vol(g, 25.4, 23.2, 1.8, gold)); P.circle(g, 26, 23.8, 0.7, c.eye);
+      // the near arm raising the gavel
+      P.path(g, [33.4, 19.4, 38.6, 13, 41.4, 14.6, 36, 22.6]); P.fill(g, P.lg(g, 33, 13, 41, 23, [rl, r]));
+      P.circle(g, 40, 12.6, 1, bone);
+      P.line(g, 39.4, 14.4, 42.2, 2.4, 0.9, '#3a2410');
+      g.save(); g.translate(42.4, 2.8 + (f ? 0.6 : 0)); g.rotate(0.25);
+      P.rrect(g, -4.4, -2, 8.8, 4, 0.8, P.lg(g, 0, -2, 0, 2, ['#5a3a20', '#2a1a0c']));
+      for (const x of [-3.4, 2.4]) P.rect(g, x, -2.1, 1, 4.2, gold);
+      g.restore();
     } });
 
-  /* ---------- Gold Custodian (Lord): a colossal masked guardian of the vault in gilded robes, a great key for a staff, gold orbiting it ---------- */
+  /* ---------- Gold Custodian (Lord): a colossal guardian of the vault: a deep red cowl round a serene golden mask split by a
+   *            crack with darkness behind it and burning cyan eyes; a vault door set in its chest, a great key for a staff,
+   *            a hand held out with a sphere of gold light, coins circling it ---------- */
   def('custodian', { w: 58, h: 66, cy: 44, frames: 2,
     colors: { robe: '#5a1a24', gold: '#e0b840', mask: '#fff0b0', light: '#fff4c0', eye: '#40e0ff' },
     draw(g, f, c) {
-      const r = c.robe, gd = c.gold, sway = f ? 1 : -1;
-      P.ell(g, 29, 63, 18, 2.8, 'rgba(0,0,0,0.5)'); P.glow(g, 29, 34, 26, c.light, 0.2);
-      // gold coins orbiting behind
-      for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2 + f * 0.4; if (Math.sin(a) > 0) continue; coin(g, 29 + Math.cos(a) * 25, 34 + Math.sin(a) * 7, 1.8, 0.5 + 0.5 * Math.abs(Math.cos(a))); }
-      // heavy robes, gold hems and a vault-door pattern
-      g.beginPath(); g.moveTo(18, 20); g.lineTo(40, 20); g.quadraticCurveTo(47, 40, 48 + sway, 60); g.lineTo(10 + sway, 60); g.quadraticCurveTo(11, 40, 18, 20); g.closePath();
-      P.fill(g, P.lg(g, 10, 20, 48, 60, [sh(r, 0.35), r, sh(r, -0.55)]));
-      P.rect(g, 10 + sway, 57, 38, 2, gd); P.line(g, 29, 22, 29, 57, 1.4, gd);
-      P.circle(g, 29, 40, 6, sh(gd, -0.3)); P.circle(g, 29, 40, 4.6, P.vol(g, 29, 39, 4.6, gd)); for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; P.line(g, 29, 40, 29 + Math.cos(a) * 4, 40 + Math.sin(a) * 4, 0.6, sh(gd, -0.5)); }
-      // mantle with gold pauldrons
-      for (const x of [16, 42]) { P.ell(g, x, 22, 7, 4.6, P.vol(g, x, 21, 7, gd)); P.ell(g, x, 23, 5, 2, G.rgba(sh(gd, -0.4), 0.6)); }
-      // the great key in the near hand
-      limb(g, 44, 24, 49, 34, 2.6, 2.2, r); P.line(g, 50, 60, 52, 12, 1.8, gd);
-      g.beginPath(); g.arc(52.2, 8, 4, 0, Math.PI * 2); g.strokeStyle = gd; g.lineWidth = 1.6; g.stroke(); P.circle(g, 52.2, 8, 1.6, c.eye);
-      P.rect(g, 49.4, 52, 3, 1.4, gd); P.rect(g, 49.4, 55, 4, 1.4, gd);
-      // far hand raised, light in the palm
-      limb(g, 14, 24, 7, 30, 2.6, 2.2, sh(r, -0.2)); P.glow(g, 6, 29, 6, c.light, 0.7); P.circle(g, 6, 29, 1.6, c.light);
-      // a tall crowned hood and a serene golden mask with blue eyes
-      g.beginPath(); g.moveTo(20, 22); g.quadraticCurveTo(19, 4, 29, 3); g.quadraticCurveTo(39, 4, 38, 22); g.quadraticCurveTo(29, 18, 20, 22); g.closePath();
-      P.fill(g, P.lg(g, 19, 3, 39, 22, [sh(r, 0.4), r, sh(r, -0.5)]));
-      P.ell(g, 29, 13, 5.4, 6.4, P.lg(g, 24, 7, 34, 20, [c.mask, gd, sh(gd, -0.45)]));
-      P.path(g, [25.6, 12, 28, 12.8, 25.8, 13.4]); P.fill(g, '#0a0604'); P.path(g, [32.4, 12, 30, 12.8, 32.2, 13.4]); P.fill(g, '#0a0604');
-      P.glow(g, 29, 12.8, 5, c.eye, 0.5); P.circle(g, 26.6, 12.7, 0.5, c.eye); P.circle(g, 31.4, 12.7, 0.5, c.eye);
-      P.line(g, 27.4, 17, 30.6, 17, 0.5, sh(gd, -0.5));
-      P.rect(g, 22, 3, 14, 2.4, gd); for (let i = 0; i < 4; i++) P.path(g, [22 + i * 4, 3.2, 24 + i * 4, -1.6, 26 + i * 4, 3.2]); P.fill(g, gd);
-      // coins orbiting in front
-      for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2 + f * 0.4; if (Math.sin(a) <= 0) continue; coin(g, 29 + Math.cos(a) * 25, 34 + Math.sin(a) * 7, 2, 0.5 + 0.5 * Math.abs(Math.cos(a))); }
+      const r = c.robe, rl = sh(r, 0.45), rd = sh(r, -0.5), gold = c.gold, gd = sh(gold, -0.45), w = f ? 1 : -1, sp = f ? 0.5 : 0;
+      P.ell(g, 29, 64, 20, 2, 'rgba(0,0,0,0.5)');
+      P.glow(g, 29, 30, 26, c.light, 0.1);
+      // coins circling it on a faint orbit, behind
+      g.beginPath(); g.ellipse(29, 32, 25, 6, 0, Math.PI, Math.PI * 2); g.strokeStyle = G.rgba(c.light, 0.25); g.lineWidth = 0.4; g.stroke();
+      for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2 + sp; if (Math.sin(a) < 0) P.coin(g, 29 + Math.cos(a) * 25, 32 + Math.sin(a) * 6, 1.3, 0.4 + Math.abs(Math.cos(a)) * 0.6); }
+      // the great key, held as a staff: the bow on top with a gem in it, the bit at the foot
+      P.line(g, 48, 61, 48.4, 12, 1.6, gd); P.line(g, 47.6, 61, 48, 12, 0.6, sh(gold, 0.4));
+      g.beginPath(); g.arc(48.4, 7.6, 4.4, 0, Math.PI * 2); g.strokeStyle = gold; g.lineWidth = 1.6; g.stroke();
+      g.beginPath(); g.arc(48.4, 7.6, 2.4, 0, Math.PI * 2); g.strokeStyle = gd; g.lineWidth = 0.8; g.stroke();
+      P.circle(g, 48.4, 7.6, 1.4, c.eye); P.glow(g, 48.4, 7.6, 3.4, c.eye, 0.6);
+      P.path(g, [49, 54, 53, 54, 53, 56, 51, 56, 51, 58, 53, 58, 53, 60, 49, 60]); P.fill(g, gold);
+      // the robe: vast, broad at the shoulders, falling to the floor, gold hem, the vault door in its chest
+      g.beginPath(); g.moveTo(15, 22); g.lineTo(43, 22); g.quadraticCurveTo(46, 42, 49 + w * 0.5, 62); g.lineTo(9 - w * 0.5, 62); g.quadraticCurveTo(12, 42, 15, 22); g.closePath();
+      P.fill(g, P.lg(g, 10, 22, 48, 62, [rl, r, rd]));
+      P.path(g, [9 - w * 0.5, 60.6, 49 + w * 0.5, 60.6, 49 + w * 0.5, 62, 9 - w * 0.5, 62]); P.fill(g, gold);
+      g.strokeStyle = rd; g.lineWidth = 1; for (const [x0, x1] of [[20, 14], [36, 42]]) { g.beginPath(); g.moveTo(x0, 30); g.quadraticCurveTo((x0 + x1) / 2, 46, x1 + w * 0.5, 60); g.stroke(); }
+      P.path(g, [26, 38, 32, 38, 34, 60.6, 24, 60.6]); P.fill(g, P.lg(g, 24, 38, 34, 60, [sh(gold, 0.1), gd])); // a gold panel below the door
+      P.circle(g, 29, 33, 6.6, P.lg(g, 22, 26, 36, 40, [sh(gold, 0.45), gold, gd]));
+      P.circle(g, 29, 33, 4.8, P.lg(g, 24, 28, 34, 38, [gd, sh(gold, 0.2)]));
+      for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 + sp * 0.6; P.line(g, 29 + Math.cos(a) * 1.4, 33 + Math.sin(a) * 1.4, 29 + Math.cos(a) * 4.4, 33 + Math.sin(a) * 4.4, 0.7, sh(gold, -0.2)); }
+      P.circle(g, 29, 33, 1.6, '#140806'); P.rect(g, 28.5, 33, 1, 2.4, '#140806'); P.glow(g, 29, 33.6, 3, c.light, 0.6); P.circle(g, 29, 33, 0.6, c.light);
+      // the far hand held out, a sphere of gold light over the palm
+      P.path(g, [15.6, 24, 7.4, 33, 6.6, 37, 10.6, 36.4, 17, 29]); P.fill(g, P.lg(g, 7, 24, 17, 37, [r, rd]));
+      P.ell(g, 8.4, 37.6, 2, 1.2, P.lg(g, 6.4, 36.4, 10.4, 38.8, [sh(gold, 0.3), gd]));
+      P.glow(g, 8.4, 32.6 - sp, 5, c.light, 0.7); P.circle(g, 8.4, 32.6 - sp, 2, P.rg(g, 7.8, 32, 2, [[0, '#ffffff'], [0.5, c.light], [1, gold]]));
+      // the mantle over the shoulders, layered gold
+      for (const [x, col] of [[16, rd], [42, r]]) { P.ell(g, x, 24, 6.4, 4, P.vol(g, x - 1.6, 22.6, 6.4, col)); g.beginPath(); g.ellipse(x, 24, 6.4, 4, 0, 0.05, Math.PI - 0.05); g.strokeStyle = gold; g.lineWidth = 1; g.stroke(); }
+      // the near arm gripping the key
+      limb(g, 42, 25, 45.6, 32, 3.6, 3, r); limb(g, 45.6, 32, 47.4, 26, 3, 2.4, rl); P.ell(g, 48.2, 25, 2.2, 2.6, P.lg(g, 46, 22.4, 50.4, 27.6, [sh(gold, 0.3), gd]));
+      // the cowl and the mask: serene, split by a crack, darkness behind, cyan eyes burning
+      const hx = 29, hy = 13;
+      g.beginPath(); g.moveTo(hx - 9, hy + 11); g.quadraticCurveTo(hx - 10, hy - 6, hx - 2, hy - 10.6); g.quadraticCurveTo(hx + 1, hy - 12, hx + 3, hy - 10); g.quadraticCurveTo(hx + 10, hy - 5, hx + 9, hy + 11); g.closePath();
+      P.fill(g, P.lg(g, hx - 9, hy - 11, hx + 9, hy + 11, [rl, r, rd]));
+      g.beginPath(); g.moveTo(hx - 8, hy - 3); g.quadraticCurveTo(hx - 2, hy - 12, hx + 7.4, hy - 4); g.strokeStyle = gold; g.lineWidth = 0.8; g.stroke();
+      P.ell(g, hx, hy + 1.4, 6, 7.4, '#08040a');
+      P.ell(g, hx + 0.2, hy + 1, 4.6, 6, P.lg(g, hx - 4.4, hy - 5, hx + 4.4, hy + 7, [sh(c.mask, 0.2), sh(gold, 0.1), gd]));
+      g.strokeStyle = sh(gold, -0.2); g.lineWidth = 0.4; g.beginPath(); g.moveTo(hx - 3.4, hy - 1.2); g.quadraticCurveTo(hx - 1.8, hy - 2.2, hx - 0.4, hy - 1.2); g.moveTo(hx + 0.8, hy - 1.2); g.quadraticCurveTo(hx + 2.2, hy - 2.2, hx + 3.6, hy - 1.2); g.stroke(); // brows
+      P.ell(g, hx - 1.8, hy + 0.2, 1.4, 0.8, '#08040a'); P.ell(g, hx + 2.2, hy + 0.2, 1.4, 0.8, '#08040a');
+      evil(g, hx - 1.8, hy + 0.2, 0.8, c.eye); evil(g, hx + 2.2, hy + 0.2, 0.8, c.eye); P.glow(g, hx + 0.2, hy + 0.2, 4, c.eye, 0.5);
+      P.line(g, hx + 0.2, hy + 1, hx + 0.6, hy + 3.4, 0.4, sh(gold, -0.3)); P.line(g, hx - 1, hy + 4.6, hx + 1.6, hy + 4.6, 0.5, sh(gold, -0.4));
+      g.strokeStyle = '#08040a'; g.lineWidth = 0.6; g.beginPath(); g.moveTo(hx + 4.4, hy - 2.6); g.lineTo(hx + 3.4, hy - 1); g.lineTo(hx + 3.8, hy + 1.6); g.lineTo(hx + 2.6, hy + 3.4); g.moveTo(hx + 3.4, hy - 1); g.lineTo(hx + 4.6, hy + 0.2); g.stroke(); // a crack across the cheek
+      // coins circling it, in front
+      g.beginPath(); g.ellipse(29, 32, 25, 6, 0, 0, Math.PI); g.strokeStyle = G.rgba(c.light, 0.25); g.lineWidth = 0.4; g.stroke();
+      for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2 + sp; if (Math.sin(a) >= 0) P.coin(g, 29 + Math.cos(a) * 25, 32 + Math.sin(a) * 6, 1.3, 0.4 + Math.abs(Math.cos(a)) * 0.6); }
     } });
 
   /* ================= Hall secrets ================= */
@@ -1948,22 +2069,31 @@
       for (let i = 0; i < 5; i++) P.line(g, hx - 5 + i * 1.8, hy - 4.4, hx - 6 + i * 1.6, hy - 7 - (i % 2), 0.7, '#d8f0ff');
     } });
 
-  /* ---------- Gilded Ooze (treasure): a glossy golden jelly, coins and a jewelled goblet suspended in it, a crown of drips ---------- */
+  /* ---------- Gilded Ooze (treasure): a glossy blob of molten gold with a greedy grin, coins, a goblet and a skull sunk in it,
+   *            drips running down its sides ---------- */
   def('gildedooze', { w: 24, h: 22, cy: 16, frames: 2,
     colors: { gold: '#e8b830', core: '#fff4a0' },
     draw(g, f, c) {
-      const sq = f ? 0.6 : 0;
-      P.ell(g, 12, 20, 9, 1.4, 'rgba(0,0,0,0.45)'); P.glow(g, 12, 13, 12, c.core, 0.35);
-      g.beginPath(); g.moveTo(3 - sq, 19); g.quadraticCurveTo(2 - sq, 8 + sq, 12, 5 + sq * 1.4); g.quadraticCurveTo(22 + sq, 8 + sq, 21 + sq, 19); g.quadraticCurveTo(12, 20.4, 3 - sq, 19); g.closePath();
-      P.fill(g, P.rg(g, 9, 9, 13, [[0, G.rgba('#fff8d0', 0.95)], [0.4, G.rgba(c.gold, 0.9)], [1, G.rgba(sh(c.gold, -0.5), 0.95)]]));
-      // treasure inside
-      coin(g, 8, 15, 1.6, 0.8); coin(g, 15.4, 16, 1.4, 0.5); coin(g, 11, 17.4, 1.2, 0.9); coin(g, 16, 11.6, 1.1, 0.6);
-      P.path(g, [10.4, 9.6, 13.6, 9.6, 12.8, 12.4, 12.4, 12.6, 12.4, 14, 13.4, 14.6, 10.6, 14.6, 11.6, 14, 11.6, 12.6, 11.2, 12.4]); P.fill(g, P.lg(g, 10, 9, 14, 15, ['#fff0a0', '#a87a20'])); P.circle(g, 12, 11, 0.6, '#e03040');
-      // a glossy highlight and drips on top
-      P.ell(g, 8, 8.6 + sq, 2.6, 1.2, G.rgba('#ffffff', 0.55), -0.4);
-      drips(g, [[6, 17.6, 1.6], [18, 17.4, 1.2]], G.rgba(c.gold, 0.9));
-      // two dim eyes
-      P.circle(g, 10, 11.4 + sq, 0.7, '#3a2004'); P.circle(g, 14.4, 11.4 + sq, 0.7, '#3a2004');
+      const gd = c.gold, gl = sh(gd, 0.5), gk = sh(gd, -0.5), sq = f ? 0.8 : 0;
+      P.ell(g, 12, 20.8, 10, 1.2, 'rgba(0,0,0,0.45)');
+      // the body: a heavy glossy dome, slumping at the base
+      g.beginPath(); g.moveTo(2.4 - sq, 20.4); g.bezierCurveTo(1.6, 12, 5, 4 + sq, 12, 4 + sq); g.bezierCurveTo(19, 4 + sq, 22.4, 12, 21.6 + sq, 20.4); g.closePath();
+      P.fill(g, P.lg(g, 4, 4, 18, 21, [gl, gd, gk]));
+      // things sunk in it, seen through the gold
+      g.save(); g.globalAlpha = 0.8;
+      P.coin(g, 7, 15, 1.6, 0.5); P.coin(g, 16.6, 16.6, 1.4, 1); P.coin(g, 10.6, 18, 1.2, 0.7);
+      P.path(g, [5.4, 9.6, 8.4, 9.6, 7.6, 11.6, 7.2, 13.2, 8.2, 13.6, 5.6, 13.6, 6.6, 13.2, 6.2, 11.6]); P.fill(g, sh(gk, -0.2)); // a goblet
+      P.circle(g, 13.4, 16.4, 1.5, sh(gk, -0.2)); P.circle(g, 13, 16.2, 0.4, gd); P.circle(g, 14, 16.2, 0.4, gd); // a skull
+      g.restore();
+      // the grin and the eyes
+      P.ell(g, 14.2, 9.6, 1.6, 1.7, '#3a1a04'); P.ell(g, 18.2, 9.8, 1.5, 1.6, '#3a1a04');
+      evil(g, 14.3, 9.8, 0.9, c.core); evil(g, 18.2, 10, 0.85, c.core); P.line(g, 12.6, 7.6, 15.6, 8.6, 0.6, '#3a1a04'); P.line(g, 16.8, 8.6, 19.8, 7.8, 0.6, '#3a1a04'); // brows knitted in greed P.glow(g, 16, 10, 3, c.core, 0.4);
+      g.beginPath(); g.moveTo(11.8, 12.4); g.quadraticCurveTo(16.4, 17.4 + sq * 0.5, 21, 12); g.quadraticCurveTo(16.6, 13.8, 11.8, 12.4); g.closePath(); P.fill(g, '#3a1a04');
+      teeth(g, 12.8, 12.9, 20.2, 12.5, 6, 0.9, 1, c.core);
+      // the gloss and the drips
+      P.ell(g, 8, 7.6 + sq, 3, 1.4, G.rgba('#ffffff', 0.55), -0.5); P.ell(g, 5.4, 11, 0.7, 1.4, G.rgba('#ffffff', 0.35), -0.2);
+      for (const [x, y, l] of [[4, 14, 4], [20.4, 14, 4.2 + sq]]) { P.line(g, x, y, x, y + l, 0.7, gd); P.circle(g, x, y + l, 0.7, gl); }
     } });
+
   Object.assign(P, { horn, cracks, barnacles, icicle, crystal, drips, coin }); // shared helpers
 })(window.DH);
