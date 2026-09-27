@@ -62,36 +62,45 @@
     colors: { bone: '#d8ccaa', eye: '#ff3a2a', rust: '#7a5a3a' },
     variants: { ice: { bone: '#c8e0ee', eye: '#8ff0ff', rust: '#5a7a98' }, fire: { bone: '#e0b890', eye: '#ffd040', rust: '#8a3a18' }, bog: { bone: '#bcbc8e', eye: '#b0ff50', rust: '#4a5a22' }, gold: { bone: '#eadaa4', eye: '#fff0a0', rust: '#a8843a' }, purple: { bone: '#d0c4e0', eye: '#ff50c0', rust: '#5a3a7a' }, drowned: { bone: '#b0c8bc', eye: '#70ffd0', rust: '#2e5a5a' } },
     draw(g, f, c) {
-      const b = c.bone, bd = sh(b, -0.5), bm = sh(b, -0.18), w = f ? 1 : 0;
+      // a hunched dead soldier: skull thrust forward, curved ribs over a hollow, a pelvis bowl, a notched sword raised to strike
+      const b = c.bone, bd = sh(b, -0.5), bm = sh(b, -0.2), w = f ? 1 : 0, steel = '#9aa0ac';
       g.translate(0, 1);
-      // rags hanging from the hips
-      P.path(g, [7.2, 11.4, 12, 11.2, 12.4, 15.4, 11.4, 14.2, 10.6, 16.6, 9.6, 14.6, 8.6, 16.2, 7.6, 14.4]); P.fill(g, P.lg(g, 7, 11, 12, 16, [sh(c.rust, -0.35), sh(c.rust, -0.7)]));
-      // legs
-      P.bone(g, 8.6, 12.4, 7.4 - w, 15.6, 0.8, bd); P.bone(g, 7.4 - w, 15.6, 7.8 - w * 1.4, 18.6, 0.75, bd);
-      P.bone(g, 10.6, 12.4, 11.6 + w, 15.4, 0.8, bm); P.bone(g, 11.6 + w, 15.4, 11.8 + w * 1.2, 18.6, 0.75, bm);
-      P.ell(g, 8 - w * 1.4, 18.9, 1.4, 0.5, bd); P.ell(g, 12.3 + w * 1.2, 18.9, 1.4, 0.5, bm);
-      // back arm, clawed hand hanging
-      P.bone(g, 7.4, 7.6, 5.8, 10.4, 0.7, bd); P.bone(g, 5.8, 10.4, 6, 13, 0.65, bd); claws(g, 6, 13, 1.7, 3, 1.4, 0.3, bd);
-      // spine and a hollow ribcage leaning forward
-      P.ell(g, 9.6, 12.2, 2.4, 1.1, P.vol(g, 9.6, 12, 2.4, bm));
-      for (let i = 0; i < 5; i++) P.ell(g, 9.3 + i * 0.12, 11.2 - i * 0.9, 0.55, 0.42, bm);
-      P.ell(g, 10, 8.6, 2.5, 2, VOID);
-      for (let i = 0; i < 4; i++) { g.beginPath(); g.ellipse(10 + i * 0.1, 7.4 + i * 1.05, 2.6 - i * 0.3, 0.6, -0.1, 0, Math.PI * 2); g.strokeStyle = i % 2 ? bd : b; g.lineWidth = 0.55; g.stroke(); }
-      // skull thrust forward, rusted half-helm
-      const hx = 10.9, hy = 4.2;
-      P.circle(g, hx, hy, 2.6, P.vol(g, hx, hy, 2.6, b));
-      P.rect(g, hx - 0.1, hy + 1.3, 3, 0.9, VOID);
-      teeth(g, hx, hy + 1.3, hx + 2.9, hy + 1.3, 4, 0.5, 1, b); teeth(g, hx + 0.2, hy + 2.2, hx + 2.7, hy + 2.2, 3, 0.45, -1, b);
-      P.rrect(g, hx + 0.1, hy + 2.1, 2.7, 0.9, 0.4, bm);
-      P.ell(g, hx + 1.2, hy + 0.1, 1.05, 0.9, VOID, -0.3); P.ell(g, hx - 0.7, hy + 0.1, 0.85, 0.8, VOID, 0.3);
-      P.circle(g, hx + 1.3, hy + 0.2, 0.28, c.eye); P.circle(g, hx - 0.6, hy + 0.2, 0.22, c.eye); P.glow(g, hx + 0.4, hy + 0.2, 1.6, c.eye, 0.35);
-      g.strokeStyle = bd; g.lineWidth = 0.35; g.beginPath(); g.moveTo(hx - 0.6, hy - 2.6); g.lineTo(hx + 0.2, hy - 1.4); g.lineTo(hx - 0.4, hy - 0.8); g.stroke();
-      P.path(g, [hx - 2.6, hy - 1, hx - 1.8, hy - 2.2, hx - 1.4, hy - 1.2]); P.fill(g, VOID);
-      // front arm raising a notched blade
-      P.bone(g, 11.8, 7.8, 13.4, 9.8, 0.7, b); P.bone(g, 13.4, 9.8, 14.8, 8.4, 0.65, b);
-      P.path(g, [14.2, 8.6, 15.1, 9.1, 19, 1.8, 18.3, 1, 17.9, 2.6, 17.1, 2.4, 16.9, 3.8, 16.3, 3.8, 16, 5.2, 15.3, 5.4]);
-      P.fill(g, P.lg(g, 14, 9, 19, 1, [sh(c.rust, -0.2), sh(c.rust, 0.25), sh(c.rust, -0.4)]));
-      P.line(g, 13.6, 7.8, 15.6, 9.6, 0.6, '#2a1c14');
+      // a rag of a loincloth hanging from the pelvis
+      P.path(g, [7.8, 11.6, 11.6, 11.4, 11.8, 14.6, 10.8, 13.8, 10, 15.6, 9.2, 13.8, 8.2, 15, 7.6, 13.6]); P.fill(g, P.lg(g, 7, 11, 12, 15, [sh(c.rust, -0.3), sh(c.rust, -0.65)]));
+      // legs: thigh, knee, shin, a bony foot with a heel
+      P.bone(g, 8.6, 12, 7.2 - w, 15.4, 0.75, bd); P.bone(g, 7.2 - w, 15.4, 7.6 - w * 1.4, 18.4, 0.7, bd); P.circle(g, 7.2 - w, 15.4, 0.7, bd);
+      P.path(g, [6.6 - w * 1.4, 18.2, 9.4 - w * 1.4, 18.4, 9.2 - w * 1.4, 19.2, 6.4 - w * 1.4, 19.2]); P.fill(g, bd);
+      P.bone(g, 10.6, 12, 11.8 + w, 15.2, 0.8, bm); P.bone(g, 11.8 + w, 15.2, 11.8 + w * 1.2, 18.4, 0.72, bm); P.circle(g, 11.8 + w, 15.2, 0.75, b);
+      P.path(g, [11 + w * 1.2, 18.2, 14 + w * 1.2, 18.4, 13.8 + w * 1.2, 19.2, 10.8 + w * 1.2, 19.2]); P.fill(g, bm);
+      // far arm hanging, a clawed hand
+      P.bone(g, 7.6, 6.8, 6, 9.8, 0.65, bd); P.bone(g, 6, 9.8, 6.4, 12.4, 0.6, bd); claws(g, 6.4, 12.6, 1.6, 3, 1.3, 0.3, bd);
+      // pelvis: a bowl with two dark holes
+      P.path(g, [7.6, 10.4, 11.8, 10.2, 11.4, 12.6, 9.6, 13, 8, 12.6]); P.fill(g, P.lg(g, 8, 10, 12, 13, [b, bd]));
+      P.circle(g, 8.8, 11.6, 0.45, VOID); P.circle(g, 10.6, 11.5, 0.45, VOID);
+      // the spine, bent forward
+      for (let i = 0; i < 4; i++) P.ell(g, 9.2 + i * 0.1, 10 - i * 0.9, 0.5, 0.4, bm);
+      // ribcage: a hollow with three curved ribs and a breastbone
+      P.ell(g, 10, 7, 2.6, 2.3, VOID);
+      for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(8.6, 5.4 + i * 1.3); g.quadraticCurveTo(11.4, 5 + i * 1.4, 12.2, 6.6 + i * 1.3); g.strokeStyle = i === 2 ? bm : b; g.lineWidth = 0.7; g.stroke(); }
+      P.line(g, 12, 5.4, 12.2, 8.6, 0.6, bm);
+      P.line(g, 7.6, 5, 11.8, 4.6, 0.55, b); P.circle(g, 7.6, 5.4, 0.8, bm); // the collarbone, the far shoulder joint
+      // skull thrust forward: a big cranium, deep sockets, a jaw of teeth
+      const hx = 11.6, hy = 2.4;
+      P.circle(g, hx, hy, 2.7, P.vol(g, hx - 0.6, hy - 0.8, 2.8, b));
+      P.path(g, [hx - 0.2, hy + 1.2, hx + 2.8, hy + 1, hx + 2.6, hy + 2.8, hx + 0.2, hy + 2.8]); P.fill(g, bm);
+      P.rect(g, hx + 0.3, hy + 1.4, 2.4, 0.7, VOID); teeth(g, hx + 0.3, hy + 1.4, hx + 2.7, hy + 1.4, 4, 0.45, 1, b);
+      P.ell(g, hx + 1.3, hy, 1, 0.95, VOID, -0.3); P.ell(g, hx - 0.8, hy + 0.1, 0.8, 0.85, VOID, 0.3);
+      evil(g, hx + 1.35, hy + 0.05, 0.4, c.eye); evil(g, hx - 0.75, hy + 0.1, 0.3, c.eye);
+      P.path(g, [hx + 2.4, hy + 0.4, hx + 2.9, hy + 0.8, hx + 2.4, hy + 1.1]); P.fill(g, VOID);
+      g.strokeStyle = bd; g.lineWidth = 0.3; g.beginPath(); g.moveTo(hx - 1, hy - 2.6); g.lineTo(hx - 0.2, hy - 1.4); g.lineTo(hx - 0.8, hy - 0.6); g.stroke();
+      // near arm raising a notched sword over the shoulder
+      P.bone(g, 11.8, 5, 13.8, 7.8, 0.7, b); P.bone(g, 13.8, 7.8, 15, 6, 0.65, b); P.circle(g, 13.8, 7.8, 0.6, b);
+      P.path(g, [14.6, 6, 15.8, 6.4, 19.6, -0.6, 19, -1.4, 18.4, -0.6, 17.8, -0.8, 17.4, 0.6]); P.fill(g, P.lg(g, 15, 6, 19, 0, [sh(steel, -0.3), steel, sh(steel, -0.2)]));
+      P.line(g, 15.4, 6, 19.4, -1, 0.35, '#e8ecf2'); // the lit edge
+      P.circle(g, 17.2, 2.4, 0.4, sh(c.rust, 0.1)); P.circle(g, 16.4, 4, 0.3, sh(c.rust, 0.1)); // rust
+      P.line(g, 13.8, 5.4, 16.2, 7.4, 0.7, '#3a2a1e'); // the crossguard
+      P.line(g, 15, 6.3, 14.2, 7.4, 0.45, '#3a2a1e'); P.circle(g, 14.1, 7.5, 0.45, '#8a7a5a'); // the grip and pommel
+      P.circle(g, 15, 6.3, 0.75, b); // the fist on the grip
     } });
 
   /* ---------- Bat: a ragged blood-bat with torn wings and long fangs ---------- */
@@ -280,35 +289,51 @@
       g.strokeStyle = sh(s, -0.65); g.lineWidth = 0.3; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(21.4 + i * 1.5, 21); g.lineTo(21.5 + i * 1.5, 24); g.stroke(); }
     } });
 
-  /* ---------- Wolf (summon): a spectral dire wolf ---------- */
+  /* ---------- Wolf (summon, and the Crypt's hounds): a gaunt grave-hound, ears up, ribs showing, jaws open ---------- */
   def('wolf', { w: 24, h: 15, frames: 2,
     colors: { fur: '#2a3448', eye: '#8ff0ff' },
     variants: { fire: { fur: '#3a1a12', eye: '#ffb040' }, bog: { fur: '#2a3018', eye: '#c0ff50' }, purple: { fur: '#2e1838', eye: '#ff60d0' },
       drowned: { fur: '#16302e', eye: '#70ffd0' }, gold: { fur: '#3a3020', eye: '#fff0a0' }, crypt: { fur: '#2a2426', eye: '#ff3a2a' } },
     draw(g, f, c) {
-      // a spirit wolf of shadow and frost: a heavy mane streaming like smoke, low and stalking, jaws half open
-      const s = c.fur, sd = sh(s, -0.55), mist = G.rgba(c.eye, 0.35), w = f ? 1 : -1;
-      P.glow(g, 12, 8, 11, c.eye, 0.2);
-      // a tail of mist
-      g.beginPath(); g.moveTo(5, 6.6); g.bezierCurveTo(2, 5.4, 1, 3.4 + w * 0.5, 0.2, 4.8 + w * 0.5); g.bezierCurveTo(1.6, 6.8, 3.4, 8, 5.2, 8.4); g.closePath(); P.fill(g, P.lg(g, 0, 4, 5, 8, [mist, sd]));
-      // legs, digitigrade, stalking
-      [[6.4, -w, 1, 1], [8.6, w, 0, 1], [15.2, w, 1, 0], [17.4, -w, 0, 0]].forEach(([x, o, back, hind]) => { const col = back ? sd : s, kx = x + o * 0.5 + (hind ? -1.2 : 0.4); limb(g, x, 8.4, kx, 11.2, 1.1, 0.6, col); limb(g, kx, 11.2, x + o + (hind ? 0.1 : 0.8), 14.1, 0.6, 0.35, col); claws(g, x + o + (hind ? 0.1 : 0.8), 14.2, 0.2, 3, 0.9, 0.2, '#e8f4ff'); });
-      // a long body, the back smooth and low
-      g.beginPath(); g.moveTo(4.4, 6.6); g.bezierCurveTo(8, 4.2, 13, 3.8, 16.4, 4.6); g.quadraticCurveTo(18.6, 6.4, 17.8, 9.4); g.quadraticCurveTo(12.6, 10, 11, 8.8); g.quadraticCurveTo(8, 10, 5, 9.2); g.closePath();
-      P.fill(g, P.lg(g, 4, 3.8, 17, 10, [sh(s, 0.35), s, sd]));
-      // the mane: long strands of smoke flowing back from the shoulders
-      for (let i = 0; i < 6; i++) { const x = 16 - i * 1.3, y = 3.6 + i * 0.25; g.beginPath(); g.moveTo(x + 1.4, y + 1.2); g.quadraticCurveTo(x - 1, y - 1.6 + (i % 2), x - 3.2 - (f ? 0.4 : 0), y - 0.2); g.quadraticCurveTo(x - 0.6, y + 0.4, x + 1.4, y + 2.2); g.closePath(); P.fill(g, P.lg(g, x - 3, y - 1, x + 1, y + 2, [mist, sh(s, 0.2)])); }
-      // head: a long wolf's skull, ears laid back, jaws parted
-      const hx = 18.6, hy = 5.6;
-      P.path(g, [hx - 1.2, hy - 1.2, hx - 2.8, hy - 3.2, hx - 0.2, hy - 1.8]); P.fill(g, sd);
-      P.ell(g, hx, hy, 2.5, 2.1, P.vol(g, hx, hy - 0.2, 2.5, s));
-      P.path(g, [hx + 0.8, hy - 1, hx + 5.4, hy - 0.2, hx + 5.2, hy + 0.9, hx + 1, hy + 0.9]); P.fill(g, P.lg(g, hx, hy - 1, hx + 5, hy + 1, [sh(s, 0.2), sd]));
-      P.path(g, [hx + 1, hy + 1.6, hx + 4.4, hy + 2.3, hx + 4, hy + 3, hx + 0.8, hy + 2.5]); P.fill(g, sd);
-      P.path(g, [hx + 1, hy + 0.9, hx + 5.2, hy + 0.9, hx + 4.4, hy + 2.3, hx + 1, hy + 1.8]); P.fill(g, '#0a1420');
-      P.path(g, [hx + 3.9, hy + 0.9, hx + 4.2, hy + 2.1, hx + 4.5, hy + 0.9]); P.fill(g, '#f0f8ff'); P.path(g, [hx + 1.6, hy + 2.2, hx + 1.9, hy + 1.3, hx + 2.2, hy + 2.3]); P.fill(g, '#dde8f0');
-      P.glow(g, hx + 2.8, hy + 1.4, 2, c.eye, 0.45);
-      evil(g, hx + 0.9, hy - 0.6, 0.45, c.eye, -0.25);
-      P.circle(g, hx + 5.3, hy + 0.1, 0.35, '#0a0a12');
+      // one connected mass from the ears to the tail: a deep chest, a tucked waist, a lean haunch; the head long and wedge-shaped
+      const s = sh(c.fur, 0.3), sl = sh(c.fur, 0.75), sd = sh(c.fur, -0.2), dk = sh(c.fur, -0.6), w = f ? 1 : -1, nail = '#dfe6ee';
+      const leg = (hx, hy, kx, ky, ax, ay, px, col, fore) => {
+        limb(g, hx, hy, kx, ky, fore ? 1.1 : 1.4, 0.75, col); limb(g, kx, ky, ax, ay, 0.75, 0.5, col);
+        limb(g, ax, ay, px, 14, 0.5, 0.45, col); P.ell(g, px + 0.5, 14.1, 0.95, 0.45, col); claws(g, px + 1.1, 14.1, 0.1, 2, 0.7, 0.2, nail);
+      };
+      // far legs, in shadow
+      leg(7.4, 8, 8.4 - w * 0.4, 10.4, 6.6 - w * 0.8, 12.2, 7 - w * 0.9, dk, false);
+      leg(15.2, 8.4, 14.8 + w * 0.4, 10.8, 15 + w * 0.9, 12.8, 15.2 + w * 0.9, dk, true);
+      // the tail, low and bushy, swinging
+      g.beginPath(); g.moveTo(5.6, 5.4); g.bezierCurveTo(2.4, 4.8, 0.6, 7 + w * 0.4, 0.4, 10.6 + w * 0.5); g.quadraticCurveTo(2.6, 10.2, 3.4, 9); g.quadraticCurveTo(4.4, 8, 6, 8.2); g.closePath();
+      P.fill(g, P.lg(g, 1, 5, 5, 10, [sl, s, sd]));
+      // body: the back, the withers rising into the neck, the deep chest, the belly tucked up to the haunch
+      g.beginPath(); g.moveTo(5.2, 5.6); g.bezierCurveTo(8, 4.4, 11, 5.2, 13.6, 4.6); g.quadraticCurveTo(15.8, 3.2, 18, 3.6); g.lineTo(19.2, 6.6);
+      g.quadraticCurveTo(18.8, 9.8, 16.6, 10.4); g.quadraticCurveTo(13.4, 10, 11.2, 8.4); g.quadraticCurveTo(8.8, 9.8, 6.6, 9.8); g.quadraticCurveTo(4.2, 8.8, 5.2, 5.6); g.closePath();
+      P.fill(g, P.lg(g, 10, 3.8, 11, 10.4, [sl, s, sd]));
+      P.ell(g, 7.4, 7.4, 2.5, 2.3, P.vol(g, 7, 6.6, 2.6, s)); // haunch
+      P.ell(g, 16.4, 7.2, 2.1, 2.6, P.vol(g, 16, 6.4, 2.6, s)); // shoulder
+      // the ribs showing through a starved flank
+      g.strokeStyle = sh(c.fur, 0.9); g.lineWidth = 0.4; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(12.6 + i * 1.1, 5.2, 3.2 - i * 0.2, 1.75, 2.35); g.stroke(); }
+      // hackles raised along the neck: three tufts, not a row
+      [[14.6, 4.2, 13.4, 2.6], [16, 3.6, 15.2, 1.8], [17.4, 3.4, 17, 1.6]].forEach(([x, y, tx, ty]) => { P.path(g, [x - 0.8, y + 0.4, tx, ty, x + 0.9, y + 0.2]); P.fill(g, s); });
+      // near legs, lit
+      leg(8, 8.4, 9.4 + w * 0.4, 10.6, 7.8 + w * 0.8, 12.4, 8.4 + w * 0.9, s, false);
+      leg(17.4, 8.6, 17.8 - w * 0.4, 11, 18.2 - w * 0.6, 12.8, 18.6 - w * 0.6, s, true);
+      // head: the cranium, two tall ears, a long muzzle, the jaw hanging open on fangs
+      const hx = 19.2, hy = 4.2, gape = f ? 0.5 : 0;
+      P.path(g, [hx - 1.4, hy - 1.2, hx - 1, hy - 4.2, hx + 0.2, hy - 1.6]); P.fill(g, sd); // far ear
+      P.path(g, [hx - 0.6, hy - 1.4, hx + 0.6, hy - 4.6, hx + 1.4, hy - 1.2]); P.fill(g, P.lg(g, hx, hy - 4.6, hx, hy - 1, [sl, s])); // near ear
+      P.path(g, [hx + 0.3, hy - 1.6, hx + 0.6, hy - 3.2, hx + 0.9, hy - 1.5]); P.fill(g, sd);
+      P.ell(g, hx, hy, 2.3, 1.9, P.vol(g, hx - 0.4, hy - 0.6, 2.4, s));
+      P.path(g, [hx - 2.2, hy + 0.2, hx - 1, hy + 3.4, hx + 1, hy + 2.6]); P.fill(g, sd); // the cheek ruff
+      P.path(g, [hx + 1, hy - 1.2, hx + 4.8, hy + 0.3, hx + 5, hy + 1.3, hx + 1.2, hy + 1.8]); P.fill(g, P.lg(g, hx, hy - 1, hx, hy + 2, [sl, sd])); // muzzle
+      P.path(g, [hx + 1, hy + 1.6, hx + 4.9, hy + 1.2, hx + 3.8, hy + 2.6 + gape, hx + 0.8, hy + 2.6]); P.fill(g, '#2a080c'); // the open mouth
+      P.path(g, [hx + 0.6, hy + 2.4, hx + 3.8, hy + 2.9 + gape, hx + 3.4, hy + 3.5 + gape, hx + 0.4, hy + 3.1]); P.fill(g, sd); // lower jaw
+      P.path(g, [hx + 3.8, hy + 1.2, hx + 4.2, hy + 2.8, hx + 4.6, hy + 1.2]); P.fill(g, nail); P.path(g, [hx + 2.2, hy + 1.4, hx + 2.5, hy + 2.4, hx + 2.8, hy + 1.4]); P.fill(g, nail); P.path(g, [hx + 2.8, hy + 3 + gape, hx + 3.2, hy + 1.8 + gape, hx + 3.6, hy + 3 + gape]); P.fill(g, nail);
+      P.circle(g, hx + 4.9, hy + 0.6, 0.5, '#08080c');
+      P.path(g, [hx - 0.2, hy - 1.2, hx + 2.2, hy - 0.8, hx + 1.8, hy - 0.2]); P.fill(g, dk); // a heavy brow
+      evil(g, hx + 1.3, hy - 0.2, 0.5, c.eye, -0.2);
     } });
 
   /* ---------- Rat: a mangy plague rat with bristles, a bald tail and yellow teeth ---------- */
@@ -343,14 +368,17 @@
     colors: G.painters.skeleton.colors, variants: G.painters.skeleton.variants,
     draw(g, f, c) {
       g.save(); g.translate(0, 1); G.painters.skeleton.draw(g, f, c); g.restore();
-      const x = 14.5 + (f ? 0.3 : 0), y = 5.5, wood = sh(c.rust, 0.05), iron = '#4a4e58';
-      P.rrect(g, x - 0.6, y - 0.6, 7.2, 13.2, 1.6, '#140e0a');
-      P.rrect(g, x, y, 6, 12, 1.2, P.lg(g, x, y, x + 6, y, [sh(wood, 0.25), wood, sh(wood, -0.35)]));
-      for (let i = 1; i < 3; i++) P.line(g, x + i * 2, y + 0.6, x + i * 2, y + 11.4, 0.25, sh(wood, -0.5));
-      P.line(g, x, y + 2.2, x + 6, y + 2.2, 0.9, iron); P.line(g, x, y + 9.6, x + 6, y + 9.6, 0.9, iron);
-      [[x + 0.9, y + 2.2], [x + 5.1, y + 2.2], [x + 0.9, y + 9.6], [x + 5.1, y + 9.6]].forEach(([a, b]) => P.circle(g, a, b, 0.4, '#c8ccd8'));
-      P.circle(g, x + 3, y + 6, 1.5, iron); P.circle(g, x + 3, y + 6, 0.9, P.vol(g, x + 3, y + 6, 0.9, '#8a8e9a')); P.circle(g, x + 3, y + 6, 0.35, c.eye);
-      g.strokeStyle = 'rgba(0,0,0,0.5)'; g.lineWidth = 0.3; g.beginPath(); g.moveTo(x + 4.6, y + 3.4); g.lineTo(x + 3.6, y + 5); g.lineTo(x + 4.4, y + 5.6); g.stroke(); // a gash
+      // a kite shield held before it: a flat top, curved sides running to a point, an iron rim, a boss, a crossed-bones blazon
+      const x = 17.6 + (f ? 0.3 : 0), y = 5, wood = sh(c.rust, 0.1), iron = '#5a5e6a';
+      const kite = (k) => { g.beginPath(); g.moveTo(x - 3.6 * k, y); g.lineTo(x + 3.6 * k, y); g.quadraticCurveTo(x + 3.8 * k, y + 7, x, y + 13 * k + (1 - k) * 0.6); g.quadraticCurveTo(x - 3.8 * k, y + 7, x - 3.6 * k, y); g.closePath(); };
+      kite(1); P.fill(g, P.lg(g, x - 4, y, x + 4, y + 12, [sh(iron, 0.5), iron, sh(iron, -0.5)]));
+      g.save(); g.translate(0, 0.7); kite(0.8); g.restore(); P.fill(g, P.lg(g, x - 3, y, x + 3, y + 10, [sh(wood, 0.3), wood, sh(wood, -0.4)]));
+      P.line(g, x, y + 1, x, y + 11, 0.3, sh(wood, -0.5));
+      // crossed bones on the face of it
+      P.bone(g, x - 1.8, y + 3, x + 1.8, y + 7.4, 0.45, '#d8ccaa'); P.bone(g, x + 1.8, y + 3, x - 1.8, y + 7.4, 0.45, sh('#d8ccaa', -0.2));
+      P.circle(g, x, y + 5.2, 1.2, P.vol(g, x - 0.3, y + 4.8, 1.2, '#8a8e9a')); P.circle(g, x, y + 5.2, 0.35, c.eye);
+      P.line(g, x - 3.3, y + 0.5, x + 3.3, y + 0.5, 0.35, '#c8ccd8'); // the lit top rim
+      g.strokeStyle = 'rgba(0,0,0,0.55)'; g.lineWidth = 0.35; g.beginPath(); g.moveTo(x + 2.2, y + 8); g.lineTo(x + 1.2, y + 9.4); g.lineTo(x + 1.8, y + 10); g.stroke(); // a gash
     } });
   /* ---------- Gilded Ooze: a heavy, faceless mass of molten gold, coins and bones sinking in it ---------- */
   def('slime', { w: 24, h: 22, cy: 16, frames: 2,
@@ -364,11 +392,11 @@
       const sq = f ? 0.93 : 1, w = 9 / sq, h = 6.8 * sq, cx = 12, by = 20.4, bone = '#e0d4b4';
       P.ell(g, cx, by, w + 0.8, 1.5, 'rgba(0,0,0,0.5)');
       // arms clawing out of the top and the sides
-      [[-5.6, -10, -2.2], [4.8, -11, -0.9], [-9.2, -4.6, -2.8], [9.4, -4.4, -0.3]].forEach(([x, l, a], i) => {
-        const x0 = cx + x * 0.8, y0 = by - (i < 2 ? h * 1.2 : 2.4), x1 = cx + x + Math.cos(a) * 1.2, y1 = by + l + (f && i < 2 ? -0.7 : 0);
-        P.line(g, x0, y0, x1, y1, 0.7, bone); P.line(g, x0 + 0.35, y0, x1 + 0.35, y1, 0.3, sh(bone, -0.35));
-        claws(g, x1, y1, a, 4, 2, 0.34, '#efe4c8');
-      });
+      // one bony arm hauling it forward, a broken femur jutting from its back
+      const ax = cx + 6.6, ay = by - 4.4, ex = cx + 9.6, ey = by - 7.6 - (f ? 0.6 : 0), hx2 = cx + 10.6, hy2 = by - 1.2 - (f ? 0.8 : 0);
+      P.bone(g, ax, ay, ex, ey, 0.9, bone); P.bone(g, ex, ey, hx2, hy2, 0.8, sh(bone, -0.15)); P.circle(g, ex, ey, 0.85, bone);
+      P.ell(g, hx2 + 0.4, hy2 + 0.4, 1.1, 0.7, bone); claws(g, hx2 + 0.8, hy2 + 0.2, 0.5, 4, 1.6, 0.4, '#efe4c8');
+      P.bone(g, cx - 5.4, by - h * 1.2, cx - 8, by - h * 1.8 + (f ? 0.5 : 0), 0.7, bone);
       g.beginPath(); g.moveTo(cx - w, by); g.bezierCurveTo(cx - w * 0.95, by - h * 1.15, cx - 3, by - h * 1.7, cx + 0.5, by - h * 1.55); g.bezierCurveTo(cx + w * 0.8, by - h * 1.45, cx + w, by - h * 0.7, cx + w, by);
       g.quadraticCurveTo(cx, by + 1.2, cx - w, by); g.closePath();
       P.fill(g, P.rg(g, cx - 2, by - h, w * 1.3, [[0, sh(c.body, 0.3)], [0.55, c.body], [1, sh(c.body, -0.7)]], cx - 3, by - h * 1.2));
@@ -379,11 +407,17 @@
         P.circle(g, x - r * 0.38, y, r * 0.1, '#ff5030'); P.circle(g, x + r * 0.38, y, r * 0.1, '#ff5030');
         P.teeth(g, x - r * 0.45, y + r * 0.55, x + r * 0.45, y + r * 0.55, 3, r * 0.3, 1, '#e8dcc0');
       };
-      skull(cx - 1.4, by - h * 1.05, 2.3, -0.15); skull(cx + 4.4, by - 3.4, 1.6, 0.3); skull(cx - 5.6, by - 2.4, 1.4, -0.3);
+      skull(cx - 4.4, by - h * 0.95, 1.9, -0.25); skull(cx - 6.6, by - 2.2, 1.3, -0.3);
+      // its face: two burning eyes deep in the mass and a wide, drooling maw of teeth
+      const fx = cx + 3.4, fy = by - h * 1.08;
+      P.ell(g, fx - 1.5, fy - 0.2, 1.6, 1.3, sh(c.body, -0.7), 0.3); P.ell(g, fx + 1.8, fy - 0.4, 1.6, 1.3, sh(c.body, -0.7), -0.3);
+      evil(g, fx - 1.4, fy - 0.1, 0.9, c.core, 0.3); evil(g, fx + 1.8, fy - 0.3, 0.9, c.core, -0.3);
+      g.beginPath(); g.moveTo(fx - 3.4, fy + 2.4); g.quadraticCurveTo(fx, fy + 1.2 + (f ? -0.3 : 0), fx + 3.6, fy + 2); g.quadraticCurveTo(fx + 0.4, fy + 6 + (f ? 0.6 : 0), fx - 3.4, fy + 2.4); g.closePath(); P.fill(g, '#140806');
+      teeth(g, fx - 3, fy + 2.3, fx + 3.2, fy + 2, 6, 0.9, 1, '#efe4c8'); teeth(g, fx - 1.6, fy + 4.4 + (f ? 0.4 : 0), fx + 1.8, fy + 4 + (f ? 0.4 : 0), 4, 0.7, -1, '#d8ccaa');
+      P.ell(g, fx + 0.8, fy + 5.6, 0.4, 1 + (f ? 0.4 : 0), G.rgba(c.core, 0.7)); // drool
       // ribs breaking the surface
-      g.strokeStyle = bone; g.lineWidth = 0.4; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(cx + 1.6, by - 1 + i * 0.1, 2.4 - i * 0.5, Math.PI * 1.1, Math.PI * 1.75); g.stroke(); }
-      [[-2.4, -1.2, 0.7], [6, -6, 0.55], [-7, -5.6, 0.5]].forEach(([x, y, r]) => P.circle(g, cx + x, by + y, r, P.vol(g, cx + x, by + y, r, c.core)));
-      [[-6, 1.6], [-0.8, 1.4], [5.4, 2]].forEach(([x, l]) => P.ell(g, cx + x, by + l * 0.4, 0.6, l * 0.7, sh(c.body, -0.25)));
+      g.strokeStyle = bone; g.lineWidth = 0.45; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(cx - 1.8, by + 0.2 + i * 0.1, 2.4 - i * 0.5, Math.PI * 1.1, Math.PI * 1.75); g.stroke(); }
+            [[-6, 1.6], [-0.8, 1.4], [5.4, 2]].forEach(([x, l]) => P.ell(g, cx + x, by + l * 0.4, 0.6, l * 0.7, sh(c.body, -0.25)));
       P.ell(g, cx - 4.4, by - h * 1.15, 1.2, 0.5, 'rgba(255,255,255,0.3)', -0.4);
     } });
   /* ---------- Snow Effigy (Frozen Catacombs): a bound idol of sticks and ice under a stitched sack ---------- */

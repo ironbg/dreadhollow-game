@@ -54,48 +54,79 @@
       for (let i = 0; i < 3; i++) { const a = -1.9 + i * 0.4 + (f ? 0.2 : -0.1); P.path(g, [17 + i * 0.8, 2.4, 17.4 + i * 0.8 + Math.cos(a) * 2.6, 2.4 + Math.sin(a) * 2.6 - (f ? 0.7 : 0), 18 + i * 0.8, 2.4]); P.fill(g, G.rgba(sh(c.fire, 0.4), 0.8)); }
     } });
 
-  /* ---------- Grave Chieftain (boss): a hunched gravedigger ogre, a tombstone hammer over its shoulder ---------- */
+  /* ---------- Grave Chieftain (boss): a hulking corpse-giant with a bare skull for a head, a tombstone hammer on its shoulder ---------- */
   def('gravechief', { w: 52, h: 50, cy: 30, frames: 2,
-    colors: { skin: '#6e7a62', rag: '#3a2e26', eye: '#ff5a2a', stone: '#8a8a90' },
+    colors: { skin: '#8e6c68', rag: '#3a2e26', eye: '#ff5a2a', stone: '#9a9aa4' },
     draw(g, f, c) {
-      const s = c.skin, sd = sh(s, -0.5), w = f ? 1 : -1;
+      // three masses: a huge hunched ribcage, a small pelvis, a skull slung low and forward; rot has opened the belly to the ribs
+      const s = c.skin, sl = sh(s, 0.3), sd = sh(s, -0.45), bone = '#dccfae', bd = sh(bone, -0.4), w = f ? 1 : -1;
       P.ell(g, 26, 47, 17, 2.6, 'rgba(0,0,0,0.45)');
-      // legs, thick and bowed, wrapped in rags
-      limb(g, 20, 32, 17 - w, 40, 3.4, 2.8, sd); limb(g, 17 - w, 40, 17 - w, 46, 2.8, 2.6, sd);
-      limb(g, 30, 32, 33 + w, 40, 3.4, 2.8, s); limb(g, 33 + w, 40, 33.6 + w, 46, 2.8, 2.6, s);
-      P.ell(g, 16.4 - w, 46.4, 3.4, 1.2, '#1a1410'); P.ell(g, 34.4 + w, 46.4, 3.4, 1.2, '#1a1410');
-      // loincloth and a belt of bones and keys
-      P.path(g, [16, 29, 35, 29, 36, 37, 31, 34, 27, 38, 23, 34, 18, 37]); P.fill(g, P.lg(g, 16, 29, 36, 38, [sh(c.rag, 0.2), sh(c.rag, -0.5)]));
-      P.line(g, 15.6, 29.4, 35.6, 29.4, 1.4, '#2a1c14');
-      for (let i = 0; i < 4; i++) P.bone(g, 18 + i * 4.6, 30, 18.6 + i * 4.6, 33.4, 0.5, '#d8ccaa');
-      // the huge hunched torso, belly and back
-      g.beginPath(); g.moveTo(14, 30); g.quadraticCurveTo(9, 18, 17, 11); g.quadraticCurveTo(26, 6, 34, 11); g.quadraticCurveTo(40, 18, 36, 30); g.closePath();
-      P.fill(g, P.rg(g, 24, 20, 17, [[0, sh(s, 0.3)], [0.6, s], [1, sh(s, -0.55)]], 22, 16));
-      g.save(); g.globalAlpha = 0.4; for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(25, 22 + i * 2, 6 - i, 0.3, 2.8); g.strokeStyle = sd; g.lineWidth = 0.5; g.stroke(); } g.restore();
-      // stitched scar and grave-chains across the chest
-      g.strokeStyle = '#2a1410'; g.lineWidth = 0.5; g.beginPath(); g.moveTo(20, 14); g.lineTo(29, 24); g.stroke();
-      for (let i = 0; i < 5; i++) P.line(g, 21 + i * 1.8, 16 + i * 2, 22.4 + i * 1.8, 14.8 + i * 2, 0.35, '#2a1410');
-      for (let i = 0; i < 7; i++) { g.beginPath(); g.ellipse(14 + i * 3.4, 14 + i * 1.6, 1.2, 0.7, 0.5, 0, Math.PI * 2); g.strokeStyle = '#5a5a60'; g.lineWidth = 0.6; g.stroke(); }
-      // far arm hanging low, a lantern of bone
-      limb(g, 14, 17, 9, 27, 2.6, 2.2, sd); claws(g, 9, 28, 1.8, 4, 2.2, 0.5, '#e0d6bc');
-      P.line(g, 9, 29, 9, 33, 0.4, '#2a1c14'); P.rrect(g, 7, 33, 4, 5, 1, '#3a2a20'); P.glow(g, 9, 35.6, 5, c.eye, 0.7); P.rect(g, 8, 34, 2, 3, sh(c.eye, 0.4));
-      // head sunk between the shoulders: tusks, a crown of finger bones
-      const hx = 30, hy = 11;
-      P.circle(g, hx, hy, 6, P.vol(g, hx, hy, 6, s));
-      P.path(g, [hx - 1, hy + 2, hx + 6, hy + 2, hx + 5, hy + 5.4, hx, hy + 5.6]); P.fill(g, '#140404');
-      P.path(g, [hx + 0.4, hy + 2.4, hx + 1.2, hy - 0.6, hx + 1.8, hy + 2.4]); P.fill(g, '#efe4c8');
-      P.path(g, [hx + 3.6, hy + 2.4, hx + 4.6, hy - 0.4, hx + 5, hy + 2.4]); P.fill(g, '#efe4c8');
-      P.ell(g, hx + 1.2, hy - 1.8, 1.8, 1, VOID, -0.2); evil(g, hx + 1.6, hy - 1.8, 0.8, c.eye); evil(g, hx - 2.2, hy - 1.6, 0.6, c.eye);
-      for (let i = 0; i < 6; i++) { const a = -2.6 + i * 0.4; P.bone(g, hx + Math.cos(a) * 5, hy + Math.sin(a) * 5, hx + Math.cos(a) * 8.4, hy + Math.sin(a) * 8.4 - 0.6, 0.55, '#e0d4b4'); }
+      // far leg
+      limb(g, 20, 31, 16.6 - w, 38.6, 3.6, 2.8, sd); limb(g, 16.6 - w, 38.6, 17.4 - w, 44.6, 2.8, 2.2, sd);
+      P.path(g, [14.4 - w, 46.4, 15.4 - w, 43.6, 19.4 - w, 43.8, 21.4 - w, 46.4]); P.fill(g, sh(sd, -0.4));
+      // far arm, hanging to the knee with a grave lantern
+      limb(g, 15, 15, 10.6, 23, 3.2, 2.4, sh(s, -0.3)); limb(g, 10.6, 23, 10, 29.6, 2.4, 1.9, sh(s, -0.3)); claws(g, 10, 30, 1.7, 3, 2, 0.55, bd);
+      P.line(g, 10.2, 30.4, 10.2, 33, 0.35, '#1a1410'); P.path(g, [8.4, 33.4, 12, 33.4, 11.4, 32.4, 9, 32.4]); P.fill(g, '#2a2420');
+      P.rrect(g, 8.2, 33.2, 4, 5.2, 0.8, '#2a2018'); P.glow(g, 10.2, 35.8, 6, c.eye, 0.6); P.rrect(g, 9, 34, 2.4, 3.6, 0.5, sh(c.eye, 0.35));
+      P.line(g, 10.2, 34, 10.2, 37.6, 0.3, '#2a2018'); P.rect(g, 8, 38.2, 4.4, 0.8, '#1a1410');
+      // the torso: a hump over the shoulders, the chest thrust forward, the waist narrowing into the belt
+      g.beginPath(); g.moveTo(18.4, 31); g.quadraticCurveTo(12.4, 25, 12, 17.6); g.quadraticCurveTo(12.4, 9.6, 20, 8.4); g.quadraticCurveTo(29, 7.4, 35.4, 12.4);
+      g.quadraticCurveTo(39, 16.6, 36.4, 21.6); g.quadraticCurveTo(33.4, 26, 31.6, 31); g.closePath();
+      P.fill(g, P.lg(g, 14, 8, 34, 31, [sl, s, sd]));
+      // the shoulder blade and the sagging chest, the belly hanging over the belt
+      g.strokeStyle = sd; g.lineWidth = 0.6; g.beginPath(); g.moveTo(14.4, 13); g.quadraticCurveTo(19, 15.6, 18.6, 21.6); g.stroke();
+      g.beginPath(); g.moveTo(26, 15.6); g.quadraticCurveTo(31, 19.6, 35.6, 17.4); g.stroke();
+      P.path(g, [20, 26.6, 31.4, 26, 31, 29.8, 20.4, 30]); P.fill(g, sh(s, -0.25));
+      g.save(); g.globalAlpha = 0.6; g.strokeStyle = '#2a1414'; g.lineWidth = 0.4; g.beginPath(); g.moveTo(15.6, 22); g.lineTo(19.6, 25.4); g.stroke();
+      for (let i = 0; i < 4; i++) P.line(g, 16.2 + i * 1, 23.4 + i * 0.8, 17.2 + i * 1, 22.2 + i * 0.8, 0.3, '#2a1414'); g.restore(); // a stitched gash
+      // rotting stripes and bruises
+      g.save(); g.globalAlpha = 0.5; [[15, 18, 1.8, 1], [22, 11.6, 1.4, 0.8], [33, 22, 1.2, 0.8]].forEach(([x, y, a, b]) => P.ell(g, x, y, a, b, '#4a5a3a')); g.restore();
+      // the torn belly: a dark wound with the ribs showing through
+      g.beginPath(); g.moveTo(21.4, 20.4); g.quadraticCurveTo(26.4, 18.2, 31, 21.4); g.quadraticCurveTo(29.6, 27.6, 24.6, 28.2); g.quadraticCurveTo(20.6, 26, 21.4, 20.4); g.closePath(); P.fill(g, '#1e0c0c');
+      g.strokeStyle = '#4a1814'; g.lineWidth = 0.5; g.stroke();
+      for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(22.2 + i * 0.4, 21.4 + i * 1.6); g.quadraticCurveTo(26.4, 20 + i * 1.7, 30 - i * 0.4, 22 + i * 1.4); g.strokeStyle = i % 2 ? bd : bone; g.lineWidth = 0.9; g.stroke(); }
+      P.line(g, 24.2, 20.6, 24.8, 28, 1, bd); // the spine behind them
+      // belt of rope, a ragged loincloth, a spade hanging from it
+      P.path(g, [17, 29.6, 33, 29.6, 34, 36.6, 30, 34.4, 26.4, 38, 22.6, 34.4, 18.4, 37]); P.fill(g, P.lg(g, 17, 29, 34, 38, [sh(c.rag, 0.25), sh(c.rag, -0.5)]));
+      P.line(g, 16.6, 30, 33.8, 30, 1.6, '#2a1c14'); P.line(g, 16.6, 29.6, 33.8, 29.6, 0.4, '#5a4632');
+      [19, 23.6, 28.2].forEach((x, i) => { P.line(g, x, 30.4, x + 0.4, 32.8 + (i % 2), 0.4, '#2a1c14'); P.circle(g, x + 0.4, 33.2 + (i % 2), 0.9, P.vol(g, x + 0.2, 33 + (i % 2), 0.9, bone)); }); // bones strung on the belt
+      // near leg
+      limb(g, 29.4, 31, 32.6 + w, 38.4, 3.6, 2.8, s); limb(g, 32.6 + w, 38.4, 32.4 + w, 44.6, 2.8, 2.2, s);
+      P.circle(g, 32.6 + w, 38.4, 2.6, P.vol(g, 32, 37.6, 2.6, s));
+      P.path(g, [30 + w, 46.4, 30.8 + w, 43.6, 35 + w, 43.8, 37.6 + w, 46.4]); P.fill(g, sh(s, -0.55));
       // near arm hoisting the tombstone hammer onto the shoulder
-      limb(g, 35, 16, 42, 22, 2.8, 2.4, s); limb(g, 42, 22, 40, 13, 2.4, 2.2, s);
-      P.line(g, 37 + w * 0.3, 29, 42, 4, 1.8, P.lg(g, 37, 0, 43, 0, ['#4a3426', '#241810']));
-      g.save(); g.translate(42.6, 3.6); g.rotate(0.22);
-      P.rrect(g, -7, -5, 14, 9, 3.2, '#1a1a1e'); P.rrect(g, -6.4, -4.4, 12.8, 8, 2.8, P.lg(g, 0, -5, 0, 4, [sh(c.stone, 0.3), c.stone, sh(c.stone, -0.5)]));
-      P.line(g, -1.6, -2.6, 1.6, -2.6, 0.6, '#3a3a40'); P.line(g, 0, -3.8, 0, 1, 0.6, '#3a3a40'); // a carved cross
-      P.path(g, [2.8, -4, 4.4, -1, 3, 2]); g.strokeStyle = '#3a3a40'; g.lineWidth = 0.4; g.stroke();
+      limb(g, 33, 14.6, 40.4, 20.6, 3.2, 2.4, s); limb(g, 40.4, 20.6, 41.2, 12.6, 2.4, 2, sl);
+      P.line(g, 37.2 + w * 0.3, 30, 42.4, 2.6, 1.8, P.lg(g, 37, 0, 43, 0, ['#5a4030', '#241810']));
+      g.save(); g.translate(43.4, 3.2); g.rotate(0.22);
+      // a gravestone: an arched top, a flat foot, a cross cut into it, moss at its base
+      g.beginPath(); g.moveTo(-6, 4.6); g.lineTo(-6, -1.6); g.quadraticCurveTo(-6, -6.4, 0, -6.4); g.quadraticCurveTo(6, -6.4, 6, -1.6); g.lineTo(6, 4.6); g.closePath();
+      P.fill(g, P.lg(g, -6, -6, 6, 5, [sh(c.stone, 0.35), c.stone, sh(c.stone, -0.5)]));
+      P.rect(g, -6.6, 4, 13.2, 1.8, sh(c.stone, -0.35));
+      P.line(g, 0, -4.4, 0, 2.6, 1, '#3a3a44'); P.line(g, -2.2, -2.4, 2.2, -2.4, 1, '#3a3a44');
+      P.line(g, 0.4, -4.4, 0.4, 2.6, 0.3, sh(c.stone, 0.45));
+      g.strokeStyle = '#4a4a54'; g.lineWidth = 0.4; g.beginPath(); g.moveTo(3.6, -5.4); g.lineTo(2.6, -2.6); g.lineTo(3.8, 0); g.stroke();
+      P.ell(g, -3.4, 3.8, 2.4, 1, '#4a6a34'); P.ell(g, 3.6, 4, 1.6, 0.8, '#3a5a2a');
       g.restore();
-      claws(g, 40, 12.4, -1.4, 4, 2, 0.5, '#e0d6bc');
+      // the head: a bare skull slung forward below the shoulders, a jaw hanging with two tusks, a crown of three grave-nails
+      const hx = 34.6, hy = 10.8;
+      P.path(g, [29.4, 10, 32.4, 8, 34.4, 14.6, 31, 15.6]); P.fill(g, sd); // the neck
+      P.circle(g, hx, hy, 5.4, P.vol(g, hx - 1, hy - 1.4, 4.4, bone));
+      P.path(g, [hx - 0.4, hy + 2.4, hx + 4.8, hy + 1.4, hx + 4.4, hy + 5.4 + (f ? 0.4 : 0), hx + 0.4, hy + 5.6]); P.fill(g, P.lg(g, hx, hy + 2, hx, hy + 6, [bone, bd])); // the jaw
+      P.rect(g, hx + 0.6, hy + 2.6, 3.8, 1.2 + (f ? 0.4 : 0), '#140404');
+      teeth(g, hx + 0.8, hy + 2.6, hx + 4.4, hy + 2.4, 4, 0.7, 1, bone);
+      P.path(g, [hx + 1, hy + 4, hx + 1.4, hy + 1.2, hx + 2, hy + 4]); P.fill(g, '#f2ead0'); P.path(g, [hx + 3.4, hy + 3.8, hx + 3.9, hy + 1, hx + 4.4, hy + 3.6]); P.fill(g, '#f2ead0'); // tusks
+      P.path(g, [hx - 0.6, hy - 1.6, hx + 3.6, hy - 1.4, hx + 3.2, hy - 0.4, hx - 0.2, hy - 0.4]); P.fill(g, sh(bone, -0.55)); // the brow ridge
+      P.ell(g, hx + 2, hy + 0.4, 1.3, 1.1, VOID, -0.2); P.ell(g, hx - 1, hy + 0.4, 0.9, 1, VOID, 0.3);
+      evil(g, hx + 2, hy + 0.4, 0.7, c.eye); evil(g, hx - 0.9, hy + 0.5, 0.5, c.eye);
+      P.path(g, [hx + 3.6, hy + 1.2, hx + 4.4, hy + 1.4, hx + 4, hy + 2.2]); P.fill(g, VOID); // the nose hole
+      g.strokeStyle = bd; g.lineWidth = 0.35; g.beginPath(); g.moveTo(hx - 2.4, hy - 3); g.lineTo(hx - 1, hy - 1.8); g.lineTo(hx - 1.6, hy - 0.8); g.stroke(); // a crack
+      // a crude iron crown: a band round the crown of the skull and three hammered prongs
+      P.path(g, [hx - 4.8, hy - 2.4, hx + 3.2, hy - 4.4, hx + 3.6, hy - 2.8, hx - 4.4, hy - 0.8]); P.fill(g, P.lg(g, hx, hy - 4.4, hx, hy - 1, ['#5a5662', '#1e1a24']));
+      [[hx - 3.6, hy - 1.8, 0], [hx - 0.6, hy - 2.6, 0.15], [hx + 2.4, hy - 3.4, 0.3]].forEach(([x, y, a], i) => { P.path(g, [x - 1, y, x + Math.sin(a) * 3.2 + (i === 1 ? 0 : 0), y - 3.4 - (i === 1 ? 0.8 : 0), x + 1, y - 0.4]); P.fill(g, P.lg(g, x, y - 4, x, y, ['#6a6672', '#26222c'])); });
+      P.circle(g, hx - 0.6, hy - 2.2, 0.55, c.eye); // one ember set in the band
+      // stitches across the flesh of the skull's cheek, where skin still clings
+      P.path(g, [hx - 5, hy + 0.4, hx - 3.2, hy + 1.2, hx - 2.4, hy + 4.4, hx - 4.6, hy + 3.2]); P.fill(g, sh(s, 0.05));
+      claws(g, 41.4, 12, -1.4, 4, 2, 0.5, bd);
     } });
 
   /* ---------- Bone Tyrant (boss): a skeletal king in black plate, a jagged crown, a greatsword planted before him ---------- */

@@ -100,19 +100,25 @@
       // soul smoke pooling beneath (it floats)
       for (let i = 0; i < 5; i++) P.ell(g, 12 + i * 5, 47 + (i % 2) * wv * 0.6, 3.4, 1.6, G.rgba(c.eye, 0.18));
       // tattered shroud: long ragged strips
-      g.beginPath(); g.moveTo(13, 15); g.lineTo(31, 15);
-      g.quadraticCurveTo(35, 28, 37 + wv, 40); g.lineTo(34.6, 38); g.lineTo(34, 46 + wv); g.lineTo(31, 40); g.lineTo(29, 48); g.lineTo(26.6, 41); g.lineTo(24, 47 - wv);
-      g.lineTo(21.4, 41); g.lineTo(19, 48 + wv); g.lineTo(16.6, 40.6); g.lineTo(14, 46); g.lineTo(12, 39); g.lineTo(9 - wv, 44); g.quadraticCurveTo(9.6, 28, 13, 15); g.closePath();
+      g.beginPath(); g.moveTo(14.4, 14.6); g.lineTo(29.6, 14.6); g.quadraticCurveTo(31, 22, 27.4, 26.4);
+      g.quadraticCurveTo(34.4, 32, 37 + wv, 40); g.lineTo(34.6, 38); g.lineTo(34, 46 + wv); g.lineTo(31, 40); g.lineTo(29, 48); g.lineTo(26.6, 41); g.lineTo(24, 47 - wv);
+      g.lineTo(21.4, 41); g.lineTo(19, 48 + wv); g.lineTo(16.6, 40.6); g.lineTo(14, 46); g.lineTo(12, 39); g.lineTo(9 - wv, 44); g.quadraticCurveTo(10, 31, 16.6, 26.4); g.quadraticCurveTo(13, 22, 14.4, 14.6); g.closePath();
       P.fill(g, P.lg(g, 10, 15, 30, 48, [sh(r, 0.2), r, G.rgba(sh(r, -0.6), 0.85)]));
       g.save(); g.globalAlpha = 0.5; for (let i = 0; i < 6; i++) P.line(g, 15 + i * 2.8, 20, 12 + i * 4, 44, 0.6, sh(r, -0.65)); g.restore();
       // runes stitched down the front
-      for (let i = 0; i < 5; i++) { const y = 20 + i * 4.4; g.strokeStyle = c.trim; g.lineWidth = 0.5; g.beginPath(); g.moveTo(21, y); g.lineTo(23, y + 1.6); g.lineTo(21.4, y + 3); g.moveTo(23.4, y + 0.4); g.lineTo(23.4, y + 2.8); g.stroke(); }
-      P.glow(g, 22, 30, 5, c.eye, 0.25);
+      // a sash at the narrow waist, and one trimmed panel falling from it to the hem
+      P.path(g, [20.4, 27.4, 24, 27.4, 25.4, 45, 19.4, 45]); P.fill(g, P.lg(g, 20, 27, 25, 45, [sh(r, 0.35), sh(r, -0.3)]));
+      P.line(g, 20.4, 27.4, 19.4, 45, 0.45, c.trim); P.line(g, 24, 27.4, 25.4, 45, 0.45, sh(c.trim, -0.3));
+      P.path(g, [16, 25.4, 28, 25.4, 27.6, 28, 16.4, 28]); P.fill(g, P.lg(g, 16, 25, 16, 28, [sh(c.trim, 0.1), sh(c.trim, -0.5)]));
+      P.circle(g, 22.2, 26.7, 1.2, P.vol(g, 22, 26.4, 1.2, c.bone)); P.circle(g, 22.2, 26.8, 0.4, c.eye); // a bone clasp
       // a high, flared collar rising behind the hood
       g.beginPath(); g.moveTo(12.4, 16.8); g.quadraticCurveTo(11, 10, 14.6, 6.8); g.quadraticCurveTo(22, 9.4, 29.4, 6.8); g.quadraticCurveTo(33, 10, 31.6, 16.8); g.closePath();
       P.fill(g, P.lg(g, 12, 6, 32, 17, [sh(r, 0.3), r, sh(r, -0.5)])); g.strokeStyle = c.trim; g.lineWidth = 0.45; g.stroke();
+      // shoulders of bone: ribbed plates over the corners of the shoulders
+      [[14.2, 15.6, -0.35, 3.4], [30, 15.6, 0.35, 3.6]].forEach(([x, y, rot, rx]) => { P.ell(g, x, y, rx, 2.2, P.vol(g, x - 0.8, y - 1, rx, sh(c.bone, -0.1)), rot);
+        for (let i = 0; i < 2; i++) { g.beginPath(); g.ellipse(x, y + 0.4 + i * 0.9, rx * (0.8 - i * 0.2), 1.2, rot, 0.2, Math.PI - 0.2); g.strokeStyle = sh(c.bone, -0.5); g.lineWidth = 0.35; g.stroke(); } });
       // far arm: a skeletal hand raised, a curse gathering in the claws
-      P.path(g, [13, 17, 7, 22, 6, 26, 10, 25, 14, 20]); P.fill(g, sh(r, -0.25));
+      P.path(g, [14.6, 15.4, 8.6, 20.4, 5.4, 26.8, 8.2, 26, 10.6, 27.4, 15.6, 20.4]); P.fill(g, P.lg(g, 6, 16, 15, 27, [sh(r, 0.1), sh(r, -0.4)])); // a bell sleeve
       P.bone(g, 7.4, 24.6, 5.2, 20, 0.8, sh(c.bone, -0.2)); claws(g, 5.2, 19.6, -1.9, 4, 2.4, 0.4, c.bone);
       P.glow(g, 4.4, 16.4, 5, c.eye, 0.75); P.circle(g, 4.4, 16.4, 1.2, sh(c.eye, 0.5));
       // hood and the skull inside it
@@ -132,13 +138,12 @@
       // staff: gnarled, crowned with a horned skull and a caged orb
       P.line(g, 34.4, 47, 36, 9, 1.3, P.lg(g, 34, 0, 36, 0, ['#3a2a30', '#140a10']));
       for (let i = 0; i < 4; i++) P.line(g, 35 + (i % 2) * 0.8, 14 + i * 8, 36.2 - (i % 2) * 0.8, 16 + i * 8, 0.5, '#241418');
-      P.path(g, [31, 17, 34.6, 21, 36.6, 20, 33, 16]); P.fill(g, sh(r, -0.2));
+      P.path(g, [29.4, 15.4, 33.4, 19.6, 37, 22.8, 34.6, 24, 33, 22.8, 28.6, 20.6]); P.fill(g, P.lg(g, 29, 15, 37, 24, [sh(r, 0.25), sh(r, -0.35)])); // the near sleeve
       P.bone(g, 32, 19, 35.4, 22.6, 0.8, sh(c.bone, -0.15)); claws(g, 35.8, 22.8, -0.4, 3, 1.6, 0.4, c.bone);
       P.circle(g, 36, 8.4, 2.6, P.vol(g, 36, 8, 2.6, sh(c.bone, -0.1)));
       horn(g, 34.4, 7, 31, 3, 32.4, 0.4, 0.7, '#d8ccb0'); horn(g, 37.6, 7, 41, 3, 39.6, 0.4, 0.7, '#d8ccb0');
       P.ell(g, 35.2, 8.4, 0.7, 0.6, VOID); P.ell(g, 36.9, 8.4, 0.7, 0.6, VOID);
       P.glow(g, 36, 3.6, 9, c.orb, 0.75); P.circle(g, 36, 3.6, 2.2, P.vol(g, 36, 3.6, 2.2, c.orb));
-      g.strokeStyle = sh(c.trim, -0.4); g.lineWidth = 0.4; g.beginPath(); g.moveTo(33.8, 5.6); g.quadraticCurveTo(36, -0.6, 38.2, 5.6); g.moveTo(36, 1.2); g.lineTo(36, 6); g.stroke();
     } });
 
   /* ---------- Archdemon: a hulking horned fiend, lava in its veins, fire in its maw ---------- */
@@ -182,11 +187,12 @@
   /* ---------- Mounts (Lord of Anguish, Pale Horseman): gaunt nightmare steeds with burning manes ---------- */
   function horse(g, f, c) {
     const s = c.horse, w = f ? 1.6 : -1.6, sd = sh(s, -0.4);
-    [[16, w], [20, -w], [35, -w], [39, w]].forEach(([x, o], i) => {
-      const col = i % 2 ? sd : s;
-      limb(g, x, 29, x + o * 0.6, 37, 1.5, 1, col); limb(g, x + o * 0.6, 37, x + o, 43.6, 1, 0.7, col);
-      P.path(g, [x + o - 1.2, 43.6, x + o + 1.2, 43.6, x + o + 1.4, 45, x + o - 1.4, 45]); P.fill(g, '#140c10');
-      if (c.flame) P.glow(g, x + o, 44.6, 2.4, c.eye, 0.5);
+    // legs with their joints: the hind legs bend back at the hock, the forelegs are straight columns to a knee; a fetlock and a hoof
+    [[15, w, 1], [19, -w, 1], [35, -w, 0], [39, w, 0]].forEach(([x, o, hind], i) => {
+      const col = i % 2 ? sh(s, 0.12) : sd, kx = hind ? x - 1.8 + o * 0.3 : x + 0.4 + o * 0.4, ky = hind ? 36.4 : 35.6, fx = x - (hind ? 0.8 : 0) + o, fy = 42;
+      limb(g, x, 27.4, kx, ky, hind ? 2.8 : 2, 1.2, col); limb(g, kx, ky, fx, fy, 1.1, 0.8, col);
+      P.circle(g, fx, fy, 1, col); P.path(g, [fx - 1.3, 43, fx + 1.5, 43, fx + 1.8, 45, fx - 1.4, 45]); P.fill(g, '#140c10');
+      if (c.flame) P.glow(g, fx, 44.6, 2.4, c.eye, 0.5);
     });
     // burning tail
     g.beginPath(); g.moveTo(12, 23); g.quadraticCurveTo(5, 26, 5, 36); g.quadraticCurveTo(8, 30, 10, 31); g.quadraticCurveTo(9, 27, 14, 27); P.fill(g, c.mane);
@@ -195,19 +201,24 @@
     P.ell(g, 27, 25.6, 15, 7, P.lg(g, 12, 18, 40, 33, [sh(s, 0.25), s, sh(s, -0.55)]));
     if (c.ribs) { g.strokeStyle = sh(s, -0.6); g.lineWidth = 0.8; for (let i = 0; i < 6; i++) { g.beginPath(); g.arc(22 + i * 2.6, 24.6, 4.4, 0.5, 2); g.stroke(); } }
     P.ell(g, 16, 23, 4.4, 4, sh(s, -0.1)); // haunch bone
-    // neck and a long skull-like head
-    g.beginPath(); g.moveTo(37, 23); g.quadraticCurveTo(41, 15, 43.6, 9.6); g.lineTo(49, 11); g.quadraticCurveTo(46, 17, 42, 29); g.closePath();
-    P.fill(g, P.lg(g, 38, 10, 49, 28, [sh(s, 0.25), s, sh(s, -0.45)]));
-    P.path(g, [43, 8.6, 50, 10, 53, 14.4, 51.6, 16.4, 47.6, 15.6, 44.6, 12.4]); P.fill(g, P.lg(g, 43, 8, 53, 16, [sh(s, 0.35), sh(s, -0.3)]));
-    P.path(g, [48, 15.4, 52.4, 16, 51, 17.6, 48.4, 16.8]); P.fill(g, '#1a0408');
-    teeth(g, 48, 15.4, 52, 15.9, 4, 0.6, 1, '#e8e0cc');
-    P.ell(g, 47, 11.8, 1.3, 1, VOID, -0.3); evil(g, 47.2, 11.8, 0.6, c.eye, -0.3);
-    P.path(g, [44, 9, 43.6, 4.4, 45.8, 8.8]); P.fill(g, sh(s, -0.3));
+    // the neck rising from the chest, then a horse's head: poll and ears, a round jowl, a long face tapering to the muzzle
+    g.beginPath(); g.moveTo(36, 22.4); g.quadraticCurveTo(39.6, 14, 43.4, 8.6); g.lineTo(47.4, 10.4); g.quadraticCurveTo(45.4, 18, 42.6, 29.4); g.closePath();
+    P.fill(g, P.lg(g, 38, 10, 47, 28, [sh(s, 0.25), s, sh(s, -0.45)]));
+    P.path(g, [44, 8.4, 44.2, 4.4, 45.8, 7.8]); P.fill(g, sh(s, 0.1)); P.path(g, [42.8, 8.8, 42.4, 5.2, 44, 8.2]); P.fill(g, sd); // ears
+    g.beginPath(); g.moveTo(43.4, 8.4); g.quadraticCurveTo(46.4, 7.6, 48, 9.6); g.lineTo(52.8, 14.8); g.quadraticCurveTo(53.8, 16.8, 52.2, 17.8); g.lineTo(49.4, 17.6);
+    g.quadraticCurveTo(47, 16.4, 45.6, 16.6); g.quadraticCurveTo(42.8, 15.4, 43.4, 8.4); g.closePath();
+    P.fill(g, P.lg(g, 44, 8, 50, 18, [sh(s, 0.35), s, sh(s, -0.35)]));
+    P.circle(g, 45.6, 13, 2.4, P.vol(g, 45, 12, 2.4, s)); // the jowl
+    P.path(g, [49.2, 16.2, 53, 16.6, 52.2, 17.8, 49.4, 17.6]); P.fill(g, '#1a0408'); teeth(g, 49.6, 16.3, 52.6, 16.6, 3, 0.6, 1, '#e8e0cc');
+    P.circle(g, 52.4, 15.2, 0.5, VOID); // the nostril
+    P.ell(g, 46.6, 10.8, 1.2, 0.9, VOID, 0.6); evil(g, 46.8, 10.9, 0.6, c.eye, 0.5);
+    P.line(g, 47, 12, 52, 16, 0.25, sh(s, 0.5)); // the lit bridge of the nose
     // burning mane
     // a mane of fire streaming back along the neck in one ragged sheet
-    g.beginPath(); g.moveTo(44.6, 9.4); g.bezierCurveTo(41, 12, 40, 17, 37.6, 23); g.bezierCurveTo(34, 21 - (f ? 1 : 0), 32, 17, 30.6, 14.6); g.bezierCurveTo(34, 15.4, 35, 13, 36.6, 10.4); g.bezierCurveTo(38.6, 11.6, 40, 9, 41.6, 6.6); g.closePath();
-    P.fill(g, P.lg(g, 44, 8, 31, 20, [sh(c.mane, 0.35), G.rgba(c.mane, 0.95), G.rgba(c.mane, 0.2)])); P.glow(g, 39, 14, 6, c.mane, 0.4);
-    if (c.flame) { P.glow(g, 38, 16, 6, c.mane, 0.4); P.glow(g, 47, 12, 3.4, c.eye, 0.6); }
+    g.beginPath(); g.moveTo(44, 8.6); g.bezierCurveTo(41.4, 10.4, 39.4, 15, 37, 21.6); g.bezierCurveTo(35.4, 19.6 - (f ? 1 : 0), 34.4, 16.6, 33.6, 13.6); g.bezierCurveTo(35.4, 14, 36.2, 12, 37.4, 10.8); g.bezierCurveTo(38.6, 10.2, 40.2, 8, 41.4, 6); g.closePath();
+    P.fill(g, P.lg(g, 44, 8, 31, 20, [sh(c.mane, 0.35), G.rgba(c.mane, 0.95), G.rgba(c.mane, 0.2)])); [[42.8, 9.4], [40.8, 13], [38.8, 17.2]].forEach(([x, y], i) => { const hgt = 3.4 - i * 0.6; g.beginPath(); g.moveTo(x - 1.6, y + 0.6); g.quadraticCurveTo(x - 2.2, y - hgt * 0.6, x - 2.6 - (f ? 0.6 : 0), y - hgt); g.quadraticCurveTo(x - 0.4, y - hgt * 0.5, x + 0.4, y - 0.2); g.closePath(); P.fill(g, G.rgba(sh(c.mane, 0.25), 0.9)); }); // tongues of fire rising off the crest
+    P.glow(g, 38, 13, 3.4, c.mane, 0.35);
+    if (c.flame) P.glow(g, 46.8, 10.9, 3, c.eye, 0.6);
   }
   /** A tall dark rider (not the heroes' rig): hips at (x,y), k = scale. o: metal, trim, cloth, glow, hood, weapon ('greatsword'|'lance'), mounted. */
   function darkRider(g, f, o, x, y, k) {
@@ -218,7 +229,7 @@
     P.fill(g, P.lg(g, -12, -14, 0, 10, [sh(cl, 0.15), cl, sh(cl, -0.6)]));
     P.rag(g, -12 - w, 9.6, -2, 7.6, 4, 3.4, sh(cl, -0.5));
     // legs: plated, or one leg bent over the saddle
-    if (o.mounted) { P.limb(g, 1, -0.4, 5.6, 2.4, 1.8, 1.5, md); P.limb(g, 5.6, 2.4, 4.6, 9, 1.5, 1.2, md); P.rrect(g, 3, 8.4, 4, 2, 0.8, '#141014'); }
+    if (o.mounted) { P.limb(g, 1, -0.4, 5.6, 2.4, 2, 1.6, m); P.circle(g, 5.6, 2.4, 1.5, P.vol(g, 5.2, 2, 1.5, sh(m, 0.25))); P.limb(g, 5.6, 2.4, 4.6, 9, 1.5, 1.2, m); P.rrect(g, 3, 8.4, 4.4, 2, 0.8, '#141014'); P.line(g, 3, 10.6, 7.6, 10.6, 0.5, o.trim); }
     else {
       P.limb(g, -1.6, 0, -2.6 - w, 8, 1.8, 1.5, md); P.limb(g, -2.6 - w, 8, -2.4 - w, 15, 1.5, 1.2, md); P.rrect(g, -4.4 - w, 14.4, 4.4, 1.8, 0.8, '#141014');
       P.limb(g, 1.8, 0, 2.8 + w, 8, 1.9, 1.6, m); P.limb(g, 2.8 + w, 8, 2.4 + w, 15, 1.6, 1.3, m); P.rrect(g, 1.2 + w, 14.4, 4.6, 1.8, 0.8, '#1a1418');
