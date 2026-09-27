@@ -1330,50 +1330,73 @@
       P.line(g, 16, 6.4, 18, 3.6, 0.3, sh(b, -0.2)); P.line(g, 15.4, 6.4, 16.4, 3.4, 0.3, sh(b, -0.2)); // feelers
     } });
 
-  /* ---------- Bog Corpse: a drowned, rotting body risen from the mire, weed and fungus on it, a gut of foul gas ---------- */
+  /* ---------- Bog Corpse: a body dragged from the peat, leather-brown and twisted, a rope noose still round its neck, its belly
+   *            swollen tight with gas and glowing through the splits; it bursts in a cloud of it ---------- */
   def('bogcorpse', { w: 22, h: 28, cy: 18, frames: 2,
     colors: { skin: '#6a7a4a', rot: '#3a4a1a', gas: '#b0d040', eye: '#e0ff60' },
     draw(g, f, c) {
-      const s = c.skin, sd = sh(s, -0.5), w = f ? 0.9 : -0.9;
-      P.ell(g, 11, 26.4, 7, 1.3, 'rgba(0,0,0,0.45)'); P.ell(g, 11, 26.2, 6, 1, G.rgba('#3a4a1a', 0.6));
-      limb(g, 8.6, 18, 7.6 - w, 26, 1.5, 1.3, sd); limb(g, 13.4, 18, 14.4 + w, 26, 1.5, 1.3, s);
-      // a torso split open at the belly, green gas glowing within
-      g.beginPath(); g.moveTo(6.4, 9); g.quadraticCurveTo(11, 7.4, 15.6, 9); g.quadraticCurveTo(17, 15, 15, 19.6); g.quadraticCurveTo(11, 21, 7, 19.6); g.quadraticCurveTo(5, 15, 6.4, 9); g.closePath();
-      P.fill(g, P.lg(g, 6, 8, 16, 20, [sh(s, 0.25), s, sd]));
-      P.ell(g, 11.4, 15, 2.6, 3.2, '#141a08'); P.glow(g, 11.4, 15, 4, c.gas, 0.6); P.ell(g, 11.4, 15.4, 1.4, 2, G.rgba(c.gas, 0.7));
-      for (const x of [9.2, 13.6]) P.line(g, x, 12.4, x + (x < 11 ? 0.8 : -0.8), 17.6, 0.4, '#d8d0b0'); // ribs showing at the wound
-      // fungus caps and weed
-      for (const [x, y, r] of [[7, 10.4, 1.4], [15, 12, 1.1], [8, 18, 0.9]]) { P.ell(g, x, y, r, r * 0.6, '#c8a060'); P.line(g, x, y, x, y + r * 0.8, 0.4, '#e8e0c0'); }
-      for (let i = 0; i < 4; i++) { const x = 7.4 + i * 2.4; g.beginPath(); g.moveTo(x, 8.6); g.quadraticCurveTo(x + (f ? 0.6 : -0.6), 12, x - 0.4, 15 + (i % 2) * 2); g.strokeStyle = c.rot; g.lineWidth = 0.7; g.stroke(); }
-      // arms hanging, one bone bare
-      limb(g, 6.4, 10, 4, 17 + w, 1.2, 1, sd); P.bone(g, 15.8, 10, 18.2, 16 - w, 0.6, '#d8d0b0'); claws(g, 18.2, 16.4 - w, 0.6, 3, 1.2, 0.3, '#d8d0b0');
-      // a lolling head, jaw hanging, one eye glowing
-      const hx = 12, hy = 5.4;
-      P.circle(g, hx, hy, 3.2, P.vol(g, hx, hy, 3.2, sh(s, 0.1)));
-      P.path(g, [hx - 1, hy + 1.4, hx + 3, hy + 1, hx + 2.4, hy + 4.2, hx - 0.4, hy + 3.6]); P.fill(g, '#141a08');
-      P.circle(g, hx + 1.2, hy - 0.4, 0.8, '#141a08'); evil(g, hx + 1.2, hy - 0.4, 0.45, c.eye); P.circle(g, hx - 1.4, hy - 0.4, 0.7, '#141a08');
-      drips(g, [[hx + 1.4, hy + 4, 2], [9, 20, 1.6]], G.rgba(c.gas, 0.8));
+      const s = '#7a5a3a', sl = sh(s, 0.4), sd = sh(s, -0.35), w = f ? 0.8 : -0.8, G0 = 26.6, rope = '#a08a5a';
+      P.ell(g, 11, G0 + 0.4, 6.4, 1, 'rgba(0,0,0,0.45)');
+      // legs: gaunt, bent, feet dragging
+      const leg = (hx, kx, ax, col) => { limb(g, hx, 17.6, kx, 21.6, 1.3, 1, col); limb(g, kx, 21.6, ax, 25.6, 1, 0.8, col); P.path(g, [ax - 1, 25.4, ax + 1.8, 25.6, ax + 2, 26.8, ax - 1.2, 26.8]); P.fill(g, col); };
+      leg(9.4, 8.4 - w * 0.4, 8 - w, sd);
+      // the far arm hanging, the hand clawed
+      limb(g, 8.2, 9.6, 6.6, 14.4, 1, 0.8, sd); limb(g, 6.6, 14.4, 7, 18.4, 0.8, 0.6, sd); claws(g, 7, 18.8, 1.6, 3, 1.1, 0.28, sh(s, 0.6));
+      // the body: a shrunken chest and a belly swollen tight, the skin split over it and gas glowing through
+      g.beginPath(); g.moveTo(8, 18); g.quadraticCurveTo(6.4, 13.6, 8, 9.4); g.quadraticCurveTo(10.6, 7.6, 13.4, 9.2); g.quadraticCurveTo(17.6, 12, 16.4, 16.4); g.quadraticCurveTo(14.6, 18.8, 11, 18.6); g.closePath();
+      P.fill(g, P.lg(g, 7, 8, 16, 19, [sl, s, sd]));
+      P.ell(g, 13, 15, 3.2, 2.8, P.vol(g, 12.4, 14, 3.2, sh(c.skin, 0.1))); // the gas-swollen belly, gone green
+      P.glow(g, 13.2, 15.2, 4, c.gas, 0.5);
+      g.strokeStyle = c.gas; g.lineWidth = 0.45; g.beginPath(); g.moveTo(11.6, 13.4); g.lineTo(12.6, 14.8); g.lineTo(12, 16.2); g.moveTo(14.4, 13.6); g.lineTo(14, 15); g.stroke();
+      [[11.4, 16.6, 0.6], [15, 16.2, 0.5], [14.2, 12.8, 0.45]].forEach(([x, y, r]) => { P.circle(g, x, y, r, P.vol(g, x - r * 0.3, y - r * 0.3, r, c.gas)); }); // boils
+      g.strokeStyle = sd; g.lineWidth = 0.35; for (let i = 0; i < 2; i++) { g.beginPath(); g.moveTo(8.6, 10.6 + i * 1.3); g.quadraticCurveTo(10.4, 10.2 + i * 1.3, 12, 10.8 + i * 1.2); g.stroke(); } // ribs
+      P.path(g, [8, 16.6, 12, 17.6, 11, 19.8, 9.6, 18.6, 8.4, 19.6]); P.fill(g, c.rot); // a rag of peat-rotted cloth
+      leg(12, 13.6 + w * 0.4, 14 + w, s);
+      // the head, lolling forward on a stretched neck, a noose still knotted round it, the jaw hanging open
+      const hx = 13.4, hy = 5;
+      limb(g, 11.2, 8.6, hx - 0.6, hy + 1.4, 1.2, 1, sd);
+      g.save(); g.translate(hx, hy); g.scale(1.3, 1.3); g.translate(-hx, -hy);
+      P.ell(g, hx, hy, 2.4, 2.2, P.vol(g, hx - 0.8, hy - 0.8, 2.4, sh(s, 0.6)), 0.2);
+      P.path(g, [hx - 2.2, hy - 1, hx - 1.6, hy - 2.8, hx + 0.6, hy - 2.6, hx - 0.6, hy - 1.4]); P.fill(g, '#2a2014'); // lank hair plastered to the skull
+      P.path(g, [hx + 0.2, hy + 1, hx + 2.8, hy + 0.8, hx + 2.4, hy + 3 + (f ? 0.4 : 0), hx + 0.4, hy + 2.8]); P.fill(g, '#140a06');
+      P.ell(g, hx + 1.2, hy - 0.4, 0.7, 0.55, '#140a06'); evil(g, hx + 1.2, hy - 0.4, 0.45, c.eye); P.ell(g, hx - 0.8, hy - 0.3, 0.55, 0.5, '#140a06'); evil(g, hx - 0.8, hy - 0.3, 0.35, c.eye);
+      g.restore();
+      P.line(g, 10.8, 8.8, 13.4, 8.2, 0.8, rope); P.line(g, 10.8, 8.8, 13.4, 8.2, 0.3, sh(rope, -0.4)); // the noose
+      P.line(g, 11, 9, 10.2, 12.4 + (f ? 0.4 : 0), 0.6, rope); P.circle(g, 10.2, 12.6 + (f ? 0.4 : 0), 0.5, sh(rope, -0.3)); // its frayed end
+      // the near arm reaching forward
+      limb(g, 13.6, 9.8, 16.6, 12.6, 1.1, 0.9, s); limb(g, 16.6, 12.6, 19.4, 12, 0.9, 0.7, sl); claws(g, 19.6, 12, 0.2, 3, 1.3, 0.3, sh(s, 0.6));
+      g.save(); g.globalAlpha = 0.45; P.ell(g, 16.6, 5 - (f ? 0.6 : 0), 1.4, 1, c.gas); P.ell(g, 18.2, 3.2 - (f ? 0.8 : 0), 1, 0.7, c.gas); g.restore(); // gas seeping
     } });
 
-  /* ---------- Bog Wraith: a hunched hag of mist and moss, long-fingered, lank hair, trailing into vapour ---------- */
+  /* ---------- Bog Wraith: the spirit of a drowned woman: long wet hair hanging over her face and to her waist, one eye burning
+   *            through it, a gaping mouth; gaunt arms stretched out with long hooked fingers, calling up the hands of the drowned;
+   *            below the ribs she is only muddy water pouring away ---------- */
   def('bogwraith', { w: 24, h: 28, cy: 18, frames: 2,
     colors: { mist: '#8aa070', hair: '#1e2614', eye: '#d0ff40', skin: '#a8b48a' },
     draw(g, f, c) {
-      const m = c.mist, sway = f ? 1 : -1;
-      P.glow(g, 12, 16, 12, c.eye, 0.18);
-      // the body trails away into vapour
-      g.beginPath(); g.moveTo(7, 10); g.quadraticCurveTo(12, 8, 17, 10); g.quadraticCurveTo(19, 18, 16 + sway, 26); g.quadraticCurveTo(14, 23, 12, 27); g.quadraticCurveTo(10, 23, 8 - sway, 26); g.quadraticCurveTo(5, 18, 7, 10); g.closePath();
-      P.fill(g, P.lg(g, 0, 8, 0, 27, [G.rgba(sh(m, 0.2), 0.95), G.rgba(m, 0.7), G.rgba(sh(m, -0.3), 0)]));
-      for (const [x, y, r] of [[8, 13, 1.2], [15.6, 15, 1], [10, 19, 0.9]]) P.ell(g, x, y, r, r * 0.7, '#3a5a1a'); // moss
-      // long arms reaching, too-long fingers
-      for (const [x0, y0, x1, y1, col] of [[7.4, 11, 2.4, 15 + sway, sh(c.skin, -0.3)], [16.6, 11, 21.6, 14 - sway, c.skin]]) { limb(g, x0, y0, x1, y1, 0.9, 0.6, col); claws(g, x1, y1 + 0.3, x1 < 12 ? -0.6 : 0.6, 4, 2, 0.25, sh(c.skin, -0.2)); }
-      // the head: lank hair to the waist, a gaunt face, glowing eyes, a wide black mouth
-      const hx = 12.6, hy = 6;
-      for (let i = 0; i < 7; i++) { const x = hx - 3.4 + i * 1.1; g.beginPath(); g.moveTo(x, hy - 2.4); g.quadraticCurveTo(x - 0.6 + sway * 0.3, hy + 4, x - 0.4 + (i % 2) * 0.6, hy + 9 + (i % 3)); g.strokeStyle = c.hair; g.lineWidth = 0.7; g.stroke(); }
-      P.ell(g, hx + 0.4, hy, 2.4, 3, P.lg(g, hx - 2, hy - 3, hx + 2, hy + 3, [c.skin, sh(c.skin, -0.45)]));
-      P.path(g, [hx - 3.6, hy - 1, hx - 1, hy - 3.8, hx + 2, hy - 3.8, hx + 3.6, hy - 1.4, hx + 1.4, hy - 2.4, hx - 1.4, hy - 2.4]); P.fill(g, c.hair);
-      evil(g, hx - 0.6, hy - 0.4, 0.5, c.eye); evil(g, hx + 1.6, hy - 0.4, 0.5, c.eye);
-      P.ell(g, hx + 0.6, hy + 1.8, 1, 0.8 + (f ? 0.3 : 0), '#0a0e04');
+      const s = c.skin, sl = sh(s, 0.3), sd = sh(s, -0.35), m = c.mist, w = f ? 1 : -1;
+      P.glow(g, 12, 14, 11, c.eye, 0.12);
+      // below the ribs: streams of muddy water pouring away, thinning to drips
+      [[8.4, 5, -0.6], [10.4, 7, 0], [12.6, 6.2, 0.4], [14.6, 4.6, 0.8]].forEach(([x, l, lean], i) => { const d = (i % 2 ? w : -w) * 0.6; g.beginPath(); g.moveTo(x - 1.3, 16.6); g.quadraticCurveTo(x + lean * 2 + d, 16.6 + l * 0.6, x + lean * 3 + d, 16.6 + l + 3);
+        g.quadraticCurveTo(x + lean * 1.4 + d * 0.3 + 0.5, 16.6 + l * 0.5, x + 1.3, 16.6); g.closePath(); P.fill(g, P.lg(g, x, 16.6, x, 16.6 + l + 3, [G.rgba(m, 0.95), G.rgba(sh(m, -0.3), 0.3)])); });
+      // the far arm stretched out, the long fingers hooked
+      limb(g, 8.4, 9.2, 4.6, 11.4, 1, 0.8, sd); limb(g, 4.6, 11.4, 1.8, 11 + w * 0.4, 0.8, 0.6, sd); claws(g, 1.6, 11 + w * 0.4, 3.2, 4, 1.8, 0.28, sd);
+      // the body: gaunt, the ribs showing, a torn shift clinging to it
+      g.beginPath(); g.moveTo(8.4, 17); g.quadraticCurveTo(7.4, 12, 8.6, 8.6); g.quadraticCurveTo(12, 7.4, 15, 8.6); g.quadraticCurveTo(16, 12, 15.4, 17); g.closePath();
+      P.fill(g, P.lg(g, 8, 8, 15, 17, [sl, s, sd]));
+      g.strokeStyle = sd; g.lineWidth = 0.35; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(9.4, 10.4 + i * 1.3); g.quadraticCurveTo(11.8, 10 + i * 1.3, 14.4, 10.6 + i * 1.2); g.stroke(); }
+      P.path(g, [8.2, 13.4, 15.6, 13, 16, 17.6, 14, 16.4, 12.4, 18.2, 10.6, 16.6, 8.4, 17.8]); P.fill(g, P.lg(g, 8, 13, 8, 18, [sh(m, -0.2), sh(m, -0.5)])); // the shift
+      // the head: hair hanging long and wet over the face and down the back, one eye burning through it, a gaping mouth
+      const hx = 12.2, hy = 5.2;
+      P.path(g, [hx - 3.4, hy - 1, hx - 4.2, hy + 7 + w * 0.3, hx - 2.4, hy + 10.4, hx - 1.4, hy + 6]); P.fill(g, c.hair); // hair down the back
+      P.ell(g, hx, hy, 2.8, 3, P.vol(g, hx - 0.6, hy - 0.8, 3, sl));
+      P.ell(g, hx + 1.2, hy + 0.2, 0.8, 0.7, '#0a0a06'); evil(g, hx + 1.2, hy + 0.2, 0.55, c.eye); P.glow(g, hx + 1.2, hy + 0.2, 2.4, c.eye, 0.6);
+      P.ell(g, hx + 0.8, hy + 2.2, 0.8, 1.2 + (f ? 0.3 : 0), '#0a0a06'); // the mouth, gaping
+      g.beginPath(); g.moveTo(hx - 3, hy + 2); g.quadraticCurveTo(hx - 3.4, hy - 3.6, hx + 0.4, hy - 3.2); g.quadraticCurveTo(hx + 3.2, hy - 2.6, hx + 2.6, hy - 1); g.lineTo(hx + 0.4, hy - 0.8); g.lineTo(hx - 0.2, hy + 4.4); g.lineTo(hx - 1.6, hy + 7.4); g.closePath(); P.fill(g, c.hair); // the crown of hair
+      for (const [x0, x1] of [[hx - 0.6, hx - 1], [hx + 2.2, hx + 2.6 + w * 0.2]]) P.line(g, x0, hy - 1, x1, hy + 5.4, 0.5, c.hair); // strands over the face
+      // the near arm stretched out, calling
+      limb(g, 15, 9.2, 18.4, 10.4, 1, 0.8, s); limb(g, 18.4, 10.4, 21.4, 9.4 - w * 0.4, 0.8, 0.6, sl); claws(g, 21.6, 9.4 - w * 0.4, -0.2, 4, 1.8, 0.28, sl);
+      P.glow(g, 22.4, 9.4, 2.4, c.eye, 0.4);
     } });
 
   /* ---------- Bog Toad: a squat warty toad as big as a hound, throat sac, a long sticky tongue ---------- */
@@ -1399,62 +1422,84 @@
       if (f) { P.line(g, 23.6, 9.8, 25.8, 10.2, 0.8, '#c85060'); P.circle(g, 25.8, 10.2, 0.7, '#e06070'); } // the tongue flicking
     } });
 
-  /* ---------- Treant: a walking rotten stump, root legs, a hollow face carved by rot, moss and fungus ---------- */
+  /* ---------- Treant: a dead tree that walks: a gnarled trunk twisting up from a spread of roots, a hollow face of knots burning
+   *            with swamp-light, branch arms ending in twig claws, a few bare boughs above, moss hanging, shelf fungus ---------- */
   def('treant', { w: 28, h: 32, cy: 22, frames: 2,
     colors: { bark: '#4a3a24', moss: '#4a6a1a', eye: '#d0ff40', fungus: '#c8a060' },
     draw(g, f, c) {
-      const b = c.bark, bd = sh(b, -0.5), w = f ? 1 : -1;
-      P.ell(g, 14, 30.4, 9, 1.5, 'rgba(0,0,0,0.45)');
-      // root legs spreading
-      for (const [x0, x1, col] of [[10, 5 - w, bd], [13, 11 + w, b], [16, 19 - w, bd], [18, 23 + w, b]]) { g.beginPath(); g.moveTo(x0 - 1.4, 22); g.quadraticCurveTo(x0, 27, x1, 30); g.lineTo(x1 + 1.4, 30); g.quadraticCurveTo(x0 + 1.6, 26, x0 + 1.4, 22); g.closePath(); P.fill(g, col); }
-      // the trunk: gnarled, ridged bark
-      g.beginPath(); g.moveTo(8, 23); g.quadraticCurveTo(6, 14, 8.4, 6); g.lineTo(19.6, 6); g.quadraticCurveTo(22, 14, 20, 23); g.closePath();
-      P.fill(g, P.lg(g, 7, 0, 21, 0, [bd, sh(b, 0.25), b, bd]));
-      g.strokeStyle = sh(b, -0.6); g.lineWidth = 0.5; for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(9 + i * 2.4, 7); g.quadraticCurveTo(8.4 + i * 2.6, 15, 9.4 + i * 2.2, 22); g.stroke(); }
-      // a broken crown of splintered branches
-      for (const [x, tx, ty] of [[9, 5, 0], [12, 11, -1.4], [16, 18, 0.4], [19, 23, 2.4]]) { P.line(g, x, 6.4, tx, ty + 1, 1.1, b); P.line(g, (x + tx) / 2, (6.4 + ty) / 2, (x + tx) / 2 + (tx > x ? 2 : -2), (6.4 + ty) / 2 - 1.4, 0.6, b); }
-      // arms: two thick boughs ending in twig claws
-      limb(g, 8, 11, 3, 17 + w, 1.6, 1, bd); claws(g, 2.8, 17.4 + w, -0.6, 4, 2, 0.35, bd);
-      limb(g, 20, 11, 25, 17 - w, 1.6, 1, b); claws(g, 25.2, 17.4 - w, 0.6, 4, 2, 0.35, b);
-      // the rotted face: hollow eyes, a gaping split mouth
-      P.ell(g, 12, 11, 1.6, 1.2, '#0a0804'); P.ell(g, 16.6, 11, 1.6, 1.2, '#0a0804'); evil(g, 12.2, 11, 0.55, c.eye); evil(g, 16.8, 11, 0.55, c.eye);
-      P.path(g, [11, 15, 18, 14.6, 16.6, 18.4, 14.4, 17.2, 12.6, 18.6]); P.fill(g, '#0a0804');
-      // moss and fungus
-      for (const [x, y, r] of [[9.4, 7.4, 1.6], [18.4, 19, 1.4], [10, 20.6, 1.2]]) P.ell(g, x, y, r, r * 0.6, c.moss);
-      for (const [x, y] of [[19.4, 13], [20, 15.4], [8, 16]]) { P.ell(g, x, y, 1.3, 0.6, c.fungus); P.line(g, x, y, x - 0.6, y + 0.8, 0.4, '#e8e0c0'); }
+      const b = sh(c.bark, 0.15), bl = sh(c.bark, 0.55), bd = sh(c.bark, -0.4), w = f ? 1 : -1, G0 = 30.4;
+      P.ell(g, 14, G0 + 0.3, 9, 1.2, 'rgba(0,0,0,0.45)');
+      // bare boughs above, uneven, one broken
+      const bough = (x, y, pts, wd) => { let px = x, py = y, ww = wd; pts.forEach(([qx, qy]) => { limb(g, px, py, qx, qy, ww, ww * 0.6, bd); px = qx; py = qy; ww *= 0.6; }); };
+      bough(10.4, 6, [[7.4, 2.4], [4.6, 1.4]], 1.2); bough(8.6, 3.8, [[9, 0.6]], 0.6);
+      bough(15.4, 5, [[17.6, 1.4], [20.4, 0.4]], 1.3); bough(18, 1.8, [[19.8, -0.6]], 0.5);
+      // roots: spread and gripping the ground, stepping
+      [[8.6, -4 - w, dk => dk], [11.6, -1.2 + w * 0.6], [15.6, 1.4 - w * 0.6], [18, 4 + w]].forEach(([x, dx], i) => { const col = i % 3 ? b : bd; limb(g, x, 23.4, x + dx * 0.5, 27.4, 1.7, 1.1, col); limb(g, x + dx * 0.5, 27.4, x + dx, G0, 1.1, 0.5, col); });
+      // the far arm: a crooked bough reaching forward-down, twig claws
+      const fa = sh(c.bark, -0.05); limb(g, 9.6, 12, 5.4, 16, 1.6, 1.2, fa); limb(g, 5.4, 16, 4.4, 20.6, 1.2, 0.8, fa); for (const a of [1.2, 1.7, 2.2]) P.line(g, 4.4, 20.6, 4.4 + Math.cos(a) * 2.4, 20.6 + Math.sin(a) * 2.4, 0.5, fa);
+      // the trunk: twisting, narrow at the waist, the grooves of the bark following the twist
+      g.beginPath(); g.moveTo(8.6, 24.4); g.quadraticCurveTo(10.6, 18, 8.4, 11.4); g.quadraticCurveTo(8, 5, 12.6, 4.4); g.quadraticCurveTo(17.6, 4.6, 17.8, 10.4); g.quadraticCurveTo(15.8, 17, 18.6, 24.4); g.closePath();
+      P.fill(g, P.lg(g, 8, 4, 18, 24, [bl, b, bd]));
+      g.strokeStyle = bd; g.lineWidth = 0.45; for (const [x0, x1] of [[10.4, 12.4], [13, 14.8], [15.6, 16.8]]) { g.beginPath(); g.moveTo(x0, 5.6); g.bezierCurveTo(x0 - 1.6, 12, x1 + 1, 16, x1, 24); g.stroke(); }
+      // the face: two knot-holes burning, a hollow split open for a mouth
+      P.ell(g, 11.6, 10, 1.3, 1.1, '#0c0a04', 0.3); P.ell(g, 15.4, 9.8, 1.2, 1, '#0c0a04', -0.3);
+      evil(g, 11.6, 10, 0.7, c.eye, 0.3); evil(g, 15.4, 9.8, 0.65, c.eye, -0.3);
+      P.path(g, [11, 13, 16.4, 12.6, 15.4, 17 + (f ? 0.6 : 0), 12.8, 17.6, 11.8, 15.6]); P.fill(g, '#0c0a04'); P.glow(g, 13.6, 15, 2.6, c.eye, 0.35);
+      P.path(g, [11.4, 13.1, 12.2, 14.8, 12.8, 13]); P.fill(g, bl); P.path(g, [14.4, 12.8, 15, 14.6, 15.6, 12.7]); P.fill(g, bl); // splinter teeth
+      // moss hanging off the shoulders, shelf fungus on the trunk
+      g.strokeStyle = c.moss; g.lineWidth = 0.8; for (const [x, l] of [[9.4, 5], [11, 3.4], [16.8, 4.4]]) { g.beginPath(); g.moveTo(x, 6.4); g.quadraticCurveTo(x + (f ? 0.6 : -0.4), 6.4 + l * 0.6, x - 0.2, 6.4 + l); g.stroke(); }
+      [[9.4, 19.6, 1.8], [10, 21.4, 1.3]].forEach(([x, y, r]) => { P.ell(g, x, y, r, r * 0.45, P.lg(g, 0, y - 0.6, 0, y + 0.6, [sh(c.fungus, 0.3), sh(c.fungus, -0.4)])); });
+      // the near arm: a heavier bough, raised to strike, twig claws spread
+      limb(g, 17, 11, 21.6, 12.4, 1.8, 1.3, b); limb(g, 21.6, 12.4, 24, 8.6 + w * 0.4, 1.3, 0.9, b);
+      for (const a of [-2.2, -1.6, -1, -0.4]) P.line(g, 24, 8.6 + w * 0.4, 24 + Math.cos(a) * 2.8, 8.6 + w * 0.4 + Math.sin(a) * 2.8, 0.5, b);
     } });
 
-  /* ---------- Blightfiend (boss): a hulking fly-demon, torn wings, a cluster of eyes, a belly of rot it vomits ---------- */
+  /* ---------- Blightfiend (boss): a bloated plague-fly demon standing upright: two great red compound eyes, a proboscis
+   *            dripping bile (what it retches over you), torn veined wings, four thin hooked arms, a swollen belly glowing
+   *            with sores, thick legs ---------- */
   def('blightfiend', { w: 54, h: 50, cy: 32, frames: 2,
     colors: { hide: '#4a4a22', belly: '#8a8a3a', wing: '#b8c890', eye: '#ff3a2a', bile: '#b0d040' },
     draw(g, f, c) {
-      const hd = c.hide, w = f ? 1 : -1;
-      P.ell(g, 27, 47.6, 16, 2.4, 'rgba(0,0,0,0.45)');
-      // torn wings behind, buzzing
-      g.save(); g.globalAlpha = 0.55;
-      for (const s of [-1, 1]) { g.save(); g.translate(27, 18); g.scale(s, 1); g.rotate(f ? -0.5 : -0.2);
-        g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(12, -14, 24, -12); g.lineTo(20, -8); g.lineTo(22, -3); g.lineTo(15, -2); g.lineTo(14, 2); g.closePath(); P.fill(g, c.wing);
-        g.strokeStyle = sh(c.wing, -0.5); g.lineWidth = 0.4; g.beginPath(); g.moveTo(0, 0); g.lineTo(22, -10); g.moveTo(4, -2); g.lineTo(18, -4); g.stroke(); g.restore(); }
-      g.restore();
-      // thick legs
-      for (const [x, d] of [[19, -w], [33, w]]) { limb(g, x, 36, x + d - 2, 46, 3, 2.6, sh(hd, -0.3)); claws(g, x + d - 2, 46.6, 0, 3, 2, 0.6, '#1a1a0a'); }
-      // a swollen belly, split and dripping
-      P.ell(g, 27, 30, 13, 11, P.rg(g, 25, 26, 13, [[0, sh(c.belly, 0.3)], [0.6, c.belly], [1, sh(hd, -0.4)]]));
-      P.ell(g, 28, 33, 5, 3, '#1a1a06'); P.glow(g, 28, 33, 6, c.bile, 0.6); P.ell(g, 28, 33.4, 3, 1.6, G.rgba(c.bile, 0.8));
-      drips(g, [[26, 35.6, 4], [30, 35.4, 3], [21, 37, 2]], G.rgba(c.bile, 0.85));
-      for (let i = 0; i < 4; i++) P.line(g, 17 + i * 2, 24 + i * 3, 19 + i * 2, 25 + i * 3, 0.5, sh(hd, -0.5));
-      // shoulders and four arms, the lower pair small and clawing
-      P.ell(g, 27, 18, 12, 6, P.vol(g, 27, 16, 12, hd));
-      limb(g, 16, 18, 8, 28 + w, 2.4, 2, sh(hd, -0.2)); claws(g, 7.6, 28.6 + w, -1, 4, 2.4, 0.5, '#1a1a0a');
-      limb(g, 38, 18, 46, 28 - w, 2.4, 2, hd); claws(g, 46.4, 28.6 - w, 1, 4, 2.4, 0.5, '#1a1a0a');
-      limb(g, 19, 26, 14, 32, 1.2, 1, sh(hd, -0.3)); limb(g, 35, 26, 40, 32, 1.2, 1, sh(hd, -0.1));
-      // the fly head: a cluster of red eyes, mandibles, a proboscis
-      const hx = 27, hy = 11;
-      P.ell(g, hx, hy, 6, 5, P.vol(g, hx, hy - 1, 6, sh(hd, 0.1)));
-      for (const [x, y, r] of [[hx - 3, hy - 1, 2.2], [hx + 3, hy - 1, 2.2], [hx - 1.2, hy - 3.4, 1.3], [hx + 1.4, hy - 3.6, 1.2], [hx, hy + 0.4, 1]]) { P.circle(g, x, y, r, sh(c.eye, -0.4)); P.circle(g, x - r * 0.3, y - r * 0.3, r * 0.45, c.eye); }
-      P.glow(g, hx, hy - 1, 7, c.eye, 0.35);
-      horn(g, hx - 2, hy + 3, hx - 4, hy + 6, hx - 2, hy + 8, 0.8, '#1a1a0a'); horn(g, hx + 2, hy + 3, hx + 4, hy + 6, hx + 2, hy + 8, 0.8, '#1a1a0a');
-      P.line(g, hx, hy + 3.4, hx + 0.4, hy + 9 + (f ? 1 : 0), 1, '#2a2a10');
+      const h = sh(c.hide, 0.2), hl = sh(c.hide, 0.6), hd = sh(c.hide, -0.35), b = c.belly, w = f ? 1 : -1, up = f ? -1.4 : 0;
+      P.ell(g, 27, 48, 14, 2, 'rgba(0,0,0,0.45)');
+      // wings: torn, veined membranes raised behind the shoulders
+      const wing = (sx) => { g.save(); g.translate(27, 16); g.scale(sx, 1);
+        g.beginPath(); g.moveTo(2, 0); g.quadraticCurveTo(10, -12 + up, 22, -14 + up); g.lineTo(20, -9 + up); g.lineTo(23, -6 + up); g.quadraticCurveTo(14, -1, 4, 4); g.closePath();
+        P.fill(g, P.lg(g, 0, -14, 20, 2, [G.rgba(sh(c.wing, 0.3), 0.85), G.rgba(c.wing, 0.6), G.rgba(sh(c.wing, -0.4), 0.5)]));
+        g.strokeStyle = sh(c.wing, -0.45); g.lineWidth = 0.4; for (const [tx, ty] of [[20, -12], [18, -6], [12, -2]]) { g.beginPath(); g.moveTo(3, 1); g.quadraticCurveTo(tx * 0.5, ty * 0.5 - 2, tx, ty + up * (ty < -8 ? 1 : 0.4)); g.stroke(); }
+        P.circle(g, 14, -7 + up * 0.6, 1, 'rgba(0,0,0,0.5)'); // a tear in the membrane
+        g.restore(); };
+      wing(-1); wing(1);
+      // legs: thick, bent, clawed feet
+      for (const [x, o, col] of [[21, -w, hd], [33, w, h]]) { limb(g, x, 36, x - 1 + o * 0.4, 41, 3, 2.4, col); limb(g, x - 1 + o * 0.4, 41, x + o * 0.6, 46.4, 2.4, 1.8, col); claws(g, x + o * 0.6 + 1, 47, 0.2, 3, 1.6, 0.5, sh(c.hide, -0.6)); }
+      // the lower far arm and upper far arm: thin, jointed like an insect's, hooked
+      limb(g, 18, 22, 12.4, 26, 1.2, 0.9, hd); limb(g, 12.4, 26, 10.6, 31, 0.9, 0.6, hd); claws(g, 10.4, 31.4, 1.8, 2, 1.6, 0.4, '#d8d0a8');
+      limb(g, 18.6, 17.6, 12, 16, 1.3, 1, hd); limb(g, 12, 16, 8.4, 11.4 + w * 0.6, 1, 0.7, hd); claws(g, 8.2, 11 + w * 0.6, -2.4, 2, 1.6, 0.4, '#d8d0a8');
+      // the body: an armoured thorax over a belly swollen huge and hanging, sores glowing on it
+      P.ell(g, 27, 30, 11.6, 9.6, P.lg(g, 16, 21, 36, 40, [sh(b, 0.35), b, sh(b, -0.45)]));
+      for (let i = 0; i < 3; i++) { g.beginPath(); g.ellipse(27, 30 + i * 2.6 - 2, 10 - i * 1.4, 2, 0, 0.15, Math.PI - 0.15); g.strokeStyle = sh(b, -0.45); g.lineWidth = 0.5; g.stroke(); } // the segments of the belly
+      P.glow(g, 28, 31, 7, c.bile, 0.4);
+      [[24, 31, 1.6], [30.4, 33.6, 1.2], [31.6, 28, 1], [22.6, 35, 0.8]].forEach(([x, y, r]) => { P.circle(g, x, y, r, P.vol(g, x - r * 0.3, y - r * 0.3, r, c.bile)); P.circle(g, x, y, r * 0.35, sh(c.bile, -0.5)); }); // sores
+      P.line(g, 25, 38.6, 25.2, 41 + (f ? 0.8 : 0), 0.5, c.bile); // dripping
+      g.beginPath(); g.moveTo(19.4, 22); g.quadraticCurveTo(20, 15, 27, 14.4); g.quadraticCurveTo(34, 15, 34.6, 22); g.quadraticCurveTo(27, 24, 19.4, 22); g.closePath();
+      P.fill(g, P.lg(g, 20, 14, 34, 24, [hl, h, hd])); // the thorax
+      P.line(g, 27, 14.8, 27, 23, 0.5, hd);
+      // the head: two great compound eyes, feelers, a proboscis dripping bile
+      const hx = 27.4, hy = 10.4;
+      P.ell(g, hx, hy, 4.6, 3.8, P.vol(g, hx - 1, hy - 1, 4.6, h));
+      for (const s of [-1, 1]) {
+        const ex = hx + s * 2.6, ey = hy - 0.6;
+        P.ell(g, ex, ey, 2.8, 3, P.rg(g, ex - s * 0.8, ey - 1, 3, [[0, sh(c.eye, 0.4)], [0.6, c.eye], [1, sh(c.eye, -0.6)]]));
+        for (let i = 0; i < 6; i++) P.circle(g, ex + Math.cos(i) * 1.5, ey + Math.sin(i * 1.7) * 1.6, 0.35, sh(c.eye, -0.5)); // facets
+        P.glow(g, ex, ey, 3, c.eye, 0.35);
+      }
+      g.strokeStyle = hd; g.lineWidth = 0.4; g.beginPath(); g.moveTo(hx - 1, hy - 3.4); g.quadraticCurveTo(hx - 3, hy - 7, hx - 5 - w * 0.4, hy - 7.4); g.moveTo(hx + 1, hy - 3.4); g.quadraticCurveTo(hx + 3, hy - 7, hx + 5 + w * 0.4, hy - 7.6); g.stroke(); // feelers
+      P.path(g, [hx - 1, hy + 2.6, hx + 1, hy + 2.6, hx + 0.4, hy + 7.4, hx - 0.4, hy + 7.4]); P.fill(g, P.lg(g, hx - 1, 0, hx + 1, 0, [hl, hd])); // the proboscis
+      P.ell(g, hx, hy + 8 + (f ? 0.8 : 0), 0.7, 1, c.bile); P.glow(g, hx, hy + 8, 2, c.bile, 0.6);
+      for (const s of [-1, 1]) P.path(g, [hx + s * 1.2, hy + 2.4, hx + s * 2.6, hy + 4.4, hx + s * 1.4, hy + 3.6]); P.fill(g, '#d8d0a8'); // mandibles
+      // the near arms: one hooked forward, one raised
+      limb(g, 35.4, 22, 41.6, 25.6, 1.2, 0.9, h); limb(g, 41.6, 25.6, 44, 30.6, 0.9, 0.6, hl); claws(g, 44.2, 31, 1.4, 2, 1.6, 0.4, '#d8d0a8');
+      limb(g, 34.6, 17.6, 41, 15.6, 1.3, 1, h); limb(g, 41, 15.6, 45, 11.4 - w * 0.6, 1, 0.7, hl); claws(g, 45.2, 11 - w * 0.6, -0.8, 2, 1.6, 0.4, '#d8d0a8');
     } });
 
   /* ---------- Bog Serpent (boss): a great moss-backed serpent reared up out of the mire, a hood of fins, acid dripping ---------- */
@@ -1474,7 +1519,10 @@
       for (const [x, y] of [[21, 40], [30, 30], [24, 24], [36, 44]]) P.ell(g, x, y, 1.8, 0.9, '#5a7a2a');
       // a hood of fins fanned behind the head
       g.save(); g.translate(30, 13 + w * 0.4);
-      for (let k = -3; k <= 3; k++) { const a = -Math.PI / 2 + k * 0.32; P.path(g, [0, 0, Math.cos(a - 0.1) * 13, Math.sin(a - 0.1) * 11, Math.cos(a + 0.1) * 13, Math.sin(a + 0.1) * 11]); P.fill(g, P.lg(g, 0, 0, 0, -11, [sh(c.fin, -0.3), c.fin, sh(c.fin, 0.3)])); }
+      // a hood flared wide behind the head like a cobra's, dark-rimmed, two false eyes marked on it
+      P.ell(g, -2.4, 4, 6.2, 9, P.lg(g, -8, 0, 4, 0, [sh(c.fin, -0.45), c.fin, sh(c.fin, 0.25), sh(c.fin, -0.3)]));
+      g.beginPath(); g.ellipse(-2.4, 4, 6.2, 9, 0, 0, Math.PI * 2); g.strokeStyle = sh(c.fin, -0.6); g.lineWidth = 0.7; g.stroke();
+      for (const [x, y] of [[-5.2, 1.6], [-4.8, 6.8]]) { P.ell(g, x, y, 1.3, 1, '#1a0a06'); P.circle(g, x, y, 0.5, sh(c.acid, 0.2)); }
       g.restore();
       // the head, jaws open, fangs, acid dripping
       const hx = 32, hy = 15 + w * 0.4;
@@ -1485,63 +1533,88 @@
       drips(g, [[hx + 5, hy + 4.4, 3], [hx + 8, hy + 4, 2]], c.acid); P.glow(g, hx + 6, hy + 3, 4, c.acid, 0.4);
     } });
 
-  /* ---------- Elder Treant (boss): an ancient rotten oak walking on a mass of roots, a face in the bole, a crown of dead limbs ---------- */
+  /* ---------- Elder Treant (boss): an ancient tree-giant, hunched under a crown of great bare boughs like antlers; a face
+   *            of deep hollows with a beard of moss, sap glowing in the cracks; knotted arms dragging to the ground, roots spread
+   *            wide beneath it ---------- */
   def('eldertreant', { w: 56, h: 64, cy: 44, frames: 2,
     colors: { bark: '#3e3020', moss: '#4a6a1a', eye: '#d0ff40', fungus: '#c89060' },
     draw(g, f, c) {
-      const b = c.bark, bd = sh(b, -0.5), w = f ? 1.2 : -1.2;
-      P.ell(g, 28, 61, 20, 2.8, 'rgba(0,0,0,0.5)');
-      // a mass of roots
-      for (let i = 0; i < 7; i++) { const x0 = 18 + i * 3.4, x1 = 6 + i * 7.4 + (i % 2 ? w : -w); g.beginPath(); g.moveTo(x0 - 2, 46); g.quadraticCurveTo(x0, 56, x1, 61); g.lineTo(x1 + 2.4, 61); g.quadraticCurveTo(x0 + 2.4, 55, x0 + 2, 46); g.closePath(); P.fill(g, i % 2 ? bd : b); }
-      // the great bole
-      g.beginPath(); g.moveTo(15, 48); g.quadraticCurveTo(11, 30, 16, 14); g.lineTo(40, 14); g.quadraticCurveTo(45, 30, 41, 48); g.closePath();
-      P.fill(g, P.lg(g, 13, 0, 43, 0, [bd, sh(b, 0.3), b, bd]));
-      g.strokeStyle = sh(b, -0.65); g.lineWidth = 0.7; for (let i = 0; i < 7; i++) { g.beginPath(); g.moveTo(17 + i * 3.6, 15); g.quadraticCurveTo(16 + i * 3.8, 30, 17 + i * 3.4, 47); g.stroke(); }
-      // the crown: dead limbs twisting up, a few dead leaves
-      for (const [x, tx, ty, k] of [[18, 8, 2, 1], [23, 18, -2, 1], [30, 32, -3, 0], [36, 44, 0, 1], [40, 52, 8, 0]]) {
-        P.line(g, x, 15, tx, ty + 2, 2.2, b); P.line(g, (x + tx) / 2, (15 + ty) / 2, (x + tx) / 2 + (tx > x ? 4 : -4), (15 + ty) / 2 - 3, 1.2, b);
-        if (k) P.ell(g, tx, ty + 2, 2.4, 1.4, '#4a4a1a');
-      }
-      // arms: huge boughs, twig claws
-      limb(g, 15, 22, 5, 36 + w, 3, 2, bd); claws(g, 4.6, 36.6 + w, -1, 5, 3, 0.6, bd);
-      limb(g, 41, 22, 51, 36 - w, 3, 2, b); claws(g, 51.4, 36.6 - w, 1, 5, 3, 0.6, b);
-      // the face in the bole: deep eye hollows, a jagged maw, sap dripping
-      P.ell(g, 23, 24, 3, 2.2, '#0a0804'); P.ell(g, 33, 24, 3, 2.2, '#0a0804'); evil(g, 23.4, 24, 1, c.eye); evil(g, 33.4, 24, 1, c.eye);
-      P.glow(g, 28, 24, 10, c.eye, 0.3);
-      P.path(g, [20, 32, 36, 31.4, 34, 40, 31, 37, 28, 41, 25, 37, 22, 40]); P.fill(g, '#0a0804');
-      drips(g, [[26, 40, 3], [31, 39, 2.4]], '#c8a040');
-      // moss and fungus shelves
-      for (const [x, y, r] of [[18, 17, 2.6], [39, 42, 2.4], [16, 40, 2], [36, 16, 2]]) P.ell(g, x, y, r, r * 0.6, c.moss);
-      for (const [x, y] of [[40, 28], [41, 32], [15, 30]]) { P.ell(g, x, y, 2.2, 0.9, c.fungus); P.line(g, x - 1.6, y + 0.5, x + 1.6, y + 0.5, 0.4, sh(c.fungus, -0.4)); }
+      const b = sh(c.bark, 0.2), bl = sh(c.bark, 0.6), bd = sh(c.bark, -0.4), w = f ? 1 : -1, G0 = 60.6, sap = c.eye;
+      P.ell(g, 28, G0 + 0.6, 22, 2.6, 'rgba(0,0,0,0.45)');
+      const bough = (x, y, pts, wd, col) => { let px = x, py = y, ww = wd; pts.forEach(([qx, qy]) => { limb(g, px, py, qx, qy, ww, ww * 0.62, col || bd); px = qx; py = qy; ww *= 0.62; }); };
+      // the crown: great bare boughs spreading up and out like antlers, uneven
+      bough(20, 16, [[13, 9], [8, 2], [5, -0.6]], 3); bough(13.6, 9.6, [[11.8, 3], [12.6, 0]], 1.4); bough(9.4, 4, [[4, 3]], 0.9);
+      bough(34, 15, [[40, 8], [46, 4], [51, 3.4]], 3.2); bough(40.6, 8.4, [[41, 2], [39.4, -0.8]], 1.5); bough(46.4, 4.2, [[49, 0]], 0.9);
+      bough(27, 14, [[26, 6], [23.6, 1]], 2);
+      // roots spread wide, the far ones darker
+      [[18, -9, bd], [22, -4, b], [30, 3, bd], [34, 8, b], [26, -1, b]].forEach(([x, dx, col]) => { limb(g, x, 50, x + dx * 0.5, 56, 3.2, 2, col); limb(g, x + dx * 0.5, 56, x + dx, G0, 2, 0.8, col); });
+      // the far arm: a knotted bough dragging to the ground, twig claws
+      const fa = sh(c.bark, 0); limb(g, 16, 22, 9, 34, 4, 3, fa); limb(g, 9, 34, 7.4, 46 + w * 0.6, 3, 2, fa); for (const a of [1, 1.5, 2, 2.5]) P.line(g, 7.4, 46 + w * 0.6, 7.4 + Math.cos(a) * 4.6, 46 + w * 0.6 + Math.sin(a) * 4.6, 1, fa);
+      P.circle(g, 9.4, 33.6, 3.2, P.vol(g, 8.6, 32.6, 3.2, b)); // a burl at the elbow
+      // the trunk: massive, hunched forward, twisting, the grooves of the bark following the twist, sap glowing in a split
+      g.beginPath(); g.moveTo(15, 52); g.quadraticCurveTo(19, 40, 15.4, 28); g.quadraticCurveTo(14, 16, 26, 14); g.quadraticCurveTo(39, 14, 40, 26); g.quadraticCurveTo(37, 40, 41.4, 52); g.closePath();
+      P.fill(g, P.lg(g, 15, 14, 40, 52, [bl, b, bd]));
+      g.strokeStyle = bd; g.lineWidth = 0.7; for (const [x0, x1] of [[19, 21.6], [23.6, 26.4], [29, 31.6], [34, 36.6]]) { g.beginPath(); g.moveTo(x0, 16); g.bezierCurveTo(x0 - 3, 28, x1 + 2, 38, x1, 52); g.stroke(); }
+      P.glow(g, 30, 42, 5, sap, 0.4); g.strokeStyle = sap; g.lineWidth = 0.7; g.beginPath(); g.moveTo(30.4, 36); g.lineTo(29.4, 40); g.lineTo(31, 43.6); g.lineTo(30, 47); g.stroke();
+      // the face: deep hollows for eyes under a heavy brow of bark, a gaping hollow mouth, a long beard of moss
+      P.path(g, [18.6, 20.6, 36, 19.6, 35, 23, 19.2, 23.4]); P.fill(g, P.lg(g, 0, 19.6, 0, 23.4, [bl, bd])); // the brow
+      P.ell(g, 22.6, 25, 2.4, 2, '#0c0a04', 0.2); P.ell(g, 31.4, 24.6, 2.3, 1.9, '#0c0a04', -0.2);
+      evil(g, 22.6, 25, 1.1, c.eye, 0.2); evil(g, 31.4, 24.6, 1, c.eye, -0.2); P.glow(g, 27, 25, 7, c.eye, 0.35);
+      P.path(g, [22, 29.4, 32.6, 29, 31, 34.6 + (f ? 0.8 : 0), 27, 36, 23.4, 34.4]); P.fill(g, '#0c0a04'); P.glow(g, 27, 32.6, 3.4, c.eye, 0.35);
+      [[23, 29.6, 24, 32.2], [26.4, 29.4, 27, 31.6], [29.6, 29.2, 30.4, 31.8]].forEach(([x0, y0, x1, y1]) => { P.path(g, [x0 - 0.6, y0, x1, y1, x0 + 0.9, y0]); P.fill(g, bl); }); // splinter teeth
+      for (let i = 0; i < 5; i++) { const x = 22.4 + i * 2.2, l = 6 + (i % 2) * 3 + (i === 2 ? 3 : 0); g.beginPath(); g.moveTo(x, 34.6); g.quadraticCurveTo(x + (f ? 0.8 : -0.6), 34.6 + l * 0.6, x - 0.4, 34.6 + l); g.strokeStyle = i % 2 ? sh(c.moss, -0.2) : c.moss; g.lineWidth = 1.2; g.stroke(); } // the beard of moss
+      // shelf fungus stepping up the trunk
+      [[37, 38, 2.6], [37.8, 41, 2], [18.4, 44, 2.2]].forEach(([x, y, r]) => { P.ell(g, x, y, r, r * 0.42, P.lg(g, 0, y - 1, 0, y + 1, [sh(c.fungus, 0.3), sh(c.fungus, -0.45)])); });
+      // the near arm: knotted, reaching forward and down, twig claws spread
+      limb(g, 38, 22, 45, 32, 4.2, 3.2, b); limb(g, 45, 32, 47.4, 44 + w * 0.6, 3.2, 2.2, b); P.circle(g, 45, 32, 3.2, P.vol(g, 44.2, 31, 3.2, b));
+      for (const a of [0.9, 1.4, 1.9, 2.4]) P.line(g, 47.4, 44 + w * 0.6, 47.4 + Math.cos(a) * 5, 44 + w * 0.6 + Math.sin(a) * 5, 1, b);
+      g.strokeStyle = c.moss; g.lineWidth = 1.1; for (const x of [40.4, 43.4]) { g.beginPath(); g.moveTo(x, 26); g.quadraticCurveTo(x + (f ? 0.8 : -0.6), 30, x, 33.4); g.stroke(); } // moss off the arm
     } });
 
-  /* ---------- Lord of Rot (Lord): a vast bloated plague-lord in a rotting mantle, a crown of antlers, a swinging censer of blight ---------- */
+  /* ---------- Lord of Rot (boss): a vast bloated corpse-king: antlers grown up through a rotted crown, a small sunken face with
+   *            a hanging jaw, a belly split open on a glowing wound, a mantle of moss and rags, a great rusted scythe ---------- */
   def('rotlord', { w: 60, h: 64, cy: 42, frames: 2,
     colors: { flesh: '#7a8a4a', mantle: '#3a3018', gold: '#8a7a3a', gas: '#b0d040', eye: '#e0ff50' },
     draw(g, f, c) {
-      const fl = c.flesh, w = f ? 1.4 : -1.4;
-      P.ell(g, 30, 61, 20, 3, 'rgba(0,0,0,0.5)'); P.glow(g, 30, 44, 26, c.gas, 0.18);
-      // the mantle, rotted to tatters
-      g.beginPath(); g.moveTo(19, 19); g.quadraticCurveTo(30, 16, 41, 19); g.quadraticCurveTo(55, 36, 51, 59); g.lineTo(9, 59); g.quadraticCurveTo(5, 36, 19, 19); g.closePath();
-      P.fill(g, P.lg(g, 8, 20, 52, 59, [sh(c.mantle, 0.3), c.mantle, sh(c.mantle, -0.55)])); rag(g, 10, 58.6, 50, 58.6, 11, 3, sh(c.mantle, -0.5));
-      P.line(g, 14, 22, 12, 56, 1, c.gold); P.line(g, 46, 22, 48, 56, 1, c.gold);
-      // the vast belly, pustules and a weeping wound
-      P.ell(g, 30, 38, 14, 13, P.rg(g, 27, 33, 15, [[0, sh(fl, 0.35)], [0.6, fl], [1, sh(fl, -0.5)]]));
-      for (const [x, y, r] of [[23, 33, 1.6], [35, 36, 1.3], [28, 44, 1.8], [37, 42, 1]]) { P.circle(g, x, y, r, sh(c.gas, -0.1)); P.circle(g, x - r * 0.3, y - r * 0.3, r * 0.4, sh(c.gas, 0.4)); }
-      P.ell(g, 30, 39, 3.4, 5, '#1a1a06'); P.glow(g, 30, 39, 5, c.gas, 0.6); drips(g, [[29, 44, 4], [31.6, 43.4, 3]], G.rgba(c.gas, 0.85));
-      // arms: a crooked staff hung with a censer of blight, the other a bloated hand
-      limb(g, 15, 24, 8, 36, 2.6, 2.2, sh(fl, -0.3)); claws(g, 7.6, 36.6, -1, 4, 2.4, 0.5, sh(fl, -0.4));
-      limb(g, 45, 24, 50, 32, 2.6, 2.2, fl);
-      P.line(g, 49, 58, 53, 10, 1.4, '#2a2010'); P.line(g, 53, 12, 47 + w * 2, 20, 0.5, '#6a6a5a');
-      P.circle(g, 47 + w * 2, 22, 3, P.vol(g, 47 + w * 2, 21, 3, c.gold)); P.glow(g, 47 + w * 2, 23, 7, c.gas, 0.6);
-      g.save(); g.globalAlpha = 0.5; for (let i = 0; i < 3; i++) P.circle(g, 46 + w * 2 - i * 1.5, 26 + i * 2.4, 1.6 + i * 0.6, c.gas); g.restore();
-      // the head sunk in fat, a crown of antlers, glowing eyes, a slack maw
-      const hx = 30, hy = 15;
-      P.ell(g, hx, hy, 7, 6, P.vol(g, hx, hy - 1, 7, sh(fl, 0.1)));
-      P.rect(g, hx - 6, hy - 6, 12, 2, c.gold); for (let i = 0; i < 4; i++) P.path(g, [hx - 5.4 + i * 3.4, hy - 6, hx - 4 + i * 3.4, hy - 9, hx - 2.6 + i * 3.4, hy - 6]); P.fill(g, c.gold);
-      for (const s of [-1, 1]) { horn(g, hx + s * 5, hy - 5, hx + s * 11, hy - 10, hx + s * 12, hy - 17, 1, '#c8b890'); horn(g, hx + s * 9, hy - 10, hx + s * 14, hy - 11, hx + s * 16, hy - 14, 0.6, '#c8b890'); }
-      evil(g, hx - 2.4, hy - 0.6, 0.8, c.eye); evil(g, hx + 2.6, hy - 0.6, 0.8, c.eye);
-      P.ell(g, hx, hy + 3, 3, 1.6, '#140a04'); teeth(g, hx - 2.4, hy + 2.4, hx + 2.4, hy + 2.4, 5, 0.6, 1, '#c8c090');
+      const s = c.flesh, sl = sh(s, 0.35), sd = sh(s, -0.35), mt = c.mantle, w = f ? 0.8 : -0.8, bone = '#d8ccaa', rust = '#6a4a2a';
+      P.ell(g, 30, 61, 18, 2.4, 'rgba(0,0,0,0.45)');
+      P.glow(g, 30, 36, 24, c.gas, 0.12);
+      // the scythe behind: a long crooked haft, a great rusted blade curving over the top
+      P.line(g, 47.6, 58, 45.4, 8, 1.4, P.lg(g, 45, 8, 48, 58, ['#4a3a24', '#2a1c10']));
+      g.beginPath(); g.moveTo(45.2, 8.4); g.bezierCurveTo(51, 5, 57, 9, 57.6, 19); g.bezierCurveTo(55, 13, 51, 11, 45.6, 12.4); g.closePath();
+      P.fill(g, P.lg(g, 45, 6, 57, 19, ['#b89a7a', rust, sh(rust, -0.3)])); P.line(g, 46, 8.6, 57, 17.4, 0.4, '#d8c8b0'); // the edge
+      // the mantle: moss and rags hanging off the back of the shoulders
+      g.beginPath(); g.moveTo(15, 20); g.bezierCurveTo(9, 28, 8 - w, 38, 9 - w, 48); g.lineTo(20, 46); g.lineTo(22, 22); g.closePath();
+      P.fill(g, P.lg(g, 8, 20, 22, 48, [sh(mt, 0.3), mt, sh(mt, -0.5)]));
+      P.rag(g, 9 - w, 47.6, 20, 45.6, 4, 2.8, sh(mt, -0.4));
+      // legs: short and thick under the gut
+      for (const [x, o, col] of [[23, -w, sd], [37, w, s]]) { limb(g, x, 46, x + o * 0.4, 52, 3.6, 3, col); limb(g, x + o * 0.4, 52, x + o, 57.6, 3, 2.6, col); P.ell(g, x + o + 0.6, 58.6, 3.6, 1.4, sh(col, -0.3)); }
+      // the gut: vast and hanging, the skin blotched, split open on a glowing wound
+      P.ell(g, 30, 38, 15, 12.4, P.lg(g, 15, 26, 45, 50, [sl, s, sd]));
+      [[21, 33, 2.2, 1.4], [38, 44, 2, 1.2], [35, 30, 1.4, 1]].forEach(([x, y, a, b]) => P.ell(g, x, y, a, b, G.rgba('#4a3a3a', 0.5)));
+      g.beginPath(); g.moveTo(26, 32); g.quadraticCurveTo(22.4, 39, 27, 46); g.quadraticCurveTo(33, 40, 31.6, 32.4); g.quadraticCurveTo(28.6, 30.4, 26, 32); g.closePath(); P.fill(g, '#1a1408');
+      P.glow(g, 28.4, 39, 7, c.gas, 0.7); P.ell(g, 28.4, 39.6, 2.6, 4.4, P.rg(g, 28.4, 39.6, 4.4, [[0, '#f8ffc8'], [0.5, c.gas], [1, sh(c.gas, -0.5)]]));
+      g.strokeStyle = '#3a2a10'; g.lineWidth = 0.45; for (let i = 0; i < 4; i++) P.line(g, 25.4 + i * 0.4, 33.6 + i * 3, 31.4 - i * 0.2, 33 + i * 3.2, 0.35, '#3a2a10'); // stitches torn open
+      P.ell(g, 20, 42, 1, 1.6 + (f ? 0.6 : 0), G.rgba(c.gas, 0.6)); // a drip
+      // the far arm: heavy, hanging, the hand clawed
+      limb(g, 16.6, 25, 11, 34, 3.4, 2.8, s); limb(g, 11, 34, 10.4, 42, 2.8, 2.2, s); claws(g, 10.2, 42.8, 1.6, 4, 2.4, 0.6, bone);
+      // the shoulders and a small head sunk into them: a sunken face, the jaw hanging, antlers grown up through a crown of rotted gold
+      g.beginPath(); g.moveTo(15, 28); g.quadraticCurveTo(15, 20, 22, 18.4); g.quadraticCurveTo(30, 16.6, 38, 18.4); g.quadraticCurveTo(45, 20, 45, 28); g.quadraticCurveTo(30, 31, 15, 28); g.closePath();
+      P.fill(g, P.lg(g, 15, 17, 45, 30, [sl, s, sd]));
+      const hx = 30, hy = 15.6;
+      const antler = (sx) => { g.save(); g.translate(hx + sx * 2.4, hy - 3.4); g.scale(sx, 1); g.lineCap = 'round'; g.strokeStyle = bone; g.lineWidth = 1.2;
+        g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(3, -4, 7, -8); g.moveTo(3, -4.4); g.lineTo(2.4, -8.4); g.moveTo(5.4, -6.6); g.lineTo(8.6, -6.2); g.stroke();
+        g.strokeStyle = sh(bone, -0.4); g.lineWidth = 0.4; g.beginPath(); g.moveTo(0.4, 0.2); g.quadraticCurveTo(3.4, -3.6, 7.2, -7.6); g.stroke(); g.restore(); };
+      antler(-1); antler(1);
+      P.ell(g, hx, hy, 4.2, 3.8, P.vol(g, hx - 1.2, hy - 1.2, 4.2, sl));
+      P.path(g, [hx - 4.2, hy - 2.6, hx - 3.4, hy - 5.4, hx - 1.8, hy - 3.6, hx, hy - 5.8, hx + 1.8, hy - 3.6, hx + 3.4, hy - 5.4, hx + 4.2, hy - 2.6]); P.fill(g, P.lg(g, 0, hy - 6, 0, hy - 2.6, [sh(c.gold, 0.4), sh(c.gold, -0.4)])); // the rotted crown
+      P.ell(g, hx + 1.6, hy - 0.4, 1, 0.8, '#140e06'); P.ell(g, hx - 1.4, hy - 0.4, 0.9, 0.8, '#140e06');
+      evil(g, hx + 1.6, hy - 0.4, 0.55, c.eye); evil(g, hx - 1.4, hy - 0.4, 0.5, c.eye);
+      P.path(g, [hx - 1.6, hy + 1.6, hx + 2.2, hy + 1.4, hx + 1.8, hy + 4.6 + (f ? 0.6 : 0), hx - 1.2, hy + 4.6 + (f ? 0.6 : 0)]); P.fill(g, '#140e06'); // the hanging jaw
+      teeth(g, hx - 1.2, hy + 1.6, hx + 1.8, hy + 1.4, 4, 0.6, 1, bone);
+      // the near arm gripping the scythe's haft
+      limb(g, 42, 24, 47.4, 28, 3.2, 2.6, s); limb(g, 47.4, 28, 46.8, 34, 2.6, 2.2, sl); P.circle(g, 46.8, 34.4, 2.4, P.vol(g, 46.2, 33.8, 2.4, sl));
+      g.save(); g.globalAlpha = 0.5; for (const [x, y] of [[20, 12], [40, 14], [16, 22]]) P.circle(g, x + (f ? 0.6 : -0.6), y, 0.5, '#1a1a0a'); g.restore(); // flies
     } });
 
   /* ---------- Blight Worm (secret boss): a vast segmented worm bursting up from the bog, a ring-mouth of hooked teeth ---------- */
