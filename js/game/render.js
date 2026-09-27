@@ -157,8 +157,8 @@
     // orbiting weapons
     for (const a of this.abilities) if (a.pos) for (const b of a.pos) {
       const name = b.kind === 'scythe' ? 'scythe_p' : b.kind === 'orb' ? 'orb_p' : 'flail_p';
-      if (b.kind === 'flail') { g.strokeStyle = 'rgba(160,160,170,0.7)'; g.lineWidth = 0.6; g.beginPath(); g.moveTo(p.x - cx, p.y - cy); g.lineTo(b.x - cx, b.y - cy); g.stroke(); }
-      this.sprite(g, name, null, 0, b.x - cx, b.y - cy, false, b.kind === 'flail' ? Math.sqrt(a.s.area) : 1, false, 1, b.kind === 'scythe' ? b.a + Math.PI / 2 + now * 6 : b.kind === 'flail' ? now * 4 : 0);
+      if (b.kind === 'flail') { this.drawChain(g, p.x - cx + 3 * p.face, p.y - cy - 7, b.x - cx, b.y - cy, b.trail, cx, cy, Math.sqrt(a.s.area)); }
+      this.sprite(g, name, null, 0, b.x - cx, b.y - cy, false, b.kind === 'flail' ? 1.55 * Math.sqrt(a.s.area) : 1, false, 1, b.kind === 'scythe' ? b.a + Math.PI / 2 + now * 6 : b.kind === 'flail' ? b.spin : 0);
       lights.push({ x: b.x, y: b.y, r: 16, kind: 'small' });
     }
     // projectiles and effects of the hero's abilities; drawn on a layer when faded (Settings: ability effects)
@@ -363,6 +363,22 @@
     lights.push({ x: al.x, y: al.y, r: 20, kind: 'small' });
   };
   const WALK = [1, 0, 5, 0];
+  /** The flail's chain: iron links from the hero's hand to the ball, alternately face-on and edge-on, plus a faint swing trail. */
+  R.drawChain = function (g, hx, hy, bx, by, trail, cx, cy, k) {
+    if (trail && trail.length > 4) { // the path the ball just swept
+      g.strokeStyle = 'rgba(200,205,220,0.16)'; g.lineWidth = 4 * k; g.lineCap = 'round'; g.beginPath();
+      g.moveTo(trail[0] - cx, trail[1] - cy); for (let i = 2; i < trail.length; i += 2) g.lineTo(trail[i] - cx, trail[i + 1] - cy); g.stroke();
+    }
+    const dx = bx - hx, dy = by - hy, len = Math.hypot(dx, dy); if (len < 2) return;
+    const ang = Math.atan2(dy, dx), step = 3.2, n = Math.max(1, Math.floor(len / step));
+    g.save(); g.translate(hx, hy); g.rotate(ang);
+    for (let i = 0; i < n; i++) {
+      const x = (i + 0.5) * len / n;
+      if (i % 2) { g.fillStyle = '#1a1c22'; g.fillRect(x - 1.9, -0.55, 3.8, 1.1); g.fillStyle = '#9aa0ae'; g.fillRect(x - 1.6, -0.3, 3.2, 0.6); } // edge-on
+      else { g.strokeStyle = '#1a1c22'; g.lineWidth = 1.3; g.beginPath(); g.ellipse(x, 0, 1.9, 1.25, 0, 0, TAU); g.stroke(); g.strokeStyle = '#b4bac8'; g.lineWidth = 0.6; g.stroke(); } // face-on ring
+    }
+    g.restore();
+  };
   R.drawPlayer = function (g, cx, cy) {
     const p = this.player;
     let fr = p.moving ? WALK[Math.floor(p.anim / 1.6) % 4] : 0; // stride, pass, the other stride, pass

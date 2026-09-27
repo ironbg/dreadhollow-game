@@ -302,7 +302,22 @@
       }
       DH.audio.play('glass');
     } },
-    flail: { update(run, a, dt) { orbit(run, a, dt, 'flail', 34, 9, 0.5); } },
+    // a heavy ball on a chain swung in a slow figure-eight through the hero: the chain pays out to full reach and draws back in,
+    // while the whole eight turns slowly so every side is swept in time; more balls swing crossed eights
+    flail: { update(run, a, dt) {
+      const p = run.player, s = a.s, n = s.count, reach = 56 * (0.55 + 0.45 * s.area), wide = reach * 0.62;
+      a.ph = (a.ph || 0) + s.speed * 0.55 * dt; // along the eight: about 5 s a figure at base speed
+      a.rot = (a.rot == null ? Math.random() * TAU : a.rot) + s.speed * 0.13 * dt; // the eight itself turns
+      a.pos = a.pos || []; a.pos.length = n;
+      for (let i = 0; i < n; i++) {
+        const t = a.ph + i * TAU / n, ax = a.rot + i * Math.PI / n, u = Math.cos(t) * reach, v = Math.sin(2 * t) * wide / 2;
+        const bx = p.x + u * Math.cos(ax) - v * Math.sin(ax), by = p.y + u * Math.sin(ax) + v * Math.cos(ax);
+        const prev = a.pos[i], trail = prev ? prev.trail : [];
+        trail.push(bx, by); if (trail.length > 12) trail.splice(0, 2);
+        a.pos[i] = { x: bx, y: by, a: Math.atan2(by - (prev ? prev.y : by), bx - (prev ? prev.x : bx)), kind: 'flail', trail, spin: (prev ? prev.spin : 0) + dt * 5 };
+        run.hitCircle(bx, by, 11 * Math.sqrt(s.area), a, 1, (e) => run.canHit(e, a.id, 0.5));
+      }
+    } },
     fists: { fire(run, a) {
       const p = run.player;
       if (volley(run, a, 80, 0.15, true, (ang) => proj(run, { k: 'fist', a, x: p.x + Math.cos(ang) * 6, y: p.y + Math.sin(ang) * 6, vx: Math.cos(ang) * 280, vy: Math.sin(ang) * 280, ang, r: 5, pierce: 0, life: 0.35 })) == null) return false;
