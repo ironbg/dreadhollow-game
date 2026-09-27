@@ -533,37 +533,37 @@
       // the hall's own six: bats, rising skeletons, hound packs, splitting oozes, bone mages, shieldbearers
       remap: { bat: 'bat', rat: 'bat', skeleton: 'skeleton', ghoul: 'ooze', ghost: 'ooze', spider: 'hound', cultist: 'bonemage', wraith: 'bonemage', hknight: 'shieldbearer', golem: 'shieldbearer' },
       bosses: [{ t: 150, id: 'gravechief' }, { t: 300, id: 'bonetyrant' }, { t: 450, id: 'lich' }, { t: 600, id: 'anguish', final: true }],
-      theme: { floorA: [66, 60, 74], floorB: [52, 47, 60], mortar: [20, 17, 26], moss: [70, 104, 58], dark: [7, 5, 12], darkness: 0.84, lightTint: 'rgba(255,170,90,', accent: '#e8a050', accentRate: 0.12 } },
+      theme: { floor: 'crypt', floorA: [66, 60, 74], floorB: [52, 47, 60], mortar: [20, 17, 26], moss: [70, 104, 58], dark: [7, 5, 12], darkness: 0.84, lightTint: 'rgba(255,170,90,', accent: '#e8a050', accentRate: 0.12 } },
     abyss: { index: 1, agonyXp: 0.31, hpMult: 1.9, dmgMult: 1.45, goldMult: 1.6, variant: 'fire', foeVariant: false, herb: 'ember',
       // imps, charred husks, cinder bloaters, magma crawlers, ember salamanders, ash cultists
       remap: { bat: 'salamander', rat: 'salamander', skeleton: 'husk', ghoul: 'cinderbloat', ghost: 'imp', spider: 'salamander', cultist: 'ashcultist', wraith: 'cinderbloat', hknight: 'magmacrawler', golem: 'magmacrawler' },
       bosses: [{ t: 150, id: 'overlord' }, { t: 300, id: 'firedancer' }, { t: 450, id: 'ashwarlord' }, { t: 600, id: 'wyrm', final: true }],
-      theme: { floorA: [78, 46, 40], floorB: [60, 34, 32], mortar: [24, 8, 8], moss: [200, 70, 20], dark: [14, 4, 4], darkness: 0.78, lightTint: 'rgba(255,120,60,', accent: '#ff6a3a', lava: true, accentRate: 0.1, blood: '#3a0404' } },
+      theme: { floor: 'abyss', floorA: [78, 46, 40], floorB: [60, 34, 32], mortar: [24, 8, 8], moss: [200, 70, 20], dark: [14, 4, 4], darkness: 0.78, lightTint: 'rgba(255,120,60,', accent: '#ff6a3a', lava: true, accentRate: 0.1, blood: '#3a0404' } },
     aqueduct: { index: 2, agonyXp: 0.24, hpMult: 3.0, dmgMult: 1.85, goldMult: 2.2, variant: 'drowned', foeVariant: false, herb: 'lily', bridge: 110,
       // frenzied rats, fading spirits, the drowned, perching gargoyles, arbalists, weeping watchers
       remap: { bat: 'rat', rat: 'rat', skeleton: 'spirit', ghoul: 'drowned', ghost: 'spirit', spider: 'gargoyle', cultist: 'arbalist', wraith: 'watcher', hknight: 'gargoyle', golem: 'drowned' },
       bosses: [{ t: 150, id: 'hydra' }, { t: 300, id: 'bellwarden' }, { t: 450, id: 'sunkknight' }, { t: 600, id: 'horseman', final: true }],
-      theme: { floorA: [58, 76, 78], floorB: [44, 60, 62], mortar: [12, 22, 24], moss: [60, 130, 110], dark: [3, 10, 12], darkness: 0.8, lightTint: 'rgba(140,255,220,', accent: '#70ffd0', pools: [30, 70, 80], accentRate: 0.14 } },
+      theme: { floor: 'aqueduct', floorA: [58, 76, 78], floorB: [44, 60, 62], mortar: [12, 22, 24], moss: [60, 130, 110], dark: [3, 10, 12], darkness: 0.8, lightTint: 'rgba(140,255,220,', accent: '#70ffd0', pools: [30, 70, 80], accentRate: 0.14 } },
     catacombs: { index: 3, agonyXp: 0.395, hpMult: 4.3, dmgMult: 2.3, goldMult: 3, variant: 'ice', foeVariant: false, herb: 'lily',
       // frost crawlers, ice skulls, frost ghouls, frost guards, snow effigies, ice bears
       remap: { bat: 'iceskull', rat: 'iceskull', skeleton: 'frostghoul', ghoul: 'frostcrawler', ghost: 'iceskull', spider: 'effigy', cultist: 'frostcrawler', wraith: 'frostguard', hknight: 'frostguard', golem: 'icebear' },
       bosses: [{ t: 150, id: 'frostconstruct' }, { t: 300, id: 'basilisk' }, { t: 450, id: 'iceprism' }, { t: 600, id: 'jotun', final: true }],
-      theme: { floorA: [60, 74, 96], floorB: [46, 58, 78], mortar: [14, 20, 32], moss: [150, 200, 230], dark: [4, 8, 18], darkness: 0.8, lightTint: 'rgba(150,210,255,', accent: '#7fd0ff', crystals: [140, 220, 255], accentRate: 0.14 } },
+      theme: { floor: 'catacombs', floorA: [60, 74, 96], floorB: [46, 58, 78], mortar: [14, 20, 32], moss: [150, 200, 230], dark: [4, 8, 18], darkness: 0.8, lightTint: 'rgba(150,210,255,', accent: '#7fd0ff', crystals: [140, 220, 255], accentRate: 0.14 } },
     discord: { index: 4, agonyXp: 0.13, hpMult: 6.0, dmgMult: 2.8, goldMult: 3.8, variant: 'purple', foeVariant: false, herb: 'ember', dissonator: true,
       // merging homunculi, leaping capra fiends, fiend casters, shapeshifters, void syphons, clockwork constructs
       remap: { bat: 'homunculus', rat: 'homunculus', skeleton: 'homunculus', ghoul: 'shapeshifter', ghost: 'capra', spider: 'capra', cultist: 'fiendcaster', wraith: 'syphon', hknight: 'clockwork', golem: 'clockwork' },
       bosses: [{ t: 150, id: 'voidcaller' }, { t: 300, id: 'discolossus' }, { t: 450, id: 'twistedknight' }, { t: 600, id: 'archdemon', final: true }],
-      theme: { floorA: [68, 52, 84], floorB: [52, 38, 66], mortar: [18, 10, 26], moss: [170, 80, 200], dark: [10, 4, 16], darkness: 0.82, lightTint: 'rgba(230,140,255,', accent: '#e080ff', crystals: [220, 110, 255], accentRate: 0.1 } },
+      theme: { floor: 'discord', floorA: [68, 52, 84], floorB: [52, 38, 66], mortar: [18, 10, 26], moss: [170, 80, 200], dark: [10, 4, 16], darkness: 0.82, lightTint: 'rgba(230,140,255,', accent: '#e080ff', crystals: [220, 110, 255], accentRate: 0.1 } },
     blightmire: { index: 5, agonyXp: 0.13, hpMult: 8.0, dmgMult: 3.3, goldMult: 4.6, variant: 'bog', foeVariant: false, herb: 'moss', lordKills: 3000,
       // spiders, blight mosquitoes, bog corpses, bog wraiths, bog toads, treants
       remap: { bat: 'mosquito', rat: 'mosquito', skeleton: 'spider', ghoul: 'bogcorpse', ghost: 'bogwraith', spider: 'toad', cultist: 'bogwraith', wraith: 'toad', hknight: 'treant', golem: 'treant' },
       bosses: [{ t: 150, id: 'blightfiend' }, { t: 300, id: 'bogserpent' }, { t: 450, id: 'eldertreant' }, { t: 600, id: 'rotlord', final: true }],
-      theme: { floorA: [64, 70, 46], floorB: [50, 54, 36], mortar: [16, 18, 8], moss: [120, 150, 40], dark: [6, 8, 2], darkness: 0.82, lightTint: 'rgba(200,255,120,', accent: '#b0ff50', pools: [50, 70, 30], accentRate: 0.22, blood: '#2a3a0a' } },
+      theme: { floor: 'blightmire', floorA: [64, 70, 46], floorB: [50, 54, 36], mortar: [16, 18, 8], moss: [120, 150, 40], dark: [6, 8, 2], darkness: 0.82, lightTint: 'rgba(200,255,120,', accent: '#b0ff50', pools: [50, 70, 30], accentRate: 0.22, blood: '#2a3a0a' } },
     reliquary: { index: 6, agonyXp: 0.1, hpMult: 10, dmgMult: 3.6, goldMult: 6, variant: 'gold', foeVariant: false, herb: 'dust', vault: true,
       // gold scarabs, mimics, gilded knights, treasure golems, vault wardens, coin wraiths
       remap: { bat: 'scarab', rat: 'scarab', skeleton: 'scarab', ghoul: 'gildedknight', ghost: 'coinwraith', spider: 'mimic', cultist: 'vaultwarden', wraith: 'coinwraith', hknight: 'gildedknight', golem: 'golem' },
       bosses: [{ t: 150, id: 'mimicking' }, { t: 300, id: 'sentinel' }, { t: 450, id: 'magistrate' }, { t: 600, id: 'custodian', final: true }],
-      theme: { floorA: [96, 88, 74], floorB: [78, 70, 58], mortar: [30, 24, 16], moss: [230, 200, 120], dark: [10, 8, 4], darkness: 0.8, lightTint: 'rgba(255,230,160,', accent: '#fff0a0', crystals: [255, 230, 140], accentRate: 0.1 } },
+      theme: { floor: 'reliquary', floorA: [96, 88, 74], floorB: [78, 70, 58], mortar: [30, 24, 16], moss: [230, 200, 120], dark: [10, 8, 4], darkness: 0.8, lightTint: 'rgba(255,230,160,', accent: '#fff0a0', crystals: [255, 230, 140], accentRate: 0.1 } },
   };
   /* Hall rules (js/game/halls.js) */
   C.BOG_FALLBACK = 900;          // the Blightmire's Lord comes at 3000 kills, or at 15:00 at the latest

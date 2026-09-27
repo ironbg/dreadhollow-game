@@ -218,6 +218,175 @@
 
   /* ---------------- procedural floor (256-unit chunks, cached) ---------------- */
   const CHUNK = 256;
+  /* ---------------- floor paving, one pattern per hall ---------------- */
+  // Every layout is laid out on global coordinates and every stone draws its details from its own seed, so a stone cut
+  // by a chunk's edge carries on unbroken into the next chunk.
+  function srng(a, b, s) { let t = (U.hash2(a, b, s) * 4294967296) >>> 0; return () => { t = (t + 0x6D2B79F5) >>> 0; let r = Math.imul(t ^ (t >>> 15), 1 | t); r ^= r + Math.imul(r ^ (r >>> 7), 61 | r); return ((r ^ (r >>> 14)) >>> 0) / 4294967296; }; }
+  /** A rectangle with its corners chipped by different amounts (clockwise, so its outer edges face out). */
+  function chipRect(x, y, w, h, r, chip) {
+    const c = () => 0.5 + r() * chip;
+    const a = c(), b = c(), d = c(), e = c();
+    return [x + a, y, x + w - b, y, x + w, y + b, x + w, y + h - d, x + w - d, y + h, x + e, y + h, x, y + h - e, x, y + a];
+  }
+  /** One worn floor stone: its face lit from the top-left, the edges facing the light catching it, the others in shadow,
+   *  pits and grit, and now and then a crack or a hollow worn by feet. */
+  function stone(g, poly, col, r, o) {
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (let i = 0; i < poly.length; i += 2) { x0 = Math.min(x0, poly[i]); x1 = Math.max(x1, poly[i]); y0 = Math.min(y0, poly[i + 1]); y1 = Math.max(y1, poly[i + 1]); }
+    const w = x1 - x0, h = y1 - y0;
+    P.path(g, poly); P.fill(g, P.lg(g, x0, y0, x0 + w * 0.5, y1, [shade(col, 0.1 + (o.lift || 0)), col, shade(col, -0.18)]));
+    g.save(); P.path(g, poly); g.clip();
+    if (r() < 0.5) { const hx = x0 + w * (0.3 + r() * 0.4), hy = y0 + h * (0.3 + r() * 0.4), hr = Math.min(w, h) * 0.5; g.fillStyle = P.rg(g, hx, hy, hr, [[0, 'rgba(0,0,0,0.13)'], [1, 'rgba(0,0,0,0)']]); g.fillRect(hx - hr, hy - hr, hr * 2, hr * 2); }
+    const n = 3 + (w * h / 60 | 0);
+    for (let i = 0; i < n; i++) P.circle(g, x0 + r() * w, y0 + r() * h, 0.3 + r() * 0.7, r() < 0.6 ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.07)');
+    if (r() < (o.crack || 0.14)) {
+      g.strokeStyle = 'rgba(0,0,0,0.45)'; g.lineWidth = 0.5; g.beginPath();
+      let px = x0 + r() * w, py = y0; g.moveTo(px, py);
+      for (let s = 1; s <= 5; s++) { px += (r() - 0.5) * 6; py = y0 + h * s / 5; g.lineTo(px, py); if (r() < 0.3) { g.moveTo(px, py); g.lineTo(px + (r() - 0.5) * 6, py + 2); g.moveTo(px, py); } }
+      g.stroke();
+    }
+    if (o.inner) o.inner(x0, y0, w, h);
+    g.restore();
+    // the bevel: an edge facing the light is lit, one facing away is dark
+    g.lineWidth = 0.6;
+    for (let i = 0; i < poly.length; i += 2) {
+      const ax = poly[i], ay = poly[i + 1], bx = poly[(i + 2) % poly.length], by = poly[(i + 3) % poly.length];
+      const L = Math.hypot(bx - ax, by - ay) || 1, nx = (by - ay) / L, ny = -(bx - ax) / L, d = -(nx + ny) * 0.707;
+      if (Math.abs(d) < 0.2) continue;
+      g.strokeStyle = d > 0 ? rgba(shade(col, 0.45), 0.4 * d) : 'rgba(0,0,0,' + (-0.42 * d).toFixed(2) + ')';
+      g.beginPath(); g.moveTo(ax - nx * 0.35, ay - ny * 0.35); g.lineTo(bx - nx * 0.35, by - ny * 0.35); g.stroke();
+    }
+  }
+  const PATS = {
+    ashlar: [[[0, 0, 1, 1]], [[0, 0, 1, 0.5], [0, 0.5, 1, 0.5]], [[0, 0, 0.5, 1], [0.5, 0, 0.5, 1]], [[0, 0, 0.5, 0.5], [0.5, 0, 0.5, 0.5], [0, 0.5, 0.5, 0.5], [0.5, 0.5, 0.5, 0.5]],
+      [[0, 0, 0.5, 1], [0.5, 0, 0.5, 0.5], [0.5, 0.5, 0.5, 0.5]], [[0, 0, 1, 0.5], [0, 0.5, 0.5, 0.5], [0.5, 0.5, 0.5, 0.5]], [[0, 0, 1, 1]]],
+    long: [[[0, 0, 1, 1]], [[0, 0, 0.5, 1], [0.5, 0, 0.5, 1]], [[0, 0, 1 / 3, 1], [1 / 3, 0, 2 / 3, 1]], [[0, 0, 2 / 3, 1], [2 / 3, 0, 1 / 3, 1]]],
+  };
+  /** Stones laid in blocks of bw x bh on a running bond; each block split by one of the patterns. */
+  function blocks(g, F, cx, cy, bw, bh, pats, gap, each) {
+    const ox = cx * CHUNK, oy = cy * CHUNK;
+    for (let by = Math.floor(oy / bh) - 1; by <= Math.floor((oy + CHUNK) / bh) + 1; by++) {
+      const off = (by & 1) ? bw / 2 : 0;
+      for (let bx = Math.floor((ox - off) / bw) - 1; bx <= Math.floor((ox + CHUNK - off) / bw) + 1; bx++) {
+        const pat = pats[Math.floor(U.hash2(bx, by, F.seed + 9) * pats.length)], X = bx * bw + off - ox, Y = by * bh - oy;
+        pat.forEach((q, i) => { const r = srng(bx * 7 + i, by * 13 + i, F.seed); each(X + q[0] * bw + gap, Y + q[1] * bh + gap, q[2] * bw - gap * 2, q[3] * bh - gap * 2, r, U.hash2(bx * 3 + i, by * 5, F.seed + 1)); });
+      }
+    }
+  }
+  const tone = (A, B, k) => shade(k < 0.5 ? A : B, (k * 7 % 1) * 0.2 - 0.1);
+  const PAVE = {
+    // the crypt: worn ashlar, chipped, some stones sunk or gone to earth, moss in the joints
+    crypt(g, F, cx, cy, T, A, B) {
+      const moss = hex.apply(null, T.moss);
+      blocks(g, F, cx, cy, 32, 32, PATS.ashlar, 0.8, (x, y, w, h, r, k) => {
+        if (k > 0.975) { P.rrect(g, x, y, w, h, 2, '#141016'); for (let i = 0; i < 7; i++) { const px = x + r() * w, py = y + r() * h, pr = 0.6 + r() * 1.4; P.circle(g, px, py, pr, P.vol(g, px, py, pr, shade(A, -0.1))); } return; }
+        const sunk = k > 0.92, col = shade(tone(A, B, k), sunk ? -0.18 : 0);
+        stone(g, chipRect(x, y, w, h, r, sunk ? 2.4 : 1.6), col, r, { inner: sunk ? (x0, y0, w0) => P.rect(g, x0, y0, w0, 2.2, 'rgba(0,0,0,0.3)') : null });
+        if (r() < 0.3) for (let i = 0; i < 4; i++) P.ell(g, x + r() * w, y + h + 0.2, 1 + r() * 1.6, 0.7, rgba(moss, 0.45));
+      });
+    },
+    // the abyss: the tops of basalt columns, a few seams still glowing with the lava beneath
+    abyss(g, F, cx, cy, T, A, B, lights) {
+      const R = 11, S3 = Math.sqrt(3), ox = cx * CHUNK, oy = cy * CHUNK, cells = [];
+      for (let q = Math.floor((ox - 2 * R) / (1.5 * R)); q <= Math.ceil((ox + CHUNK + 2 * R) / (1.5 * R)); q++)
+        for (let s = Math.floor((oy - 2 * R) / (S3 * R) - q / 2); s <= Math.ceil((oy + CHUNK + 2 * R) / (S3 * R) - q / 2); s++) cells.push([q, s, 1.5 * R * q - ox, S3 * R * (s + q / 2) - oy]);
+      const corner = (X, Y, k, rr) => [X + rr * Math.cos(k * Math.PI / 3), Y + rr * Math.sin(k * Math.PI / 3)];
+      g.lineCap = 'round'; let lit = 0;
+      for (const [q, s, X, Y] of cells) for (let k = 0; k < 3; k++) if (U.hash2(q * 3 + k, s, F.seed + 21) < 0.06) {
+        const [ax, ay] = corner(X, Y, k, R), [bx, by] = corner(X, Y, k + 1, R);
+        P.line(g, ax, ay, bx, by, 2.6, 'rgba(255,80,20,0.35)'); P.line(g, ax, ay, bx, by, 0.8, '#ff9a3a');
+        if (lit < 2 && U.hash2(q, s * 3 + k, F.seed + 22) < 0.15) { lit++; lights.push({ x: ox + (ax + bx) / 2, y: oy + (ay + by) / 2, r: 22, kind: 'lava' }); }
+      }
+      for (const [q, s, X, Y] of cells) {
+        const r = srng(q, s, F.seed), k = U.hash2(q, s, F.seed + 1), poly = [];
+        for (let i = 0; i < 6; i++) { const [px, py] = corner(X, Y, i, R - 0.8 - r() * 0.5); poly.push(px, py); }
+        stone(g, poly, shade(mix(tone(A, B, k), '#3a3634', 0.45), -0.12), r, { crack: 0.2 });
+      }
+      for (let i = 0; i < 3; i++) { const r = srng(cx * 5 + i, cy, F.seed + 30), x = 30 + r() * 196, y = 30 + r() * 196, rr = 14 + r() * 20; g.fillStyle = P.rg(g, x, y, rr, [[0, 'rgba(130,120,115,0.16)'], [1, 'rgba(130,120,115,0)']]); g.fillRect(x - rr, y - rr, rr * 2, rr * 2); }
+    },
+    // the aqueduct: long wet slabs, algae in the joints, the wet catching the light
+    aqueduct(g, F, cx, cy, T, A, B) {
+      const alg = hex.apply(null, T.moss);
+      blocks(g, F, cx, cy, 48, 16, PATS.long, 0.7, (x, y, w, h, r, k) => {
+        stone(g, chipRect(x, y, w, h, r, 1.2), tone(A, B, k), r, { inner: (x0, y0, w0, h0) => { if (r() < 0.55) { const sx = x0 + r() * w0 * 0.7; P.line(g, sx, y0 + h0 * 0.7, sx + 5 + r() * 6, y0 + h0 * 0.3, 0.8, 'rgba(210,255,245,0.12)'); } } });
+        if (r() < 0.4) for (let i = 0; i < 5; i++) P.ell(g, x + r() * w, y + h + 0.3, 1.2 + r() * 2, 0.6, rgba(alg, 0.5));
+      });
+    },
+    // the frozen catacombs: frost-rimmed flagstones, snow packed in the joints, sheets of clear ice
+    catacombs(g, F, cx, cy, T, A, B) {
+      blocks(g, F, cx, cy, 32, 32, PATS.ashlar, 0.8, (x, y, w, h, r, k) => {
+        stone(g, chipRect(x, y, w, h, r, 1.4), tone(A, B, k), r, { inner: (x0, y0, w0, h0) => {
+          g.strokeStyle = 'rgba(230,245,255,0.3)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x0, y0 + h0 * 0.6); g.lineTo(x0, y0); g.lineTo(x0 + w0 * 0.7, y0); g.stroke();
+          for (let i = 0; i < 6; i++) P.rect(g, x0 + r() * w0, y0 + r() * 2.4, 0.6, 0.6, 'rgba(240,250,255,0.4)');
+        } });
+        if (r() < 0.35) P.rect(g, x - 0.8, y + h, w + 1.6, 0.8, 'rgba(225,240,255,0.55)');
+      });
+      for (let i = 0; i < 2; i++) {
+        const r = srng(cx * 3 + i, cy * 7, F.seed + 40); if (r() < 0.35) continue;
+        const x = 50 + r() * 156, y = 50 + r() * 156, rx = 18 + r() * 22, ry = rx * (0.5 + r() * 0.2), a = r() * 0.6 - 0.3;
+        P.ell(g, x, y, rx, ry, 'rgba(190,230,255,0.16)', a);
+        g.strokeStyle = 'rgba(255,255,255,0.22)'; g.lineWidth = 0.5; g.beginPath(); g.ellipse(x, y, rx, ry, a, 0, Math.PI * 2); g.stroke();
+        for (let j = 0; j < 3; j++) { const sx = x - rx * 0.5 + j * rx * 0.3; P.line(g, sx, y + ry * 0.3, sx + rx * 0.25, y - ry * 0.3, 0.7, 'rgba(255,255,255,0.2)'); }
+      }
+    },
+    // the halls of discord: an argyle of dark tiles bound in thin inlay of the hall's colour, a rune set in a few
+    discord(g, F, cx, cy, T, A, B, lights) {
+      const d = 14, ox = cx * CHUNK, oy = cy * CHUNK, ac = T.accent || '#e080ff'; let lit = 0;
+      for (let j = Math.floor(oy / d) - 1; j <= Math.ceil((oy + CHUNK) / d) + 1; j++)
+        for (let i = Math.floor(ox / (2 * d)) - 1; i <= Math.ceil((ox + CHUNK) / (2 * d)) + 1; i++) {
+          const X = i * 2 * d + ((j & 1) ? d : 0) - ox, Y = j * d - oy, r = srng(i, j, F.seed), k = U.hash2(i, j, F.seed + 1), gp = 0.7;
+          const poly = [X, Y - d + gp, X + d - gp, Y, X, Y + d - gp, X - d + gp, Y];
+          stone(g, poly, shade((j & 1) ? A : B, (k * 7 % 1) * 0.12 - 0.06 + ((j & 1) ? 0.02 : -0.06)), r, { crack: 0.1 });
+          g.strokeStyle = rgba(ac, 0.22); g.lineWidth = 0.5; P.path(g, [X, Y - d, X + d, Y, X, Y + d, X - d, Y]); g.stroke();
+          if (k > 0.985) {
+            g.strokeStyle = rgba(ac, 0.75); g.lineWidth = 0.6; g.beginPath(); g.arc(X, Y, 4, 0, Math.PI * 2); g.moveTo(X, Y - 5.4); g.lineTo(X, Y + 5.4); g.moveTo(X - 3, Y - 1.6); g.lineTo(X + 3, Y + 1.6); g.stroke();
+            if (X > 0 && X < CHUNK && Y > 0 && Y < CHUNK && lit++ < 2) lights.push({ x: ox + X, y: oy + Y, r: 14, kind: 'crystal', color: ac });
+          }
+        }
+    },
+    // the blightmire: flagstones sinking into the mud, tipped and broken, grass and roots between them
+    blightmire(g, F, cx, cy, T, A, B) {
+      const moss = hex.apply(null, T.moss), mud = mix(A, hex.apply(null, T.mortar), 0.62);
+      P.rect(g, -8, -8, CHUNK + 16, CHUNK + 16, mud);
+      for (let i = 0; i < 26; i++) { const r = srng(cx * 31 + i, cy * 17, F.seed + 50), x = r() * CHUNK, y = r() * CHUNK, rr = 6 + r() * 14; P.ell(g, x, y, rr * 1.4, rr, rgba(shade(mud, r() < 0.5 ? 0.18 : -0.25), 0.5), r() * 3); }
+      blocks(g, F, cx, cy, 28, 28, PATS.ashlar, 1.6, (x, y, w, h, r, k) => {
+        if (k < 0.14) return;
+        const a = (r() - 0.5) * 0.14, mx = x + w / 2, my = y + h / 2;
+        g.save(); g.translate(mx, my); g.rotate(a); g.translate(-mx, -my);
+        P.path(g, chipRect(x + 0.8, y + 1.6, w, h, r, 2)); P.fill(g, 'rgba(0,0,0,0.35)');
+        stone(g, chipRect(x, y, w, h, r, 3), shade(tone(A, B, k), -0.05), r, { crack: 0.25, inner: (x0, y0, w0, h0) => {
+          for (let j = 0; j < 3; j++) if (r() < 0.6) { const px = x0 + r() * w0, py = y0 + r() * h0, pr = 3 + r() * 6; g.fillStyle = P.rg(g, px, py, pr, [[0, rgba(moss, 0.3)], [1, rgba(moss, 0)]]); g.fillRect(px - pr, py - pr, pr * 2, pr * 2); }
+        } });
+        g.restore();
+      });
+      g.lineCap = 'round';
+      for (let i = 0; i < 16; i++) { const r = srng(cx * 11 + i, cy * 23, F.seed + 51), x = 6 + r() * 244, y = 6 + r() * 244; for (let j = -2; j <= 2; j++) P.line(g, x + j * 0.6, y, x + j * 1.4 + (r() - 0.5), y - 2.4 - r() * 2.4, 0.5, rgba(shade(moss, r() * 0.4 - 0.2), 0.8)); }
+      const r = srng(cx, cy, F.seed + 52);
+      for (let i = 0; i < 2; i++) {
+        let px = 20 + r() * 216, py = 20 + r() * 216, a = r() * Math.PI * 2;
+        g.strokeStyle = '#1a140a'; g.lineWidth = 1.8 - i * 0.4; g.beginPath(); g.moveTo(px, py);
+        for (let s = 0; s < 6; s++) { a += (r() - 0.5) * 1.1; const nx = U.clamp(px + Math.cos(a) * 9, 4, 252), ny = U.clamp(py + Math.sin(a) * 9, 4, 252); g.quadraticCurveTo(px + Math.cos(a + 0.6) * 5, py + Math.sin(a + 0.6) * 5, nx, ny); px = nx; py = ny; }
+        g.stroke(); g.strokeStyle = 'rgba(120,100,60,0.3)'; g.lineWidth = 0.4; g.stroke();
+      }
+    },
+    // the reliquary: polished marble in a chequer, veined, bound every few tiles by bands of gold
+    reliquary(g, F, cx, cy, T, A, B) {
+      const s = 24, ox = cx * CHUNK, oy = cy * CHUNK, L = shade(A, 0.05), D = shade(B, -0.08);
+      for (let j = Math.floor(oy / s) - 1; j <= Math.ceil((oy + CHUNK) / s); j++) for (let i = Math.floor(ox / s) - 1; i <= Math.ceil((ox + CHUNK) / s); i++) {
+        const x = i * s - ox + 0.5, y = j * s - oy + 0.5, r = srng(i, j, F.seed), k = U.hash2(i, j, F.seed + 1), light = (i + j) & 1;
+        stone(g, [x, y, x + s - 1, y, x + s - 1, y + s - 1, x, y + s - 1], shade(light ? L : D, k * 0.08 - 0.04), r, { crack: 0.08, lift: 0.06, inner: (x0, y0, w0, h0) => {
+          for (let v = 0; v < 2; v++) { let px = x0 + r() * w0, py = y0; g.strokeStyle = light ? 'rgba(90,70,50,0.22)' : 'rgba(255,240,210,0.12)'; g.lineWidth = 0.4; g.beginPath(); g.moveTo(px, py); for (let t = 1; t <= 4; t++) { px += (r() - 0.5) * 9; g.lineTo(px, y0 + h0 * t / 4); } g.stroke(); }
+          P.path(g, [x0, y0 + h0 * 0.6, x0 + w0 * 0.6, y0, x0 + w0 * 0.85, y0, x0, y0 + h0 * 0.85]); P.fill(g, 'rgba(255,250,230,0.05)');
+        } });
+      }
+      const gold = 'rgba(200,150,50,0.75)';
+      for (let v = Math.ceil((ox - 1) / (s * 3)) * s * 3; v < ox + CHUNK + 1; v += s * 3) P.rect(g, v - ox - 0.45, 0, 0.9, CHUNK, gold);
+      for (let v = Math.ceil((oy - 1) / (s * 3)) * s * 3; v < oy + CHUNK + 1; v += s * 3) P.rect(g, 0, v - oy - 0.45, CHUNK, 0.9, gold);
+      for (let vx = Math.ceil((ox - 1) / (s * 3)) * s * 3; vx < ox + CHUNK + 1; vx += s * 3) for (let vy = Math.ceil((oy - 1) / (s * 3)) * s * 3; vy < oy + CHUNK + 1; vy += s * 3) {
+        const x = vx - ox, y = vy - oy; P.path(g, [x, y - 2.6, x + 2.6, y, x, y + 2.6, x - 2.6, y]); P.fill(g, '#c89838'); P.path(g, [x, y - 2.6, x + 2.6, y, x, y]); P.fill(g, '#f0d070');
+      }
+    },
+  };
   function Floor(theme, seed, res) { this.theme = theme; this.seed = seed || 1; this.res = res; this.chunks = new Map(); }
   Floor.prototype.chunk = function (cx, cy) {
     const key = cx + ',' + cy; let ch = this.chunks.get(key);
@@ -233,51 +402,9 @@
     const A = hex.apply(null, T.floorA), B = hex.apply(null, T.floorB), M = hex.apply(null, T.mortar);
     g.fillStyle = M; g.fillRect(0, 0, S, S);
     g.save(); g.scale(R, R);
-    // flagstones on a 32-unit grid, randomly split into halves; running bond on odd rows
-    const TS = 32;
-    for (let ty = -1; ty <= CHUNK / TS; ty++) {
-      const off = (ty & 1) ? TS / 2 : 0;
-      for (let tx = -1; tx <= CHUNK / TS; tx++) {
-        const gx = cx * 8 + tx, gy = cy * 8 + ty;
-        const h1 = U.hash2(gx, gy, this.seed), split = U.hash2(gx, gy, this.seed + 9);
-        const x0 = tx * TS + off, y0 = ty * TS;
-        const slabs = split < 0.35 ? [[x0, y0, TS, TS / 2], [x0, y0 + TS / 2, TS, TS / 2]] : split < 0.6 ? [[x0, y0, TS / 2, TS], [x0 + TS / 2, y0, TS / 2, TS]] : [[x0, y0, TS, TS]];
-        slabs.forEach((s, si) => {
-          const hv = U.hash2(gx * 3 + si, gy * 5, this.seed + 1);
-          const base = mix(hv < 0.5 ? A : B, T.tint || A, 0.1 * U.hash2(gx, gy + si, 4));
-          const k = 0.86 + hv * 0.22;
-          const col = shade(base, k - 1);
-          const gap = 0.9;
-          const x = s[0] + gap, y = s[1] + gap, w = s[2] - gap * 2, h = s[3] - gap * 2;
-          P.rrect(g, x, y, w, h, 2.2, P.lg(g, x, y, x + w * 0.4, y + h, [shade(col, 0.12), col, shade(col, -0.18)]));
-          // bevel highlight / shadow
-          g.strokeStyle = rgba(shade(col, 0.35), 0.35); g.lineWidth = 0.6;
-          g.beginPath(); g.moveTo(x + 1.5, y + h - 1); g.lineTo(x + 0.6, y + 0.6); g.lineTo(x + w - 1.5, y + 0.6); g.stroke();
-          g.strokeStyle = rgba('#000000', 0.3);
-          g.beginPath(); g.moveTo(x + w - 0.5, y + 1.5); g.lineTo(x + w - 0.5, y + h - 0.5); g.lineTo(x + 1.5, y + h - 0.5); g.stroke();
-          // pits and speckles
-          const n = 5 + (rng() * 8 | 0);
-          for (let i = 0; i < n; i++) {
-            const px = x + 2 + rng() * (w - 4), py = y + 2 + rng() * (h - 4), pr = 0.3 + rng() * 0.9;
-            P.circle(g, px, py, pr, rgba(rng() < 0.5 ? '#000000' : '#ffffff', rng() < 0.5 ? 0.14 : 0.06));
-          }
-          // cracks
-          if (U.hash2(gx + si, gy, this.seed + 3) < 0.18) {
-            g.strokeStyle = rgba('#000000', 0.45); g.lineWidth = 0.55; g.beginPath();
-            let px = x + rng() * w, py = y + 1; g.moveTo(px, py);
-            for (let s2 = 0; s2 < 6; s2++) { px += (rng() - 0.5) * 7; py += h / 6; g.lineTo(U.clamp(px, x + 1, x + w - 1), Math.min(py, y + h - 1)); }
-            g.stroke();
-          }
-          // theme accent patches (moss / frost / embers / slime / gilding)
-          if (U.hash2(gx - si, gy + 7, this.seed + 5) < (T.accentRate || 0.12)) {
-            const ax = x + rng() * w, ay = y + rng() * h, ar = 3 + rng() * 6;
-            const grd = P.rg(g, ax, ay, ar, [[0, rgba(hex.apply(null, T.moss), 0.65)], [1, rgba(hex.apply(null, T.moss), 0)]]);
-            g.fillStyle = grd; g.beginPath(); g.ellipse(ax, ay, ar * 1.4, ar, rng() * 3, 0, Math.PI * 2); g.fill();
-            for (let i = 0; i < 6; i++) P.circle(g, ax + (rng() - 0.5) * ar * 2, ay + (rng() - 0.5) * ar, 0.5 + rng() * 0.6, rgba(shade(hex.apply(null, T.moss), 0.2), 0.7));
-          }
-        });
-      }
-    }
+    // the paving of this hall
+    const lights = [];
+    (PAVE[T.floor] || PAVE.crypt)(g, this, cx, cy, T, A, B, lights);
     // large stains and puddles
     for (let i = 0; i < 3; i++) {
       const x = rng() * CHUNK, y = rng() * CHUNK, r = 25 + rng() * 55;
@@ -289,7 +416,6 @@
       P.ell(g, x, y, rx, ry, P.lg(g, x, y - ry, x, y + ry, [shade(pc, 0.2), pc, shade(pc, -0.3)]));
       g.strokeStyle = rgba(shade(pc, 0.5), 0.35); g.lineWidth = 0.6; g.beginPath(); g.ellipse(x - rx * 0.2, y - ry * 0.3, rx * 0.5, ry * 0.3, 0, Math.PI, Math.PI * 1.8); g.stroke();
     }
-    const lights = [];
     // decals
     const nDec = 7 + (rng() * 8 | 0);
     for (let i = 0; i < nDec; i++) {
