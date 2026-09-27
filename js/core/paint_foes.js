@@ -1373,4 +1373,85 @@
       // coins orbiting in front
       for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2 + f * 0.4; if (Math.sin(a) <= 0) continue; coin(g, 29 + Math.cos(a) * 25, 34 + Math.sin(a) * 7, 2, 0.5 + 0.5 * Math.abs(Math.cos(a))); }
     } });
+
+  /* ================= Hall secrets ================= */
+  /* ---------- Cyclops (secret boss): a hulking one-eyed giant in hides, a tree-trunk club, a single great eye ---------- */
+  def('cyclops', { w: 50, h: 56, cy: 36, frames: 2,
+    colors: { skin: '#8a6a52', hide: '#4a3020', eye: '#ffb030', club: '#4a3420' },
+    draw(g, f, c) {
+      const sk = c.skin, sd = sh(sk, -0.45), w = f ? 1 : -1;
+      P.ell(g, 25, 53.4, 15, 2.4, 'rgba(0,0,0,0.5)');
+      // thick legs, hide boots
+      limb(g, 19, 36, 17 - w, 51, 3.4, 3, sd); limb(g, 30, 36, 32 + w, 51, 3.4, 3, sk);
+      P.rrect(g, 13.4 - w, 49, 7, 3.6, 1.2, c.hide); P.rrect(g, 29 + w, 49, 7, 3.6, 1.2, c.hide);
+      // a hide loincloth and a pot belly
+      P.ell(g, 25, 28, 12, 11, P.rg(g, 23, 25, 12, [[0, sh(sk, 0.3)], [0.6, sk], [1, sd]]));
+      P.path(g, [13, 32, 37, 32, 38, 40, 32, 38, 26, 42, 20, 38, 13, 40]); P.fill(g, P.lg(g, 13, 32, 38, 42, [sh(c.hide, 0.3), sh(c.hide, -0.4)]));
+      P.line(g, 13.4, 32.4, 36.6, 32.4, 1.2, sh(c.hide, -0.5));
+      g.strokeStyle = G.rgba(sd, 0.6); g.lineWidth = 0.6; g.beginPath(); g.moveTo(20, 22); g.quadraticCurveTo(25, 24, 30, 22); g.stroke(); // chest line
+      // arms: the far one hanging, the near one hefting a club over the shoulder
+      limb(g, 14, 20, 8, 34 + w, 3, 2.6, sd); claws(g, 7.6, 34.6 + w, -1, 4, 2.2, 0.6, sd);
+      limb(g, 36, 20, 42, 28, 3, 2.6, sk); limb(g, 42, 28, 44, 20, 2.6, 2.4, sk);
+      g.save(); g.translate(44, 20); g.rotate(-0.5 + (f ? 0.08 : 0));
+      P.rrect(g, -2, -22, 5.4, 26, 2.4, P.lg(g, -2, 0, 3.4, 0, [sh(c.club, 0.3), c.club, sh(c.club, -0.5)])); P.ell(g, 0.7, -21, 3.8, 3, P.vol(g, 0.7, -22, 3.8, c.club));
+      for (const [x, y] of [[-1.4, -17], [2.6, -13], [-1, -9]]) P.circle(g, x, y, 0.8, '#8a8a90'); // iron studs
+      g.restore();
+      // the head: low brow, a single great eye, tusks, a wide mouth
+      const hx = 25, hy = 11;
+      P.ell(g, hx, hy, 8, 7.4, P.vol(g, hx, hy - 1, 8, sk));
+      P.ell(g, hx, hy - 3.6, 7, 2.4, sh(sk, -0.2));
+      P.ell(g, hx, hy - 0.6, 3.6, 3, '#f0e8d0'); P.glow(g, hx, hy - 0.6, 6, c.eye, 0.5); P.circle(g, hx + 0.6, hy - 0.4, 1.9, c.eye); P.ell(g, hx + 0.6, hy - 0.4, 0.6, 1.6, '#140804');
+      P.path(g, [hx - 4.6, hy + 3.6, hx + 4.6, hy + 3.6, hx + 3.6, hy + 6, hx - 3.6, hy + 6]); P.fill(g, '#2a0a06');
+      horn(g, hx - 3.4, hy + 4.4, hx - 3.8, hy + 2.6, hx - 3.4, hy + 1, 0.6, '#efe8d0'); horn(g, hx + 3.4, hy + 4.4, hx + 3.8, hy + 2.6, hx + 3.4, hy + 1, 0.6, '#efe8d0');
+      P.circle(g, hx - 7.6, hy, 1.6, sd); P.circle(g, hx + 7.6, hy, 1.6, sk); // ears
+    } });
+
+  /* ---------- Ghoul Lieutenant (secret boss): a huge frost-gnawed ghoul captain in scraps of armour, a bone banner on its back, a butcher's cleaver ---------- */
+  def('ghoullt', { w: 48, h: 50, cy: 32, frames: 2,
+    colors: { skin: '#8aa6bc', plate: '#3a4658', banner: '#6a1a24', bone: '#d8d4c4', eye: '#8ff0ff' },
+    draw(g, f, c) {
+      const sk = c.skin, sd = sh(sk, -0.5), w = f ? 1 : -1;
+      P.ell(g, 24, 47.6, 15, 2.4, 'rgba(0,0,0,0.5)');
+      // the banner on a pole of bone behind it
+      P.line(g, 13, 44, 10, 2, 1.2, c.bone); P.circle(g, 10, 2, 1.6, c.bone);
+      g.beginPath(); g.moveTo(10.4, 4); g.lineTo(2 + w, 6); g.lineTo(3 + w, 18); g.lineTo(6 + w, 15); g.lineTo(8 + w, 19); g.lineTo(10.8, 16); g.closePath(); P.fill(g, P.lg(g, 2, 4, 11, 19, [sh(c.banner, 0.3), sh(c.banner, -0.5)]));
+      skull(g, 6 + w * 0.5, 10.4, 1.8, c.bone, null);
+      // hunched legs, backward bent
+      limb(g, 18, 34, 14 - w, 40, 3, 2.4, sd); limb(g, 14 - w, 40, 16 - w, 46, 2.4, 2, sd); claws(g, 16 - w, 46.4, 0.6, 3, 2, 0.5, '#1a1a20');
+      limb(g, 30, 34, 34 + w, 40, 3, 2.4, sk); limb(g, 34 + w, 40, 32 + w, 46, 2.4, 2, sk); claws(g, 32 + w, 46.4, 0.6, 3, 2, 0.5, '#1a1a20');
+      // a hunched torso, ribs, a strapped breastplate
+      P.ell(g, 24, 26, 12, 10, P.rg(g, 22, 22, 12, [[0, sh(sk, 0.3)], [0.6, sk], [1, sd]]));
+      P.rrect(g, 16, 22, 14, 10, 3, P.lg(g, 16, 22, 30, 32, [sh(c.plate, 0.4), c.plate, sh(c.plate, -0.5)]));
+      P.line(g, 16, 25, 30, 29, 1, '#4a3020'); for (const x of [20, 25]) P.circle(g, x, 27, 0.7, sh(c.plate, 0.5));
+      for (let i = 0; i < 3; i++) P.line(g, 31, 25 + i * 2.4, 35, 26 + i * 2.4, 0.6, sd); // ribs showing
+      // arms: long, the near one with a cleaver
+      limb(g, 14, 20, 6, 32 + w, 2.4, 2, sd); claws(g, 5.6, 32.6 + w, -1, 4, 3, 0.5, '#1a1a20');
+      limb(g, 34, 20, 40, 30, 2.4, 2, sk);
+      P.line(g, 40, 30, 42, 26, 1.2, '#3a2a1a'); P.path(g, [41, 27, 47, 18, 49, 22, 44, 30]); P.fill(g, P.lg(g, 41, 18, 49, 30, ['#e0e4ec', '#6a7080'])); P.line(g, 46.6, 18.6, 48.6, 22, 0.4, '#8a2a2a');
+      // the head thrust forward: a split jaw, long teeth, pale eyes, frost in the hair
+      const hx = 30, hy = 13;
+      P.ell(g, hx, hy, 6, 5, P.vol(g, hx, hy - 1, 6, sk));
+      P.path(g, [hx - 1, hy + 1.6, hx + 7, hy + 1, hx + 6, hy + 5.4, hx, hy + 4]); P.fill(g, '#1a0a10');
+      teeth(g, hx, hy + 1.8, hx + 6.6, hy + 1.2, 5, 1.2, 1, '#efe8d0'); teeth(g, hx + 0.4, hy + 4, hx + 6, hy + 5, 4, -1, 1, '#efe8d0');
+      evil(g, hx + 1.6, hy - 1.4, 0.8, c.eye); evil(g, hx - 1.6, hy - 1.6, 0.7, c.eye);
+      for (let i = 0; i < 5; i++) P.line(g, hx - 5 + i * 1.8, hy - 4.4, hx - 6 + i * 1.6, hy - 7 - (i % 2), 0.7, '#d8f0ff');
+    } });
+
+  /* ---------- Gilded Ooze (treasure): a glossy golden jelly, coins and a jewelled goblet suspended in it, a crown of drips ---------- */
+  def('gildedooze', { w: 24, h: 22, cy: 16, frames: 2,
+    colors: { gold: '#e8b830', core: '#fff4a0' },
+    draw(g, f, c) {
+      const sq = f ? 0.6 : 0;
+      P.ell(g, 12, 20, 9, 1.4, 'rgba(0,0,0,0.45)'); P.glow(g, 12, 13, 12, c.core, 0.35);
+      g.beginPath(); g.moveTo(3 - sq, 19); g.quadraticCurveTo(2 - sq, 8 + sq, 12, 5 + sq * 1.4); g.quadraticCurveTo(22 + sq, 8 + sq, 21 + sq, 19); g.quadraticCurveTo(12, 20.4, 3 - sq, 19); g.closePath();
+      P.fill(g, P.rg(g, 9, 9, 13, [[0, G.rgba('#fff8d0', 0.95)], [0.4, G.rgba(c.gold, 0.9)], [1, G.rgba(sh(c.gold, -0.5), 0.95)]]));
+      // treasure inside
+      coin(g, 8, 15, 1.6, 0.8); coin(g, 15.4, 16, 1.4, 0.5); coin(g, 11, 17.4, 1.2, 0.9); coin(g, 16, 11.6, 1.1, 0.6);
+      P.path(g, [10.4, 9.6, 13.6, 9.6, 12.8, 12.4, 12.4, 12.6, 12.4, 14, 13.4, 14.6, 10.6, 14.6, 11.6, 14, 11.6, 12.6, 11.2, 12.4]); P.fill(g, P.lg(g, 10, 9, 14, 15, ['#fff0a0', '#a87a20'])); P.circle(g, 12, 11, 0.6, '#e03040');
+      // a glossy highlight and drips on top
+      P.ell(g, 8, 8.6 + sq, 2.6, 1.2, G.rgba('#ffffff', 0.55), -0.4);
+      drips(g, [[6, 17.6, 1.6], [18, 17.4, 1.2]], G.rgba(c.gold, 0.9));
+      // two dim eyes
+      P.circle(g, 10, 11.4 + sq, 0.7, '#3a2004'); P.circle(g, 14.4, 11.4 + sq, 0.7, '#3a2004');
+    } });
 })(window.DH);

@@ -376,8 +376,8 @@
     effigy:      { painter: 'effigy', hp: 10, spd: 24, dmg: 9, xp: 3, r: 7, mass: 2, dmgFactor: 0.17, noPierce: true }, // Snow Effigy: shrugs off direct hits, not burns and frost
     pylon:       { painter: 'pylon', hp: 400, spd: 0, dmg: 0, xp: 60, r: 10, mass: 999 },
     // hall secrets: guardians and breakables (secrets.js)
-    cyclops:     { painter: 'colossus', variant: 'fire', hp: 1700, spd: 34, dmg: 24, xp: 200, r: 16, mass: 60, def: 0.15, ai: 'b_charge', boss: true },
-    ghoullt:     { painter: 'ghoul', variant: 'ice', hp: 1600, spd: 40, dmg: 22, xp: 200, r: 14, mass: 50, def: 0.15, ai: 'b_charge', boss: true, scale: 2.4 },
+    cyclops:     { painter: 'cyclops', hp: 1700, spd: 34, dmg: 24, xp: 200, r: 16, mass: 60, def: 0.15, ai: 'b_cyclops', boss: true },
+    ghoullt:     { painter: 'ghoullt', hp: 1600, spd: 40, dmg: 22, xp: 200, r: 14, mass: 50, def: 0.15, ai: 'b_ghoullt', boss: true },
     blightworm:  { painter: 'blightworm', hp: 1900, spd: 40, dmg: 24, xp: 220, r: 15, mass: 60, def: 0.15, ai: 'b_blightworm', boss: true },
     sarcophagus: { painter: 'sarcophagus', hp: 900, spd: 0, dmg: 0, xp: 40, r: 12, mass: 999, noPierce: true },
     eviltree:    { painter: 'eviltree', hp: 1400, spd: 0, dmg: 0, xp: 60, r: 14, mass: 999, noPierce: true },
@@ -451,7 +451,7 @@
   // [enemy, from (timeline s), weight, variant override]
   C.HALL_FOES = {
   };
-  C.enemies.gildedooze = { painter: 'slime', variant: 'gold', hp: 1, hits: 45, spd: 40, dmg: 0, xp: 0, r: 8, mass: 99, ai: 'flee', life: 20, gilded: true, anim: 0.3 };
+  C.enemies.gildedooze = { painter: 'gildedooze', hp: 1, hits: 45, spd: 40, dmg: 0, xp: 0, r: 8, mass: 99, ai: 'flee', life: 20, gilded: true, anim: 0.3 };
   /* Power-up runes smashed out of urns (duration in seconds) */
   /* Urns: one roll per urn, top to bottom; nothing special -> a single coin */
   C.BAG_SIZE = 4; // the bag holds 4 spare items found in the run; more and you must discard one

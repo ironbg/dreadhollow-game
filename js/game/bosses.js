@@ -461,5 +461,34 @@
     }
     if (e.c3 > 13) { e.c3 = 0; e.ward = 4; for (const s of [-1, 1]) run.spawnEnemy('vaultwarden', e.x + s * 30, e.y - 10); DH.audio.play('frost'); }
   };
+  /* ---------- hall secrets ---------- */
+  // Cyclops: charges along a marked line; its great eye burns a marked line toward you; hurls boulders that burst into shards
+  AI.b_cyclops = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    charge(run, e, dt, dx, dy, dist, 240);
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt;
+    if (e.c1 > 5 && e.phase === 0) { e.c1 = 0; run.hazard({ kind: 'line', x: e.x, y: e.y - 10, ang: Math.atan2(p.y - e.y + 10, p.x - e.x), len: 240, w: 12, delay: 1.1, dmg: e.dmg * 1.4 * e.enr, color: '#ffb030', src: e, boss: true, sound: 'fire', fire: true }); }
+    if (e.c2 > 4 && e.phase === 0) {
+      e.c2 = 0; DH.audio.play('throw');
+      run.hazard({ kind: 'circle', x: p.x, y: p.y, r: 26, delay: 1.2, dmg: e.dmg * 1.2 * e.enr, color: '#c8a070', src: e, boss: true, sound: 'boom', boulder: true,
+        onFire: (r, h) => { r.shake = 5; for (let i = 0; i < 8; i++) r.enemyShot({ x: h.x, y: h.y }, i / 8 * TAU, 85, e.dmg * 0.45 * e.enr, '#c8a070'); } });
+    }
+  };
+  // Ghoul Lieutenant: leaps onto a marked circle and frost bursts round where it lands; rakes twice before it; calls its ghouls
+  AI.b_ghoullt = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    if (e.leap > 0) {
+      e.leap -= dt; const k = 1 - Math.max(0, e.leap) / 0.8; e.x = e.lx0 + (e.lx1 - e.lx0) * k; e.y = e.ly0 + (e.ly1 - e.ly0) * k; e.hop = Math.sin(k * Math.PI) * 26;
+      e.mx = e.my = 0; e.cspd = 0; e.kx = e.ky = 0; if (e.leap <= 0) { e.hop = 0; e.eth = 0; } return;
+    }
+    e.cspd = e.spd; e.mx = dx; e.my = dy;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 5 && dist > 50) {
+      e.c1 = 0; e.leap = 0.8; e.eth = 0.8; e.lx0 = e.x; e.ly0 = e.y; e.lx1 = p.x; e.ly1 = p.y; DH.audio.play('roar');
+      run.hazard({ kind: 'circle', x: p.x, y: p.y, r: 34, delay: 0.8, dmg: e.dmg * 1.3 * e.enr, color: '#8ff0ff', src: e, boss: true, sound: 'boom', onFire: (r, h) => { r.shake = 6; for (let i = 0; i < 8; i++) r.enemyShot({ x: h.x, y: h.y }, i / 8 * TAU, 80, e.dmg * 0.4 * e.enr, '#a8e0ff', 'frost'); } });
+    }
+    if (e.c2 > 3 && dist < 70) { e.c2 = 0; const a = Math.atan2(dy, dx); [-0.5, 0.5].forEach((o, i) => run.hazard({ kind: 'cone', x: e.x, y: e.y, ang: a + o, arc: 1.3, len: 64, delay: 0.5 + i * 0.3, dmg: e.dmg * e.enr, color: '#ff5040', src: e, boss: true, sound: 'swing' })); }
+    if (e.c3 > 10) { e.c3 = 0; for (let i = 0; i < 4; i++) { const a = i / 4 * TAU; run.spawnEnemy('frostghoul', e.x + Math.cos(a) * 26, e.y + Math.sin(a) * 26); } }
+  };
   C.BOSS_AI = AI;
 })(window.DH);
