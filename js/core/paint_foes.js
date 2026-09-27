@@ -823,36 +823,36 @@
     P.fill(g, P.lg(g, x - nx, y - ny, x + nx, y + ny, [sh(col, 0.5), col, sh(col, -0.35)]));
   }
 
-  /* ---------- Frost Crawler: an ice scorpion that tunnels under the snow: a pale armoured body low on six legs, two great
-   *            pincers held forward, a segmented tail curled high over its back ending in a stinger of ice ---------- */
-  def('frostcrawler', { w: 30, h: 22, cy: 15, frames: 2,
+  /* ---------- Frost Crawler: a frost worm that tunnels under the snow and bursts up beneath you: an armoured pale body rising
+   *            out of a heaved mound of snow and broken ice, a round gaping maw ringed with fangs of ice, a cluster of cold eyes ---------- */
+  def('frostcrawler', { w: 26, h: 26, cy: 20, frames: 2,
     colors: { shell: '#6a8aa8', flesh: '#c8b8c8', eye: '#8ff0ff', ice: '#d8f4ff' },
     draw(g, f, c) {
-      const s = c.shell, sl = sh(s, 0.5), sd = sh(s, -0.4), dk = sh(s, -0.65), w = f ? 1 : -1, G0 = 18.6;
-      P.ell(g, 15, G0 + 0.2, 12, 1.1, 'rgba(0,0,0,0.4)');
-      const leg = (x, y, dir, o, col) => { const kx = x + dir * 1.6 + o, ky = y - 2.2; limb(g, x, y, kx, ky, 0.55, 0.4, col); limb(g, kx, ky, x + dir * 3 + o * 1.3, G0, 0.4, 0.25, col); };
-      // far legs
-      for (const [x, d, i] of [[11, -1, 0], [14, -1, 1], [17, 1, 2]]) leg(x, 15.4, d, (i % 2 ? w : -w) * 0.6, dk);
-      // the tail: segments rising from the rump and curling forward over the back, an ice stinger at the tip
-      const tail = [[8.4, 14.6, 2], [6, 12.4, 1.9], [5, 9.4, 1.8], [5.8, 6.4, 1.7], [8.2, 4.2, 1.6], [11.2, 3.6 + (f ? 0.4 : 0), 1.4]];
-      tail.forEach(([x, y, r]) => { P.ell(g, x, y, r, r * 0.9, P.vol(g, x - r * 0.4, y - r * 0.5, r * 1.1, s)); g.beginPath(); g.arc(x, y, r, Math.PI * 1.1, Math.PI * 1.7); g.strokeStyle = c.ice; g.lineWidth = 0.3; g.stroke(); });
-      P.path(g, [11.6, 2.6, 14.6, 3.8 + (f ? 0.6 : 0), 12.2, 4.8]); P.fill(g, P.lg(g, 11, 2.6, 14.6, 4.8, ['#ffffff', c.ice, sh(c.ice, -0.3)])); // the stinger
-      P.glow(g, 14, 4, 2.2, c.eye, 0.5);
-      // the body: a flat armoured shield of plates, lit along the top
-      P.ell(g, 15, 14.6, 7.6, 3, P.vol(g, 13, 13.2, 7.6, s));
-      for (let i = 0; i < 3; i++) { g.beginPath(); g.ellipse(15 - i * 2.4, 14.6, 5.6 - i * 1.2, 2.8, 0, Math.PI * 1.1, Math.PI * 1.6); g.strokeStyle = i ? sd : sl; g.lineWidth = 0.35; g.stroke(); }
-      icicle(g, 13.4, 12.2, 12.6, 9.6, 0.8, c.ice); icicle(g, 16.8, 12, 18, 10, 0.6, c.ice); // frost grown on the back
-      // near legs
-      for (const [x, d, i] of [[12, -1, 1], [15.4, 1, 0], [18.4, 1, 1]]) leg(x, 16, d, (i % 2 ? -w : w) * 0.6, sl);
-      // the head and the pincers held forward, open
-      P.ell(g, 22.4, 14.4, 2.4, 2, P.vol(g, 21.8, 13.6, 2.4, sl));
-      evil(g, 23.4, 13.4, 0.5, c.eye); P.circle(g, 22, 13.3, 0.35, c.eye);
-      for (const [y0, oy, col] of [[13.6, -1.6, sl], [15.4, 0.6, s]]) {
-        limb(g, 23, y0, 25.4, y0 + oy, 0.8, 0.65, col);
-        const px = 26.6, py = y0 + oy, gap = f ? 0.9 : 0.5;
-        P.path(g, [px - 1.2, py - 1.2, px + 2.6, py - 1 - gap, px + 2.4, py - 0.3, px, py]); P.fill(g, P.lg(g, px, py - 1.4, px, py, [c.ice, col]));
-        P.path(g, [px - 1.2, py + 0.8, px + 2.2, py + 0.8 + gap, px + 2, py + 0.2, px, py]); P.fill(g, sd);
-      }
+      const s = c.shell, sl = sh(s, 0.5), sd = sh(s, -0.45), fl = c.flesh, fd = sh(fl, -0.4), wv = f ? 0.8 : -0.8, snow = '#e8f2f8';
+      // the mound of snow it breaks out of, and broken slabs of ice thrown up around it
+      P.ell(g, 13, 23, 11.4, 2.4, 'rgba(0,0,0,0.35)');
+      g.beginPath(); g.moveTo(2, 23.2); g.quadraticCurveTo(2.6, 20.4, 5.4, 20.2); g.quadraticCurveTo(7, 17.6, 10.4, 18.4); g.quadraticCurveTo(14, 17, 16.6, 18.8); g.quadraticCurveTo(20.6, 18.6, 21.4, 20.8); g.quadraticCurveTo(24.2, 21.4, 23.8, 23.4); g.closePath();
+      P.fill(g, P.lg(g, 0, 17, 0, 23.6, [snow, sh(snow, -0.15), sh(snow, -0.45)])); // a heaved, lumpy mound
+      P.ell(g, 10.8, 20.6, 4.6, 1.6, '#16222e'); // the hole it broke out of
+      [[4.6, 21.4, 3.4, 18.6, 1.2], [17.8, 20.6, 19.6, 17.8, 1.1], [15.4, 21.6, 16.2, 19.6, 0.7]].forEach(([x, y, tx, ty, ww]) => icicle(g, x, y, tx, ty, ww, c.ice)); // slabs of ice thrown up
+      // the body rising in a curve: each ring a pale belly under an armoured back-plate rimed with frost
+      const seg = [[10.6, 19.4, 3.8], [9.4, 15.8, 3.6], [9.8 + wv * 0.3, 12.4, 3.3], [11.6 + wv * 0.5, 9.6, 3.1]];
+      seg.forEach(([x, y, r], i) => {
+        P.ell(g, x, y, r, r * 0.95, P.vol(g, x - r * 0.3, y - r * 0.4, r, fl)); // the belly ring
+        g.beginPath(); g.arc(x, y, r, Math.PI * 0.55, Math.PI * 1.45); g.lineTo(x - r * 0.1, y - r * 0.6); g.closePath(); P.fill(g, P.lg(g, x - r, y - r, x, y + r, [sl, s, sd])); // the back-plate
+        g.beginPath(); g.arc(x, y, r, Math.PI * 1.05, Math.PI * 1.35); g.strokeStyle = c.ice; g.lineWidth = 0.4; g.stroke();
+        if (i) { g.beginPath(); g.arc(x, y + r * 0.9, r * 0.8, Math.PI * 1.15, Math.PI * 1.85); g.strokeStyle = fd; g.lineWidth = 0.35; g.stroke(); }
+      });
+      P.path(g, [6, 21.2, 8, 20.2, 10.4, 21, 12.8, 20.2, 15.6, 21.2, 13, 22, 8.4, 22]); P.fill(g, G.rgba(snow, 0.95)); // snow heaped against its body
+      // the head: turned toward us, a round maw gaping open, fangs of ice ringed round it, cold eyes clustered above
+      const hx = 14.6 + wv * 0.6, hy = 6.8;
+      P.ell(g, hx - 0.6, hy, 4.4, 4.2, P.vol(g, hx - 1.8, hy - 1.4, 4.4, s));
+      P.ell(g, hx + 0.6, hy + 0.6, 3.4, 3.2, fd, 0.2); // the lip
+      P.ell(g, hx + 0.8, hy + 0.8, 2.5, 2.3, '#0a1620', 0.2); // the throat
+      P.glow(g, hx + 0.8, hy + 1, 2.4, c.eye, 0.6);
+      for (let i = 0; i < 9; i++) { const a = i / 9 * Math.PI * 2, x0 = hx + 0.8 + Math.cos(a) * 2.6, y0 = hy + 0.8 + Math.sin(a) * 2.4, x1 = hx + 0.8 + Math.cos(a) * 1.2, y1 = hy + 0.8 + Math.sin(a) * 1.1;
+        P.path(g, [x0 + Math.sin(a) * 0.45, y0 - Math.cos(a) * 0.45, x1, y1, x0 - Math.sin(a) * 0.45, y0 + Math.cos(a) * 0.45]); P.fill(g, i % 2 ? c.ice : '#ffffff'); }
+      for (const [dx, dy, r] of [[-2.8, -2.6, 0.5], [-1.2, -3.4, 0.55], [0.6, -3.2, 0.42]]) evil(g, hx + dx, hy + dy, r, c.eye);
     } });
 
   /* ---------- Ice Skull: a skull cased in frost, flying, seen full face: two cold eyes deep in the sockets, a row of teeth,
@@ -942,47 +942,57 @@
       for (let i = 0; i < 2; i++) P.ell(g, hx + 6.6 + i * 1.4 + (f ? 0.6 : 0), hy + 1.6 - i * 0.6, 0.9 - i * 0.2, 0.6 - i * 0.15, G.rgba('#e8f4ff', 0.5 - i * 0.2)); // breath
     } });
 
-  /* ---------- Frost Construct (boss): a hunched colossus of frozen stone and blue ice bound with iron bands, a small head sunk
-   *            between crystal shoulders, a cold core showing through a crack in its chest, one fist grown into a club of ice ---------- */
+  /* ---------- Frost Construct (boss): a colossus of glacier ice walking on its knuckles, faceted like cut crystal: massive arms
+   *            to the ground, a small head hung low in front, three uneven spires of crystal from its back, a rune-heart burning
+   *            in its chest, broken iron shackles still on its wrists ---------- */
   def('frostconstruct', { w: 52, h: 56, cy: 36, frames: 2,
     colors: { ice: '#7ab8e0', iron: '#3a4050', core: '#c8f4ff', rune: '#8ff0ff' },
     draw(g, f, c) {
-      const ic = c.ice, il = sh(ic, 0.45), id = sh(ic, -0.45), st = '#5a6878', stl = sh(st, 0.4), std = sh(st, -0.4), ir = c.iron, w = f ? 0.8 : -0.8;
-      const block = (pts, col) => { P.path(g, pts); P.fill(g, P.lg(g, pts[0], pts[1], pts[4], pts[5], [sh(col, 0.4), col, sh(col, -0.45)])); };
-      P.ell(g, 26, 53, 16, 2.4, 'rgba(0,0,0,0.45)');
-      // legs: two short pillars of stone, knees of ice, broad feet
-      for (const [x, o, col] of [[19, -w, std], [31, w, st]]) {
-        block([x - 3.4, 36, x + 3.4, 36, x + 3.2 + o, 44, x - 3 + o, 44], col);
-        P.ell(g, x + o * 0.5, 43.6, 3.8, 2.4, P.vol(g, x - 1, 42.6, 3.8, ic));
-        block([x - 3.4 + o, 44, x + 3.4 + o, 44, x + 4.4 + o * 1.2, 52.4, x - 4 + o * 1.2, 52.4], col);
-        P.rect(g, x - 3.6 + o, 45.4, 7.2, 1.2, ir);
-      }
-      // the far arm: a massive stone arm hanging to the knee, a fist of ice
-      block([8, 18, 13, 18.6, 12.4, 30, 7, 29.4], std); block([7, 29.6, 12.4, 30.2, 12.8, 37, 7.4, 36.6], std);
-      P.path(g, [5.6, 36, 13.6, 36.4, 14.4, 42, 11.6, 44.2, 6.4, 43.6, 5, 40]); P.fill(g, P.lg(g, 5, 36, 14, 44, [ic, id]));
-      // the torso: hunched, a barrel of stone blocks bound in iron, a crack of ice glowing with the core
-      P.path(g, [10, 17.4, 16, 12.6, 36, 12, 42, 16.8, 36.4, 30, 34.6, 37, 17, 37.4, 15.4, 30]); P.fill(g, P.lg(g, 10, 12, 40, 37, [stl, st, std]));
-      P.path(g, [11, 17.4, 16.4, 13.2, 25.6, 12.8, 24.6, 24.4, 15.8, 26.6]); P.fill(g, P.lg(g, 11, 13, 24, 26, [sh(st, 0.55), stl]));
-      P.rect(g, 13.6, 26.6, 23.2, 1.6, ir); P.rect(g, 14.4, 33.4, 21.8, 1.4, ir);
-      for (const x of [16, 22, 28, 34]) { P.circle(g, x, 27.4, 0.5, '#8a92a0'); P.circle(g, x, 34.1, 0.45, '#8a92a0'); } // rivets
-      P.glow(g, 26, 22, 9, c.core, 0.55);
-      g.beginPath(); g.moveTo(24.6, 16); g.lineTo(27.8, 19.4); g.lineTo(26, 22); g.lineTo(29, 25.6); g.lineTo(26.4, 29); g.lineTo(23.6, 25.6); g.lineTo(25.2, 22.2); g.lineTo(22.8, 19); g.closePath();
-      P.fill(g, P.lg(g, 23, 16, 29, 29, ['#ffffff', c.core, ic])); // the crack and the cold core inside
-      // shoulders of ice crystal, jutting, uneven
-      icicle(g, 12.6, 17, 8.4, 9.4, 3, ic); icicle(g, 15, 15.6, 13.2, 7.4, 2.2, il); icicle(g, 37, 15.6, 41.4, 8, 3.2, ic); icicle(g, 34.4, 14.6, 35.4, 6.6, 2, il);
-      // the head: small, sunk low between the shoulders, a brow of stone, two rune-eyes
-      const hx = 27.4, hy = 14.2;
-      P.path(g, [hx - 4, hy - 2.4, hx + 1, hy - 3.8, hx + 4.6, hy - 2, hx + 4.4, hy + 3, hx - 4, hy + 3.4]); P.fill(g, P.lg(g, hx - 4, hy - 4, hx + 4, hy + 3, [stl, st, std]));
-      P.path(g, [hx - 4.4, hy - 3.4, hx + 4.8, hy - 3.8, hx + 4.4, hy - 1.4, hx - 4, hy - 1]); P.fill(g, stl); // the brow
-      P.rect(g, hx - 3, hy - 0.6, 6.4, 1.6, '#05080c');
-      evil(g, hx + 2, hy + 0.2, 0.75, c.rune); evil(g, hx - 1.4, hy + 0.2, 0.65, c.rune); P.glow(g, hx + 0.4, hy + 0.2, 4, c.rune, 0.5);
-      // the near arm, raised a little, its fist grown into a great club of ice
-      block([36.4, 17, 41.4, 17.6, 42, 28, 37, 27.6], st);
-      block([37, 27.6, 42, 28, 44 + w * 0.4, 34, 39.4 + w * 0.4, 34.4], stl);
-      P.rect(g, 36.8, 26.4, 5.4, 1.2, ir);
-      P.path(g, [37.6 + w * 0.4, 33.6, 45.6 + w * 0.4, 33.4, 48 + w * 0.4, 38, 46.4 + w * 0.4, 44.6, 40.4 + w * 0.4, 45.4, 37 + w * 0.4, 40]); P.fill(g, P.lg(g, 37, 33, 48, 45, [il, ic, id]));
-      icicle(g, 45 + w * 0.4, 36, 49.6 + w * 0.4, 33.6, 1.4, il); icicle(g, 44 + w * 0.4, 43.6, 47.6 + w * 0.4, 47.4, 1.2, ic);
-      g.strokeStyle = G.rgba('#ffffff', 0.6); g.lineWidth = 0.4; g.beginPath(); g.moveTo(40 + w * 0.4, 35.6); g.lineTo(42 + w * 0.4, 39); g.lineTo(41 + w * 0.4, 42); g.stroke();
+      const ic = c.ice, il = sh(ic, 0.55), iw = '#eef8ff', id = sh(ic, -0.4), idd = sh(ic, -0.62), ir = c.iron, w = f ? 0.8 : -0.8;
+      /** A faceted mass: the outline in mid ice, a lit facet, a shadow facet, a white edge along the ridge. */
+      const facet = (out, lit, dark, edge) => {
+        P.path(g, out); P.fill(g, ic);
+        if (lit) { P.path(g, lit); P.fill(g, P.lg(g, lit[0], lit[1], lit[4], lit[5], [iw, il])); }
+        if (dark) { P.path(g, dark); P.fill(g, P.lg(g, dark[0], dark[1], dark[4], dark[5], [id, idd])); }
+        if (edge) { g.strokeStyle = G.rgba(iw, 0.85); g.lineWidth = 0.45; g.beginPath(); g.moveTo(edge[0], edge[1]); for (let i = 2; i < edge.length; i += 2) g.lineTo(edge[i], edge[i + 1]); g.stroke(); }
+      };
+      P.ell(g, 26, 53, 20, 2.4, 'rgba(0,0,0,0.45)');
+      P.glow(g, 26, 30, 22, ic, 0.15);
+      // crystal spires from the back: three, uneven, leaning
+      facet([16, 16, 13, 3, 19.6, 13], [16, 16, 13, 3, 16.6, 14], null, [13, 3, 16, 16]);
+      facet([21, 13, 22.4, -0.6, 26, 12.4], [21, 13, 22.4, -0.6, 23.4, 12.6], [23.4, 12.6, 22.4, -0.6, 26, 12.4], [22.4, -0.6, 21, 13]);
+      facet([27.6, 12.6, 31.4, 4.4, 31.6, 13.4], [27.6, 12.6, 31.4, 4.4, 29.6, 13], null, [31.4, 4.4, 27.6, 12.6]);
+      // the far arm: shoulder to knuckles on the ground, the forearm thicker than the upper arm
+      facet([12, 16, 17, 18, 13, 32, 8, 30], null, [15, 17.4, 17, 18, 13, 32, 11.6, 31.4]);
+      facet([7, 30, 13.4, 31.6, 13, 44, 5.4, 44.6], null, [11, 31, 13.4, 31.6, 13, 44, 10.4, 44.4]);
+      facet([3.4, 44, 13.6, 43.4, 14.6, 51.6, 2.6, 52.4], [3.4, 44, 13.6, 43.4, 8.6, 47.4], null, [3.4, 44, 13.6, 43.4]); // the knuckles
+      P.rect(g, 5.6, 39.4, 8, 2, ir); P.rect(g, 5.6, 39.4, 8, 0.6, '#6a7280'); // a shackle
+      // legs: short faceted pillars
+      for (const [x, o] of [[20, -w], [32, w]]) facet([x - 3.6, 38, x + 3.6, 38, x + 4 + o, 52.6, x - 4.2 + o, 52.6], [x - 3.6, 38, x, 38, x - 1.6 + o, 52.6, x - 4.2 + o, 52.6], [x + 1.4, 38, x + 3.6, 38, x + 4 + o, 52.6, x + 2 + o, 52.6], [x - 3.6, 38, x - 4.2 + o, 52.6]);
+      // the body: a great hunched mass, the back high, the chest hanging low between the arms
+      facet([11, 17, 18, 11, 34, 10.6, 42, 16, 38.6, 30, 33, 40, 19, 40, 13.4, 30],
+        [11, 17, 18, 11, 26, 10.8, 24, 22, 14.4, 27],
+        [33, 12, 42, 16, 38.6, 30, 33, 40, 28, 30],
+        [11, 17, 18, 11, 34, 10.6, 42, 16]);
+      // the heart: a rune burning in a cracked cavity in the chest
+      P.path(g, [22, 21.4, 27.8, 19.6, 31.4, 24.8, 29.6, 32.2, 23.6, 33.4, 20.4, 28]); P.fill(g, '#0e2236'); // the dark cavity
+      P.glow(g, 26, 27, 7, c.rune, 0.7);
+      P.path(g, [23.4, 22.8, 27.4, 21.6, 29.6, 25.2, 28.2, 30.6, 24.2, 31.4, 22.2, 27.6]); P.fill(g, P.rg(g, 25.8, 26.6, 5, [[0, '#ffffff'], [0.45, c.core], [1, sh(c.rune, -0.2)]]));
+      g.strokeStyle = '#1a5a8a'; g.lineWidth = 0.5; g.beginPath(); g.arc(25.8, 26.6, 2.4, 0, Math.PI * 2); g.moveTo(25.8, 23.6); g.lineTo(25.8, 29.6); g.moveTo(23.4, 25.4); g.lineTo(28.2, 27.8); g.stroke();
+      g.strokeStyle = G.rgba(iw, 0.7); g.lineWidth = 0.35; g.beginPath(); g.moveTo(30, 25); g.lineTo(34, 22); g.lineTo(36.4, 23.4); g.moveTo(21.6, 27.6); g.lineTo(18, 30); g.stroke(); // cracks running out
+      // the head: small, angular, hung low in front of the shoulders, a jaw of ice, two rune-eyes
+      const hx = 27.6, hy = 16.4;
+      g.save(); g.translate(hx, hy); g.scale(1.35, 1.35); g.translate(-hx, -hy);
+      facet([hx - 4.4, hy - 2.4, hx + 1, hy - 4.4, hx + 5.2, hy - 1.6, hx + 4.4, hy + 3.4, hx - 3.6, hy + 3.6], [hx - 4.4, hy - 2.4, hx + 1, hy - 4.4, hx + 0.4, hy - 0.6, hx - 3.8, hy + 0.6], null, [hx - 4.4, hy - 2.4, hx + 1, hy - 4.4, hx + 5.2, hy - 1.6]);
+      P.path(g, [hx - 3, hy + 2.4, hx + 4, hy + 2.2, hx + 3, hy + 5.2 + (f ? 0.4 : 0), hx - 2.4, hy + 5]); P.fill(g, P.lg(g, 0, hy + 2, 0, hy + 5, [id, idd])); // the jaw
+      P.path(g, [hx - 3, hy - 0.4, hx + 4.6, hy - 1, hx + 4.2, hy + 0.8, hx - 2.6, hy + 1.2]); P.fill(g, '#06101a'); // the brow's shadow
+      evil(g, hx + 2.4, hy + 0.1, 0.8, c.rune); evil(g, hx - 1, hy + 0.3, 0.7, c.rune); P.glow(g, hx + 0.8, hy + 0.2, 4, c.rune, 0.5);
+      g.restore();
+      // the near arm, the knuckles planted before it
+      facet([36, 15, 42, 16, 45, 30, 39.4, 31.4], [36, 15, 42, 16, 39.6, 22, 37, 22.6], [42, 16, 45, 30, 41.6, 31], [36, 15, 42, 16]);
+      facet([39, 30.6, 45.4, 29.4, 47.4, 43.4, 40, 44.4], [39, 30.6, 45.4, 29.4, 42, 36, 40, 37], [45.4, 29.4, 47.4, 43.4, 44.6, 44], null);
+      facet([38, 44, 48.6, 42.6, 50, 51.4, 37.6, 52.4], [38, 44, 48.6, 42.6, 43.4, 47], [48.6, 42.6, 50, 51.4, 45.6, 52], [38, 44, 48.6, 42.6]);
+      P.rect(g, 39.6, 38.2, 8, 2, ir); P.rect(g, 39.6, 38.2, 8, 0.6, '#6a7280');
     } });
 
   /* ---------- Ice Prism (boss): a great floating crystal, a lesser ring of shards turning round it, light caught inside ---------- */
