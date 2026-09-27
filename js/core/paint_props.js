@@ -149,27 +149,35 @@
     } });
   });
   /* ---------------- summons: the hero's allies, each its own model (never an enemy's) ---------------- */
-  // Huntress's wolves: spirit wolves of frost, pale and lean, a mane of rime streaming off them, cold eyes, breath smoking
+  // Huntress's wolves: dire wolves of the frost-spirits: heavy-shouldered, dark blue-grey, a thick ruff at the neck, ears up,
+  // jaws open on white fangs, eyes of cold light, rime crystals grown on the shoulders, breath smoking, a brush of a tail
   def('sum_wolf', { w: 24, h: 15, frames: 2, draw(g, f) {
-    const fur = '#a8c4e0', fl = '#e8f4ff', fd = '#4a6a94', eye = '#8ff0ff', gal = f ? 1 : -1;
-    P.ell(g, 12, 14.2, 8, 0.8, 'rgba(0,0,0,0.3)');
-    const leg = (x, y, kx, ky, fx, fy, col) => { P.limb(g, x, y, kx, ky, 1.1, 0.8, col); P.limb(g, kx, ky, fx, fy, 0.8, 0.5, col); };
-    leg(8, 9, 5.6 - gal, 11.4, 4.4 - gal * 1.4, 13.6, fd); leg(15.4, 9, 17.4 + gal, 11.6, 18.6 + gal * 1.2, 13.6, fd);
-    // the tail streaming back, frosted
-    g.beginPath(); g.moveTo(5.6, 7.4); g.quadraticCurveTo(2, 5.6 + gal * 0.6, 0.4, 7 + gal); g.quadraticCurveTo(2.4, 8, 5.6, 8.8); g.closePath(); P.fill(g, P.lg(g, 0, 5, 6, 9, [fl, fur]));
-    // the body: lean, deep at the chest, tucked at the belly
-    g.beginPath(); g.moveTo(5.4, 7.6); g.quadraticCurveTo(8, 5.2, 13, 5.4); g.quadraticCurveTo(17, 5.2, 17.8, 7.6); g.quadraticCurveTo(17.4, 10.4, 14.6, 10.2); g.quadraticCurveTo(11, 9.2, 8.4, 10); g.quadraticCurveTo(5.4, 10, 5.4, 7.6); g.closePath();
-    P.fill(g, P.lg(g, 6, 5, 16, 10.4, [fl, fur, fd]));
-    g.strokeStyle = G.rgba(fd, 0.6); g.lineWidth = 0.3; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(11.4 + i * 1.2, 7.2); g.quadraticCurveTo(12 + i * 1.2, 8.4, 11.6 + i * 1.2, 9.4); g.stroke(); } // ribs under the fur
-    P.path(g, [9, 5.6, 11, 3.6, 12.2, 5.4, 13.4, 3.8, 14.4, 5.6, 16, 4.6, 16.6, 6.4]); P.fill(g, P.lg(g, 0, 3.6, 0, 6.4, [fl, sh(fur, 0.2)])); // the rime mane
-    leg(9, 9, 7.6 + gal, 11.6, 7 + gal * 1.6, 13.8, fur); leg(16.2, 8.8, 18.6 - gal, 11, 20.2 - gal * 1.4, 13.4, fur);
-    // the head: a long muzzle, ears back, jaws parted, cold eyes, breath smoking
-    P.ell(g, 18.8, 6.4, 2.4, 2, P.vol(g, 18.2, 5.8, 2.4, fur));
-    P.path(g, [19.6, 5.6, 23.4, 6.6, 23, 7.4, 20, 7.8]); P.fill(g, P.lg(g, 19, 5.6, 23, 7.8, [fl, fur]));
-    P.path(g, [20, 7.8, 22.8, 7.6 + (f ? 0.6 : 0.2), 20.4, 8.6]); P.fill(g, sh(fd, -0.3)); P.circle(g, 23.3, 6.8, 0.35, '#1a2a3a');
-    P.path(g, [17.6, 5, 17, 2.4, 18.8, 4.6]); P.fill(g, fur); P.path(g, [18.8, 4.8, 18.8, 2.6, 19.8, 4.8]); P.fill(g, fl);
-    P.ell(g, 20.2, 5.6, 0.55, 0.4, '#0a1420'); P.evil(g, 20.2, 5.6, 0.4, eye); P.glow(g, 20.2, 5.6, 2, eye, 0.6);
-    g.save(); g.globalAlpha = 0.45; P.ell(g, 24 - (f ? 0 : 0.6), 8.2, 1, 0.6, fl); g.restore(); // breath
+    const fur = '#4a5c7a', fl = sh(fur, 0.45), fd = sh(fur, -0.45), ice = '#bfe8ff', eye = '#8ff0ff', gal = f ? 1 : -1;
+    P.ell(g, 12, 14.2, 8, 0.8, 'rgba(0,0,0,0.35)');
+    P.glow(g, 12, 8, 10, eye, 0.12);
+    const leg = (x, y, kx, ky, fx, fy, col, w0) => { P.limb(g, x, y, kx, ky, w0, w0 * 0.7, col); P.limb(g, kx, ky, fx, fy, w0 * 0.7, 0.45, col); P.ell(g, fx + 0.3, fy + 0.2, 0.8, 0.4, col); };
+    leg(7.6, 8.6, 5.4 - gal * 0.8, 11.2, 4.4 - gal * 1.6, 13.6, fd, 1.5); leg(15, 9, 16.8 + gal, 11.6, 17.8 + gal * 1.4, 13.6, fd, 1.2);
+    // the tail: a thick brush streaming back
+    g.beginPath(); g.moveTo(5.8, 7); g.quadraticCurveTo(2.6, 6 + gal * 0.5, 0.6, 8 + gal * 0.8); g.quadraticCurveTo(2.2, 9.6, 5.8, 9); g.closePath(); P.fill(g, P.lg(g, 0, 6, 6, 9.6, [fl, fur, fd])); P.circle(g, 1, 8 + gal * 0.8, 0.6, ice);
+    // the body: heavy shoulders and a deep chest, a tucked waist, the haunch
+    g.beginPath(); g.moveTo(5, 8); g.quadraticCurveTo(6, 5.6, 9.4, 5.8); g.quadraticCurveTo(12, 5, 15, 4.4); g.quadraticCurveTo(18, 4.6, 18.2, 7.8); g.quadraticCurveTo(17.8, 10.8, 15, 10.8); g.quadraticCurveTo(12, 9.4, 9.6, 9.6); g.quadraticCurveTo(6, 10.4, 5, 8); g.closePath();
+    P.fill(g, P.lg(g, 6, 4.4, 16, 10.8, [fl, fur, fd]));
+    P.ell(g, 7.4, 7.6, 2.4, 2, G.rgba(fl, 0.35)); // the haunch
+    g.strokeStyle = G.rgba(fd, 0.8); g.lineWidth = 0.3; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(11 + i * 1.3, 6.8); g.quadraticCurveTo(11.6 + i * 1.3, 8.4, 11.2 + i * 1.3, 9.6); g.stroke(); } // ribs under the fur
+    // the ruff: a thick mane round the neck and shoulders
+    g.beginPath(); g.moveTo(13, 4.8); g.quadraticCurveTo(15.6, 2.8, 18.2, 4.2); g.quadraticCurveTo(19.4, 6.6, 18.4, 9.6); g.quadraticCurveTo(16.4, 10.4, 15.2, 9.2); g.quadraticCurveTo(14.8, 6.8, 13, 4.8); g.closePath(); P.fill(g, P.lg(g, 13, 3, 19, 10, [sh(fl, 0.15), fur, fd]));
+    for (const [x, y, h, a] of [[11.4, 5.2, 2, -1.9], [13, 4.4, 2.4, -1.5], [14.6, 3.8, 1.8, -1.2]]) { g.save(); g.translate(x, y); g.rotate(a); P.path(g, [0, -0.45, h, 0, 0, 0.45]); P.fill(g, P.lg(g, 0, 0, h, 0, [ice, '#ffffff'])); g.restore(); } // rime crystals on the shoulders
+    leg(8.8, 8.6, 7.4 + gal, 11.4, 6.6 + gal * 1.8, 13.8, fur, 1.5); leg(16.4, 9, 18.4 - gal * 0.6, 11.2, 19.8 - gal * 1.4, 13.4, fur, 1.2);
+    // the head: broad skull, ears up, a long muzzle, jaws open on fangs, cold eyes, breath smoking
+    P.ell(g, 19, 5.8, 2.6, 2.2, P.vol(g, 18.4, 5.2, 2.6, fur));
+    P.path(g, [17.6, 4.4, 17.8, 1.4, 19.2, 3.8]); P.fill(g, P.lg(g, 17.6, 1.4, 19.2, 4.4, [fl, fd])); P.path(g, [19, 4, 19.8, 1.6, 20.4, 4.2]); P.fill(g, P.lg(g, 19, 1.6, 20.4, 4.2, [fl, fur]));
+    P.path(g, [20, 5, 23.6, 6, 23.6, 6.8, 20.4, 7]); P.fill(g, P.lg(g, 20, 5, 23.6, 7, [fl, fur])); // the upper jaw
+    P.path(g, [20.4, 7.6, 23, 7.8 + (f ? 0.8 : 0.4), 22.8, 8.4 + (f ? 0.8 : 0.4), 20.2, 8.4]); P.fill(g, fd); // the lower jaw
+    P.path(g, [20.4, 7, 23.4, 6.8, 23, 7.8 + (f ? 0.8 : 0.4), 20.4, 7.6]); P.fill(g, '#1a0a10');
+    for (const x of [21.4, 22.8]) { P.path(g, [x - 0.3, 6.9, x + 0.3, 6.9, x, 7.7]); P.fill(g, '#f4f4f0'); }
+    P.circle(g, 23.7, 6.2, 0.35, '#0a0a14');
+    P.ell(g, 20.4, 5.2, 0.6, 0.4, '#0a1420'); P.evil(g, 20.4, 5.2, 0.45, eye); P.glow(g, 20.4, 5.2, 2.4, eye, 0.7);
+    g.save(); g.globalAlpha = 0.5; P.ell(g, 24 - (f ? 0 : 0.5), 8.8, 1.2, 0.7, ice); g.restore(); // breath
   } });
   // the Phantom Knights: a knight's ghost in pale armour, a great helm with a slit of cold light, a sword, dissolving to mist below the waist
   def('sum_phantom', { w: 20, h: 23, cy: 14, frames: 2, soft: true, draw(g, f) {
