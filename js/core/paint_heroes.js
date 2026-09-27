@@ -41,9 +41,9 @@
       case 'hammer': {
         P.line(g, hx - 0.2, hy + 3, hx + 1.8, hy - 7, 0.9, '#6a4428');
         g.save(); g.translate(hx + 2, hy - 7.6); g.rotate(0.2);
-        P.rrect(g, -3, -1.8, 6, 3.6, 0.7, P.lg(g, 0, -1.8, 0, 1.8, ['#f0e6c8', '#c9b27a', '#8a7648']));
-        P.rrect(g, -3, -0.4, 6, 0.8, 0.2, o.wcol || '#e8c050'); g.restore();
-        P.glow(g, hx + 2, hy - 7.6, 5, '#ffe89a', 0.35);
+        P.rrect(g, -2.4, -1.4, 4.8, 2.8, 0.5, P.lg(g, 0, -1.4, 0, 1.4, ['#d8d0b8', '#9a8a60', '#5a4a2a']));
+        P.rrect(g, -2.4, -0.35, 4.8, 0.7, 0.2, o.wcol || '#e8c050'); P.rect(g, 1.9, -1.4, 0.5, 2.8, sh(o.wcol || '#e8c050', -0.3)); g.restore();
+        P.glow(g, hx + 2, hy - 7.6, 3.4, '#ffe89a', 0.3);
         break;
       }
       case 'axe': case 'greataxe': {
@@ -164,7 +164,10 @@
         if (o.head === 'helm') { P.rrect(g, hx + 1.1, hy - 0.6, 2.4, 0.7, 0.2, '#0c0810'); P.line(g, hx - 0.2, hy - 3.2, hx - 0.2, hy + 2.6, 0.35, sh(hc, 0.5)); }
         else { P.ell(g, hx + 1.9, hy - 0.2, 0.9, 0.55, '#0c0810'); if (o.eyeGlow) P.eye(g, hx + 2, hy - 0.2, 0.3, o.eyeGlow); }
         if (o.plume) { g.beginPath(); g.moveTo(hx - 0.5, hy - 3.2); g.quadraticCurveTo(hx - 4, hy - 5.4, hx - 5.6, hy - 1.4); g.quadraticCurveTo(hx - 3.2, hy - 3.2, hx - 0.2, hy - 2.4); P.fill(g, P.lg(g, hx - 5, hy - 5, hx, hy, [sh(o.plume, 0.3), o.plume, sh(o.plume, -0.4)])); }
-        if (o.head === 'wingedhelm') for (const s of [-1]) { g.beginPath(); g.moveTo(hx - 1.4, hy - 1.2); g.quadraticCurveTo(hx - 4.8, hy - 5.8, hx - 6.2, hy - 3.2 * s * -1); g.quadraticCurveTo(hx - 4, hy - 1.8, hx - 1.6, hy + 0.2); P.fill(g, P.lg(g, hx - 6, hy - 5, hx - 1, hy, ['#ffffff', '#c8d4e8'])); for (let i = 0; i < 3; i++) P.line(g, hx - 2 - i, hy - 1 - i * 0.6, hx - 3.6 - i * 0.6, hy - 3 - i * 0.4, 0.25, '#9aa8c0'); }
+        if (o.head === 'wingedhelm') for (const [ox, oy, k] of [[0.8, -0.6, 0.8], [-1.4, 0, 1]]) { // two wings swept back from the temples, the far one smaller
+          g.beginPath(); g.moveTo(hx + ox, hy + oy - 1); g.quadraticCurveTo(hx + ox - 2.4 * k, hy + oy - 4.4 * k, hx + ox - 6 * k, hy + oy - 3.4 * k); g.lineTo(hx + ox - 4.8 * k, hy + oy - 2.6 * k); g.lineTo(hx + ox - 5.6 * k, hy + oy - 2 * k); g.lineTo(hx + ox - 4.2 * k, hy + oy - 1.4 * k); g.quadraticCurveTo(hx + ox - 2, hy + oy - 0.6, hx + ox, hy + oy);
+          P.fill(g, P.lg(g, hx + ox - 6, hy - 4, hx + ox, hy, k < 1 ? ['#9aa6ba', '#6a7488'] : ['#e8eef8', '#a8b4c8', '#7a869a']));
+          for (let i = 0; i < 2; i++) P.line(g, hx + ox - 1.4 - i * 1.2, hy + oy - 1.2 - i * 0.6, hx + ox - 3 - i * 1.4, hy + oy - 2.8 - i * 0.3, 0.2, '#5a6478'); }
         if (o.head === 'hornedhelm') { g.beginPath(); g.moveTo(hx - 1.6, hy - 2.2); g.quadraticCurveTo(hx - 5.4, hy - 3, hx - 4.6, hy - 7.2); g.quadraticCurveTo(hx - 3.6, hy - 4.2, hx - 0.8, hy - 3.2); P.fill(g, P.lg(g, hx - 5, hy - 7, hx, hy, ['#fffbe8', '#d8c8a0', '#8a7a58'])); g.beginPath(); g.moveTo(hx + 1.6, hy - 2.6); g.quadraticCurveTo(hx + 4.6, hy - 4.2, hx + 3.6, hy - 7.4); g.quadraticCurveTo(hx + 3.2, hy - 4.6, hx + 0.6, hy - 3.4); P.fill(g, P.lg(g, hx, hy - 7, hx + 4, hy, ['#fffbe8', '#d8c8a0', '#8a7a58'])); }
         break;
       }
@@ -304,39 +307,51 @@
   function humanoid(g, f, o) {
     const stride = f === 1 ? 1 : f === 5 ? -1 : 0, walk = stride ? 1 : 0, pose = f >= 2 && f <= 4 ? POSE[SWING[o.weapon] || 'cast'][f - 2] : null;
     if (pose) g.translate(pose.lean, 0);
-    const bx = 9.4, hipY = 12.6, footY = 18.3;
+    // proportions: the upper body is drawn in its own frame and lifted by UP, the legs stretched to meet it, the head drawn
+    // smaller (HS) on its neck: a hero of about four heads, not a doll with a head as big as its chest
+    const UP = 1.5, HS = 0.76;
+    const bx = 9.4, hipY = 12.6, footY = 18.3, gy = footY + UP; // gy: the ground, in the lifted upper-body frame
     const body = o.body || '#7a2a2a', trim = o.trim || sh(body, 0.35), legs = o.legs || '#3a3040', boots = o.boots || '#2a1e18';
+    g.save(); g.translate(0, -UP);
     // cape
     if (o.cape) {
-      g.beginPath(); g.moveTo(bx - 2.6, 7.8); g.quadraticCurveTo(bx - 5.6 - walk * 0.8, 13, bx - 5.2 - walk, 17.6); g.lineTo(bx - 0.4, 17); g.lineTo(bx + 0.6, 8.2); g.closePath();
-      P.fill(g, P.lg(g, bx - 5, 8, bx, 17, [sh(o.cape, 0.1), o.cape, sh(o.cape, -0.45)]));
+      g.beginPath(); g.moveTo(bx - 2.6, 7.8); g.quadraticCurveTo(bx - 5.6 - walk * 0.8, 13, bx - 5.2 - walk, gy - 0.9); g.lineTo(bx - 0.4, gy - 1.5); g.lineTo(bx + 0.6, 8.2); g.closePath();
+      P.fill(g, P.lg(g, bx - 5, 8, bx, gy, [sh(o.cape, 0.1), o.cape, sh(o.cape, -0.45)]));
     }
     if (o.backpack) o.backpack(g, bx);
-    // legs
+    g.restore();
+    // legs: from the lifted hips to the ground, thigh and shin, a knee between them
     if (!o.robe) {
-      const dl = walk ? 1.2 : 0.35;
+      const dl = walk ? 1.3 : 0.35, top = hipY - UP, len = footY - 1.6 - top;
       for (const s of [-1, 1]) {
         const q = stride < 0 ? -s : s; // the other stride: the legs trade places (the shading stays with each leg)
         const lx = bx + q * 0.95 + (q === -1 ? -dl : dl) * 0.8;
-        g.save(); g.translate(bx + q * 0.9, hipY); g.rotate((q === -1 ? 1 : -1) * (walk ? 0.22 : 0.03));
-        P.rrect(g, -1.05, 0, 2.1, 5, 0.9, P.lg(g, -1, 0, 1, 0, [sh(legs, s === -1 ? -0.25 : 0.15), legs, sh(legs, -0.35)]));
+        const lc = sh(legs, s === -1 ? -0.25 : 0.12);
+        g.save(); g.translate(bx + q * 0.9, top); g.rotate((q === -1 ? 1 : -1) * (walk ? 0.2 : 0.03));
+        P.rrect(g, -1.15, 0, 2.3, len * 0.55, 1, P.lg(g, -1, 0, 1, 0, [sh(lc, 0.15), lc, sh(lc, -0.35)]));
+        P.rrect(g, -0.95, len * 0.48, 1.9, len * 0.56, 0.8, P.lg(g, -1, 0, 1, 0, [sh(lc, 0.1), lc, sh(lc, -0.4)]));
+        P.ell(g, 0.1, len * 0.52, 0.9, 0.5, G.rgba(sh(lc, -0.5), 0.6)); // the knee
         g.restore();
         P.rrect(g, lx - 1.2, footY - 1.9, 2.8, 1.9, 0.8, P.lg(g, 0, footY - 2, 0, footY, [sh(boots, 0.3), boots, sh(boots, -0.4)]));
       }
     }
+    g.save(); g.translate(0, -UP);
     // back arm
-    P.rrect(g, bx - 3.2, 8.4, 1.8, 4.6, 0.9, P.lg(g, bx - 3, 8, bx - 1.4, 8, [sh(o.arms || body, -0.35), sh(o.arms || body, -0.15)]));
-    P.circle(g, bx - 2.3, 13.2, 0.95, sh(o.skin || '#e8b890', -0.15));
+    { const ac = sh(o.arms || body, -0.3), sw = walk ? (stride > 0 ? 0.5 : -0.5) : 0;
+      P.limb(g, bx - 2.6, 8.4, bx - 3.2 - sw * 0.4, 10.8, 1, 0.8, ac); P.limb(g, bx - 3.2 - sw * 0.4, 10.8, bx - 2.6 - sw, 13, 0.8, 0.65, sh(ac, -0.1));
+      P.circle(g, bx - 2.5 - sw, 13.3, 0.9, sh(o.gloves || o.skin || '#e8b890', -0.2)); }
     // robe / torso
     if (o.robe) {
-      g.beginPath(); g.moveTo(bx - 3, 8); g.lineTo(bx + 2.8, 8); g.quadraticCurveTo(bx + 3.6, 13, bx + 4.6 + walk * 0.4, footY); g.lineTo(bx - 4.4 - walk * 0.4, footY); g.quadraticCurveTo(bx - 3.6, 13, bx - 3, 8); g.closePath();
-      P.fill(g, P.lg(g, bx - 4, 8, bx + 4, footY, [sh(o.robe, 0.3), o.robe, sh(o.robe, -0.45)]));
-      P.rrect(g, bx - 4.5 - walk * 0.4, footY - 1.2, 9.1 + walk * 0.8, 1.2, 0.5, trim);
-      g.save(); g.globalAlpha = 0.35; for (let i = 0; i < 3; i++) P.line(g, bx - 1.5 + i * 1.6, 12.5, bx - 2.2 + i * 2.2, footY - 1.2, 0.3, sh(o.robe, -0.5)); g.restore();
-      P.ell(g, bx + 2.6 + walk, footY - 0.1, 1.2, 0.6, boots);
+      g.beginPath(); g.moveTo(bx - 3, 8); g.lineTo(bx + 2.8, 8); g.quadraticCurveTo(bx + 3.6, 13, bx + 4.6 + walk * 0.4, gy); g.lineTo(bx - 4.4 - walk * 0.4, gy); g.quadraticCurveTo(bx - 3.6, 13, bx - 3, 8); g.closePath();
+      P.fill(g, P.lg(g, bx - 4, 8, bx + 4, gy, [sh(o.robe, 0.3), o.robe, sh(o.robe, -0.45)]));
+      P.rrect(g, bx - 4.5 - walk * 0.4, gy - 1.2, 9.1 + walk * 0.8, 1.2, 0.5, trim);
+      g.save(); g.globalAlpha = 0.35; for (let i = 0; i < 3; i++) P.line(g, bx - 1.5 + i * 1.6, 12.5, bx - 2.2 + i * 2.2, gy - 1.2, 0.3, sh(o.robe, -0.5)); g.restore();
+      P.ell(g, bx + 2.6 + walk, gy - 0.1, 1.2, 0.6, boots);
     }
-    g.beginPath(); g.moveTo(bx - 3.4, 8.6); g.quadraticCurveTo(bx - 3.4, 7.5, bx - 2, 7.5); g.lineTo(bx + 2.2, 7.5); g.quadraticCurveTo(bx + 3.6, 7.5, bx + 3.4, 9); g.lineTo(bx + 2.6, 13); g.lineTo(bx - 2.6, 13); g.closePath();
-    P.fill(g, P.lg(g, bx - 3, 7.5, bx + 3, 13, [sh(body, 0.3), body, sh(body, -0.4)]));
+    g.beginPath(); g.moveTo(bx - 3.7, 8.4); g.quadraticCurveTo(bx - 3.6, 7.3, bx - 2.2, 7.2); g.lineTo(bx + 2.4, 7.2); g.quadraticCurveTo(bx + 3.9, 7.3, bx + 3.7, 8.8);
+    g.quadraticCurveTo(bx + 3, 10.6, bx + 2.4, 13); g.lineTo(bx - 2.4, 13); g.quadraticCurveTo(bx - 3, 10.6, bx - 3.7, 8.4); g.closePath();
+    P.fill(g, P.lg(g, bx - 3, 7.2, bx + 3, 13, [sh(body, 0.35), body, sh(body, -0.45)]));
+    P.ell(g, bx - 0.6, 9.2, 2, 1.3, G.rgba(sh(body, 0.5), 0.25)); P.line(g, bx + 2.2, 8.2, bx + 1.8, 12.6, 0.5, G.rgba(sh(body, -0.6), 0.5)); // the lit chest, the shadowed flank
     if (o.chest) o.chest(g, bx);
     P.rrect(g, bx - 2.8, 11.7, 5.6, 1.1, 0.4, o.belt || '#3a2418'); P.rrect(g, bx + 0.2, 11.8, 1, 0.9, 0.2, '#d8b048');
     // shoulders / pauldrons
@@ -352,19 +367,24 @@
         if (o.emblem !== false) { P.rrect(g, sx - 0.4, sy - 2.6, 0.8, 5, 0.2, '#e8d070'); P.rrect(g, sx - 2, sy - 0.8, 4, 0.8, 0.2, '#e8d070'); }
       }
     }
-    // head
+    // the neck, then the head, drawn smaller about the base of the neck
+    P.rrect(g, bx - 0.4, 6.2, 1.9, 2, 0.6, P.lg(g, bx - 0.4, 0, bx + 1.5, 0, [sh(o.skin || '#e8b890', -0.05), sh(o.skin || '#e8b890', -0.4)]));
+    g.save(); g.translate(bx + 0.6, 7.8); g.scale(HS, HS); g.translate(-bx - 0.6, -7.8);
     head(g, o, bx + 0.6, 4.9);
+    g.restore();
     // front arm + hand + weapon
     const hx = bx + 3.3, hy = 11.4;
     if (o.weaponBehind !== true) {
       g.save();
       if (pose) { const sx = bx + 2.7, sy = 8.8; g.translate(sx + pose.x, sy); g.rotate(pose.r); g.translate(-sx, -sy); } // the attack: arm and weapon swing about the shoulder
-      P.rrect(g, bx + 1.8, 8.4, 1.8, 3.8, 0.9, P.lg(g, bx + 2, 8, bx + 3.6, 8, [sh(o.arms || body, 0.2), sh(o.arms || body, -0.2)]));
+      const ac = o.arms || body;
+      P.limb(g, bx + 2.7, 8.4, bx + 3.9, 10.2, 1.05, 0.85, sh(ac, 0.1)); P.limb(g, bx + 3.9, 10.2, hx - 0.1, hy, 0.85, 0.7, ac);
       if (o.puff) o.puff(g, bx);
       weapon(g, o, f, hx, hy);
       P.circle(g, hx - 0.2, hy + 0.2, 0.95, P.vol(g, hx - 0.2, hy + 0.2, 1, o.gloves || o.skin || '#e8b890'));
       g.restore();
     }
+    g.restore();
   }
   G.humanoid = humanoid;
 
@@ -373,7 +393,7 @@
   // M: room around the hero so a swung weapon never runs off the sprite (anchors shift with it)
   const M = 7, H = (name, o) => { const k = o.size || 1; G.painters[name] = { w: Math.ceil(20 * k) + M * 2, h: Math.ceil(25 * k) + M * 2, cx: 10 * k + M, cy: 23.3 * k - 7.3 + M, frames: 6, colors: {}, draw: (g, f) => { g.translate(M, M); g.scale(k, k); g.translate(0, 5); humanoid(g, f, o); } }; };
 
-  // the Swordbearer: a barbarian of the north (after Diablo II's) - bare and broad, furs and leather, a great two-handed sword
+  // the Swordbearer: a barbarian of the north - bare and broad, furs and leather, a great two-handed sword
   H('knight', { size: 1.15, body: '#c8845a', trim: '#8a5a34', arms: '#d8966a', legs: '#5a4230', boots: '#7a6650', hair: '#2e1c12', hairStyle: 'long', skin: '#d8966a',
     head: 'band', headCol: '#6a4428', weapon: 'greatsword', wcol: '#8a6a3a', gloves: '#6a4a2a', belt: '#3a2414',
     chest: (g, bx) => { // a bare, scarred chest: pecs and belly, a leather strap and a heavy buckle
