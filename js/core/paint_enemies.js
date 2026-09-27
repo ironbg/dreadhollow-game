@@ -305,43 +305,51 @@
       for (const [x, y] of [[3, 24 + (f ? 1 : 0)], [25.4, 24.6 - (f ? 0.8 : 0)], [8, 21.4 + (f ? 0.8 : 0)]]) P.rect(g, x, y, 0.6, 0.6, sh(s, -0.2));
     } });
 
-  /* ---------- Treasure Golem (the Reliquary): a vault guardian of pale marble bound in gold, a hoard of coins and a goblet
-   *            heaped on its shoulders, a cavity in its chest where a great ruby heart burns, a gold mask for a face,
-   *            fists banded in gold ---------- */
+  /* ---------- Treasure Golem (the Reliquary): a hoard that got up and walks: a hunched brute of coins fused by molten gold,
+   *            knuckling along on vast fists, a sword, a goblet and a chain sunk in the heap of its back, a crown pressed askew
+   *            into its lump of a head, ruby eyes, a maw of black full of coins, gold dripping off it ---------- */
   def('treasuregolem', { w: 28, h: 28, frames: 2,
-    colors: { stone: '#b8b0a0', gold: '#e0b040', gem: '#ff3050' },
+    colors: { stone: '#5a4020', gold: '#e0b040', gem: '#ff3050' },
     draw(g, f, c) {
-      const s = c.stone, sl = sh(s, 0.4), sd = sh(s, -0.45), gold = c.gold, gd = sh(gold, -0.45), w = f ? 0.9 : -0.9;
-      const block = (x, y, bw, bh, col) => P.rrect(g, x, y, bw, bh, 0.8, P.lg(g, x, y, x + bw, y + bh, [sh(col, 0.35), col, sh(col, -0.5)]));
-      const band = (x, y, bw) => P.rect(g, x, y, bw, 0.9, P.lg(g, 0, y, 0, y + 0.9, [sh(gold, 0.4), gd]));
-      P.ell(g, 14, 26.8, 11, 1.3, 'rgba(0,0,0,0.5)');
-      P.glow(g, 14, 12, 11, gold, 0.12);
-      // legs: marble blocks banded in gold
-      block(8.4 - w * 0.5, 19.6, 4.6, 6.6, sd); band(8.4 - w * 0.5, 22.4, 4.6);
-      block(15.2 + w * 0.5, 19.6, 4.6, 6.6, s); band(15.2 + w * 0.5, 22.4, 4.6);
-      // the far arm
-      block(1.8, 7, 4.2, 5.4, sd); block(1, 12.8, 3.8, 5, sd); block(0.4, 18.2, 5, 4.6, sh(sd, -0.1)); band(0.4, 18.6, 5);
-      // the hoard heaped on its shoulders: coins and a goblet
-      g.beginPath(); g.moveTo(6, 6); g.quadraticCurveTo(9, 0.6, 14, 1); g.quadraticCurveTo(19.4, 0.8, 22, 6); g.closePath(); P.fill(g, P.lg(g, 6, 1, 20, 6, ['#fff0a0', gold, gd]));
-      [[8.6, 4.6], [11, 2.8], [13.8, 2], [16.8, 2.8], [19.2, 4.4], [12.4, 4.6], [15.6, 4.6]].forEach(([x, y], i) => P.coin(g, x, y, 1, i % 2 ? 0.6 : 1));
-      P.path(g, [9.4, -0.2, 12, -0.2, 11.2, 1.8, 11, 3, 11.8, 3.4, 9.6, 3.4, 10.4, 3, 10.2, 1.8]); P.fill(g, P.lg(g, 9, 0, 12, 3.4, [sh(gold, 0.4), gd])); P.circle(g, 10.7, 0.8, 0.4, c.gem); // a goblet
-      // the body: marble blocks, gold straps, a cavity in the chest with the ruby heart
-      block(6.2, 5.6, 15.6, 13.6, s);
-      g.strokeStyle = G.rgba(sd, 0.9); g.lineWidth = 0.35; g.beginPath(); g.moveTo(6.4, 11.6); g.lineTo(9.6, 11.6); g.moveTo(18.4, 11.6); g.lineTo(21.6, 11.6); g.moveTo(10.4, 16.4); g.lineTo(10.4, 19); g.moveTo(17.6, 16.4); g.lineTo(17.6, 19); g.stroke();
-      band(6.2, 7, 15.6); band(6.2, 15.8, 15.6);
-      P.ell(g, 14, 11.6, 3.6, 3.4, '#140a06');
-      P.glow(g, 14, 11.6, 5, c.gem, 0.6);
-      P.path(g, [14, 8.8, 16.4, 11, 14, 14.6, 11.6, 11]); P.fill(g, P.lg(g, 11.6, 8.8, 16.4, 14.6, ['#ffc0c8', c.gem, sh(c.gem, -0.5)]));
-      P.path(g, [14, 8.8, 16.4, 11, 14, 11.4]); P.fill(g, G.rgba('#ffffff', 0.45));
-      for (const [x, y] of [[10.4, 8.6], [17.6, 8.6], [10.4, 14.6], [17.6, 14.6]]) P.circle(g, x, y, 0.5, sh(gold, 0.3)); // rivets
-      // the head: a gold mask set in a marble block
-      block(15.4, 1.6, 5.6, 5, sl);
-      P.rrect(g, 16.2, 2.4, 4.2, 3.8, 1.2, P.lg(g, 16, 2.4, 20.4, 6.2, [sh(gold, 0.5), gold, gd]));
-      P.rect(g, 16.8, 3.8, 1.2, 0.6, '#140a06'); P.rect(g, 18.8, 3.8, 1.2, 0.6, '#140a06');
-      P.rect(g, 17, 3.9, 0.8, 0.35, '#fff8c0'); P.rect(g, 19, 3.9, 0.8, 0.35, '#fff8c0'); P.glow(g, 18.4, 4.1, 2.2, '#fff8c0', 0.6);
-      P.line(g, 17.6, 5.4, 19.4, 5.4, 0.35, gd);
-      // the near arm: blocks to a gold-banded fist
-      block(22, 7, 4.2, 5.4, s); block(23.2, 12.8, 3.8, 5, s); block(22.6, 18.2, 5, 4.6, sl); band(22.6, 18.6, 5); band(22.6, 21, 5);
+      const gold = c.gold, gl = sh(gold, 0.45), gd = sh(gold, -0.5), dk = c.stone, w = f ? 0.9 : -0.9;
+      /** A mass of fused coins: a dark tarnished base, coins packed over it, lit from the top-left. */
+      const hoard = (path, x0, y0, x1, y1, shade) => {
+        g.save(); path(); P.fill(g, P.lg(g, x0, y0, x1, y1, [sh(gold, -0.25 + shade), sh(dk, shade), sh(dk, -0.5)]));
+        path(); g.clip();
+        let row = 0; for (let y = y0 + 0.6; y < y1 + 1; y += 2.3, row++) for (let x = x0 + (row % 2) * 1.2; x < x1 + 1; x += 2.5) { const k = ((x - x0) / (x1 - x0 + 1) + (y - y0) / (y1 - y0 + 1)) / 2; if (((x * 13 + y * 7) | 0) % 3 === 0) continue; g.globalAlpha = Math.max(0, 0.95 - k * 0.8 - (shade < 0 ? 0.35 : 0)); P.coin(g, x, y, 1.05, ((x + y) | 0) % 2 ? 0.6 : 1); }
+        g.restore(); };
+      P.ell(g, 14, 26.8, 11.4, 1.3, 'rgba(0,0,0,0.5)');
+      P.glow(g, 14, 14, 11, gold, 0.14);
+      // hind legs: short, stumpy, behind
+      for (const [x, d, sd] of [[8.6, -w, -0.2], [13, w, 0]]) hoard(() => { g.beginPath(); g.moveTo(x - 2, 18); g.lineTo(x + 2.2, 18); g.lineTo(x + 2 + d * 0.5, 26.4); g.lineTo(x - 2.4 + d * 0.5, 26.4); g.closePath(); }, x - 2.4, 18, x + 2.4, 26.4, sd);
+      // the far arm, knuckling down behind
+      hoard(() => { g.beginPath(); g.moveTo(8, 9); g.quadraticCurveTo(3.4, 14, 4.4, 22); g.lineTo(8.4, 22); g.quadraticCurveTo(9, 15, 12, 11); g.closePath(); }, 3.4, 9, 12, 22, -0.3);
+      P.ell(g, 6.2, 23.6, 3.2, 2.8, P.lg(g, 3, 21, 9, 26.4, [sh(gold, -0.2), gd, sh(dk, -0.4)]));
+      // the sword and the goblet sunk in the heap of its back
+      P.line(g, 5.4, 1.4, 9.4, 7.6, 0.8, '#b8c0c8'); P.line(g, 4.6, 3, 6.6, 1.8, 0.7, gold); P.line(g, 4.6, 0.6, 5.2, 1.6, 0.8, '#3a2410'); P.circle(g, 4.4, 0.4, 0.5, c.gem);
+      P.path(g, [15, 1.4, 17.8, 1.4, 17, 3.4, 16.8, 4.6, 17.6, 5, 15.2, 5, 16, 4.6, 15.8, 3.4]); P.fill(g, P.lg(g, 15, 1.4, 18, 5, [gl, gd]));
+      // the body: a hunched heap of fused coins, highest at the back, sloping to the head
+      hoard(() => { g.beginPath(); g.moveTo(6.4, 19.6); g.quadraticCurveTo(3.4, 8, 10, 4); g.quadraticCurveTo(17, 1.6, 21, 7.4); g.quadraticCurveTo(22.6, 12, 20, 16); g.quadraticCurveTo(15, 20.6, 6.4, 19.6); g.closePath(); }, 3.4, 2, 22.6, 20.6, 0);
+      g.strokeStyle = '#b8a060'; g.lineWidth = 0.5; g.setLineDash([0.7, 0.35]); g.beginPath(); g.moveTo(7, 9); g.quadraticCurveTo(12, 14, 19, 10); g.stroke(); g.setLineDash([]); // a chain sunk across it
+      // molten gold running off it
+      for (const [x, y, l] of [[9, 18.6, 3], [15.4, 18.4, 2.2], [20.4, 15, 2.6]]) { P.line(g, x, y, x, y + l + (f ? 0.6 : 0), 0.7, gl); P.circle(g, x, y + l + (f ? 0.6 : 0), 0.6, gl); }
+      // the head: a lump of fused gold thrust forward and low, a crown pressed askew into it, ruby eyes, a black maw full of coins
+      const hx = 21.4, hy = 11.6;
+      P.ell(g, hx - 1, hy + 1, 4.4, 3.8, G.rgba('#140a02', 0.6));
+      P.ell(g, hx, hy, 3.8, 3.4, P.lg(g, hx - 3.6, hy - 3.4, hx + 3.6, hy + 3.4, [gl, gold, gd]));
+      g.save(); g.translate(hx - 0.6, hy - 3); g.rotate(-0.3);
+      P.path(g, [-2.6, 0.6, -2.6, -1.8, -1.4, -0.6, -0.2, -2.4, 1, -0.6, 2.2, -1.8, 2.2, 0.6]); P.fill(g, P.lg(g, 0, -2.4, 0, 0.6, [gl, gold, gd]));
+      P.circle(g, -0.2, -0.2, 0.45, '#40c0e0'); g.restore();
+      P.path(g, [hx - 2.4, hy - 2.2, hx + 4, hy - 1.8, hx + 4.2, hy - 0.6, hx - 2.2, hy - 0.8]); P.fill(g, P.lg(g, 0, hy - 2.2, 0, hy - 0.6, [gl, gd])); // the heavy brow
+      P.ell(g, hx + 0.4, hy - 0.1, 0.9, 0.7, '#140a02'); P.ell(g, hx + 2.6, hy, 0.8, 0.65, '#140a02');
+      evil(g, hx + 0.4, hy - 0.1, 0.6, c.gem); evil(g, hx + 2.6, hy, 0.55, c.gem); P.glow(g, hx + 0.4, hy - 0.1, 1.4, c.gem, 0.45); P.glow(g, hx + 2.6, hy, 1.3, c.gem, 0.45);
+      P.path(g, [hx - 1, hy + 1.2, hx + 4.2, hy + 0.8, hx + 3.8, hy + 3.8 + (f ? 0.6 : 0), hx - 0.6, hy + 3.6]); P.fill(g, '#0e0602');
+      P.coin(g, hx + 1, hy + 2.2, 0.7, 0.6); P.coin(g, hx + 2.4, hy + 2.4 + (f ? 0.4 : 0), 0.6, 1);
+      // the near arm: a vast forearm of coins knuckling on a fist, the shadow it casts on the body behind it
+      g.beginPath(); g.moveTo(15.8, 11); g.quadraticCurveTo(19, 15, 19.6, 21); g.strokeStyle = G.rgba('#0e0602', 0.8); g.lineWidth = 1.4; g.stroke();
+      hoard(() => { g.beginPath(); g.moveTo(16.6, 10); g.quadraticCurveTo(24.6, 12, 24.4, 21); g.lineTo(20.2, 21.4); g.quadraticCurveTo(20, 16, 15.4, 15); g.closePath(); }, 15.4, 10, 24.6, 21.4, 0.05);
+      P.ell(g, 22.6, 23.4, 3.6, 3, P.lg(g, 19, 20.4, 26.2, 26.4, [gl, gold, gd]));
+      for (const x of [21, 22.6, 24.2]) P.line(g, x, 24.4, x + 0.2, 26, 0.3, gd);
     } });
 
   /* ---------- Wolf (summon, and the Crypt's hounds): a gaunt grave-hound, ears up, ribs showing, jaws open ---------- */
