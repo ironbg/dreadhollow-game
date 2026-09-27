@@ -275,5 +275,40 @@
     }
     if (e.c2 > 10) { e.c2 = 0; for (let i = 0; i < 4; i++) { const a = i / 4 * TAU + 0.4; run.spawnEnemy('spirit', p.x + Math.cos(a) * 95, p.y + Math.sin(a) * 95); } DH.audio.play('frost'); }
   };
+  /* ---------- the Catacombs ---------- */
+  // Frost Construct: stamps, and lines of ice spikes burst out from it in a cross (then turned by half); hurls ice boulders
+  // that numb your step; its core wakes ice skulls; at half health its ice thickens (sturdier, slower, stamps sooner)
+  AI.b_construct = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    if (!e.hard && e.hp < e.maxHp * 0.5) { e.hard = true; e.armor = Math.min(0.75, e.armor + 0.2); run.burst(e.x, e.y, 30, ['#d8f4ff', '#7ab8e0'], 100); DH.audio.play('frost'); run.text(e.x, e.y - e.r - 12, t('hud.iceArmor'), '#9fd8ff', true); }
+    e.stamp = Math.max(0, (e.stamp || 0) - dt); e.cspd = e.stamp > 0 ? 0 : e.spd * (e.hard ? 0.8 : 1); e.mx = dx; e.my = dy;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > (e.hard ? 4.6 : 5.8)) {
+      e.c1 = 0; e.stamp = 0.7; e.cross = !e.cross; const a0 = e.cross ? Math.PI / 4 : 0;
+      run.shake = Math.max(run.shake, 4); DH.audio.play('boom');
+      for (let k = 0; k < 4; k++) { const a = a0 + k * Math.PI / 2; for (let i = 0; i < 6; i++) run.after(i * 0.1, () => run.hazard({ kind: 'circle', x: e.x + Math.cos(a) * (26 + i * 22), y: e.y + Math.sin(a) * (26 + i * 22), r: 13, delay: 0.7, dmg: e.dmg * 1.1 * e.enr, slow: 1, color: '#9fd8ff', src: e, boss: true, sound: i === 0 && k === 0 ? 'frost' : null })); }
+    }
+    if (e.c2 > 5.2) { e.c2 = 0; run.hazard({ kind: 'circle', x: p.x, y: p.y, r: 26, delay: 1.1, dmg: e.dmg * 1.2 * e.enr, slow: 1.5, color: '#9fd8ff', src: e, boss: true, sound: 'boom', boulder: true }); DH.audio.play('throw'); }
+    if (e.c3 > 9) { e.c3 = 0; for (let i = 0; i < 4; i++) { const a = i / 4 * TAU; run.spawnEnemy('iceskull', e.x + Math.cos(a) * 22, e.y + Math.sin(a) * 22); } run.burst(e.x, e.y, 16, ['#c8f4ff', '#8ff0ff'], 70); }
+  };
+  // Ice Prism: drifts in on a slow spiral; a beam of cold light sweeps across a marked arc; flings fans of frost shards;
+  // shatters into light and reforms elsewhere around you, shards bursting out
+  AI.b_prism = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    const orbit = dist < 36 ? -1 : 1; e.cspd = e.sweep > 0 ? 0 : e.spd; e.mx = dx * orbit - dy * 0.4; e.my = dy * orbit + dx * 0.4; // drifts in on a slow spiral
+    e.sweep = Math.max(0, (e.sweep || 0) - dt);
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 7) {
+      e.c1 = 0; e.sweep = 2.6; const a0 = Math.atan2(dy, dx), dir = Math.random() < 0.5 ? -1 : 1;
+      for (let i = 0; i < 9; i++) run.after(i * 0.22, () => { if (e.dead) return; run.hazard({ kind: 'line', x: e.x, y: e.y, ang: a0 + dir * (-0.9 + i * 0.225), len: 280, w: 14, delay: 0.7, dmg: e.dmg * 1.1 * e.enr, color: '#c8f4ff', src: e, boss: true, sound: i % 3 ? null : 'zap' }); });
+    }
+    if (e.c2 > 3 && e.sweep <= 0) { e.c2 = 0; const a = Math.atan2(dy, dx); for (const o of [-0.36, -0.18, 0, 0.18, 0.36]) shot(run, e, a + o, 105, 0.5, '#a8e0ff', 'frost'); DH.audio.play('frost'); }
+    if (e.c3 > 10 && e.sweep <= 0) {
+      e.c3 = 0; run.burst(e.x, e.y, 26, ['#ffffff', '#8ff0ff'], 110);
+      const a = Math.random() * TAU; e.x = p.x + Math.cos(a) * 130; e.y = p.y + Math.sin(a) * 130;
+      run.burst(e.x, e.y, 26, ['#ffffff', '#8ff0ff'], 110); DH.audio.play('frost');
+      for (let i = 0; i < 8; i++) shot(run, e, i / 8 * TAU, 80, 0.45, '#a8e0ff', 'frost');
+    }
+  };
   C.BOSS_AI = AI;
 })(window.DH);

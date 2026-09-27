@@ -200,6 +200,7 @@
       g.drawImage(A.glow(b.color), x - 8, y - 8, 16, 16);
       if (b.kind === 'curse') { g.drawImage(A.glow('#a040ff'), x - 16, y - 16, 32, 32); G.P.circle(g, x, y, 4, '#2a0840'); G.P.circle(g, x - 1.3, y - 0.6, 1, '#e080ff'); G.P.circle(g, x + 1.3, y - 0.6, 1, '#e080ff'); }
       else if (b.kind === 'skull') { G.P.circle(g, x, y, 2.4, '#e8d8ff'); G.P.circle(g, x - 0.8, y - 0.3, 0.6, '#300050'); G.P.circle(g, x + 0.8, y - 0.3, 0.6, '#300050'); }
+      else if (b.kind === 'frost') { const l = Math.hypot(b.vx, b.vy) || 1, ux = b.vx / l, uy = b.vy / l; G.P.path(g, [x + ux * 3, y + uy * 3, x - uy * 1.2, y + ux * 1.2, x - ux * 3, y - uy * 3, x + uy * 1.2, y - ux * 1.2]); G.P.fill(g, '#d8f4ff'); }
       else if (b.kind === 'bolt') { const l = Math.hypot(b.vx, b.vy) || 1, ux = b.vx / l, uy = b.vy / l; G.P.line(g, x - ux * 6, y - uy * 6, x + ux * 2, y + uy * 2, 1, '#e8e0c8'); G.P.line(g, x + ux * 1, y + uy * 1, x + ux * 3, y + uy * 3, 1.4, '#c8ccd8'); }
       else { g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x, y, 1.4, 0, TAU); g.fill(); }
       if (FIREY(b.color)) { lights.push({ x: b.x, y: b.y, r: 30, kind: 'fire' }); if (Math.random() < 0.4) this.parts.push({ x: b.x, y: b.y, vx: U.rand(-8, 8), vy: U.rand(-14, 4), life: 0.3, max: 0.3, c: U.pick(['#ff8a30', '#ffd040']), s: 1 }); }
@@ -303,6 +304,11 @@
     const fr = e.fr != null ? e.fr % nf : nf > 1 ? Math.floor(e.anim / (e.def.anim || 0.3)) % nf : 0; // a slow, heavy two-frame gait
     const bob = e.def.fly && !e.perch ? Math.sin(e.anim * 4) * 1.5 - 2 : 0;
     const x = e.x - cx, y = e.y - cy + bob, k = e.scale;
+    if (e.under) { // a burrower under the snow: only a travelling mound shows
+      const P = G.P, w = 7 * k, j = Math.sin(e.anim * 20) * 0.6;
+      P.ell(g, x, y + 2, w, w * 0.45, 'rgba(0,0,0,0.35)'); P.ell(g, x + j, y, w * 0.8, w * 0.42, '#b8cadc'); P.ell(g, x - 1 + j, y - 1, w * 0.45, w * 0.2, '#e8f4ff');
+      return;
+    }
     if (e.down > 0) { // a fallen skeleton: a heap of bones that pulls itself back up (it rises through the last half second)
       const up = Math.max(0, 1 - e.down / 0.5), hh = s.h * k * (0.28 + 0.72 * up), ww = s.w * k * (1.25 - 0.25 * up);
       g.globalAlpha = 0.85; g.drawImage(s.frames[0], x - s.ox * k * (ww / (s.w * k)), y + (s.h * k - s.oy * k) - hh, ww, hh); g.globalAlpha = 1;

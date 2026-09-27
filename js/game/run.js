@@ -297,6 +297,7 @@
         st: { fragile: 0, affl: 0, burn: 0, burnPS: 0, burnT: 0, spark: 0, sparkPS: 0, sparkT: 0, frost: 0, frostMax: 0, frostPS: 0, decay: 0, decayPS: 0 },
       };
       if (def.scale && !def.boss) e.scale *= def.scale;
+      if (def.move) e.move = def.move; // a foe whose everyday attack is an elite's move (the ice bear's charge)
       if (o.champion && !def.boss) this.champAffix(e);
       this.hallSpawn(e);
       if (fx.accolade && !rank && !def.boss && !def.prop && Math.random() < fx.accolade) { e.special = true; e.hp *= 4; e.maxHp *= 4; e.scale *= 1.25; e.xp *= 5; }
@@ -397,6 +398,19 @@
             if (dist < 110) { mx = -dx; my = -dy; } else if (dist < 160) { mx = -dy; my = dx; spd *= 0.4; }
             if (e.t > e.def.shot.cd && dist < 220) { e.aiming = 0.9; e.aimA = Math.atan2(dy, dx); this.hazard({ kind: 'line', x: e.x, y: e.y, ang: e.aimA, len: 280, w: 3, delay: 0.9, dmg: 0, color: '#ffe0a0', src: e }); }
           }
+        } else if (ai === 'burrow') { // the frost crawler: crawls, sinks under the snow (untouchable), tunnels to you and bursts up
+          if (e.under) {
+            e.under -= dt; e.eth = 1; e.kx = e.ky = 0; spd *= 2.6;
+            if (Math.random() < dt * 14) this.parts.push({ x: e.x + U.rand(-4, 4), y: e.y + 2, vx: U.rand(-12, 12), vy: U.rand(-24, -8), life: 0.4, max: 0.4, c: U.pick(['#e8f4ff', '#a8c8e0']), s: 1.5 });
+            if (e.under <= 0 || dist < 16) { e.under = 0; e.eth = 0; e.burT = U.rand(3, 4.5); this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 18, delay: 0.45, dmg: e.dmg * 1.2, color: '#a8e0ff', src: e, sound: 'frost' }); e.stun = 0.5; }
+          } else {
+            e.burT = (e.burT == null ? U.rand(1, 3) : e.burT) - dt;
+            if (e.burT <= 0) { e.under = 2.2; this.burst(e.x, e.y, 10, ['#e8f4ff', '#6a8aa8'], 50); }
+          }
+        } else if (ai === 'lunge') { // the frost ghoul: crouches when close, then springs at you
+          if (e.lng > 0) { e.lng -= dt; mx = e.lockX; my = e.lockY; spd *= 4.2; }
+          else if (e.crouch > 0) { e.crouch -= dt; spd = 0; if (e.crouch <= 0) { e.lng = 0.32; e.lockX = dx; e.lockY = dy; } }
+          else { e.lngCd = (e.lngCd || 0) - dt; if (e.lngCd <= 0 && dist < 70) { e.crouch = 0.45; e.lngCd = U.rand(2.6, 3.4); this.enemyAttackAnim(e); } }
         } else if (ai === 'flutter') { const w = Math.sin(e.anim * 5 + e.x * 0.01) * 0.6; mx = dx - dy * w; my = dy + dx * w; }
         else if (ai === 'dash') { const c = e.t % 1.6; spd *= c < 1.0 ? 0.35 : 3.2; }
         else if (ai === 'ranged') {
@@ -427,6 +441,9 @@
           if (e.fuse == null && dist < B.R * 0.8) { e.fuse = B.fuse; DH.audio.play('fire'); }
           if (e.fuse != null) { spd = 0; e.fuse -= dt; e.flash = Math.sin(e.fuse * 32) > 0 ? 0.06 : 0; if (e.fuse <= 0) { this.bloaterBoom(e); continue; } }
         } else if (ai && ai.startsWith('b_')) { this.bossAI(e, dt, dx, dy, dist); mx = e.mx; my = e.my; spd = e.cspd * slowK; }
+        if (e.def.iceArmor && e.iceArm !== false && e.hp < e.maxHp * 0.5) { // the Frost Guard's ice shatters: faster and fiercer without it
+          e.iceArm = false; e.variant = 'bare'; e.spd *= 1.6; e.dmg *= 1.2; this.burst(e.x, e.y, 18, ['#d8f4ff', '#a8d8f0', '#ffffff'], 90); DH.audio.play('frost');
+        }
         if ((e.elite || e.move) && !e.boss) { const o = this.eliteMove(e, dt, dx, dy, dist); if (o) { mx = o.x; my = o.y; spd = o.s * slowK; } }
         e.x += (mx * spd + e.kx) * dt; e.y += (my * spd + e.ky) * dt;
         const kd = Math.pow(0.0005, dt); e.kx *= kd; e.ky *= kd;
@@ -656,6 +673,7 @@
       let xp = e.final && !this.bosses.some((b) => b.final && !b.dead && b !== e) ? 0 : e.xp; // the last Lord ends the hall: no pointless level-ups after victory
       for (const [v] of C.GEM_TIERS) { while (xp >= v) { this.drop('xp', e.x + U.rand(-5, 5), e.y + U.rand(-5, 5), v); xp -= v; } }
       this.mergeGems();
+      if (e.def.shards) { const o = Math.random() * TAU; for (let i = 0; i < e.def.shards; i++) this.enemyShot(e, o + i / e.def.shards * TAU, 75, e.dmg * 0.6, '#a8e0ff', 'frost'); } // an ice skull bursts into frost shards
       if (e.def.puddle) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 20, delay: 0.2, dur: 4, dmg: 0, slow: 1, color: '#3a8aa0', src: e }); // the drowned leave a pool that drags at your feet
       if (e.def.deathFire && Math.random() < 0.5) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 9, delay: 0.3, dur: 1.6, dmg: e.dmg * 0.25, color: '#ff7a20', src: e }); // a husk burns on where it falls
       if (e.affix && e.affix.includes('volatile')) this.warns.push({ x: e.x, y: e.y, R: 46, t: 1, max: 1, dmg: e.dmg * 1.5 }); // bursts a moment after death
@@ -932,7 +950,7 @@
     text(x, y, str, color, big) { if (this.texts.length < 80) this.texts.push({ x, y, str: String(str), c: color, big: !!big, life: big ? 1.1 : 0.7, max: big ? 1.1 : 0.7 }); }
     nearest(x, y, maxD, exclude) {
       let best = null, bd = maxD * maxD;
-      for (const e of this.enemies) { if (e.dead || e.def.prop || (exclude && exclude.has(e))) continue; const d = U.dist2(x, y, e.x, e.y); if (d < bd) { bd = d; best = e; } }
+      for (const e of this.enemies) { if (e.dead || e.def.prop || e.under || (exclude && exclude.has(e))) continue; const d = U.dist2(x, y, e.x, e.y); if (d < bd) { bd = d; best = e; } }
       return best;
     }
     randomTarget(maxD, x, y) {

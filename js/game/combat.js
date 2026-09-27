@@ -138,7 +138,7 @@
       return 1;
     }
     if (e.sealed) { if (Math.random() < 0.08) this.text(e.x, e.y - e.r - 6, t('hud.sealedHit'), '#fff0a0'); return 0; }
-    if (e.eth > 0) { if (Math.random() < 0.08) this.text(e.x, e.y - e.r - 6, t('sec.immune'), '#80f0ff'); return 0; } // ethereal Lord
+    if (e.eth > 0) { if (e.boss && Math.random() < 0.08) this.text(e.x, e.y - e.r - 6, t('sec.immune'), '#80f0ff'); return 0; } // ethereal Lord
     const P = this.P, s = a.s, fx = this.fx_;
     if (fx.targe && !e.boss) { // Hardened Buckler: enemies gain Block Strength as you level
       const B = fx.targe * this.level, D = Math.max(1, s.dmg), bc = Math.min(0.5 * B / D, 0.5 * Math.sqrt(B / D), 0.6);
@@ -159,7 +159,7 @@
     const exp = e.exposed > 0; // Hating Heart: the Lord's guard is down
     const vul = (1 + C.FRAGILE_PER * S.fragile) * (exp ? 1.5 : 1); // Fragile: +5% direct damage per stack
     const def = exp ? 0 : Math.max(0, e.armor - C.STATUS.decay.armor * S.decay); // Decay strips armor for good
-    const dmg = Math.max(1, base * pct * cm * vul * (1 - def) * (mult == null ? 1 : mult) * (e.def.dmgFactor || 1) * (e.perch ? 0.2 : 1) * U.rand(0.92, 1.08)); // a perched gargoyle is stone
+    const dmg = Math.max(1, base * pct * cm * vul * (1 - def) * (mult == null ? 1 : mult) * (e.def.dmgFactor || 1) * (e.perch ? 0.2 : 1) * (e.def.iceArmor && e.iceArm !== false ? 0.5 : 1) * U.rand(0.92, 1.08)); // a perched gargoyle is stone
     e.hp -= dmg; e.flash = 0.1;
     this.dmgByAb[a.id] = (this.dmgByAb[a.id] || 0) + dmg;
     if (this.gAcc != null && a.tags.includes('projectile')) this.gAcc += dmg; // Landsknecht: projectile damage fills the next grenade

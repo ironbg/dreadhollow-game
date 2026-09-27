@@ -368,7 +368,7 @@
     wyrm:        { painter: 'wyrm', hp: 3400, spd: 36, dmg: 26, xp: 400, r: 18, mass: 90, def: 0.2, ai: 'b_wyrm', boss: true, lord: true, fly: true },
     lich:        { painter: 'lich', hp: 1600, spd: 34, dmg: 18, xp: 200, r: 14, mass: 40, def: 0.15, ai: 'b_caster', boss: true },
     horseman:    { painter: 'horseman', hp: 3600, spd: 50, dmg: 26, xp: 400, r: 17, mass: 80, def: 0.2, ai: 'b_horseman', boss: true, lord: true, alpha: 0.95 },
-    basilisk:    { painter: 'basilisk', variant: 'ice', hp: 2200, spd: 34, dmg: 22, xp: 220, r: 16, mass: 70, def: 0.2, ai: 'b_basilisk', boss: true },
+    basilisk:    { painter: 'basilisk', variant: 'ice', hp: 1300, spd: 34, dmg: 22, xp: 220, r: 16, mass: 70, def: 0.2, ai: 'b_basilisk', boss: true },
     jotun:       { painter: 'jotun', hp: 4200, spd: 30, dmg: 30, xp: 450, r: 18, mass: 120, def: 0.25, ai: 'b_jotun', boss: true, lord: true },
     discolossus: { painter: 'colossus', variant: 'purple', hp: 2600, spd: 34, dmg: 26, xp: 250, r: 16, mass: 60, def: 0.2, ai: 'b_charge', boss: true },
     archdemon:   { painter: 'demon', variant: 'purple', hp: 4600, spd: 38, dmg: 30, xp: 500, r: 18, mass: 100, def: 0.25, ai: 'b_demon', boss: true, lord: true },
@@ -411,13 +411,20 @@
   C.enemies.drowned = { painter: 'drowned', hp: 50, spd: 24, dmg: 11, xp: 4, r: 8, mass: 2.4, puddle: true, particles: ['#7a98a0', '#2e5a3a', '#b0e8f0'] }; // leaves a dragging pool where it falls
   C.enemies.gargoyle = { painter: 'gargoyle', hp: 30, spd: 42, dmg: 9, xp: 3, r: 7, mass: 2, ai: 'perch', fly: true, particles: ['#6a7266', '#3a3e38'] }; // stone while perched, then swoops
   C.enemies.arbalist = { painter: 'arbalist', hp: 20, spd: 30, dmg: 7, xp: 3, r: 6, mass: 0.9, ai: 'aim', shot: { dmg: 11, cd: 3.6 } }; // marks a line, then a fast bolt along it
+  // the Catacombs
+  C.enemies.frostcrawler = { painter: 'frostcrawler', hp: 40, spd: 30, dmg: 11, xp: 4, r: 8, mass: 2.5, ai: 'burrow', particles: ['#6a8aa8', '#d8f4ff'] }; // tunnels under the snow, bursts up beneath you
+  C.enemies.iceskull = { painter: 'iceskull', hp: 7, spd: 58, dmg: 5, xp: 1, r: 5, mass: 0.5, ai: 'flutter', fly: true, shards: 4, anim: 0.2, particles: ['#d8e8f0', '#9fd8ff'] }; // bursts into frost shards
+  C.enemies.frostghoul = { painter: 'ghoul', variant: 'ice', hp: 26, spd: 32, dmg: 10, xp: 2, r: 7, mass: 1.5, ai: 'lunge' }; // crouches, then springs
+  C.enemies.frostguard = { painter: 'frostguard', hp: 80, spd: 24, dmg: 14, xp: 6, r: 8, mass: 3, def: 0.1, iceArmor: true, particles: ['#a8d8f0', '#3a4658'] }; // half damage until its ice shatters
+  C.enemies.icebear = { painter: 'icebear', hp: 90, spd: 30, dmg: 16, xp: 7, r: 10, mass: 4, move: 'charge', anim: 0.25, particles: ['#c8d4dc', '#6a7a8a'] }; // a marked line, then a charge
+  C.enemies.frostconstruct = { painter: 'frostconstruct', hp: 600, spd: 34, dmg: 20, xp: 130, r: 16, mass: 80, def: 0.15, ai: 'b_construct', boss: true };
+  C.enemies.iceprism = { painter: 'iceprism', hp: 1400, spd: 44, dmg: 22, xp: 190, r: 14, mass: 60, def: 0.15, ai: 'b_prism', boss: true, fly: true };
   C.enemies.hydra = { painter: 'hydra', hp: 700, spd: 22, dmg: 18, xp: 120, r: 16, mass: 70, def: 0.1, ai: 'b_hydra', boss: true };
   C.enemies.bellwarden = { painter: 'bellwarden', hp: 1000, spd: 26, dmg: 20, xp: 150, r: 14, mass: 60, def: 0.15, ai: 'b_bell', boss: true };
   C.enemies.sunkknight = { painter: 'sunkknight', hp: 1300, spd: 34, dmg: 22, xp: 180, r: 14, mass: 60, def: 0.2, ai: 'b_sunken', boss: true };
   C.enemies.bloater = { painter: 'slime', variant: 'volatile', hp: 14, spd: 44, dmg: 0, xp: 2, r: 7, mass: 1, ai: 'fuse', boom: { R: 28, dmg: 15, fuse: 1.0 }, scale: 0.62, anim: 0.2, particles: ['#ff7030', '#ffd060', '#401008'] };
   // [enemy, from (timeline s), weight, variant override]
   C.HALL_FOES = {
-    catacombs: [['hound', 70, 1.2], ['ooze', 160, 1.5]],
     discord: [['watcher', 80, 1.3], ['bloater', 170, 1.4]],
     blightmire: [['ooze', 60, 1.2], ['bloater', 150, 1], ['hound', 240, 0.9]],
     reliquary: [['shieldbearer', 60, 1.4], ['watcher', 150, 1.2], ['hound', 240, 1]],
@@ -440,7 +447,8 @@
   C.ELITE_MOVES = { skeleton: 'volley', ghost: 'volley', wraith: 'volley', imp: 'volley', cultist: 'volley', ashcultist: 'slam', husk: 'charge', salamander: 'charge', magmacrawler: 'slam', cinderbloat: 'slam', watcher: 'volley',
     ghoul: 'charge', hknight: 'charge', rat: 'charge', spider: 'charge', hound: 'charge',
     golem: 'slam', shieldbearer: 'slam', effigy: 'slam', ooze: 'slam', bloater: 'slam',
-    bat: 'summon', bonemage: 'volley', spirit: 'volley', drowned: 'slam', gargoyle: 'charge', arbalist: 'volley' };
+    bat: 'summon', bonemage: 'volley', spirit: 'volley', drowned: 'slam', gargoyle: 'charge', arbalist: 'volley',
+    frostghoul: 'charge', frostcrawler: 'slam', iceskull: 'summon', frostguard: 'slam', icebear: 'charge' };
   C.CHAMPION = { hp: 18, dmg: 1.7, scale: 1.8, def: 0.2 };
   // Champion affixes: one each (two from Agony III), from its hall's list. Their health also grows with the hall's progress:
   // x0.7 at the start to x1.3 at the end (the hall's strength).
@@ -511,8 +519,10 @@
       remap: { bat: 'rat', rat: 'rat', skeleton: 'spirit', ghoul: 'drowned', ghost: 'spirit', spider: 'gargoyle', cultist: 'arbalist', wraith: 'watcher', hknight: 'gargoyle', golem: 'drowned' },
       bosses: [{ t: 150, id: 'hydra' }, { t: 300, id: 'bellwarden' }, { t: 450, id: 'sunkknight' }, { t: 600, id: 'horseman', final: true }],
       theme: { floorA: [58, 76, 78], floorB: [44, 60, 62], mortar: [12, 22, 24], moss: [60, 130, 110], dark: [3, 10, 12], darkness: 0.8, lightTint: 'rgba(140,255,220,', accent: '#70ffd0', pools: [30, 70, 80], accentRate: 0.14 } },
-    catacombs: { index: 3, agonyXp: 0.395, hpMult: 4.3, dmgMult: 2.3, goldMult: 3, variant: 'ice', remap: { spider: 'effigy' }, herb: 'lily',
-      bosses: [{ t: 300, id: 'basilisk' }, { t: 600, id: 'jotun', final: true }],
+    catacombs: { index: 3, agonyXp: 0.395, hpMult: 4.3, dmgMult: 2.3, goldMult: 3, variant: 'ice', foeVariant: false, herb: 'lily',
+      // frost crawlers, ice skulls, frost ghouls, frost guards, snow effigies, ice bears
+      remap: { bat: 'iceskull', rat: 'iceskull', skeleton: 'frostghoul', ghoul: 'frostcrawler', ghost: 'iceskull', spider: 'effigy', cultist: 'frostcrawler', wraith: 'frostguard', hknight: 'frostguard', golem: 'icebear' },
+      bosses: [{ t: 150, id: 'frostconstruct' }, { t: 300, id: 'basilisk' }, { t: 450, id: 'iceprism' }, { t: 600, id: 'jotun', final: true }],
       theme: { floorA: [60, 74, 96], floorB: [46, 58, 78], mortar: [14, 20, 32], moss: [150, 200, 230], dark: [4, 8, 18], darkness: 0.8, lightTint: 'rgba(150,210,255,', accent: '#7fd0ff', crystals: [140, 220, 255], accentRate: 0.14 } },
     discord: { index: 4, agonyXp: 0.13, hpMult: 6.0, dmgMult: 2.8, goldMult: 3.8, variant: 'purple', remap: { rat: 'bat', ghoul: 'hknight' }, herb: 'ember', dissonator: true,
       bosses: [{ t: 300, id: 'discolossus' }, { t: 600, id: 'archdemon', final: true }],

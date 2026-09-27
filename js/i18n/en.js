@@ -111,6 +111,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'affix.swift': 'Swift', 'affix.gunner': 'Gunner', 'affix.summoner': 'Summoner', 'affix.ironclad': 'Ironclad', 'affix.regen': 'Regenerating', 'affix.volatile': 'Volatile', 'affix.charger': 'Charger',
   'hud.march': 'The Procession marches! Step aside', 'enemy.marcher': 'Procession Monk',
   'enemy.bonemage': 'Bone Mage', 'enemy.gravechief': 'Grave Chieftain', 'enemy.bonetyrant': 'Bone Tyrant',
+  'enemy.frostcrawler': 'Frost Crawler', 'enemy.iceskull': 'Ice Skull', 'enemy.frostghoul': 'Frost Ghoul', 'enemy.frostguard': 'Frost Guard', 'enemy.icebear': 'Ice Bear', 'enemy.frostconstruct': 'Frost Construct', 'enemy.iceprism': 'Ice Prism', 'hud.iceArmor': 'Its ice thickens!',
   'enemy.spirit': 'Drowned Spirit', 'enemy.drowned': 'The Drowned', 'enemy.gargoyle': 'Gargoyle', 'enemy.arbalist': 'Skeletal Arbalist', 'enemy.hydra': 'Cistern Hydra', 'enemy.bellwarden': 'Bell Warden', 'enemy.sunkknight': 'Sunken Knight',
   'enemy.husk': 'Charred Husk', 'enemy.cinderbloat': 'Cinder Bloater', 'enemy.magmacrawler': 'Magma Crawler', 'enemy.salamander': 'Ember Salamander', 'enemy.ashcultist': 'Ash Cultist', 'enemy.firedancer': 'Flamedancer', 'enemy.ashwarlord': 'Ashen Warlord', 'enemy.ashclone': 'Ashen Shade',
   'nb.dh': '{d}d {h}h', 'nb.title': 'The Seven Nights',

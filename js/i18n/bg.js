@@ -111,6 +111,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'affix.swift': 'Бърз', 'affix.gunner': 'Стрелец', 'affix.summoner': 'Призовател', 'affix.ironclad': 'Железен', 'affix.regen': 'Възстановяващ се', 'affix.volatile': 'Взривоопасен', 'affix.charger': 'Нападател',
   'hud.march': 'Шествието идва! Отдръпни се', 'enemy.marcher': 'Монах от шествието',
   'enemy.bonemage': 'Костен маг', 'enemy.gravechief': 'Гробищен вожд', 'enemy.bonetyrant': 'Костен тиранин',
+  'enemy.frostcrawler': 'Ледена гъсеница', 'enemy.iceskull': 'Леден череп', 'enemy.frostghoul': 'Леден гул', 'enemy.frostguard': 'Леден страж', 'enemy.icebear': 'Леден мечок', 'enemy.frostconstruct': 'Леденият голем', 'enemy.iceprism': 'Ледената призма', 'hud.iceArmor': 'Ледът му се сгъстява!',
   'enemy.spirit': 'Удавен дух', 'enemy.drowned': 'Удавник', 'enemy.gargoyle': 'Гаргойл', 'enemy.arbalist': 'Скелет арбалетчик', 'enemy.hydra': 'Хидрата от цистерната', 'enemy.bellwarden': 'Камбанният страж', 'enemy.sunkknight': 'Потъналият рицар',
   'enemy.husk': 'Овъглен труп', 'enemy.cinderbloat': 'Жарав издут', 'enemy.magmacrawler': 'Магмена гъсеница', 'enemy.salamander': 'Жарав саламандър', 'enemy.ashcultist': 'Пепелен култист', 'enemy.firedancer': 'Огнена танцьорка', 'enemy.ashwarlord': 'Пепелен пълководец', 'enemy.ashclone': 'Пепелна сянка',
   'nb.dh': '{d}д {h}ч', 'nb.title': 'Седемте нощи',

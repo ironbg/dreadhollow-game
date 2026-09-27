@@ -524,4 +524,162 @@
       barnacles(g, [[hx - 2.4, hy - 3.2, 0.7], [hx + 2.6, hy + 2.4, 0.6]], '#c8c0a8');
       for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(hx - 3 + i * 3, hy + 4.6); g.quadraticCurveTo(hx - 3.4 + i * 3 + (f ? 0.6 : 0), hy + 7, hx - 3 + i * 3, hy + 9); g.strokeStyle = c.weed; g.lineWidth = 0.7; g.stroke(); }
     } });
+
+  /* ================= Hall 4: the Catacombs (frozen) ================= */
+  /** A jagged icicle from (x,y) pointing to (tx,ty), base half-width w. */
+  function icicle(g, x, y, tx, ty, w, col) {
+    const a = Math.atan2(ty - y, tx - x), nx = -Math.sin(a) * w, ny = Math.cos(a) * w;
+    g.beginPath(); g.moveTo(x + nx, y + ny); g.lineTo(tx, ty); g.lineTo(x - nx, y - ny); g.closePath();
+    P.fill(g, P.lg(g, x - nx, y - ny, x + nx, y + ny, [sh(col, 0.5), col, sh(col, -0.35)]));
+  }
+
+  /* ---------- Frost Crawler: a pale segmented burrower, a ring of ice mandibles, armoured plates rimed with frost ---------- */
+  def('frostcrawler', { w: 30, h: 16, cy: 11, frames: 2,
+    colors: { shell: '#6a8aa8', flesh: '#c8b8c8', eye: '#8ff0ff', ice: '#d8f4ff' },
+    draw(g, f, c) {
+      const sc = c.shell, w = f ? 0.8 : -0.8;
+      P.ell(g, 14, 14.4, 12, 1.4, 'rgba(0,0,0,0.45)');
+      // six segments, smaller toward the tail; little legs under each
+      for (let i = 5; i >= 0; i--) {
+        const x = 5 + i * 3.6, y = 9.6 + Math.sin(i * 1.3 + f * 2) * 0.6, r = 2.6 + i * 0.35;
+        P.line(g, x - 0.6, y + r * 0.6, x - 1.4 + (i % 2 ? w : -w), 14, 0.45, sh(sc, -0.5));
+        P.ell(g, x, y, r, r * 0.9, P.vol(g, x, y - 0.4, r, i % 2 ? sc : sh(sc, -0.08)));
+        P.ell(g, x, y + r * 0.55, r * 0.8, r * 0.3, sh(c.flesh, -0.2));
+        icicle(g, x - 0.4, y - r * 0.8, x - 1, y - r * 0.8 - 1.6 - (i % 2), 0.6, c.ice); // frost spines along the back
+      }
+      // the head: a round maw ringed with ice fangs
+      const hx = 26.2, hy = 9;
+      P.circle(g, hx, hy, 3.2, P.vol(g, hx, hy, 3.2, sh(sc, 0.15)));
+      P.circle(g, hx + 1.2, hy + 0.4, 1.7, '#140a14');
+      for (let k = 0; k < 5; k++) { const a = -1.2 + k * 0.6; icicle(g, hx + 1.2 + Math.cos(a) * 1.9, hy + 0.4 + Math.sin(a) * 1.9, hx + 1.2 + Math.cos(a) * 0.4, hy + 0.4 + Math.sin(a) * 0.4, 0.35, c.ice); }
+      icicle(g, hx + 2.4, hy - 1.2, hx + 5 + w * 0.4, hy - 2.2, 0.6, c.ice); icicle(g, hx + 2.4, hy + 2, hx + 5 - w * 0.4, hy + 3, 0.6, c.ice); // mandibles
+      evil(g, hx - 1, hy - 1.6, 0.5, c.eye); evil(g, hx + 0.6, hy - 2.2, 0.4, c.eye);
+    } });
+
+  /* ---------- Ice Skull: a floating skull cased in ice, frost-trailing, shards orbiting it ---------- */
+  def('iceskull', { w: 18, h: 18, cy: 10, frames: 2,
+    colors: { bone: '#d8e8f0', ice: '#9fd8ff', eye: '#40c8ff' },
+    draw(g, f, c) {
+      const b = f ? 0.6 : -0.6;
+      // a trail of frost below
+      g.save(); g.globalAlpha = 0.45; for (let i = 0; i < 4; i++) P.circle(g, 6 - i * 1.4, 12 + i * 1.2 + b * 0.5, 1.4 - i * 0.25, c.ice); g.restore();
+      P.glow(g, 9, 8.6, 7, c.ice, 0.35);
+      skull(g, 9, 8.4 + b * 0.3, 4.2, c.bone, c.eye);
+      // an ice casing cracked over the crown, icicles hanging from the jaw
+      g.beginPath(); g.arc(9, 8.2 + b * 0.3, 5, Math.PI * 1.05, Math.PI * 1.95); g.strokeStyle = G.rgba(c.ice, 0.8); g.lineWidth = 1; g.stroke();
+      for (let i = 0; i < 3; i++) icicle(g, 7.6 + i * 1.6, 12.6 + b * 0.3, 7.8 + i * 1.6, 14.6 + (i % 2) + b * 0.3, 0.45, c.ice);
+      icicle(g, 6.6, 4.6 + b * 0.3, 5.4, 1.8, 0.7, c.ice); icicle(g, 10.4, 4.4 + b * 0.3, 11.8, 1.2, 0.8, c.ice);
+      for (let k = 0; k < 3; k++) { const a = f * 1 + k * 2.1; P.path(g, [9 + Math.cos(a) * 7, 8.4 + Math.sin(a) * 4.2 - 1, 9.6 + Math.cos(a) * 7, 8.4 + Math.sin(a) * 4.2, 9 + Math.cos(a) * 7, 8.4 + Math.sin(a) * 4.2 + 1, 8.4 + Math.cos(a) * 7, 8.4 + Math.sin(a) * 4.2]); P.fill(g, c.ice); }
+    } });
+
+  /* ---------- Frost Guard: a tall dead warden sealed in a shell of ice, a great kite shield of ice and a glaive;
+   *            variant 'bare' is the same guard once its ice has shattered ---------- */
+  def('frostguard', { w: 26, h: 30, cy: 20, frames: 2,
+    colors: { ice: '#a8d8f0', iron: '#3a4658', eye: '#8ff0ff', cloth: '#1e2a40' },
+    variants: { bare: { ice: '#3a4658', eye: '#ff6a5a' } },
+    draw(g, f, c) {
+      const ic = c.ice, ir = c.iron, w = f ? 0.8 : -0.8;
+      P.ell(g, 12, 28.4, 7, 1.2, 'rgba(0,0,0,0.45)');
+      // legs in greaves
+      P.rrect(g, 8.6 - w, 19, 2.8, 9, 1, P.lg(g, 8, 0, 12, 0, [sh(ir, 0.2), sh(ir, -0.4)])); P.rrect(g, 12.8 + w, 19, 2.8, 9, 1, P.lg(g, 12, 0, 16, 0, [sh(ir, 0.3), sh(ir, -0.3)]));
+      // a ragged tabard and the cuirass
+      P.path(g, [8, 16, 16, 16, 16.6, 22, 14.6, 21, 12, 23, 9.4, 21, 7.4, 22]); P.fill(g, P.lg(g, 8, 16, 16, 23, [sh(c.cloth, 0.3), sh(c.cloth, -0.4)]));
+      P.rrect(g, 7.4, 9.4, 9.2, 8, 2.2, P.lg(g, 7, 9, 16, 17, [sh(ir, 0.45), ir, sh(ir, -0.45)]));
+      // ice crusted over the armour: shoulders, a collar of icicles
+      for (const [x, y, r] of [[7.2, 10.4, 2.6], [16.6, 10.4, 2.6]]) P.ell(g, x, y, r, r * 0.8, P.vol(g, x, y - 0.5, r, ic));
+      for (let i = 0; i < 4; i++) icicle(g, 8.4 + i * 2.2, 13, 8.6 + i * 2.2, 15 + (i % 2) * 0.8, 0.55, ic);
+      icicle(g, 6, 9.4, 4.6, 6, 0.8, ic); icicle(g, 17.8, 9.4, 19.6, 5.8, 0.8, ic);
+      // glaive in the near hand, blade of ice
+      limb(g, 16.6, 11.6, 19, 16, 1.1, 1, ir);
+      P.line(g, 19.6, 26, 21.4, 3.4, 0.8, '#2a2026');
+      icicle(g, 20.8, 7.6, 22.4, 0.6, 1.2, ic); P.line(g, 20.2, 7.4, 22.6, 7.8, 0.6, sh(ir, 0.3));
+      // a great kite shield of ice in the far hand
+      g.beginPath(); g.moveTo(2.4, 12); g.quadraticCurveTo(6.2, 10.6, 9.4, 12); g.lineTo(9, 18.6); g.quadraticCurveTo(6, 23.4, 5.8, 24); g.quadraticCurveTo(3, 21, 2.6, 18.6); g.closePath();
+      P.fill(g, P.lg(g, 2, 11, 9, 24, [sh(ic, 0.45), ic, sh(ic, -0.4)])); g.strokeStyle = sh(ic, -0.5); g.lineWidth = 0.5; g.stroke();
+      g.strokeStyle = G.rgba('#ffffff', 0.5); g.lineWidth = 0.35; g.beginPath(); g.moveTo(4, 13); g.lineTo(5.6, 16.4); g.lineTo(4.6, 19.4); g.stroke();
+      // a closed helm with an icicle crest
+      const hx = 12.4, hy = 5.8;
+      P.rrect(g, hx - 3.2, hy - 3.6, 6.4, 7.2, 2.2, P.lg(g, hx - 3, 0, hx + 3, 0, [sh(ir, 0.45), ir, sh(ir, -0.4)]));
+      P.rect(g, hx - 2.2, hy - 0.2, 5, 0.9, '#05070a'); P.glow(g, hx + 0.4, hy + 0.2, 3, c.eye, 0.6); P.rect(g, hx - 1.2, hy + 0.05, 3.4, 0.4, c.eye);
+      for (let i = 0; i < 3; i++) icicle(g, hx - 1.4 + i * 1.4, hy - 3.4, hx - 1.8 + i * 1.6, hy - 6.4 - (i === 1 ? 1.4 : 0), 0.55, ic);
+    } });
+
+  /* ---------- Ice Bear: a huge frost-maned bear on all fours, rime on its back, breath steaming ---------- */
+  def('icebear', { w: 36, h: 24, cy: 16, frames: 2,
+    colors: { fur: '#c8d4dc', dark: '#6a7a8a', eye: '#40c8ff', ice: '#a8e0ff' },
+    draw(g, f, c) {
+      const fu = c.fur, fd = sh(fu, -0.4), w = f ? 1 : -1;
+      P.ell(g, 17, 22.4, 13, 1.6, 'rgba(0,0,0,0.45)');
+      // far legs
+      limb(g, 10, 15, 9 + w, 21.4, 2.4, 2.2, sh(fu, -0.3)); limb(g, 22, 15, 23 - w, 21.4, 2.4, 2.2, sh(fu, -0.3));
+      // a hulking body, shoulder hump higher than the rump
+      g.beginPath(); g.moveTo(4, 14); g.quadraticCurveTo(4, 7, 12, 6.6); g.quadraticCurveTo(20, 4, 25, 7.6); g.quadraticCurveTo(29, 11, 27, 16); g.quadraticCurveTo(16, 19.4, 5.6, 17.4); g.closePath();
+      P.fill(g, P.lg(g, 4, 5, 20, 19, [sh(fu, 0.3), fu, fd]));
+      // shaggy fur strokes and rime crystals along the back
+      g.strokeStyle = fd; g.lineWidth = 0.45; for (let i = 0; i < 9; i++) { g.beginPath(); g.moveTo(6 + i * 2.3, 8.6 + Math.abs(i - 5) * 0.3); g.lineTo(5.2 + i * 2.3, 11 + Math.abs(i - 5) * 0.3); g.stroke(); }
+      for (let i = 0; i < 5; i++) icicle(g, 11 + i * 2.8, 6.4 - (i === 2 ? 1 : 0), 10.4 + i * 2.8, 3.8 - (i % 2) - (i === 2 ? 1.2 : 0), 0.7, c.ice);
+      // near legs with heavy paws and claws
+      limb(g, 8, 15, 7 - w, 21.4, 2.6, 2.4, fu); limb(g, 24, 14, 25 + w, 21.4, 2.6, 2.4, fu);
+      claws(g, 7 - w, 22, 0, 3, 1.4, 0.4, '#2a2a30'); claws(g, 25 + w, 22, 0, 3, 1.4, 0.4, '#2a2a30');
+      // the head: low, heavy, jaws open
+      const hx = 29.6, hy = 12;
+      P.ell(g, hx, hy, 4.4, 3.6, P.vol(g, hx - 0.4, hy - 0.6, 4.4, fu));
+      P.ell(g, hx + 3.4, hy + 1, 2.4, 1.8, sh(fu, -0.1)); P.ell(g, hx + 5.4, hy + 0.2, 0.8, 0.6, '#1a1a20'); // muzzle and nose
+      P.path(g, [hx + 1.4, hy + 2.2, hx + 5.6, hy + 2.2, hx + 4.6, hy + 4 + (f ? 0.4 : 0), hx + 1.8, hy + 3.4]); P.fill(g, '#2a0a10');
+      teeth(g, hx + 1.8, hy + 2.3, hx + 5.4, hy + 2.3, 4, 0.7, 1, '#f0ece0');
+      P.circle(g, hx - 2.2, hy - 3.2, 1.3, fd); P.circle(g, hx + 0.4, hy - 3.6, 1.2, fu); // ears
+      evil(g, hx + 1.6, hy - 1, 0.6, c.eye);
+      g.save(); g.globalAlpha = 0.4; P.circle(g, hx + 7 + (f ? 0.8 : 0), hy + 2, 1.4, '#e8f4ff'); P.circle(g, hx + 8.6 + (f ? 1 : 0), hy + 1, 1, '#e8f4ff'); g.restore(); // breath
+    } });
+
+  /* ---------- Frost Construct (boss): an iron-bound colossus of blue ice, a furnace of cold in its chest, fists like anvils ---------- */
+  def('frostconstruct', { w: 52, h: 56, cy: 36, frames: 2,
+    colors: { ice: '#7ab8e0', iron: '#3a4050', core: '#c8f4ff', rune: '#8ff0ff' },
+    draw(g, f, c) {
+      const ic = c.ice, ir = c.iron, w = f ? 0.9 : -0.9;
+      P.ell(g, 26, 53.4, 17, 2.4, 'rgba(0,0,0,0.45)');
+      // legs: pillars of ice banded in iron
+      for (const [x, d] of [[18, -w], [30, w]]) { P.rrect(g, x + d, 36, 6, 17, 2, P.lg(g, x, 0, x + 6, 0, [sh(ic, 0.3), ic, sh(ic, -0.45)])); P.rect(g, x + d - 0.4, 42, 6.8, 1.6, ir); P.rect(g, x + d - 0.4, 49, 6.8, 1.6, ir); }
+      // torso: a great block of ice, iron bands, the glowing core
+      g.beginPath(); g.moveTo(12, 16); g.lineTo(40, 16); g.lineTo(37, 38); g.lineTo(15, 38); g.closePath();
+      P.fill(g, P.lg(g, 12, 14, 40, 38, [sh(ic, 0.45), ic, sh(ic, -0.45)]));
+      g.strokeStyle = G.rgba('#ffffff', 0.35); g.lineWidth = 0.5; g.beginPath(); g.moveTo(16, 19); g.lineTo(21, 26); g.lineTo(18, 33); g.moveTo(34, 20); g.lineTo(31, 27); g.stroke();
+      P.rect(g, 12.6, 22, 26.8, 2, ir); P.rect(g, 14.4, 33, 23.2, 2, ir);
+      for (const x of [15, 36]) P.circle(g, x, 23, 0.7, sh(ir, 0.5));
+      P.glow(g, 26, 28, 9, c.core, 0.7); P.ell(g, 26, 28.4, 4, 4.4, P.rg(g, 26, 28, 4.4, [[0, '#ffffff'], [0.5, c.core], [1, sh(c.core, -0.4)]]));
+      // shoulders: jagged ice outcrops
+      for (const [x, s] of [[11, -1], [41, 1]]) { P.ell(g, x, 17, 6, 4.6, P.vol(g, x, 16, 6, ic)); icicle(g, x - 2 * s, 14, x - 4 * s, 7, 1.4, sh(ic, 0.2)); icicle(g, x + 1.4 * s, 13.6, x + 2.4 * s, 8.4, 1.2, sh(ic, 0.2)); }
+      // arms hanging to anvil fists
+      limb(g, 8, 20, 6, 32, 3, 2.6, sh(ic, -0.15)); limb(g, 44, 20, 46, 32, 3, 2.6, ic);
+      for (const x of [6, 46]) { P.rrect(g, x - 4, 31 + (x === 6 ? w : -w), 8, 7, 1.8, P.lg(g, x - 4, 0, x + 4, 0, [sh(ir, 0.45), ir, sh(ir, -0.45)])); P.rect(g, x - 4, 34 + (x === 6 ? w : -w), 8, 0.8, c.rune); }
+      // a small head sunk between the shoulders: an iron mask, rune eyes
+      const hx = 26, hy = 11;
+      P.rrect(g, hx - 5, hy - 5, 10, 9, 2.4, P.lg(g, hx - 5, 0, hx + 5, 0, [sh(ir, 0.5), ir, sh(ir, -0.4)]));
+      P.glow(g, hx, hy, 5, c.rune, 0.6); P.rect(g, hx - 3.4, hy - 0.8, 2.6, 1, c.rune); P.rect(g, hx + 0.8, hy - 0.8, 2.6, 1, c.rune);
+      for (let i = 0; i < 3; i++) icicle(g, hx - 3 + i * 3, hy - 4.6, hx - 3.4 + i * 3.4, hy - 9 - (i === 1 ? 2 : 0), 0.9, ic);
+    } });
+
+  /* ---------- Ice Prism (boss): a great floating crystal, a lesser ring of shards turning round it, light caught inside ---------- */
+  def('iceprism', { w: 44, h: 56, cy: 38, frames: 2,
+    colors: { ice: '#9fd8ff', core: '#ffffff', glow: '#8ff0ff', dark: '#1e3a6a' },
+    draw(g, f, c) {
+      const ic = c.ice, bob = f ? -1 : 0;
+      P.ell(g, 22, 53, 11, 2, 'rgba(0,0,0,0.35)');
+      P.glow(g, 22, 26 + bob, 20, c.glow, 0.35);
+      // the ring of lesser shards behind
+      for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + f * 0.5; if (Math.sin(a) > 0) continue; const x = 22 + Math.cos(a) * 17, y = 28 + bob + Math.sin(a) * 5; icicle(g, x, y + 2.6, x, y - 3.4, 1.2, sh(ic, -0.25)); }
+      // the great crystal: an elongated faceted bipyramid
+      const cx = 22, top = 4 + bob, mid = 24 + bob, bot = 48 + bob;
+      const facet = (pts, col) => { P.path(g, pts); P.fill(g, col); };
+      facet([cx, top, cx - 10, mid, cx, mid + 2], P.lg(g, cx - 10, top, cx, mid, [sh(ic, 0.55), ic]));
+      facet([cx, top, cx + 10, mid, cx, mid + 2], P.lg(g, cx, top, cx + 10, mid, [sh(ic, 0.1), sh(ic, -0.35)]));
+      facet([cx - 10, mid, cx, bot, cx, mid + 2], P.lg(g, cx - 10, mid, cx, bot, [sh(ic, 0.2), sh(c.dark, 0.3)]));
+      facet([cx + 10, mid, cx, bot, cx, mid + 2], P.lg(g, cx, mid, cx + 10, bot, [sh(ic, -0.3), c.dark]));
+      g.strokeStyle = G.rgba('#ffffff', 0.55); g.lineWidth = 0.5; g.beginPath(); g.moveTo(cx - 6, 14 + bob); g.lineTo(cx - 3, 22 + bob); g.moveTo(cx + 4, 30 + bob); g.lineTo(cx + 6, 36 + bob); g.stroke();
+      // the heart of light, an eye inside it
+      P.glow(g, cx, mid, 8, c.glow, 0.8); P.ell(g, cx, mid, 3.2, 4, P.rg(g, cx, mid, 4, [[0, c.core], [0.6, c.glow], [1, G.rgba(c.glow, 0)]]));
+      P.ell(g, cx, mid, 0.8, 2.2, c.dark);
+      // the shards in front
+      for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + f * 0.5; if (Math.sin(a) <= 0) continue; const x = 22 + Math.cos(a) * 17, y = 28 + bob + Math.sin(a) * 5; icicle(g, x, y + 3, x, y - 4, 1.4, sh(ic, 0.15)); }
+    } });
 })(window.DH);
