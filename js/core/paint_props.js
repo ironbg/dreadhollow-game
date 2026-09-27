@@ -161,27 +161,34 @@
   } });
 
   /* projectiles & weapon parts (drawn rotated at runtime, pointing right) */
-  def('axe_p', { w: 10, h: 10, outline: 0.5, draw(g) {
-    P.line(g, 1, 9, 7, 3, 1, '#6a4428');
-    P.path(g, [5, 1, 9.6, 0.6, 9.4, 5, 7.4, 4.6, 6, 3]); P.fill(g, P.lg(g, 5, 0, 10, 5, ['#f0f4fa', '#8a92a4']));
+  def('axe_p', { w: 10, h: 10, outline: 0.5, draw(g) { // a bearded throwing axe: a leather-wrapped haft, a crescent blade with a hooked beard
+    P.line(g, 1, 9, 7, 3, 1, '#4a2e18'); for (let i = 0; i < 3; i++) P.line(g, 1.6 + i * 0.7, 8.4 - i * 0.7, 2.2 + i * 0.7, 8.8 - i * 0.7, 0.3, '#8a6a4a');
+    g.beginPath(); g.moveTo(5.4, 2.2); g.quadraticCurveTo(7.2, -0.2, 9.8, 0.8); g.quadraticCurveTo(9.4, 4, 8.8, 6.4); g.quadraticCurveTo(7.6, 4.6, 6.6, 5.4); g.lineTo(7.4, 3.6); g.closePath();
+    P.fill(g, P.lg(g, 5, 0, 10, 6, ['#f4f8ff', '#9aa2b4', '#4a5264']));
+    g.beginPath(); g.moveTo(7.2, 0.4); g.quadraticCurveTo(9.8, 0.4, 9.8, 1); g.quadraticCurveTo(9.4, 4, 8.8, 6.4); g.strokeStyle = '#ffffff'; g.lineWidth = 0.35; g.stroke(); // the honed edge
   } });
-  def('scythe_p', { w: 14, h: 12, outline: 0.5, draw(g) {
-    P.line(g, 7, 11.6, 7.6, 3.4, 0.8, '#3a2e3a');
-    g.beginPath(); g.moveTo(7.6, 3.4); g.quadraticCurveTo(3, 0, 0.4, 4.6); g.quadraticCurveTo(3.4, 2.4, 7.4, 5); g.closePath();
-    P.fill(g, P.lg(g, 0, 0, 8, 5, ['#8a94a8', '#f4f8ff', '#9aa4b8'])); P.glow(g, 3.6, 2.6, 4, '#8affd0', 0.4);
+  def('scythe_p', { w: 14, h: 12, outline: 0.5, draw(g) { // the reaper's scythe: a dark snath, a long curved blade, a ghost-green edge
+    P.line(g, 7, 11.6, 7.6, 3.4, 0.9, '#2a1e2a'); P.line(g, 6.2, 8.6, 7.8, 8.4, 0.6, '#4a3a4a');
+    g.beginPath(); g.moveTo(7.6, 3.2); g.quadraticCurveTo(3, -0.6, 0.2, 4.8); g.quadraticCurveTo(3.4, 2.2, 7.4, 5.2); g.closePath();
+    P.fill(g, P.lg(g, 0, 0, 8, 5, ['#4a5264', '#c8d0e0', '#6a7488']));
+    g.beginPath(); g.moveTo(0.2, 4.8); g.quadraticCurveTo(3, -0.6, 7.6, 3.2); g.strokeStyle = '#b0ffe0'; g.lineWidth = 0.4; g.stroke(); P.glow(g, 3.6, 2, 4, '#8affd0', 0.5);
   } });
-  def('dagger_p', { w: 9, h: 4, outline: 0.4, draw(g) {
-    P.rrect(g, 0, 1.3, 2.4, 1.4, 0.4, '#5a3a22'); P.rrect(g, 2.2, 0.4, 0.7, 3.2, 0.2, '#c9a24a');
-    P.path(g, [2.9, 1.2, 8.8, 2, 2.9, 2.8]); P.fill(g, P.lg(g, 0, 1.2, 0, 2.8, ['#ffffff', '#9aa2b4']));
+  def('dagger_p', { w: 9, h: 4, outline: 0.4, draw(g) { // a throwing knife: a wrapped grip, a steel guard, a blade with a fuller
+    P.rrect(g, 0, 1.2, 2.5, 1.6, 0.5, '#4a2e18'); P.line(g, 0.8, 1.2, 0.8, 2.8, 0.25, '#8a6a4a'); P.line(g, 1.6, 1.2, 1.6, 2.8, 0.25, '#8a6a4a');
+    P.rrect(g, 2.3, 0.3, 0.8, 3.4, 0.3, P.lg(g, 0, 0.3, 0, 3.7, ['#e8ecf4', '#6a7080']));
+    P.path(g, [3.1, 1.1, 8.9, 2, 3.1, 2.9]); P.fill(g, P.lg(g, 0, 1.1, 0, 2.9, ['#ffffff', '#b8c0d0', '#5a6274']));
+    P.line(g, 3.4, 2, 7, 2, 0.25, 'rgba(60,66,80,.8)');
   } });
-  def('arrow_p', { w: 11, h: 4, outline: 0.35, draw(g) {
-    P.line(g, 1, 2, 9, 2, 0.45, '#8a6a4a');
-    P.path(g, [8.6, 0.8, 11, 2, 8.6, 3.2]); P.fill(g, '#e8eef6');
-    P.path(g, [0, 0.6, 2.4, 2, 0, 3.4, 0.8, 2]); P.fill(g, '#e84a4a');
+  def('arrow_p', { w: 11, h: 4, outline: 0.35, draw(g) { // an arrow: a stout ash shaft, a steel broadhead, red fletching
+    P.line(g, 1.2, 2, 8.8, 2, 0.75, '#b08858'); P.line(g, 1.2, 1.8, 8.8, 1.8, 0.25, '#d8b888');
+    P.path(g, [8.4, 0.7, 11, 2, 8.4, 3.3, 9, 2]); P.fill(g, P.lg(g, 8, 0.7, 8, 3.3, ['#ffffff', '#9aa2b4']));
+    P.path(g, [0, 0.4, 2.8, 1.7, 1.2, 1.9]); P.fill(g, '#e84a4a'); P.path(g, [0, 3.6, 2.8, 2.3, 1.2, 2.1]); P.fill(g, '#a02828');
   } });
-  def('flask_p', { w: 6, h: 8, outline: 0.4, draw(g) {
-    P.rrect(g, 2, 0, 2, 1.4, 0.3, '#7a5230'); P.circle(g, 3, 5, 2.6, 'rgba(210,255,220,0.5)');
-    g.save(); g.beginPath(); g.arc(3, 5, 2.4, 0, Math.PI * 2); g.clip(); P.rect(g, 0, 4.4, 6, 4, '#60d050'); g.restore(); P.glow(g, 3, 5, 3.4, '#80ff60', 0.5);
+  def('flask_p', { w: 6, h: 8, outline: 0.4, draw(g) { // a thrown vial of venom: a green brew, a skull scratched on the glass
+    P.rrect(g, 2, 0, 2, 1.4, 0.3, '#7a5230'); P.circle(g, 3, 5, 2.7, 'rgba(210,255,220,0.5)');
+    g.save(); g.beginPath(); g.arc(3, 5, 2.5, 0, Math.PI * 2); g.clip(); P.rect(g, 0, 4, 6, 4, P.lg(g, 0, 4, 0, 8, ['#a0ff70', '#40a030'])); g.restore();
+    P.circle(g, 3, 5.4, 0.8, '#1a3a10'); P.circle(g, 2.7, 5.3, 0.2, '#a0ff70'); P.circle(g, 3.3, 5.3, 0.2, '#a0ff70');
+    P.circle(g, 2, 3.8, 0.45, 'rgba(255,255,255,0.8)'); P.glow(g, 3, 5, 3.4, '#80ff60', 0.5);
   } });
   def('grenade_p', { w: 7, h: 8, outline: 0.4, draw(g) { // an iron powder grenade with a lit fuse
     P.circle(g, 3.5, 4.8, 2.8, P.vol(g, 3.5, 4.8, 2.8, '#4a4a52')); P.rrect(g, 2.6, 1.4, 1.8, 1.2, 0.3, '#6a6a72');
@@ -310,26 +317,71 @@
     g.restore();
     if (f) { P.glow(g, 12.4, 7.2, 3.4, '#c890ff', 0.8); P.circle(g, 12.4, 7.2, 0.8, '#e0c0ff'); }
   } });
-  def('chakram_p', { w: 10, h: 10, outline: 0.4, draw(g) {
-    for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2; P.path(g, [5 + Math.cos(a) * 2, 5 + Math.sin(a) * 2, 5 + Math.cos(a + 0.5) * 5, 5 + Math.sin(a + 0.5) * 5, 5 + Math.cos(a + 0.9) * 2.4, 5 + Math.sin(a + 0.9) * 2.4]); P.fill(g, P.lg(g, 0, 0, 10, 10, ['#ffffff', '#9aa4b8'])); }
-    g.beginPath(); g.arc(5, 5, 2.4, 0, Math.PI * 2); g.strokeStyle = '#d8b048'; g.lineWidth = 0.9; g.stroke();
+  def('chakram_p', { w: 10, h: 10, outline: 0.4, draw(g) { // a war-quoit: a steel ring with four hooked blades, a gold inlay, spinning
+    for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2; P.path(g, [5 + Math.cos(a - 0.5) * 2.6, 5 + Math.sin(a - 0.5) * 2.6, 5 + Math.cos(a + 0.25) * 5, 5 + Math.sin(a + 0.25) * 5, 5 + Math.cos(a + 0.5) * 2.8, 5 + Math.sin(a + 0.5) * 2.8]); P.fill(g, P.lg(g, 0, 0, 10, 10, ['#ffffff', '#a8b0c0', '#5a6274'])); } // four hooked blades
+    g.beginPath(); g.arc(5, 5, 3, 0, Math.PI * 2); g.strokeStyle = '#8a92a4'; g.lineWidth = 1.2; g.stroke();
+    g.beginPath(); g.arc(5, 5, 3, 0, Math.PI * 2); g.strokeStyle = '#e8c050'; g.lineWidth = 0.4; g.stroke();
   } });
-  def('flail_p', { w: 10, h: 10, outline: 0.5, draw(g) {
-    for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; P.path(g, [5 + Math.cos(a - 0.3) * 2.8, 5 + Math.sin(a - 0.3) * 2.8, 5 + Math.cos(a) * 4.8, 5 + Math.sin(a) * 4.8, 5 + Math.cos(a + 0.3) * 2.8, 5 + Math.sin(a + 0.3) * 2.8]); P.fill(g, '#c8ccd8'); }
-    P.circle(g, 5, 5, 3.1, P.vol(g, 5, 5, 3.1, '#6a6e7a'));
+  def('flail_p', { w: 10, h: 10, outline: 0.5, draw(g) { // a morning star: an iron ball studded with six stout spikes, a ring for the chain
+    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 + 0.3; P.path(g, [5 + Math.cos(a - 0.35) * 2.8, 5 + Math.sin(a - 0.35) * 2.8, 5 + Math.cos(a) * 4.8, 5 + Math.sin(a) * 4.8, 5 + Math.cos(a + 0.35) * 2.8, 5 + Math.sin(a + 0.35) * 2.8]); P.fill(g, P.lg(g, 0, 0, 10, 10, ['#c8ccd8', '#5a5e6a'])); }
+    P.circle(g, 5, 5, 3.1, P.vol(g, 4.2, 4.2, 3.4, '#5a5e6a')); P.circle(g, 4, 4, 0.7, 'rgba(255,255,255,0.4)');
+    g.beginPath(); g.arc(5, 5, 3.1, 0, Math.PI * 2); g.strokeStyle = '#3a3e48'; g.lineWidth = 0.3; g.stroke();
   } });
-  def('orb_p', { w: 8, h: 8, outline: 0.3, draw(g) { P.glow(g, 4, 4, 4, '#c8d8ff', 0.6); P.circle(g, 4, 4, 2.6, P.vol(g, 4, 4, 2.6, '#aab4c8')); g.strokeStyle = '#e8c870'; g.lineWidth = 0.4; g.beginPath(); g.ellipse(4, 4, 3.4, 1.1, 0.4, 0, Math.PI * 2); g.stroke(); } });
-  def('hammer_p', { w: 10, h: 10, outline: 0.5, draw(g) {
-    P.glow(g, 5, 5, 6, '#ffe89a', 0.6);
-    P.line(g, 5, 9.6, 5, 4, 1, '#6a4428');
-    P.rrect(g, 1.4, 1, 7.2, 4, 0.8, P.lg(g, 0, 1, 0, 5, ['#fffbe8', '#e8c050', '#9a7a30']));
+  def('orb_p', { w: 8, h: 8, outline: 0.3, draw(g) { // an orbiting warding orb: polished silver in a gold ring, a rune glowing in it
+    P.glow(g, 4, 4, 4, '#c8d8ff', 0.6);
+    P.circle(g, 4, 4, 2.6, P.vol(g, 3.2, 3.2, 2.8, '#b8c4d8'));
+    g.beginPath(); g.ellipse(4, 4, 3.4, 1.1, -0.4, 0, Math.PI * 2); g.strokeStyle = '#e8c870'; g.lineWidth = 0.45; g.stroke();
+    P.circle(g, 4, 4, 0.8, '#8ab0ff'); P.circle(g, 3.1, 3, 0.5, 'rgba(255,255,255,0.9)');
   } });
-  def('fist_p', { w: 9, h: 8, outline: 0.4, draw(g) {
-    P.glow(g, 4.5, 4, 5, '#b080ff', 0.6);
-    P.rrect(g, 1, 1.6, 6.4, 5, 2, G.rgba('#c8a8ff', 0.9));
-    for (let i = 0; i < 4; i++) P.line(g, 5.2, 2.2 + i * 1.2, 7.4, 2.2 + i * 1.2, 0.8, G.rgba('#e8d8ff', 0.9));
+  def('hammer_p', { w: 10, h: 10, outline: 0.5, draw(g) { // the smiting hammer falling from the sky: a golden head with a cross engraved, light pouring off it
+    P.glow(g, 5, 4, 6, '#ffe89a', 0.7);
+    P.line(g, 5, 9.6, 5, 4.4, 1, '#5a3a20'); P.circle(g, 5, 9.6, 0.6, '#c9a24a');
+    P.rrect(g, 1.2, 1, 7.6, 4, 0.7, P.lg(g, 1, 1, 9, 5, ['#fffbe8', '#e8c050', '#8a6a24']));
+    P.rect(g, 1.2, 2.6, 7.6, 0.7, '#8a6a24'); P.rect(g, 4.65, 1.4, 0.7, 3.2, '#fff4c0'); P.rect(g, 3.6, 2.6, 2.8, 0.7, '#fff4c0'); // the cross
   } });
-  def('shield_p', { w: 12, h: 12, outline: 0.5, draw(g) { P.circle(g, 6, 6, 5.2, P.vol(g, 6, 6, 5.2, '#b0402a')); g.strokeStyle = '#d8b048'; g.lineWidth = 0.7; g.beginPath(); g.arc(6, 6, 4.8, 0, Math.PI * 2); g.stroke(); P.circle(g, 6, 6, 1.6, P.vol(g, 6, 6, 1.6, '#e0e0e8')); } });
+  def('fist_p', { w: 9, h: 8, outline: 0.4, draw(g) { // a spectral fist: a gauntlet of violet light, knuckles forward, a trail of mist
+    P.glow(g, 5, 4, 5, '#b080ff', 0.7);
+    g.save(); g.globalAlpha = 0.5; P.path(g, [0, 2.4, 3, 1.8, 3, 6.2, 0, 5.6]); P.fill(g, '#9a70e0'); g.restore(); // mist trailing
+    P.rrect(g, 2.2, 1.4, 5, 5.2, 1.6, P.lg(g, 2, 1.4, 7, 6.6, ['#f0e0ff', '#b890f0', '#6a40b0']));
+    for (let i = 0; i < 4; i++) P.circle(g, 7, 2.2 + i * 1.2, 0.65, P.vol(g, 6.8, 2 + i * 1.2, 0.7, '#e8d8ff')); // knuckles
+    P.path(g, [3.2, 5.4, 5.2, 4.4, 6.2, 6.2, 4, 6.6]); P.fill(g, '#9a70e0'); // the thumb
+  } });
+  def('shield_p', { w: 12, h: 12, outline: 0.5, draw(g) { // a round war-shield of painted planks, an iron rim, a boss, rivets
+    P.circle(g, 6, 6, 5.2, P.vol(g, 4.6, 4.6, 5.6, '#b0402a'));
+    g.strokeStyle = 'rgba(40,10,6,.6)'; g.lineWidth = 0.3; for (const x of [3.6, 6, 8.4]) { g.beginPath(); g.moveTo(x, 1.2); g.lineTo(x, 10.8); g.stroke(); } // the planks
+    g.beginPath(); g.arc(6, 6, 4.9, 0, Math.PI * 2); g.strokeStyle = '#8a8e98'; g.lineWidth = 0.8; g.stroke();
+    for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; P.circle(g, 6 + Math.cos(a) * 4.9, 6 + Math.sin(a) * 4.9, 0.3, '#d8dce8'); }
+    P.circle(g, 6, 6, 1.6, P.vol(g, 5.4, 5.4, 1.8, '#c8ccd8')); P.circle(g, 5.4, 5.4, 0.4, '#ffffff');
+  } });
+  // projectiles that used to be drawn as plain dots
+  def('fireball_p', { w: 14, h: 8, cx: 11, outline: 0, frames: 2, draw(g, f) { // a comet of fire: a white-hot core, flames streaming back
+    P.glow(g, 10, 4, 5, '#ff7a20', 0.7);
+    for (const [l, w, col] of [[10, 3.2, '#c02810'], [8, 2.4, '#ff6a18'], [5.6, 1.6, '#ffc040']]) { g.beginPath(); g.moveTo(11.4, 4 - w); g.quadraticCurveTo(11.4 - l * 0.6, 4 - w * 0.8 + (f ? 0.4 : -0.4), 11.4 - l, 4 + (f ? 0.6 : -0.6)); g.quadraticCurveTo(11.4 - l * 0.6, 4 + w * 0.8, 11.4, 4 + w); g.closePath(); P.fill(g, col); }
+    P.circle(g, 11, 4, 2.4, P.rg(g, 11.4, 3.6, 2.6, [[0, '#ffffff'], [0.5, '#fff0a0'], [1, '#ffb030']]));
+  } });
+  def('arcorb_p', { w: 10, h: 10, outline: 0, frames: 2, draw(g, f) { // the oracle's orb: an eye of cold light, runes circling it
+    P.glow(g, 5, 5, 5, '#60e0d0', 0.7);
+    P.circle(g, 5, 5, 2.8, P.rg(g, 4.4, 4.4, 3, [[0, '#ffffff'], [0.5, '#b8fff4'], [1, '#30a8a0']]));
+    P.ell(g, 5, 5, 1.6, 1.2, '#1a5a6a'); P.ell(g, 5.2, 5, 0.6, 1, '#0a1a20'); // the eye
+    for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + (f ? 0.4 : 0); P.rect(g, 5 + Math.cos(a) * 4.2 - 0.35, 5 + Math.sin(a) * 4.2 - 0.35, 0.7, 0.7, '#e8fff8'); }
+  } });
+  def('storm_p', { w: 10, h: 10, outline: 0, frames: 2, draw(g, f) { // a ball of storm: a white core in a skin of lightning
+    P.glow(g, 5, 5, 5, '#fff6a0', 0.8);
+    P.circle(g, 5, 5, 3, P.rg(g, 4.4, 4.4, 3.2, [[0, '#ffffff'], [0.6, '#fff6a0'], [1, '#c8a830']]));
+    g.strokeStyle = '#ffffff'; g.lineWidth = 0.35;
+    for (let i = 0; i < 3; i++) { const a = i / 3 * Math.PI * 2 + (f ? 1 : 0); g.beginPath(); g.moveTo(5 + Math.cos(a) * 1.4, 5 + Math.sin(a) * 1.4); g.lineTo(5 + Math.cos(a + 0.4) * 3, 5 + Math.sin(a + 0.4) * 3); g.lineTo(5 + Math.cos(a + 0.1) * 4.6, 5 + Math.sin(a + 0.1) * 4.6); g.stroke(); }
+  } });
+  def('seed_p', { w: 6, h: 6, outline: 0.3, draw(g) { // a thorny seed spat by the pitcher plant, glowing violet
+    P.glow(g, 3, 3, 3, '#c890ff', 0.6);
+    for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; P.path(g, [3 + Math.cos(a - 0.4) * 1.4, 3 + Math.sin(a - 0.4) * 1.4, 3 + Math.cos(a) * 2.8, 3 + Math.sin(a) * 2.8, 3 + Math.cos(a + 0.4) * 1.4, 3 + Math.sin(a + 0.4) * 1.4]); P.fill(g, '#4a2a5a'); }
+    P.circle(g, 3, 3, 1.6, P.vol(g, 2.6, 2.6, 1.8, '#b070e0')); P.circle(g, 2.5, 2.5, 0.4, '#f0e0ff');
+  } });
+  def('hex_p', { w: 12, h: 6, cx: 8, outline: 0, draw(g) { // a hex: a shard of violet curse with a sigil in it, a smoky tail
+    P.glow(g, 8, 3, 4, '#be50ff', 0.7);
+    g.save(); g.globalAlpha = 0.6; P.path(g, [0, 3, 6, 1.6, 6, 4.4]); P.fill(g, '#6a2a9a'); g.restore();
+    P.path(g, [5, 3, 8, 0.6, 11.6, 3, 8, 5.4]); P.fill(g, P.lg(g, 5, 0, 12, 6, ['#f0c0ff', '#be50ff', '#5a1a8a']));
+    g.strokeStyle = '#ffffff'; g.lineWidth = 0.3; g.beginPath(); g.moveTo(7, 3); g.lineTo(9.6, 3); g.moveTo(8.3, 1.8); g.lineTo(8.3, 4.2); g.stroke();
+  } });
   def('rift_p', { w: 14, h: 10, outline: 0, draw(g) {
     P.glow(g, 7, 5, 7, '#b050ff', 0.7);
     g.beginPath(); g.moveTo(1, 5); g.quadraticCurveTo(7, -1, 13, 5); g.quadraticCurveTo(7, 11, 1, 5); P.fill(g, P.rg(g, 7, 5, 6, ['#ffffff', '#c070ff', '#40106a']));

@@ -443,8 +443,8 @@
     this.projTrail(b);
     switch (b.k) {
       case 'fireball':
-        g.drawImage(A.glow('rgba(255,120,30,0.8)'), x - 10, y - 10, 20, 20);
-        G.P.circle(g, x, y, 3.2, '#ffd35a'); G.P.circle(g, x + 0.5, y - 0.5, 1.6, '#fff6c0');
+        g.drawImage(A.glow('rgba(255,120,30,0.6)'), x - 10, y - 10, 20, 20);
+        this.sprite(g, 'fireball_p', null, Math.floor(now * 14) % 2, x, y, false, 1, false, 1, b.ang || Math.atan2(b.vy, b.vx) || 0.0001);
         if (Math.random() < 0.7) this.parts.push({ x: b.x, y: b.y, vx: U.rand(-10, 10), vy: U.rand(-10, 10), life: 0.35, max: 0.35, c: U.pick(['#ff6a1a', '#ffd35a', '#7c1624']), s: 1 });
         lights.push({ x: b.x, y: b.y, r: 34, kind: 'fire' }); break;
       case 'flame': case 'wave': {
@@ -456,18 +456,18 @@
         lights.push({ x: b.x, y: b.y, r: rr * 3, kind: 'fire' }); break;
       }
       case 'orb':
-        g.drawImage(A.glow('rgba(120,220,255,0.7)'), x - b.r * 2, y - b.r * 2, b.r * 4, b.r * 4);
-        G.P.circle(g, x, y, b.r * 0.55, G.P.vol(g, x, y, b.r * 0.55, '#a8f0ff'));
+        g.drawImage(A.glow('rgba(120,220,255,0.6)'), x - b.r * 2, y - b.r * 2, b.r * 4, b.r * 4);
+        this.sprite(g, 'arcorb_p', null, Math.floor(now * 6) % 2, x, y, b.vx < 0, Math.max(1, b.r / 7));
         lights.push({ x: b.x, y: b.y, r: 26, kind: 'magic' }); break;
       case 'sphere':
         g.drawImage(A.glow('rgba(255,245,150,0.8)'), x - 12, y - 12, 24, 24);
-        G.P.circle(g, x, y, 3.6, G.P.vol(g, x, y, 3.6, '#fff6a0'));
+        this.sprite(g, 'storm_p', null, Math.floor(now * 16) % 2, x, y, false, 1);
         g.strokeStyle = 'rgba(255,255,255,0.8)'; g.lineWidth = 0.5; g.beginPath(); for (let i = 0; i < 4; i++) { const a = now * 9 + i * 1.6; g.moveTo(x, y); g.lineTo(x + Math.cos(a) * 7, y + Math.sin(a) * 7); } g.stroke();
         lights.push({ x: b.x, y: b.y, r: 40, kind: 'bolt' }); break;
       case 'wall': { // spectral warrior of the Wall of the Dead
         const al = Math.min(1, b.life / 0.3, (1.6 - b.life) / 0.15);
         g.drawImage(A.glow('rgba(170,150,255,0.5)'), x - 14, y - 14, 28, 28);
-        this.sprite(g, 'hknight', 'ice', Math.floor(now * 10) % 2, x, y, Math.cos(b.ang) < 0, 1, false, 0.75 * al);
+        this.sprite(g, 'sum_phantom', null, Math.floor(now * 10) % 2, x, y, Math.cos(b.ang) < 0, 1, false, 0.85 * al);
         if (Math.random() < 0.4) this.parts.push({ x: b.x - Math.cos(b.ang) * 6, y: b.y + U.rand(-4, 4), vx: 0, vy: -8, life: 0.4, max: 0.4, c: '#b8a8ff', s: 1 });
         lights.push({ x: b.x, y: b.y, r: 22, kind: 'magic' }); break;
       }
@@ -489,11 +489,11 @@
       }
       case 'spit':
         g.drawImage(A.glow('rgba(170,110,255,0.7)'), x - 6, y - 6, 12, 12);
-        G.P.circle(g, x, y, 1.8, G.P.vol(g, x, y, 1.8, '#c890ff')); G.P.circle(g, x - 0.5, y - 0.5, 0.5, '#f0e0ff');
+        this.sprite(g, 'seed_p', null, 0, x, y, false, 1, false, 1, now * 8);
         lights.push({ x: b.x, y: b.y, r: 14, kind: 'magic' }); break;
       case 'hex':
         g.drawImage(A.glow('rgba(190,80,255,0.8)'), x - 7, y - 7, 14, 14);
-        g.strokeStyle = '#f0c0ff'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x - Math.cos(b.ang) * 6, y - Math.sin(b.ang) * 6); g.lineTo(x + Math.cos(b.ang) * 3, y + Math.sin(b.ang) * 3); g.stroke();
+        this.sprite(g, 'hex_p', null, 0, x, y, false, 1, false, 1, b.ang || Math.atan2(b.vy, b.vx) || 0.0001);
         lights.push({ x: b.x, y: b.y, r: 16, kind: 'magic' }); break;
       default: {
         const name = { arrow: 'arrow_p', dart: 'dagger_p', axe: 'axe_p', flask: 'flask_p', chakram: 'chakram_p', fist: 'fist_p' }[b.k];
