@@ -340,13 +340,26 @@
     P.circle(g, 10.6, 4.6, 0.7, '#ff3040'); P.glow(g, 10.6, 4.6, 2.4, '#ff3040', 0.8);
     g.strokeStyle = '#1a1410'; g.lineWidth = 0.5; g.beginPath(); g.moveTo(6.4, 9.4); g.lineTo(6.2, 10.6); g.moveTo(7.8, 9.4); g.lineTo(8, 10.6); g.stroke();
   } });
-  // a sealed sarcophagus (breakable)
+  // a sealed sarcophagus (breakable): a coffin of stone, a cross and a skull carved on its lid, a chain and padlock round it,
+  // cold light leaking through its cracks
   def('sarcophagus', { w: 26, h: 18, cy: 14, frames: 1, draw(g) {
-    P.ell(g, 13, 15.4, 12.4, 2.4, 'rgba(0,0,0,0.55)');
-    P.path(g, [1, 14.6, 2.4, 5, 23.6, 5, 25, 14.6]); P.fill(g, P.lg(g, 0, 5, 0, 15, ['#7a8a88', '#4a5856', '#232c2c']));
-    P.path(g, [2.4, 5, 5, 1.4, 21, 1.4, 23.6, 5]); P.fill(g, P.lg(g, 0, 1, 0, 5, ['#a8b8b4', '#6a7a78']));
-    g.strokeStyle = '#2a3434'; g.lineWidth = 0.6; g.beginPath(); g.moveTo(13, 2); g.lineTo(13, 14); g.moveTo(9, 7.6); g.lineTo(17, 7.6); g.moveTo(6, 11); g.lineTo(9, 14); g.stroke();
-    P.glow(g, 13, 8, 6, '#70ffd0', 0.35);
+    const st = '#8a9490', sl = '#c8d2ce', sd = '#2a3232', lite = '#70ffd0';
+    P.ell(g, 13, 15.4, 12.6, 2.2, 'rgba(0,0,0,0.55)');
+    P.glow(g, 13, 8, 10, lite, 0.25);
+    // the side of the coffin
+    P.path(g, [1.2, 6.4, 5, 10.4, 23, 9.2, 24.8, 6.4, 24.8, 10.8, 23, 13.8, 5, 15, 1.2, 11]); P.fill(g, P.lg(g, 0, 7, 0, 15, [sh(st, -0.2), sh(st, -0.45), sd]));
+    // the lid: a long coffin shape, wide at the shoulders, its lip standing out
+    P.path(g, [1.2, 6.4, 5, 2.2, 23, 3.4, 24.8, 6.4, 23, 9.2, 5, 10.4]); P.fill(g, P.lg(g, 3, 2, 20, 10, [sl, st, sh(st, -0.2)]));
+    g.strokeStyle = sd; g.lineWidth = 0.6; g.beginPath(); g.moveTo(1.2, 6.4); g.lineTo(5, 10.4); g.lineTo(23, 9.2); g.lineTo(24.8, 6.4); g.stroke(); // the seam
+    // carved on the lid: a skull at the head, a long cross
+    P.circle(g, 5.4, 6.2, 1.5, P.vol(g, 5, 5.8, 1.5, '#e0e8e4')); P.circle(g, 5, 6.1, 0.4, sd); P.circle(g, 6, 6, 0.4, sd);
+    P.rect(g, 8.4, 5.8, 13, 0.9, sh(st, -0.35)); P.rect(g, 11.4, 3.8, 0.9, 5, sh(st, -0.35));
+    // cracks with the light leaking out
+    g.strokeStyle = lite; g.lineWidth = 0.45; g.beginPath(); g.moveTo(15, 9.8); g.lineTo(14.2, 11.8); g.lineTo(15.4, 13); g.lineTo(14.8, 14.6); g.moveTo(20, 3.4); g.lineTo(18.6, 5.2); g.lineTo(19.4, 6.4); g.stroke();
+    P.glow(g, 14.8, 12, 3, lite, 0.6); P.glow(g, 19, 5, 2, lite, 0.5);
+    // a chain round it, a padlock hanging
+    g.strokeStyle = '#5a5a62'; g.lineWidth = 0.8; g.setLineDash([0.9, 0.45]); g.beginPath(); g.moveTo(8.6, 2.6); g.lineTo(9.6, 14.6); g.stroke(); g.setLineDash([]);
+    P.rrect(g, 8.4, 11.4, 2.6, 2.4, 0.5, P.lg(g, 8.4, 11.4, 11, 13.8, ['#c8a040', '#6a4a14'])); P.rect(g, 9.5, 12.2, 0.4, 0.9, '#1a1004');
   } });
   // a hovering will-o'-wisp orb (catacombs) / a glowing root (blightmire)
   def('wisp', { w: 12, h: 18, cy: 15, frames: 2, colors: { glow: '#8ff0ff' }, variants: { bog: { glow: '#b0ff50' } }, draw(g, f, c) {
@@ -360,16 +373,29 @@
     g.strokeStyle = f ? '#d8ff80' : '#90c040'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(1, 9); g.quadraticCurveTo(6, 3, 10, 7); g.quadraticCurveTo(14, 11, 19, 4); g.stroke();
     P.circle(g, 10, 7, 1, '#f0ffc0');
   } });
-  // the Evil Tree of the Blightmire (breakable)
+  // the Evil Tree of the Blightmire (breakable): a twisted dead tree with a screaming face in its trunk, branches reaching
+  // out like clawed hands, glowing pods hanging from them on threads, roots clutching the mud
   def('eviltree', { w: 34, h: 44, cy: 40, frames: 2, draw(g, f) {
-    P.ell(g, 17, 41, 14, 3, 'rgba(0,0,0,0.55)');
-    const bark = P.lg(g, 8, 0, 26, 0, ['#4a3a22', '#2a1e10', '#120a04']);
-    P.path(g, [10, 41, 13, 26, 11, 16, 4, 8, 6, 7, 13, 13, 15, 4, 18, 4, 19, 13, 27, 5, 29, 7, 22, 17, 21, 27, 25, 41]); P.fill(g, bark);
-    g.strokeStyle = '#2a1e10'; g.lineWidth = 2; g.beginPath(); g.moveTo(10, 41); g.lineTo(3, 43); g.moveTo(25, 41); g.lineTo(32, 43); g.stroke();
-    P.ell(g, 17.4, 24, 3.4, 4.4, '#0a0602'); // the maw
-    P.circle(g, 14.4, 19, 1.3, f ? '#e8ff60' : '#b0ff50'); P.circle(g, 20.4, 19, 1.3, f ? '#e8ff60' : '#b0ff50');
-    P.glow(g, 17, 20, 9, '#b0ff50', f ? 0.6 : 0.4);
-    for (const [x, y] of [[6, 8], [15, 4], [28, 6]]) P.circle(g, x, y, 1.6, G.rgba('#90b030', 0.8));
+    const b = '#4a3a22', bl = sh(b, 0.45), bd = sh(b, -0.55), lite = f ? '#e8ff60' : '#b0ff50', sw = f ? 0.8 : -0.8;
+    P.ell(g, 17, 41, 15, 2.8, 'rgba(0,0,0,0.55)');
+    P.glow(g, 17, 22, 14, '#b0ff50', f ? 0.3 : 0.2);
+    // roots clutching the ground
+    for (const [x0, x1, y1] of [[12, 3, 42.4], [14, 7, 43], [21, 27, 43], [23, 32, 42]]) P.limb(g, x0, 38, x1, y1, 2.4, 0.6, bd);
+    // the trunk: twisted, narrowing, split into crooked limbs that end in twig claws
+    const limbs = [[14, 16, 8, 10, 3 + sw, 6], [16, 14, 15, 7, 13 + sw * 0.6, 2.4], [20, 14, 24, 8, 28 + sw, 4.4], [21, 18, 27, 15, 32, 13 + sw]];
+    for (const [x0, y0, mx, my, tx, ty] of limbs) { P.limb(g, x0, y0, mx, my, 2.4, 1.6, b); P.limb(g, mx, my, tx, ty, 1.6, 0.7, bl);
+      const a = Math.atan2(ty - my, tx - mx); for (const d of [-0.6, 0, 0.6]) P.line(g, tx, ty, tx + Math.cos(a + d) * 2.2, ty + Math.sin(a + d) * 2.2, 0.45, bl); }
+    g.beginPath(); g.moveTo(10.6, 40); g.bezierCurveTo(13, 32, 11, 24, 13.6, 15); g.lineTo(21.4, 15); g.bezierCurveTo(23, 24, 21, 32, 24.6, 40); g.closePath();
+    P.fill(g, P.lg(g, 10, 15, 25, 40, [bl, b, bd]));
+    g.strokeStyle = bd; g.lineWidth = 0.6; for (const [x0, x1] of [[14, 12.4], [17.6, 18.6], [20.6, 22.6]]) { g.beginPath(); g.moveTo(x0, 16); g.bezierCurveTo(x0 - 1, 24, x1 + 1, 32, x1, 39.6); g.stroke(); }
+    // the face: hollow eyes burning, a long screaming maw
+    P.ell(g, 15.2, 21.4, 1.8, 2.2, '#0a0602'); P.ell(g, 20.2, 21.2, 1.7, 2.1, '#0a0602');
+    P.circle(g, 15.4, 21.6, 0.9, lite); P.circle(g, 20.2, 21.4, 0.85, lite); P.glow(g, 17.8, 21.4, 5, lite, 0.6);
+    P.path(g, [14.6, 18.6, 16.8, 19.8, 17.2, 19.4]); P.fill(g, bd); P.path(g, [21.4, 18.4, 19.2, 19.6, 18.8, 19.2]); P.fill(g, bd); // the brows
+    P.ell(g, 17.6, 28, 2.4, 4.2 + (f ? 0.6 : 0), '#0a0602'); P.glow(g, 17.6, 28.6, 3, lite, 0.3);
+    P.line(g, 17, 32.4, 17, 34.6 + (f ? 0.8 : 0), 0.4, G.rgba(lite, 0.8));
+    // pods hanging from the branches on threads, glowing
+    for (const [x, y, l] of [[8, 10, 5], [25, 9, 6], [29.6, 14.6, 4]]) { P.line(g, x, y, x + sw * 0.3, y + l, 0.25, '#6a5a3a'); P.ell(g, x + sw * 0.3, y + l + 1.2, 1.1, 1.4, P.rg(g, x + sw * 0.3 - 0.3, y + l + 0.8, 1.4, [[0, '#f4ffc0'], [0.5, lite], [1, '#4a6a10']])); P.glow(g, x + sw * 0.3, y + l + 1.2, 2.6, lite, 0.4); }
   } });
 
   /* ---------- Environmental hazards ---------- */
