@@ -12,91 +12,140 @@
     P.circle(g, cx - r * 0.35, cy - r * 0.55, r * 0.22, 'rgba(255,255,255,0.9)');
   }
   const GEMS = { gem1: '#4aa8ff', gem10: '#ffd040', gem100: '#c060ff', gem1000: '#ffb020', cluster: '#e02838', clusterX: '#2a1a2a' };
+  /** A faceted crystal standing upright at (x,y) (its foot), height h: a lit left face, a dark right face, a bright crown, a glint. */
+  function crystal(g, x, y, h, col, lean) {
+    const w = h * 0.46, top = y - h, tx = x + (lean || 0);
+    P.path(g, [x - w, y - h * 0.3, tx - w, top + h * 0.34, tx, top, x, y]); P.fill(g, P.lg(g, x - w, top, x, y, [sh(col, 0.5), sh(col, 0.1)]));
+    P.path(g, [x, y, tx, top, tx + w, top + h * 0.34, x + w, y - h * 0.3]); P.fill(g, P.lg(g, x, top, x + w, y, [sh(col, -0.25), sh(col, -0.7)]));
+    P.path(g, [tx - w, top + h * 0.34, tx, top, tx, top + h * 0.5]); P.fill(g, sh(col, 0.75)); // the lit crown facet
+    P.circle(g, tx - w * 0.35, top + h * 0.3, Math.max(0.25, h * 0.07), '#ffffff'); // a glint
+  }
   Object.keys(GEMS).forEach((k) => {
     const big = k.startsWith('cluster');
     def(k, { w: big ? 10 : 6, h: big ? 10 : 7, draw(g) {
-      if (big) { gem(g, 3.2, 5.6, 2, GEMS[k]); gem(g, 6.8, 5.2, 2.2, GEMS[k]); gem(g, 5, 3.6, 2.4, k === 'clusterX' ? '#6a2a6a' : sh(GEMS[k], 0.1)); if (k === 'clusterX') P.glow(g, 5, 5, 6, '#ff2040', 0.4); }
-      else gem(g, 3, 3.6, k === 'gem1' ? 1.7 : k === 'gem10' ? 2 : k === 'gem100' ? 2.3 : 2.6, GEMS[k]);
+      if (big) { // three crystals grown out of a lump of dark rock
+        const col = GEMS[k] === '#2a1a2a' ? '#8a2a6a' : GEMS[k];
+        P.glow(g, 5, 5, 5, k === 'clusterX' ? '#ff2040' : col, 0.25);
+        P.ell(g, 5, 8.6, 4, 1.4, P.lg(g, 1, 7.4, 9, 10, ['#5a5058', '#2a242a']));
+        crystal(g, 3.2, 8.4, 4.6, col, -1); crystal(g, 7, 8.4, 4.2, sh(col, -0.1), 1); crystal(g, 5, 8.8, 6.6, sh(col, 0.1), 0);
+        return;
+      }
+      const h = k === 'gem1' ? 4.8 : k === 'gem10' ? 5.4 : k === 'gem100' ? 5.9 : 6.4;
+      P.glow(g, 3, 3.8, h * 0.7, GEMS[k], 0.25);
+      crystal(g, 3, 6.6, h, GEMS[k], 0);
     } });
   });
-  def('coin', { w: 6, h: 6, draw(g) {
-    P.circle(g, 3, 3, 2.6, P.vol(g, 3, 3, 2.6, '#f0b030')); P.circle(g, 3, 3, 1.8, P.lg(g, 1, 1, 5, 5, ['#fff0a0', '#e0a020']));
-    P.path(g, [3, 1.6, 3.45, 2.55, 4.4, 3, 3.45, 3.45, 3, 4.4, 2.55, 3.45, 1.6, 3, 2.55, 2.55]); P.fill(g, '#b07010'); // stamped star
-  } });
-  def('potion', { w: 8, h: 10, draw(g) {
-    P.rrect(g, 2.9, 0.3, 2.2, 1.4, 0.4, '#8a5a30');
-    P.rrect(g, 3.1, 1.5, 1.8, 2, 0.3, 'rgba(210,230,255,0.8)');
-    P.circle(g, 4, 6.2, 3.2, 'rgba(210,230,255,0.5)');
-    g.save(); g.beginPath(); g.arc(4, 6.2, 3, 0, Math.PI * 2); g.clip(); P.rect(g, 0, 5.2, 8, 5, P.lg(g, 0, 5, 0, 9, ['#ff5060', '#a01020'])); g.restore();
-    P.glow(g, 4, 7, 4, '#ff3040', 0.4); P.ell(g, 2.8, 5, 0.7, 1.2, 'rgba(255,255,255,0.8)', 0.4);
-  } });
-  def('magnet', { w: 9, h: 9, draw(g) {
-    g.lineCap = 'butt'; g.beginPath(); g.arc(4.5, 4.2, 2.7, Math.PI, 0, true); g.strokeStyle = P.lg(g, 1, 0, 8, 0, ['#e02838', '#ff7080', '#e02838']); g.lineWidth = 2; g.stroke();
-    P.rect(g, 0.8, 1, 2, 2.2, '#e02838'); P.rect(g, 6.2, 1, 2, 2.2, '#e02838'); P.rect(g, 0.8, 0.2, 2, 1.1, '#e8eef6'); P.rect(g, 6.2, 0.2, 2, 1.1, '#e8eef6');
-  } });
-  def('bomb', { w: 9, h: 10, draw(g) {
-    P.circle(g, 4.5, 6, 3.4, P.vol(g, 4.5, 6, 3.4, '#4a3a5a'));
-    P.rrect(g, 3.5, 1.8, 2, 1.4, 0.3, '#8a8290');
-    g.beginPath(); g.moveTo(4.5, 1.8); g.quadraticCurveTo(5.6, 0.4, 6.8, 0.8); g.strokeStyle = '#c8a070'; g.lineWidth = 0.4; g.stroke();
-    P.glow(g, 7, 0.8, 2.4, '#ffd040', 0.9); P.circle(g, 7, 0.8, 0.5, '#fff8c0');
-    P.circle(g, 3.2, 4.8, 0.8, 'rgba(255,255,255,0.35)');
-  } });
-  function chest(g, body, band, glow) {
-    P.rrect(g, 1, 5, 12, 6.4, 0.8, P.lg(g, 0, 5, 0, 11.4, [sh(body, 0.25), body, sh(body, -0.4)]));
-    g.beginPath(); g.moveTo(1, 5.4); g.quadraticCurveTo(1, 0.8, 7, 0.8); g.quadraticCurveTo(13, 0.8, 13, 5.4); g.closePath(); P.fill(g, P.lg(g, 0, 0.8, 0, 5.4, [sh(body, 0.45), sh(body, 0.05)]));
-    [2.6, 11.4].forEach((x) => P.rrect(g, x - 0.7, 0.9, 1.4, 10.4, 0.3, P.lg(g, x - 0.7, 0, x + 0.7, 0, [sh(band, 0.4), band, sh(band, -0.3)])));
-    P.rrect(g, 1, 4.9, 12, 1, 0.3, band);
-    P.rrect(g, 5.8, 4.4, 2.4, 3, 0.4, P.lg(g, 0, 4.4, 0, 7.4, [sh(band, 0.5), band])); P.circle(g, 7, 6.1, 0.4, '#1a1010');
+  /** A gold coin face-on at (x,y), radius r: a raised rim, a skull stamped in it, a shine. */
+  function coinFace(g, x, y, r) {
+    P.circle(g, x, y, r, P.lg(g, x - r, y - r, x + r, y + r, ['#fff0a0', '#e0a020', '#8a5a10']));
+    P.circle(g, x, y, r * 0.72, P.lg(g, x - r, y - r, x + r, y + r, ['#c88a18', '#f0c040']));
+    P.circle(g, x, y - r * 0.08, r * 0.34, '#8a5a10'); P.rect(g, x - r * 0.2, y + r * 0.18, r * 0.4, r * 0.2, '#8a5a10'); // a stamped skull
+    P.circle(g, x - r * 0.13, y - r * 0.1, r * 0.09, '#f0c040'); P.circle(g, x + r * 0.13, y - r * 0.1, r * 0.09, '#f0c040');
+    P.ell(g, x - r * 0.45, y - r * 0.5, r * 0.28, r * 0.14, 'rgba(255,255,255,0.8)', -0.6);
   }
-  def('chest_red', { w: 14, h: 12, draw(g) { chest(g, '#8a1a24', '#c8ccd8', '#ff3040'); } });
-  def('chest_gold', { w: 14, h: 12, draw(g) { chest(g, '#6a3a1a', '#ffd35a', '#ffd35a'); } });
-  def('chest', { w: 14, h: 12, draw(g) { chest(g, '#7a4a24', '#9aa0aa', '#ffb050'); } });
-  def('chest_new', { w: 14, h: 12, frames: 2, draw(g, f) { P.glow(g, 7, 6, 8, '#c070ff', f ? 0.7 : 0.45); chest(g, '#3a1a4a', '#e0c0ff', '#c070ff'); } }); // the Strange Pendulum's chest
-  // coins: a stack (5) and a bag (25)
-  def('coin_stack', { w: 8, h: 8, draw(g) {
-    for (const [x, y] of [[2.6, 5.4], [5.4, 5.6], [4, 3.2]]) { P.ell(g, x, y, 2.3, 1.5, P.lg(g, x - 2, y - 1, x + 2, y + 1, ['#fff0a0', '#e0a020', '#8a5a10'])); P.ell(g, x, y - 0.3, 1.5, 0.8, '#ffe070'); }
+  def('coin', { w: 6, h: 6, draw(g) { coinFace(g, 3, 3, 2.7); } });
+  def('potion', { w: 8, h: 10, draw(g) { // a round flask of blood-red draught: a cork under a wax seal, a label, a bubble rising
+    P.glow(g, 4, 6.6, 4.4, '#ff3040', 0.4);
+    P.rrect(g, 3.1, 1.6, 1.8, 1.8, 0.3, G.rgba('#d8e8ff', 0.7));
+    P.rrect(g, 2.8, 0.3, 2.4, 1.5, 0.5, '#8a5a30'); P.ell(g, 4, 0.5, 1.4, 0.5, '#b82838'); // cork and wax
+    P.circle(g, 4, 6.3, 3.3, G.rgba('#d8e8ff', 0.45));
+    g.save(); g.beginPath(); g.arc(4, 6.3, 3.1, 0, Math.PI * 2); g.clip(); P.rect(g, 0, 4.8, 8, 5, P.lg(g, 0, 4.8, 0, 9.6, ['#ff6070', '#c01828', '#5a0810'])); P.ell(g, 4, 4.9, 3.2, 0.5, '#ff8a90'); g.restore();
+    P.rrect(g, 2.4, 6, 3.2, 1.6, 0.3, '#e8dcb8'); P.line(g, 2.9, 6.8, 5.1, 6.8, 0.25, '#6a4a2a'); // a label
+    P.circle(g, 5.2, 8.4, 0.35, 'rgba(255,200,200,0.8)'); P.ell(g, 2.4, 4.6, 0.6, 1.3, 'rgba(255,255,255,0.8)', 0.4);
   } });
-  def('coin_bag', { w: 10, h: 10, draw(g) {
-    P.glow(g, 5, 6, 5, '#ffd35a', 0.4);
-    g.beginPath(); g.moveTo(3.6, 2.6); g.quadraticCurveTo(0.6, 5, 1.4, 8.4); g.quadraticCurveTo(2.4, 9.8, 5, 9.8); g.quadraticCurveTo(7.6, 9.8, 8.6, 8.4); g.quadraticCurveTo(9.4, 5, 6.4, 2.6); g.closePath();
-    P.fill(g, P.lg(g, 1, 0, 9, 0, ['#c89a5a', '#8a5a2a', '#4a2a10']));
-    P.rect(g, 3.4, 1.8, 3.2, 1.1, '#5a3a18'); P.ell(g, 5, 1.2, 2, 0.9, '#a07040');
-    P.circle(g, 5, 6.2, 1.6, P.lg(g, 3.4, 4.6, 6.6, 7.8, ['#fff0a0', '#e0a020'])); P.path(g, [5, 5.2, 5.4, 6.2, 5, 7.2, 4.6, 6.2]); P.fill(g, '#b07010');
+  def('magnet', { w: 9, h: 9, draw(g) { // a horseshoe of dark iron, its arms painted red, bright steel poles, a hum of blue sparks
+    g.lineCap = 'butt'; g.beginPath(); g.arc(4.5, 4.4, 2.8, Math.PI, 0, true); g.strokeStyle = P.lg(g, 1, 0, 8, 0, ['#a01828', '#ff5a60', '#a01828']); g.lineWidth = 2.1; g.stroke();
+    g.beginPath(); g.arc(4.5, 4.4, 3.8, Math.PI * 1.1, Math.PI * 1.9, true); g.strokeStyle = 'rgba(255,255,255,0.35)'; g.lineWidth = 0.35; g.stroke();
+    for (const x of [0.7, 6.2]) { P.rect(g, x, 1.4, 2.1, 3, P.lg(g, x, 0, x + 2.1, 0, ['#e02838', '#801018'])); P.rect(g, x, 0.2, 2.1, 1.3, P.lg(g, x, 0, x + 2.1, 0, ['#ffffff', '#9aa4b4'])); }
+    for (const [x, y] of [[4.5, 0.6], [3.4, 1.2], [5.6, 1.1]]) P.circle(g, x, y, 0.3, '#8ad8ff'); P.glow(g, 4.5, 1, 2.2, '#6ac8ff', 0.5);
+  } });
+  def('bomb', { w: 9, h: 10, draw(g) { // an iron bomb: a riveted band, a skull daubed on it, a fuse spitting sparks
+    P.circle(g, 4.5, 6.2, 3.4, P.vol(g, 3.8, 5.2, 3.6, '#4a4450'));
+    P.line(g, 1.2, 6.8, 7.8, 6.4, 0.7, '#6a6470'); for (const x of [2, 4.4, 6.8]) P.circle(g, x, 6.6, 0.3, '#9a94a0');
+    P.circle(g, 4.6, 5, 0.9, '#d8d0c0'); P.circle(g, 4.3, 4.9, 0.25, '#2a2430'); P.circle(g, 4.9, 4.9, 0.25, '#2a2430');
+    P.rrect(g, 3.5, 2, 2, 1.4, 0.3, '#8a8290');
+    g.beginPath(); g.moveTo(4.5, 2); g.quadraticCurveTo(5.6, 0.6, 6.8, 0.9); g.strokeStyle = '#c8a070'; g.lineWidth = 0.4; g.stroke();
+    P.glow(g, 7, 0.9, 2.6, '#ffb040', 0.9); P.circle(g, 7, 0.9, 0.5, '#fff8c0'); for (const [x, y] of [[8.2, 0.3], [7.8, 1.8], [8.4, 1.2]]) P.rect(g, x, y, 0.3, 0.3, '#ffd060');
+    P.ell(g, 3, 4.6, 0.9, 0.5, 'rgba(255,255,255,0.3)', -0.6);
+  } });
+  /** An iron-bound chest in three-quarter view: a domed lid of planks, iron corner caps, a lock with a keyhole. */
+  function chest(g, body, band, glow, runes) {
+    P.ell(g, 7, 11.4, 6.2, 0.9, 'rgba(0,0,0,0.4)');
+    P.rrect(g, 1, 5.2, 12, 6.2, 0.6, P.lg(g, 0, 5, 0, 11.4, [sh(body, 0.2), body, sh(body, -0.45)]));
+    g.strokeStyle = G.rgba(sh(body, -0.6), 0.9); g.lineWidth = 0.3; for (const y of [7.2, 9.2]) { g.beginPath(); g.moveTo(1.2, y); g.lineTo(12.8, y); g.stroke(); } // planks
+    g.beginPath(); g.moveTo(1, 5.4); g.quadraticCurveTo(1, 0.6, 7, 0.6); g.quadraticCurveTo(13, 0.6, 13, 5.4); g.closePath(); P.fill(g, P.lg(g, 0, 0.6, 0, 5.4, [sh(body, 0.5), body]));
+    g.strokeStyle = G.rgba(sh(body, -0.5), 0.8); for (const x of [4.6, 9.4]) { g.beginPath(); g.moveTo(x, 0.9); g.quadraticCurveTo(x + (x < 7 ? -0.6 : 0.6), 3, x + (x < 7 ? -0.8 : 0.8), 5.2); g.stroke(); }
+    for (const x of [2.8, 11.2]) { g.beginPath(); g.moveTo(x - 0.7, 1.2); g.quadraticCurveTo(x - 0.9, 0.9, x, 0.8); g.lineTo(x + 0.7, 1.1); g.lineTo(x + 0.7, 11.4); g.lineTo(x - 0.7, 11.4); g.closePath(); P.fill(g, P.lg(g, x - 0.7, 0, x + 0.7, 0, [sh(band, 0.45), band, sh(band, -0.4)])); for (const y of [3, 8, 10.4]) P.circle(g, x, y, 0.25, sh(band, 0.6)); }
+    P.rrect(g, 1, 4.9, 12, 0.9, 0.3, P.lg(g, 0, 4.9, 0, 5.8, [sh(band, 0.3), sh(band, -0.3)]));
+    for (const [x, y] of [[1, 9.8], [11.4, 9.8]]) P.rrect(g, x, y, 1.6, 1.6, 0.3, sh(band, -0.1)); // corner caps
+    P.rrect(g, 5.6, 4.4, 2.8, 3.2, 0.5, P.lg(g, 5.6, 4.4, 8.4, 7.6, [sh(band, 0.55), band, sh(band, -0.4)]));
+    P.circle(g, 7, 5.7, 0.45, '#140a08'); P.rect(g, 6.8, 5.8, 0.4, 0.9, '#140a08');
+    if (glow) { P.glow(g, 7, 5.2, 3, glow, 0.35); P.line(g, 1.4, 5.3, 12.6, 5.3, 0.25, G.rgba(glow, 0.8)); } // light leaking from under the lid
+    if (runes) for (const [x, y] of [[4, 8.2], [10, 8.2], [7, 9.8]]) { P.circle(g, x, y, 0.5, G.rgba(glow, 0.9)); P.glow(g, x, y, 1.4, glow, 0.5); }
+  }
+  def('chest_red', { w: 14, h: 12, draw(g) { chest(g, '#6a1420', '#c8ccd8', '#ff3040'); } });
+  def('chest_gold', { w: 14, h: 12, draw(g) { P.glow(g, 7, 6, 8, '#ffd35a', 0.3); chest(g, '#4a2a14', '#ffd35a', '#ffe070'); } });
+  def('chest', { w: 14, h: 12, draw(g) { chest(g, '#6a4222', '#7a808a', null); } });
+  def('chest_new', { w: 14, h: 12, frames: 2, draw(g, f) { P.glow(g, 7, 6, 8, '#c070ff', f ? 0.7 : 0.45); chest(g, '#2a1438', '#b890e0', '#d080ff', true); } }); // the Strange Pendulum's chest
+  // coins: a stack (5) and a bag (25)
+  def('coin_stack', { w: 8, h: 8, draw(g) { // two short stacks and a coin leaning on them
+    for (const [x, n] of [[2.6, 3], [5.4, 2]]) for (let i = 0; i < n; i++) { const y = 6.8 - i * 0.9; P.ell(g, x, y, 2.2, 0.9, P.lg(g, x - 2, 0, x + 2, 0, ['#8a5a10', '#e0a020', '#8a5a10'])); P.ell(g, x, y - 0.3, 2.2, 0.8, P.lg(g, x - 2, y - 1, x + 2, y + 1, ['#fff0a0', '#e0a020'])); }
+    coinFace(g, 5.6, 3.4, 1.9);
+  } });
+  def('coin_bag', { w: 10, h: 10, draw(g) { // a fat leather purse tied with a cord, coins spilling at its foot
+    P.glow(g, 5, 6, 5, '#ffd35a', 0.35);
+    g.beginPath(); g.moveTo(3.6, 3); g.quadraticCurveTo(0.4, 5, 1.2, 8.2); g.quadraticCurveTo(2.2, 9.8, 5, 9.8); g.quadraticCurveTo(7.8, 9.8, 8.8, 8.2); g.quadraticCurveTo(9.6, 5, 6.4, 3); g.closePath();
+    P.fill(g, P.lg(g, 1, 3, 9, 10, ['#b88a50', '#7a4e24', '#3a2210']));
+    g.strokeStyle = 'rgba(40,20,8,.6)'; g.lineWidth = 0.3; for (const x of [3.4, 5, 6.6]) { g.beginPath(); g.moveTo(x, 3.6); g.quadraticCurveTo(x + (x - 5) * 0.4, 6.4, x + (x - 5) * 0.2, 9.4); g.stroke(); } // gathers
+    P.path(g, [3.4, 3, 2.8, 1, 4.4, 1.8, 5, 0.6, 5.6, 1.8, 7.2, 1, 6.6, 3]); P.fill(g, P.lg(g, 0, 0.6, 0, 3, ['#c8985a', '#7a4e24'])); // the neck, puckered
+    P.line(g, 3.2, 3, 6.8, 3, 0.6, '#c8a878'); P.line(g, 6.6, 3, 7.8, 4.6, 0.4, '#c8a878'); // the cord
+    coinFace(g, 5, 6.4, 1.6); P.ell(g, 8.6, 9.4, 1, 0.45, '#e0a020'); P.ell(g, 1.6, 9.6, 0.9, 0.4, '#c89020');
   } });
   // food: soup, carrot, cheese (a mouthful of health)
-  def('food_soup', { w: 9, h: 8, draw(g) {
-    P.ell(g, 4.5, 3.4, 3.8, 1.2, '#c86a2a'); P.circle(g, 3.4, 3.2, 0.5, '#f0d060'); P.circle(g, 5.6, 3.5, 0.45, '#70b040');
-    g.beginPath(); g.moveTo(0.7, 3.4); g.quadraticCurveTo(1.2, 7.4, 4.5, 7.4); g.quadraticCurveTo(7.8, 7.4, 8.3, 3.4); g.closePath(); P.fill(g, P.lg(g, 0, 3, 0, 8, ['#a8784a', '#5a3a1a']));
-    g.strokeStyle = 'rgba(255,255,255,0.5)'; g.lineWidth = 0.4; g.beginPath(); g.moveTo(3.4, 1.6); g.quadraticCurveTo(2.8, 0.8, 3.6, 0.2); g.moveTo(5.4, 1.8); g.quadraticCurveTo(6, 1, 5.4, 0.3); g.stroke();
+  def('food_soup', { w: 9, h: 8, draw(g) { // a wooden bowl of stew: meat and roots in it, steam rising
+    g.beginPath(); g.moveTo(0.6, 3.6); g.quadraticCurveTo(1, 7.6, 4.5, 7.6); g.quadraticCurveTo(8, 7.6, 8.4, 3.6); g.closePath(); P.fill(g, P.lg(g, 0, 3, 9, 8, ['#a8784a', '#6a4424', '#3a2210']));
+    g.strokeStyle = 'rgba(40,20,8,.5)'; g.lineWidth = 0.3; g.beginPath(); g.moveTo(1.4, 5.4); g.quadraticCurveTo(4.5, 6.2, 7.6, 5.4); g.stroke();
+    P.ell(g, 4.5, 3.6, 3.9, 1.2, P.lg(g, 0, 2.4, 0, 4.8, ['#d8803a', '#8a4a1a'])); P.circle(g, 3.2, 3.4, 0.6, '#7a3a2a'); P.circle(g, 5.8, 3.7, 0.5, '#f0c050'); P.circle(g, 4.6, 3.2, 0.4, '#5a9a30');
+    g.strokeStyle = 'rgba(255,255,255,0.55)'; g.lineWidth = 0.4; g.beginPath(); g.moveTo(3.4, 2); g.quadraticCurveTo(2.8, 1.1, 3.6, 0.3); g.moveTo(5.6, 2.1); g.quadraticCurveTo(6.2, 1.2, 5.4, 0.4); g.stroke();
   } });
-  def('food_carrot', { w: 9, h: 9, draw(g) {
-    P.path(g, [1.4, 7.8, 6.2, 2.4, 7.6, 3.8]); P.fill(g, P.lg(g, 1, 8, 7, 3, ['#c04a10', '#ff8a2a']));
-    g.strokeStyle = '#a03a08'; g.lineWidth = 0.35; g.beginPath(); g.moveTo(4, 5.4); g.lineTo(4.7, 6); g.moveTo(5.2, 4.2); g.lineTo(5.8, 4.8); g.stroke();
-    g.strokeStyle = '#5ab030'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(6.9, 3.1); g.lineTo(8.4, 0.8); g.moveTo(6.9, 3.1); g.lineTo(8.8, 2.6); g.moveTo(6.9, 3.1); g.lineTo(6.8, 0.6); g.stroke();
+  def('food_carrot', { w: 9, h: 9, draw(g) { // a fat carrot, ridged, its greens fanned
+    g.beginPath(); g.moveTo(1.2, 8); g.quadraticCurveTo(3.4, 4.4, 5.8, 2.4); g.quadraticCurveTo(7.4, 2.6, 7.6, 4); g.quadraticCurveTo(5, 6.6, 1.2, 8); g.closePath(); P.fill(g, P.lg(g, 1, 8, 7, 2.4, ['#b83e0c', '#ff8a2a', '#ffb060']));
+    g.strokeStyle = '#8a2e08'; g.lineWidth = 0.3; for (const [x, y] of [[3.4, 5.8], [4.6, 4.6], [5.8, 3.6]]) { g.beginPath(); g.moveTo(x, y); g.lineTo(x + 0.8, y + 0.6); g.stroke(); }
+    for (const [x, y, c] of [[8.6, 0.6, '#4a9a24'], [8.8, 2.6, '#5ab030'], [6.8, 0.4, '#6ac040']]) P.line(g, 6.9, 3.1, x, y, 0.7, c);
   } });
-  def('food_cheese', { w: 9, h: 8, draw(g) {
-    P.path(g, [0.8, 6.8, 8.2, 6.8, 8.2, 3.2, 0.8, 5]); P.fill(g, P.lg(g, 0, 3, 0, 7, ['#ffe070', '#e0a830']));
-    P.path(g, [0.8, 5, 8.2, 3.2, 6, 1.8]); P.fill(g, '#fff0a0');
-    P.circle(g, 3, 5.8, 0.6, '#c89020'); P.circle(g, 6, 5.2, 0.8, '#c89020'); P.circle(g, 7.2, 6.2, 0.4, '#c89020');
+  def('food_cheese', { w: 9, h: 8, draw(g) { // a wedge of hard cheese, a waxed rind, holes
+    P.path(g, [0.8, 6.8, 8.2, 6.8, 8.2, 3.2, 0.8, 5]); P.fill(g, P.lg(g, 0, 3, 0, 7, ['#ffe070', '#e0a830', '#b07818']));
+    P.path(g, [0.8, 5, 8.2, 3.2, 6, 1.8]); P.fill(g, P.lg(g, 1, 2, 8, 5, ['#fff4b0', '#f0d060']));
+    P.path(g, [8.2, 3.2, 8.2, 6.8, 8.9, 6.4, 8.9, 3.1]); P.fill(g, '#a01818'); // the waxed rind
+    for (const [x, y, r] of [[3, 5.8, 0.6], [6, 5.3, 0.8], [7.2, 6.3, 0.4], [4.6, 3.6, 0.4]]) { P.circle(g, x, y, r, '#b88018'); P.circle(g, x + r * 0.2, y + r * 0.2, r * 0.6, '#9a6810'); }
   } });
-  def('tome', { w: 12, h: 11, draw(g) {
-    P.rrect(g, 1, 2, 10, 7.6, 0.8, P.lg(g, 0, 2, 0, 9.6, ['#4a60c0', '#2a3a8a', '#1a2460']));
-    P.rrect(g, 1.6, 2.6, 8.8, 6.4, 0.5, '#efe4c8'); P.rrect(g, 1, 2, 1.4, 7.6, 0.5, '#1a2460');
-    g.strokeStyle = '#6a8aff'; g.lineWidth = 0.5; g.beginPath(); g.arc(6.4, 5.8, 1.9, 0, Math.PI * 2); g.moveTo(6.4, 3.4); g.lineTo(6.4, 8.2); g.moveTo(4, 5.8); g.lineTo(8.8, 5.8); g.stroke();
-    P.rrect(g, 3, 0.4, 6.4, 1.8, 0.4, '#d8b048');
+  def('tome', { w: 12, h: 11, draw(g) { // a leather tome: iron corners, a clasp, a sigil burning on its cover
+    P.glow(g, 6, 5.8, 5, '#6a8aff', 0.35);
+    P.rrect(g, 1.6, 2.4, 9.4, 7.6, 0.6, '#efe4c8'); P.line(g, 2, 9.6, 10.6, 9.6, 0.4, '#b8a888'); // the pages
+    P.rrect(g, 1, 1.6, 9.6, 7.8, 0.8, P.lg(g, 0, 1.6, 10, 9.4, ['#4a5ac0', '#28348a', '#161e56']));
+    P.rrect(g, 1, 1.6, 1.4, 7.8, 0.5, '#101640'); // the spine
+    for (const [x, y] of [[9, 1.6], [9, 7.8]]) P.rrect(g, x, y, 1.6, 1.6, 0.3, P.lg(g, x, y, x + 1.6, y + 1.6, ['#d8dce8', '#6a7080'])); // iron corners
+    g.strokeStyle = '#9ab4ff'; g.lineWidth = 0.45; g.beginPath(); g.arc(6, 5.5, 1.9, 0, Math.PI * 2); g.moveTo(6, 3.2); g.lineTo(6, 7.8); g.moveTo(3.8, 5.5); g.lineTo(8.2, 5.5); g.stroke(); P.glow(g, 6, 5.5, 2.6, '#8ab0ff', 0.6);
+    P.rrect(g, 10.2, 4.6, 1.4, 1.8, 0.3, '#c9a24a'); // the clasp
   } });
   const HERBS = { moss: '#7ad04a', ember: '#ff7a2a', lily: '#8ae8ff', dust: '#fff0a0' };
-  Object.keys(HERBS).forEach((k) => def('herb_' + k, { w: 8, h: 8, draw(g) {
+  Object.keys(HERBS).forEach((k) => def('herb_' + k, { w: 8, h: 8, draw(g) { // a sprig: two leaves, a small flower glowing
     const c = HERBS[k];
-    for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2 - 1.57; P.ell(g, 4 + Math.cos(a) * 1.6, 4 + Math.sin(a) * 1.6, 1.3, 0.8, P.lg(g, 2, 2, 6, 6, [sh(c, 0.4), c, sh(c, -0.4)]), a); }
-    P.circle(g, 4, 4, 0.9, sh(c, 0.6));
+    P.line(g, 4, 7.6, 4, 3.6, 0.45, '#4a6a2a');
+    for (const [a, l] of [[-2.4, 2.4], [-0.7, 2.4]]) { g.save(); g.translate(4, 6.4); g.rotate(a); g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(l * 0.5, -0.9, l, 0); g.quadraticCurveTo(l * 0.5, 0.9, 0, 0); P.fill(g, P.lg(g, 0, -1, l, 1, ['#8ac050', '#3a6a1a'])); g.restore(); }
+    P.glow(g, 4, 3, 3, c, 0.5);
+    for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2 - 1.57; P.ell(g, 4 + Math.cos(a) * 1.2, 3 + Math.sin(a) * 1.2, 1, 0.65, P.lg(g, 2, 1, 6, 5, [sh(c, 0.4), c, sh(c, -0.4)]), a); }
+    P.circle(g, 4, 3, 0.7, sh(c, 0.7));
   } }));
-  def('urn', { w: 10, h: 12, draw(g) {
-    P.rrect(g, 3, 0.6, 4, 1.2, 0.4, '#6a3e22');
-    g.beginPath(); g.moveTo(3.4, 1.6); g.quadraticCurveTo(0.2, 5, 1.6, 9.4); g.quadraticCurveTo(2.4, 11.4, 5, 11.4); g.quadraticCurveTo(7.6, 11.4, 8.4, 9.4); g.quadraticCurveTo(9.8, 5, 6.6, 1.6); g.closePath();
-    P.fill(g, P.lg(g, 1, 0, 9, 0, ['#c8844a', '#9a5a2e', '#5a3016']));
-    g.strokeStyle = '#e8c070'; g.lineWidth = 0.4; g.beginPath(); g.moveTo(1.6, 5.4); g.lineTo(8.4, 5.4); g.moveTo(1.4, 7.4); g.lineTo(8.6, 7.4); g.stroke();
-    for (let i = 0; i < 4; i++) P.circle(g, 2.6 + i * 1.6, 6.4, 0.35, '#3a1a0a');
+  def('urn', { w: 10, h: 12, draw(g) { // a funerary urn of fired clay: a lid, two handles, a band of painted figures, a crack
+    for (const s of [-1, 1]) { g.beginPath(); g.arc(5 + s * 3.8, 4.4, 1.1, s < 0 ? Math.PI * 0.5 : -Math.PI * 0.5, s < 0 ? Math.PI * 1.5 : Math.PI * 0.5); g.strokeStyle = '#7a4424'; g.lineWidth = 0.6; g.stroke(); } // handles
+    g.beginPath(); g.moveTo(3.4, 2); g.quadraticCurveTo(0.2, 5, 1.6, 9.4); g.quadraticCurveTo(2.4, 11.4, 5, 11.4); g.quadraticCurveTo(7.6, 11.4, 8.4, 9.4); g.quadraticCurveTo(9.8, 5, 6.6, 2); g.closePath();
+    P.fill(g, P.lg(g, 1, 2, 9, 11.4, ['#d0925a', '#9a5a2e', '#4a2410']));
+    P.path(g, [1.2, 5.6, 8.8, 5.6, 8.9, 7.6, 1.1, 7.6]); P.fill(g, '#2a1a10'); // a black band
+    for (let i = 0; i < 4; i++) { const x = 2.2 + i * 1.8; P.circle(g, x, 6, 0.3, '#e8b070'); P.line(g, x, 6.3, x, 7.1, 0.3, '#e8b070'); } // little painted figures
+    P.rrect(g, 2.8, 0.6, 4.4, 1.6, 0.6, P.lg(g, 0, 0.6, 0, 2.2, ['#c8844a', '#6a3a1a'])); P.circle(g, 5, 0.5, 0.6, '#9a5a2e'); // the lid
+    g.strokeStyle = '#3a1a0a'; g.lineWidth = 0.3; g.beginPath(); g.moveTo(7.4, 8.4); g.lineTo(6.8, 9.6); g.lineTo(7.2, 10.6); g.stroke(); // a crack
+    P.ell(g, 3, 4.4, 0.6, 1.4, 'rgba(255,230,200,0.35)', 0.3);
   } });
   def('well', { w: 30, h: 30, cy: 20, draw(g) {
     P.ell(g, 15, 25, 13, 4.4, 'rgba(0,0,0,0.4)');
