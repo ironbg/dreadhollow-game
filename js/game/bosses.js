@@ -29,14 +29,14 @@
       if (!h.fired && h.t >= h.delay) {
         h.fired = true;
         const eye = this.crackedEye && h.src && h.src.def && h.src.def.lord; // Cracked Ember Eye: the Lord's bombs and flames pass you by
-        if (!eye && this.inHazard(h, p.x, p.y)) { this.hurtPlayer(h.dmg); if (h.slow) this.pslow = Math.max(this.pslow, h.slow); }
+        if (!eye && h.dmg && this.inHazard(h, p.x, p.y)) { this.hurtPlayer(h.dmg); if (h.slow) this.pslow = Math.max(this.pslow, h.slow); }
         if (h.onFire) h.onFire(this, h);
         this.fx.push({ k: 'hzfire', h: Object.assign({}, h), life: 0.35, max: 0.35 });
         if (h.sound) DH.audio.play(h.sound);
       }
       if (h.fired && h.dur) {
         h.tick -= dt;
-        if (!(this.crackedEye && h.src && h.src.def && h.src.def.lord) && this.inHazard(h, p.x, p.y)) { if (h.slow) this.pslow = Math.max(this.pslow, 0.25); if (h.tick <= 0) { h.tick = 0.5; this.hurtPlayer(h.dmg * 0.5); } }
+        if (h.dmg && !(this.crackedEye && h.src && h.src.def && h.src.def.lord) && this.inHazard(h, p.x, p.y)) { if (h.slow) this.pslow = Math.max(this.pslow, 0.25); if (h.tick <= 0) { h.tick = 0.5; this.hurtPlayer(h.dmg * 0.5); } }
       }
       if (h.fired && h.t >= h.delay + (h.dur || 0)) this.hazards.splice(i, 1);
     }
@@ -196,6 +196,37 @@
     if (e.c1 > 4.2) { e.c1 = 0; run.hazard({ kind: 'ring', x: p.x, y: p.y, r: 70, r0: 22, delay: 1.2, dmg: e.dmg * 1.3 * e.enr, color: '#b060ff', src: e, boss: true, sound: 'frost' }); }
     if (e.c2 > 1.6 && dist < 60) { e.c2 = 0; run.hazard({ kind: 'cone', x: e.x, y: e.y, ang: Math.atan2(dy, dx), arc: 2.2, len: 62, delay: 0.55, dmg: e.dmg * 1.2 * e.enr, color: '#ff5040', src: e, boss: true, sound: 'swing' }); }
     if (e.c3 > 9) { e.c3 = 0; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; run.spawnEnemy('skeleton', e.x + Math.cos(a) * 26, e.y + Math.sin(a) * 26); } run.burst(e.x, e.y, 20, ['#b060ff', '#e6dcc0'], 70); }
+  };
+  /* ---------- the Abyss ---------- */
+  // Flamedancer: circles you in a dance; flicks fans of fire; dashes through you leaving a line of flame; rings you in fire
+  // (the band of the ring burns while it lasts: stay inside or cross it quickly)
+  AI.b_dancer = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.dashT > 0) { e.dashT -= dt; e.mx = e.lockX; e.my = e.lockY; e.cspd = 260; if (Math.random() < dt * 30) run.hazard({ kind: 'circle', x: e.x, y: e.y, r: 10, delay: 0.1, dur: 2.2, dmg: e.dmg * 0.4 * e.enr, color: '#ff7a20', src: e, boss: true }); return; }
+    const orbit = dist < 90 ? -1 : dist > 130 ? 1 : 0; e.cspd = e.spd; e.mx = dx * orbit - dy * 0.8; e.my = dy * orbit + dx * 0.8;
+    if (e.c1 > 2.6) { e.c1 = 0; const a = Math.atan2(dy, dx); for (const o of [-0.4, -0.2, 0, 0.2, 0.4]) shot(run, e, a + o, 110, 0.6, '#ff8a3a', 'fire'); DH.audio.play('fire'); }
+    if (e.c2 > 6) { e.c2 = 0; e.dashT = 0.7; e.lockX = dx; e.lockY = dy; DH.audio.play('roar'); }
+    if (e.c3 > 11) { e.c3 = 0; run.hazard({ kind: 'ring', x: p.x, y: p.y, r: 64, r0: 52, delay: 0.9, dur: 4, dmg: e.dmg * 0.8 * e.enr, color: '#ff5a1a', src: e, boss: true, sound: 'fire', fire: true }); }
+  };
+  // Ashen Warlord: casts two hollow copies of itself that each dash along a marked line through you, then stands where the last
+  // one ended; rains fire arrows on three marked circles around you
+  AI.b_warlord = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    e.cspd = e.spd * 0.8; e.mx = dx; e.my = dy;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt;
+    if (e.c1 > 6) {
+      e.c1 = 0; let last = null;
+      for (let k = 0; k < 2; k++) {
+        const a = Math.random() * TAU, d = 110, sx = p.x + Math.cos(a) * d, sy = p.y + Math.sin(a) * d, ux = -Math.cos(a), uy = -Math.sin(a);
+        run.hazard({ kind: 'line', x: sx, y: sy, ang: Math.atan2(uy, ux), len: 220, w: 18, delay: 0.8, dmg: 0, color: '#ffb070', src: e, boss: true });
+        const c = run.spawnEnemy('ashclone', sx, sy); if (c) { c.mdx = ux; c.mdy = uy; c.ttl = 1.6; c.dmg = e.dmg * 0.9; c.face = ux >= 0 ? 1 : -1; }
+        last = { x: sx + ux * 220, y: sy + uy * 220 };
+      }
+      if (last) run.after(1.6, () => { if (e.dead) return; run.burst(e.x, e.y, 20, ['#5a5452', '#ff7030'], 80); e.x = last.x; e.y = last.y; run.burst(e.x, e.y, 20, ['#5a5452', '#ff7030'], 80); });
+      DH.audio.play('roar');
+    }
+    if (e.c2 > 4) { e.c2 = 0; for (let i = 0; i < 3; i++) run.hazard({ kind: 'circle', x: p.x + U.rand(-45, 45), y: p.y + U.rand(-45, 45), r: 24, delay: 1.2, dmg: e.dmg * e.enr, color: '#ff9040', src: e, boss: true, sound: i ? null : 'boom', fire: true }); }
   };
   C.BOSS_AI = AI;
 })(window.DH);

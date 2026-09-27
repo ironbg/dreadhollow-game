@@ -354,6 +354,23 @@
               this.burst(e.x, e.y, 10, ['#9a70ff', '#2a1040'], 60);
             }
           }
+        } else if (ai === 'imp') { // flits side to side as it comes, flicks a fire dart now and then
+          const w = Math.sin(e.t * 2.3 + e.anim) * 0.9; mx = dx - dy * w; my = dy + dx * w;
+          e.dartT = (e.dartT == null ? U.rand(1, 3) : e.dartT) - dt;
+          if (e.dartT <= 0 && dist < 130) { e.dartT = U.rand(3.5, 5); this.enemyShot(e, Math.atan2(dy, dx), 90, e.dmg * 0.45, '#ff8a3a', 'fire'); }
+        } else if (ai === 'crawler') { // a molten slug: leaves burning ground behind; now and then heaves up a spray of molten drops
+          e.trailT = (e.trailT || 0) - dt;
+          if (e.trailT <= 0) { e.trailT = 1.1; this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 8, delay: 0.3, dur: 2, dmg: e.dmg * 0.25, color: '#ff6a18', src: e }); }
+          e.sprayT = (e.sprayT == null ? U.rand(3, 6) : e.sprayT) - dt;
+          if (e.sprayT <= 0 && dist < 160) { e.sprayT = U.rand(5, 7); const o = Math.random() * TAU; for (let i = 0; i < 6; i++) this.enemyShot(e, o + i / 6 * TAU, 70, e.dmg * 0.5, '#ff6a18', 'fire'); DH.audio.play('fire'); }
+        } else if (ai === 'dart') { // a lizard's rush: short bursts in a zig-zag, stillness between
+          const c = e.t % 1.2; if (Math.floor(e.t / 1.2) !== e.zzN) { e.zzN = Math.floor(e.t / 1.2); e.zz = (e.zz || 1) * -1; }
+          const a = e.zz * 0.6, ca = Math.cos(a), sa = Math.sin(a); mx = dx * ca - dy * sa; my = dx * sa + dy * ca; spd *= c < 0.45 ? 2.5 : 0.3;
+        } else if (ai === 'lobber') { // keeps back and lobs fire onto the ground where you stand (a marked circle)
+          if (dist < 90) { mx = -dx; my = -dy; } else if (dist < 140) { mx = -dy; my = dx; spd *= 0.4; }
+          if (e.t > e.def.shot.cd && dist < 210) { e.t = 0; this.enemyAttackAnim(e); this.hazard({ kind: 'circle', x: p.x, y: p.y, r: 16, delay: 1.1, dmg: e.def.shot.dmg * this.stage.dmgMult * (1 + this.time / 60 * 0.07), color: '#ff7a20', src: e, sound: 'fire', fire: true }); DH.audio.play('throw'); }
+        } else if (ai === 'clone') { // the Ashen Warlord's cast shadow: waits, then dashes along its line
+          e.cw = (e.cw || 0) + dt; if (e.cw < 0.8) { mx = 0; my = 0; spd = 0; } else { mx = e.mdx; my = e.mdy; spd = 300; } e.kx = e.ky = 0;
         } else if (ai === 'flutter') { const w = Math.sin(e.anim * 5 + e.x * 0.01) * 0.6; mx = dx - dy * w; my = dy + dx * w; }
         else if (ai === 'dash') { const c = e.t % 1.6; spd *= c < 1.0 ? 0.35 : 3.2; }
         else if (ai === 'ranged') {
@@ -465,10 +482,11 @@
       }
       return null;
     }
-    /** A Bloater bursts: it hurts the hero in reach and tears into the foes around it (lure them in). No experience. */
+    /** A Bloater bursts: it hurts the hero in reach and tears into the foes around it (lure them in). Half its experience. */
     bloaterBoom(e) {
       const B = e.def.boom, p = this.player, R = B.R * (e.scale > 1 ? 1.4 : 1);
       e.dead = true;
+      for (let v = Math.ceil(e.xp / 2); v > 0; v--) this.drop('xp', e.x + U.rand(-5, 5), e.y + U.rand(-5, 5), 1); // half its worth, scattered
       if (U.dist2(e.x, e.y, p.x, p.y) < (R + p.r) * (R + p.r)) this.hurtPlayer(B.dmg * this.stage.dmgMult * (1 + this.time / 60 * 0.07) * (e.champion ? 1.7 : 1), e);
       for (const o of this.enemies) if (o !== e && !o.dead && !o.boss && !o.def.prop && U.dist2(e.x, e.y, o.x, o.y) < R * R) this.rawDamage(o, o.maxHp * 0.4, '#ff9040');
       this.fx.push({ k: 'explosion', x: e.x, y: e.y, R, life: 0.45, max: 0.45 });
@@ -612,6 +630,7 @@
       let xp = e.final && !this.bosses.some((b) => b.final && !b.dead && b !== e) ? 0 : e.xp; // the last Lord ends the hall: no pointless level-ups after victory
       for (const [v] of C.GEM_TIERS) { while (xp >= v) { this.drop('xp', e.x + U.rand(-5, 5), e.y + U.rand(-5, 5), v); xp -= v; } }
       this.mergeGems();
+      if (e.def.deathFire && Math.random() < 0.5) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 9, delay: 0.3, dur: 1.6, dmg: e.dmg * 0.25, color: '#ff7a20', src: e }); // a husk burns on where it falls
       if (e.affix && e.affix.includes('volatile')) this.warns.push({ x: e.x, y: e.y, R: 46, t: 1, max: 1, dmg: e.dmg * 1.5 }); // bursts a moment after death
       if (e.def.split) for (const sx of [-1, 1]) { // an ooze splits in two
         const c = this.spawnEnemy(e.def.split, e.x + sx * 5, e.y + U.rand(-3, 3), { variant: e.variant }); if (c) { c.kx = sx * 70; c.ky = U.rand(-30, 30); }

@@ -356,14 +356,14 @@
     ghost:    { painter: 'ghost',    hp: 16,  spd: 46, dmg: 7,  xp: 2, r: 6,  mass: 0.8, ai: 'float', fly: true, alpha: 0.85 },
     spider:   { painter: 'spider',   hp: 10,  spd: 40, dmg: 6,  xp: 1, r: 6,  mass: 0.8, ai: 'dash', anim: 0.18 },
     cultist:  { painter: 'cultist',  hp: 22,  spd: 32, dmg: 8,  xp: 3, r: 6,  mass: 1, ai: 'ranged', shot: { dmg: 9, spd: 95, cd: 2.8 } },
-    imp:      { painter: 'imp',      hp: 20,  spd: 58, dmg: 9,  xp: 2, r: 6,  mass: 0.8, fly: true },
+    imp:      { painter: 'imp',      hp: 18,  spd: 54, dmg: 7,  xp: 2, r: 6,  mass: 0.8, fly: true, ai: 'imp' }, // flits about, flicks fire darts
     wraith:   { painter: 'ghost', variant: 'wraith', hp: 44, spd: 50, dmg: 13, xp: 4, r: 7, mass: 1.2, ai: 'float', fly: true, alpha: 0.92 },
     hknight:  { painter: 'hknight',  hp: 70,  spd: 30, dmg: 15, xp: 5, r: 7,  mass: 2.5, def: 0.2 },
     golem:    { painter: 'golem',    hp: 150, spd: 22, dmg: 18, xp: 10, r: 10, mass: 6, def: 0.25 },
     // bosses
     colossus:    { painter: 'colossus', hp: 1500, spd: 30, dmg: 22, xp: 150, r: 16, mass: 60, def: 0.15, ai: 'b_charge', boss: true },
     anguish:     { painter: 'anguish', painter2: 'anguish_foot', hp: 3000, spd: 44, dmg: 26, xp: 400, r: 17, mass: 80, def: 0.2, ai: 'b_lord', boss: true, lord: true },
-    overlord:    { painter: 'overlord', hp: 1900, spd: 32, dmg: 24, xp: 180, r: 15, mass: 60, def: 0.15, ai: 'b_overlord', boss: true },
+    overlord:    { painter: 'overlord', hp: 800, spd: 32, dmg: 20, xp: 180, r: 15, mass: 60, def: 0.15, ai: 'b_overlord', boss: true },
     wyrm:        { painter: 'wyrm', hp: 3400, spd: 36, dmg: 26, xp: 400, r: 18, mass: 90, def: 0.2, ai: 'b_wyrm', boss: true, lord: true, fly: true },
     lich:        { painter: 'lich', hp: 1600, spd: 34, dmg: 18, xp: 200, r: 14, mass: 40, def: 0.15, ai: 'b_caster', boss: true },
     horseman:    { painter: 'horseman', hp: 3600, spd: 50, dmg: 26, xp: 400, r: 17, mass: 80, def: 0.2, ai: 'b_horseman', boss: true, lord: true, alpha: 0.95 },
@@ -392,6 +392,15 @@
   C.enemies.oozelet = { painter: 'slime', hp: 10, spd: 40, dmg: 5, xp: 1, r: 5, mass: 0.6, ai: 'hop', scale: 0.45, anim: 0.25, particles: ['#7ab040', '#d0ff80'] };
   C.enemies.shieldbearer = { painter: 'shieldskel', hp: 46, spd: 26, dmg: 11, xp: 4, r: 7, mass: 2.6, def: 0.15, shield: 0.25 };
   C.enemies.bonemage = { painter: 'bonemage', hp: 20, spd: 30, dmg: 7, xp: 3, r: 6, mass: 0.9, ai: 'mage', shot: { dmg: 7, spd: 100, cd: 3.2 } }; // keeps its distance, a fan of three bolts, blinks away
+  // the Abyss
+  C.enemies.husk = { painter: 'husk', hp: 14, spd: 34, dmg: 8, xp: 1, r: 6, mass: 1, deathFire: true, particles: ['#ff7a20', '#241a18', '#ffd040'] }; // leaves a burning patch where it falls
+  C.enemies.cinderbloat = { painter: 'cinderbloat', hp: 14, spd: 40, dmg: 0, xp: 2, r: 7, mass: 1, ai: 'fuse', boom: { R: 26, dmg: 10, fuse: 1.2 }, particles: ['#ff7030', '#ffd060', '#401008'] };
+  C.enemies.magmacrawler = { painter: 'magmacrawler', hp: 60, spd: 20, dmg: 12, xp: 5, r: 9, mass: 3, def: 0.15, ai: 'crawler', particles: ['#ff6a18', '#2e2624', '#ffe060'] }; // a burning trail, bursts of molten drops
+  C.enemies.salamander = { painter: 'salamander', hp: 7, spd: 50, dmg: 4, xp: 1, r: 5, mass: 0.6, ai: 'dart', anim: 0.12, particles: ['#ff8a20', '#1e1414'] }; // darts in zig-zag bursts
+  C.enemies.ashcultist = { painter: 'cultist', hp: 22, spd: 30, dmg: 8, xp: 3, r: 6, mass: 1, ai: 'lobber', shot: { dmg: 12, cd: 3.6 } }; // lobs fire at the ground where you stand
+  C.enemies.firedancer = { painter: 'flamedancer', hp: 1100, spd: 46, dmg: 18, xp: 130, r: 12, mass: 40, def: 0.1, ai: 'b_dancer', boss: true };
+  C.enemies.ashwarlord = { painter: 'ashwarlord', hp: 1400, spd: 34, dmg: 20, xp: 170, r: 14, mass: 60, def: 0.2, ai: 'b_warlord', boss: true };
+  C.enemies.ashclone = { painter: 'ashwarlord', hp: 1, spd: 0, dmg: 16, xp: 0, r: 12, mass: 99, ai: 'clone', alpha: 0.45, fly: true };
   C.enemies.gravechief = { painter: 'gravechief', hp: 750, spd: 30, dmg: 18, xp: 110, r: 15, mass: 60, def: 0.1, ai: 'b_chieftain', boss: true };
   C.enemies.bonetyrant = { painter: 'bonetyrant', hp: 1200, spd: 32, dmg: 20, xp: 140, r: 13, mass: 55, def: 0.15, ai: 'b_tyrant', boss: true }; // shots from the front: a quarter of their damage, and they stop
   C.enemies.hound = { painter: 'wolf', hp: 12, spd: 68, dmg: 5, xp: 2, r: 6, mass: 0.7, ai: 'pack', pack: [3, 5], anim: 0.14 };
@@ -399,7 +408,6 @@
   C.enemies.bloater = { painter: 'slime', variant: 'volatile', hp: 14, spd: 44, dmg: 0, xp: 2, r: 7, mass: 1, ai: 'fuse', boom: { R: 28, dmg: 15, fuse: 1.0 }, scale: 0.62, anim: 0.2, particles: ['#ff7030', '#ffd060', '#401008'] };
   // [enemy, from (timeline s), weight, variant override]
   C.HALL_FOES = {
-    abyss: [['bloater', 90, 0.9], ['hound', 200, 1]],
     aqueduct: [['watcher', 90, 1.2], ['shieldbearer', 200, 1.4]],
     catacombs: [['hound', 70, 1.2], ['ooze', 160, 1.5]],
     discord: [['watcher', 80, 1.3], ['bloater', 170, 1.4]],
@@ -421,7 +429,7 @@
   C.ELITE = { hp: 8, dmg: 1.4, scale: 1.5, def: 0.1 };
   // an Elite's signature move, by the kind of foe it is (Run.eliteMove): volley = a fan of three bolts and a blink around the hero,
   // charge = a marked line, then a rush along it, slam = a marked circle, then a blow, summon = calls a few of its kin
-  C.ELITE_MOVES = { skeleton: 'volley', ghost: 'volley', wraith: 'volley', imp: 'volley', cultist: 'volley', watcher: 'volley',
+  C.ELITE_MOVES = { skeleton: 'volley', ghost: 'volley', wraith: 'volley', imp: 'volley', cultist: 'volley', ashcultist: 'slam', husk: 'charge', salamander: 'charge', magmacrawler: 'slam', cinderbloat: 'slam', watcher: 'volley',
     ghoul: 'charge', hknight: 'charge', rat: 'charge', spider: 'charge', hound: 'charge',
     golem: 'slam', shieldbearer: 'slam', effigy: 'slam', ooze: 'slam', bloater: 'slam',
     bat: 'summon', bonemage: 'volley' };
@@ -484,8 +492,10 @@
       remap: { bat: 'bat', rat: 'bat', skeleton: 'skeleton', ghoul: 'ooze', ghost: 'ooze', spider: 'hound', cultist: 'bonemage', wraith: 'bonemage', hknight: 'shieldbearer', golem: 'shieldbearer' },
       bosses: [{ t: 150, id: 'gravechief' }, { t: 300, id: 'bonetyrant' }, { t: 450, id: 'lich' }, { t: 600, id: 'anguish', final: true }],
       theme: { floorA: [66, 60, 74], floorB: [52, 47, 60], mortar: [20, 17, 26], moss: [70, 104, 58], dark: [7, 5, 12], darkness: 0.84, lightTint: 'rgba(255,170,90,', accent: '#e8a050', accentRate: 0.12 } },
-    abyss: { index: 1, agonyXp: 0.31, hpMult: 1.9, dmgMult: 1.45, goldMult: 1.6, variant: 'fire', remap: { ghost: 'imp', rat: 'bat' }, herb: 'ember',
-      bosses: [{ t: 300, id: 'overlord' }, { t: 600, id: 'wyrm', final: true }],
+    abyss: { index: 1, agonyXp: 0.31, hpMult: 1.9, dmgMult: 1.45, goldMult: 1.6, variant: null, herb: 'ember',
+      // imps, charred husks, cinder bloaters, magma crawlers, ember salamanders, ash cultists
+      remap: { bat: 'salamander', rat: 'salamander', skeleton: 'husk', ghoul: 'cinderbloat', ghost: 'imp', spider: 'salamander', cultist: 'ashcultist', wraith: 'cinderbloat', hknight: 'magmacrawler', golem: 'magmacrawler' },
+      bosses: [{ t: 150, id: 'overlord' }, { t: 300, id: 'firedancer' }, { t: 450, id: 'ashwarlord' }, { t: 600, id: 'wyrm', final: true }],
       theme: { floorA: [78, 46, 40], floorB: [60, 34, 32], mortar: [24, 8, 8], moss: [200, 70, 20], dark: [14, 4, 4], darkness: 0.78, lightTint: 'rgba(255,120,60,', accent: '#ff6a3a', lava: true, accentRate: 0.1, blood: '#3a0404' } },
     aqueduct: { index: 2, agonyXp: 0.24, hpMult: 3.0, dmgMult: 1.85, goldMult: 2.2, variant: 'drowned', remap: { spider: 'rat' }, herb: 'lily', bridge: 110,
       bosses: [{ t: 300, id: 'lich' }, { t: 600, id: 'horseman', final: true }],

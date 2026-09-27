@@ -111,6 +111,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'affix.swift': 'Бърз', 'affix.gunner': 'Стрелец', 'affix.summoner': 'Призовател', 'affix.ironclad': 'Железен', 'affix.regen': 'Възстановяващ се', 'affix.volatile': 'Взривоопасен', 'affix.charger': 'Нападател',
   'hud.march': 'Шествието идва! Отдръпни се', 'enemy.marcher': 'Дух от шествието',
   'enemy.bonemage': 'Костен маг', 'enemy.gravechief': 'Гробищен вожд', 'enemy.bonetyrant': 'Костен тиранин',
+  'enemy.husk': 'Овъглен труп', 'enemy.cinderbloat': 'Жарав издут', 'enemy.magmacrawler': 'Магмена гъсеница', 'enemy.salamander': 'Жарав саламандър', 'enemy.ashcultist': 'Пепелен култист', 'enemy.firedancer': 'Огнена танцьорка', 'enemy.ashwarlord': 'Пепелен пълководец', 'enemy.ashclone': 'Пепелна сянка',
   'nb.dh': '{d}д {h}ч', 'nb.title': 'Седемте нощи',
   'nb.short': '7 нощи',
   'nb.sub': 'Посрещане за новодошлите: всяка нощ отваря нови задачи. Задачите дават Печати, а Печатите пълнят наградите горе.',
