@@ -30,6 +30,7 @@
     this.pslow = Math.max(0, (this.pslow || 0) - dt); this.proot = Math.max(0, (this.proot || 0) - dt);
     for (let i = this.hazards.length - 1; i >= 0; i--) {
       const h = this.hazards[i]; h.t += dt;
+      if (h.follow && h.t < h.follow) { const k = Math.min(1, dt * 5); h.x += (p.x - h.x) * k; h.y += (p.y - h.y) * k; } // a judgment mark follows you, then locks
       if (!h.fired && h.t >= h.delay) {
         h.fired = true;
         const eye = this.crackedEye && h.src && h.src.def && h.src.def.lord; // Cracked Ember Eye: the Lord's bombs and flames pass you by
@@ -405,6 +406,60 @@
       run.hazard({ kind: 'circle', x: p.x, y: p.y, r: 36, delay: 1.5, dmg: e.dmg * 1.3 * e.enr, color: '#b0d040', src: e, boss: true, sound: 'boom',
         onFire: (r, h) => { if (e.dead) return; e.x = h.x; e.y = h.y; e.sub = false; e.eth = 0; r.shake = 7; r.burst(h.x, h.y, 30, ['#3a4a1a', '#b0d040'], 110); for (let i = 0; i < 10; i++) r.enemyShot({ x: h.x, y: h.y }, i / 10 * TAU, 80, e.dmg * 0.45 * e.enr, '#b0d040'); } });
     }
+  };
+  /* ---------- the Reliquary ---------- */
+  // Mimic King: lunges along a marked line; spits a fan of gold; its tongue lashes along a marked line and reels you in;
+  // sets mimics about you
+  AI.b_mimicking = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    charge(run, e, dt, dx, dy, dist, 250);
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 4 && e.phase === 0) { e.c1 = 0; const a = Math.atan2(dy, dx); for (let i = -3; i <= 3; i++) shot(run, e, a + i * 0.16, 100, 0.45, '#ffd35a', 'coin'); DH.audio.play('coin'); }
+    if (e.c2 > 6 && e.phase === 0 && dist < 140) {
+      e.c2 = 0; const a = Math.atan2(dy, dx), tx = e.x, ty = e.y;
+      run.hazard({ kind: 'line', x: e.x, y: e.y, ang: a, len: 150, w: 12, delay: 0.7, dmg: e.dmg * e.enr, color: '#c83050', src: e, boss: true, sound: 'swing', onFire: (r, h) => { const q = r.player; if (r.inHazard(h, q.x, q.y)) { q.x += (tx - q.x) * 0.6; q.y += (ty - q.y) * 0.6; } } });
+    }
+    if (e.c3 > 12) { e.c3 = 0; for (let i = 0; i < 3; i++) { const a = i / 3 * TAU + Math.random(); run.spawnEnemy('mimic', p.x + Math.cos(a) * 80, p.y + Math.sin(a) * 80); } }
+  };
+  // Gilded Sentinel: raises its tower shield (all but proof), then thrusts its spear three times along marked lines;
+  // its halo flares in a ring of light
+  AI.b_sentinel = function (run, e, dt, dx, dy, dist) {
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt;
+    if (e.guard > 0) {
+      e.guard -= dt; e.cspd = 0; e.mx = e.my = 0;
+      if (e.guard <= 0) { const a = Math.atan2(dy, dx); [0, -0.4, 0.4].forEach((o, i) => run.hazard({ kind: 'line', x: e.x, y: e.y, ang: a + o, len: 170, w: 14, delay: 0.6 + i * 0.25, dmg: e.dmg * 1.2 * e.enr, color: '#fff0a0', src: e, boss: true, sound: 'swing' })); }
+      return;
+    }
+    e.cspd = e.spd; e.mx = dx; e.my = dy;
+    if (e.c1 > 7) { e.c1 = 0; e.guard = 2; run.burst(e.x, e.y - 10, 14, ['#fff0a0', '#d0a840'], 60); DH.audio.play('block'); }
+    if (e.c2 > 5) { e.c2 = 0; for (let i = 0; i < 12; i++) shot(run, e, i / 12 * TAU + Math.random() * 0.3, 85, 0.45, '#fff0a0'); DH.audio.play('zap'); }
+  };
+  // Hollow Magistrate: passes judgment: a mark follows you, locks, then strikes; brings the gavel down and the verdict rolls
+  // out in waves with gaps; summons coin wraiths
+  AI.b_magistrate = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    const orbit = dist < 40 ? -1 : 1; e.cspd = e.spd; e.mx = dx * orbit - dy * 0.4; e.my = dy * orbit + dx * 0.4;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 5) { e.c1 = 0; run.hazard({ kind: 'circle', x: p.x, y: p.y, r: 30, delay: 2, follow: 1.3, dmg: e.dmg * 1.4 * e.enr, color: '#ff5040', src: e, boss: true, sound: 'boom' }); run.text(p.x, p.y - 18, t('hud.judged'), '#ff5040', true); }
+    if (e.c2 > 8) {
+      e.c2 = 0; DH.audio.play('boom'); run.shake = Math.max(run.shake, 3);
+      const g0 = Math.atan2(dy, dx) + U.rand(-1, 1), turn = Math.random() < 0.5 ? -0.7 : 0.7;
+      for (let i = 0; i < 3; i++) { const r0 = 22 + i * 44; run.hazard({ kind: 'ring', x: e.x, y: e.y, r0, r: r0 + 26, gap: g0 + i * turn, gw: 0.45, delay: 1.0 + i * 0.45, dmg: e.dmg * 1.1 * e.enr, color: '#d8b050', src: e, boss: true }); }
+    }
+    if (e.c3 > 11) { e.c3 = 0; for (const s of [-1, 1]) run.spawnEnemy('coinwraith', e.x + s * 26, e.y); run.burst(e.x, e.y, 16, ['#d8b050', '#1e1a24'], 70); }
+  };
+  // Gold Custodian (Lord): gold rains on marked circles round you; its key sweeps a beam across a marked arc; it wards itself
+  // and calls vault wardens
+  AI.b_custodian = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    e.sweep = Math.max(0, (e.sweep || 0) - dt); e.cspd = e.sweep > 0 ? 0 : e.spd; e.mx = dx; e.my = dy;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 4.5) { e.c1 = 0; for (let i = 0; i < 6; i++) run.hazard({ kind: 'circle', x: p.x + U.rand(-70, 70), y: p.y + U.rand(-70, 70), r: 20, delay: 1.2, dmg: e.dmg * e.enr, color: '#ffd35a', src: e, boss: true, sound: i ? null : 'coin' }); }
+    if (e.c2 > 8) {
+      e.c2 = 0; e.sweep = 2.4; const a0 = Math.atan2(dy, dx), dir = Math.random() < 0.5 ? -1 : 1;
+      for (let i = 0; i < 9; i++) run.after(i * 0.2, () => { if (e.dead) return; run.hazard({ kind: 'line', x: e.x, y: e.y, ang: a0 + dir * (-0.9 + i * 0.225), len: 260, w: 14, delay: 0.7, dmg: e.dmg * 1.1 * e.enr, color: '#40e0ff', src: e, boss: true, sound: i % 3 ? null : 'zap' }); });
+    }
+    if (e.c3 > 13) { e.c3 = 0; e.ward = 4; for (const s of [-1, 1]) run.spawnEnemy('vaultwarden', e.x + s * 30, e.y - 10); DH.audio.play('frost'); }
   };
   C.BOSS_AI = AI;
 })(window.DH);

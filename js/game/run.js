@@ -317,7 +317,7 @@
       const farD = Math.hypot(v.w, v.h) * 0.62 + 40;
       for (const e of this.enemies) {
         if (e.dead) continue;
-        e.flash = Math.max(0, e.flash - dt);
+        e.flash = Math.max(0, e.flash - dt); if (e.ward > 0) e.ward -= dt;
         if (e.def.prop) {
           if (U.dist2(e.x, e.y, p.x, p.y) > farD * farD) { e.dead = true; continue; }
           e.anim += dt;
@@ -486,6 +486,37 @@
         } else if (ai === 'root') { // the treant: plods on; the ground under you bursts into roots that hold you fast
           e.rtT = (e.rtT == null ? U.rand(2, 4) : e.rtT) - dt;
           if (e.rtT <= 0 && dist < 150) { e.rtT = U.rand(5.5, 7); this.enemyAttackAnim(e); this.hazard({ kind: 'circle', x: p.x, y: p.y, r: 20, delay: 1.1, dmg: e.dmg * 0.6, color: '#8a6a3a', src: e, sound: 'swing', onFire: (r, h) => { if (r.inHazard(h, r.player.x, r.player.y)) r.proot = 1.1; } }); }
+        } else if (ai === 'thief') { // the gold scarab: runs in, snatches your gold and scuttles off with it; kill it to get it back
+          if (e.fleeT > 0) { e.fleeT -= dt; mx = -dx; my = -dy; spd *= 1.4; }
+          else if (dist < e.r + p.r + 3) {
+            const amt = Math.min(Math.floor(this.gold), Math.ceil(6 * this.stage.goldMult));
+            if (amt > 0) { this.gold -= amt; e.loot = (e.loot || 0) + amt; this.text(p.x, p.y - 14, '-' + amt, '#ffd35a'); DH.audio.play('coin'); }
+            e.fleeT = 6; this.hurtPlayer(e.dmg, e);
+          }
+        } else if (ai === 'ambush') { // the mimic: a chest, still and harmless, until you come near or strike it: then it springs
+          if (e.shut == null) { e.shut = true; e.disg = true; e.fr = 0; }
+          if (e.shut) { spd = 0; e.kx = e.ky = 0; e.anim -= dt; if (dist < 50 || e.hp < e.maxHp) { e.shut = false; e.disg = false; e.fr = 1; e.spd *= 1.5; this.burst(e.x, e.y, 16, ['#c89a3a', '#6a3a1a', '#ffe060'], 80); DH.audio.play('roar'); } }
+          else if (e.lng > 0) { e.lng -= dt; mx = e.lockX; my = e.lockY; spd *= 3.6; }
+          else { e.lngCd = (e.lngCd || 0) - dt; if (e.lngCd <= 0 && dist < 60) { e.lng = 0.3; e.lockX = dx; e.lockY = dy; e.lngCd = U.rand(2, 3); } }
+        } else if (ai === 'guard') { // the gilded knight: raises its shield (all but proof), then strikes back where it stands
+          e.gdCd = (e.gdCd == null ? U.rand(2, 4) : e.gdCd) - dt;
+          if (e.guard > 0) { e.guard -= dt; spd = 0; if (e.guard <= 0) { e.gdCd = U.rand(4.5, 6); this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 30, delay: 0.4, dmg: e.dmg * 1.2, color: '#ffd35a', src: e, sound: 'swing' }); } }
+          else if (e.gdCd <= 0 && dist < 120) { e.guard = 1.6; this.burst(e.x, e.y - 6, 8, ['#fff0a0', '#d0a030'], 40); DH.audio.play('block'); }
+        } else if (ai === 'quake') { // the treasure golem: stamps, and a shockwave rolls out round it (its heart is safe)
+          e.qkCd = (e.qkCd == null ? U.rand(2, 4) : e.qkCd) - dt;
+          if (e.qk > 0) { e.qk -= dt; spd = 0; }
+          else if (e.qkCd <= 0 && dist < 100) { e.qkCd = U.rand(5, 6.5); e.qk = 1; this.enemyAttackAnim(e); this.hazard({ kind: 'ring', x: e.x, y: e.y, r0: 14, r: 72, delay: 0.9, dmg: e.dmg, color: '#c8a060', src: e, sound: 'boom' }); }
+        } else if (ai === 'ward') { // the vault warden: hangs back and wards the foes around it (half damage while the ward lasts)
+          if (dist < 90) { mx = -dx; my = -dy; } else if (dist < 130) { mx = -dy; my = dx; spd *= 0.4; }
+          e.wdCd = (e.wdCd == null ? U.rand(1, 3) : e.wdCd) - dt;
+          if (e.wdCd <= 0) { e.wdCd = U.rand(5, 6); this.grid.query(e.x, e.y, 100, tmp); for (const o of tmp) if (!o.dead && !o.def.prop && !o.boss) o.ward = 3; this.fx.push({ k: 'ring', x: e.x, y: e.y, life: 0.5, max: 0.5, r0: 6, r1: 100, color: '#fff0a0' }); DH.audio.play('frost'); }
+        } else if (ai === 'hoard') { // the coin wraith: draws in the gold and experience lying near it, growing; kill it and it all spills out
+          e.hdT = (e.hdT || 0) - dt;
+          if (e.hdT <= 0) {
+            e.hdT = 0.4;
+            for (const k of this.pickups) if ((k.type === 'xp' || k.type === 'coin') && !k.gone && U.dist2(k.x, k.y, e.x, e.y) < 60 * 60) { k.gone = true; if (k.type === 'xp') e.hXp = (e.hXp || 0) + k.val; else e.hGold = (e.hGold || 0) + k.val; if (e.scale < 1.7) { e.scale *= 1.03; e.dmg *= 1.02; } }
+            if (this.pickups.some((k) => k.gone)) this.pickups = this.pickups.filter((k) => !k.gone);
+          }
         } else if (ai === 'flutter') { const w = Math.sin(e.anim * 5 + e.x * 0.01) * 0.6; mx = dx - dy * w; my = dy + dx * w; }
         else if (ai === 'dash') { // spiders: creep, then a sudden rush; now and then spit a web that tangles your feet
           const c = e.t % 1.6; spd *= c < 1.0 ? 0.35 : 3.2;
@@ -752,6 +783,9 @@
       let xp = e.final && !this.bosses.some((b) => b.final && !b.dead && b !== e) ? 0 : e.xp; // the last Lord ends the hall: no pointless level-ups after victory
       for (const [v] of C.GEM_TIERS) { while (xp >= v) { this.drop('xp', e.x + U.rand(-5, 5), e.y + U.rand(-5, 5), v); xp -= v; } }
       this.mergeGems();
+      if (e.loot) { for (let v = e.loot; v > 0; v -= 20) this.drop('coin', e.x + U.rand(-6, 6), e.y + U.rand(-6, 6), Math.min(20, v)); } // a scarab gives back what it stole
+      if (e.hXp) this.drop('xp', e.x, e.y, e.hXp); if (e.hGold) this.drop('coin', e.x, e.y, e.hGold, 'bag'); // a coin wraith's hoard spills out
+      if (e.def.chest) this.drop('coin', e.x, e.y, Math.ceil(C.COIN_VALUE.coins * this.stage.goldMult), 'stack'); // a mimic's hoard
       if (e.def.gas) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 22, delay: 0.2, dur: 3, dmg: e.dmg * 0.3, color: '#90b030', src: e }); // a bog corpse bursts in a cloud of foul gas
       if (e.def.shards) { const o = Math.random() * TAU; for (let i = 0; i < e.def.shards; i++) this.enemyShot(e, o + i / e.def.shards * TAU, 75, e.dmg * 0.6, '#a8e0ff', 'frost'); } // an ice skull bursts into frost shards
       if (e.def.puddle) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 20, delay: 0.2, dur: 4, dmg: 0, slow: 1, color: '#3a8aa0', src: e }); // the drowned leave a pool that drags at your feet

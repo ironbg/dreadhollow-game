@@ -200,6 +200,7 @@
       g.drawImage(A.glow(b.color), x - 8, y - 8, 16, 16);
       if (b.kind === 'curse') { g.drawImage(A.glow('#a040ff'), x - 16, y - 16, 32, 32); G.P.circle(g, x, y, 4, '#2a0840'); G.P.circle(g, x - 1.3, y - 0.6, 1, '#e080ff'); G.P.circle(g, x + 1.3, y - 0.6, 1, '#e080ff'); }
       else if (b.kind === 'skull') { G.P.circle(g, x, y, 2.4, '#e8d8ff'); G.P.circle(g, x - 0.8, y - 0.3, 0.6, '#300050'); G.P.circle(g, x + 0.8, y - 0.3, 0.6, '#300050'); }
+      else if (b.kind === 'coin') { G.P.ell(g, x, y, 2.2 * (0.5 + 0.5 * Math.abs(Math.sin(now * 12 + b.x))), 2.2, '#ffd35a'); }
       else if (b.kind === 'web') { const P = G.P; for (let k = 0; k < 4; k++) { const a = k * Math.PI / 4; P.line(g, x - Math.cos(a) * 3, y - Math.sin(a) * 3, x + Math.cos(a) * 3, y + Math.sin(a) * 3, 0.5, '#e8e8d8'); } g.strokeStyle = '#e8e8d8'; g.lineWidth = 0.4; g.beginPath(); g.arc(x, y, 1.8, 0, TAU); g.stroke(); }
       else if (b.kind === 'frost') { const l = Math.hypot(b.vx, b.vy) || 1, ux = b.vx / l, uy = b.vy / l; G.P.path(g, [x + ux * 3, y + uy * 3, x - uy * 1.2, y + ux * 1.2, x - ux * 3, y - uy * 3, x + uy * 1.2, y - ux * 1.2]); G.P.fill(g, '#d8f4ff'); }
       else if (b.kind === 'bolt') { const l = Math.hypot(b.vx, b.vy) || 1, ux = b.vx / l, uy = b.vy / l; G.P.line(g, x - ux * 6, y - uy * 6, x + ux * 2, y + uy * 2, 1, '#e8e0c8'); G.P.line(g, x + ux * 1, y + uy * 1, x + ux * 3, y + uy * 3, 1.4, '#c8ccd8'); }
@@ -305,6 +306,7 @@
     const fr = e.fr != null ? e.fr % nf : nf > 1 ? Math.floor(e.anim / (e.def.anim || 0.3)) % nf : 0; // a slow, heavy two-frame gait
     const bob = e.def.fly && !e.perch ? Math.sin(e.anim * 4) * 1.5 - 2 : 0;
     const x = e.x - cx, y = e.y - cy + bob - (e.hop || 0), k = e.scale;
+    if (e.ward > 0 || e.guard > 0) { const P = G.P; g.save(); g.globalAlpha = 0.55 + Math.sin(e.anim * 8) * 0.15; g.strokeStyle = '#fff0a0'; g.lineWidth = 1; g.beginPath(); g.ellipse(x, y - e.r * 0.6 * k, e.r * 1.3 * k, e.r * 1.5 * k, 0, 0, TAU); g.stroke(); g.restore(); lights.push({ x: e.x, y: e.y, r: 24, kind: 'tint', color: '#ffe080', a: 0.35 }); }
     if (e.tether > 0) { const P = G.P, px = this.player.x - cx, py = this.player.y - cy - 6, w = 1.2 + Math.sin(e.anim * 30) * 0.5; g.save(); g.globalAlpha = 0.8; P.line(g, x, y - 4, px, py, w + 1.4, 'rgba(176,80,255,0.35)'); P.line(g, x, y - 4, px, py, w, '#e0a0ff'); g.restore(); lights.push({ x: (e.x + this.player.x) / 2, y: (e.y + this.player.y) / 2, r: 30, kind: 'tint', color: '#b050ff', a: 0.4 }); }
     if (e.under) { // a burrower under the snow: only a travelling mound shows
       const P = G.P, w = 7 * k, j = Math.sin(e.anim * 20) * 0.6;

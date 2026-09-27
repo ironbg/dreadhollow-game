@@ -51,7 +51,7 @@
   // the deed that puts an Arcane Tome beside the hero at the start of each hall
   C.START_TOME_QUEST = { crypt: { kills: 2000 }, abyss: { kills: 2000 }, catacombs: { survive: 6 }, blightmire: { survive: 4 }, reliquary: { kills: 2000 } };
   // new boss deed <- the old one it replaces (see save.migrate); [old, v]: only for saves older than version v (the old boss lives on elsewhere)
-  C.BOSS_DEED_OLD = { d_boss_gravechief: 'd_boss_colossus', d_boss_bellwarden: ['d_boss_lich', 7], d_boss_bogserpent: 'd_boss_mirebasilisk', d_boss_rotlord: 'd_boss_rotwyrm' };
+  C.BOSS_DEED_OLD = { d_boss_gravechief: 'd_boss_colossus', d_boss_bellwarden: ['d_boss_lich', 7], d_boss_bogserpent: 'd_boss_mirebasilisk', d_boss_rotlord: 'd_boss_rotwyrm', d_boss_sentinel: 'd_boss_echoanguish' };
   C.START_TOME_DEED = {
     crypt: 'd_start_crypt', abyss: 'd_start_abyss', aqueduct: 'd_boss_bellwarden', catacombs: 'd_start_catacombs',
     discord: 'd_boss_discolossus', blightmire: 'd_start_blightmire', reliquary: 'd_start_reliquary',
@@ -360,7 +360,7 @@
     imp:      { painter: 'imp',      hp: 18,  spd: 54, dmg: 7,  xp: 2, r: 6,  mass: 0.8, fly: true, ai: 'imp' }, // flits about, flicks fire darts
     wraith:   { painter: 'ghost', variant: 'wraith', hp: 44, spd: 50, dmg: 13, xp: 4, r: 7, mass: 1.2, ai: 'float', fly: true, alpha: 0.92 },
     hknight:  { painter: 'hknight',  hp: 70,  spd: 30, dmg: 15, xp: 5, r: 7,  mass: 2.5, def: 0.2 },
-    golem:    { painter: 'golem',    hp: 150, spd: 22, dmg: 18, xp: 10, r: 10, mass: 6, def: 0.25 },
+    golem:    { painter: 'golem', variant: 'gold', hp: 150, spd: 22, dmg: 18, xp: 10, r: 10, mass: 6, def: 0.25, ai: 'quake' }, // the treasure golem: stamps a shockwave
     // bosses
     colossus:    { painter: 'colossus', hp: 1500, spd: 30, dmg: 22, xp: 150, r: 16, mass: 60, def: 0.15, ai: 'b_charge', boss: true },
     anguish:     { painter: 'anguish', painter2: 'anguish_foot', hp: 3000, spd: 44, dmg: 26, xp: 400, r: 17, mass: 80, def: 0.2, ai: 'b_lord', boss: true, lord: true },
@@ -373,7 +373,6 @@
     discolossus: { painter: 'colossus', variant: 'purple', hp: 1600, spd: 34, dmg: 26, xp: 250, r: 16, mass: 60, def: 0.2, ai: 'b_charge', boss: true },
     archdemon:   { painter: 'demon', variant: 'purple', hp: 4600, spd: 38, dmg: 30, xp: 500, r: 18, mass: 100, def: 0.25, ai: 'b_demon', boss: true, lord: true },
     rotlord:     { painter: 'rotlord', hp: 5200, spd: 30, dmg: 32, xp: 550, r: 18, mass: 100, def: 0.25, ai: 'b_rotlord', boss: true, lord: true },
-    echoanguish: { painter: 'anguish', painter2: 'anguish_foot', hp: 3600, spd: 46, dmg: 30, xp: 300, r: 17, mass: 80, def: 0.2, ai: 'b_lord', boss: true },
     effigy:      { painter: 'effigy', hp: 10, spd: 24, dmg: 9, xp: 3, r: 7, mass: 2, dmgFactor: 0.17, noPierce: true }, // Snow Effigy: shrugs off direct hits, not burns and frost
     pylon:       { painter: 'pylon', hp: 400, spd: 0, dmg: 0, xp: 60, r: 10, mass: 999 },
     // hall secrets: guardians and breakables (secrets.js)
@@ -382,7 +381,7 @@
     blightworm:  { painter: 'blightworm', hp: 1900, spd: 40, dmg: 24, xp: 220, r: 15, mass: 60, def: 0.15, ai: 'b_blightworm', boss: true },
     sarcophagus: { painter: 'sarcophagus', hp: 900, spd: 0, dmg: 0, xp: 40, r: 12, mass: 999, noPierce: true },
     eviltree:    { painter: 'eviltree', hp: 1400, spd: 0, dmg: 0, xp: 60, r: 14, mass: 999, noPierce: true },
-    custodian:   { painter: 'lich', variant: 'gold', hp: 6400, spd: 36, dmg: 34, xp: 700, r: 15, mass: 60, def: 0.3, ai: 'b_caster', boss: true, lord: true },
+    custodian:   { painter: 'custodian', hp: 6400, spd: 32, dmg: 34, xp: 700, r: 17, mass: 100, def: 0.3, ai: 'b_custodian', boss: true, lord: true },
   };
   // Gilded Ooze: a treasure champion. Every hit deals exactly 1 damage and knocks out gold; flees and escapes after 20s.
   /* Hall foes: behaviours the common horde lacks (see Run.updateEnemies). Each hall brings two or three (C.HALL_FOES). */
@@ -436,13 +435,21 @@
   C.enemies.blightfiend = { painter: 'blightfiend', hp: 1000, spd: 30, dmg: 24, xp: 160, r: 16, mass: 70, def: 0.15, ai: 'b_blightfiend', boss: true };
   C.enemies.bogserpent = { painter: 'bogserpent', hp: 1700, spd: 36, dmg: 26, xp: 220, r: 15, mass: 70, def: 0.2, ai: 'b_serpent', boss: true };
   C.enemies.eldertreant = { painter: 'eldertreant', hp: 2100, spd: 20, dmg: 28, xp: 260, r: 18, mass: 120, def: 0.25, ai: 'b_eldertreant', boss: true };
+  // the Reliquary
+  C.enemies.scarab = { painter: 'scarab', hp: 8, spd: 56, dmg: 4, xp: 1, r: 5, mass: 0.5, ai: 'thief', anim: 0.12, particles: ['#d0a030', '#3a2a0a'] }; // steals your gold
+  C.enemies.mimic = { painter: 'mimic', hp: 40, spd: 44, dmg: 13, xp: 5, r: 8, mass: 2.5, ai: 'ambush', chest: true, particles: ['#6a3a1a', '#c89a3a'] }; // a chest, until you come near
+  C.enemies.gildedknight = { painter: 'gildedknight', hp: 60, spd: 28, dmg: 14, xp: 5, r: 7, mass: 2.6, def: 0.15, ai: 'guard', particles: ['#c8a040', '#6a1a24'] }; // raises its shield, strikes back
+  C.enemies.vaultwarden = { painter: 'vaultwarden', hp: 30, spd: 30, dmg: 8, xp: 4, r: 6, mass: 1, ai: 'ward', fly: true }; // wards the foes around it
+  C.enemies.coinwraith = { painter: 'coinwraith', hp: 26, spd: 40, dmg: 9, xp: 3, r: 6, mass: 0.8, ai: 'hoard', fly: true, particles: ['#ffd35a', '#3a2a10'] }; // hoards the gold and experience about it
+  C.enemies.mimicking = { painter: 'mimicking', hp: 1200, spd: 32, dmg: 26, xp: 180, r: 17, mass: 80, def: 0.15, ai: 'b_mimicking', boss: true };
+  C.enemies.sentinel = { painter: 'sentinel', hp: 2000, spd: 30, dmg: 28, xp: 240, r: 15, mass: 90, def: 0.2, ai: 'b_sentinel', boss: true };
+  C.enemies.magistrate = { painter: 'magistrate', hp: 2600, spd: 34, dmg: 30, xp: 280, r: 14, mass: 70, def: 0.2, ai: 'b_magistrate', boss: true, fly: true };
   C.enemies.hydra = { painter: 'hydra', hp: 700, spd: 22, dmg: 18, xp: 120, r: 16, mass: 70, def: 0.1, ai: 'b_hydra', boss: true };
   C.enemies.bellwarden = { painter: 'bellwarden', hp: 1000, spd: 26, dmg: 20, xp: 150, r: 14, mass: 60, def: 0.15, ai: 'b_bell', boss: true };
   C.enemies.sunkknight = { painter: 'sunkknight', hp: 1300, spd: 34, dmg: 22, xp: 180, r: 14, mass: 60, def: 0.2, ai: 'b_sunken', boss: true };
   C.enemies.bloater = { painter: 'slime', variant: 'volatile', hp: 14, spd: 44, dmg: 0, xp: 2, r: 7, mass: 1, ai: 'fuse', boom: { R: 28, dmg: 15, fuse: 1.0 }, scale: 0.62, anim: 0.2, particles: ['#ff7030', '#ffd060', '#401008'] };
   // [enemy, from (timeline s), weight, variant override]
   C.HALL_FOES = {
-    reliquary: [['shieldbearer', 60, 1.4], ['watcher', 150, 1.2], ['hound', 240, 1]],
   };
   C.enemies.gildedooze = { painter: 'slime', variant: 'gold', hp: 1, hits: 45, spd: 40, dmg: 0, xp: 0, r: 8, mass: 99, ai: 'flee', life: 20, gilded: true, anim: 0.3 };
   /* Power-up runes smashed out of urns (duration in seconds) */
@@ -465,7 +472,8 @@
     bat: 'summon', bonemage: 'volley', spirit: 'volley', drowned: 'slam', gargoyle: 'charge', arbalist: 'volley',
     frostghoul: 'charge', frostcrawler: 'slam', iceskull: 'summon', frostguard: 'slam', icebear: 'charge',
     homunculus: 'summon', capra: 'slam', fiendcaster: 'volley', shapeshifter: 'charge', syphon: 'volley', clockwork: 'slam',
-    mosquito: 'summon', bogcorpse: 'slam', bogwraith: 'volley', toad: 'charge', treant: 'slam' };
+    mosquito: 'summon', bogcorpse: 'slam', bogwraith: 'volley', toad: 'charge', treant: 'slam',
+    scarab: 'summon', mimic: 'charge', gildedknight: 'slam', vaultwarden: 'volley', coinwraith: 'volley' };
   C.CHAMPION = { hp: 18, dmg: 1.7, scale: 1.8, def: 0.2 };
   // Champion affixes: one each (two from Agony III), from its hall's list. Their health also grows with the hall's progress:
   // x0.7 at the start to x1.3 at the end (the hall's strength).
@@ -551,8 +559,10 @@
       remap: { bat: 'mosquito', rat: 'mosquito', skeleton: 'spider', ghoul: 'bogcorpse', ghost: 'bogwraith', spider: 'toad', cultist: 'bogwraith', wraith: 'toad', hknight: 'treant', golem: 'treant' },
       bosses: [{ t: 150, id: 'blightfiend' }, { t: 300, id: 'bogserpent' }, { t: 450, id: 'eldertreant' }, { t: 600, id: 'rotlord', final: true }],
       theme: { floorA: [64, 70, 46], floorB: [50, 54, 36], mortar: [16, 18, 8], moss: [120, 150, 40], dark: [6, 8, 2], darkness: 0.82, lightTint: 'rgba(200,255,120,', accent: '#b0ff50', pools: [50, 70, 30], accentRate: 0.22, blood: '#2a3a0a' } },
-    reliquary: { index: 6, agonyXp: 0.1, hpMult: 10, dmgMult: 3.6, goldMult: 6, variant: 'gold', remap: { rat: 'hknight', bat: 'ghost' }, herb: 'dust', vault: true,
-      bosses: [{ t: 300, id: 'echoanguish' }, { t: 600, id: 'custodian', final: true }],
+    reliquary: { index: 6, agonyXp: 0.1, hpMult: 10, dmgMult: 3.6, goldMult: 6, variant: 'gold', foeVariant: false, herb: 'dust', vault: true,
+      // gold scarabs, mimics, gilded knights, treasure golems, vault wardens, coin wraiths
+      remap: { bat: 'scarab', rat: 'scarab', skeleton: 'scarab', ghoul: 'gildedknight', ghost: 'coinwraith', spider: 'mimic', cultist: 'vaultwarden', wraith: 'coinwraith', hknight: 'gildedknight', golem: 'golem' },
+      bosses: [{ t: 150, id: 'mimicking' }, { t: 300, id: 'sentinel' }, { t: 450, id: 'magistrate' }, { t: 600, id: 'custodian', final: true }],
       theme: { floorA: [96, 88, 74], floorB: [78, 70, 58], mortar: [30, 24, 16], moss: [230, 200, 120], dark: [10, 8, 4], darkness: 0.8, lightTint: 'rgba(255,230,160,', accent: '#fff0a0', crystals: [255, 230, 140], accentRate: 0.1 } },
   };
   /* Hall rules (js/game/halls.js) */
