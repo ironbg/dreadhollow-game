@@ -40,6 +40,7 @@
       }
       if (h.fired && h.dur) {
         h.tick -= dt;
+        if (h.pull) { const d = Math.hypot(p.x - h.x, p.y - h.y); if (d > 3 && d < h.r * 2.4) { p.x -= (p.x - h.x) / d * h.pull * dt; p.y -= (p.y - h.y) / d * h.pull * dt; } } // a rift drags you toward it
         if ((h.dmg || h.slow) && !(this.crackedEye && h.src && h.src.def && h.src.def.lord) && this.inHazard(h, p.x, p.y)) { if (h.slow) this.pslow = Math.max(this.pslow, 0.25); if (h.dmg && h.tick <= 0) { h.tick = 0.5; this.hurtPlayer(h.dmg * 0.5); } } // a slowing puddle may do no harm at all
       }
       if (h.fired && h.t >= h.delay + (h.dur || 0)) this.hazards.splice(i, 1);
@@ -308,6 +309,44 @@
       const a = Math.random() * TAU; e.x = p.x + Math.cos(a) * 130; e.y = p.y + Math.sin(a) * 130;
       run.burst(e.x, e.y, 26, ['#ffffff', '#8ff0ff'], 110); DH.audio.play('frost');
       for (let i = 0; i < 8; i++) shot(run, e, i / 8 * TAU, 80, 0.45, '#a8e0ff', 'frost');
+    }
+  };
+  /* ---------- the Halls of Discord ---------- */
+  // Void Caller: drifts in; looses orbs of void that follow you; tears rifts that drag you in, and each spits out a homunculus
+  // as it closes; steps through the void to elsewhere and calls a brood of homunculi
+  AI.b_voidcaller = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    const orbit = dist < 40 ? -1 : 1; e.cspd = e.spd; e.mx = dx * orbit - dy * 0.5; e.my = dy * orbit + dx * 0.5;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 3.2) { e.c1 = 0; const a = Math.atan2(dy, dx); for (const o of [-0.5, 0, 0.5]) { const b = shot(run, e, a + o, 60, 0.5, '#b050ff'); b.home = 1.3; b.life = 5; } DH.audio.play('zap'); }
+    if (e.c2 > 7) {
+      e.c2 = 0;
+      for (let i = 0; i < 2; i++) {
+        const a = Math.random() * TAU, x = p.x + Math.cos(a) * 50, y = p.y + Math.sin(a) * 50;
+        run.hazard({ kind: 'circle', x, y, r: 24, delay: 0.9, dur: 4.5, dmg: e.dmg * 0.6 * e.enr, pull: 34, color: '#b050ff', src: e, boss: true, sound: i ? null : 'frost' });
+        run.after(5.4, () => run.spawnEnemy('homunculus', x, y));
+      }
+    }
+    if (e.c3 > 11) {
+      e.c3 = 0; run.burst(e.x, e.y, 24, ['#b050ff', '#140420'], 100);
+      const a = Math.random() * TAU; e.x = p.x + Math.cos(a) * 120; e.y = p.y + Math.sin(a) * 120;
+      run.burst(e.x, e.y, 24, ['#b050ff', '#140420'], 100); DH.audio.play('frost');
+      for (let i = 0; i < 3; i++) { const b = i / 3 * TAU; run.spawnEnemy('homunculus', e.x + Math.cos(b) * 18, e.y + Math.sin(b) * 18); }
+    }
+  };
+  // Twisted Knight: charges along a marked line; close in, it strikes before and behind at once (two marked cones);
+  // splits the floor with crystal in six lines radiating from it; at half health it grows faster
+  AI.b_twisted = function (run, e, dt, dx, dy, dist) {
+    if (!e.frenzy && e.hp < e.maxHp * 0.5) { e.frenzy = true; e.spd *= 1.25; run.burst(e.x, e.y, 26, ['#e060ff', '#ffffff'], 100); DH.audio.play('roar'); }
+    charge(run, e, dt, dx, dy, dist, 270);
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt;
+    if (e.c1 > 3 && e.phase === 0 && dist < 75) {
+      e.c1 = 0; const a = Math.atan2(dy, dx);
+      for (const o of [0, Math.PI]) run.hazard({ kind: 'cone', x: e.x, y: e.y, ang: a + o, arc: 1.5, len: 72, delay: 0.6, dmg: e.dmg * 1.2 * e.enr, color: '#e060ff', src: e, boss: true, sound: o ? null : 'swing' });
+    }
+    if (e.c2 > 8 && e.phase === 0) {
+      e.c2 = 0; e.split = !e.split; const a0 = (e.split ? 0 : Math.PI / 6) + Math.atan2(dy, dx);
+      for (let i = 0; i < 6; i++) run.hazard({ kind: 'line', x: e.x, y: e.y, ang: a0 + i / 6 * TAU, len: 180, w: 12, delay: 0.9, dmg: e.dmg * 1.1 * e.enr, color: '#e060ff', src: e, boss: true, sound: i ? null : 'frost' });
     }
   };
   C.BOSS_AI = AI;

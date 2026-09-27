@@ -411,6 +411,50 @@
           if (e.lng > 0) { e.lng -= dt; mx = e.lockX; my = e.lockY; spd *= 4.2; }
           else if (e.crouch > 0) { e.crouch -= dt; spd = 0; if (e.crouch <= 0) { e.lng = 0.32; e.lockX = dx; e.lockY = dy; } }
           else { e.lngCd = (e.lngCd || 0) - dt; if (e.lngCd <= 0 && dist < 70) { e.crouch = 0.45; e.lngCd = U.rand(2.6, 3.4); this.enemyAttackAnim(e); } }
+        } else if (ai === 'merge') { // homunculi: two that touch become one, bigger and stronger (three times at most)
+          e.mgT = (e.mgT || 0) - dt;
+          if (e.mgT <= 0) {
+            e.mgT = 0.4; this.grid.query(e.x, e.y, e.r * 2.2, tmp);
+            for (const o of tmp) {
+              if (o === e || o.dead || o.id !== e.id || (e.mlv || 0) + (o.mlv || 0) >= 3 || o.hp > e.hp) continue;
+              if (U.dist2(e.x, e.y, o.x, o.y) > (e.r + o.r) * (e.r + o.r)) continue;
+              o.dead = true; e.mlv = (e.mlv || 0) + (o.mlv || 0) + 1; e.hp += o.hp; e.maxHp += o.maxHp; e.xp += o.xp; e.dmg *= 1.2; e.scale *= 1.22; e.r *= 1.18; e.spd *= 0.92;
+              this.burst(e.x, e.y, 10, ['#b07a90', '#3a1a2a'], 50); DH.audio.play('hit'); break;
+            }
+          }
+        } else if (ai === 'leap') { // the capra fiend: marks where you stand and leaps there, landing hooves-first
+          if (e.leap > 0) {
+            e.leap -= dt; e.eth = 1; e.kx = e.ky = 0; const k = 1 - Math.max(0, e.leap) / 0.75;
+            e.x = e.lx0 + (e.lx1 - e.lx0) * k; e.y = e.ly0 + (e.ly1 - e.ly0) * k; e.hop = Math.sin(k * Math.PI) * 18; mx = my = 0; spd = 0;
+            if (e.leap <= 0) { e.eth = 0; e.hop = 0; e.lpCd = U.rand(3.5, 5); }
+          } else {
+            e.lpCd = (e.lpCd == null ? U.rand(1, 3) : e.lpCd) - dt;
+            if (e.lpCd <= 0 && dist > 45 && dist < 170) {
+              e.leap = 0.75; e.lx0 = e.x; e.ly0 = e.y; e.lx1 = p.x; e.ly1 = p.y; DH.audio.play('swing');
+              this.hazard({ kind: 'circle', x: p.x, y: p.y, r: 22, delay: 0.75, dmg: e.dmg, color: '#ff5ae0', src: e, sound: 'boom' });
+            }
+          }
+        } else if (ai === 'hexer') { // the fiend caster: keeps back and looses slow orbs of discord that follow you
+          if (dist < 90) { mx = -dx; my = -dy; } else if (dist < 140) { mx = -dy; my = dx; spd *= 0.4; }
+          if (e.t > e.def.shot.cd && dist < 210) { e.t = 0; const b = this.enemyShot(e, Math.atan2(dy, dx), 62, e.def.shot.dmg * this.stage.dmgMult, '#ff60d0'); b.home = 1.4; b.life = 4.5; DH.audio.play('zap'); }
+        } else if (ai === 'mimic') { // the shapeshifter: comes as a homunculus; close by (or hurt) it shows its true shape
+          if (e.disg == null) { e.disg = true; e.painter = 'homunculus'; }
+          if (e.disg) { spd *= 0.8; if (dist < 55 || e.hp < e.maxHp) { e.disg = false; e.painter = e.def.painter; e.spd *= 1.25; this.burst(e.x, e.y, 18, ['#6a3a5a', '#ffe060', '#2a0e22'], 80); DH.audio.play('roar'); } }
+        } else if (ai === 'tether') { // the void syphon: latches a beam onto you, drags you in and drinks
+          e.tthCd = (e.tthCd == null ? U.rand(1, 3) : e.tthCd) - dt;
+          if (e.tether > 0) {
+            e.tether -= dt; spd = 0; const pull = 30 * dt; p.x -= dx * pull; p.y -= dy * pull;
+            e.tick = (e.tick || 0) - dt; if (e.tick <= 0) { e.tick = 0.5; this.hurtPlayer(e.dmg * 0.2, e); }
+            if (dist > 200 || e.tether <= 0) { e.tether = 0; e.tthCd = U.rand(4.5, 6); }
+          } else if (e.tthCd <= 0 && dist < 150 && !this.enemies.some((o) => o.tether > 0)) { e.tether = 2.4; e.tick = 0.3; DH.audio.play('zap'); }
+          else if (dist < 90) { mx = -dy; my = dx; spd *= 0.5; }
+        } else if (ai === 'laser') { // the clockwork construct: halts, and its lens sweeps a beam across a marked arc
+          e.lzCd = (e.lzCd == null ? U.rand(2, 4) : e.lzCd) - dt;
+          if (e.lz > 0) { e.lz -= dt; spd = 0; }
+          else if (e.lzCd <= 0 && dist < 170) {
+            e.lz = 1.5; e.lzCd = U.rand(5, 6.5); const a0 = Math.atan2(dy, dx), s = Math.random() < 0.5 ? -1 : 1;
+            for (let i = 0; i < 3; i++) this.hazard({ kind: 'line', x: e.x, y: e.y, ang: a0 + s * (i - 1) * 0.3, len: 200, w: 7, delay: 0.8 + i * 0.2, dmg: e.dmg * 0.8, color: '#ff4080', src: e, sound: i ? null : 'zap' });
+          }
         } else if (ai === 'flutter') { const w = Math.sin(e.anim * 5 + e.x * 0.01) * 0.6; mx = dx - dy * w; my = dy + dx * w; }
         else if (ai === 'dash') { const c = e.t % 1.6; spd *= c < 1.0 ? 0.35 : 3.2; }
         else if (ai === 'ranged') {
@@ -457,7 +501,7 @@
             if (d2 < rr * rr && d2 > 0.0001) { const d = Math.sqrt(d2), push = (rr - d) * 0.5; e.x += ox / d * push; e.y += oy / d * push; if (++n > 6) break; }
           }
         }
-        if (e.dmg > 0 && dist < e.r * 0.8 + p.r && !(e.eth > 0 && !e.boss)) this.hurtPlayer(e.dmg, e); // a faded spirit passes through you
+        if (e.dmg > 0 && !e.disg && dist < e.r * 0.8 + p.r && !(e.eth > 0 && !e.boss)) this.hurtPlayer(e.dmg, e); // a faded spirit passes through you
         // the attack animation: in reach of the hero, a foe coils, lunges and recovers
         e.atkT = Math.max(0, (e.atkT || 0) - dt); e.atkCd = (e.atkCd || 0) - dt;
         if (e.dmg > 0 && !e.def.prop && e.atkCd <= 0 && dist < e.r + p.r + 10) this.enemyAttackAnim(e);
@@ -538,7 +582,8 @@
     enemyAttackAnim(e) { const p = this.player; e.atkMax = e.boss ? 0.6 : 0.42; e.atkT = e.atkMax; e.atkCd = e.boss ? 1.2 : 0.8 + Math.random() * 0.3; e.atkAng = Math.atan2(p.y - e.y, p.x - e.x); }
     enemyShot(e, ang, spd, dmg, color, kind) {
       if (!(e.atkT > 0)) this.enemyAttackAnim(e);
-      this.eproj.push({ x: e.x, y: e.y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, dmg, life: 6, color: color || '#c070ff', r: kind === 'skull' ? 4 : kind === 'curse' ? 6 : 3, kind, src: e });
+      const b = { x: e.x, y: e.y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, dmg, life: 6, color: color || '#c070ff', r: kind === 'skull' ? 4 : kind === 'curse' ? 6 : 3, kind, src: e };
+      this.eproj.push(b); return b;
     }
 
     /* ---------------- player ---------------- */

@@ -740,6 +740,10 @@
       const b = this.eproj[i];
       b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
       if (b.acc) { b.vx *= 1 + b.acc * dt; b.vy *= 1 + b.acc * dt; }
+      if (b.home) { // a homing orb turns toward you, slowly
+        const cur = Math.atan2(b.vy, b.vx), sp = Math.hypot(b.vx, b.vy); let da = Math.atan2(p.y - b.y, p.x - b.x) - cur; da = Math.atan2(Math.sin(da), Math.cos(da));
+        const a = cur + U.clamp(da, -b.home * dt, b.home * dt); b.vx = Math.cos(a) * sp; b.vy = Math.sin(a) * sp;
+      }
       if (U.dist2(b.x, b.y, p.x, p.y) < (b.r + p.r - 1) * (b.r + p.r - 1)) {
         if (b.kind === 'curse' && !(p.inv > 0) && !(this.buffs.wraith > 0) && !(this.curse > 0)) { this.curse = C.STATUS.curse; DH.audio.play('roar'); DH.events.emit('run:warning', t('hud.cursed')); } // Curse Bolt
         if (b.kind === 'frost') this.pslow = Math.max(this.pslow || 0, 1); // frost shards numb your step

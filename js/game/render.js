@@ -303,7 +303,8 @@
     const s = G.sprite(e.painter, e.variant), nf = s.frames.length;
     const fr = e.fr != null ? e.fr % nf : nf > 1 ? Math.floor(e.anim / (e.def.anim || 0.3)) % nf : 0; // a slow, heavy two-frame gait
     const bob = e.def.fly && !e.perch ? Math.sin(e.anim * 4) * 1.5 - 2 : 0;
-    const x = e.x - cx, y = e.y - cy + bob, k = e.scale;
+    const x = e.x - cx, y = e.y - cy + bob - (e.hop || 0), k = e.scale;
+    if (e.tether > 0) { const P = G.P, px = this.player.x - cx, py = this.player.y - cy - 6, w = 1.2 + Math.sin(e.anim * 30) * 0.5; g.save(); g.globalAlpha = 0.8; P.line(g, x, y - 4, px, py, w + 1.4, 'rgba(176,80,255,0.35)'); P.line(g, x, y - 4, px, py, w, '#e0a0ff'); g.restore(); lights.push({ x: (e.x + this.player.x) / 2, y: (e.y + this.player.y) / 2, r: 30, kind: 'tint', color: '#b050ff', a: 0.4 }); }
     if (e.under) { // a burrower under the snow: only a travelling mound shows
       const P = G.P, w = 7 * k, j = Math.sin(e.anim * 20) * 0.6;
       P.ell(g, x, y + 2, w, w * 0.45, 'rgba(0,0,0,0.35)'); P.ell(g, x + j, y, w * 0.8, w * 0.42, '#b8cadc'); P.ell(g, x - 1 + j, y - 1, w * 0.45, w * 0.2, '#e8f4ff');
