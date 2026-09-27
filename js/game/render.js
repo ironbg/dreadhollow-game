@@ -389,10 +389,9 @@
   };
   R.drawAlly = function (g, al, cx, cy, lights) {
     const x = al.x - cx, y = al.y - cy;
-    if (al.kind === 'spirit') {
-      g.drawImage(A.glow('rgba(200,120,255,0.8)'), x - 8, y - 8, 16, 16);
-      G.P.circle(g, x, y, 2.4, '#f0d8ff'); G.P.circle(g, x + 0.6, y - 0.4, 0.7, '#6a2a9a');
-      lights.push({ x: al.x, y: al.y, r: 18, kind: 'magic' });
+    if (al.kind === 'spirit') { // a wailing skull of pale light, facing the way it flies
+      this.sprite(g, 'sum_spirit', null, Math.floor(al.t * 6) % 2, x, y, al.vx < 0, 1, false, 0.95);
+      lights.push({ x: al.x, y: al.y, r: 18, kind: 'tint', color: '#8affd0', a: 0.3 });
       return;
     }
     if (al.kind === 'plant') {
@@ -402,12 +401,13 @@
       lights.push({ x: al.x, y: al.y - 4, r: 16, kind: 'tint', color: al.type === 'pod' ? '#b070ff' : '#9adf50', a: 0.2 * fade });
       return;
     }
-    const name = al.kind === 'wolf' ? 'wolf' : al.kind === 'golem' ? 'golem' : al.kind === 'phantom' ? 'hknight' : 'imp';
-    const variant = al.kind === 'golem' ? 'bone' : al.kind === 'phantom' ? 'ice' : null;
+    const name = R.SUMMON[al.kind] || 'sum_imp', variant = al.kind === 'golem' ? 'bone' : null;
     const sc = al.kind === 'golem' ? 0.75 : 1, fr = al.moving ? Math.floor(al.t * 6) % 2 : 0;
     this.sprite(g, name, variant, fr, x, y, al.face < 0, sc, false, al.kind === 'phantom' ? 0.7 : 1);
     lights.push({ x: al.x, y: al.y, r: 20, kind: 'small' });
   };
+  /** Each summon's own model (the golem is the stone golem in bone). */
+  R.SUMMON = { wolf: 'sum_wolf', golem: 'golem', phantom: 'sum_phantom', imp: 'sum_imp' };
   const WALK = [1, 0, 5, 0];
   /** The flail's chain: iron links from the hero's hand to the ball, alternately face-on and edge-on, plus a faint swing trail. */
   R.drawChain = function (g, hx, hy, bx, by, trail, cx, cy, k) {

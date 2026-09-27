@@ -178,7 +178,7 @@
       if (!best) continue;
       let name, variant = null, frame = 0, scale = 1, face = 1;
       if (e === p) { name = this.hero.painter || this.heroId; face = p.face; frame = p.moving ? Math.floor(p.anim / 1.6) % 2 : 0; }
-      else if (e.kind) { if (e.kind === 'spirit') continue; name = e.kind === 'golem' ? 'golem' : e.kind === 'phantom' ? 'hknight' : e.kind === 'imp' ? 'imp' : 'wolf'; variant = e.kind === 'golem' ? 'bone' : e.kind === 'phantom' ? 'ice' : e.kind === 'wolf' ? 'ice' : null; face = e.face || 1; }
+      else if (e.kind) { if (e.kind === 'spirit') continue; name = e.kind === 'plant' ? 'plant_' + e.type : this.SUMMON[e.kind] || 'sum_imp'; variant = e.kind === 'golem' ? 'bone' : null; face = e.face || 1; }
       else { if (e.def.fly || e.def.prop) continue; name = e.painter; variant = e.variant; scale = e.scale; face = e.face; frame = e.def.anim ? Math.floor(e.anim / (e.def.anim || 0.22)) % 2 : 0; }
       if (!G.painters[name]) continue;
       const s = G.sprite(name, variant), img = s.frames[frame % s.frames.length];

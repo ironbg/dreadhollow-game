@@ -148,6 +148,64 @@
       P.circle(g, 2.6, 4.6, 0.55, 'rgba(255,255,255,0.85)'); P.glow(g, 3.5, 5.8, 4, col, 0.45);
     } });
   });
+  /* ---------------- summons: the hero's allies, each its own model (never an enemy's) ---------------- */
+  // Huntress's wolves: spirit wolves of frost, pale and lean, a mane of rime streaming off them, cold eyes, breath smoking
+  def('sum_wolf', { w: 24, h: 15, frames: 2, draw(g, f) {
+    const fur = '#a8c4e0', fl = '#e8f4ff', fd = '#4a6a94', eye = '#8ff0ff', gal = f ? 1 : -1;
+    P.ell(g, 12, 14.2, 8, 0.8, 'rgba(0,0,0,0.3)');
+    const leg = (x, y, kx, ky, fx, fy, col) => { P.limb(g, x, y, kx, ky, 1.1, 0.8, col); P.limb(g, kx, ky, fx, fy, 0.8, 0.5, col); };
+    leg(8, 9, 5.6 - gal, 11.4, 4.4 - gal * 1.4, 13.6, fd); leg(15.4, 9, 17.4 + gal, 11.6, 18.6 + gal * 1.2, 13.6, fd);
+    // the tail streaming back, frosted
+    g.beginPath(); g.moveTo(5.6, 7.4); g.quadraticCurveTo(2, 5.6 + gal * 0.6, 0.4, 7 + gal); g.quadraticCurveTo(2.4, 8, 5.6, 8.8); g.closePath(); P.fill(g, P.lg(g, 0, 5, 6, 9, [fl, fur]));
+    // the body: lean, deep at the chest, tucked at the belly
+    g.beginPath(); g.moveTo(5.4, 7.6); g.quadraticCurveTo(8, 5.2, 13, 5.4); g.quadraticCurveTo(17, 5.2, 17.8, 7.6); g.quadraticCurveTo(17.4, 10.4, 14.6, 10.2); g.quadraticCurveTo(11, 9.2, 8.4, 10); g.quadraticCurveTo(5.4, 10, 5.4, 7.6); g.closePath();
+    P.fill(g, P.lg(g, 6, 5, 16, 10.4, [fl, fur, fd]));
+    g.strokeStyle = G.rgba(fd, 0.6); g.lineWidth = 0.3; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(11.4 + i * 1.2, 7.2); g.quadraticCurveTo(12 + i * 1.2, 8.4, 11.6 + i * 1.2, 9.4); g.stroke(); } // ribs under the fur
+    P.path(g, [9, 5.6, 11, 3.6, 12.2, 5.4, 13.4, 3.8, 14.4, 5.6, 16, 4.6, 16.6, 6.4]); P.fill(g, P.lg(g, 0, 3.6, 0, 6.4, [fl, sh(fur, 0.2)])); // the rime mane
+    leg(9, 9, 7.6 + gal, 11.6, 7 + gal * 1.6, 13.8, fur); leg(16.2, 8.8, 18.6 - gal, 11, 20.2 - gal * 1.4, 13.4, fur);
+    // the head: a long muzzle, ears back, jaws parted, cold eyes, breath smoking
+    P.ell(g, 18.8, 6.4, 2.4, 2, P.vol(g, 18.2, 5.8, 2.4, fur));
+    P.path(g, [19.6, 5.6, 23.4, 6.6, 23, 7.4, 20, 7.8]); P.fill(g, P.lg(g, 19, 5.6, 23, 7.8, [fl, fur]));
+    P.path(g, [20, 7.8, 22.8, 7.6 + (f ? 0.6 : 0.2), 20.4, 8.6]); P.fill(g, sh(fd, -0.3)); P.circle(g, 23.3, 6.8, 0.35, '#1a2a3a');
+    P.path(g, [17.6, 5, 17, 2.4, 18.8, 4.6]); P.fill(g, fur); P.path(g, [18.8, 4.8, 18.8, 2.6, 19.8, 4.8]); P.fill(g, fl);
+    P.ell(g, 20.2, 5.6, 0.55, 0.4, '#0a1420'); P.evil(g, 20.2, 5.6, 0.4, eye); P.glow(g, 20.2, 5.6, 2, eye, 0.6);
+    g.save(); g.globalAlpha = 0.45; P.ell(g, 24 - (f ? 0 : 0.6), 8.2, 1, 0.6, fl); g.restore(); // breath
+  } });
+  // the Phantom Knights: a knight's ghost in pale armour, a great helm with a slit of cold light, a sword, dissolving to mist below the waist
+  def('sum_phantom', { w: 20, h: 23, cy: 14, frames: 2, soft: true, draw(g, f) {
+    g.save(); g.translate(0, 3);
+    G.humanoid(g, f, { robe: '#6a8ab8', body: '#9ab4d8', trim: '#d8f0ff', arms: '#8aa4c8', head: 'greathelm', headCol: '#b8cce8', headCol2: '#5a7098', eyeGlow: '#8ff0ff', weapon: 'sword', cape: '#3a5078', gloves: '#9ab4d8', skin: '#9ab4d8', pauldron: '#b8cce8' });
+    g.restore();
+    g.save(); g.globalCompositeOperation = 'destination-out'; P.rect(g, 0, 14, 20, 9, P.lg(g, 0, 14, 0, 21.6, ['rgba(0,0,0,0)', 'rgba(0,0,0,1)'])); g.restore(); // the legs dissolve into mist
+    g.save(); g.globalAlpha = 0.5; for (const [x, y] of [[6, 17.6], [9.6, 18.6 + (f ? 0.6 : 0)], [13, 17.4]]) { g.beginPath(); g.moveTo(x - 1.4, y - 2); g.quadraticCurveTo(x - 0.4, y + 1, x + 0.6, y + 2.4); g.strokeStyle = '#c8e4ff'; g.lineWidth = 0.6; g.stroke(); } g.restore();
+    P.glow(g, 11, 8, 6, '#8ff0ff', 0.25);
+  } });
+  // the familiar imp (a blessing's): a small violet fiend on bat wings, curled horns, amber eyes, a spade-tipped tail, an ember in its claws
+  def('sum_imp', { w: 20, h: 20, frames: 2, draw(g, f) {
+    const s = '#5a2a7a', sl = sh(s, 0.45), sd = sh(s, -0.5), wing = '#3a1a52', eye = '#ffc040', up = f === 0;
+    for (const d of [-1, 1]) { // bat wings, the far one darker
+      g.save(); g.translate(9.4 + d * 0.8, 9); g.scale(d, 1);
+      g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(3, up ? -7 : -2, 7.4, up ? -6.4 : -1); g.lineTo(6.2, up ? -4.2 : 0.8); g.lineTo(7, up ? -2.4 : 2.6); g.lineTo(5, up ? -1.6 : 2.6); g.lineTo(4.6, up ? 0 : 3.8); g.quadraticCurveTo(2, 1.4, 0, 1.6); g.closePath();
+      P.fill(g, P.lg(g, 0, -6, 7, 3, d < 0 ? [sh(wing, -0.2), sh(wing, -0.5)] : [sh(wing, 0.3), wing])); P.line(g, 0, 0.4, 7.2, up ? -6.2 : -0.8, 0.3, sd);
+      g.restore(); }
+    g.beginPath(); g.moveTo(8.4, 13.6); g.quadraticCurveTo(5, 16.4, 3.4, 14 + (f ? 1 : 0)); g.strokeStyle = sd; g.lineWidth = 0.6; g.stroke(); P.path(g, [3.4, 14 + (f ? 1 : 0), 2, 13.2 + (f ? 1 : 0), 2.6, 15.2 + (f ? 1 : 0)]); P.fill(g, sd); // the spade tail
+    P.ell(g, 10, 11.4, 2.6, 3, P.lg(g, 8, 8.6, 12, 14.4, [sl, s, sd]));
+    P.limb(g, 9.2, 13.8, 8.6, 16.4, 0.8, 0.5, sd); P.limb(g, 11, 13.8, 11.6, 16.2, 0.8, 0.5, s);
+    P.ell(g, 11.2, 6.6, 2.6, 2.4, P.vol(g, 10.4, 5.8, 2.6, s));
+    P.horn(g, 10, 4.8, 8.4, 2.4, 9.8, 1.4, 0.45, '#2a1a1a'); P.horn(g, 12.4, 4.8, 13.6, 2.6, 12.4, 1.8, 0.4, '#2a1a1a');
+    P.ell(g, 11.8, 6.4, 0.8, 0.7, '#140810'); P.ell(g, 13.2, 6.5, 0.7, 0.6, '#140810'); P.evil(g, 11.8, 6.4, 0.55, eye); P.evil(g, 13.2, 6.5, 0.5, eye); P.glow(g, 12.5, 6.4, 2.4, eye, 0.5);
+    P.path(g, [11.4, 7.8, 13.8, 7.6, 12.6, 8.6]); P.fill(g, '#140810'); P.path(g, [12, 7.8, 12.4, 7.8, 12.2, 8.3]); P.fill(g, '#f0e0d0');
+    P.limb(g, 11.8, 10.4, 13.8, 11.6, 0.7, 0.5, s); P.circle(g, 14.2, 11.4, 0.9, '#ffb030'); P.glow(g, 14.2, 11.4, 2.6, '#ff8a20', 0.7); // the ember in its claws
+  } });
+  // the Occultist's grave spirits: a small wailing skull of pale light trailing a wisp
+  def('sum_spirit', { w: 14, h: 12, frames: 2, soft: true, draw(g, f) {
+    const c = '#8affd0', cl = '#e8fff4';
+    P.glow(g, 8, 6, 6, c, 0.55);
+    g.beginPath(); g.moveTo(8, 3.4); g.quadraticCurveTo(3, 3.6 + (f ? 0.8 : -0.4), 0.6, 6.4 + (f ? 1 : 0)); g.quadraticCurveTo(3.4, 6.4, 7.6, 8.4); g.closePath(); P.fill(g, P.lg(g, 0, 5, 8, 6, [G.rgba(c, 0), G.rgba(c, 0.7)]));
+    P.ell(g, 9, 5.8, 2.9, 2.7, P.rg(g, 8.4, 5, 3, [[0, '#ffffff'], [0.5, cl], [1, G.rgba(c, 0.9)]]));
+    P.ell(g, 9.4, 5.2, 0.7, 0.8, '#0a2a20'); P.ell(g, 11, 5.2, 0.6, 0.75, '#0a2a20'); P.ell(g, 10.4, 7.2, 0.7, 0.9 + (f ? 0.3 : 0), '#0a2a20'); // hollow eyes, a wailing mouth
+  } });
+
   /* Crone's bog plants (anchored at the root; frame 1 = striking) */
   const leaf = (g, x, y, a, l, col) => { g.save(); g.translate(x, y); g.rotate(a); g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(l * 0.5, -l * 0.35, l, 0); g.quadraticCurveTo(l * 0.5, l * 0.3, 0, 0); P.fill(g, P.lg(g, 0, -1, l, 1, [sh(col, 0.25), col, sh(col, -0.35)])); g.restore(); };
   const mound = (g) => { P.ell(g, 8, 15.4, 5.2, 1.6, P.lg(g, 0, 14, 0, 17, ['#4a3a24', '#2a2014'])); for (let i = 0; i < 4; i++) P.circle(g, 4.6 + i * 2.2, 15 + (i % 2) * 0.5, 0.5, '#5a4a30'); };
@@ -159,7 +217,7 @@
       g.strokeStyle = i % 2 ? '#4a6a22' : '#3a5418'; g.lineWidth = 0.9; g.stroke();
       for (let k = 1; k < 3; k++) P.circle(g, bx + Math.cos(a) * 2.4 * k, by - (f ? 3.2 : 1.6) * k, 0.35, '#c8d890');
     }
-    P.circle(g, 8, 12.8, 2.2, P.vol(g, 8, 12.8, 2.2, '#8a3a4a')); P.circle(g, 7.4, 12.2, 0.6, 'rgba(255,220,230,0.8)');
+    P.circle(g, 8, 12.8, 2.2, P.vol(g, 8, 12.8, 2.2, '#6a2a3a')); P.ell(g, 8.3, 12.8, 1.3, 1, '#e8f070'); P.ell(g, 8.4, 12.8, 0.35, 0.9, '#140a06'); P.glow(g, 8.3, 12.8, 2.4, '#d8ff60', 0.4); // a bulb with an eye in it
     if (f) P.glow(g, 8, 12.8, 5, '#c0ff60', 0.4);
   } });
   def('plant_biter', { w: 16, h: 20, cy: 18, frames: 2, draw(g, f) { // a bog flytrap on a crooked stalk
@@ -171,6 +229,7 @@
     g.save(); g.rotate(-0.55 * open); g.beginPath(); g.moveTo(-1.6, 0); g.quadraticCurveTo(2, -4, 5.6, -0.6); g.lineTo(-1.6, 0.4); P.fill(g, P.lg(g, 0, -4, 0, 0, ['#8ac040', '#4a7a20'])); P.path(g, [-0.6, 0, 1.6, -1, 3.8, -0.3]); P.fill(g, '#c0283a'); for (let i = 0; i < 4; i++) P.path(g, [0.6 + i * 1.2, -0.4, 1 + i * 1.2, 0.8, 1.4 + i * 1.2, -0.3]); g.fillStyle = '#f0ecd8'; g.fill(); g.restore();
     g.save(); g.rotate(0.55 * open); g.beginPath(); g.moveTo(-1.6, 0); g.quadraticCurveTo(2, 4, 5.6, 0.6); g.lineTo(-1.6, -0.4); P.fill(g, P.lg(g, 0, 0, 0, 4, ['#4a7a20', '#2a4a12'])); P.path(g, [-0.6, 0, 1.6, 1, 3.8, 0.3]); P.fill(g, '#8a1424'); for (let i = 0; i < 4; i++) P.path(g, [0.6 + i * 1.2, 0.4, 1 + i * 1.2, -0.8, 1.4 + i * 1.2, 0.3]); g.fillStyle = '#e0dcc8'; g.fill(); g.restore();
     g.restore();
+    for (let i = 0; i < 3; i++) { P.path(g, [hx + 0.6 + i * 1.3, hy - 0.4, hx + 1.1 + i * 1.3, hy - 0.4, hx + 0.9 + i * 1.3, hy + 0.8]); P.fill(g, '#f0ead0'); } // fangs
     P.circle(g, hx - 0.8, hy - 1.2, 0.35, '#ffe060');
   } });
   def('plant_pod', { w: 16, h: 18, cy: 16, frames: 2, draw(g, f) { // a swollen spore pod with glowing veins
@@ -182,16 +241,17 @@
     P.path(g, [cx - 1.2, cy2 - r * 0.9, cx, cy2 - r - 1.4, cx + 1.2, cy2 - r * 0.9]); P.fill(g, '#4a6a22');
     P.glow(g, cx, cy2, r * 2, '#b070ff', f ? 0.6 : 0.3);
   } });
-  def('plant_spitter', { w: 16, h: 20, cy: 18, frames: 2, draw(g, f) { // a pitcher plant that spits thorny seeds
+  def('plant_spitter', { w: 16, h: 20, cy: 18, frames: 2, draw(g, f) { // a pitcher plant: a swollen veined belly, a hooded lid over a gaping lip, spitting a thorny seed
     P.ell(g, 8, 18.4, 4.4, 1.4, '#2a2014');
     leaf(g, 7.4, 17.8, -2.8, 5.2, '#3a6a20'); leaf(g, 8.6, 17.8, -0.35, 5.2, '#4a7a28');
-    g.save(); g.translate(8, 17.6); g.rotate(f ? -0.12 : 0);
-    g.beginPath(); g.moveTo(-1.6, 0); g.quadraticCurveTo(-3.6, -6, -1.2, -9.4); g.lineTo(3.8, -11.4); g.lineTo(3.4, -8.6); g.quadraticCurveTo(2.4, -4, 1.6, 0); g.closePath();
-    P.fill(g, P.lg(g, -3, -10, 3, 0, ['#9ac850', '#5a8a2a', '#2e4a14']));
-    for (let i = 0; i < 3; i++) P.line(g, -1.6 + i * 1, -1 - i * 0.2, -1 + i * 1.2, -8.6 - i * 0.4, 0.3, '#8a2a3a');
-    P.ell(g, 3.6, -10, 0.9, 1.6, '#3a0c18', -0.4); P.rrect(g, 1.6, -12.6, 2.8, 1, 0.4, '#b83a4a');
+    g.save(); g.translate(8, 17.6); g.rotate(f ? -0.1 : 0);
+    g.beginPath(); g.moveTo(-1, 0); g.quadraticCurveTo(-4.6, -3, -3.4, -7.4); g.quadraticCurveTo(-2.4, -10.4, 1, -10.6); g.quadraticCurveTo(3.8, -10.4, 3.8, -7.6); g.quadraticCurveTo(4, -3, 1, 0); g.closePath();
+    P.fill(g, P.lg(g, -4, -10, 4, 0, ['#a8d060', '#5a8a2a', '#2a4410']));
+    g.strokeStyle = '#8a2a3a'; g.lineWidth = 0.3; for (const x of [-2.4, -0.8, 0.8, 2.2]) { g.beginPath(); g.moveTo(x * 0.6, -0.6); g.quadraticCurveTo(x * 1.1, -5, x * 0.7, -9); g.stroke(); } // red veins
+    P.ell(g, 1.4, -9.4, 2.6, 1.3, '#1a0608', -0.3); P.ell(g, 1.4, -9.6, 2.6, 0.6, '#b83a4a', -0.3); // the gaping lip
+    g.beginPath(); g.moveTo(-2.4, -10); g.quadraticCurveTo(0, -14.6 + (f ? -0.6 : 0), 4.8, -12.6 + (f ? -1 : 0)); g.quadraticCurveTo(2.6, -11.4, -0.8, -10.4); g.closePath(); P.fill(g, P.lg(g, -2, -14, 4, -10, ['#c8e070', '#6a9a30'])); // the hood
     g.restore();
-    if (f) P.glow(g, 11.6, 7.6, 3.4, '#c890ff', 0.8);
+    if (f) { P.glow(g, 12.4, 7.2, 3.4, '#c890ff', 0.8); P.circle(g, 12.4, 7.2, 0.8, '#e0c0ff'); }
   } });
   def('chakram_p', { w: 10, h: 10, outline: 0.4, draw(g) {
     for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2; P.path(g, [5 + Math.cos(a) * 2, 5 + Math.sin(a) * 2, 5 + Math.cos(a + 0.5) * 5, 5 + Math.sin(a + 0.5) * 5, 5 + Math.cos(a + 0.9) * 2.4, 5 + Math.sin(a + 0.9) * 2.4]); P.fill(g, P.lg(g, 0, 0, 10, 10, ['#ffffff', '#9aa4b8'])); }
