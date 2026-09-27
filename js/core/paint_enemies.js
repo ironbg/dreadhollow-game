@@ -144,30 +144,35 @@
     colors: { skin: '#8a9480', cloth: '#3a2e2a', eye: '#e8ff50' },
     variants: { ice: { skin: '#8aa6bc', cloth: '#22304a', eye: '#8ff0ff' }, fire: { skin: '#9a6a52', cloth: '#30140c', eye: '#ffd040' }, bog: { skin: '#6e7a48', cloth: '#30301a', eye: '#d0ff40' }, drowned: { skin: '#6a908a', cloth: '#163232', eye: '#70ffd0' }, purple: { skin: '#8a7c96', cloth: '#301640', eye: '#ff50c0' }, gold: { skin: '#a8987a', cloth: '#4a3e24', eye: '#fff0a0' } },
     draw(g, f, c) {
-      // a corpse-eater stooped almost double: knees high, arms too long, a bald skull face with a jaw hanging open
-      const s = c.skin, sd = sh(s, -0.5), w = f ? 0.9 : -0.9;
-      // far leg and arm
-      limb(g, 7.4, 12, 5 - w * 0.4, 13.6, 1, 0.7, sd); limb(g, 5 - w * 0.4, 13.6, 6.6 - w, 18.6, 0.7, 0.45, sd); claws(g, 6.6 - w, 18.8, 0.1, 3, 1.1, 0.26, '#d8d0b8');
-      limb(g, 11, 7.6, 13.4, 11.8, 0.75, 0.55, sd); limb(g, 13.4, 11.8, 14.6 - w, 17.6, 0.55, 0.4, sd); claws(g, 14.6 - w, 17.8, 0.6, 4, 1.6, 0.26, '#d8d0b8');
-      // a stooped back, shoulder blades and a line of vertebrae under the skin
-      g.beginPath(); g.moveTo(6.2, 12.6); g.bezierCurveTo(5, 7.4, 8.4, 4.6, 12.4, 5.6); g.quadraticCurveTo(14.2, 7.6, 12.6, 10.4); g.quadraticCurveTo(10.4, 12.8, 6.2, 12.6); g.closePath();
-      P.fill(g, P.lg(g, 5.6, 5, 13, 12.6, [sh(s, 0.3), s, sd]));
-      g.strokeStyle = sh(s, 0.35); g.lineWidth = 0.5; g.beginPath(); g.moveTo(6.6, 11.4); g.bezierCurveTo(6, 8, 8.4, 5.8, 11.4, 5.9); g.stroke(); // the spine
-      g.strokeStyle = sh(s, -0.65); g.lineWidth = 0.28; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(8.4 + i * 1.1, 7 + i * 0.3); g.quadraticCurveTo(9.4 + i * 1.1, 9 + i * 0.3, 8.6 + i * 1.1, 11); g.stroke(); }
-      rag(g, 5.8, 12, 10.6, 12.4, 3, 3, P.lg(g, 5, 12, 5, 15, [c.cloth, sh(c.cloth, -0.5)]));
-      // near leg, bent high
-      limb(g, 9.4, 12.2, 11.2 + w * 0.4, 14, 1.1, 0.75, s); limb(g, 11.2 + w * 0.4, 14, 10.2 + w, 18.6, 0.75, 0.5, s); claws(g, 10.2 + w, 18.8, 0.1, 3, 1.1, 0.28, '#e4dcc4');
-      // the head hung forward: a pale skull face, sunken eyes, a jaw dropped open
-      const hx = 14.6, hy = 6.4, sk = sh(s, 0.35);
-      P.ell(g, hx, hy, 2.4, 2.5, P.vol(g, hx, hy - 0.4, 2.5, sk));
-      P.ell(g, hx + 1, hy - 0.4, 0.8, 0.7, VOID, -0.2); P.ell(g, hx - 0.8, hy - 0.5, 0.6, 0.6, VOID, 0.2);
-      P.circle(g, hx + 1.1, hy - 0.3, 0.3, c.eye); P.glow(g, hx + 1.1, hy - 0.3, 1.3, c.eye, 0.45);
-      P.path(g, [hx - 0.4, hy + 1.4, hx + 2.4, hy + 1.2, hx + 2, hy + 4.4, hx, hy + 4]); P.fill(g, '#140204'); // the open maw
-      P.path(g, [hx + 0.2, hy + 4, hx + 2, hy + 4.4, hx + 1.8, hy + 5, hx + 0.2, hy + 4.7]); P.fill(g, sh(sk, -0.2)); // the hanging jaw
-      P.path(g, [hx + 0.4, hy + 1.3, hx + 0.6, hy + 2.5, hx + 0.9, hy + 1.3]); P.fill(g, '#ece4cc'); P.path(g, [hx + 1.6, hy + 1.2, hx + 1.8, hy + 2.3, hx + 2.1, hy + 1.2]); P.fill(g, '#ece4cc');
-      g.strokeStyle = '#2a2622'; g.lineWidth = 0.3; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(hx - 1.8 + i * 0.4, hy - 1.8); g.quadraticCurveTo(hx - 2.8 + i * 0.3, hy + 0.6, hx - 2.4 + i * 0.4, hy + 2.8 + i * 0.4); g.stroke(); } // lank hair behind
-      // near arm reaching, claws out
-      limb(g, 12.6, 8, 15.4, 11.4, 0.8, 0.55, s); limb(g, 15.4, 11.4, 17.8 + w * 0.3, 14.6, 0.55, 0.42, s); claws(g, 17.8 + w * 0.3, 14.7, 0.5, 4, 2, 0.3, '#ece4cc');
+      // a corpse-eater crouched to spring: hunched shoulders over a caved-in chest, a big bald head thrust forward with
+      // burning eyes and a jaw hanging open on teeth, long arms down to the ground with hooked claws, legs folded under
+      const s = c.skin, sl = sh(s, 0.35), sd = sh(s, -0.35), dk = sh(s, -0.6), w = f ? 0.7 : -0.7, nail = '#e8e0cc';
+      P.ell(g, 11, 19.2, 8, 1, 'rgba(0,0,0,0.45)');
+      // far limbs in shadow: the far arm reaching down, the far leg folded
+      limb(g, 11, 7.4, 13.6 + w, 12, 1, 0.8, dk); limb(g, 13.6 + w, 12, 14.6 + w, 18.2, 0.8, 0.6, dk); claws(g, 14.8 + w, 18.4, 0.1, 3, 1.2, 0.3, sh(nail, -0.3));
+      limb(g, 7.4, 12.4, 9.6 - w, 14.8, 1.5, 1.1, dk); limb(g, 9.6 - w, 14.8, 7.6 - w, 18.6, 1.1, 0.8, dk);
+      // the torso: hunched, the back a hump, the chest caved in over the ribs, a rag round the loins
+      g.beginPath(); g.moveTo(6.4, 13.4); g.quadraticCurveTo(4.8, 8.4, 8, 5.4); g.quadraticCurveTo(11.4, 3.6, 13.4, 6.4); g.quadraticCurveTo(13, 9, 10.8, 10.4); g.quadraticCurveTo(9.4, 12.4, 9.6, 13.6); g.closePath();
+      P.fill(g, P.lg(g, 5, 4, 12, 14, [sl, s, sd]));
+      for (let i = 0; i < 4; i++) P.circle(g, 5.8 + i * 1.1, 11.4 - i * 1.8 + (i > 1 ? 0.4 : 0), 0.45, sl); // the spine along the hump
+      g.strokeStyle = sd; g.lineWidth = 0.35; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(9, 7 + i * 1.3); g.quadraticCurveTo(10.8, 6.8 + i * 1.3, 11.8, 7.8 + i * 1.2); g.stroke(); } // ribs
+      P.path(g, [6.2, 12.6, 9.8, 12.6, 9.4, 15, 8.2, 14, 7, 15.4]); P.fill(g, c.cloth);
+      // the near leg folded under: thigh forward, knee high, a long foot flat
+      limb(g, 8.4, 12.8, 11.4 + w * 0.4, 13.6, 1.8, 1.2, s); P.circle(g, 11.4 + w * 0.4, 13.6, 1.2, P.vol(g, 11 + w * 0.4, 13.2, 1.2, sl));
+      limb(g, 11.4 + w * 0.4, 13.6, 9.6 + w * 0.4, 18.2, 1.1, 0.8, s); P.path(g, [8.8 + w * 0.4, 18, 12.4 + w * 0.4, 18.2, 12.2 + w * 0.4, 19.2, 8.6 + w * 0.4, 19.2]); P.fill(g, s); claws(g, 12.2 + w * 0.4, 18.8, 0, 2, 0.8, 0.25, nail);
+      // the head: a big bald skull thrust forward, a heavy brow, burning eyes, the jaw hanging open on teeth
+      const hx = 15.4, hy = 5.4;
+      limb(g, 12.2, 6.4, hx - 1.4, hy + 1, 1.4, 1.1, s);
+      P.ell(g, hx, hy, 3, 2.7, P.vol(g, hx - 1, hy - 1.2, 3, sl));
+      P.path(g, [hx - 0.6, hy - 1.4, hx + 3.4, hy - 1, hx + 3, hy - 0.2, hx - 0.4, hy - 0.4]); P.fill(g, sd); // the brow
+      P.ell(g, hx + 1.6, hy + 0.2, 0.9, 0.7, VOID); P.ell(g, hx - 0.2, hy + 0.3, 0.7, 0.65, VOID);
+      evil(g, hx + 1.6, hy + 0.2, 0.55, c.eye); evil(g, hx - 0.2, hy + 0.3, 0.45, c.eye);
+      P.path(g, [hx + 0.4, hy + 1.6, hx + 3.4, hy + 1.2, hx + 3, hy + 3.6 + (f ? 0.5 : 0), hx + 0.6, hy + 3.4]); P.fill(g, '#140406'); // the mouth hanging open
+      teeth(g, hx + 0.6, hy + 1.6, hx + 3.2, hy + 1.3, 4, 0.6, 1, nail);
+      P.path(g, [hx + 0.4, hy + 3.4, hx + 3, hy + 3.6 + (f ? 0.5 : 0), hx + 2.6, hy + 4.4 + (f ? 0.5 : 0), hx + 0.4, hy + 4.2]); P.fill(g, sd); // the lower jaw
+      P.path(g, [hx - 2.4, hy - 0.6, hx - 3.6, hy - 2.6, hx - 1.6, hy - 1.6]); P.fill(g, sd); // a torn ear
+      // the near arm, long and thin, reaching down to the ground, claws hooked
+      limb(g, 12.4, 7.2, 16.4 - w, 11.4, 1.1, 0.8, s); limb(g, 16.4 - w, 11.4, 18 - w, 18, 0.8, 0.6, sl); claws(g, 18.2 - w, 18.3, 0.1, 3, 1.5, 0.34, nail);
     } });
 
   /* ---------- Ghost / Wraith: a hooded shade, a black void for a face, clawed hands, a dissolving hem ---------- */
