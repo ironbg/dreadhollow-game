@@ -85,7 +85,7 @@
   /* ---------- Potions (Apothecary) & ingredients ---------- */
   E.herbs = ['moss', 'ember', 'lily'];
   E.potions = {
-    remembrance: { recipe: { moss: 3, lily: 2 }, gold: 500, gems: 40, unlock: 'd_boss_colossus' },
+    remembrance: { recipe: { moss: 3, lily: 2 }, gold: 500, gems: 40, unlock: 'd_boss_gravechief' },
     resonance:   { recipe: { ember: 3, moss: 2 }, gold: 800, gems: 60, unlock: 'd_stage_abyss_win' },
     lethe:       { recipe: { lily: 2, ember: 2 }, gold: 400, gems: 25, unlock: 'd_stage_crypt_win' },
   };
@@ -123,7 +123,7 @@
 
   /* ---------- Main quests: a guided path through the deeds, each pays out gems ---------- */
   E.mainQuests = [
-    ['d_stage_crypt_s3', 30], ['d_stage_crypt_s5', 30], ['d_boss_colossus', 40], ['d_hero_knight_l20', 30], ['d_stage_crypt_win', 60],
+    ['d_stage_crypt_s3', 30], ['d_stage_crypt_s5', 30], ['d_boss_gravechief', 40], ['d_hero_knight_l20', 30], ['d_stage_crypt_win', 60],
     ['d_brew_1', 30], ['d_stage_abyss_s5', 40], ['d_well_1', 40], ['d_secret_crypt', 50], ['d_stage_abyss_win', 80],
     ['d_stage_crypt_a1', 60], ['d_level_50', 60], ['d_stage_aqueduct_win', 100], ['d_champions_10', 60], ['d_dread_4', 80],
     ['d_stage_catacombs_win', 120], ['d_stage_discord_win', 150], ['d_stage_blightmire_win', 180], ['d_stage_reliquary_win', 250],

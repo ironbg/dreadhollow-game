@@ -8,6 +8,7 @@
   R.hazard = function (h) { h.t = 0; h.fired = false; h.tick = 0; this.hazards.push(h); return h; };
   R.inHazard = function (h, x, y) {
     if (h.kind === 'circle') return U.dist2(x, y, h.x, h.y) < h.r * h.r;
+    if (h.kind === 'ring') { const d2 = U.dist2(x, y, h.x, h.y); return d2 < h.r * h.r && d2 > h.r0 * h.r0; }
     if (h.kind === 'line') {
       const dx = x - h.x, dy = y - h.y, ca = Math.cos(h.ang), sa = Math.sin(h.ang);
       const along = dx * ca + dy * sa, perp = -dx * sa + dy * ca;
@@ -167,6 +168,34 @@
       }
       if (e.c2 > 5) { e.c2 = 0; for (let i = 0; i < 3; i++) run.after(i * 0.3, () => run.hazard({ kind: 'circle', x: p.x + (run.hatingHeart ? 0 : U.rand(-20, 20)), y: p.y + (run.hatingHeart ? 0 : U.rand(-20, 20)), r: 22, delay: run.hatingHeart ? 1.5 : 1.2, dmg: e.dmg, slow: 1, color: '#9fe8ff', src: e, boss: true, sound: 'boom', boulder: true })); }
     },
+  };
+  /* ---------- the Crypt ---------- */
+  // Grave Chieftain: lumbers after you; raises its tombstone hammer (a marked circle), the blow throws bone shards all around;
+  // stamps the ground in a line toward you; calls the hall's hounds
+  AI.b_chieftain = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    e.cspd = e.slam > 0 ? 0 : e.spd; e.mx = dx; e.my = dy; e.slam = Math.max(0, (e.slam || 0) - dt);
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 3.4) {
+      e.c1 = 0; e.slam = 1.1;
+      run.hazard({ kind: 'circle', x: p.x, y: p.y, r: 36, delay: 1.1, dmg: e.dmg * 1.4 * e.enr, color: '#c8a070', src: e, boss: true, sound: 'boom',
+        onFire: (r, h) => { r.shake = 6; for (let i = 0; i < 10; i++) r.enemyShot({ x: h.x, y: h.y }, i / 10 * TAU, 85, e.dmg * 0.5, '#e8dcc0', 'skull'); } });
+    }
+    if (e.c2 > 6.5) {
+      e.c2 = 0; const a = Math.atan2(dy, dx);
+      for (let i = 0; i < 5; i++) run.after(i * 0.16, () => run.hazard({ kind: 'circle', x: e.x + Math.cos(a) * (24 + i * 24), y: e.y + Math.sin(a) * (24 + i * 24), r: 15, delay: 0.7, dmg: e.dmg * 0.9 * e.enr, color: '#c8a070', src: e, boss: true, sound: i === 0 ? 'boom' : null }));
+    }
+    if (e.c3 > 11) { e.c3 = 0; run.spawnPack('hound', { x: e.x, y: e.y }, 4); DH.audio.play('roar'); }
+  };
+  // Bone Tyrant: strides at you; its curse rings the ground around you (only the heart of the ring is safe); a wide sweep of
+  // the greatsword when you come close; raises a guard of skeletons
+  AI.b_tyrant = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    e.cspd = e.spd; e.mx = dx; e.my = dy;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 4.2) { e.c1 = 0; run.hazard({ kind: 'ring', x: p.x, y: p.y, r: 70, r0: 22, delay: 1.2, dmg: e.dmg * 1.3 * e.enr, color: '#b060ff', src: e, boss: true, sound: 'frost' }); }
+    if (e.c2 > 1.6 && dist < 60) { e.c2 = 0; run.hazard({ kind: 'cone', x: e.x, y: e.y, ang: Math.atan2(dy, dx), arc: 2.2, len: 62, delay: 0.55, dmg: e.dmg * 1.2 * e.enr, color: '#ff5040', src: e, boss: true, sound: 'swing' }); }
+    if (e.c3 > 9) { e.c3 = 0; for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; run.spawnEnemy('skeleton', e.x + Math.cos(a) * 26, e.y + Math.sin(a) * 26); } run.burst(e.x, e.y, 20, ['#b060ff', '#e6dcc0'], 70); }
   };
   C.BOSS_AI = AI;
 })(window.DH);

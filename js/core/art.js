@@ -50,7 +50,7 @@
       g.fillStyle = 'rgba(0,0,0,0.4)'; g.beginPath(); g.ellipse(x, y + 7, 6, 2, 0, 0, Math.PI * 2); g.fill();
       g.drawImage(s.frames[0], x - s.ox, y - s.oy, s.w, s.h);
     }
-    const bdef = C.enemies[st.bosses[1].id], bs = G.sprite(bdef.painter, bdef.variant || null);
+    const bdef = C.enemies[st.bosses.find((b) => b.final).id], bs = G.sprite(bdef.painter, bdef.variant || null);
     const k = Math.min(1, (h - 10) / bs.h);
     g.drawImage(bs.frames[0], w / 2 - bs.w * k / 2, h / 2 - bs.h * k / 2 + 4, bs.w * k, bs.h * k);
     const dark = makeCanvas(w, h), dg = dark.getContext('2d'), D = st.theme.dark;

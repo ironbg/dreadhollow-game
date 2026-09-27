@@ -110,6 +110,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'enemy.ooze': 'Carrion Ooze', 'enemy.oozelet': 'Ooze Spawn', 'enemy.shieldbearer': 'Shieldbearer', 'enemy.hound': 'Grave Hound', 'enemy.watcher': 'Watcher', 'enemy.bloater': 'Bloater',
   'affix.swift': 'Swift', 'affix.gunner': 'Gunner', 'affix.summoner': 'Summoner', 'affix.ironclad': 'Ironclad', 'affix.regen': 'Regenerating', 'affix.volatile': 'Volatile', 'affix.charger': 'Charger',
   'hud.march': 'The Procession marches! Step aside', 'enemy.marcher': 'Procession Spirit',
+  'enemy.bonemage': 'Bone Mage', 'enemy.gravechief': 'Grave Chieftain', 'enemy.bonetyrant': 'Bone Tyrant',
   'nb.dh': '{d}d {h}h', 'nb.title': 'The Seven Nights',
   'nb.short': '7 Nights',
   'nb.sub': 'A welcome for newcomers: each night opens new tasks. Tasks pay Seals; Seals fill the rewards track.',

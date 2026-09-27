@@ -115,6 +115,7 @@
       if (DH.content && !DH.content.stages[d.selectedStage]) d.selectedStage = 'crypt';
       // the Starting Tome quests became gentler: whoever beat the old ones keeps the tome
       const ST = DH.content && DH.content.START_TOME_OLD; if (ST && d.deeds) for (const k in ST) if (d.deeds[ST[k]] && !d.deeds[k]) d.deeds[k] = d.deeds[ST[k]];
+      const BO = DH.content && DH.content.BOSS_DEED_OLD; if (BO && d.deeds) for (const k in BO) if (d.deeds[BO[k]] && !d.deeds[k]) d.deeds[k] = d.deeds[BO[k]]; // a hall's bosses were recast: a beaten boss counts for its successor
       d.v = SAVE_VERSION;
     },
     _t: null,

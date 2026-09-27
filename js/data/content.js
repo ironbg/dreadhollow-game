@@ -50,6 +50,7 @@
   /* "Starting Ability": a hall quest (deed) that puts an Arcane Tome right next to the hero at the start */
   // the deed that puts an Arcane Tome beside the hero at the start of each hall
   C.START_TOME_QUEST = { crypt: { kills: 2000 }, abyss: { kills: 2000 }, catacombs: { survive: 6 }, blightmire: { survive: 4 }, reliquary: { kills: 2000 } };
+  C.BOSS_DEED_OLD = { d_boss_gravechief: 'd_boss_colossus' }; // new boss deed <- the old one it replaces (see save.migrate)
   C.START_TOME_DEED = {
     crypt: 'd_start_crypt', abyss: 'd_start_abyss', aqueduct: 'd_boss_lich', catacombs: 'd_start_catacombs',
     discord: 'd_boss_discolossus', blightmire: 'd_start_blightmire', reliquary: 'd_start_reliquary',
@@ -348,9 +349,9 @@
   /* ------------------------------------------------------------------ */
   /* Enemies. mass drives knockback resistance, def is % damage reduction. */
   C.enemies = {
-    bat:      { painter: 'bat',      hp: 5,   spd: 62, dmg: 4,  xp: 1, r: 5,  mass: 0.5, ai: 'flutter', fly: true, anim: 0.16 },
+    bat:      { painter: 'bat',      hp: 5,   spd: 62, dmg: 4,  xp: 1, r: 5,  mass: 0.5, ai: 'bat', fly: true, anim: 0.16 }, // flutters, then dives
     rat:      { painter: 'rat',      hp: 6,   spd: 56, dmg: 4,  xp: 1, r: 4,  mass: 0.5, anim: 0.2 },
-    skeleton: { painter: 'skeleton', hp: 13,  spd: 36, dmg: 7,  xp: 1, r: 6,  mass: 1 },
+    skeleton: { painter: 'skeleton', hp: 13,  spd: 36, dmg: 7,  xp: 1, r: 6,  mass: 1, reform: 0.35 }, // may fall to a heap of bones and rise again
     ghoul:    { painter: 'ghoul',    hp: 28,  spd: 28, dmg: 10, xp: 2, r: 7,  mass: 1.6 },
     ghost:    { painter: 'ghost',    hp: 16,  spd: 46, dmg: 7,  xp: 2, r: 6,  mass: 0.8, ai: 'float', fly: true, alpha: 0.85 },
     spider:   { painter: 'spider',   hp: 10,  spd: 40, dmg: 6,  xp: 1, r: 6,  mass: 0.8, ai: 'dash', anim: 0.18 },
@@ -364,7 +365,7 @@
     anguish:     { painter: 'anguish', painter2: 'anguish_foot', hp: 3000, spd: 44, dmg: 26, xp: 400, r: 17, mass: 80, def: 0.2, ai: 'b_lord', boss: true, lord: true },
     overlord:    { painter: 'overlord', hp: 1900, spd: 32, dmg: 24, xp: 180, r: 15, mass: 60, def: 0.15, ai: 'b_overlord', boss: true },
     wyrm:        { painter: 'wyrm', hp: 3400, spd: 36, dmg: 26, xp: 400, r: 18, mass: 90, def: 0.2, ai: 'b_wyrm', boss: true, lord: true, fly: true },
-    lich:        { painter: 'lich', hp: 2200, spd: 34, dmg: 18, xp: 200, r: 14, mass: 40, def: 0.15, ai: 'b_caster', boss: true },
+    lich:        { painter: 'lich', hp: 1600, spd: 34, dmg: 18, xp: 200, r: 14, mass: 40, def: 0.15, ai: 'b_caster', boss: true },
     horseman:    { painter: 'horseman', hp: 3600, spd: 50, dmg: 26, xp: 400, r: 17, mass: 80, def: 0.2, ai: 'b_horseman', boss: true, lord: true, alpha: 0.95 },
     basilisk:    { painter: 'basilisk', variant: 'ice', hp: 2200, spd: 34, dmg: 22, xp: 220, r: 16, mass: 70, def: 0.2, ai: 'b_basilisk', boss: true },
     jotun:       { painter: 'jotun', hp: 4200, spd: 30, dmg: 30, xp: 450, r: 18, mass: 120, def: 0.25, ai: 'b_jotun', boss: true, lord: true },
@@ -389,13 +390,15 @@
   C.enemies.marcher = { painter: 'ghost', variant: 'wraith', hp: 400, spd: 26, dmg: 12, xp: 0, r: 6, mass: 99, ai: 'march', fly: true, dmgFactor: 0.05, alpha: 0.8 };
   C.enemies.ooze = { painter: 'slime', hp: 34, spd: 30, dmg: 9, xp: 2, r: 8, mass: 1.4, ai: 'hop', split: 'oozelet', scale: 0.72, anim: 0.3, particles: ['#7ab040', '#d0ff80', '#2a4a10'] };
   C.enemies.oozelet = { painter: 'slime', hp: 10, spd: 40, dmg: 5, xp: 1, r: 5, mass: 0.6, ai: 'hop', scale: 0.45, anim: 0.25, particles: ['#7ab040', '#d0ff80'] };
-  C.enemies.shieldbearer = { painter: 'shieldskel', hp: 34, spd: 26, dmg: 9, xp: 3, r: 7, mass: 2.2, def: 0.1, shield: 0.25 }; // shots from the front: a quarter of their damage, and they stop
-  C.enemies.hound = { painter: 'wolf', hp: 12, spd: 68, dmg: 7, xp: 1, r: 6, mass: 0.7, ai: 'pack', pack: [4, 6], anim: 0.14 };
+  C.enemies.shieldbearer = { painter: 'shieldskel', hp: 46, spd: 26, dmg: 11, xp: 4, r: 7, mass: 2.6, def: 0.15, shield: 0.25 };
+  C.enemies.bonemage = { painter: 'bonemage', hp: 20, spd: 30, dmg: 7, xp: 3, r: 6, mass: 0.9, ai: 'mage', shot: { dmg: 7, spd: 100, cd: 3.2 } }; // keeps its distance, a fan of three bolts, blinks away
+  C.enemies.gravechief = { painter: 'gravechief', hp: 750, spd: 30, dmg: 18, xp: 110, r: 15, mass: 60, def: 0.1, ai: 'b_chieftain', boss: true };
+  C.enemies.bonetyrant = { painter: 'bonetyrant', hp: 1200, spd: 32, dmg: 20, xp: 140, r: 13, mass: 55, def: 0.15, ai: 'b_tyrant', boss: true }; // shots from the front: a quarter of their damage, and they stop
+  C.enemies.hound = { painter: 'wolf', hp: 12, spd: 68, dmg: 5, xp: 2, r: 6, mass: 0.7, ai: 'pack', pack: [3, 5], anim: 0.14 };
   C.enemies.watcher = { painter: 'effigy', hp: 36, spd: 66, dmg: 12, xp: 3, r: 7, mass: 2.5, def: 0.15, ai: 'watch', scale: 0.8 }; // still while the hero faces it
   C.enemies.bloater = { painter: 'slime', variant: 'volatile', hp: 14, spd: 44, dmg: 0, xp: 2, r: 7, mass: 1, ai: 'fuse', boom: { R: 28, dmg: 15, fuse: 1.0 }, scale: 0.62, anim: 0.2, particles: ['#ff7030', '#ffd060', '#401008'] };
   // [enemy, from (timeline s), weight, variant override]
   C.HALL_FOES = {
-    crypt: [['ooze', 50, 1.6], ['shieldbearer', 150, 1.4], ['hound', 260, 0.8, 'crypt']],
     abyss: [['bloater', 90, 0.9], ['hound', 200, 1]],
     aqueduct: [['watcher', 90, 1.2], ['shieldbearer', 200, 1.4]],
     catacombs: [['hound', 70, 1.2], ['ooze', 160, 1.5]],
@@ -421,7 +424,7 @@
   C.ELITE_MOVES = { skeleton: 'volley', ghost: 'volley', wraith: 'volley', imp: 'volley', cultist: 'volley', watcher: 'volley',
     ghoul: 'charge', hknight: 'charge', rat: 'charge', spider: 'charge', hound: 'charge',
     golem: 'slam', shieldbearer: 'slam', effigy: 'slam', ooze: 'slam', bloater: 'slam',
-    bat: 'summon' };
+    bat: 'summon', bonemage: 'volley' };
   C.CHAMPION = { hp: 18, dmg: 1.7, scale: 1.8, def: 0.2 };
   // Champion affixes: one each (two from Agony III), from its hall's list. Their health also grows with the hall's progress:
   // x0.7 at the start to x1.3 at the end (the hall's strength).
@@ -476,8 +479,10 @@
   /* ------------------------------------------------------------------ */
   /* Stages. theme colours are RGB arrays for the procedural floor. */
   C.stages = {
-    crypt: { index: 0, agonyXp: 0.529, hpMult: 1, dmgMult: 1, goldMult: 1, variant: null, remap: {}, herb: 'moss',
-      bosses: [{ t: 300, id: 'colossus' }, { t: 600, id: 'anguish', final: true }],
+    crypt: { index: 0, agonyXp: 0.529, hpMult: 1, dmgMult: 1, goldMult: 1, variant: null, herb: 'moss',
+      // the hall's own six: bats, rising skeletons, hound packs, splitting oozes, bone mages, shieldbearers
+      remap: { bat: 'bat', rat: 'bat', skeleton: 'skeleton', ghoul: 'ooze', ghost: 'ooze', spider: 'hound', cultist: 'bonemage', wraith: 'bonemage', hknight: 'shieldbearer', golem: 'shieldbearer' },
+      bosses: [{ t: 150, id: 'gravechief' }, { t: 300, id: 'bonetyrant' }, { t: 450, id: 'lich' }, { t: 600, id: 'anguish', final: true }],
       theme: { floorA: [66, 60, 74], floorB: [52, 47, 60], mortar: [20, 17, 26], moss: [70, 104, 58], dark: [7, 5, 12], darkness: 0.84, lightTint: 'rgba(255,170,90,', accent: '#e8a050', accentRate: 0.12 } },
     abyss: { index: 1, agonyXp: 0.31, hpMult: 1.9, dmgMult: 1.45, goldMult: 1.6, variant: 'fire', remap: { ghost: 'imp', rat: 'bat' }, herb: 'ember',
       bosses: [{ t: 300, id: 'overlord' }, { t: 600, id: 'wyrm', final: true }],

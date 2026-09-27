@@ -302,6 +302,11 @@
     const fr = nf > 1 ? Math.floor(e.anim / (e.def.anim || 0.3)) % nf : 0; // a slow, heavy two-frame gait
     const bob = e.def.fly ? Math.sin(e.anim * 4) * 1.5 - 2 : 0;
     const x = e.x - cx, y = e.y - cy + bob, k = e.scale;
+    if (e.down > 0) { // a fallen skeleton: a heap of bones that pulls itself back up (it rises through the last half second)
+      const up = Math.max(0, 1 - e.down / 0.5), hh = s.h * k * (0.28 + 0.72 * up), ww = s.w * k * (1.25 - 0.25 * up);
+      g.globalAlpha = 0.85; g.drawImage(s.frames[0], x - s.ox * k * (ww / (s.w * k)), y + (s.h * k - s.oy * k) - hh, ww, hh); g.globalAlpha = 1;
+      return;
+    }
     if (e.elite || e.champion || e.boss || e.def.gilded || e.special) {
       const gl = A.glow(e.boss ? 'rgba(255,60,60,0.55)' : e.champion ? 'rgba(255,40,60,0.7)' : 'rgba(255,200,80,0.55)');
       const rr = (e.boss ? 34 : 20) * k * (e.boss ? 1 : 0.8);
@@ -507,7 +512,7 @@
   };
   /** Points along a hazard's shape (for its light). */
   function hazardPts(h) {
-    if (h.kind === 'circle') return [[h.x, h.y, h.r * 1.3]];
+    if (h.kind === 'circle' || h.kind === 'ring') return [[h.x, h.y, h.r * 1.3]];
     const out = [], n = 3;
     if (h.kind === 'line') for (let i = 0; i < n; i++) { const d = (i + 0.5) / n * h.len; out.push([h.x + Math.cos(h.ang) * d, h.y + Math.sin(h.ang) * d, Math.max(h.w * 2, h.len / n * 0.8)]); }
     else for (let i = 0; i < n; i++) { const d = (i + 1) / (n + 0.5) * h.len; out.push([h.x + Math.cos(h.ang) * d, h.y + Math.sin(h.ang) * d, d * Math.sin(h.arc / 2) * 1.4 + 10]); }
@@ -525,6 +530,7 @@
     const f = k == null ? 1 : k;
     g.beginPath();
     if (h.kind === 'circle') g.ellipse(x, y, h.r * f, h.r * 0.8 * f, 0, 0, TAU);
+    else if (h.kind === 'ring') { const ro = h.r0 + (h.r - h.r0) * f; g.ellipse(x, y, ro, ro * 0.8, 0, 0, TAU); g.ellipse(x, y, h.r0, h.r0 * 0.8, 0, TAU, 0, true); } // a band with a safe heart
     else if (h.kind === 'line') { g.save(); g.translate(x, y); g.rotate(h.ang); g.rect(0, -h.w / 2 * f, h.len, h.w * f); g.restore(); }
     else if (h.kind === 'cone') { g.moveTo(x, y); g.arc(x, y, h.len * f, h.ang - h.arc / 2, h.ang + h.arc / 2); g.closePath(); }
   };

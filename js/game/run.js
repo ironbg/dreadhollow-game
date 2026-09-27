@@ -175,7 +175,7 @@
       while (this.spawnAcc >= 1) {
         this.spawnAcc -= 1;
         if (this.enemies.length >= cap) continue;
-        const pt = this.edgePoint(), type = U.weighted(mix), pk = C.enemies[type] && C.enemies[type].pack;
+        const pt = this.edgePoint(), type = U.weighted(mix), ud = C.enemies[this.remap(type)], pk = ud && ud.pack;
         if (pk) this.spawnAcc -= this.spawnPack(type, pt, U.randi(pk[0], pk[1])) - 1; // hounds come as a pack
         else this.spawnEnemy(type, pt.x, pt.y);
       }
@@ -332,13 +332,29 @@
         if (e.affix && !e.affixShown && U.dist2(e.x, e.y, p.x, p.y) < 150 * 150) { // a Champion names its affixes as it comes into view
           e.affixShown = true; this.text(e.x, e.y - 16 * e.scale, e.affix.map((a) => t('affix.' + a)).join(' · '), C.CHAMP_AFFIX[e.affix[0]].color, true);
         }
+        if (e.down > 0) { e.down -= dt; if (e.down <= 0) { this.burst(e.x, e.y, 8, ['#e6dcc0', '#8a6a4a'], 50); DH.audio.play('swing'); } continue; } // a heap of bones, pulling itself together
         if (e.stun > 0) { e.stun -= dt; e.x += e.kx * dt; e.y += e.ky * dt; const kd0 = Math.pow(0.0005, dt); e.kx *= kd0; e.ky *= kd0; continue; }
         const slowK = this.slowFactor(e); // Slow stacks: x0.91 each
         let dx = p.x - e.x, dy = p.y - e.y; const dist = Math.hypot(dx, dy) || 1; dx /= dist; dy /= dist;
         let mx = dx, my = dy, spd = e.spd * slowK;
         e.t += dt;
         const ai = e.def.ai;
-        if (ai === 'flutter') { const w = Math.sin(e.anim * 5 + e.x * 0.01) * 0.6; mx = dx - dy * w; my = dy + dx * w; }
+        if (ai === 'bat') { // flutters in, then every few seconds folds its wings and dives straight at the hero
+          e.dive = (e.dive == null ? U.rand(1.5, 3.5) : e.dive) - dt;
+          if (e.dive <= -0.45) e.dive = U.rand(2.5, 4);
+          if (e.dive <= 0 && dist < 110) spd *= 2.6; else { const w = Math.sin(e.anim * 5 + e.x * 0.01) * 0.7; mx = dx - dy * w; my = dy + dx * w; }
+        } else if (ai === 'mage') { // keeps its distance, casts a fan of three bolts; every other cast it vanishes and reappears nearby
+          if (dist < 80) { mx = -dx; my = -dy; } else if (dist < 120) { mx = -dy; my = dx; spd *= 0.5; }
+          if (e.t > e.def.shot.cd && dist < 190) {
+            e.t = 0; const a0 = Math.atan2(dy, dx);
+            for (const o of [-0.24, 0, 0.24]) this.enemyShot(e, a0 + o, e.def.shot.spd, e.def.shot.dmg * this.stage.dmgMult, '#9a70ff');
+            if ((e.casts = (e.casts || 0) + 1) % 2 === 0) {
+              this.burst(e.x, e.y, 10, ['#9a70ff', '#2a1040'], 60);
+              const a = Math.atan2(-dy, -dx) + U.rand(-1.2, 1.2), d = U.rand(90, 125); e.x = p.x + Math.cos(a) * d; e.y = p.y + Math.sin(a) * d;
+              this.burst(e.x, e.y, 10, ['#9a70ff', '#2a1040'], 60);
+            }
+          }
+        } else if (ai === 'flutter') { const w = Math.sin(e.anim * 5 + e.x * 0.01) * 0.6; mx = dx - dy * w; my = dy + dx * w; }
         else if (ai === 'dash') { const c = e.t % 1.6; spd *= c < 1.0 ? 0.35 : 3.2; }
         else if (ai === 'ranged') {
           if (dist < 90) { mx = -dx; my = -dy; } else if (dist < 130) { mx = -dy; my = dx; spd *= 0.5; }
@@ -356,7 +372,7 @@
           if (e.rushT > 0) { e.rushT -= dt; spd *= 1.5; if (e.rushT <= 0) e.packT = U.rand(1.8, 2.8); }
           else {
             e.packT = (e.packT == null ? 2 : e.packT) - dt; e.slotA = (e.slotA == null ? Math.atan2(-dy, -dx) : e.slotA) + dt * 0.8;
-            const tx = p.x + Math.cos(e.slotA) * 58 - e.x, ty = p.y + Math.sin(e.slotA) * 58 - e.y, tl = Math.hypot(tx, ty) || 1;
+            const tx = p.x + Math.cos(e.slotA) * 48 - e.x, ty = p.y + Math.sin(e.slotA) * 48 - e.y, tl = Math.hypot(tx, ty) || 1;
             mx = tx / tl; my = ty / tl; if (tl < 8) spd *= tl / 8;
             if (e.packT <= 0) { e.rushT = 1.1; DH.audio.play('roar'); }
           }
@@ -548,6 +564,10 @@
     /* ---------------- kills & loot ---------------- */
     killEnemy(e) {
       if (e.dead) return;
+      // a skeleton may fall to a heap of bones and rise again once, at half strength (not Elites, Champions or those with Frost)
+      if (e.def.reform && !e.reformed && !e.elite && !e.champion && !(e.st.frost > 0) && Math.random() < e.def.reform) {
+        e.reformed = true; e.hp = e.maxHp * 0.5; e.down = 2.6; e.st.burn = 0; this.burst(e.x, e.y, 10, ['#e6dcc0', '#8a6a4a'], 70); DH.audio.play('kill'); return;
+      }
       e.dead = true;
       const cols = e.def.particles || ['#e6dcc0', '#8a6a4a', '#7c1624'];
       if (e.def.hazard) { this.envBreak(e); return; } // braziers and ice spikes: no loot, a hazard
