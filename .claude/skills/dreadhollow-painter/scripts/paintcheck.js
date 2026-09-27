@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /* paintcheck: look at Dreadhollow painters the way the game shows them.
  *
- *   NODE_PATH=$(npm root -g) node paintcheck.js OUTDIR name[:variant] [name[:variant] ...] [--scale N] [--repo PATH]
+ *   NODE_PATH=$(npm root -g) node paintcheck.js OUTDIR name[:variant][@frame] [...] [--scale N] [--repo PATH]
+ *   (@frame picks the frame shown in blind_N.png, 1-based: mimic@2 shows the open chest)
  *
  * Writes into OUTDIR:
  *   sheet.png      one row per painter: in-game size (native px x2, as on a phone), both frames magnified,
@@ -33,7 +34,7 @@ fs.mkdirSync(out, { recursive: true });
     const cv = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; return [c, g]; };
     const lum = (d, i) => 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
     for (const spec of names) {
-      const [name, variant] = spec.split(':');
+      const [base, fr] = spec.split('@'), [name, variant] = base.split(':'), bf = Math.max(0, (+fr || 1) - 1);
       if (!G.painters[name]) { stats[spec] = { error: 'no painter' }; continue; }
       const s = G.sprite(name, variant || null), f0 = s.frames[0], W = f0.width, H = f0.height;
       const d = f0.getContext('2d').getImageData(0, 0, W, H).data, L = [];
@@ -50,7 +51,7 @@ fs.mkdirSync(out, { recursive: true });
       for (let i = 0; i < W * H * 4; i += 4) { if (d[i + 3] <= 128) continue; sd2.data.set([34, 36, 46, 255], i); const v = lum(d, i) > med ? 214 : 52; nd.data.set([v, v, v, 255], i); }
       sg.putImageData(sd2, 0, 0); ng.putImageData(nd, 0, 0);
       rows.push({ spec, parts: [[f0, 2, 'in game'], [f0, S, 'frame 1'], [s.frames[1 % s.frames.length], S, 'frame 2'], [sil, S, 'silhouette'], [no, S, 'notan']], W, H });
-      const [b, bg] = cv(W * S + 40, H * S + 40); bg.fillStyle = '#5a5660'; bg.fillRect(0, 0, b.width, b.height); bg.drawImage(f0, 20, 20, W * S, H * S);
+      const [b, bg] = cv(W * S + 40, H * S + 40); bg.fillStyle = '#5a5660'; bg.fillRect(0, 0, b.width, b.height); bg.drawImage(s.frames[bf % s.frames.length], 20, 20, W * S, H * S);
       blind.push(b.toDataURL());
     }
     // sheet
