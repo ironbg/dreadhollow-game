@@ -1,16 +1,15 @@
 """Sunken Knight (Dreadhollow, the Aqueduct's 7:30 boss) as true pixel art.
 Canvas 98x118 = the game's sprite cell for a 46x56-unit painter at 2 px/unit with its 1.5-unit pad.
-Light: top-left. No outer outline: the game grades pixel painters like every other model (key light, bevelled edges,
-fine grain, the dark rim), so detail is kept at one pixel and the palette sits a step lighter than the final look."""
+Light: top-left. Clean cel shading with one-pixel detail and its own dark outline; used ungraded (grade: false)."""
 import sys, json
 sys.path.insert(0, "/home/user/game/.claude/skills/pixel-art-studio/scripts")
 from pixelstudio import Sprite
 
 # ---- palette (hard budget ~26) ----
 OUT = "#0b0710"
-PL = ["#1e3038", "#36565a", "#58847c", "#88b4a0", "#c8e4d0"]       # verdigris steel, dark -> light (hue-shifted)
-WEED = ["#16301a", "#2c5228", "#4c7a34", "#86a848"]                  # kelp cloak
-BARN = ["#6e6856", "#b0a890", "#ece6d0"]                            # barnacles
+PL = ["#141e28", "#23363f", "#3a5458", "#5f8580", "#9cbcb2"]       # verdigris steel, dark -> light (hue-shifted)
+WEED = ["#10200f", "#1f3a1c", "#3a5e2a", "#6a8a3a"]                  # kelp cloak
+BARN = ["#5a5446", "#9a9480", "#d8d2bc"]                            # barnacles
 GLOW = ["#1e6e66", "#50e0c0", "#d8fff4"]                            # eyes, rune
 WOOD = ["#24160e", "#4a2e1a", "#6e4a2a"]                            # trident shaft
 BRONZE = ["#4a3014", "#8a6428", "#c8a050"]                           # trim
@@ -36,9 +35,7 @@ def cluster(pts):
 
 def patina(box, seed, only):
     """verdigris and rust flecks, one pixel each"""
-    s.noise(*box, PL[3], density=0.035, seed=seed, only=only)
-    s.noise(*box, PL[0], density=0.018, seed=seed + 7, only=only)
-    s.noise(*box, BRONZE[1], density=0.012, seed=seed + 13, only=only)
+    return  # clean cel look: no flecks
 
 def draw(f):
     w = 2 if f else -2          # stride
@@ -52,9 +49,8 @@ def draw(f):
     for i, x in enumerate(range(26, 76, 7)):         # strands hanging from the hem
         s.line(x, 92 + (i % 3) * 2, x + sw, 110 - (i % 2) * 3, WEED[1 + (i % 2)])
     s.polygon([(60, 40), (66, 38), (74, 70), (78 + sw, 100), (70, 104), (62 + sw, 98)], WEED[0], only="opaque")
-    for i, x in enumerate(range(24, 76, 3)):
-        s.line(x, 42 + (i % 4) * 3, x - 2 + sw, 100 - (i % 3) * 4, WEED[3] if i % 3 == 0 else WEED[1], only="opaque")
-    s.noise(20, 40, 80, 110, WEED[3], density=0.04, seed=3, only=WEED[2])
+    for i, x in enumerate(range(26, 76, 6)):
+        s.line(x, 46 + (i % 3) * 4, x - 2 + sw, 98 - (i % 2) * 6, WEED[2] if i % 2 else WEED[0], only="opaque")
 
     # ---------- far leg ----------
     s.use(layer="legF")
@@ -153,7 +149,7 @@ def draw(f):
     # ---------- trident ----------
     s.use(layer="trident")
     b = 0 if f else 1
-    s.line(81, 110, 86, 17 + b, WOOD[1]); s.line(82, 110, 87, 17 + b, WOOD[0]); s.noise(80, 18, 88, 110, WOOD[2], density=0.12, seed=61, only=WOOD[1])
+    s.line(81, 110, 86, 17 + b, WOOD[1]); s.line(82, 110, 87, 17 + b, WOOD[0]); s.line(80, 108, 85, 19 + b, WOOD[2])
     s.rect(80, 55, 85, 58, BRONZE[1]); s.line(80, 55, 85, 55, BRONZE[2])     # the grip ring over the fist
     t0 = 17 + b
     s.rect(78, t0 - 1, 95, t0 + 1, PL[2]); s.line(78, t0 - 1, 94, t0 - 1, PL[4])   # crossbar
@@ -171,6 +167,7 @@ def draw(f):
 
     # ---------- merge, outline, drips ----------
     s.flatten()
+    s.outline(OUT, where="outside")
     for (x, y) in [(40 - w, 110), (58 + w, 111), (30, 106)]:
         if s.get(x, y) is None: s.px(x, y, DRIP)
 
