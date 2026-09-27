@@ -1665,11 +1665,181 @@
   };
 
 
+  /* ---------- currencies, navigation, tomes, potions and UI marks, redrawn with ink ---------- */
+  const flask = (g, col, shape) => {
+    P.glow(g, 16, 20, 12, col, 0.45);
+    inkPath(g, () => { g.beginPath(); g.rect(13, 3, 6, 3.6); }, wood(g, 13, 0, 19, 0), 1);
+    if (shape === 'tall') inkPath(g, () => { g.beginPath(); g.moveTo(13.6, 6.4); g.lineTo(18.4, 6.4); g.lineTo(18.4, 11); g.lineTo(23.4, 26); g.quadraticCurveTo(23.4, 28.4, 21, 28.4); g.lineTo(11, 28.4); g.quadraticCurveTo(8.6, 28.4, 8.6, 26); g.lineTo(13.6, 11); g.closePath(); }, 'rgba(210,230,245,0.5)', 1.2);
+    else if (shape === 'square') inkPath(g, () => { g.beginPath(); g.moveTo(13.6, 6.4); g.lineTo(18.4, 6.4); g.lineTo(18.4, 10); g.lineTo(24, 12); g.lineTo(24, 28); g.lineTo(8, 28); g.lineTo(8, 12); g.lineTo(13.6, 10); g.closePath(); }, 'rgba(210,230,245,0.5)', 1.2);
+    else { inkPath(g, () => { g.beginPath(); g.rect(13.6, 6.4, 4.8, 5); }, 'rgba(210,230,245,0.55)', 1); inkCircle(g, 16, 20, 8.6, 'rgba(210,230,245,0.5)'); }
+    g.save(); g.beginPath(); if (shape === 'tall') { g.moveTo(11.6, 17); g.lineTo(20.4, 17); g.lineTo(23, 26); g.lineTo(9, 26); } else if (shape === 'square') g.rect(8.6, 16, 14.8, 11.4); else g.arc(16, 20, 8, 0, Math.PI * 2); g.clip();
+    P.rect(g, 6, shape ? 16.4 : 18, 20, 12, P.lg(g, 0, 16, 0, 28, [sh(col, 0.5), col, sh(col, -0.55)])); g.restore();
+    for (const [x, y, r] of [[13, 23, 1.2], [18.6, 25, 0.9], [16, 21, 0.7]]) P.circle(g, x, y, r, 'rgba(255,255,255,0.7)');
+    P.line(g, 11, 15, 11.4, 24, 0.7, 'rgba(255,255,255,0.6)');
+  };
+  const tome = (g, cover, emblem) => {
+    inkPath(g, () => { g.beginPath(); g.rect(6.4, 5, 19.2, 23); }, P.lg(g, 6, 5, 26, 28, [sh(cover, 0.3), cover, sh(cover, -0.5)]), 1.3);
+    P.rect(g, 6.4, 5, 3, 23, 'rgba(0,0,0,0.35)'); P.rect(g, 25.6, 6, 1.6, 21, '#e8dcc0'); P.line(g, 25.6, 8, 27.2, 8, 0.3, '#8a7a5a');
+    for (const [x, y] of [[10.4, 6.4], [23.2, 6.4], [10.4, 24.8], [23.2, 24.8]]) { P.path(g, [x - 1.4, y - 1.4, x + 1.4, y - 1.4, x, y + 1.4]); P.fill(g, MAT.gold[1]); }
+    emblem();
+  };
+  const MISC = {
+    i_gold(g) {
+      inkCircle(g, 16, 16, 11.6, P.rg(g, 13, 12, 14, ['#fff4c0', '#e8b840', '#8a5a10']));
+      for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; P.circle(g, 16 + Math.cos(a) * 10.4, 16 + Math.sin(a) * 10.4, 0.5, '#8a5a10'); }
+      P.circle(g, 16, 16, 8.4, P.lg(g, 8, 8, 24, 24, ['#fff0a0', '#d8a020']));
+      skullAt(g, 16, 14.6, 4.4, null);
+      g.save(); g.globalCompositeOperation = 'multiply'; P.circle(g, 16, 16, 8.4, 'rgba(230,180,60,0.55)'); g.restore();
+      P.path(g, [8, 11, 11, 7, 12, 8, 9, 12]); P.fill(g, 'rgba(255,255,255,0.6)');
+    },
+    i_gem(g) {
+      P.glow(g, 16, 16, 13, '#ff5ad8', 0.45);
+      sil(g, [9, 6.6, 23, 6.6, 29, 13, 16, 28.4, 3, 13], P.lg(g, 3, 6, 29, 28, ['#ffc0f0', '#ff5ad8', '#6a0a5a']), 1.3);
+      P.path(g, [9, 6.6, 23, 6.6, 20, 13, 12, 13]); P.fill(g, 'rgba(255,255,255,0.4)'); P.path(g, [3, 13, 12, 13, 16, 28.4]); P.fill(g, 'rgba(255,230,250,0.25)'); P.path(g, [29, 13, 20, 13, 16, 28.4]); P.fill(g, 'rgba(60,0,50,0.35)');
+      g.strokeStyle = 'rgba(80,0,60,0.6)'; g.lineWidth = 0.5; g.beginPath(); g.moveTo(3, 13); g.lineTo(29, 13); g.moveTo(12, 13); g.lineTo(16, 28.4); g.lineTo(20, 13); g.moveTo(9, 6.6); g.lineTo(12, 13); g.moveTo(23, 6.6); g.lineTo(20, 13); g.stroke();
+      glint(g, 11.6, 8.8, 2, '#ffffff');
+    },
+    i_energy(g) {
+      P.glow(g, 16, 8, 9, '#ffa030', 0.75);
+      inkPath(g, () => { g.beginPath(); g.moveTo(13.6, 14); g.lineTo(18.4, 14); g.lineTo(17.4, 29); g.lineTo(14.6, 29); g.closePath(); }, wood(g, 13, 0, 19, 0), 1.1);
+      inkPath(g, () => { g.beginPath(); g.rect(12.4, 11.6, 7.2, 4.4); }, P.lg(g, 0, 11, 0, 16, ['#a89078', '#5a4a38']), 1);
+      for (const y of [12.8, 14.4]) P.line(g, 12.6, y, 19.4, y + 0.6, 0.4, 'rgba(0,0,0,0.5)');
+      inkPath(g, () => { g.beginPath(); g.rect(12, 19, 8, 2); }, mfill(g, 12, 19, 20, 21, MAT.iron), 0.9);
+      g.beginPath(); g.moveTo(16, 1.2); g.bezierCurveTo(22.4, 5.4, 22, 10.4, 19.6, 12); g.lineTo(12.4, 12); g.bezierCurveTo(10, 10.4, 10, 6, 14, 3.6); g.quadraticCurveTo(14, 6, 15.6, 6.6); g.quadraticCurveTo(14.6, 3.4, 16, 1.2); P.fill(g, P.lg(g, 0, 1, 0, 12, ['#fff4b0', '#ffa030', '#e04010']));
+      g.beginPath(); g.moveTo(16, 5.4); g.quadraticCurveTo(18.6, 8.6, 17.6, 11.6); g.lineTo(14.4, 11.6); g.quadraticCurveTo(13.6, 8.6, 16, 5.4); P.fill(g, '#fff6d0');
+    },
+    i_revive(g) {
+      P.glow(g, 16, 13, 11, '#ffd070', 0.45);
+      g.strokeStyle = INK; g.lineWidth = 4.2; g.beginPath(); g.ellipse(16, 9, 4.4, 5.6, 0, 0, Math.PI * 2); g.stroke();
+      g.strokeStyle = mfill(g, 11, 3, 21, 15, MAT.gold); g.lineWidth = 2.8; g.stroke();
+      sil(g, [7, 14.6, 25, 14.6, 25, 17.6, 7, 17.6], mfill(g, 7, 14, 25, 18, MAT.gold), 1.2);
+      sil(g, [14.4, 17.4, 17.6, 17.4, 18.4, 29, 13.6, 29], mfill(g, 13, 17, 19, 29, MAT.gold), 1.2);
+      gemCut(g, 16, 16.1, 1.6, '#ff3040');
+    },
+    i_reroll(g) {
+      g.strokeStyle = 'rgba(230,220,200,0.45)'; g.lineWidth = 1.2; g.beginPath(); g.arc(16, 16, 12.4, 3.6, 5.4); g.stroke(); g.beginPath(); g.arc(16, 16, 12.4, 0.5, 2.3); g.stroke();
+      dice(g, 16, 16, 7.4, '#ece4d0', '#a01020', 0.22);
+    },
+    n_battle(g) {
+      for (const s of [-1, 1]) { g.save(); g.translate(16, 16); g.scale(s, 1); g.rotate(-0.78);
+        sil(g, [-1.6, 6, -1.6, -11, 0, -14, 1.6, -11, 1.6, 6], P.lg(g, -1.6, 0, 1.6, 0, ['#ffffff', '#aab2c0', '#555b6a']), 1.1);
+        inkLine(g, -4, 6.4, 4, 6.4, 1.1, '#c89838'); inkLine(g, 0, 7.4, 0, 11.4, 1.2, '#3a2412'); inkCircle(g, 0, 12.4, 1, '#c89838'); g.restore(); }
+      glint(g, 16, 10.4, 1.8, '#fff4d0');
+    },
+    n_shrine(g) {
+      for (const x of [10, 22]) { P.glow(g, x, 6, 4, '#ffb040', 0.8); P.ell(g, x, 6.6, 1.1, 2, '#ffd060'); inkPath(g, () => { g.beginPath(); g.rect(x - 1.2, 8.6, 2.4, 6); }, '#e8dcc0', 0.8); }
+      skullAt(g, 16, 9.4, 3.4, '#ff7030');
+      sil(g, [5, 15, 27, 15, 26, 18, 6, 18], P.lg(g, 0, 15, 0, 18, ['#9a96a4', '#4a4654']), 1.2);
+      sil(g, [8, 18, 24, 18, 24, 26, 8, 26], P.lg(g, 8, 0, 24, 0, ['#7a7684', '#4a4654', '#26222c']), 1.2);
+      sil(g, [5, 26, 27, 26, 27, 29, 5, 29], P.lg(g, 0, 26, 0, 29, ['#8a8694', '#3a3644']), 1.2);
+      P.ell(g, 16, 16.4, 4, 0.8, 'rgba(120,10,20,0.8)'); P.path(g, [18, 18, 19, 18, 18.8, 21.6, 18.2, 22]); P.fill(g, 'rgba(120,10,20,0.8)');
+    },
+    n_scroll(g) {
+      inkPath(g, () => { g.beginPath(); g.rect(8, 7, 16, 18); }, P.lg(g, 8, 7, 24, 25, ['#f0e2c0', '#c8b088', '#8a7450']), 1.2);
+      for (const y of [5, 25]) inkPath(g, () => { g.beginPath(); g.ellipse(16, y + 1, 9.6, 2.2, 0, 0, Math.PI * 2); }, wood(g, 6, y, 26, y + 3), 1);
+      for (let i = 0; i < 5; i++) P.line(g, 10.6, 10 + i * 2.2, 21.4 - (i % 2) * 3, 10 + i * 2.2, 0.5, 'rgba(60,40,20,0.7)');
+      inkCircle(g, 20, 21, 2.6, P.vol(g, 20, 21, 2.6, '#b0101e'));
+    },
+    n_trophy(g) {
+      for (const s of [-1, 1]) { g.strokeStyle = INK; g.lineWidth = 2.6; g.beginPath(); g.moveTo(16 + s * 7, 7); g.quadraticCurveTo(16 + s * 13, 6, 16 + s * 11.4, 12); g.quadraticCurveTo(16 + s * 10, 15, 16 + s * 7, 14); g.stroke(); g.strokeStyle = MAT.gold[1]; g.lineWidth = 1.2; g.stroke(); }
+      inkPath(g, () => { g.beginPath(); g.moveTo(8, 4.4); g.lineTo(24, 4.4); g.lineTo(23, 13); g.quadraticCurveTo(20, 18, 16, 18.4); g.quadraticCurveTo(12, 18, 9, 13); g.closePath(); }, mfill(g, 8, 4, 24, 18, MAT.gold), 1.3);
+      skullAt(g, 16, 9.4, 2.8, null);
+      sil(g, [14.6, 18, 17.4, 18, 17, 23, 15, 23], mfill(g, 14, 18, 18, 23, MAT.gold), 1);
+      sil(g, [10, 23, 22, 23, 23, 28, 9, 28], P.lg(g, 0, 23, 0, 28, ['#6a4a2a', '#2a1a0a']), 1.2);
+      P.rect(g, 12, 24.6, 8, 1.6, MAT.gold[2]);
+    },
+    n_calendar(g) { // a stone tablet: the days scratched off, the moon's face above
+      inkPath(g, () => { g.beginPath(); g.moveTo(6, 28); g.lineTo(6, 10); g.quadraticCurveTo(6, 4, 16, 4); g.quadraticCurveTo(26, 4, 26, 10); g.lineTo(26, 28); g.closePath(); }, P.lg(g, 6, 4, 26, 28, ['#a8a4b0', '#6a6674', '#302c38']), 1.3);
+      inkCircle(g, 16, 10, 3.2, P.rg(g, 15, 9, 4, ['#fffae0', '#e8dca0', '#8a7a40'])); P.circle(g, 17.6, 9.2, 2.6, '#6a6674');
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) { const x = 9 + c * 4.2, y = 16 + r * 4; if (r === 2 && c === 3) { P.circle(g, x + 1, y + 1, 1.6, '#b0101e'); continue; } for (let k = 0; k < 3; k++) P.line(g, x + k * 0.9, y, x + k * 0.9, y + 2.4, 0.4, INK); if (r < 2 || c < 2) P.line(g, x - 0.3, y + 2.2, x + 2.4, y + 0.2, 0.4, INK); }
+    },
+    n_pass(g) {
+      inkLine(g, 5, 4.4, 27, 4.4, 1.2, '#6a4424'); for (const x of [5, 27]) inkCircle(g, x, 4.4, 1.2, mfill(g, x - 1, 3, x + 1, 6, MAT.gold));
+      inkPath(g, () => { g.beginPath(); g.moveTo(7.4, 5.4); g.lineTo(24.6, 5.4); g.lineTo(24, 28); g.lineTo(21, 24.4); g.lineTo(18.4, 28.6); g.lineTo(16, 24); g.lineTo(13.4, 28.4); g.lineTo(11, 24.6); g.lineTo(8, 28); g.closePath(); }, P.lg(g, 7, 5, 25, 28, ['#b070f0', '#5a1a90', '#240838']), 1.2);
+      P.rect(g, 7.8, 7, 16.4, 1.2, MAT.gold[1]);
+      const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 2.6 : 6; pts.push(16 + Math.cos(a) * r, 15 + Math.sin(a) * r); } sil(g, pts, mfill(g, 10, 9, 22, 21, MAT.gold), 1);
+    },
+    n_ad(g) { // a scrying orb on a claw stand, a vision in it
+      P.glow(g, 16, 13, 12, '#80c0ff', 0.5);
+      inkCircle(g, 16, 13, 9, P.rg(g, 13, 10, 11, ['#e8f6ff', '#6aa8e0', '#1a3a6a', '#081428']));
+      g.strokeStyle = 'rgba(200,235,255,0.6)'; g.lineWidth = 0.6; g.beginPath(); g.arc(16, 13, 5.4, 0.3, 2.8); g.stroke();
+      sil(g, [14, 9.4, 20, 13, 14, 16.6], '#ffffff', 0.7);
+      P.ell(g, 12, 8.6, 2, 1.2, 'rgba(255,255,255,0.7)', -0.6);
+      for (const s of [-1, 0, 1]) sil(g, [16 + s * 3.4, 19.6, 16 + s * 6.4, 24, 16 + s * 4, 24.6, 16 + s * 2.4, 21], mfill(g, 9, 19, 23, 25, MAT.gold), 0.9);
+      sil(g, [9, 24, 23, 24, 24.4, 28.4, 7.6, 28.4], P.lg(g, 0, 24, 0, 28.4, ['#6a4a2a', '#2a1a0a']), 1.2);
+    },
+    n_skull(g) { skullAt(g, 16, 14, 10, '#ff3040'); },
+    n_book(g) { tome(g, '#3a4a8a', () => { P.glow(g, 16, 16, 6, '#80c0ff', 0.6); inkPath(g, () => { g.beginPath(); g.moveTo(10.4, 16); g.quadraticCurveTo(16, 10.6, 21.6, 16); g.quadraticCurveTo(16, 21.4, 10.4, 16); }, '#e8f0ff', 0.8); inkCircle(g, 16, 16, 2.2, P.rg(g, 15.4, 15.4, 3, ['#c0e8ff', '#3a8ad0'])); P.circle(g, 16, 16, 0.9, INK); }); },
+    t_wisdom(g) { MISC.n_book(g); },
+    t_haste(g) { TRA.quickhands[1](g); },
+    t_might(g) { TRA.strength[1](g); },
+    p_remembrance(g) { flask(g, '#60a0ff'); },
+    p_resonance(g) { flask(g, '#ff9a30', 'tall'); },
+    p_lethe(g) { flask(g, '#8a8a9a', 'square'); for (const [x, y] of [[10, 12], [22, 11]]) P.circle(g, x, y, 1.4, 'rgba(200,200,210,0.35)'); },
+    u_agony(g) {
+      P.glow(g, 16, 15, 13, '#ff2a3a', 0.5);
+      for (const s of [-1, 1]) sil(g, [16 + s * 5, 8, 16 + s * 12, 1.6, 16 + s * 11, 7.6, 16 + s * 7.4, 11], P.lg(g, 0, 1, 0, 11, ['#f0e6cc', '#8a7e62']), 1);
+      skullAt(g, 16, 14, 9, '#ff3040');
+    },
+    u_kill(g) { MISC.n_battle(g); for (const [x, y, l] of [[10, 21, 3], [22, 20.4, 3.6], [16, 24, 2.4]]) { P.path(g, [x - 0.8, y, x + 0.8, y, x, y + l]); P.fill(g, '#c0182a'); } },
+    u_lock(g) {
+      g.strokeStyle = INK; g.lineWidth = 3.6; g.beginPath(); g.arc(16, 12, 6, Math.PI, 0); g.lineTo(22, 16); g.moveTo(10, 12); g.lineTo(10, 16); g.stroke();
+      g.strokeStyle = mfill(g, 10, 6, 22, 16, DARKSTEEL); g.lineWidth = 2.2; g.stroke();
+      inkPath(g, () => { P.rrect(g, 7, 15, 18, 13.4, 2); }, mfill(g, 7, 15, 25, 28, MAT.gold), 1.3);
+      inkPath(g, () => { g.beginPath(); g.arc(16, 20.4, 1.8, 0, Math.PI * 2); g.moveTo(15.2, 21.6); g.lineTo(16.8, 21.6); g.lineTo(17.2, 25.2); g.lineTo(14.8, 25.2); g.closePath(); }, INK, 0.4);
+      for (const [x, y] of [[9, 17], [23, 17], [9, 26.4], [23, 26.4]]) rivet(g, x, y, 0.7, MAT.gold);
+    },
+    u_unlock(g) {
+      g.strokeStyle = INK; g.lineWidth = 3.6; g.beginPath(); g.moveTo(22, 16); g.lineTo(22, 10); g.arc(16, 10, 6, 0, Math.PI, true); g.lineTo(10, 11); g.stroke();
+      g.strokeStyle = mfill(g, 10, 4, 22, 16, DARKSTEEL); g.lineWidth = 2.2; g.stroke();
+      inkPath(g, () => { P.rrect(g, 7, 15, 18, 13.4, 2); }, mfill(g, 7, 15, 25, 28, ['#c0f0a0', '#6ab040', '#3a7a20', '#1e4a10', '#0a2004']), 1.3);
+      inkPath(g, () => { g.beginPath(); g.arc(16, 20.4, 1.8, 0, Math.PI * 2); g.moveTo(15.2, 21.6); g.lineTo(16.8, 21.6); g.lineTo(17.2, 25.2); g.lineTo(14.8, 25.2); g.closePath(); }, INK, 0.4);
+      P.glow(g, 16, 21, 7, '#a0ff80', 0.35);
+    },
+    u_check(g) { P.glow(g, 14, 18, 10, '#70e050', 0.35); sil(g, [4, 16, 8.4, 12, 13, 17.4, 24.6, 4.6, 28.6, 8.4, 13, 25.4], P.lg(g, 4, 5, 28, 25, ['#d0ff90', '#5aa030', '#1e4a10']), 1.4); P.line(g, 5.6, 16, 13, 23.6, 0.5, 'rgba(255,255,255,0.5)'); },
+    u_secret(g) { P.glow(g, 16, 16, 13, '#c070ff', 0.6); sil(g, [16, 2.6, 18.6, 13.4, 29.4, 16, 18.6, 18.6, 16, 29.4, 13.4, 18.6, 2.6, 16, 13.4, 13.4], P.lg(g, 3, 3, 29, 29, ['#ffffff', '#d0a0ff', '#6a2ab0']), 1.2); inkCircle(g, 16, 16, 2.2, '#ffffff'); },
+    u_star(g) { const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 5.6 : 13; pts.push(16 + Math.cos(a) * r, 16.6 + Math.sin(a) * r); } P.glow(g, 16, 16, 12, '#ffd040', 0.4); sil(g, pts, mfill(g, 3, 3, 29, 29, MAT.gold), 1.4); P.path(g, [16, 3.6, 18, 12, 16, 16.6, 14, 12]); P.fill(g, 'rgba(255,255,255,0.4)'); },
+    u_star0(g) { const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 5.6 : 13; pts.push(16 + Math.cos(a) * r, 16.6 + Math.sin(a) * r); } sil(g, pts, P.lg(g, 0, 3, 0, 29, ['#4a4452', '#1e1a24']), 1.4); },
+    u_bag(g) {
+      inkPath(g, () => { g.beginPath(); g.moveTo(11, 11); g.quadraticCurveTo(4, 17, 5.6, 24); g.quadraticCurveTo(7, 29, 16, 29); g.quadraticCurveTo(25, 29, 26.4, 24); g.quadraticCurveTo(28, 17, 21, 11); g.closePath(); }, mfill(g, 5, 11, 27, 29, MAT.leather), 1.3);
+      inkPath(g, () => { g.beginPath(); g.moveTo(11, 11.4); g.lineTo(8.4, 5.6); g.lineTo(12.6, 7.6); g.lineTo(16, 4.4); g.lineTo(19.4, 7.6); g.lineTo(23.6, 5.6); g.lineTo(21, 11.4); g.closePath(); }, mfill(g, 8, 4, 24, 12, MAT.leather), 1.1);
+      inkLine(g, 10.4, 11.6, 21.6, 11.6, 0.8, '#c8a060'); inkLine(g, 21, 11.6, 24.4, 16, 0.6, '#c8a060');
+      P.path(g, [8, 17, 10.6, 13.6, 11, 22, 8.6, 24]); P.fill(g, 'rgba(255,255,255,0.14)');
+      coinAt(g, 16, 21, 3);
+    },
+    u_close(g) { for (const a of [0.78, -0.78]) { g.save(); g.translate(16, 16); g.rotate(a); inkPath(g, () => { P.rrect(g, -2, -12, 4, 24, 1.6); }, P.lg(g, -2, 0, 2, 0, ['#ff8080', '#c01828', '#5a0610']), 1.3); g.restore(); } },
+    u_cog(g) {
+      const pts = []; for (let t = 0; t < 8; t++) { const a = t * Math.PI / 4; for (const [d, r] of [[-0.2, 13.4], [0.2, 13.4], [0.3, 9.6], [Math.PI / 4 - 0.3, 9.6]]) pts.push(16 + Math.cos(a + d) * r, 16 + Math.sin(a + d) * r); }
+      sil(g, pts, mfill(g, 3, 3, 29, 29, MAT.iron), 1.3);
+      inkCircle(g, 16, 16, 5.4, mfill(g, 10, 10, 22, 22, DARKSTEEL)); P.circle(g, 16, 16, 2.4, INK);
+      for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + 0.6; rivet(g, 16 + Math.cos(a) * 7.6, 16 + Math.sin(a) * 7.6, 0.7, MAT.iron); }
+    },
+    u_hand(g) { g.strokeStyle = INK; g.lineWidth = 3.6; g.beginPath(); g.arc(16, 16, 11, 0, Math.PI * 2); g.stroke(); g.strokeStyle = mfill(g, 5, 5, 27, 27, MAT.gold); g.lineWidth = 2.2; g.stroke(); inkCircle(g, 16, 16, 5, P.rg(g, 14.6, 14.6, 6, ['#fff6c8', '#e8b840', '#7a5414'])); },
+    u_left(g) { sil(g, [22, 4.4, 22, 27.6, 6, 16], mfill(g, 6, 4, 22, 28, MAT.gold), 1.4); P.path(g, [21, 6.6, 21, 16, 8.4, 16]); P.fill(g, 'rgba(255,255,255,0.3)'); },
+    u_right(g) { sil(g, [10, 4.4, 10, 27.6, 26, 16], mfill(g, 10, 4, 26, 28, MAT.gold), 1.4); P.path(g, [11, 6.6, 11, 16, 23.6, 16]); P.fill(g, 'rgba(255,255,255,0.3)'); },
+    u_seal(g) {
+      const pts = []; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2, r = 11.6 + (i % 2 ? -0.8 : 0.6); pts.push(16 + Math.cos(a) * r, 16 + Math.sin(a) * r); }
+      sil(g, pts, P.rg(g, 13, 12, 14, ['#e04050', '#a01020', '#4a0610']), 1.3);
+      g.strokeStyle = 'rgba(40,0,6,0.8)'; g.lineWidth = 0.8; g.beginPath(); g.arc(16, 16, 7.6, 0, Math.PI * 2); g.stroke();
+      P.glow(g, 16, 16, 5, '#ff8060', 0.6); for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; P.line(g, 16 + Math.cos(a) * 1.4, 16 + Math.sin(a) * 1.4, 16 + Math.cos(a) * 5, 16 + Math.sin(a) * 5, 0.7, '#ffc0a0'); }
+    },
+    u_pause(g) { for (const x of [8, 19]) inkPath(g, () => { P.rrect(g, x, 5, 5, 22, 1.4); }, mfill(g, x, 5, x + 5, 27, MAT.iron), 1.3); },
+    u_full(g) { for (const [x, y, sx, sy] of [[5, 5, 1, 1], [27, 5, -1, 1], [5, 27, 1, -1], [27, 27, -1, -1]]) sil(g, [x, y, x + sx * 9, y, x + sx * 9, y + sy * 3, x + sx * 3, y + sy * 3, x + sx * 3, y + sy * 9, x, y + sy * 9], mfill(g, 5, 5, 27, 27, MAT.iron), 1.2); },
+    u_unfull(g) { for (const [x, y, sx, sy] of [[13, 13, -1, -1], [19, 13, 1, -1], [13, 19, -1, 1], [19, 19, 1, 1]]) sil(g, [x, y, x + sx * 9, y, x + sx * 9, y + sy * 3, x + sx * 3, y + sy * 3, x + sx * 3, y + sy * 9, x, y + sy * 9], mfill(g, 4, 4, 28, 28, MAT.iron), 1.2); },
+    u_pin(g) { // an iron nail driven through a scrap of parchment
+      inkPath(g, () => { g.beginPath(); g.moveTo(8, 12); g.lineTo(22, 9); g.lineTo(25, 22); g.lineTo(11, 25.4); g.closePath(); }, P.lg(g, 8, 9, 25, 25, ['#f0e2c0', '#b8a078']), 1);
+      inkPath(g, () => { g.beginPath(); g.moveTo(14.6, 13.4); g.lineTo(17.4, 13.4); g.lineTo(16.4, 27.6); g.lineTo(15.6, 27.6); g.closePath(); }, P.lg(g, 14, 0, 18, 0, ['#9aa0ac', '#4a4e58']), 0.9);
+      inkPath(g, () => { g.beginPath(); g.ellipse(16, 13, 3.6, 1.8, 0, 0, Math.PI * 2); }, P.lg(g, 12, 11, 20, 15, ['#b8bcc8', '#5a5e6a', '#26282e']), 1.1);
+      P.ell(g, 15, 12.4, 1.4, 0.5, 'rgba(255,255,255,0.5)'); P.ell(g, 16, 17, 2.4, 0.8, 'rgba(0,0,0,0.3)');
+    },
+  };
+
   function draw(name) {
     const c = G.canvas(SIZE, SIZE), g = c.getContext('2d');
     g.scale(U2, U2); g.lineJoin = 'round'; g.lineCap = 'round';
     const [pre, ...rest] = name.split('_'); const id = rest.join('_');
-    if (name === 'i_gold') GL.coin(g);
+    if (MISC[name]) MISC[name](g);
+    else if (name === 'i_gold') GL.coin(g);
     else if (name === 'i_gem') GL.gem(g);
     else if (name === 'i_energy') GL.torch(g);
     else if (name === 'i_revive') GL.ankh(g);
