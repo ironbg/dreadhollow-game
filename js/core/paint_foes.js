@@ -361,116 +361,127 @@
       for (let i = 0; i < 4; i++) P.flame(g, 11.6 + i * 2.8, 7.2 - (i === 1 ? 0.3 : 0), 1.6 + ((i + f) % 2) * 0.9, -0.6, 0.85);
     } });
 
-  /* ---------- Flamedancer (boss): a horned demoness caught mid-turn, one arm flung up trailing a long ribbon of fire,
-   *            a fireball in the other palm, hair of flame streaming up, a swirling silk skirt burning at the hem ---------- */
+  /* ---------- Flamedancer (boss): a lean obsidian demoness on goat legs, one hoof lifted in the dance, a tail tipped with fire,
+   *            long horns and hair of flame, an open fan of fire in each hand, their rims burning ---------- */
   def('flamedancer', { w: 44, h: 54, cy: 34, frames: 2,
-    colors: { skin: '#7a2818', silk: '#8a1a14', gold: '#e0a040', fire: '#ff8a2a', eye: '#fff0a0' },
+    colors: { skin: '#2a1614', silk: '#8a1a14', gold: '#e0a040', fire: '#ff8a2a', eye: '#fff0a0' },
     draw(g, f, c) {
-      const wv = f ? 1 : -1, sk = c.skin, skl = sh(c.skin, 0.35), skd = sh(c.skin, -0.35), F = c.fire;
-      const fire = (pts, col) => { g.beginPath(); g.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 4) g.quadraticCurveTo(pts[i], pts[i + 1], pts[i + 2], pts[i + 3]); g.closePath(); P.fill(g, col); };
-      P.ell(g, 22, 51.6, 11, 1.6, 'rgba(0,0,0,0.45)');
-      P.glow(g, 22, 30, 20, F, 0.22);
-      // the ribbon of fire: from the raised hand, sweeping down behind her and out to the left
-      g.beginPath(); g.moveTo(31, 5); g.bezierCurveTo(38, 0 + wv, 44, 8, 38.6, 16); g.bezierCurveTo(35, 22, 42, 26 + wv, 42.6, 33);
-      g.bezierCurveTo(40, 28 + wv, 33.4, 24, 36.6, 16.6); g.bezierCurveTo(40.4, 9.6, 36, 4.4, 31, 6.2); g.closePath();
-      P.fill(g, P.lg(g, 31, 5, 42, 33, [G.rgba('#ffe070', 0.95), G.rgba(F, 0.9), G.rgba(sh(F, -0.3), 0.3)]));
-      // the far leg under the skirt, only its foot showing
-      P.path(g, [15.6, 48.6, 18.4, 48.4, 19.4, 50.2, 15, 50.4]); P.fill(g, skd);
-      // the skirt swirling out with the turn: deep silk, lifted at the front where the near leg steps through
-      g.beginPath(); g.moveTo(18, 27); g.lineTo(26.4, 27); g.quadraticCurveTo(29, 33, 27.4, 38.4); g.quadraticCurveTo(33, 40 + wv, 34.6, 45.6);
-      g.quadraticCurveTo(29.6, 44, 26, 47.6); g.quadraticCurveTo(21.6, 45.4, 17, 49); g.quadraticCurveTo(12.6, 45.6, 7.4 - wv, 47.6); g.quadraticCurveTo(11.6, 36, 18, 27); g.closePath();
-      P.fill(g, P.lg(g, 10, 27, 30, 48, [sh(c.silk, 0.45), c.silk, sh(c.silk, -0.45)]));
-      g.strokeStyle = sh(c.silk, -0.55); g.lineWidth = 0.5; for (const [x0, x1] of [[20, 14], [23, 21.6], [25.4, 28.6]]) { g.beginPath(); g.moveTo(x0, 29); g.quadraticCurveTo((x0 + x1) / 2 - 1, 38, x1, 45.4); g.stroke(); } // folds
-      // the hem burning: flame licking up from it in a few tongues of different heights
-      fire([7.4 - wv, 47.6, 9, 43.6, 10.4, 42 + wv, 11.4, 45.6, 13, 45.8, 14.6, 42.8, 15.4, 40.4, 17, 45, 17, 49, 12.6, 45.6, 7.4 - wv, 47.6], G.rgba(F, 0.9));
-      fire([26, 47.6, 27.6, 43, 30, 41.8 - wv, 30.4, 43.6, 32.4, 44, 33.6, 42, 34.6, 45.6, 29.6, 44, 26, 47.6], G.rgba(F, 0.9));
-      P.line(g, 8.4, 47.2, 16.6, 48.6, 0.5, G.rgba('#ffe070', 0.9)); P.line(g, 26.6, 47, 34, 45.4, 0.5, G.rgba('#ffe070', 0.9));
-      // the near leg stepping out through the slit, pointed foot, a gold anklet
-      limb(g, 25.4, 34, 28.4 + wv * 0.4, 41.2, 1.8, 1.2, sk); limb(g, 28.4 + wv * 0.4, 41.2, 30 + wv * 0.6, 48.4, 1.2, 0.8, sk);
-      P.path(g, [29.2 + wv * 0.6, 48, 31 + wv * 0.6, 48, 33.6 + wv * 0.6, 49.8, 29 + wv * 0.6, 50.2]); P.fill(g, sk);
-      P.line(g, 29 + wv * 0.6, 47, 31.2 + wv * 0.6, 47, 0.7, c.gold);
-      // the torso: a slim waist twisting into the turn, a silk wrap over the breast, gold girdle, veins of fire
-      g.beginPath(); g.moveTo(18.4, 27.6); g.quadraticCurveTo(20.6, 23.6, 18.4, 18.6); g.quadraticCurveTo(17.4, 16.4, 18, 15.6); g.lineTo(26.4, 15.6); g.quadraticCurveTo(26.8, 17, 25.8, 19); g.quadraticCurveTo(24, 23.6, 26.4, 27.6); g.closePath();
-      P.fill(g, P.lg(g, 17, 16, 27, 28, [skl, sk, skd]));
-      P.path(g, [17.8, 16.4, 26.4, 16.2, 25.6, 19.6, 18.6, 20]); P.fill(g, P.lg(g, 18, 16, 18, 20.4, [sh(c.silk, 0.4), sh(c.silk, -0.3)]));
-      P.line(g, 18.4, 19.9, 25.8, 19.5, 0.5, c.gold);
-      P.rrect(g, 18.2, 25.8, 8.4, 2, 0.8, P.lg(g, 0, 25.8, 0, 27.8, [sh(c.gold, 0.35), sh(c.gold, -0.4)])); P.circle(g, 22.6, 26.8, 0.8, F);
-      cracks(g, [[20.4, 21.2, 21.2, 23, 20.6, 25], [24.2, 21.4, 23.6, 24]], F, 0.4);
-      // the far arm sweeping out and down, a fireball in the palm
-      limb(g, 18.6, 16.6, 13.4, 19.6, 1.2, 1, skd); limb(g, 13.4, 19.6, 8.6, 18, 1, 0.8, skd); P.line(g, 10, 18.2, 10.4, 19.6, 0.6, c.gold);
-      P.glow(g, 6.6, 16.4, 5 + (f ? 0.8 : 0), F, 0.8); P.circle(g, 6.6, 16.4, 1.7, P.rg(g, 6.6, 16.4, 1.7, [[0, '#fff6c8'], [0.5, '#ffd060'], [1, F]]));
-      // the near arm flung up over the head, holding the ribbon
-      limb(g, 26, 16.6, 29.8, 11, 1.2, 1, sk); limb(g, 29.8, 11, 31, 6, 1, 0.8, skl); P.line(g, 30, 7.4, 31.6, 7.6, 0.6, c.gold); P.circle(g, 31, 5.4, 0.9, skl);
-      // the head: hair of fire streaming up and back, two small horns, a gold circlet, burning eyes
-      const hx = 22.8, hy = 11.2;
-      fire([hx - 2.6, hy - 1, hx - 7, hy - 6, hx - 9.6 - wv, hy - 10.4, hx - 4.6, hy - 7, hx - 3, hy - 6.4, hx - 3.6, hy - 9.6, hx - 3.4 + wv, hy - 11.4, hx - 0.4, hy - 7.4, hx + 0.6, hy - 4, hx + 1, hy - 3, hx - 2.6, hy - 1], G.rgba(F, 0.95));
-      fire([hx - 2, hy - 1.6, hx - 5, hy - 5, hx - 6.4, hy - 7.6, hx - 2.4, hy - 5.4, hx - 1.4, hy - 4.8, hx - 1.4, hy - 7, hx - 1, hy - 8, hx + 0.4, hy - 5, hx - 2, hy - 1.6], G.rgba('#ffe070', 0.9));
-      P.path(g, [hx - 0.8, hy + 2.6, hx + 1.4, hy + 2.8, hx + 0.6, hy + 4.6]); P.fill(g, skd); // the neck
-      P.ell(g, hx, hy, 2.6, 3, P.vol(g, hx - 0.6, hy - 1, 2.8, sk), 0.15);
-      P.path(g, [hx + 1.6, hy - 1, hx + 3, hy + 0.8, hx + 2, hy + 2.4, hx + 1.2, hy + 1]); P.fill(g, sk); // the face turned toward us
-      horn(g, hx - 1, hy - 2.4, hx - 3.4, hy - 4.6, hx - 5.6, hy - 3.2, 0.6, '#2a1a14'); horn(g, hx + 1.2, hy - 2.6, hx + 2, hy - 5.4, hx + 0.4, hy - 6.8, 0.6, '#3a2a20');
-      P.line(g, hx - 2.4, hy - 1.6, hx + 2.6, hy - 1.8, 0.6, c.gold); P.circle(g, hx + 1.4, hy - 1.8, 0.5, F);
-      P.ell(g, hx + 1.9, hy - 0.2, 0.8, 0.6, '#1a0404'); P.ell(g, hx + 0.2, hy - 0.2, 0.7, 0.55, '#1a0404');
-      evil(g, hx + 1.9, hy - 0.2, 0.62, c.eye); evil(g, hx + 0.2, hy - 0.2, 0.5, c.eye);
-      P.path(g, [hx + 0.8, hy + 1.4, hx + 2.6, hy + 1.2, hx + 1.8, hy + 2.2]); P.fill(g, '#1a0404'); // a smiling mouth
+      const wv = f ? 1 : -1, sk = sh(c.skin, 0.3), skl = sh(c.skin, 0.75), skd = sh(c.skin, -0.25), F = c.fire, HOT = '#ffe070';
+      const band = (pts, w0, cols) => {
+        const [x0, y0, a1, b1, a2, b2, x1, y1] = pts;
+        g.beginPath(); g.moveTo(x0, y0 - w0); g.bezierCurveTo(a1, b1 - w0, a2, b2 - w0 * 0.5, x1, y1); g.bezierCurveTo(a2, b2 + w0 * 0.5, a1, b1 + w0, x0, y0 + w0); g.closePath();
+        P.fill(g, P.lg(g, x0, y0, x1, y1, cols));
+      };
+      /** An open fan pivoting at (x,y), spread from angle a0 to a1, radius r: silk between dark ribs, the rim on fire. */
+      const fan = (x, y, a0, a1, r) => {
+        g.beginPath(); g.moveTo(x, y); g.arc(x, y, r, a0, a1); g.closePath(); P.fill(g, P.rg(g, x, y, r, [[0, sh(c.silk, -0.3)], [0.7, c.silk], [1, sh(c.silk, 0.3)]]));
+        for (let i = 0; i <= 5; i++) { const a = a0 + (a1 - a0) * i / 5; P.line(g, x, y, x + Math.cos(a) * r, y + Math.sin(a) * r, 0.35, '#1a0a08'); }
+        g.beginPath(); g.arc(x, y, r, a0, a1); g.strokeStyle = G.rgba(F, 0.95); g.lineWidth = 1.6; g.stroke(); g.strokeStyle = HOT; g.lineWidth = 0.5; g.stroke();
+        for (let i = 0; i < 3; i++) { const a = a0 + (a1 - a0) * (0.2 + i * 0.3), px = x + Math.cos(a) * r, py = y + Math.sin(a) * r, h = 2.6 + ((i + (f ? 1 : 0)) % 2) * 1.2;
+          band([px, py, px + Math.cos(a) * h * 0.4, py + Math.sin(a) * h * 0.4 - 0.6, px + Math.cos(a) * h * 0.8, py + Math.sin(a) * h * 0.8 - 1.2, px + Math.cos(a) * h, py + Math.sin(a) * h - 1.6], 0.8, [G.rgba(F, 0.9), G.rgba(HOT, 0.3)]); }
+        P.glow(g, x + Math.cos((a0 + a1) / 2) * r * 0.6, y + Math.sin((a0 + a1) / 2) * r * 0.6, r, F, 0.3);
+        P.circle(g, x, y, 0.8, c.gold);
+      };
+      P.ell(g, 20, 51, 8, 1.4, 'rgba(0,0,0,0.45)');
+      // the tail, curling up behind her, a flame at its tip
+      band([19, 29, 15, 40, 8, 44 + wv, 5.4, 38.6], 1, [sk, skd, skd]);
+      P.glow(g, 5.4, 38, 3, F, 0.7); band([5.6, 39.4, 4.4, 37, 3.4 - wv, 35, 4.6, 32 + wv], 1.2, [G.rgba(HOT, 0.95), G.rgba(F, 0.9), G.rgba(F, 0.1)]);
+      // the far fan, held low and out to the side
+      fan(9.6, 25.6, Math.PI * 0.5, Math.PI * 1.15, 7.2);
+      // the standing leg (far): a goat's leg, knee forward, hock back, a cloven hoof
+      limb(g, 20, 29, 21.8, 36, 2.2, 1.4, skd); limb(g, 21.8, 36, 18.8, 42.6, 1.4, 1, skd); limb(g, 18.8, 42.6, 19.8, 48.6, 1, 0.8, skd);
+      P.path(g, [18.4, 48.4, 21.4, 48.4, 22, 50.4, 18, 50.4]); P.fill(g, '#140a08');
+      // the lifted leg (near): thigh raised, the shin folded back, the hoof pointed
+      limb(g, 23.6, 29.4, 30.4 + wv * 0.4, 32, 2.3, 1.5, sk); P.circle(g, 30.4 + wv * 0.4, 32, 1.5, P.vol(g, 30, 31.4, 1.5, skl));
+      limb(g, 30.4 + wv * 0.4, 32, 27.6 + wv * 0.4, 38.4, 1.4, 1, sk); limb(g, 27.6 + wv * 0.4, 38.4, 30.4 + wv * 0.4, 41.4, 1, 0.8, sk);
+      P.path(g, [29.8 + wv * 0.4, 40.4, 32.2 + wv * 0.4, 41, 32 + wv * 0.4, 42.8, 29.6 + wv * 0.4, 42.2]); P.fill(g, '#140a08');
+      P.line(g, 28.6, 37.2, 29.6, 36.6, 0.7, c.gold); // an anklet
+      // a silk loincloth fluttering from a gold girdle
+      P.path(g, [18, 26.6, 26.4, 26.6, 26.8, 28.6, 24 + wv, 33.4, 22, 29.4, 19.6, 33 - wv, 17.6, 28.6]); P.fill(g, P.lg(g, 18, 26, 18, 33, [sh(c.silk, 0.45), sh(c.silk, -0.35)]));
+      P.rrect(g, 17.6, 25.8, 9.2, 1.6, 0.6, P.lg(g, 0, 25.8, 0, 27.4, [sh(c.gold, 0.35), sh(c.gold, -0.35)]));
+      // the torso: lean and twisting, the waist pinched, cracks of fire
+      g.beginPath(); g.moveTo(18.4, 26.2); g.quadraticCurveTo(20.4, 21.6, 17.4, 16.6); g.quadraticCurveTo(22, 14.4, 27.6, 16.6); g.quadraticCurveTo(24.6, 21.6, 26.4, 26.2); g.closePath();
+      P.fill(g, P.lg(g, 16, 14, 28, 27, [skl, sk, skd]));
+      cracks(g, [[21.6, 16.4, 22.6, 19.2, 21.8, 22.2, 22.6, 25.2], [25.4, 17.6, 24.4, 20.4]], F, 0.45);
+      P.glow(g, 22.4, 21, 3.6, F, 0.35);
+      // the far arm down to the low fan
+      limb(g, 18, 17, 13.6, 21.4, 1.1, 0.9, skd); limb(g, 13.6, 21.4, 10.2, 25, 0.9, 0.7, skd); P.line(g, 11.2, 23.4, 12.4, 24.6, 0.6, c.gold);
+      // the head: a long face, two long horns sweeping up and back, hair of fire streaming behind
+      const hx = 22.8, hy = 10.4;
+      band([hx - 1, hy - 2, hx - 5, hy - 4.6, hx - 9 + wv, hy - 6, hx - 13 - wv, hy - 9.4], 2.4, [G.rgba(F, 0.95), G.rgba(sh(F, -0.25), 0.85), G.rgba(sh(F, -0.4), 0.1)]);
+      band([hx - 0.4, hy - 2.4, hx - 3.4, hy - 5.6, hx - 6 - wv, hy - 8, hx - 8.6 + wv, hy - 12.4], 1.7, [G.rgba(HOT, 0.9), G.rgba(F, 0.85), G.rgba(F, 0.1)]);
+      horn(g, hx - 1.4, hy - 2.2, hx - 4.6, hy - 6.4, hx - 3.4, hy - 10, 1, '#2a1c18'); horn(g, hx + 1, hy - 2.6, hx + 3.4, hy - 7, hx + 2.2, hy - 10.4, 1, '#3a2a24');
+      P.path(g, [hx - 1.4, hy + 3, hx + 1.2, hy + 3, hx + 0.6, hy + 5.6, hx - 1.2, hy + 5.4]); P.fill(g, skd);
+      g.beginPath(); g.moveTo(hx - 2.6, hy - 1.6); g.quadraticCurveTo(hx, hy - 3.8, hx + 2.6, hy - 1.6); g.lineTo(hx + 2.4, hy + 2); g.lineTo(hx + 0.4, hy + 4.4); g.lineTo(hx - 1.8, hy + 2.4); g.closePath();
+      P.fill(g, P.lg(g, hx - 2.6, hy - 3, hx + 2.6, hy + 4, [skl, sk, skd]));
+      P.path(g, [hx - 2.2, hy - 0.6, hx + 2.4, hy - 0.6, hx + 2, hy + 0.4, hx - 1.8, hy + 0.4]); P.fill(g, '#140404');
+      evil(g, hx + 1.2, hy - 0.1, 0.62, c.eye, -0.35); evil(g, hx - 1, hy - 0.1, 0.55, c.eye, 0.35);
+      P.path(g, [hx - 1, hy + 2, hx + 1.8, hy + 1.8, hx + 0.6, hy + 3.4]); P.fill(g, '#1a0404'); P.glow(g, hx + 0.4, hy + 2.4, 1.6, F, 0.8);
+      teeth(g, hx - 0.8, hy + 2, hx + 1.6, hy + 1.8, 3, 0.5, 1, '#f0e0c0');
+      P.line(g, hx - 1.8, hy + 4.8, hx + 1.4, hy + 4.8, 0.7, c.gold);
+      // the near arm raised, the other fan open high over her
+      limb(g, 27.2, 17, 31, 12, 1.1, 0.9, sk); limb(g, 31, 12, 32.8, 9, 0.9, 0.7, skl); P.line(g, 31.6, 10.6, 33.2, 11, 0.6, c.gold);
+      fan(33, 8.6, -Math.PI * 0.62, Math.PI * 0.08, 7);
     } });
 
-  /* ---------- Ashen Warlord (boss): a broad knight in cracked ash-grey plate with embers glowing in the seams,
-   *            a crown of fire over a great helm, a tattered ash cloak, a burning war-glaive held across the body ---------- */
+  /* ---------- Ashen Warlord (boss): a hollow armour burned black, fire behind its visor and in the split of its breastplate,
+   *            sharp angular plates, a cloak crumbling into ash, a greatsword of cooling slag held point-down ---------- */
   def('ashwarlord', { w: 48, h: 56, cy: 34, frames: 2,
     colors: { ash: '#5a5452', dark: '#221e20', ember: '#ff7030', eye: '#ffcf60', cloth: '#4a1c16' },
     draw(g, f, c) {
-      const a = sh(c.ash, 0.1), al = sh(c.ash, 0.55), ad = sh(c.ash, -0.45), E = c.ember, w = f ? 0.8 : -0.8, wood = '#3a2618';
-      P.ell(g, 24, 52.6, 13, 2, 'rgba(0,0,0,0.45)');
-      // the cloak behind, ash-grey and scorched, hanging in tatters
-      g.beginPath(); g.moveTo(15, 15); g.bezierCurveTo(9, 22, 8 - w, 34, 7 - w, 46); g.lineTo(18, 44); g.lineTo(20, 18); g.closePath();
-      P.fill(g, P.lg(g, 7, 15, 20, 46, [sh(c.cloth, 0.3), c.cloth, sh(c.cloth, -0.5)]));
-      P.rag(g, 7 - w, 45.6, 18, 43.6, 4, 3, sh(c.cloth, -0.4));
-      // the legs: far leg back in shadow, near leg forward; greaves with knee cops, heavy sabatons
+      const m = sh(c.dark, 0.35), ml = sh(c.ash, 0.2), md = sh(c.dark, -0.2), E = c.ember, w = f ? 0.8 : -0.8, HOT = '#ffe070';
+      const plate = (pts, lit) => { P.path(g, pts); P.fill(g, P.lg(g, pts[0], pts[1], pts[pts.length - 2], pts[pts.length - 1], [lit ? ml : m, lit ? m : md])); };
+      P.ell(g, 25, 52.8, 13, 2, 'rgba(0,0,0,0.45)');
+      // the cloak: dark, shredded, the lower hem breaking up into drifting ash
+      g.beginPath(); g.moveTo(16, 14.6); g.bezierCurveTo(9, 20, 6 - w, 32, 4 - w, 44); g.lineTo(9, 41.6); g.lineTo(11.6, 45); g.lineTo(14.4, 40.4); g.lineTo(18.6, 42); g.lineTo(20.6, 17); g.closePath();
+      P.fill(g, P.lg(g, 4, 14, 20, 46, [sh(c.cloth, 0.2), c.cloth, G.rgba(sh(c.cloth, -0.5), 0.8)]));
+      // legs: angular greaves, a pointed knee plate, sabatons tapering to a point
       const leg = (hx, kx, ax, col, lit) => {
-        limb(g, hx, 35, kx, 43, 3, 2.4, col); limb(g, kx, 43, ax, 50, 2.4, 2, col);
-        P.circle(g, kx, 43, 2.2, P.vol(g, kx - 0.6, 42.2, 2.3, lit));
-        P.path(g, [ax - 2.4, 49.4, ax + 2.2, 49.4, ax + 4, 51.8, ax - 2.6, 51.8]); P.fill(g, P.lg(g, 0, 49.4, 0, 51.8, [col, c.dark]));
+        limb(g, hx, 35, kx, 43, 2.8, 2.2, col); limb(g, kx, 43, ax, 50, 2.2, 1.8, col);
+        P.path(g, [kx - 2, 42, kx + 0.4, 39.6, kx + 2.4, 42.4, kx + 0.2, 45]); P.fill(g, P.lg(g, kx, 39.6, kx, 45, [lit, col]));
+        P.path(g, [ax - 2.2, 49.4, ax + 1.6, 49.2, ax + 5, 51.8, ax - 2.4, 51.8]); P.fill(g, md);
       };
-      leg(20.4, 17.6 - w * 0.4, 17 - w, ad, a);
-      leg(27.4, 30.2 + w * 0.4, 31 + w, a, al);
-      // plated tassets over the hips
-      for (let i = 0; i < 3; i++) P.rrect(g, 18.4 + i * 3.6, 32, 3.4, 5.4 - (i === 1 ? 0 : 1), 1, P.lg(g, 0, 32, 0, 37, [al, ad]));
-      // the torso: a broad breastplate over a narrower waist, cracked, embers in the seams
-      g.beginPath(); g.moveTo(14.6, 15); g.lineTo(33.6, 15); g.quadraticCurveTo(34, 25, 29.6, 32.4); g.lineTo(18.6, 32.4); g.quadraticCurveTo(14, 25, 14.6, 15); g.closePath();
-      P.fill(g, P.lg(g, 14, 14, 33, 32, [al, a, ad]));
-      P.ell(g, 20.4, 20.4, 5, 5, P.vol(g, 19, 18.6, 5.2, a), 0.2); P.ell(g, 28, 20.4, 5, 5, P.vol(g, 26.8, 18.6, 5.2, sh(c.ash, 0.2)), -0.2);
-      for (let i = 0; i < 2; i++) P.rrect(g, 18.6 + i * 0.4, 25.8 + i * 2.8, 11.2 - i * 0.8, 2.4, 0.8, P.lg(g, 0, 25.8 + i * 2.8, 0, 28.2 + i * 2.8, [al, ad])); // banded belly plates
-      cracks(g, [[21, 16.6, 22.4, 19, 21.2, 22], [27.4, 17, 26.4, 20.4, 28.4, 22.6], [23.4, 26, 24.6, 28.4]], E, 0.5);
-      P.glow(g, 24, 21, 6, E, 0.3);
-      P.rrect(g, 18, 31.2, 12.6, 1.8, 0.6, c.dark); P.circle(g, 24.2, 32.1, 1, E); // the belt
-      // the far pauldron and arm, the gauntlet low on the haft
-      P.ell(g, 14.4, 16, 4, 3, P.vol(g, 13.4, 15, 4, a));
-      limb(g, 13.6, 18, 12.4, 26, 2.2, 1.8, ad); limb(g, 12.4, 26, 17.2, 33, 1.8, 1.6, ad);
-      // the war-glaive: a long haft across the body, a broad curved blade at the top burning along its edge
-      P.line(g, 9.4, 47.4, 37.6, 6.4, 1.4, P.lg(g, 9, 47, 37, 6, [sh(wood, 0.4), wood, sh(wood, -0.4)]));
-      for (const t of [0.25, 0.6]) P.line(g, 9.4 + 28.2 * t - 0.8, 47.4 - 41 * t - 0.6, 9.4 + 28.2 * t + 0.8, 47.4 - 41 * t + 0.6, 1.4, c.dark); // iron bands
-      P.path(g, [9.4, 47.4, 8.2, 50.4, 10.4, 47.8]); P.fill(g, '#6a6468'); // the butt spike
-      P.glow(g, 40, 6, 7, E, 0.45);
-      P.path(g, [35.2, 10.8, 38.4, 6.6, 41.4, 2.6, 44, 0.6, 43.8, 4.6, 42, 8.8, 38.6, 12.6]); P.fill(g, P.lg(g, 35, 12, 44, 1, ['#4a4448', '#9a9498', '#e8e0dc']));
-      P.line(g, 38.8, 12.4, 43.8, 4, 0.5, E); P.line(g, 42.4, 8.4, 43.8, 1.6, 0.35, '#ffe070'); // the burning edge
-      P.path(g, [36.4, 8.2, 33.4, 5.4, 36.8, 6.8]); P.fill(g, '#6a6468'); // a back spike
-      flame(g, 43.2, 3.2, 3.4 + (f ? 0.8 : 0), 0.4, 0.8);
-      P.circle(g, 17.2, 33.2, 1.8, P.vol(g, 16.6, 32.6, 1.8, a)); // the far gauntlet on the haft
-      // the helm: a great helm narrowing to the jaw, a burning slit, a gorget, a crown of fire
-      const hx = 24.4, hy = 9;
-      P.rrect(g, hx - 3.4, hy + 3.6, 7, 2.4, 1, ad); // the gorget
-      g.beginPath(); g.moveTo(hx - 4.2, hy + 4.4); g.lineTo(hx - 4.4, hy - 2.4); g.quadraticCurveTo(hx - 4, hy - 5.6, hx, hy - 5.8); g.quadraticCurveTo(hx + 4.2, hy - 5.6, hx + 4.6, hy - 2.4); g.lineTo(hx + 4, hy + 3.4); g.quadraticCurveTo(hx + 1, hy + 5.4, hx - 4.2, hy + 4.4); g.closePath();
-      P.fill(g, P.lg(g, hx - 4, hy - 6, hx + 4, hy + 5, [al, a, ad]));
-      P.line(g, hx + 0.6, hy - 5.6, hx + 0.6, hy + 4.6, 0.5, al); // the crest ridge
-      P.rect(g, hx - 3.4, hy - 1, 7.4, 1.2, '#0a0404'); P.glow(g, hx + 0.6, hy - 0.4, 3.6, c.eye, 0.7); P.rect(g, hx - 2.4, hy - 0.8, 5.8, 0.6, c.eye);
-      for (let i = 0; i < 3; i++) P.circle(g, hx + 1.6 + i * 0.9, hy + 2 + (i % 2) * 0.8, 0.3, '#0a0404'); // breaths
-      for (const [x, h, l] of [[hx - 2.6, 3.4, -0.6], [hx - 0.2, 5, -0.4], [hx + 2.2, 3.8, -0.2]]) flame(g, x, hy - 5, h + (f ? 0.8 : 0), l, 0.9);
-      // the near pauldron, great and layered, then the near arm with its gauntlet high on the haft
-      P.ell(g, 34, 16.2, 4.6, 3.4, P.vol(g, 33, 15, 4.6, sh(c.ash, 0.2))); P.ell(g, 34.6, 18, 4, 2, P.lg(g, 0, 17, 0, 20, [a, ad]));
-      cracks(g, [[32.4, 14.6, 34, 16, 33.4, 17.6]], E, 0.4);
-      limb(g, 34, 19.6, 35.6, 26, 2.2, 1.8, a); limb(g, 35.6, 26, 29.6, 23.6, 1.8, 1.6, al);
-      P.circle(g, 29, 23.4, 1.9, P.vol(g, 28.4, 22.8, 1.9, al)); // the gauntlet round the haft
+      leg(20.4, 17.4 - w * 0.4, 16.6 - w, md, m);
+      leg(27.2, 29.6 + w * 0.4, 30.4 + w, m, ml);
+      // the far arm reaching across behind to the hilt
+      limb(g, 16.4, 18, 16.4, 26.4, 2.2, 1.8, md); limb(g, 16.4, 26.4, 29.4, 31.4, 1.8, 1.5, md);
+      // hip plates, sharp-edged
+      plate([17.6, 31.6, 22.4, 31.6, 21.8, 37.4, 18.4, 36], true); plate([22.6, 31.6, 27.4, 31.6, 27, 36.2, 23.4, 37.8], false); plate([27.6, 31.6, 31, 31.6, 30.6, 35.6, 28, 36.6], false);
+      // the breastplate: a V of angular plates, split down the middle, fire burning inside the hollow
+      g.beginPath(); g.moveTo(14.8, 15); g.lineTo(34, 15); g.lineTo(32, 23); g.lineTo(28.4, 31.8); g.lineTo(19.8, 31.8); g.lineTo(16.4, 23); g.closePath();
+      P.fill(g, P.lg(g, 15, 15, 32, 32, [ml, m, md]));
+      P.path(g, [15.4, 15.4, 23.4, 16.4, 22.6, 24.6, 16.2, 23.6]); P.fill(g, P.lg(g, 15, 15, 22, 24, [sh(c.ash, 0.45), m])); // the lit left plate
+      P.glow(g, 24.2, 23, 4.6, E, 0.45);
+      g.beginPath(); g.moveTo(23.6, 16); g.lineTo(25.4, 19.4); g.lineTo(24.2, 22.6); g.lineTo(25.8, 26); g.lineTo(24.4, 30.6); g.lineTo(22.6, 26.4); g.lineTo(23.8, 22.8); g.lineTo(22.2, 19.2); g.closePath();
+      P.fill(g, P.lg(g, 23, 16, 25, 31, [HOT, E, sh(E, -0.3)])); // the split, and the fire inside
+      cracks(g, [[18, 18.6, 19.6, 20.6, 18.8, 23], [30.4, 18, 28.6, 21, 30, 23.4]], E, 0.4);
+      P.line(g, 18.4, 28.6, 29.8, 28.6, 0.6, md); // the lower edge of the plastron
+      // the pauldrons: great angular plates, each swept up to one point
+      plate([10.2, 18.6, 11.2, 13, 12.6, 5.6, 16.4, 11.6, 19.8, 13.6, 18.6, 19.2, 13, 20.6], true);
+      plate([28.8, 14, 32, 11.4, 37, 4.8, 37.8, 11.8, 39.4, 18, 36.6, 20.8, 30.8, 19.2], true);
+      P.line(g, 12.4, 12.6, 18.8, 14.4, 0.4, E); P.line(g, 32.4, 12.6, 38, 16.4, 0.4, E);
+      // the helm: tall and narrow, a V-slit burning, a crest of smoke and cinders streaming back
+      const hx = 24.4, hy = 8.6;
+      g.beginPath(); g.moveTo(hx - 2, hy - 6); g.quadraticCurveTo(hx - 7 - w, hy - 9, hx - 11 - w, hy - 5.4); g.quadraticCurveTo(hx - 6, hy - 6.6, hx - 2.4, hy - 3.4); g.closePath();
+      P.fill(g, P.lg(g, hx - 11, hy - 8, hx - 2, hy - 4, [G.rgba(c.ash, 0.1), G.rgba(c.ash, 0.8), E]));
+      P.rrect(g, hx - 3.2, hy + 3.4, 6.6, 2.4, 0.8, md); // the gorget
+      g.beginPath(); g.moveTo(hx - 3.6, hy + 4.2); g.lineTo(hx - 3.8, hy - 3); g.lineTo(hx - 1.4, hy - 6.4); g.lineTo(hx + 1.6, hy - 6.4); g.lineTo(hx + 4, hy - 3); g.lineTo(hx + 3.6, hy + 2.6); g.lineTo(hx + 0.8, hy + 5); g.lineTo(hx - 1.6, hy + 5); g.closePath();
+      P.fill(g, P.lg(g, hx - 4, hy - 6, hx + 4, hy + 5, [ml, m, md]));
+      P.line(g, hx + 0.2, hy - 6.2, hx + 0.2, hy + 4.8, 0.45, sh(c.ash, 0.5)); // the ridge
+      P.path(g, [hx - 3.2, hy - 1.4, hx + 0.2, hy + 0.8, hx + 3.6, hy - 1.4, hx + 3.6, hy - 0.2, hx + 0.2, hy + 2, hx - 3.2, hy - 0.2]); P.fill(g, '#0a0404'); // the V slit
+      P.glow(g, hx + 0.4, hy, 3.6, E, 0.8); P.path(g, [hx - 2.4, hy - 1, hx + 0.2, hy + 0.8, hx + 2.8, hy - 1, hx + 0.2, hy + 1.3]); P.fill(g, c.eye);
+      // the greatsword: a broad blade of cooling slag, molten along its heart, held point-down before him
+      g.save(); g.translate(31.4, 33); g.rotate(-0.58);
+      P.glow(g, 0, 11, 8, E, 0.35);
+      P.path(g, [-1.9, 1.8, 1.9, 1.8, 2.2, 13, 1.2, 14.6, 2, 16.4, 0, 20.4, -2, 16, -2.2, 6]); P.fill(g, P.lg(g, -2, 0, 2, 0, ['#5a5054', '#2a2426', '#141012']));
+      P.path(g, [-0.4, 2.4, 0.5, 2.4, 0.4, 17, 0, 18.4, -0.4, 16.6]); P.fill(g, P.lg(g, 0, 2, 0, 18, [HOT, E, sh(E, -0.4)])); // the molten heart
+      P.line(g, -1.9, 2, -2.1, 15.6, 0.3, sh(c.ash, 0.5)); // a lit edge
+      P.rrect(g, -4, 0.2, 8, 1.6, 0.5, md); P.path(g, [-4, 0.2, -5.2, -1.2, -3.4, 0.6]); P.fill(g, md); P.path(g, [4, 0.2, 5.2, -1.2, 3.4, 0.6]); P.fill(g, md); // the crossguard with hooked quillons
+      P.line(g, 0, -0.2, 0, -4.2, 1.2, '#2a1a14'); P.circle(g, 0, -4.8, 0.9, E); // grip, a glowing pommel
+      g.restore();
+      // the near arm: a great gauntlet over the far one on the grip
+      limb(g, 35.6, 18.6, 36.4, 26, 2.4, 2, m); limb(g, 36.4, 26, 31, 31, 2, 1.7, ml);
+      P.path(g, [29, 29.6, 32.6, 29.2, 33.4, 32.4, 29.6, 33]); P.fill(g, P.lg(g, 29, 29, 29, 33, [ml, md]));
     } });
 
   /* ================= Hall 3: the Aqueduct ================= */
