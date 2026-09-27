@@ -131,5 +131,5 @@ window.DH = window.DH || {};
   };
 
   DH.util = U;
-  DH.VERSION = '1.60.6';
+  DH.VERSION = '1.60.7';
 })(window.DH);
