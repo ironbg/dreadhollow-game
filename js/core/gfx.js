@@ -52,10 +52,11 @@
       const frames = [], flash = [];
       const nf = p.frames || 1;
       for (let f = 0; f < nf; f++) {
-        if (p.pixels) { // hand-placed pixel art (paint_pixel.js): used as it is, scaled only by whole steps
+        if (p.pixels) { // hand-placed pixel art (paint_pixel.js), scaled only by whole steps, then graded like every other model
           const src = gfx.unpackPixels(p.pixels, f), c = canvas(W * res, H * res), g = c.getContext('2d');
           g.imageSmoothingEnabled = false; g.drawImage(src, 0, 0, W * res, H * res);
-          frames.push(c); flash.push(whiten(c)); continue;
+          const out = p.grade === false ? c : classicize(c, p, res);
+          frames.push(out); flash.push(whiten(out)); continue;
         }
         const c = canvas(W * res, H * res), g = c.getContext('2d');
         g.scale(res, res); g.translate(pad, pad);
