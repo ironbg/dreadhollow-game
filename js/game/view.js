@@ -10,6 +10,8 @@
       this.buf = document.createElement('canvas'); this.bctx = this.buf.getContext('2d');
       this.dark = document.createElement('canvas'); this.dctx = this.dark.getContext('2d');
       window.addEventListener('resize', () => this.resize());
+      // the graphics context was lost (a phone short of memory) and is back: every cached sprite came back blank, repaint them
+      canvas.addEventListener('contextrestored', () => { DH.gfx.flush(); this.vignette = null; });
       window.addEventListener('orientationchange', () => setTimeout(() => this.resize(), 200));
       this.resize();
     },

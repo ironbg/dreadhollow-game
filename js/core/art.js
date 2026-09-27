@@ -23,15 +23,21 @@
     g.fillStyle = grd; g.fillRect(0, 0, 128, 128);
     return c;
   })();
-  const glowCache = {};
+  let glowCache = {}, glowCount = 0;
+  /* One stamp per colour. A pulsing light asks for a new alpha every frame, so the alpha is rounded to steps of 0.05 and
+   * the cache is capped: an unbounded cache of 64x64 canvases filled the memory of a phone within minutes. */
   art.glow = function (color) {
+    color = color.replace(/,\s*(\d*\.?\d+)\)$/, (m, a) => ',' + Math.round(Math.min(1, +a) * 20) / 20 + ')');
     if (glowCache[color]) return glowCache[color];
+    if (++glowCount > 256) { glowCache = {}; glowCount = 1; }
     const c = makeCanvas(64, 64), g = c.getContext('2d');
     const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
     grd.addColorStop(0, color); grd.addColorStop(1, 'rgba(0,0,0,0)');
     g.fillStyle = grd; g.fillRect(0, 0, 64, 64);
     return (glowCache[color] = c);
   };
+
+  art.flushGlows = function () { glowCache = {}; glowCount = 0; };
 
   /** Small scene thumbnail for the stage selector. */
   art.stageThumb = function (stageId, w, h) {

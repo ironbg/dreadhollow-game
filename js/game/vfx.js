@@ -50,7 +50,7 @@
     g.putImageData(id, 0, 0);
     return (fogTex = c);
   }
-  const fogTint = {};
+  let fogTint = {};
   function tintedFog(rgb) {
     const key = rgb.join(',');
     if (fogTint[key]) return fogTint[key];
@@ -58,6 +58,9 @@
     g.drawImage(src, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = 'rgb(' + key + ')'; g.fillRect(0, 0, c.width, c.height);
     return (fogTint[key] = c);
   }
+
+  // lost graphics memory: the cached stamps came back blank, make them again
+  DH.events.on('gfx:flush', () => { fogTex = null; fogTint = {}; blobCache.clear(); });
 
   /* ---------------- per-frame update of ambient particles ---------------- */
   R.vfxAtmo = function () { return ATMO[this.stageId] || ATMO.crypt; };

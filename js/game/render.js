@@ -292,6 +292,7 @@
   };
   /** Six cached frames of a small licking flame (for foes on fire). */
   const FLAMES = [];
+  DH.events.on('gfx:flush', () => { FLAMES.length = 0; for (const k in stickArt) delete stickArt[k]; });
   function flameFrame(i) {
     if (!FLAMES.length) for (let f = 0; f < 6; f++) {
       const c = G.canvas(10, 24), q = c.getContext('2d'), sw = Math.sin(f / 6 * TAU) * 1.4;

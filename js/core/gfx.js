@@ -398,7 +398,16 @@
   gfx.drawDecal = drawDecal;
   gfx.Floor = Floor;
   gfx.CHUNK = CHUNK;
-  gfx.floor = function (theme, seed) { return new Floor(theme, seed, this.CPX); };
+  const floors = [];
+  gfx.floor = function (theme, seed) { const f = new Floor(theme, seed, this.CPX); floors.push(f); if (floors.length > 3) floors.shift(); return f; };
+  /** Drop every cached image so it is painted again. A phone that runs short of graphics memory can lose the contents of
+   *  all its canvases at once; without this every sprite would stay blank for the rest of the session. */
+  gfx.flush = function () {
+    this.cache = {};
+    for (const f of floors) f.chunks.clear();
+    if (DH.art && DH.art.flushGlows) DH.art.flushGlows();
+    DH.events.emit('gfx:flush');
+  };
 
   DH.gfx = gfx;
 })(window.DH);
