@@ -1628,45 +1628,42 @@
     },
   });
 
-  /* ---------- chest icons: a domed chest in three-quarter view, bound in metal ---------- */
-  function chest3(g, o) {
-    const B = o.body, M = o.band, open = o.open;
-    P.ell(g, 16, 28.4, 13, 2, 'rgba(0,0,0,0.5)');
-    // the body
-    inkPath(g, () => { g.beginPath(); g.rect(4, 16, 24, 12); }, P.lg(g, 0, 16, 0, 28, [sh(B, 0.15), B, sh(B, -0.5)]), 1.3);
-    if (o.planks) { for (const y of [20, 24]) P.line(g, 4.4, y, 27.6, y, 0.5, 'rgba(0,0,0,0.5)'); for (const [x, y] of [[10, 18], [21, 22], [14, 26]]) P.line(g, x, y, x + 3, y, 0.4, 'rgba(255,230,190,0.15)'); }
-    if (o.inside) { P.glow(g, 16, 15, 11, o.inside, 0.8); }
-    // the lid, raised a little when open
-    g.save(); if (open) { g.translate(16, 16); g.rotate(-0.16); g.translate(-16, -18.4); }
-    if (open) { P.path(g, [4.4, 16, 27.6, 16, 27.6, 18, 4.4, 18]); P.fill(g, '#140a04'); }
-    inkPath(g, () => { g.beginPath(); g.moveTo(4, 16.4); g.lineTo(4, 11.4); g.quadraticCurveTo(4, 5, 16, 4.6); g.quadraticCurveTo(28, 5, 28, 11.4); g.lineTo(28, 16.4); g.closePath(); }, P.lg(g, 0, 4.6, 0, 16.4, [sh(B, 0.4), sh(B, 0.05), sh(B, -0.35)]), 1.3);
-    if (o.planks) for (const y of [8.6, 12.4]) { g.strokeStyle = 'rgba(0,0,0,0.5)'; g.lineWidth = 0.5; g.beginPath(); g.moveTo(4.6, y + 1.4); g.quadraticCurveTo(16, y - 1.2, 27.4, y + 1.4); g.stroke(); }
-    P.path(g, [5, 11, 6, 7.4, 12, 5.4, 9, 9.6, 6.4, 15.6, 5, 15.6]); P.fill(g, 'rgba(255,255,255,0.14)');
-    for (const x of [7, 22.8]) { inkPath(g, () => { g.beginPath(); g.moveTo(x, 16.4); g.lineTo(x, 7.2 + (x < 16 ? 0 : 0)); g.quadraticCurveTo(x + 1.1, 6 - (x < 16 ? 0.4 : 0), x + 2.2, 5.8); g.lineTo(x + 2.2, 16.4); g.closePath(); }, mfill(g, x, 5, x + 2.2, 17, M), 0.9); rivet(g, x + 1.1, 9, 0.5, M); rivet(g, x + 1.1, 13.6, 0.5, M); }
-    inkPath(g, () => { g.beginPath(); g.rect(3.6, 15, 24.8, 1.8); }, mfill(g, 4, 15, 28, 17, M), 0.9);
+  /* ---------- chest icons: the same chests that stand in the halls, drawn large ---------- */
+  function chest3(g, body, band, glow, o) {
+    o = o || {};
+    g.save(); g.translate(2, 4.6); g.scale(2, 2);
+    P.ell(g, 7, 11.6, 6.6, 0.9, 'rgba(0,0,0,0.5)');
+    if (glow) P.glow(g, 7, 5.6, 8, glow, 0.35);
+    g.beginPath(); g.moveTo(1, 11.4); g.lineTo(1, 5.4); g.quadraticCurveTo(1, 0.6, 7, 0.6); g.quadraticCurveTo(13, 0.6, 13, 5.4); g.lineTo(13, 11.4); g.closePath();
+    g.strokeStyle = INK; g.lineWidth = 0.7; g.stroke();
+    P.rrect(g, 1, 5.2, 12, 6.2, 0.6, P.lg(g, 0, 5, 0, 11.4, [sh(body, 0.2), body, sh(body, -0.45)]));
+    g.strokeStyle = G.rgba(sh(body, -0.6), 0.9); g.lineWidth = 0.3; for (const y of [7.2, 9.2]) { g.beginPath(); g.moveTo(1.2, y); g.lineTo(12.8, y); g.stroke(); }
+    g.strokeStyle = G.rgba(sh(body, 0.4), 0.35); g.lineWidth = 0.2; for (const y of [7.5, 9.5]) { g.beginPath(); g.moveTo(1.4, y); g.lineTo(12.6, y); g.stroke(); }
+    g.beginPath(); g.moveTo(1, 5.4); g.quadraticCurveTo(1, 0.6, 7, 0.6); g.quadraticCurveTo(13, 0.6, 13, 5.4); g.closePath(); P.fill(g, P.lg(g, 0, 0.6, 0, 5.4, [sh(body, 0.5), body, sh(body, -0.15)]));
+    g.strokeStyle = G.rgba(sh(body, -0.5), 0.8); g.lineWidth = 0.3; for (const x of [4.6, 9.4]) { g.beginPath(); g.moveTo(x, 0.9); g.quadraticCurveTo(x + (x < 7 ? -0.6 : 0.6), 3, x + (x < 7 ? -0.8 : 0.8), 5.2); g.stroke(); }
+    P.path(g, [1.6, 5, 2.4, 2, 5, 1, 3.4, 3, 2.6, 5]); P.fill(g, 'rgba(255,255,255,0.14)');
+    for (const x of [2.8, 11.2]) {
+      g.beginPath(); g.moveTo(x - 0.7, 1.2); g.quadraticCurveTo(x - 0.9, 0.9, x, 0.8); g.lineTo(x + 0.7, 1.1); g.lineTo(x + 0.7, 11.4); g.lineTo(x - 0.7, 11.4); g.closePath();
+      g.strokeStyle = G.rgba(INK, 0.8); g.lineWidth = 0.25; g.stroke(); P.fill(g, P.lg(g, x - 0.7, 0, x + 0.7, 0, [sh(band, 0.45), band, sh(band, -0.4)]));
+      for (const y of [3, 8, 10.4]) { P.circle(g, x, y, 0.3, sh(band, -0.5)); P.circle(g, x - 0.08, y - 0.08, 0.18, sh(band, 0.6)); }
+    }
+    P.rrect(g, 1, 4.9, 12, 0.9, 0.3, P.lg(g, 0, 4.9, 0, 5.8, [sh(band, 0.3), sh(band, -0.3)]));
+    for (const [x, y] of [[0.8, 9.8], [11.6, 9.8]]) P.rrect(g, x, y, 1.6, 1.6, 0.3, P.lg(g, x, y, x + 1.6, y + 1.6, [sh(band, 0.3), sh(band, -0.3)]));
+    if (glow) { P.line(g, 1.4, 5.35, 12.6, 5.35, 0.3, G.rgba(glow, 0.9)); P.glow(g, 7, 5.3, 4, glow, 0.4); }
+    if (o.lock) o.lock(); else {
+      P.rrect(g, 5.5, 4.3, 3, 3.4, 0.5, INK); P.rrect(g, 5.7, 4.5, 2.6, 3, 0.4, P.lg(g, 5.6, 4.4, 8.4, 7.6, [sh(band, 0.55), band, sh(band, -0.4)]));
+      P.circle(g, 7, 5.7, 0.45, '#140a08'); P.rect(g, 6.8, 5.8, 0.4, 0.9, '#140a08');
+    }
+    if (o.runes) for (const [x, y] of [[4.2, 8.2], [9.8, 8.2]]) { P.glow(g, x, y, 1.6, glow, 0.6); P.circle(g, x, y, 0.45, G.rgba(glow, 0.95)); }
     g.restore();
-    if (o.spill) o.spill();
-    for (const x of [7, 22.8]) { inkPath(g, () => { g.beginPath(); g.rect(x, 17, 2.2, 11); }, mfill(g, x, 17, x + 2.2, 28, M), 0.9); rivet(g, x + 1.1, 20, 0.5, M); rivet(g, x + 1.1, 25, 0.5, M); }
-    inkPath(g, () => { g.beginPath(); g.rect(3.6, 26.4, 24.8, 1.8); }, mfill(g, 4, 26, 28, 28, M), 0.9);
-    // the lock
-    if (o.lock) o.lock(); else { inkPath(g, () => { P.rrect(g, 13.2, 15.4, 5.6, 6.4, 1); }, mfill(g, 13, 15, 19, 22, M), 1); P.circle(g, 16, 17.8, 0.9, INK); P.path(g, [15.4, 18.2, 16.6, 18.2, 16.9, 20.4, 15.1, 20.4]); P.fill(g, INK); }
-    if (o.gems) o.gems();
   }
   const CHEST = {
-    c_wood(g) { chest3(g, { body: '#7a4e2a', band: MAT.iron, planks: true }); for (const [x, y] of [[8.4, 21], [25, 13], [26, 23]]) P.ell(g, x, y, 1, 0.6, 'rgba(150,70,20,0.7)'); },
-    c_silver(g) { chest3(g, { body: '#3a4a66', band: MAT.silver, inside: '#80c8ff', open: true }); for (const [x, y] of [[12, 22.4], [20, 22.4]]) { g.strokeStyle = 'rgba(220,235,255,0.5)'; g.lineWidth = 0.5; g.beginPath(); g.arc(x, y, 1.6, 0, Math.PI * 1.5); g.stroke(); } },
-    c_gold(g) {
-      chest3(g, { body: '#7a1a2a', band: MAT.gold, inside: '#ffd060', open: true,
-        spill: () => { for (const [x, y] of [[11, 15.4], [14.4, 14.6], [18, 14.4], [21.4, 15.2], [16, 13.6]]) { P.ell(g, x, y, 1.6, 0.9, MAT.gold[3]); P.ell(g, x, y - 0.1, 1.3, 0.6, MAT.gold[1]); } glint(g, 19, 12.6, 1.6, '#fff8d0'); },
-        gems: () => { gemCut(g, 11, 22.4, 1.2, '#ff3050'); gemCut(g, 21, 22.4, 1.2, '#40a0ff'); } });
-      for (const [x, y] of [[4, 28.4], [27.6, 28]]) { P.ell(g, x, y, 1.5, 0.7, MAT.gold[3]); P.ell(g, x, y - 0.1, 1.2, 0.45, MAT.gold[1]); }
-    },
-    c_red(g) {
-      chest3(g, { body: '#5a0a14', band: MAT.iron, inside: '#ff2040', open: true,
-        lock: () => { skullAt(g, 16, 17.8, 3, '#ff3040'); } });
-      for (const [x, l] of [[10, 2.4], [22, 3]]) { P.path(g, [x - 0.6, 28, x + 0.6, 28, x, 28 + l]); P.fill(g, '#a01020'); }
-    },
+    c_wood(g) { chest3(g, '#6a4222', '#7a808a', null); },
+    c_silver(g) { chest3(g, '#243048', '#dfe6f2', '#90d0ff', { runes: true }); },
+    c_gold(g) { chest3(g, '#4a2a14', '#ffd35a', '#ffe070'); glint(g, 24.4, 8.6, 1.8, '#fff8d0'); glint(g, 8, 13, 1.2, '#fff8d0'); },
+    c_red(g) { chest3(g, '#6a1420', '#c8ccd8', '#ff3040', { lock: () => { skullAt(g, 7, 5.9, 1.7, '#ff3040'); } }); },
   };
+
 
   function draw(name) {
     const c = G.canvas(SIZE, SIZE), g = c.getContext('2d');
