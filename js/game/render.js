@@ -566,14 +566,16 @@
     const k = 1 - f.life / f.max, p = this.player, P = G.P;
     const x = (f.follow ? p.x : f.x) - cx, y = (f.follow ? p.y : f.y) - cy;
     switch (f.k) {
-      case 'slash': {
+      case 'slash': { // a crescent of steel light: thick at its middle, tapering to both ends, a bright edge, sparks thrown off
         const a0 = f.ang - f.arc / 2, sweep = f.arc * Math.min(1, k * 2.2);
-        const s0 = f.flip ? f.ang + f.arc / 2 - sweep : a0, s1 = f.flip ? f.ang + f.arc / 2 : a0 + sweep;
-        g.globalAlpha = 1 - k * 0.8;
-        g.strokeStyle = f.color || '#ffffff'; g.lineWidth = 2.2; g.beginPath(); g.arc(x, y, f.R * 0.88, s0, s1); g.stroke();
-        g.strokeStyle = 'rgba(200,220,255,0.55)'; g.lineWidth = 5; g.beginPath(); g.arc(x, y, f.R * 0.7, s0, s1); g.stroke();
-        g.strokeStyle = 'rgba(160,180,255,0.22)'; g.lineWidth = 10; g.beginPath(); g.arc(x, y, f.R * 0.5, s0, s1); g.stroke();
-        g.globalAlpha = 1; g.lineWidth = 1;
+        const s0 = f.flip ? f.ang + f.arc / 2 - sweep : a0, s1 = f.flip ? f.ang + f.arc / 2 : a0 + sweep, col = f.color || '#ffffff';
+        const crescent = (r0, r1, style) => { const n = 14; g.beginPath(); for (let i = 0; i <= n; i++) { const a = s0 + (s1 - s0) * i / n, th = Math.sin(i / n * Math.PI); g.lineTo(x + Math.cos(a) * (r1 - (r1 - r0) * (1 - th)), y + Math.sin(a) * (r1 - (r1 - r0) * (1 - th))); } for (let i = n; i >= 0; i--) { const a = s0 + (s1 - s0) * i / n; g.lineTo(x + Math.cos(a) * r0, y + Math.sin(a) * r0); } g.closePath(); g.fillStyle = style; g.fill(); };
+        g.save(); g.globalAlpha = 1 - k * 0.85;
+        crescent(f.R * 0.4, f.R * 0.95, G.rgba(col === '#ffffff' ? '#a8c0ff' : col, 0.25));
+        crescent(f.R * 0.62, f.R * 0.95, G.rgba(col === '#ffffff' ? '#d8e4ff' : col, 0.6));
+        g.strokeStyle = '#ffffff'; g.lineWidth = 1.2; g.beginPath(); g.arc(x, y, f.R * 0.94, s0, s1); g.stroke(); // the bright edge
+        g.restore();
+        if (k < 0.3 && Math.random() < 0.5) { const a = s1, px = f.x + Math.cos(a) * f.R * 0.9, py = f.y + Math.sin(a) * f.R * 0.9; this.parts.push({ x: px, y: py, vx: Math.cos(a) * 40, vy: Math.sin(a) * 40, life: 0.2, max: 0.2, c: '#ffffff', s: 1 }); }
         const sx = x + cx + Math.cos(f.ang) * f.R * 0.6, sy = y + cy + Math.sin(f.ang) * f.R * 0.6;
         lights.push(f.color && f.color !== '#ffffff' ? { x: sx, y: sy, r: 36 * (1 - k * 0.6), kind: 'tint', color: f.color, a: 0.45 } : { x: sx, y: sy, r: 30, kind: 'small' });
         break;
@@ -584,12 +586,16 @@
         g.globalAlpha = (1 - k) * 0.6; g.strokeStyle = '#ffe8b0'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, f.R * (0.6 + k * 0.4), f.ang - 1.1, f.ang + 1.1); g.stroke(); g.globalAlpha = 1;
         break;
       }
-      case 'smite': {
-        const drop = Math.max(0, 1 - k / 0.4);
+      case 'smite': { // a column of holy light, the hammer falling down it, a ring of light where it lands
+        const drop = Math.max(0, 1 - k / 0.4), a = 1 - k;
+        g.save(); g.globalCompositeOperation = 'lighter';
+        const grd = g.createLinearGradient(0, y - 100, 0, y); grd.addColorStop(0, 'rgba(255,240,170,0)'); grd.addColorStop(1, 'rgba(255,240,170,' + 0.5 * a + ')');
+        g.fillStyle = grd; g.fillRect(x - f.R * 0.35, y - 100, f.R * 0.7, 100);
+        g.restore();
         if (drop > 0) this.sprite(g, 'hammer_p', null, 0, x, y - drop * 40, false, 1.6);
-        g.globalAlpha = 1 - k; g.strokeStyle = '#fff0a0'; g.lineWidth = 2; g.beginPath(); g.ellipse(x, y, f.R * Math.min(1, k * 2.5), f.R * 0.7 * Math.min(1, k * 2.5), 0, 0, TAU); g.stroke();
+        g.globalAlpha = a; g.strokeStyle = '#fff0a0'; g.lineWidth = 2; g.beginPath(); g.ellipse(x, y, f.R * Math.min(1, k * 2.5), f.R * 0.7 * Math.min(1, k * 2.5), 0, 0, TAU); g.stroke();
         g.drawImage(A.glow('rgba(255,240,160,1)'), x - f.R, y - f.R, f.R * 2, f.R * 2); g.globalAlpha = 1;
-        lights.push({ x: f.x, y: f.y, r: f.R * 2 * (1 - k), kind: 'holy' });
+        lights.push({ x: f.x, y: f.y, r: f.R * 2 * a, kind: 'holy' });
         break;
       }
       case 'pillar': { // level-up: a column of light
@@ -621,6 +627,13 @@
         g.globalAlpha = 1 - k; g.strokeStyle = f.color || '#fff'; g.lineWidth = f.k === 'pop' ? 1.5 : 3;
         g.beginPath(); g.ellipse(x, y, Rr, Rr * 0.75, 0, 0, TAU); g.stroke();
         g.drawImage(A.glow(G.rgba(f.color || '#ffffff', 0.5)), x - Rr, y - Rr, Rr * 2, Rr * 2);
+        if (f.k === 'slam') { // cracks run out through the floor, dust thrown up
+          const rng = U.seeded((f.x * 7 + f.y * 13) | 0);
+          g.strokeStyle = 'rgba(20,14,10,0.85)'; g.lineWidth = 1; g.beginPath();
+          for (let i = 0; i < 6; i++) { const a = rng() * TAU, l = f.R * (0.5 + rng() * 0.5) * Math.min(1, k * 3); let px = x, py = y; g.moveTo(px, py); for (let s = 1; s <= 3; s++) { px = x + Math.cos(a + (rng() - 0.5) * 0.5) * l * s / 3; py = y + Math.sin(a + (rng() - 0.5) * 0.5) * l * s / 3 * 0.75; g.lineTo(px, py); } }
+          g.stroke();
+          g.fillStyle = 'rgba(150,130,110,' + 0.35 * (1 - k) + ')'; g.beginPath(); g.ellipse(x, y - k * 4, Rr * 1.05, Rr * 0.45, 0, 0, TAU); g.fill();
+        }
         g.globalAlpha = 1; g.lineWidth = 1;
         lights.push({ x: x + cx, y: y + cy, r: Rr * (f.k === 'pop' ? 1.1 : 1.4) * (1 - k * 0.5), kind: 'tint', color: f.color || '#ffffff', a: f.k === 'pop' ? 0.3 : 0.45 });
         break;
@@ -635,28 +648,33 @@
         if (!f.flashed) { f.flashed = true; this.flashLight(0.05, 'rgba(255,190,110,'); }
         break;
       }
-      case 'explosion': {
-        const Rr = f.R * (0.4 + k * 0.8);
-        g.globalAlpha = 1 - k; g.drawImage(A.glow('rgba(255,140,40,1)'), x - Rr * 1.4, y - Rr * 1.4, Rr * 2.8, Rr * 2.8); g.globalAlpha = 1;
-        g.fillStyle = 'rgba(255,240,180,' + (1 - k) * 0.9 + ')'; g.beginPath(); g.arc(x, y, Rr * (1 - k) * 0.6, 0, TAU); g.fill();
-        g.strokeStyle = 'rgba(255,180,80,' + (1 - k) + ')'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, Rr, 0, TAU); g.stroke(); g.lineWidth = 1;
-        lights.push({ x: f.x, y: f.y, r: f.R * 2.5 * (1 - k), kind: 'fire' });
+      case 'explosion': { // a white-hot core, tongues of flame, a ring of smoke rolling out, debris flung
+        const Rr = f.R * (0.4 + k * 0.8), a = 1 - k, rng = U.seeded((f.x * 11 + f.y * 5) | 0);
+        g.globalAlpha = a; g.drawImage(A.glow('rgba(255,140,40,1)'), x - Rr * 1.4, y - Rr * 1.4, Rr * 2.8, Rr * 2.8);
+        g.fillStyle = 'rgba(60,44,40,' + 0.45 * k * a * 2 + ')'; g.beginPath(); g.ellipse(x, y - k * 6, Rr * 1.1, Rr * 0.8, 0, 0, TAU); g.fill(); // the smoke
+        for (let i = 0; i < 7; i++) { const an = rng() * TAU, l = Rr * (0.6 + rng() * 0.5) * (1 - k * 0.4); g.fillStyle = i % 2 ? '#ff8a20' : '#ffc040'; g.beginPath(); g.moveTo(x + Math.cos(an - 0.55) * Rr * 0.3, y + Math.sin(an - 0.55) * Rr * 0.3); g.quadraticCurveTo(x + Math.cos(an - 0.15) * l * 0.8, y + Math.sin(an - 0.15) * l * 0.8, x + Math.cos(an) * l, y + Math.sin(an) * l); g.quadraticCurveTo(x + Math.cos(an + 0.15) * l * 0.8, y + Math.sin(an + 0.15) * l * 0.8, x + Math.cos(an + 0.55) * Rr * 0.3, y + Math.sin(an + 0.55) * Rr * 0.3); g.fill(); } // flame tongues
+        g.globalAlpha = 1;
+        g.fillStyle = 'rgba(255,248,210,' + a * 0.95 + ')'; g.beginPath(); g.arc(x, y, Rr * a * 0.55, 0, TAU); g.fill();
+        g.strokeStyle = 'rgba(255,180,80,' + a + ')'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, Rr, 0, TAU); g.stroke(); g.lineWidth = 1;
+        if (!f.debris) { f.debris = true; for (let i = 0; i < 6; i++) { const an = rng() * TAU; this.parts.push({ x: f.x, y: f.y, vx: Math.cos(an) * 70, vy: Math.sin(an) * 50 - 30, life: 0.5, max: 0.5, c: i % 2 ? '#3a2a24' : '#ffb040', s: 1.4, g: 120 }); } }
+        lights.push({ x: f.x, y: f.y, r: f.R * 2.5 * a, kind: 'fire' });
         if (!f.flashed) { f.flashed = true; this.flashLight(Math.min(0.2, f.R / 200), 'rgba(255,170,90,'); }
         break;
       }
-      case 'meteor': {
-        g.globalAlpha = 0.3 + k * 0.4; g.strokeStyle = '#ff8a2a'; g.lineWidth = 1; g.beginPath(); g.ellipse(x, y, f.R, f.R * 0.75, 0, 0, TAU); g.stroke();
+      case 'meteor': { // a burning rock streaking down on a ring of fire marked on the ground
+        g.globalAlpha = 0.3 + k * 0.5; g.strokeStyle = '#ff8a2a'; g.lineWidth = 1.2; g.beginPath(); g.ellipse(x, y, f.R, f.R * 0.75, 0, 0, TAU); g.stroke();
         g.fillStyle = 'rgba(255,120,40,0.25)'; g.beginPath(); g.ellipse(x, y, f.R * k, f.R * 0.75 * k, 0, 0, TAU); g.fill(); g.globalAlpha = 1;
-        const mx = x + (1 - k) * 60, my = y - (1 - k) * 120;
-        g.drawImage(A.glow('rgba(255,140,40,0.9)'), mx - 10, my - 10, 20, 20); P.circle(g, mx, my, 3.4, P.vol(g, mx, my, 3.4, '#8a4a2a'));
-        g.strokeStyle = 'rgba(255,180,80,0.6)'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(mx, my); g.lineTo(mx + 14, my - 26); g.stroke(); g.lineWidth = 1;
-        lights.push({ x: mx + cx, y: my + cy, r: 30, kind: 'fire' });
+        const mx = x + (1 - k) * 60, my = y - (1 - k) * 120, ang = Math.atan2(120, -60);
+        this.sprite(g, 'fireball_p', null, Math.floor(this.time * 14) % 2, mx, my, false, 2.2, false, 1, ang);
+        P.circle(g, mx, my, 3, P.vol(g, mx - 1, my - 1, 3.2, '#5a3a2a')); P.circle(g, mx + 0.8, my + 0.8, 1.2, '#ff8a20'); // the rock, glowing in its cracks
+        lights.push({ x: mx + cx, y: my + cy, r: 34, kind: 'fire' });
         break;
       }
-      case 'hail': {
+      case 'hail': { // a spear of ice falling on its mark
         const hy = y - (1 - k) * 60;
         g.globalAlpha = 0.5; g.strokeStyle = '#bfefff'; g.beginPath(); g.ellipse(x, y, f.R, f.R * 0.75, 0, 0, TAU); g.stroke(); g.globalAlpha = 1;
-        P.circle(g, x, hy, 2.2, P.vol(g, x, hy, 2.2, '#e8f8ff'));
+        P.path(g, [x - 1.8, hy - 6, x + 1.8, hy - 6, x, hy + 3]); P.fill(g, P.lg(g, x - 2, 0, x + 2, 0, ['#ffffff', '#9fe0ff', '#4a90c8']));
+        P.line(g, x - 0.6, hy - 5, x - 0.2, hy + 1, 0.4, 'rgba(255,255,255,0.9)');
         lights.push({ x: f.x, y: f.y - (1 - k) * 60, r: 12 + k * 10, kind: 'frost' });
         break;
       }
@@ -692,11 +710,13 @@
         f.pts.forEach(([px, py]) => lights.push({ x: px, y: py, r: 24, kind: 'bolt' }));
         break;
       }
-      case 'nova': {
+      case 'nova': { // a wave of frost: a bright ring with shards of ice riding it
         const Rr = f.cur || 0;
         g.strokeStyle = 'rgba(180,240,255,' + (1 - k) + ')'; g.lineWidth = 3; g.beginPath(); g.ellipse(x, y, Rr, Rr * 0.75, 0, 0, TAU); g.stroke();
         g.strokeStyle = 'rgba(120,200,255,' + (1 - k) * 0.4 + ')'; g.lineWidth = 8; g.stroke(); g.lineWidth = 1;
-        for (let i = 0; i < 12; i++) { const a = i / 12 * TAU + k; g.fillStyle = '#ffffff'; g.fillRect(x + Math.cos(a) * Rr - 1, y + Math.sin(a) * Rr * 0.75 - 1, 2, 2); }
+        g.globalAlpha = 1 - k;
+        for (let i = 0; i < 12; i++) { const a = i / 12 * TAU + k * 0.5, sx = x + Math.cos(a) * Rr, sy = y + Math.sin(a) * Rr * 0.75; P.path(g, [sx - Math.cos(a) * 3 - Math.sin(a) * 2, sy - Math.sin(a) * 2.2 + Math.cos(a) * 1.5, sx + Math.cos(a) * 6, sy + Math.sin(a) * 4.5, sx - Math.cos(a) * 3 + Math.sin(a) * 2, sy - Math.sin(a) * 2.2 - Math.cos(a) * 1.5]); P.fill(g, i % 2 ? '#ffffff' : '#bfefff'); }
+        g.globalAlpha = 1;
         lights.push({ x: f.x, y: f.y, r: Rr * 1.2, kind: 'frost' });
         break;
       }
