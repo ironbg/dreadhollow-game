@@ -200,6 +200,7 @@
       g.drawImage(A.glow(b.color), x - 8, y - 8, 16, 16);
       if (b.kind === 'curse') { g.drawImage(A.glow('#a040ff'), x - 16, y - 16, 32, 32); G.P.circle(g, x, y, 4, '#2a0840'); G.P.circle(g, x - 1.3, y - 0.6, 1, '#e080ff'); G.P.circle(g, x + 1.3, y - 0.6, 1, '#e080ff'); }
       else if (b.kind === 'skull') { G.P.circle(g, x, y, 2.4, '#e8d8ff'); G.P.circle(g, x - 0.8, y - 0.3, 0.6, '#300050'); G.P.circle(g, x + 0.8, y - 0.3, 0.6, '#300050'); }
+      else if (b.kind === 'bolt') { const l = Math.hypot(b.vx, b.vy) || 1, ux = b.vx / l, uy = b.vy / l; G.P.line(g, x - ux * 6, y - uy * 6, x + ux * 2, y + uy * 2, 1, '#e8e0c8'); G.P.line(g, x + ux * 1, y + uy * 1, x + ux * 3, y + uy * 3, 1.4, '#c8ccd8'); }
       else { g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x, y, 1.4, 0, TAU); g.fill(); }
       if (FIREY(b.color)) { lights.push({ x: b.x, y: b.y, r: 30, kind: 'fire' }); if (Math.random() < 0.4) this.parts.push({ x: b.x, y: b.y, vx: U.rand(-8, 8), vy: U.rand(-14, 4), life: 0.3, max: 0.3, c: U.pick(['#ff8a30', '#ffd040']), s: 1 }); }
       else lights.push({ x: b.x, y: b.y, r: b.kind === 'curse' ? 34 : 24, kind: 'tint', color: b.color, a: 0.4 });
@@ -299,8 +300,8 @@
   }
   R.drawEnemy = function (g, e, cx, cy, lights) {
     const s = G.sprite(e.painter, e.variant), nf = s.frames.length;
-    const fr = nf > 1 ? Math.floor(e.anim / (e.def.anim || 0.3)) % nf : 0; // a slow, heavy two-frame gait
-    const bob = e.def.fly ? Math.sin(e.anim * 4) * 1.5 - 2 : 0;
+    const fr = e.fr != null ? e.fr % nf : nf > 1 ? Math.floor(e.anim / (e.def.anim || 0.3)) % nf : 0; // a slow, heavy two-frame gait
+    const bob = e.def.fly && !e.perch ? Math.sin(e.anim * 4) * 1.5 - 2 : 0;
     const x = e.x - cx, y = e.y - cy + bob, k = e.scale;
     if (e.down > 0) { // a fallen skeleton: a heap of bones that pulls itself back up (it rises through the last half second)
       const up = Math.max(0, 1 - e.down / 0.5), hh = s.h * k * (0.28 + 0.72 * up), ww = s.w * k * (1.25 - 0.25 * up);
@@ -530,7 +531,10 @@
     const f = k == null ? 1 : k;
     g.beginPath();
     if (h.kind === 'circle') g.ellipse(x, y, h.r * f, h.r * 0.8 * f, 0, 0, TAU);
-    else if (h.kind === 'ring') { const ro = h.r0 + (h.r - h.r0) * f; g.ellipse(x, y, ro, ro * 0.8, 0, 0, TAU); g.ellipse(x, y, h.r0, h.r0 * 0.8, 0, TAU, 0, true); } // a band with a safe heart
+    else if (h.kind === 'ring') { // a band with a safe heart (and perhaps a gap to slip through)
+      const ro = h.r0 + (h.r - h.r0) * f, a0 = h.gap == null ? 0 : h.gap + h.gw, a1 = h.gap == null ? TAU : h.gap + TAU - h.gw;
+      g.ellipse(x, y, ro, ro * 0.8, 0, a0, a1); g.ellipse(x, y, h.r0, h.r0 * 0.8, 0, a1, a0, true); if (h.gap != null) g.closePath();
+    }
     else if (h.kind === 'line') { g.save(); g.translate(x, y); g.rotate(h.ang); g.rect(0, -h.w / 2 * f, h.len, h.w * f); g.restore(); }
     else if (h.kind === 'cone') { g.moveTo(x, y); g.arc(x, y, h.len * f, h.ang - h.arc / 2, h.ang + h.arc / 2); g.closePath(); }
   };

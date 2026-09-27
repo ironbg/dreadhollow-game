@@ -6,7 +6,7 @@
   'use strict';
   const KEY = 'dreadhollow.save.v1';
   const META_KEY = 'dreadhollow.sync.v1';
-  const SAVE_VERSION = 6;
+  const SAVE_VERSION = 7;
   const store = () => DH.platform.storage;
   const newMeta = () => ({ rev: 0, dirty: false, uid: null, syncedAt: 0, device: Math.random().toString(36).slice(2, 10) });
 
@@ -115,7 +115,7 @@
       if (DH.content && !DH.content.stages[d.selectedStage]) d.selectedStage = 'crypt';
       // the Starting Tome quests became gentler: whoever beat the old ones keeps the tome
       const ST = DH.content && DH.content.START_TOME_OLD; if (ST && d.deeds) for (const k in ST) if (d.deeds[ST[k]] && !d.deeds[k]) d.deeds[k] = d.deeds[ST[k]];
-      const BO = DH.content && DH.content.BOSS_DEED_OLD; if (BO && d.deeds) for (const k in BO) if (d.deeds[BO[k]] && !d.deeds[k]) d.deeds[k] = d.deeds[BO[k]]; // a hall's bosses were recast: a beaten boss counts for its successor
+      const BO = DH.content && DH.content.BOSS_DEED_OLD; if (BO && d.deeds) for (const k in BO) { const o = BO[k], old = Array.isArray(o) ? o[0] : o; if (Array.isArray(o) && !(d.v < o[1])) continue; if (d.deeds[old] && !d.deeds[k]) d.deeds[k] = d.deeds[old]; } // a hall's bosses were recast: a beaten boss counts for its successor
       d.v = SAVE_VERSION;
     },
     _t: null,

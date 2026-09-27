@@ -140,6 +140,8 @@
     boom() { burst({ t: 0.9, ff: 900, ff2: 40, vol: 0.4, rev: 0.7 }); tone({ type: 'sine', f: 70, f2: 24, t: 0.8, vol: 0.34 }); },
     zap() { tone({ type: 'sawtooth', f: 900, f2: 110, t: 0.22, vol: 0.09, filter: 'lowpass', ff: 2400 }); for (let i = 0; i < 4; i++) burst({ t: 0.03, filter: 'bandpass', ff: rnd(1500, 3000), q: 3, vol: 0.12, delay: i * 0.035 }); },
     frost() { burst({ t: 0.18, filter: 'highpass', ff: 2600, vol: 0.12 }); metal(rnd(700, 900), 0.6, 0.03, PLATE, { rev: true }); },
+    bell() { metal(rnd(150, 170), 3.2, 0.14, BELL, { rev: 1 }); thud(70, 0.4, 0.2); }, // the Bell Warden's toll
+    splash() { burst({ t: 0.35, filter: 'bandpass', ff: 900, ff2: 250, q: 0.9, vol: 0.22 }); for (let i = 0; i < 4; i++) tone({ type: 'sine', f: rnd(300, 700), f2: rnd(900, 1400), t: 0.07, vol: 0.04, delay: 0.05 + i * rnd(0.04, 0.09) }); },
     throw() { burst({ t: 0.14, filter: 'bandpass', ff: 700, ff2: 300, q: 1.8, vol: 0.14, attack: 0.03 }); },
     glass() { // clay urn shattering
       burst({ t: 0.16, filter: 'bandpass', ff: 1100, ff2: 400, q: 1.2, vol: 0.2 });

@@ -304,4 +304,224 @@
       P.line(g, hx, hy + 1, hx, hy + 4, 0.5, c.dark);
       for (let i = 0; i < 4; i++) flame(g, hx - 2.4 + i * 1.6, hy - 4.2, 3 + (i % 2) + (f ? 0.8 : 0), -0.8, 0.8);
     } });
+
+  /* ================= Hall 3: the Aqueduct ================= */
+  /** Barnacles and moss spots scattered over an area. */
+  function barnacles(g, pts, col) { for (const [x, y, r] of pts) { P.circle(g, x, y, r, sh(col, -0.35)); P.circle(g, x - r * 0.2, y - r * 0.2, r * 0.55, col); } }
+
+  /* ---------- Weeping Watcher: a hooded stone mourner, face hidden in its hands; eyes show when it moves ---------- */
+  def('weeper', { w: 20, h: 30, cy: 20, frames: 2,
+    colors: { stone: '#8a8a86', moss: '#4a6a3a', eye: '#9ff0ff' },
+    draw(g, f, c) {
+      const st = c.stone, sd = sh(st, -0.45);
+      P.ell(g, 10, 28.4, 6, 1.2, 'rgba(0,0,0,0.45)');
+      // a plinth of cracked stone and the robe falling onto it
+      P.rrect(g, 3.4, 25, 13.2, 3.4, 0.8, P.lg(g, 0, 25, 0, 28.4, [sh(st, 0.1), sd]));
+      g.beginPath(); g.moveTo(6.4, 9); g.lineTo(13.6, 9); g.quadraticCurveTo(16, 17, 16.2, 25.4); g.lineTo(3.8, 25.4); g.quadraticCurveTo(4, 17, 6.4, 9); g.closePath();
+      P.fill(g, P.lg(g, 4, 9, 16, 25, [sh(st, 0.35), st, sd]));
+      g.strokeStyle = sh(st, -0.3); g.lineWidth = 0.4; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(7.4 + i * 1.6, 11); g.quadraticCurveTo(6.4 + i * 2.2, 18, 5.8 + i * 2.6, 25); g.stroke(); }
+      // cracks and moss
+      g.strokeStyle = '#2a2a28'; g.lineWidth = 0.35; g.beginPath(); g.moveTo(12.6, 14); g.lineTo(11.4, 17); g.lineTo(12.4, 19.4); g.moveTo(5.6, 21); g.lineTo(7.4, 22.6); g.stroke();
+      for (const [x, y, r] of [[5, 24.4, 1.4], [14.6, 23.6, 1.1], [7.6, 10.2, 0.8], [13.8, 9.8, 0.9]]) P.ell(g, x, y, r, r * 0.6, c.moss);
+      // a deep hood; the hands cover the face (lowered a little while it moves, and the eyes glare through)
+      g.beginPath(); g.moveTo(5.2, 10.4); g.quadraticCurveTo(4.6, 1.6, 10.4, 1); g.quadraticCurveTo(15.8, 1.8, 15, 10.4); g.quadraticCurveTo(10, 8.6, 5.2, 10.4); g.closePath();
+      P.fill(g, P.lg(g, 5, 1, 15, 10, [sh(st, 0.45), st, sd]));
+      P.ell(g, 10.6, 6.4, 3.4, 3.6, '#1a1a1a');
+      const low = f ? 1.2 : 0;
+      if (f) { P.glow(g, 11, 5.4, 3, c.eye, 0.7); P.circle(g, 9.6, 5.4, 0.45, c.eye); P.circle(g, 12.2, 5.4, 0.45, c.eye); }
+      for (const [x, d] of [[9, -1], [12, 1]]) { P.ell(g, x, 6.6 + low, 1.7, 2.2, P.vol(g, x, 6.4 + low, 2, sh(st, 0.2)), d * 0.2); for (let k = 0; k < 3; k++) P.line(g, x - 1 + k, 4.8 + low, x - 1.1 + k * 1.05, 6 + low, 0.25, sd); }
+      P.path(g, [7.6, 9 + low, 8.6, 12.4, 11.6, 12.4, 12.6, 9 + low]); P.fill(g, sh(st, 0.05)); // forearms
+      P.line(g, 10, 7.6 + low, 10.4, 9.6 + low, 0.35, 'rgba(120,200,220,0.55)'); // a stone tear
+    } });
+
+  /* ---------- Gargoyle: a horned stone imp; wings folded while it perches, spread when it swoops ---------- */
+  def('gargoyle', { w: 30, h: 24, cy: 15, frames: 2,
+    colors: { stone: '#6a7266', eye: '#ffb040' },
+    draw(g, f, c) {
+      const st = c.stone, sd = sh(st, -0.5);
+      P.ell(g, 15, 22.4, 7, 1.2, 'rgba(0,0,0,0.45)');
+      // wings: folded against the back (frame 0) or spread wide (frame 1)
+      const wing = (sx) => {
+        g.save(); g.translate(15 - sx * 3, 9); g.scale(sx, 1);
+        if (f) { g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(6, -9, 14, -6); g.lineTo(12, -2); g.lineTo(13, 2); g.lineTo(9, 1); g.lineTo(9, 5); g.lineTo(5, 3); g.lineTo(1, 5); g.closePath(); }
+        else { g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(4, -7, 7, -4); g.lineTo(6, 2); g.lineTo(4, 5); g.lineTo(1, 6); g.closePath(); }
+        P.fill(g, P.lg(g, 0, -8, 0, 6, [sh(st, 0.25), sd])); g.strokeStyle = sh(st, -0.65); g.lineWidth = 0.4; g.stroke();
+        g.restore();
+      };
+      wing(1); wing(-1);
+      // crouched haunches and clawed feet
+      limb(g, 12, 15, 10, 20, 1.6, 1.2, sd); limb(g, 18, 15, 20, 20, 1.6, 1.2, st);
+      claws(g, 10, 20.4, 1.2, 3, 1.3, 0.4, sh(st, 0.3)); claws(g, 20, 20.4, 1.2, 3, 1.3, 0.4, sh(st, 0.3));
+      // a hunched body, ridges down the spine
+      P.ell(g, 15, 13.4, 5.6, 5, P.vol(g, 15, 12.6, 5.6, st));
+      for (let i = 0; i < 4; i++) P.path(g, [11 + i * 2, 9.4 - i * 0.2, 11.8 + i * 2, 7.6 - i * 0.2, 12.6 + i * 2, 9.4 - i * 0.2]); P.fill(g, sd);
+      // arms and long claws resting forward
+      limb(g, 17.6, 12, 21, 16.4, 1.1, 0.9, st); claws(g, 21.2, 16.8, 1.1, 3, 1.4, 0.35, sh(st, 0.3));
+      // head: heavy brow, curling horns, a grinning maw
+      const hx = 20.4, hy = 8.2;
+      P.circle(g, hx, hy, 3.2, P.vol(g, hx, hy, 3.2, st));
+      horn(g, hx - 1.6, hy - 2.2, hx - 3.6, hy - 5.6, hx - 1.6, hy - 7, 0.7, sh(st, 0.1)); horn(g, hx + 1, hy - 2.6, hx + 2.6, hy - 6.2, hx + 4.6, hy - 6, 0.7, sh(st, 0.1));
+      P.path(g, [hx, hy + 1, hx + 3.8, hy + 0.6, hx + 3, hy + 2.6, hx + 0.4, hy + 2.8]); P.fill(g, '#141414');
+      teeth(g, hx + 0.2, hy + 1, hx + 3.6, hy + 0.7, 4, 0.6, 1, '#d8d4c4');
+      evil(g, hx + 1.4, hy - 0.8, 0.5, c.eye); evil(g, hx - 0.8, hy - 0.8, 0.4, c.eye);
+      g.strokeStyle = '#2a2e28'; g.lineWidth = 0.3; g.beginPath(); g.moveTo(13, 11); g.lineTo(14.4, 13.6); g.lineTo(13.4, 15.6); g.stroke();
+    } });
+
+  /* ---------- Arbalist: a skeletal crossbowman under a kettle helm, a heavy crossbow braced ---------- */
+  def('arbalist', { w: 26, h: 22, cy: 13, frames: 2,
+    colors: { bone: '#c8c8b4', iron: '#5a5e66', wood: '#5a3e26', eye: '#70ffd0' },
+    draw(g, f, c) {
+      const b = c.bone, bd = sh(b, -0.45), w = f ? 0.8 : 0;
+      P.ell(g, 11, 20.4, 6, 1, 'rgba(0,0,0,0.45)');
+      P.bone(g, 9.6, 13, 8.4 - w, 16.4, 0.8, bd); P.bone(g, 8.4 - w, 16.4, 8.8 - w, 19.6, 0.75, bd);
+      P.bone(g, 12, 13, 13.2 + w, 16.4, 0.8, b); P.bone(g, 13.2 + w, 16.4, 13.4 + w, 19.6, 0.75, b);
+      // a quiver of bolts on the back and a tattered tabard
+      P.rrect(g, 5, 6, 2.6, 7, 0.8, sh(c.wood, -0.2)); for (let i = 0; i < 3; i++) P.line(g, 5.6 + i * 0.7, 6, 5.4 + i * 0.7, 3.8, 0.4, '#d8d0b0');
+      P.path(g, [8.4, 7, 13.4, 7, 14, 13.4, 12.4, 12.6, 11, 14.4, 9.6, 12.6, 8, 13.4]); P.fill(g, P.lg(g, 8, 7, 14, 14, ['#2e4a4a', '#16262a']));
+      for (let i = 0; i < 3; i++) { g.beginPath(); g.ellipse(11, 8.4 + i * 1.3, 1.8 - i * 0.2, 0.45, 0, 0, Math.PI * 2); g.strokeStyle = bd; g.lineWidth = 0.4; g.stroke(); }
+      // skull under a kettle helm
+      const hx = 11.6, hy = 4.2;
+      skull(g, hx, hy + 0.4, 2.3, b, c.eye);
+      P.path(g, [hx - 4, hy - 0.4, hx + 4, hy - 0.4, hx + 3, hy - 1.4, hx + 2.4, hy - 3.4, hx - 2.4, hy - 3.4, hx - 3, hy - 1.4]); P.fill(g, P.lg(g, 0, hy - 3.4, 0, hy, [sh(c.iron, 0.4), sh(c.iron, -0.35)]));
+      // arms bracing the crossbow, aimed forward
+      P.bone(g, 13, 8.2, 15, 10.4, 0.7, b); P.bone(g, 9.6, 8.2, 13.6, 10.8, 0.7, bd);
+      P.rrect(g, 12.4, 9.6, 11, 1.8, 0.6, P.lg(g, 0, 9.6, 0, 11.4, [sh(c.wood, 0.3), sh(c.wood, -0.4)]));
+      g.strokeStyle = c.iron; g.lineWidth = 0.9; g.beginPath(); g.moveTo(21.6, 6.6); g.quadraticCurveTo(24.6, 10.5, 21.6, 14.4); g.stroke();
+      P.line(g, 21.6, 6.6, 17.6 - w, 10.5, 0.25, '#e0e0d0'); P.line(g, 17.6 - w, 10.5, 21.6, 14.4, 0.25, '#e0e0d0');
+      P.line(g, 17.6 - w, 10.5, 25.4, 10.5, 0.5, '#3a2a1c'); P.path(g, [25.2, 9.8, 26.6, 10.5, 25.2, 11.2]); P.fill(g, '#c8ccd8');
+    } });
+
+  /* ---------- Drowned: a bloated waterlogged corpse, weed hanging from it, dragging an anchor chain ---------- */
+  def('drowned', { w: 26, h: 28, cy: 17, frames: 2,
+    colors: { skin: '#7a98a0', weed: '#2e5a3a', eye: '#b0fff0' },
+    draw(g, f, c) {
+      const s = c.skin, sd = sh(s, -0.5), w = f ? 0.9 : -0.9;
+      P.ell(g, 13, 26.4, 8, 1.4, 'rgba(0,0,0,0.45)');
+      // a puddle it leaves as it walks
+      P.ell(g, 13, 26.2, 7, 1.2, 'rgba(90,150,170,0.35)');
+      limb(g, 10, 18, 9 - w, 22, 1.8, 1.5, sd); limb(g, 9 - w, 22, 9 - w, 25.6, 1.5, 1.4, sd);
+      limb(g, 16, 18, 17 + w, 22, 1.8, 1.5, s); limb(g, 17 + w, 22, 17 + w, 25.6, 1.5, 1.4, s);
+      // a swollen belly and hunched shoulders
+      P.ell(g, 13, 14, 7.2, 6.8, P.rg(g, 13, 13, 8, [[0, sh(s, 0.3)], [0.6, s], [1, sd]], 11, 11));
+      g.save(); g.globalAlpha = 0.5; P.ell(g, 12, 16, 3.4, 2.4, sh(s, -0.25)); g.restore();
+      for (const [x, y] of [[8, 11], [16, 17], [11, 18.4]]) P.circle(g, x, y, 0.6, '#3a4a50'); // sores
+      // weed draped over the shoulders, hanging in strands
+      for (let i = 0; i < 6; i++) { const x = 7 + i * 2.4; g.beginPath(); g.moveTo(x, 8.6 + (i % 2)); g.quadraticCurveTo(x + (f ? 0.8 : -0.4), 13, x - 0.4, 16 + (i % 3)); g.strokeStyle = c.weed; g.lineWidth = 0.8; g.stroke(); }
+      // arms: one dragging a rusted chain, one reaching
+      limb(g, 7, 11, 4.4, 17, 1.3, 1.1, sd); P.line(g, 4.4, 17.6, 3, 25, 0.5, '#5a4a3a');
+      for (let i = 0; i < 5; i++) { g.beginPath(); g.ellipse(3.6 - i * 0.1, 18.6 + i * 1.4, 0.5, 0.7, 0, 0, Math.PI * 2); g.strokeStyle = '#6a5a44'; g.lineWidth = 0.35; g.stroke(); }
+      limb(g, 19, 11, 22.6, 14 + w, 1.3, 1.1, s); claws(g, 22.8, 14.2 + w, 0.3, 3, 1.3, 0.35, sh(s, 0.3));
+      // a slumped head, lank hair, milky eyes
+      const hx = 14.6, hy = 6.6;
+      P.circle(g, hx, hy, 3.4, P.vol(g, hx, hy, 3.4, sh(s, 0.1)));
+      for (let i = 0; i < 5; i++) P.line(g, hx - 3 + i * 1.2, hy - 2.6, hx - 3.4 + i * 1.3, hy + 1.8, 0.5, '#1a2622');
+      P.circle(g, hx + 1.4, hy + 0.2, 0.7, sh(c.eye, 0.2)); P.circle(g, hx - 0.8, hy + 0.2, 0.6, sh(c.eye, 0.2)); P.glow(g, hx + 0.4, hy + 0.2, 2.2, c.eye, 0.35);
+      P.ell(g, hx + 1, hy + 2.2, 1.2, 0.7, '#0a1414');
+      for (let i = 0; i < 2; i++) P.circle(g, 12 + i * 5, 20 + (f ? 1 : 0) + i, 0.35, 'rgba(160,220,240,0.8)'); // drips
+    } });
+
+  /* ---------- Procession Monk: a hooded chanting monk, a candle cupped in both hands ---------- */
+  def('monk', { w: 16, h: 26, cy: 17, frames: 2,
+    colors: { robe: '#2e2c3a', eye: '#b0e8ff', candle: '#ffd070' },
+    draw(g, f, c) {
+      const r = c.robe, sway = f ? 0.4 : -0.4;
+      g.beginPath(); g.moveTo(5, 8); g.lineTo(11, 8); g.quadraticCurveTo(13.4, 16, 13.6 + sway, 24.6); g.lineTo(2.4 + sway, 24.6); g.quadraticCurveTo(2.6, 16, 5, 8); g.closePath();
+      P.fill(g, P.lg(g, 2, 8, 14, 24, [sh(r, 0.3), r, sh(r, -0.6)]));
+      g.strokeStyle = sh(r, -0.5); g.lineWidth = 0.4; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(6 + i * 2, 10); g.lineTo(4.6 + i * 3, 24); g.stroke(); }
+      P.line(g, 5.4, 14.6, 11, 14.6, 0.7, '#6a5a44'); P.line(g, 10.4, 14.6, 11, 19, 0.5, '#6a5a44'); // a rope belt
+      // hood; only two faint lights inside
+      g.beginPath(); g.moveTo(3.6, 9.6); g.quadraticCurveTo(3.4, 1.4, 8.4, 1); g.quadraticCurveTo(13, 1.6, 12.4, 9.6); g.quadraticCurveTo(8, 8, 3.6, 9.6); g.closePath();
+      P.fill(g, P.lg(g, 3, 1, 13, 10, [sh(r, 0.4), r, sh(r, -0.5)]));
+      P.ell(g, 8.8, 5.8, 2.6, 2.8, '#050308'); P.circle(g, 8, 5.6, 0.35, c.eye); P.circle(g, 9.8, 5.6, 0.35, c.eye);
+      // hands cupping a candle
+      P.ell(g, 9.4, 12.4, 2, 1.2, sh(r, 0.1)); P.rrect(g, 9, 9.2, 0.9, 3, 0.3, '#e8dcc0');
+      P.glow(g, 9.4, 8.2, 4, c.candle, 0.6); P.ell(g, 9.45, 8.4 - (f ? 0.2 : 0), 0.45, 0.9, c.candle);
+    } });
+
+  /* ---------- Hydra (boss): three serpent heads rising from a coiled, weed-grown body in a pool ---------- */
+  def('hydra', { w: 60, h: 52, cy: 36, frames: 2,
+    colors: { scale: '#2e5a52', belly: '#8ab8a0', eye: '#ffe060', water: '#4a8a9a' },
+    draw(g, f, c) {
+      const sc = c.scale, w = f ? 1 : -1;
+      P.ell(g, 30, 46, 24, 5, G.rgba(c.water, 0.45)); P.ell(g, 30, 46, 18, 3.4, G.rgba(sh(c.water, 0.3), 0.35));
+      // coils in the pool
+      for (const [x, y, rx] of [[20, 43, 10], [38, 44, 11], [29, 40, 12]]) { P.ell(g, x, y, rx, 4, P.lg(g, 0, y - 4, 0, y + 4, [sh(sc, 0.35), sc, sh(sc, -0.5)])); for (let i = 0; i < 4; i++) P.path(g, [x - rx * 0.6 + i * rx * 0.4, y - 3.4, x - rx * 0.4 + i * rx * 0.4, y - 5.6, x - rx * 0.2 + i * rx * 0.4, y - 3.4]); P.fill(g, sh(sc, -0.3)); }
+      // three necks and heads, the middle one tallest
+      const head = (bx, by, tx, ty, dir, lean) => {
+        g.beginPath(); g.moveTo(bx - 3, by); g.bezierCurveTo(bx - 4, by - 10, tx - dir * 6, ty + 8, tx - 2, ty + 2); g.lineTo(tx + 2, ty + 3); g.bezierCurveTo(tx - dir * 2, ty + 10, bx + 4, by - 8, bx + 3, by); g.closePath();
+        P.fill(g, P.lg(g, bx - 4, 0, bx + 4, 0, [sh(sc, 0.3), sc, sh(sc, -0.45)]));
+        g.strokeStyle = G.rgba(c.belly, 0.5); g.lineWidth = 1; g.beginPath(); g.moveTo(bx + 1.4, by - 2); g.bezierCurveTo(bx + 2, by - 9, tx, ty + 9, tx + 1, ty + 3); g.stroke();
+        g.save(); g.translate(tx, ty); g.scale(dir, 1); g.rotate(lean);
+        P.ell(g, 0, 0, 4.6, 3, P.vol(g, 0, -0.4, 4.6, sc));
+        P.path(g, [1, 0.6, 7.4, 1.2, 6.4, 2.6, 1, 2.4]); P.fill(g, '#140806');
+        teeth(g, 1.4, 0.8, 7, 1.2, 4, 0.8, 1, '#efe4c8');
+        P.path(g, [-3, -1.6, -6.4, -4.6, -2, -2.4]); P.fill(g, sh(sc, -0.4)); P.path(g, [-1.4, -2.4, -3.6, -6, 0, -2.8]); P.fill(g, sh(sc, -0.3));
+        evil(g, 1.4, -1.2, 0.7, c.eye);
+        g.restore();
+      };
+      head(18, 40, 10, 18 + w, -1, -0.2);
+      head(42, 40, 50, 20 - w, 1, -0.2);
+      head(30, 39, 31, 9 + w * 0.6, 1, 0.1);
+      for (let i = 0; i < 6; i++) P.circle(g, 12 + i * 7, 45 + (i % 2), 0.5, G.rgba('#c8f0ff', 0.7)); // foam
+    } });
+
+  /* ---------- Bell Warden (boss): a tall armoured warden whose head is a great cracked bell ---------- */
+  def('bellwarden', { w: 48, h: 60, cy: 38, frames: 2,
+    colors: { bronze: '#8a6a34', plate: '#3a3a42', cloth: '#2a3a4a', eye: '#9ff0ff' },
+    draw(g, f, c) {
+      const pl = c.plate, w = f ? 0.8 : -0.8, br = c.bronze;
+      P.ell(g, 24, 57, 14, 2.4, 'rgba(0,0,0,0.45)');
+      // long robes over armoured legs
+      g.beginPath(); g.moveTo(15, 30); g.lineTo(33, 30); g.quadraticCurveTo(36, 42, 37 + w, 55); g.lineTo(11 - w, 55); g.quadraticCurveTo(12, 42, 15, 30); g.closePath();
+      P.fill(g, P.lg(g, 11, 30, 37, 55, [sh(c.cloth, 0.25), c.cloth, sh(c.cloth, -0.55)]));
+      rag(g, 11 - w, 54.6, 37 + w, 54.6, 7, 2, sh(c.cloth, -0.5));
+      // a broad breastplate and pauldrons hung with small bells
+      g.beginPath(); g.moveTo(14, 18); g.quadraticCurveTo(24, 15, 34, 18); g.lineTo(33, 31); g.quadraticCurveTo(24, 33, 15, 31); g.closePath();
+      P.fill(g, P.lg(g, 14, 16, 34, 32, [sh(pl, 0.45), pl, sh(pl, -0.5)]));
+      P.line(g, 24, 18, 24, 31, 0.6, sh(pl, -0.6));
+      for (const x of [13, 35]) { P.ell(g, x, 19, 4.6, 3.2, P.vol(g, x, 18, 4.6, pl)); for (let i = 0; i < 3; i++) { const bx = x - 2.6 + i * 2.6, by = 22.6 + (i % 2); P.path(g, [bx - 0.9, by + 1.6, bx - 0.6, by, bx + 0.6, by, bx + 0.9, by + 1.6]); P.fill(g, br); } }
+      // arms: one holding a great clapper-mace, one hanging
+      limb(g, 12, 21, 10, 31, 1.8, 1.5, sh(pl, -0.2)); claws(g, 10, 31.6, 1.6, 3, 1.4, 0.45, '#c8ccd8');
+      limb(g, 36, 21, 39, 28, 1.8, 1.5, pl);
+      P.line(g, 38.6, 36, 40, 18, 1.4, '#2a1c14'); P.circle(g, 40.2, 15, 4 + (f ? 0.3 : 0), P.vol(g, 40, 15, 4, sh(br, 0.1))); P.circle(g, 39, 13.8, 1, sh(br, 0.5));
+      // the bell for a head: a flared mouth, cracks, a single slit lit from within
+      const hx = 24, hy = 9;
+      g.beginPath(); g.moveTo(hx - 3, hy - 7); g.quadraticCurveTo(hx - 3.6, hy - 1, hx - 7.4, hy + 6.4); g.lineTo(hx + 7.4, hy + 6.4); g.quadraticCurveTo(hx + 3.6, hy - 1, hx + 3, hy - 7); g.quadraticCurveTo(hx, hy - 9, hx - 3, hy - 7); g.closePath();
+      P.fill(g, P.lg(g, hx - 7, 0, hx + 7, 0, [sh(br, -0.45), sh(br, 0.35), br, sh(br, -0.5)]));
+      P.ell(g, hx, hy + 6.4, 7.4, 1.4, '#140c06'); P.rect(g, hx - 2.4 + (f ? 0.6 : 0), hy + 4.4, 1.4, 3, sh(br, -0.2)); // the clapper swinging
+      P.rrect(g, hx - 3.6, hy + 0.2, 7.2, 1.2, 0.4, '#0a0808'); P.glow(g, hx, hy + 0.8, 4, c.eye, 0.6); P.rect(g, hx - 2.6, hy + 0.5, 5.2, 0.6, c.eye);
+      g.strokeStyle = '#2a1a0a'; g.lineWidth = 0.4; g.beginPath(); g.moveTo(hx + 2, hy - 5); g.lineTo(hx + 3, hy - 2); g.lineTo(hx + 2.2, hy + 1); g.stroke();
+      P.circle(g, hx, hy - 8.4, 1.2, sh(br, 0.2));
+    } });
+
+  /* ---------- Sunken Knight (boss): a barnacled knight risen from the water, a trident, a cloak of weed ---------- */
+  def('sunkknight', { w: 46, h: 56, cy: 35, frames: 2,
+    colors: { plate: '#4a6068', weed: '#2e5a3a', eye: '#70ffd0', gold: '#a88a4a' },
+    draw(g, f, c) {
+      const pl = c.plate, w = f ? 0.8 : -0.8;
+      P.ell(g, 22, 53, 13, 2.2, 'rgba(0,0,0,0.45)'); P.ell(g, 22, 53, 11, 1.6, 'rgba(90,150,170,0.35)');
+      // a cloak of weed trailing behind
+      g.beginPath(); g.moveTo(13, 17); g.lineTo(30, 17); g.quadraticCurveTo(33, 34, 34 + w, 50); g.lineTo(9 - w, 50); g.quadraticCurveTo(10, 32, 13, 17); g.closePath();
+      P.fill(g, P.lg(g, 9, 17, 34, 50, [sh(c.weed, 0.25), c.weed, sh(c.weed, -0.55)]));
+      for (let i = 0; i < 7; i++) { const x = 10 + i * 3.6; g.beginPath(); g.moveTo(x, 44); g.quadraticCurveTo(x + (f ? 1 : -1), 48, x - 0.4, 52); g.strokeStyle = sh(c.weed, -0.3); g.lineWidth = 0.9; g.stroke(); }
+      // armoured legs
+      P.rrect(g, 16 - w, 34, 4.4, 16, 1.6, P.lg(g, 16, 0, 21, 0, [sh(pl, 0.2), sh(pl, -0.4)])); P.rrect(g, 24 + w, 34, 4.4, 16, 1.6, P.lg(g, 24, 0, 29, 0, [sh(pl, 0.3), sh(pl, -0.3)]));
+      // breastplate crusted with barnacles
+      g.beginPath(); g.moveTo(13, 17); g.quadraticCurveTo(22, 14, 31, 17); g.lineTo(30, 35); g.quadraticCurveTo(22, 37, 14, 35); g.closePath();
+      P.fill(g, P.lg(g, 13, 15, 31, 36, [sh(pl, 0.45), pl, sh(pl, -0.5)]));
+      barnacles(g, [[16, 22, 1], [18, 28, 0.8], [27, 20, 0.9], [26, 30, 1.1], [21, 33, 0.7]], '#c8c0a8');
+      P.line(g, 13.4, 25, 30.6, 25, 0.5, c.gold);
+      for (const x of [12.6, 31.4]) { P.ell(g, x, 18, 4.2, 3, P.vol(g, x, 17, 4.2, pl)); barnacles(g, [[x - 1.4, 17, 0.7], [x + 1.2, 18.4, 0.6]], '#c8c0a8'); }
+      // far arm hanging, near arm raising the trident
+      limb(g, 11, 20, 9, 30, 1.6, 1.4, sh(pl, -0.2)); claws(g, 9, 30.6, 1.6, 3, 1.4, 0.4, '#b0c0c0');
+      limb(g, 33, 20, 37, 27, 1.6, 1.4, pl);
+      P.line(g, 36, 44, 38.6, 6, 1, '#3a2a1a');
+      P.path(g, [36.6, 9, 40.6, 9.4, 40, 6.4, 39.4, 1, 38.8, 6.2, 38.2, 0.6, 37.6, 6, 37, 1.2, 36.8, 6.2]); P.fill(g, P.lg(g, 0, 0, 0, 9, ['#e8f0f0', '#8aa0a8']));
+      // a great helm with a visor slit, teal light, weed hanging from it
+      const hx = 22, hy = 8.6;
+      P.rrect(g, hx - 4.6, hy - 5, 9.2, 10, 3.2, P.lg(g, hx - 4, 0, hx + 4, 0, [sh(pl, 0.4), pl, sh(pl, -0.45)]));
+      P.rect(g, hx - 3.4, hy - 0.8, 6.8, 1.2, '#050a0a'); P.glow(g, hx, hy - 0.2, 4, c.eye, 0.6); P.rect(g, hx - 2.4, hy - 0.5, 4.8, 0.6, c.eye);
+      barnacles(g, [[hx - 2.4, hy - 3.2, 0.7], [hx + 2.6, hy + 2.4, 0.6]], '#c8c0a8');
+      for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(hx - 3 + i * 3, hy + 4.6); g.quadraticCurveTo(hx - 3.4 + i * 3 + (f ? 0.6 : 0), hy + 7, hx - 3 + i * 3, hy + 9); g.strokeStyle = c.weed; g.lineWidth = 0.7; g.stroke(); }
+    } });
 })(window.DH);

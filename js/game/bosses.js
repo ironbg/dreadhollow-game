@@ -8,7 +8,11 @@
   R.hazard = function (h) { h.t = 0; h.fired = false; h.tick = 0; this.hazards.push(h); return h; };
   R.inHazard = function (h, x, y) {
     if (h.kind === 'circle') return U.dist2(x, y, h.x, h.y) < h.r * h.r;
-    if (h.kind === 'ring') { const d2 = U.dist2(x, y, h.x, h.y); return d2 < h.r * h.r && d2 > h.r0 * h.r0; }
+    if (h.kind === 'ring') {
+      const d2 = U.dist2(x, y, h.x, h.y); if (!(d2 < h.r * h.r && d2 > h.r0 * h.r0)) return false;
+      if (h.gap == null) return true;
+      let a = Math.atan2(y - h.y, x - h.x) - h.gap; a = Math.atan2(Math.sin(a), Math.cos(a)); return Math.abs(a) > h.gw; // a gap in the wave lets you through
+    }
     if (h.kind === 'line') {
       const dx = x - h.x, dy = y - h.y, ca = Math.cos(h.ang), sa = Math.sin(h.ang);
       const along = dx * ca + dy * sa, perp = -dx * sa + dy * ca;
@@ -36,7 +40,7 @@
       }
       if (h.fired && h.dur) {
         h.tick -= dt;
-        if (h.dmg && !(this.crackedEye && h.src && h.src.def && h.src.def.lord) && this.inHazard(h, p.x, p.y)) { if (h.slow) this.pslow = Math.max(this.pslow, 0.25); if (h.tick <= 0) { h.tick = 0.5; this.hurtPlayer(h.dmg * 0.5); } }
+        if ((h.dmg || h.slow) && !(this.crackedEye && h.src && h.src.def && h.src.def.lord) && this.inHazard(h, p.x, p.y)) { if (h.slow) this.pslow = Math.max(this.pslow, 0.25); if (h.dmg && h.tick <= 0) { h.tick = 0.5; this.hurtPlayer(h.dmg * 0.5); } } // a slowing puddle may do no harm at all
       }
       if (h.fired && h.t >= h.delay + (h.dur || 0)) this.hazards.splice(i, 1);
     }
@@ -227,6 +231,49 @@
       DH.audio.play('roar');
     }
     if (e.c2 > 4) { e.c2 = 0; for (let i = 0; i < 3; i++) run.hazard({ kind: 'circle', x: p.x + U.rand(-45, 45), y: p.y + U.rand(-45, 45), r: 24, delay: 1.2, dmg: e.dmg * e.enr, color: '#ff9040', src: e, boss: true, sound: i ? null : 'boom', fire: true }); }
+  };
+  /* ---------- the Aqueduct ---------- */
+  // Hydra: three heads spit in turn; fouled water rains in pools that drag at you; it sinks from sight (untouchable) and rises
+  // under where you stood (a marked circle), throwing a ring of spit
+  AI.b_hydra = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    if (e.sub) { e.mx = 0; e.my = 0; e.cspd = 0; e.kx = e.ky = 0; return; } // under the water
+    e.cspd = e.spd; e.mx = dx; e.my = dy;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 1.3) { e.c1 = 0; e.head = ((e.head || 0) + 1) % 3; const a = Math.atan2(dy, dx) + (e.head - 1) * 0.3; for (const o of [-0.14, 0, 0.14]) shot(run, e, a + o, 100, 0.45, '#70e0c0'); DH.audio.play('zap'); }
+    if (e.c2 > 6) { e.c2 = 0; for (let i = 0; i < 3; i++) run.hazard({ kind: 'circle', x: p.x + U.rand(-40, 40), y: p.y + U.rand(-40, 40), r: 20, delay: 1.2, dur: 3, dmg: e.dmg * 0.5 * e.enr, slow: 1, color: '#40c0a0', src: e, boss: true, sound: i ? null : 'splash' }); }
+    if (e.c3 > 11) {
+      e.c3 = 0; e.sub = true; e.eth = 99; run.burst(e.x, e.y, 24, ['#70e0c0', '#2e5a52', '#c8f0ff'], 90); DH.audio.play('splash');
+      run.hazard({ kind: 'circle', x: p.x, y: p.y, r: 40, delay: 1.6, dmg: e.dmg * 1.3 * e.enr, color: '#40c0a0', src: e, boss: true, sound: 'splash',
+        onFire: (r, h) => { if (e.dead) return; e.x = h.x; e.y = h.y; e.sub = false; e.eth = 0; r.shake = 6; r.burst(h.x, h.y, 30, ['#70e0c0', '#c8f0ff'], 110); for (let i = 0; i < 10; i++) r.enemyShot({ x: h.x, y: h.y }, i / 10 * TAU, 80, e.dmg * 0.45 * e.enr, '#70e0c0'); } });
+    }
+  };
+  // Bell Warden: tolls its bell, and waves of sound roll out from it; each wave has a gap to slip through; brings its clapper
+  // down where you stand (a marked circle that stuns your step); rings in a procession of monks
+  AI.b_bell = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    e.toll = Math.max(0, (e.toll || 0) - dt); e.cspd = e.toll > 0 ? 0 : e.spd; e.mx = dx; e.my = dy;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 5.5) {
+      e.c1 = 0; e.toll = 2; DH.audio.play('bell'); run.shake = Math.max(run.shake, 3);
+      const g0 = Math.atan2(dy, dx) + U.rand(-1.2, 1.2), turn = Math.random() < 0.5 ? -0.7 : 0.7;
+      for (let i = 0; i < 3; i++) { const r0 = 22 + i * 46; run.hazard({ kind: 'ring', x: e.x, y: e.y, r0, r: r0 + 28, gap: g0 + i * turn, gw: 0.42, delay: 1.0 + i * 0.45, dmg: e.dmg * 1.1 * e.enr, color: '#ffd070', src: e, boss: true, sound: i ? null : 'boom' }); }
+    }
+    if (e.c2 > 3.2 && e.toll <= 0) { e.c2 = 0; run.hazard({ kind: 'circle', x: p.x, y: p.y, r: 28, delay: 1.0, dmg: e.dmg * 1.2 * e.enr, slow: 1.2, color: '#c8a060', src: e, boss: true, sound: 'boom', onFire: (r) => { r.shake = Math.max(r.shake, 4); } }); }
+    if (e.c3 > 13) { e.c3 = 0; run.runEvent({ type: 'march', rows: 2, cols: 7 }); }
+  };
+  // Sunken Knight: charges with a marked line; hurls its trident along a marked line, and the water it drags floods the path
+  // (pools that slow you); calls the drowned spirits up around you
+  AI.b_sunken = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    charge(run, e, dt, dx, dy, dist, 250);
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt;
+    if (e.c1 > 4.4 && e.phase === 0) {
+      e.c1 = 0; const a = Math.atan2(dy, dx), L = 260, ca = Math.cos(a), sa = Math.sin(a);
+      run.hazard({ kind: 'line', x: e.x, y: e.y, ang: a, len: L, w: 14, delay: 0.8, dmg: e.dmg * 1.2 * e.enr, color: '#70ffd0', src: e, boss: true, sound: 'throw',
+        onFire: (r, h) => { for (let i = 1; i <= 3; i++) r.hazard({ kind: 'circle', x: h.x + ca * L * i / 4, y: h.y + sa * L * i / 4, r: 18, delay: 0.1, dur: 3.5, dmg: 0, slow: 1, color: '#3a8aa0', src: e }); } });
+    }
+    if (e.c2 > 10) { e.c2 = 0; for (let i = 0; i < 4; i++) { const a = i / 4 * TAU + 0.4; run.spawnEnemy('spirit', p.x + Math.cos(a) * 95, p.y + Math.sin(a) * 95); } DH.audio.play('frost'); }
   };
   C.BOSS_AI = AI;
 })(window.DH);

@@ -284,7 +284,7 @@
       const hpMult = def.prop ? 1 : this.stage.hpMult * (def.boss ? 1 + this.stage.index * 0.1 : ts) * (rank ? rank.hp : 1) * Math.pow(T.hp, tr) * (fx.giants && !def.boss ? 2 : 1)
         * (1 + this.agony * 0.25) * (this.fx_.enemyHp || 1);
       const fv = !def.variant && (C.HALL_FOES[this.stageId] || []).find((f) => f[0] === id && f[3]);
-      const variant = (o.variant || def.variant || (fv && fv[3])) || (this.stage.variant && DH.gfx.painters[def.painter] && DH.gfx.painters[def.painter].variants && DH.gfx.painters[def.painter].variants[this.stage.variant] ? this.stage.variant : null);
+      const variant = (o.variant || def.variant || (fv && fv[3])) || (this.stage.variant && this.stage.foeVariant !== false && DH.gfx.painters[def.painter] && DH.gfx.painters[def.painter].variants && DH.gfx.painters[def.painter].variants[this.stage.variant] ? this.stage.variant : null);
       const e = {
         id, def, x, y, kx: 0, ky: 0, hp: def.hp * hpMult, maxHp: def.hp * hpMult,
         r: def.r * (rank ? rank.scale * 0.85 : 1), spd: def.spd * (rank ? 0.9 : 1) * U.rand(0.92, 1.08) * (fx.enemySpeed || 1) * (fx.allSpeed || 1) * (1 + T.speed * tr) * (fx.giants && !def.boss ? 0.8 : 1),
@@ -371,6 +371,32 @@
           if (e.t > e.def.shot.cd && dist < 210) { e.t = 0; this.enemyAttackAnim(e); this.hazard({ kind: 'circle', x: p.x, y: p.y, r: 16, delay: 1.1, dmg: e.def.shot.dmg * this.stage.dmgMult * (1 + this.time / 60 * 0.07), color: '#ff7a20', src: e, sound: 'fire', fire: true }); DH.audio.play('throw'); }
         } else if (ai === 'clone') { // the Ashen Warlord's cast shadow: waits, then dashes along its line
           e.cw = (e.cw || 0) + dt; if (e.cw < 0.8) { mx = 0; my = 0; spd = 0; } else { mx = e.mdx; my = e.mdy; spd = 300; } e.kx = e.ky = 0;
+        } else if (ai === 'frenzy') { // rats: the more of them close by, the faster they scurry
+          e.frzT = (e.frzT || 0) - dt;
+          if (e.frzT <= 0) { e.frzT = 0.5; this.grid.query(e.x, e.y, 36, tmp); let n = 0; for (const o of tmp) if (o !== e && !o.dead && o.id === e.id) n++; e.frz = Math.min(5, n); }
+          spd *= 1 + 0.1 * (e.frz || 0); const w = Math.sin(e.t * 9 + e.anim) * 0.35; mx = dx - dy * w; my = dy + dx * w;
+        } else if (ai === 'fade') { // a drowned spirit: now and then it fades from the world, untouchable, and glides in sideways
+          e.eth = Math.max(0, (e.eth || 0) - dt); e.fadeT = (e.fadeT == null ? U.rand(2, 4) : e.fadeT) - dt;
+          if (e.fadeT <= 0 && dist < 170) { e.fadeT = U.rand(4.5, 6.5); e.eth = 1.4; e.fadeS = Math.random() < 0.5 ? -1 : 1; }
+          if (e.eth > 0) { spd *= 1.7; mx = dx - dy * 0.9 * e.fadeS; my = dy + dx * 0.9 * e.fadeS; }
+        } else if (ai === 'perch') { // the gargoyle: perched it is stone (a fifth of the damage), then it spreads its wings and swoops
+          if (e.perchT == null) { e.perch = true; e.perchT = U.rand(0.6, 2); }
+          if (e.perch) {
+            spd = 0; e.fr = 0; e.kx = e.ky = 0; e.perchT -= dt;
+            if (e.perchT <= 0) { e.perch = false; e.swoop = 1.5; e.lockX = dx; e.lockY = dy; this.burst(e.x, e.y, 6, ['#8a8a86', '#4a4a48'], 40); }
+          } else {
+            e.fr = 1; e.swoop -= dt; spd *= 2.7;
+            const k = Math.min(1, dt * 1.6); e.lockX += (dx - e.lockX) * k; e.lockY += (dy - e.lockY) * k; const l = Math.hypot(e.lockX, e.lockY) || 1; mx = e.lockX / l; my = e.lockY / l;
+            if (e.swoop <= 0) { e.perch = true; e.perchT = U.rand(1.6, 2.4); this.burst(e.x, e.y, 8, ['#8a8a86', '#4a4a48'], 50); }
+          }
+        } else if (ai === 'aim') { // the arbalist: keeps its range, marks a line, looses a fast bolt along it
+          if (e.aiming > 0) {
+            spd = 0; e.aiming -= dt;
+            if (e.aiming <= 0) { this.enemyShot(e, e.aimA, 280, e.def.shot.dmg * this.stage.dmgMult, '#e8e0c8', 'bolt'); DH.audio.play('throw'); e.t = 0; }
+          } else {
+            if (dist < 110) { mx = -dx; my = -dy; } else if (dist < 160) { mx = -dy; my = dx; spd *= 0.4; }
+            if (e.t > e.def.shot.cd && dist < 220) { e.aiming = 0.9; e.aimA = Math.atan2(dy, dx); this.hazard({ kind: 'line', x: e.x, y: e.y, ang: e.aimA, len: 280, w: 3, delay: 0.9, dmg: 0, color: '#ffe0a0', src: e }); }
+          }
         } else if (ai === 'flutter') { const w = Math.sin(e.anim * 5 + e.x * 0.01) * 0.6; mx = dx - dy * w; my = dy + dx * w; }
         else if (ai === 'dash') { const c = e.t % 1.6; spd *= c < 1.0 ? 0.35 : 3.2; }
         else if (ai === 'ranged') {
@@ -395,7 +421,7 @@
           }
         } else if (ai === 'watch') { // the Watcher: stone while the hero faces it, swift the moment they turn away
           const seen = (p.dirX * -dx + p.dirY * -dy) > 0.3;
-          e.still = seen; if (seen) { spd = 0; e.anim -= dt; }
+          e.still = seen; e.fr = seen ? 0 : 1; if (seen) { spd = 0; e.anim -= dt; } // unwatched, it lowers its hands and its eyes glare
         } else if (ai === 'fuse') { // the Bloater: close in, light up, burst
           const B = e.def.boom;
           if (e.fuse == null && dist < B.R * 0.8) { e.fuse = B.fuse; DH.audio.play('fire'); }
@@ -414,7 +440,7 @@
             if (d2 < rr * rr && d2 > 0.0001) { const d = Math.sqrt(d2), push = (rr - d) * 0.5; e.x += ox / d * push; e.y += oy / d * push; if (++n > 6) break; }
           }
         }
-        if (e.dmg > 0 && dist < e.r * 0.8 + p.r) this.hurtPlayer(e.dmg, e);
+        if (e.dmg > 0 && dist < e.r * 0.8 + p.r && !(e.eth > 0 && !e.boss)) this.hurtPlayer(e.dmg, e); // a faded spirit passes through you
         // the attack animation: in reach of the hero, a foe coils, lunges and recovers
         e.atkT = Math.max(0, (e.atkT || 0) - dt); e.atkCd = (e.atkCd || 0) - dt;
         if (e.dmg > 0 && !e.def.prop && e.atkCd <= 0 && dist < e.r + p.r + 10) this.enemyAttackAnim(e);
@@ -630,6 +656,7 @@
       let xp = e.final && !this.bosses.some((b) => b.final && !b.dead && b !== e) ? 0 : e.xp; // the last Lord ends the hall: no pointless level-ups after victory
       for (const [v] of C.GEM_TIERS) { while (xp >= v) { this.drop('xp', e.x + U.rand(-5, 5), e.y + U.rand(-5, 5), v); xp -= v; } }
       this.mergeGems();
+      if (e.def.puddle) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 20, delay: 0.2, dur: 4, dmg: 0, slow: 1, color: '#3a8aa0', src: e }); // the drowned leave a pool that drags at your feet
       if (e.def.deathFire && Math.random() < 0.5) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 9, delay: 0.3, dur: 1.6, dmg: e.dmg * 0.25, color: '#ff7a20', src: e }); // a husk burns on where it falls
       if (e.affix && e.affix.includes('volatile')) this.warns.push({ x: e.x, y: e.y, R: 46, t: 1, max: 1, dmg: e.dmg * 1.5 }); // bursts a moment after death
       if (e.def.split) for (const sx of [-1, 1]) { // an ooze splits in two
