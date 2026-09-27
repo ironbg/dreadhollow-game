@@ -396,7 +396,7 @@
   C.enemies.cinderbloat = { painter: 'cinderbloat', hp: 14, spd: 40, dmg: 0, xp: 2, r: 7, mass: 1, ai: 'fuse', boom: { R: 26, dmg: 10, fuse: 1.2 }, particles: ['#ff7030', '#ffd060', '#401008'] };
   C.enemies.magmacrawler = { painter: 'magmacrawler', hp: 60, spd: 20, dmg: 12, xp: 5, r: 9, mass: 3, def: 0.15, ai: 'crawler', particles: ['#ff6a18', '#2e2624', '#ffe060'] }; // a burning trail, bursts of molten drops
   C.enemies.salamander = { painter: 'salamander', hp: 7, spd: 50, dmg: 4, xp: 1, r: 5, mass: 0.6, ai: 'dart', anim: 0.12, particles: ['#ff8a20', '#1e1414'] }; // darts in zig-zag bursts
-  C.enemies.ashcultist = { painter: 'cultist', hp: 22, spd: 30, dmg: 8, xp: 3, r: 6, mass: 1, ai: 'lobber', shot: { dmg: 12, cd: 3.6 } }; // lobs fire at the ground where you stand
+  C.enemies.ashcultist = { painter: 'ashcultist', hp: 22, spd: 30, dmg: 8, xp: 3, r: 6, mass: 1, ai: 'lobber', shot: { dmg: 12, cd: 3.6 } }; // lobs fire at the ground where you stand
   C.enemies.firedancer = { painter: 'flamedancer', hp: 1100, spd: 46, dmg: 18, xp: 130, r: 12, mass: 40, def: 0.1, ai: 'b_dancer', boss: true };
   C.enemies.ashwarlord = { painter: 'ashwarlord', hp: 1400, spd: 34, dmg: 20, xp: 170, r: 14, mass: 60, def: 0.2, ai: 'b_warlord', boss: true };
   C.enemies.ashclone = { painter: 'ashwarlord', hp: 1, spd: 0, dmg: 16, xp: 0, r: 12, mass: 99, ai: 'clone', alpha: 0.45, fly: true };
