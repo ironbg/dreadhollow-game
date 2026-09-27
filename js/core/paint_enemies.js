@@ -314,10 +314,18 @@
       const gold = c.gold, gl = sh(gold, 0.45), gd = sh(gold, -0.5), dk = c.stone, w = f ? 0.9 : -0.9;
       /** A mass of fused coins: a dark tarnished base, coins packed over it, lit from the top-left. */
       const hoard = (path, x0, y0, x1, y1, shade) => {
-        g.save(); path(); P.fill(g, P.lg(g, x0, y0, x1, y1, [sh(gold, -0.25 + shade), sh(dk, shade), sh(dk, -0.5)]));
+        g.save(); path(); P.fill(g, P.lg(g, x0, y0, x1, y1, [sh(gold, 0.05 + shade), sh(gold, -0.4 + shade), sh(dk, -0.3)]));
         path(); g.clip();
-        let row = 0; for (let y = y0 + 0.6; y < y1 + 1; y += 2.3, row++) for (let x = x0 + (row % 2) * 1.2; x < x1 + 1; x += 2.5) { const k = ((x - x0) / (x1 - x0 + 1) + (y - y0) / (y1 - y0 + 1)) / 2; if (((x * 13 + y * 7) | 0) % 3 === 0) continue; g.globalAlpha = Math.max(0, 0.95 - k * 0.8 - (shade < 0 ? 0.35 : 0)); P.coin(g, x, y, 1.05, ((x + y) | 0) % 2 ? 0.6 : 1); }
+        let row = 0; for (let y = y0 + 0.6; y < y1 + 1; y += 2.3, row++) for (let x = x0 + (row % 2) * 1.2; x < x1 + 1; x += 2.5) { const k = ((x - x0) / (x1 - x0 + 1) + (y - y0) / (y1 - y0 + 1)) / 2; if (((x * 13 + y * 7) | 0) % 3 === 0) continue; g.globalAlpha = Math.max(0, 0.6 - k * 0.6 - (shade < 0 ? 0.25 : 0)); P.coin(g, x, y, 1.05, ((x + y) | 0) % 2 ? 0.6 : 1); }
         g.restore(); };
+      /** A great gem crystal growing out of it: a six-sided prism from its base at (x,y), leaning by angle a, length l, width wd. */
+      const gem = (x, y, a, l, wd, col) => { const ca = Math.cos(a), sa = Math.sin(a), px = -sa, py = ca, P2 = (u, v) => [x + ca * u + px * v, y + sa * u + py * v];
+        const [b1, b2, s1, s2, tp, m0] = [P2(0, -wd), P2(0, wd), P2(l * 0.72, -wd * 0.9), P2(l * 0.72, wd * 0.9), P2(l, 0), P2(0, 0)];
+        P.glow(g, x + ca * l * 0.5, y + sa * l * 0.5, l * 0.7, col, 0.35);
+        P.path(g, [...b1, ...s1, ...tp, ...P2(l * 0.72, 0), ...m0]); P.fill(g, P.lg(g, ...b1, ...tp, [sh(col, 0.2), sh(col, 0.55)]));
+        P.path(g, [...m0, ...P2(l * 0.72, 0), ...tp, ...s2, ...b2]); P.fill(g, P.lg(g, ...b2, ...tp, [sh(col, -0.55), sh(col, -0.1)]));
+        P.path(g, [...P2(l * 0.72, -wd * 0.9), ...tp, ...P2(l * 0.72, 0)]); P.fill(g, G.rgba('#ffffff', 0.55));
+        P.line(g, ...P2(l * 0.1, -wd * 0.5), ...P2(l * 0.6, -wd * 0.6), 0.3, G.rgba('#ffffff', 0.7)); };
       P.ell(g, 14, 26.8, 11.4, 1.3, 'rgba(0,0,0,0.5)');
       P.glow(g, 14, 14, 11, gold, 0.14);
       // hind legs: short, stumpy, behind
@@ -326,11 +334,14 @@
       hoard(() => { g.beginPath(); g.moveTo(8, 9); g.quadraticCurveTo(3.4, 14, 4.4, 22); g.lineTo(8.4, 22); g.quadraticCurveTo(9, 15, 12, 11); g.closePath(); }, 3.4, 9, 12, 22, -0.3);
       P.ell(g, 6.2, 23.6, 3.2, 2.8, P.lg(g, 3, 21, 9, 26.4, [sh(gold, -0.2), gd, sh(dk, -0.4)]));
       // the sword and the goblet sunk in the heap of its back
-      P.line(g, 5.4, 1.4, 9.4, 7.6, 0.8, '#b8c0c8'); P.line(g, 4.6, 3, 6.6, 1.8, 0.7, gold); P.line(g, 4.6, 0.6, 5.2, 1.6, 0.8, '#3a2410'); P.circle(g, 4.4, 0.4, 0.5, c.gem);
+      P.line(g, 4.2, 2, 8.6, 8, 1, '#c8d0d8'); P.line(g, 4.4, 2.3, 8.6, 8, 0.35, '#ffffff'); P.line(g, 2.8, 3.4, 5.4, 1.4, 0.8, gold); P.line(g, 3.2, 1, 4, 2, 0.9, '#3a2410'); P.circle(g, 2.9, 0.6, 0.6, c.gem);
       P.path(g, [15, 1.4, 17.8, 1.4, 17, 3.4, 16.8, 4.6, 17.6, 5, 15.2, 5, 16, 4.6, 15.8, 3.4]); P.fill(g, P.lg(g, 15, 1.4, 18, 5, [gl, gd]));
       // the body: a hunched heap of fused coins, highest at the back, sloping to the head
       hoard(() => { g.beginPath(); g.moveTo(6.4, 19.6); g.quadraticCurveTo(3.4, 8, 10, 4); g.quadraticCurveTo(17, 1.6, 21, 7.4); g.quadraticCurveTo(22.6, 12, 20, 16); g.quadraticCurveTo(15, 20.6, 6.4, 19.6); g.closePath(); }, 3.4, 2, 22.6, 20.6, 0);
       g.strokeStyle = '#b8a060'; g.lineWidth = 0.5; g.setLineDash([0.7, 0.35]); g.beginPath(); g.moveTo(7, 9); g.quadraticCurveTo(12, 14, 19, 10); g.stroke(); g.setLineDash([]); // a chain sunk across it
+      // great gem crystals grown out of the hoard: a ruby cluster on the back, a sapphire and an emerald at the shoulders
+      gem(13.2, 4.6, -1.75, 7.2, 1.5, c.gem); gem(14.8, 4.8, -1.2, 5.4, 1.2, c.gem); gem(11.6, 5, -2.3, 4.6, 1.1, sh(c.gem, -0.1));
+      gem(6.4, 9.6, -2.6, 4.4, 1.1, '#3a80ff'); gem(18.8, 6.4, -0.9, 4.6, 1.1, '#30e090');
       // molten gold running off it
       for (const [x, y, l] of [[9, 18.6, 3], [15.4, 18.4, 2.2], [20.4, 15, 2.6]]) { P.line(g, x, y, x, y + l + (f ? 0.6 : 0), 0.7, gl); P.circle(g, x, y + l + (f ? 0.6 : 0), 0.6, gl); }
       // the head: a lump of fused gold thrust forward and low, a crown pressed askew into it, ruby eyes, a black maw full of coins
@@ -350,6 +361,7 @@
       hoard(() => { g.beginPath(); g.moveTo(16.6, 10); g.quadraticCurveTo(24.6, 12, 24.4, 21); g.lineTo(20.2, 21.4); g.quadraticCurveTo(20, 16, 15.4, 15); g.closePath(); }, 15.4, 10, 24.6, 21.4, 0.05);
       P.ell(g, 22.6, 23.4, 3.6, 3, P.lg(g, 19, 20.4, 26.2, 26.4, [gl, gold, gd]));
       for (const x of [21, 22.6, 24.2]) P.line(g, x, 24.4, x + 0.2, 26, 0.3, gd);
+      gem(21.4, 15.4, -0.5, 3.6, 0.9, '#b060ff'); // an amethyst grown through the forearm
     } });
 
   /* ---------- Wolf (summon, and the Crypt's hounds): a gaunt grave-hound, ears up, ribs showing, jaws open ---------- */
