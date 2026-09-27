@@ -360,7 +360,7 @@
     imp:      { painter: 'imp',      hp: 18,  spd: 54, dmg: 7,  xp: 2, r: 6,  mass: 0.8, fly: true, ai: 'imp' }, // flits about, flicks fire darts
     wraith:   { painter: 'ghost', variant: 'wraith', hp: 44, spd: 50, dmg: 13, xp: 4, r: 7, mass: 1.2, ai: 'float', fly: true, alpha: 0.92 },
     hknight:  { painter: 'hknight',  hp: 70,  spd: 30, dmg: 15, xp: 5, r: 7,  mass: 2.5, def: 0.2 },
-    golem:    { painter: 'golem', variant: 'gold', hp: 150, spd: 22, dmg: 18, xp: 10, r: 10, mass: 6, def: 0.25, ai: 'quake' }, // the treasure golem: stamps a shockwave
+    golem:    { painter: 'treasuregolem', hp: 150, spd: 22, dmg: 18, xp: 10, r: 10, mass: 6, def: 0.25, ai: 'quake' }, // the treasure golem: stamps a shockwave
     // bosses
     colossus:    { painter: 'colossus', hp: 1500, spd: 30, dmg: 22, xp: 150, r: 16, mass: 60, def: 0.15, ai: 'b_charge', boss: true },
     anguish:     { painter: 'anguish', painter2: 'anguish_foot', hp: 3000, spd: 44, dmg: 26, xp: 400, r: 17, mass: 80, def: 0.2, ai: 'b_lord', boss: true, lord: true },

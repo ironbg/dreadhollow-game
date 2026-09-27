@@ -266,32 +266,82 @@
       P.path(g, [hx + 2.4, hy + 1.05, hx + 2.6, hy + 2, hx + 2.8, hy + 1.05]); P.fill(g, '#f0e6cc');
     } });
 
-  /* ---------- Golem: a hunched heap of cracked boulders with a burning rune heart ---------- */
+  /* ---------- Golem (the summoned stone golem, the idol's guardian): a hunched colossus of boulders bound by a burning rune ---------- */
   def('golem', { w: 28, h: 28, frames: 2,
     colors: { stone: '#6a6c74', rune: '#6ad8f0' },
     variants: { ice: { stone: '#7a9cb8', rune: '#ffffff' }, fire: { stone: '#4a3028', rune: '#ff8a20' }, bog: { stone: '#4e543a', rune: '#b0ff50' }, gold: { stone: '#9c8650', rune: '#fff8c0' }, purple: { stone: '#4a3c5a', rune: '#ff60c0' }, bone: { stone: '#c8bc98', rune: '#8affd0' }, drowned: { stone: '#3e5a56', rune: '#70ffd0' } },
     draw(g, f, c) {
-      // a stone colossus: a torso like a cliff face, a small head sunk between vast shoulders, arms hanging past its knees
-      const s = c.stone, w = f ? 0.8 : 0;
-      const shape = (pts, col) => { P.path(g, pts); let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; for (let i = 0; i < pts.length; i += 2) { x0 = Math.min(x0, pts[i]); x1 = Math.max(x1, pts[i]); y0 = Math.min(y0, pts[i + 1]); y1 = Math.max(y1, pts[i + 1]); } P.fill(g, P.lg(g, x0, y0, x1, y1, [sh(col, 0.32), col, sh(col, -0.6)])); };
-      const crack = (pts) => { g.beginPath(); g.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) g.lineTo(pts[i], pts[i + 1]); g.strokeStyle = G.rgba(c.rune, 0.45); g.lineWidth = 1; g.stroke(); g.strokeStyle = c.rune; g.lineWidth = 0.35; g.stroke(); };
-      P.glow(g, 14, 12, 10, c.rune, 0.2);
-      // legs: tapered pillars
-      shape([9.4 - w, 17, 13 - w, 17, 12.6 - w, 26, 8.4 - w, 26.2], sh(s, -0.3)); shape([15 + w, 17, 18.6 + w, 17, 19.6 + w, 26.2, 15.4 + w, 26], sh(s, -0.12));
-      // far arm: shoulder boulder, forearm, fist
-      shape([3.6, 6.8, 7.6, 6, 8, 12.4, 4.4, 13.6], sh(s, -0.4)); shape([3.2, 13.2, 7, 12.4, 7.2, 19, 3, 19.6], sh(s, -0.4)); shape([1.6, 18.8, 7.4, 18.4, 7.6, 23.4, 2, 23.8], sh(s, -0.42));
-      // the torso: broad at the shoulders, hunched, narrowing to the hips
-      shape([6.4, 7, 10.8, 3.6, 18.6, 3.6, 22.6, 7.2, 20.4, 13, 18.4, 18.2, 9.8, 18.2, 7.6, 13], s);
-      g.strokeStyle = sh(s, -0.7); g.lineWidth = 0.35; g.beginPath(); g.moveTo(8.6, 9); g.lineTo(11.4, 11); g.moveTo(20.4, 8.4); g.lineTo(17.6, 10.2); g.moveTo(10.2, 15.6); g.lineTo(13.6, 16.6); g.moveTo(14.4, 4.6); g.lineTo(14.6, 7); g.stroke();
-      crack([13.6, 7.4, 12.6, 10, 14.4, 12.2, 13.4, 15.4]); crack([14.4, 12.2, 17, 13]); crack([12.6, 10, 10, 10.6]);
-      P.glow(g, 13.8, 11, 3.2, c.rune, 0.65);
-      // the head: a heavy wedge sunk forward between the shoulders
-      shape([14.6, 1.2, 19.4, 1.4, 20.6, 5.6, 15.6, 6.4], sh(s, 0.08));
-      P.path(g, [14.8, 2.8, 20.2, 3, 20, 3.8, 15, 3.6]); P.fill(g, sh(s, -0.7));
-      P.ell(g, 16.6, 4.1, 0.7, 0.4, VOID); P.ell(g, 19, 4.2, 0.7, 0.4, VOID); evil(g, 16.6, 4.1, 0.45, c.rune, 0); evil(g, 19, 4.2, 0.45, c.rune, 0);
-      // near arm, a fist like a boulder
-      shape([20.2, 6, 24.4, 6.8, 24.6, 13.6, 20.6, 13], s); shape([20.6, 12.6, 24.8, 13.2, 25, 19.6, 20.8, 19.4], sh(s, 0.05)); shape([19.8, 19, 26, 19, 26.4, 24.6, 20, 24.8], sh(s, 0.1));
-      g.strokeStyle = sh(s, -0.65); g.lineWidth = 0.3; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(21.4 + i * 1.5, 21); g.lineTo(21.5 + i * 1.5, 24); g.stroke(); }
+      // a hunched colossus of rough boulders bound by old runes: vast rounded shoulders, a small head sunk under a heavy brow,
+      // one burning eye-slit, arms of stacked stones hanging to fists like boulders, a rune carved in its chest, grit falling
+      const s = c.stone, sl = sh(s, 0.45), sd = sh(s, -0.45), w = f ? 0.9 : -0.9, r = c.rune;
+      const rock = (x, y, rx, ry, col, rot) => { P.ell(g, x, y, rx, ry, P.lg(g, x - rx, y - ry, x + rx, y + ry, [sh(col, 0.4), col, sh(col, -0.5)]), rot || 0); };
+      const seam = (pts, a) => { g.beginPath(); g.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) g.lineTo(pts[i], pts[i + 1]); g.strokeStyle = G.rgba(r, a || 0.9); g.lineWidth = 0.4; g.stroke(); };
+      P.ell(g, 14, 26.8, 11, 1.3, 'rgba(0,0,0,0.5)');
+      P.glow(g, 14, 12, 11, r, 0.15);
+      // legs: squat pillars of stone, one stepping
+      rock(10.4 - w * 0.5, 22.8, 2.4, 3.6, sd); rock(10 - w * 0.6, 25.6, 3, 1.3, sh(sd, -0.1));
+      rock(17.8 + w * 0.5, 22.8, 2.4, 3.6, s); rock(18.2 + w * 0.6, 25.6, 3, 1.3, sd);
+      // the far arm: a shoulder boulder, a forearm, a fist near the ground
+      rock(6.4, 8, 3, 2.8, sd); rock(3.6, 13.4, 2.2, 3, sd, 0.2); rock(3.2, 19.6, 3, 2.7, sh(sd, -0.1));
+      // the body: a hunched mass of stone, heaped high at the shoulders
+      g.beginPath(); g.moveTo(8.6, 19.4); g.quadraticCurveTo(6.6, 10, 9.4, 5.6); g.quadraticCurveTo(14, 3.4, 19, 5.4); g.quadraticCurveTo(21.8, 9, 19.6, 19.4); g.closePath();
+      P.fill(g, P.lg(g, 6, 3, 21, 19, [sl, s, sd]));
+      g.strokeStyle = G.rgba(sh(s, -0.7), 0.9); g.lineWidth = 0.4; g.beginPath(); g.moveTo(7.4, 10); g.quadraticCurveTo(11, 11.6, 13, 10.4); g.moveTo(16, 7.4); g.lineTo(20, 9.4); g.moveTo(8.4, 15.6); g.lineTo(12, 17); g.moveTo(17.4, 15.4); g.lineTo(20.4, 14.6); g.moveTo(11.4, 4); g.lineTo(12.4, 7); g.stroke(); // the joins between the stones
+      rock(14.2, 18.8, 4.6, 1.8, sd); // the hips
+      // the rune carved in its chest, burning, and the cracks it lights
+      g.beginPath(); g.arc(14.2, 11.4, 2.4, 0, Math.PI * 2); g.strokeStyle = sh(s, -0.7); g.lineWidth = 1; g.stroke();
+      g.beginPath(); g.arc(14.2, 11.4, 2.4, 0, Math.PI * 2); g.strokeStyle = r; g.lineWidth = 0.45; g.stroke();
+      seam([14.2, 8.4, 14.2, 14.4]); seam([12.6, 10.4, 15.8, 12.4]);
+      seam([16.4, 12.6, 18, 14, 17.6, 16.2], 0.6); seam([11.8, 9.6, 10.2, 8.4, 9.4, 9.6], 0.6);
+      P.glow(g, 14.2, 11.4, 4, r, 0.55);
+      // the head: a small block sunk under the shoulders, a heavy brow, one eye-slit burning
+      rock(15.8, 3.6, 3.2, 2.8, sl);
+      P.path(g, [12.6, 2.4, 19, 2, 19.2, 3.4, 12.8, 3.6]); P.fill(g, sd);
+      P.rect(g, 14, 3.8, 3.8, 0.9, VOID); P.rect(g, 14.4, 4, 3, 0.5, r); P.glow(g, 16, 4.2, 2.4, r, 0.7);
+      // the near arm: stacked stones to a boulder fist
+      rock(21.4, 8, 3.2, 3, s); rock(24.2, 13.4, 2.4, 3.2, s, -0.2); rock(24.6, 19.6, 3, 2.8, sl);
+      seam([23.4, 18.4, 24.6, 20.2, 26.2, 19.6], 0.5);
+      // grit falling from it
+      for (const [x, y] of [[3, 24 + (f ? 1 : 0)], [25.4, 24.6 - (f ? 0.8 : 0)], [8, 21.4 + (f ? 0.8 : 0)]]) P.rect(g, x, y, 0.6, 0.6, sh(s, -0.2));
+    } });
+
+  /* ---------- Treasure Golem (the Reliquary): a vault guardian of pale marble bound in gold, a hoard of coins and a goblet
+   *            heaped on its shoulders, a cavity in its chest where a great ruby heart burns, a gold mask for a face,
+   *            fists banded in gold ---------- */
+  def('treasuregolem', { w: 28, h: 28, frames: 2,
+    colors: { stone: '#b8b0a0', gold: '#e0b040', gem: '#ff3050' },
+    draw(g, f, c) {
+      const s = c.stone, sl = sh(s, 0.4), sd = sh(s, -0.45), gold = c.gold, gd = sh(gold, -0.45), w = f ? 0.9 : -0.9;
+      const block = (x, y, bw, bh, col) => P.rrect(g, x, y, bw, bh, 0.8, P.lg(g, x, y, x + bw, y + bh, [sh(col, 0.35), col, sh(col, -0.5)]));
+      const band = (x, y, bw) => P.rect(g, x, y, bw, 0.9, P.lg(g, 0, y, 0, y + 0.9, [sh(gold, 0.4), gd]));
+      P.ell(g, 14, 26.8, 11, 1.3, 'rgba(0,0,0,0.5)');
+      P.glow(g, 14, 12, 11, gold, 0.12);
+      // legs: marble blocks banded in gold
+      block(8.4 - w * 0.5, 19.6, 4.6, 6.6, sd); band(8.4 - w * 0.5, 22.4, 4.6);
+      block(15.2 + w * 0.5, 19.6, 4.6, 6.6, s); band(15.2 + w * 0.5, 22.4, 4.6);
+      // the far arm
+      block(1.8, 7, 4.2, 5.4, sd); block(1, 12.8, 3.8, 5, sd); block(0.4, 18.2, 5, 4.6, sh(sd, -0.1)); band(0.4, 18.6, 5);
+      // the hoard heaped on its shoulders: coins and a goblet
+      g.beginPath(); g.moveTo(6, 6); g.quadraticCurveTo(9, 0.6, 14, 1); g.quadraticCurveTo(19.4, 0.8, 22, 6); g.closePath(); P.fill(g, P.lg(g, 6, 1, 20, 6, ['#fff0a0', gold, gd]));
+      [[8.6, 4.6], [11, 2.8], [13.8, 2], [16.8, 2.8], [19.2, 4.4], [12.4, 4.6], [15.6, 4.6]].forEach(([x, y], i) => P.coin(g, x, y, 1, i % 2 ? 0.6 : 1));
+      P.path(g, [9.4, -0.2, 12, -0.2, 11.2, 1.8, 11, 3, 11.8, 3.4, 9.6, 3.4, 10.4, 3, 10.2, 1.8]); P.fill(g, P.lg(g, 9, 0, 12, 3.4, [sh(gold, 0.4), gd])); P.circle(g, 10.7, 0.8, 0.4, c.gem); // a goblet
+      // the body: marble blocks, gold straps, a cavity in the chest with the ruby heart
+      block(6.2, 5.6, 15.6, 13.6, s);
+      g.strokeStyle = G.rgba(sd, 0.9); g.lineWidth = 0.35; g.beginPath(); g.moveTo(6.4, 11.6); g.lineTo(9.6, 11.6); g.moveTo(18.4, 11.6); g.lineTo(21.6, 11.6); g.moveTo(10.4, 16.4); g.lineTo(10.4, 19); g.moveTo(17.6, 16.4); g.lineTo(17.6, 19); g.stroke();
+      band(6.2, 7, 15.6); band(6.2, 15.8, 15.6);
+      P.ell(g, 14, 11.6, 3.6, 3.4, '#140a06');
+      P.glow(g, 14, 11.6, 5, c.gem, 0.6);
+      P.path(g, [14, 8.8, 16.4, 11, 14, 14.6, 11.6, 11]); P.fill(g, P.lg(g, 11.6, 8.8, 16.4, 14.6, ['#ffc0c8', c.gem, sh(c.gem, -0.5)]));
+      P.path(g, [14, 8.8, 16.4, 11, 14, 11.4]); P.fill(g, G.rgba('#ffffff', 0.45));
+      for (const [x, y] of [[10.4, 8.6], [17.6, 8.6], [10.4, 14.6], [17.6, 14.6]]) P.circle(g, x, y, 0.5, sh(gold, 0.3)); // rivets
+      // the head: a gold mask set in a marble block
+      block(15.4, 1.6, 5.6, 5, sl);
+      P.rrect(g, 16.2, 2.4, 4.2, 3.8, 1.2, P.lg(g, 16, 2.4, 20.4, 6.2, [sh(gold, 0.5), gold, gd]));
+      P.rect(g, 16.8, 3.8, 1.2, 0.6, '#140a06'); P.rect(g, 18.8, 3.8, 1.2, 0.6, '#140a06');
+      P.rect(g, 17, 3.9, 0.8, 0.35, '#fff8c0'); P.rect(g, 19, 3.9, 0.8, 0.35, '#fff8c0'); P.glow(g, 18.4, 4.1, 2.2, '#fff8c0', 0.6);
+      P.line(g, 17.6, 5.4, 19.4, 5.4, 0.35, gd);
+      // the near arm: blocks to a gold-banded fist
+      block(22, 7, 4.2, 5.4, s); block(23.2, 12.8, 3.8, 5, s); block(22.6, 18.2, 5, 4.6, sl); band(22.6, 18.6, 5); band(22.6, 21, 5);
     } });
 
   /* ---------- Wolf (summon, and the Crypt's hounds): a gaunt grave-hound, ears up, ribs showing, jaws open ---------- */
