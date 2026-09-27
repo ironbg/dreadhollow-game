@@ -1707,15 +1707,24 @@
     g.restore();
   }
   const MISC = {
-    i_gold(g) {
-      inkCircle(g, 16, 16, 11.6, P.rg(g, 13, 12, 14, ['#fff4c0', '#e8b840', '#8a5a10']));
-      for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; P.circle(g, 16 + Math.cos(a) * 10.4, 16 + Math.sin(a) * 10.4, 0.5, '#8a5a10'); }
-      P.circle(g, 16, 16, 8.4, P.lg(g, 8, 8, 24, 24, ['#fff0a0', '#d8a020']));
-      P.path(g, [10.6, 19.6, 10, 11.4, 12.8, 14.4, 16, 9.4, 19.2, 14.4, 22, 11.4, 21.4, 19.6]); P.fill(g, '#a8741a'); // a crown struck in the face
-      P.path(g, [10.6, 19.6, 10, 11.4, 12.8, 14.4, 16, 9.4, 16, 19.6]); P.fill(g, 'rgba(120,70,0,0.35)');
-      for (const [x, y] of [[10, 11.4], [16, 9.4], [22, 11.4]]) P.circle(g, x, y, 0.9, '#8a5a10');
-      P.rect(g, 10.4, 19.4, 11.2, 1.6, '#8a5a10'); P.line(g, 11, 20.2, 21, 20.2, 0.4, '#fff0a0');
-      P.path(g, [8, 11, 11, 7, 12, 8, 9, 12]); P.fill(g, 'rgba(255,255,255,0.6)');
+    i_gold(g) { // two stacks of coins and one standing before them
+      const stackCoin = (x, y, rx, ry) => {
+        P.ell(g, x, y + 1.3, rx + 0.6, ry + 0.6, INK);
+        P.rect(g, x - rx, y, rx * 2, 1.3, P.lg(g, x - rx, 0, x + rx, 0, ['#8a5a10', '#f0c040', '#c88a18', '#6a4008']));
+        P.ell(g, x, y + 1.3, rx, ry, P.lg(g, x - rx, 0, x + rx, 0, ['#8a5a10', '#e0a020', '#6a4008']));
+        for (let i = 1; i < 8; i++) { const t = i / 8, xx = x - rx + t * rx * 2; P.line(g, xx, y + ry * Math.sin(Math.PI * t) * 0.9, xx, y + 1.3 + ry * Math.sin(Math.PI * t) * 0.9, 0.3, 'rgba(90,50,0,0.6)'); }
+        P.ell(g, x, y, rx + 0.6, ry + 0.6, INK); P.ell(g, x, y, rx, ry, P.lg(g, x - rx, y - ry, x + rx, y + ry, ['#fff4c0', '#f0c040', '#b07818']));
+        P.ell(g, x, y, rx * 0.66, ry * 0.62, 'rgba(160,100,10,0.35)');
+      };
+      P.ell(g, 16, 28.4, 13, 2.2, 'rgba(0,0,0,0.5)');
+      for (let i = 0; i < 6; i++) stackCoin(10.4, 25.4 - i * 2.4, 6.4, 2.4);
+      for (let i = 0; i < 3; i++) stackCoin(21.4, 26 - i * 2.4, 6, 2.3);
+      inkCircle(g, 21, 15.4, 7, P.rg(g, 18.6, 13, 9, ['#fff8d0', '#f0c040', '#a86a10']));
+      g.strokeStyle = '#8a5a10'; g.lineWidth = 0.6; g.beginPath(); g.arc(21, 15.4, 5.6, 0, Math.PI * 2); g.stroke();
+      for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; P.circle(g, 21 + Math.cos(a) * 4.4, 15.4 + Math.sin(a) * 4.4, 0.4, '#a86a10'); }
+      P.circle(g, 21, 15.4, 2.2, P.rg(g, 20.4, 14.8, 2.6, ['#fff0a0', '#c88a18']));
+      P.ell(g, 18.4, 12.4, 1.8, 0.9, 'rgba(255,255,255,0.8)', -0.7);
+      glint(g, 7.6, 12.2, 1.6, '#fff8d0');
     },
     i_gem(g) {
       P.glow(g, 16, 16, 13, '#ff5ad8', 0.45);
