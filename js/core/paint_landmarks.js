@@ -79,6 +79,9 @@
     g.strokeStyle = c.glow === '#000000' ? 'rgba(110,16,16,0.85)' : G.rgba(c.glow, 0.95); g.lineWidth = w * 0.45; draw(); g.stroke();
   }
 
+  /** Glyphs cut into ritual stones, as strokes in a unit box. */
+  const RUNES = [[[0, -1, 0, 1], [0, -0.3, 0.8, -1]], [[-0.6, 1, 0, -1, 0.6, 1]], [[0, -1, 0, 1], [-0.7, -0.3, 0.7, 0.4]], [[-0.6, -1, 0.6, 0, -0.6, 1]], [[0, -1, 0, 1], [0, -1, 0.7, -0.5, 0, 0]], [[-0.7, -1, 0.7, 1], [0.7, -1, -0.7, 1]]];
+
   /* ---------- columns ---------- */
   land('lm_column', { w: 18, h: 62, cy: 58, draw(g, f, c) {
     shadow(g, 9, 58.4, 8.8, 2.4);
@@ -125,52 +128,96 @@
   } });
 
   /* ---------- a ruined wall with a gothic window ---------- */
+  // a ruined chapel wall: coursed stone, a lancet window with tracery, a doorway fallen in, ivy and rubble at its foot
   land('lm_wall', { w: 72, h: 54, cy: 48, draw(g, f, c) {
     shadow(g, 36, 48.6, 34, 3.2);
     const top = [1, 8, 9, 6, 15, 10, 22, 9, 27, 14, 33, 13, 38, 20, 45, 21, 50, 27, 57, 29, 61, 34, 67, 36, 71, 40];
-    P.path(g, [1, 47].concat(top, [71, 47])); P.fill(g, P.lg(g, 0, 6, 0, 47, [sh(c.stone, 0.15), c.stone, sh(c.stone, -0.4)]));
-    // brick courses
-    g.save(); P.path(g, [1, 47].concat(top, [71, 47])); g.clip();
-    g.strokeStyle = G.rgba(c.dark, 0.6); g.lineWidth = 0.55;
-    for (let y = 11, r = 0; y < 47; y += 4, r++) { g.beginPath(); g.moveTo(0, y); g.lineTo(72, y); g.stroke(); for (let x = (r & 1) ? 3 : 7; x < 72; x += 8) { g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 4); g.stroke(); } }
-    g.fillStyle = 'rgba(255,255,255,0.07)'; for (let y = 11; y < 47; y += 4) g.fillRect(0, y + 0.6, 72, 0.6);
+    const body = [1, 47].concat(top, [71, 47]);
+    P.path(g, body); P.fill(g, sh(c.dark, 0.1));
+    g.save(); P.path(g, body); g.clip();
+    for (let y = 5, r = 0; y < 47; y += 4, r++) for (let x = (r & 1) ? -4 : 0, i = 0; x < 72; x += 8, i++) {
+      const k = ((r * 7 + i * 13) % 5) / 4 - 0.5;
+      P.rect(g, x + 0.35, y + 0.35, 7.3, 3.3, sh(c.stone, 0.14 + k * 0.18 - (y / 47) * 0.35 - (x / 72) * 0.12));
+      P.rect(g, x + 0.35, y + 0.35, 7.3, 0.6, 'rgba(255,255,255,0.13)'); P.rect(g, x + 0.35, y + 3.05, 7.3, 0.6, 'rgba(0,0,0,0.25)');
+    }
+    P.rect(g, 0, 36, 72, 12, P.lg(g, 0, 36, 0, 48, ['rgba(0,0,0,0)', 'rgba(0,0,0,0.4)']));
     g.restore();
-    // the pointed window: darkness behind, a sill below
-    P.path(g, [13, 36, 13, 22, 18, 15, 23, 22, 23, 36]); P.fill(g, '#07050a');
-    P.path(g, [14.4, 36, 14.4, 23, 18, 17.4, 21.6, 23, 21.6, 36]); P.fill(g, P.lg(g, 0, 17, 0, 36, [G.rgba(c.glow === '#000000' ? '#3a3050' : c.glow, 0.35), 'rgba(0,0,0,0)']));
-    P.rect(g, 18, 18, 0.9, 18, sh(c.stone, -0.3));
-    P.rrect(g, 11.6, 35.6, 12.8, 2.2, 0.4, stoneY(g, 35.6, 38, c));
-    // a doorway fallen in on the right
-    P.path(g, [42, 47, 42, 33, 47, 29, 52, 33, 52, 47]); P.fill(g, '#0a080c');
-    cracks(g, [30, 16, 31, 24, 29, 30, 31, 38], c); cracks(g, [60, 35, 58, 41, 60, 46], c);
+    // the broken top: a lit ledge showing the wall's thickness
+    g.lineJoin = 'round'; g.strokeStyle = sh(c.stone, 0.5); g.lineWidth = 1.1; P.path(g, top, false); g.stroke();
+    g.save(); g.translate(0.4, 1.1); g.strokeStyle = G.rgba(c.dark, 0.6); g.lineWidth = 0.5; P.path(g, top, false); g.stroke(); g.restore();
+    // the lancet window: a dressed frame, a mullion, two small arches and a round light above them
+    const lanc = (x0, x1, ys, yb, apex) => { const m = (x0 + x1) / 2; g.beginPath(); g.moveTo(x0, yb); g.lineTo(x0, ys); g.quadraticCurveTo(x0, apex + (ys - apex) * 0.3, m, apex); g.quadraticCurveTo(x1, apex + (ys - apex) * 0.3, x1, ys); g.lineTo(x1, yb); g.closePath(); };
+    lanc(11.2, 24.8, 22, 37, 12.4); P.fill(g, stoneX(g, 11.2, 24.8, c));
+    lanc(13, 23, 22.4, 36.4, 14.6); P.fill(g, '#07050a');
+    const wg = c.glow === '#000000' ? '#4a3a66' : c.glow;
+    lanc(13, 23, 22.4, 36.4, 14.6); P.fill(g, P.lg(g, 0, 15, 0, 36, [G.rgba(wg, 0.5), G.rgba(wg, 0.04)]));
+    g.strokeStyle = sh(c.stone, 0.05); g.lineWidth = 0.8;
+    g.beginPath(); g.arc(18, 18.8, 2, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.moveTo(13, 24.4); g.quadraticCurveTo(13, 21.6, 15.25, 21.2); g.quadraticCurveTo(17.5, 21.6, 17.5, 24.4); g.moveTo(18.5, 24.4); g.quadraticCurveTo(18.5, 21.6, 20.75, 21.2); g.quadraticCurveTo(23, 21.6, 23, 24.4); g.stroke();
+    P.rect(g, 17.5, 21.4, 1, 15, sh(c.stone, -0.1)); P.rect(g, 17.5, 21.4, 0.35, 15, sh(c.stone, 0.3));
+    for (const [x1, y1, x2, y2] of [[11.2, 28, 13, 28], [23, 28, 24.8, 28], [11.6, 19, 13.2, 20.2], [22.8, 20.2, 24.4, 19], [18, 12.6, 18, 14.6]]) P.line(g, x1, y1, x2, y2, 0.4, G.rgba(c.dark, 0.7));
+    P.rrect(g, 10.4, 36.4, 15.2, 2, 0.4, stoneY(g, 36.4, 38.4, c));
+    // a doorway fallen in on the right, choked with rubble
+    lanc(40.4, 53.6, 35, 47, 27.8); P.fill(g, stoneX(g, 40.4, 53.6, c));
+    lanc(42, 52, 35.4, 47, 29.6); P.fill(g, '#0a080c');
+    P.line(g, 40.4, 38, 42, 38, 0.4, G.rgba(c.dark, 0.7)); P.line(g, 52, 38, 53.6, 38, 0.4, G.rgba(c.dark, 0.7));
+    block(g, 42.6, 43.4, 5, 3.6, 1.4, c, -0.05); block(g, 47, 44.6, 4, 2.4, 1.2, c, 0.05);
+    cracks(g, [30, 16, 31, 24, 29, 30, 31, 38], c); cracks(g, [60, 35, 58, 41, 60, 46], c); cracks(g, [6, 12, 8, 17, 7, 22], c);
     // rubble at its foot
-    for (const [x, y, r] of [[40, 47, 3.4], [45, 46.4, 2.4], [55, 47.4, 3], [8, 47.6, 2.6], [63, 47, 2.2], [49, 48, 1.8]]) P.circle(g, x, y, r, P.vol(g, x, y, r, c.stone));
+    block(g, 29, 44.6, 5.4, 3.2, 1.4, c, -0.02); block(g, 56, 45, 4.6, 2.8, 1.2, c, -0.1);
+    for (const [x, y, r] of [[36, 47.4, 1.8], [55, 47.6, 1.4], [8, 47.6, 2], [63, 47, 1.6], [26.4, 47.8, 1.2], [65.6, 47.8, 1]]) P.circle(g, x, y, r, P.vol(g, x, y, r, c.stone));
     accent(g, c, 2, 44.4, 20); accent(g, c, 30, 12, 8);
-    if (c.acc === VAR.ice.acc) { accent(g, c, 1, 7, 14, 'top'); accent(g, c, 27, 13, 12, 'top'); }
+    ivy(g, [3, 46.4, 6, 41, 4, 36, 8, 31, 6, 26, 9.4, 21, 7.4, 15, 10.6, 10], c);
+    ivy(g, [60, 46, 62.4, 42, 61, 38.4], c);
+    if (c.acc === VAR.ice.acc) { accent(g, c, 1, 7, 14, 'top'); accent(g, c, 27, 13, 12, 'top'); accent(g, c, 44, 20.6, 8, 'top'); }
   } });
 
   /* ---------- a ruined gateway ---------- */
+
+  // a ruined gateway: coursed pillars, an arch of wedge stones with a carved skull for its keystone and a chain hanging from it
   land('lm_arch', { w: 62, h: 68, cy: 62, draw(g, f, c) {
-    shadow(g, 31, 62.4, 28, 3);
+    shadow(g, 31, 62.4, 29, 3);
+    const Bz = (a, b, d, t) => (1 - t) * (1 - t) * a + 2 * (1 - t) * t * b + t * t * d;
+    const O = (t) => [Bz(3, 6, 31, t), Bz(20, 4, 1.6, t)], I = (t) => [Bz(15, 16, 31, t), Bz(20, 11, 10.6, t)];
     for (const x0 of [4, 47]) {
-      P.rrect(g, x0 - 2, 55, 15, 7, 1, stoneY(g, 55, 62, c));
-      P.path(g, [x0, 55, x0, 22, x0 + 11, 22, x0 + 11, 55]); P.fill(g, stoneX(g, x0, x0 + 11, c));
-      g.strokeStyle = G.rgba(c.dark, 0.55); g.lineWidth = 0.5; for (let y = 26; y < 55; y += 5) { g.beginPath(); g.moveTo(x0, y); g.lineTo(x0 + 11, y); g.stroke(); }
-      P.rrect(g, x0 - 1.4, 19, 13.8, 3.6, 0.6, stoneY(g, 19, 22.6, c));
+      block(g, x0 - 2.4, 56.6, 15, 5.4, 1.4, c, -0.05);
+      for (let y = 22, r = 0; y < 56.6; y += 4.4, r++) {
+        const h = Math.min(4.4, 56.6 - y), k = ((r * 5 + x0) % 4) / 3 - 0.5;
+        P.rect(g, x0, y, 11, h, P.lg(g, x0, 0, x0 + 11, 0, [sh(c.stone, 0.32 + k * 0.12), sh(c.stone, k * 0.12), sh(c.stone, -0.5 + k * 0.1)]));
+        P.rect(g, x0, y, 11, 0.5, 'rgba(255,255,255,0.14)'); P.rect(g, x0, y + h - 0.5, 11, 0.5, G.rgba(c.dark, 0.6));
+        if (r & 1) P.line(g, x0 + 5.5, y + 0.5, x0 + 5.5, y + h - 0.5, 0.4, G.rgba(c.dark, 0.5));
+      }
+      block(g, x0 - 1.4, 20.4, 13.8, 2.2, 1, c, 0.05);
     }
-    // the pointed arch, its right shoulder fallen away
-    g.beginPath(); g.moveTo(3, 20); g.quadraticCurveTo(6, 4, 31, 2); g.lineTo(38, 3.4); g.lineTo(40, 8); g.lineTo(36, 10.6); g.quadraticCurveTo(16, 11, 15, 20); g.closePath();
-    P.fill(g, P.lg(g, 0, 2, 0, 20, [sh(c.stone, 0.35), c.stone, sh(c.stone, -0.3)]));
-    g.strokeStyle = G.rgba(c.dark, 0.6); g.lineWidth = 0.5; for (const [x1, y1, x2, y2] of [[8, 14, 13, 17], [13, 8, 17, 12], [20, 4.6, 22, 9.6], [28, 3, 29, 9]]) { g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); }
-    P.path(g, [47, 20, 50, 13, 53, 16, 58, 12, 59, 20]); P.fill(g, stoneX(g, 47, 59, c)); // the stump on the right
-    // keystone: a carved skull (fire), a rune (arcane), a crown (gold), else a plain block
-    P.rrect(g, 27, 1.6, 7, 8, 1, stoneY(g, 1.6, 9.6, c));
-    if (c.acc === VAR.fire.acc) { P.circle(g, 30.5, 5.2, 2.6, '#c8b89a'); P.circle(g, 29.4, 5, 0.7, '#ff6a20'); P.circle(g, 31.6, 5, 0.7, '#ff6a20'); P.glow(g, 30.5, 5, 4, '#ff6a20', 0.6); }
-    else if (c.acc === VAR.purple.acc || c.acc === VAR.gold.acc) accent(g, c, 27.6, 3, 5.8);
-    // fallen blocks under the gap
-    for (const [x, y, r] of [[36, 60.6, 3.2], [41, 61, 2.4], [32, 61.4, 2]]) P.circle(g, x, y, r, P.vol(g, x, y, r, c.stone));
-    accent(g, c, 3, 54, 12); accent(g, c, 46, 54.4, 12);
-    if (c.acc === VAR.ice.acc) accent(g, c, 6, 4, 26, 'top');
+    // the arch, stone by stone; each lit along its outer edge and darker towards the soffit
+    const vous = (m, t0, t1, k, jag) => {
+      const X = (p) => m ? [62 - p[0], p[1]] : p, a = X(O(t0)), b = X(O(t1)), d = X(I(t1)), e = X(I(t0));
+      const pts = [a[0], a[1], b[0], b[1]].concat(jag ? [(b[0] + d[0]) / 2 + jag, (b[1] + d[1]) / 2 + 1] : [], [d[0], d[1], e[0], e[1]]);
+      P.path(g, pts); P.fill(g, P.lg(g, (a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (d[0] + e[0]) / 2, (d[1] + e[1]) / 2, [sh(c.stone, k + 0.18), sh(c.stone, k - 0.3)]));
+      P.line(g, a[0], a[1], b[0], b[1], 0.5, 'rgba(255,255,255,0.22)');
+      if (!jag) P.line(g, b[0], b[1], d[0], d[1], 0.45, G.rgba(c.dark, 0.75));
+    };
+    const N = 7;
+    for (let i = 0; i < N; i++) vous(0, i / N, (i + 1) / N, 0.2 - i * 0.02 + (i % 2) * 0.07);
+    vous(1, 6 / N, 1, -0.05); vous(1, 6 / N, 5.3 / N, -0.12, 1.4); // the right shoulder broken off past the crown
+    vous(1, 0, 1 / N, -0.2); vous(1, 1 / N, 1.7 / N, -0.25, -1.2); // and its springer, still on the pillar
+    // the keystone, a skull carved into it
+    P.rrect(g, 27.3, 0.4, 7.4, 11, 1, stoneY(g, 0.4, 11.4, c)); P.rect(g, 27.3, 0.4, 7.4, 0.6, sh(c.stone, 0.5));
+    P.ell(g, 31, 4.8, 2.5, 2.3, P.vol(g, 31, 4.8, 2.5, sh(c.stone, 0.3))); P.rrect(g, 29.6, 6.2, 2.8, 2, 0.5, sh(c.stone, 0.15));
+    for (const x of [30, 32]) { P.ell(g, x, 4.9, 0.75, 0.85, '#0a080c'); if (c.glow !== '#000000') { P.circle(g, x, 5, 0.4, c.glow); P.glow(g, x, 5, 2, c.glow, 0.6); } }
+    P.path(g, [31, 5.8, 30.6, 6.8, 31.4, 6.8]); P.fill(g, '#0a080c');
+    for (const x of [30.2, 31, 31.8]) P.line(g, x, 7.2, x, 8, 0.25, G.rgba(c.dark, 0.8));
+    // an iron chain and hook hanging from the crown
+    for (let i = 0; i < 7; i++) { const y = 11.8 + i * 1.3; if (i % 2) P.rect(g, 30.8, y - 0.6, 0.4, 1.2, '#3a3a40'); else { g.strokeStyle = '#2a2a30'; g.lineWidth = 0.4; g.beginPath(); g.ellipse(31, y, 0.5, 0.8, 0, 0, Math.PI * 2); g.stroke(); } }
+    g.strokeStyle = '#3a3a42'; g.lineWidth = 0.55; g.beginPath(); g.moveTo(31, 20.6); g.lineTo(31, 22); g.arc(30, 22, 1, 0, Math.PI * 0.9); g.stroke();
+    // fallen stones under the gap
+    block(g, 33.6, 58.4, 5, 3, 1.4, c, -0.05); block(g, 38.4, 59.6, 3.6, 2.2, 1, c, 0.05);
+    for (const [x, y, r] of [[32, 61.4, 1.4], [43, 61.2, 1.2], [36.4, 61.8, 0.8]]) P.circle(g, x, y, r, P.vol(g, x, y, r, c.stone));
+    cracks(g, [8, 30, 9, 35, 7.6, 40], c); cracks(g, [53, 40, 52, 45, 53.4, 50], c);
+    accent(g, c, 2.4, 55, 12); accent(g, c, 45.4, 55.4, 12);
+    ivy(g, [5, 55, 8, 50, 5.6, 45, 9, 40, 6.6, 35, 9.6, 30, 7, 25, 9, 21, 7, 16], c);
+    if (c.acc === VAR.ice.acc) { accent(g, c, 5, 10, 16, 'top'); accent(g, c, 27.3, 0, 7.4, 'top'); }
+    else if (c.acc === VAR.purple.acc || c.acc === VAR.gold.acc) accent(g, c, 47.6, 30, 10);
   } });
 
   /* ---------- graves, statues, rubble ---------- */
@@ -291,7 +338,7 @@
     // the carved ring of runes
     const ring = (k) => groove(g, () => { g.beginPath(); g.ellipse(X, Y, RX * k, RY * k, 0, 0, Math.PI * 2); }, c, 0.9);
     ring(0.74); ring(0.6);
-    const GL = [[[0, -1, 0, 1], [0, -0.3, 0.8, -1]], [[-0.6, 1, 0, -1, 0.6, 1]], [[0, -1, 0, 1], [-0.7, -0.3, 0.7, 0.4]], [[-0.6, -1, 0.6, 0, -0.6, 1]], [[0, -1, 0, 1], [0, -1, 0.7, -0.5, 0, 0]], [[-0.7, -1, 0.7, 1], [0.7, -1, -0.7, 1]]];
+    const GL = RUNES;
     for (let i = 0; i < 18; i++) {
       const a = i / 18 * Math.PI * 2 + 0.09, [x, y] = at(0.67, a), gl = GL[i * 5 % GL.length];
       groove(g, () => { g.beginPath(); for (const s of gl) { g.moveTo(x + s[0] * 1.5, y + s[1] * 1.8); for (let j = 2; j < s.length; j += 2) g.lineTo(x + s[j] * 1.5, y + s[j + 1] * 1.8); } }, c, 0.55);
@@ -369,14 +416,33 @@
   } });
 
   /* ---------- Frozen Catacombs ---------- */
+  // an ice-bound grave: spikes of cloudy ice risen from the floor, a skull caught in the largest, a drift of snow at their feet
   land('lm_stalag', { w: 30, h: 46, cy: 42, draw(g, f, c) {
-    shadow(g, 15, 42.4, 13, 2.6);
-    P.glow(g, 15, 26, 16, '#8fe0ff', 0.3);
-    const ice = (pts, hl) => { P.path(g, pts); P.fill(g, P.lg(g, pts[0], 0, pts[4], 0, ['#ffffff', '#9fdcff', '#2e6a9a'])); P.path(g, hl); P.fill(g, 'rgba(255,255,255,0.6)'); };
-    ice([2, 42, 6, 20, 11, 42], [6, 20, 6.8, 32, 5.2, 32]);
-    ice([18, 42, 23, 16, 28, 42], [23, 16, 23.8, 28, 22.2, 28]);
-    ice([7, 42, 14, 1, 21, 42], [14, 1, 15.2, 20, 13, 20]);
-    P.path(g, [0, 42.4, 4, 38.6, 10, 40, 16, 37.6, 22, 39.6, 28, 38.4, 30, 42.4]); P.fill(g, P.lg(g, 0, 37, 0, 43, ['#ffffff', '#c8e4f4']));
+    shadow(g, 15, 42.4, 13.4, 2.6);
+    P.glow(g, 15, 24, 16, '#8fe0ff', 0.25);
+    const spike = (xb, w, tx, ty, inner) => {
+      const x0 = xb - w / 2, x1 = xb + w / 2, rx = xb + (tx - xb) * 0.15 + w * 0.08;
+      P.path(g, [x0, 42, tx, ty, rx, 42]); P.fill(g, P.lg(g, x0, ty, rx, 42, ['#ffffff', '#b8e6ff', '#6ab0e0']));
+      P.path(g, [rx, 42, tx, ty, x1, 42]); P.fill(g, P.lg(g, rx, 0, x1, 0, ['#5a9ccc', '#24507e']));
+      if (inner) inner(x0, x1, rx, tx, ty);
+      P.line(g, tx, ty + 0.6, rx, 42, 0.4, 'rgba(255,255,255,0.85)');
+      P.line(g, x0 + (tx - x0) * 0.3 + 0.9, 42 - (42 - ty) * 0.3, x0 + (tx - x0) * 0.62 + 0.5, 42 - (42 - ty) * 0.62, 0.5, 'rgba(255,255,255,0.5)');
+    };
+    spike(6.6, 9, 5.2, 17.4); spike(23.4, 10, 24.4, 13);
+    spike(14.8, 13.4, 14, 0.6, (x0, x1, rx) => {
+      // the skull inside, pale and blurred by the ice over it
+      P.ell(g, 14.2, 29.4, 3, 2.8, 'rgba(240,244,246,0.95)'); P.rrect(g, 12.7, 31.4, 3, 2.2, 0.6, 'rgba(226,232,236,0.95)');
+      for (const x of [13.1, 15.3]) P.ell(g, x, 29.6, 0.85, 0.95, 'rgba(12,24,44,0.95)');
+      P.path(g, [14.2, 30.8, 13.8, 31.8, 14.6, 31.8]); P.fill(g, 'rgba(12,24,44,0.9)');
+      for (const x of [13.4, 14.2, 15]) P.line(g, x, 32.6, x, 33.6, 0.3, 'rgba(12,24,44,0.7)');
+      P.path(g, [x0, 42, 14, 0.6, x1, 42]); P.fill(g, 'rgba(170,220,250,0.18)');
+      g.strokeStyle = 'rgba(255,255,255,0.45)'; g.lineWidth = 0.35; g.beginPath(); g.moveTo(16.4, 18); g.lineTo(15.2, 22); g.lineTo(17, 25.4); g.moveTo(11.6, 34); g.lineTo(13, 36.4); g.stroke();
+    });
+    spike(9.8, 5, 8.8, 30); spike(20.4, 5.4, 21.8, 31.6);
+    // a drift of snow, soft and rounded
+    for (const [x, y, rx, ry] of [[3.4, 41.8, 4, 2], [9.4, 41.4, 4.4, 2.2], [15.4, 41.8, 4.6, 1.8], [21.4, 41.2, 4.4, 2.2], [27, 41.8, 3.6, 1.8]]) P.ell(g, x, y, rx, ry, P.lg(g, 0, y - ry, 0, y + ry, ['#ffffff', '#c8e4f4']));
+    P.path(g, [0, 42.6, 30, 42.6, 30, 41.6, 0, 41.6]); P.fill(g, '#c8e4f4');
+    for (const [x, y] of f ? [[13.6, 4]] : [[24, 16], [5.4, 20]]) { P.glow(g, x, y, 2, '#ffffff', 0.6); P.line(g, x - 1.2, y, x + 1.2, y, 0.3, '#ffffff'); P.line(g, x, y - 1.2, x, y + 1.2, 0.3, '#ffffff'); }
   } });
   // a warrior frozen mid-fight: the body (solid) and the ice around it (lm_frozen_ice, translucent, drawn on top)
   land('lm_frozen', { w: 28, h: 40, cy: 36, draw(g, f, c) {
@@ -402,71 +468,134 @@
     P.line(g, 20, 21.8, 23.2, 19.8, 1, '#5a5040'); P.circle(g, 21.6, 20.6, 1, skin);
     // the shielding arm, thrown up before the face
     limb([9.8, 13.4, 6.6, 11, 9.6, 6.8], 2.2, mail); P.circle(g, 10, 6.6, 1.2, skin);
+    // the round shield on that arm, raised against the cold
+    P.circle(g, 6.8, 10.2, 3.1, '#0c1016'); P.circle(g, 6.8, 10.2, 2.7, P.lg(g, 4, 7.5, 9.5, 13, ['#6a5638', '#3a2c1c', '#1a140c']));
+    g.strokeStyle = sh(plate, 0.2); g.lineWidth = 0.5; g.beginPath(); g.arc(6.8, 10.2, 2.5, 0, Math.PI * 2); g.stroke();
+    P.line(g, 4.4, 10.2, 9.2, 10.2, 0.35, 'rgba(0,0,0,0.4)'); P.circle(g, 6.8, 10.2, 0.85, P.vol(g, 6.8, 10.2, 0.85, plate));
+    g.strokeStyle = 'rgba(236,248,255,0.9)'; g.lineWidth = 0.6; g.beginPath(); g.arc(6.8, 10.2, 2.5, Math.PI * 1.1, Math.PI * 1.7); g.stroke();
     // the head, turned from the cold: pale, eyes shut, hair white with rime
     P.circle(g, 13.8, 9, 2.8, '#0c1016'); P.circle(g, 13.8, 9, 2.3, P.vol(g, 13.8, 9, 2.3, skin));
-    P.path(g, [11.2, 8.4, 12, 6, 14.6, 5.6, 16.6, 7.2, 16.4, 9, 14.6, 7.6, 12.6, 8.2]); P.fill(g, '#dfeaf2');
+    g.beginPath(); g.arc(13.8, 8.4, 2.7, Math.PI * 1.02, Math.PI * 1.98); g.lineTo(16.5, 8.9); g.lineTo(11.1, 8.9); g.closePath(); P.fill(g, P.lg(g, 11, 6, 16, 9.4, [sh(plate, 0.55), plate, sh(plate, -0.45)]));
+    P.rect(g, 11.1, 8.2, 5.4, 0.8, sh(plate, -0.25)); P.rect(g, 15.4, 8.2, 0.7, 2.4, sh(plate, 0.1)); P.rect(g, 12, 5.8, 2.6, 0.6, 'rgba(236,248,255,0.95)'); // a nasal helm, rime on its crown
     P.line(g, 14.4, 9.4, 15.6, 9.2, 0.45, '#3a4450'); P.line(g, 14.8, 11, 15.8, 10.8, 0.45, '#5a4a50');
     // hoarfrost on everything facing up
     for (const [x, y, w] of [[9.8, 12.4, 3.6], [15.4, 12.2, 3.2], [10.4, 12.9, 2], [6.4, 10.4, 2.4], [19.6, 16.6, 2.2]]) P.rect(g, x, y, w, 0.7, 'rgba(236,248,255,0.95)');
   } });
   def('lm_frozen_ice', { w: 28, h: 40, cy: 36, soft: true, draw(g) {
     const blk = [2.4, 35, 1, 16, 3.6, 5, 9, 1.4, 19, 0.6, 25, 4.4, 27.4, 14, 26, 35];
-    P.path(g, blk); P.fill(g, P.lg(g, 0, 0, 28, 38, ['rgba(236,250,255,0.34)', 'rgba(150,210,245,0.16)', 'rgba(70,140,200,0.3)']));
-    // facets: a lit face on the left, a shaded one on the right
-    P.path(g, [1, 16, 3.6, 5, 9, 1.4, 8, 14, 5, 35, 2.4, 35]); P.fill(g, 'rgba(255,255,255,0.14)');
-    P.path(g, [19, 0.6, 25, 4.4, 27.4, 14, 26, 35, 20, 35, 21, 12]); P.fill(g, 'rgba(20,70,120,0.22)');
-    // bright edges and streaks
-    g.strokeStyle = 'rgba(255,255,255,0.85)'; g.lineWidth = 0.6; P.path(g, blk); g.stroke();
+    P.path(g, blk); P.fill(g, P.lg(g, 0, 0, 28, 38, ['rgba(236,250,255,0.3)', 'rgba(150,210,245,0.13)', 'rgba(70,140,200,0.3)']));
+    // flat facets catching the light at different angles
+    for (const [a, pts] of [[0.16, [1, 16, 3.6, 5, 9, 1.4, 7.4, 12]], [0.1, [9, 1.4, 19, 0.6, 14.6, 6.4, 7.4, 12]], [-0.14, [19, 0.6, 25, 4.4, 27.4, 14, 21, 11]],
+      [0.06, [1, 16, 7.4, 12, 5.6, 26, 2.4, 35]], [-0.2, [27.4, 14, 26, 35, 22, 29, 21, 11]], [0.04, [14.6, 6.4, 19, 0.6, 21, 11]]]) {
+      P.path(g, pts); P.fill(g, a > 0 ? 'rgba(255,255,255,' + a + ')' : 'rgba(20,70,120,' + (-a) + ')');
+      g.strokeStyle = 'rgba(255,255,255,0.32)'; g.lineWidth = 0.35; g.stroke();
+    }
+    g.strokeStyle = 'rgba(255,255,255,0.9)'; g.lineWidth = 0.6; P.path(g, blk); g.stroke();
     g.strokeStyle = 'rgba(255,255,255,0.7)'; g.lineWidth = 0.9;
-    for (const [x1, y1, x2, y2] of [[4.4, 8, 6.4, 18], [5, 22, 5.8, 28], [22, 6, 23.4, 11], [11, 3, 16, 2.4]]) { g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); }
-    g.strokeStyle = 'rgba(255,255,255,0.45)'; g.lineWidth = 0.4; // cracks
+    for (const [x1, y1, x2, y2] of [[3.6, 9, 5.4, 18], [4, 22, 4.8, 28], [22.4, 6, 23.6, 10.4], [11, 3, 15.4, 2.4]]) { g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); }
+    g.strokeStyle = 'rgba(255,255,255,0.45)'; g.lineWidth = 0.4;
     for (const pts of [[17, 18, 19.6, 22, 18.4, 26, 21, 30], [8, 27, 10.6, 24, 12, 27.4], [22.6, 16, 25.6, 19]]) { g.beginPath(); g.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) g.lineTo(pts[i], pts[i + 1]); g.stroke(); }
-    // rime creeping up from the base
-    P.path(g, [2.4, 35, 3, 30, 6, 32, 9, 29.4, 13, 31.6, 17, 29, 21, 31.4, 24, 29.6, 26, 35]); P.fill(g, 'rgba(240,250,255,0.75)');
+    // rime creeping up from the base, in soft drifts
+    for (const [x, y, rx, ry] of [[5, 33.4, 3.4, 2.6], [10.6, 33, 3.6, 2.4], [16.4, 33.4, 3.4, 2.2], [21.6, 32.8, 3.6, 2.6]]) P.ell(g, x, y, rx, ry, 'rgba(240,250,255,0.7)');
+    P.path(g, [2.4, 35, 2.6, 33, 26, 33, 26, 35]); P.fill(g, 'rgba(240,250,255,0.75)');
   } });
 
   /* ---------- Halls of Discord ---------- */
+
+  // an obelisk of dark stone: a watching eye beneath its tip, a column of runes cut down its face, both alight
   land('lm_obelisk', { w: 16, h: 60, cy: 56, frames: 2, draw(g, f, c) {
     shadow(g, 8, 56.4, 7.4, 2);
-    P.rrect(g, 1, 50, 14, 6.4, 1, stoneY(g, 50, 56.4, c));
-    P.path(g, [3, 50, 4.6, 9, 8, 3, 11.4, 9, 13, 50]); P.fill(g, P.lg(g, 3, 0, 13, 0, [sh(c.stone, 0.25), sh(c.stone, -0.2), sh(c.stone, -0.6)]));
-    P.path(g, [4.6, 9, 8, 3, 11.4, 9]); P.fill(g, sh(c.stone, 0.4));
-    const gl = c.glow === '#000000' ? '#c070ff' : c.glow;
-    g.strokeStyle = G.rgba(gl, f ? 1 : 0.7); g.lineWidth = 0.7;
-    for (let i = 0; i < 6; i++) { const y = 14 + i * 6; g.beginPath(); g.moveTo(8, y); g.lineTo(6.8 + (i % 2) * 2.4, y + 2); g.lineTo(8, y + 4); g.stroke(); }
-    P.glow(g, 8, 28, 10, gl, f ? 0.5 : 0.32);
+    block(g, 0.8, 51.4, 12.8, 5, 1.6, c, -0.05); block(g, 2.2, 49, 10, 2.4, 1.2, c);
+    const gl = c.glow === '#000000' ? '#c070ff' : c.glow, cg = Object.assign({}, c, { glow: gl });
+    P.path(g, [3.2, 49, 4.4, 10, 11.6, 10, 12.8, 49]); P.fill(g, P.lg(g, 3, 0, 13, 0, [sh(c.stone, 0.1), sh(c.stone, -0.25), sh(c.stone, -0.4)]));
+    P.path(g, [3.2, 49, 4.4, 10, 5.4, 10, 4.4, 49]); P.fill(g, sh(c.stone, 0.35));
+    P.path(g, [11.6, 49, 10.6, 10, 11.6, 10, 12.8, 49]); P.fill(g, sh(c.stone, -0.65));
+    P.path(g, [4.4, 10, 8, 1.6, 11.6, 10]); P.fill(g, sh(c.stone, 0.05));
+    P.path(g, [4.4, 10, 8, 1.6, 6.6, 10]); P.fill(g, sh(c.stone, 0.45)); P.path(g, [9.4, 10, 8, 1.6, 11.6, 10]); P.fill(g, sh(c.stone, -0.55));
+    P.line(g, 4.2, 10.2, 11.8, 10.2, 0.45, G.rgba(c.dark, 0.85));
+    // the eye
+    P.path(g, [5.6, 14.6, 8, 12.8, 10.4, 14.6, 8, 16.4]); P.fill(g, '#0a080c');
+    P.glow(g, 8, 14.6, f ? 4.4 : 3.2, gl, f ? 0.75 : 0.5); P.circle(g, 8, 14.6, 1.1, gl); P.line(g, 8, 13.8, 8, 15.4, 0.45, '#0a080c');
+    // the runes
+    for (let i = 0; i < 5; i++) {
+      const y = 21 + i * 5.2, gy = RUNES[(i * 4 + 1) % RUNES.length];
+      const rune = () => { g.beginPath(); for (const s of gy) { g.moveTo(8 + s[0] * 1.5, y + s[1] * 1.9); for (let j = 2; j < s.length; j += 2) g.lineTo(8 + s[j] * 1.5, y + s[j + 1] * 1.9); } };
+      groove(g, rune, cg, 0.9); rune(); g.strokeStyle = G.rgba(sh(gl, 0.35), f ? 1 : 0.7); g.lineWidth = 0.4; g.stroke();
+      P.glow(g, 8, y, 2.4, gl, f ? 0.3 : 0.15);
+    }
+    P.rect(g, 3.5, 45, 9, 1.4, P.lg(g, 3, 0, 13, 0, ['#e8c060', '#8a5a18', '#3a2408']));
+    cracks(g, [10, 20, 10.8, 25, 10.2, 30], c); cracks(g, [5, 36, 5.8, 40, 5.2, 43], c);
+    P.glow(g, 8, 28, 9, gl, f ? 0.22 : 0.12);
+    if (c.acc === VAR.ice.acc) { accent(g, c, 4.6, 8.4, 7, 'top'); accent(g, c, 2.4, 48.2, 10, 'top'); } else if (mossy(c)) accent(g, c, 1.4, 50.6, 11);
   } });
+  // a cluster of crystals breaking out of a rock: faceted prisms with a lit face, a front face and a shaded one, light inside
   land('lm_crystal', { w: 26, h: 34, cy: 31, frames: 2, draw(g, f, c) {
-    shadow(g, 13, 31.4, 11, 2.2);
+    shadow(g, 13, 31.4, 11.6, 2.2);
     const gl = c.glow === '#000000' ? '#c070ff' : c.glow;
-    P.glow(g, 13, 20, 14, gl, f ? 0.55 : 0.38);
-    // faceted prisms: a flat-sided body with a short cut tip, lit face and shaded face
-    const prism = (x, w, h, lean) => {
-      const b = 31, t = b - h, tip = t - w * 0.7;
-      P.path(g, [x, b, x + lean, t, x + w / 2 + lean, tip, x + w + lean, t, x + w, b]); P.fill(g, P.lg(g, x, 0, x + w, 0, [sh(gl, 0.55), gl, sh(gl, -0.5)]));
-      P.path(g, [x + w / 2, b, x + w / 2 + lean, t + 0.4, x + w / 2 + lean, tip, x + w + lean, t, x + w, b]); P.fill(g, G.rgba(sh(gl, -0.6), 0.45));
-      P.path(g, [x + 0.8 + lean * 0.8, t + 2, x + w * 0.3 + lean * 0.8, t + 1, x + w * 0.3, b - 3, x + 0.8, b - 2]); P.fill(g, 'rgba(255,255,255,0.35)');
+    P.glow(g, 13, 18, 14, gl, f ? 0.5 : 0.32);
+    P.path(g, [1, 31, 2.6, 26.4, 7.4, 24, 13, 25, 19.6, 23.4, 24.4, 26.6, 25.4, 31]); P.fill(g, P.lg(g, 2, 23, 22, 31, [sh(c.stone, 0.35), c.stone, sh(c.stone, -0.55)]));
+    const prism = (x, y, w, h, a) => {
+      g.save(); g.translate(x, y); g.rotate(a);
+      const q = w / 2, s = w / 6, tip = -h - w * 0.9;
+      for (const [a0, a1, col] of [[-q, -s, sh(gl, 0.45)], [-s, s, sh(gl, 0)], [s, q, sh(gl, -0.55)]]) {
+        P.path(g, [a0, 0, a0, -h, a1, -h, a1, 0]); P.fill(g, col); P.path(g, [a0, -h, a1, -h, 0, tip]); P.fill(g, sh(col, 0.18));
+      }
+      P.rect(g, -q, -h * 0.35, w, h * 0.35, P.lg(g, 0, -h * 0.35, 0, 0, [G.rgba(sh(gl, -0.6), 0), G.rgba(sh(gl, -0.6), 0.6)]));
+      P.line(g, -s + 0.3, -1, -s + 0.3, -h + 0.4, 0.35, 'rgba(255,255,255,0.7)');
+      P.line(g, -q + 0.1, -h, 0, tip, 0.3, 'rgba(255,255,255,0.65)');
+      g.restore();
     };
-    prism(2.4, 6, 11, -1.6); prism(16.4, 6.4, 14, 1.8); prism(8.4, 8.4, 22, 0);
-    for (const [x, y, r] of [[4, 30.6, 2], [22, 30.8, 2.2], [13, 31, 2.4]]) P.circle(g, x, y, r, P.vol(g, x, y, r, c.stone));
+    prism(7, 27, 4.4, 8, -0.5); prism(19.4, 26.6, 4.8, 10, 0.45); prism(13, 27.6, 6.4, 17, 0.05); prism(9, 29.4, 3.4, 4.6, -0.95); prism(17.8, 29.6, 3.2, 3.6, 0.85);
+    for (const [x, y, r] of [[4, 30.4, 2], [22, 30.6, 2.2], [13, 31, 2.4], [16.4, 30.8, 1.2]]) P.circle(g, x, y, r, P.vol(g, x, y, r, c.stone));
+    for (const [x, y] of f ? [[12.6, 5.4], [21.4, 13]] : [[5.2, 17.6]]) { P.glow(g, x, y, 2.4, '#ffffff', 0.6); P.line(g, x - 1.3, y, x + 1.3, y, 0.3, '#ffffff'); P.line(g, x, y - 1.3, x, y + 1.3, 0.3, '#ffffff'); }
+    if (mossy(c)) accent(g, c, 2.4, 28.4, 8);
   } });
 
   /* ---------- Blightmire ---------- */
+
+  // a dead tree, twisted and hollow: buttress roots, ridged bark, a hollow where something watches, moss and a rope
   land('lm_deadtree', { w: 46, h: 62, cy: 58, draw(g, f, c) {
-    shadow(g, 23, 58.4, 17, 3);
-    const bark = P.lg(g, 14, 0, 32, 0, ['#5a4a30', '#2e2414', '#120c06']);
-    P.path(g, [15, 58, 18, 44, 17, 30, 10, 20, 3, 17, 4, 15, 12, 17, 19, 25, 21, 12, 17, 4, 20, 3, 24, 11, 26, 22, 33, 13, 42, 9, 43, 11, 35, 17, 29, 30, 28, 44, 33, 58]); P.fill(g, bark);
-    g.strokeStyle = '#2e2414'; g.lineWidth = 2.2; g.beginPath(); g.moveTo(15, 58); g.lineTo(8, 60); g.moveTo(33, 58); g.lineTo(41, 60); g.moveTo(24, 58); g.lineTo(24, 61); g.stroke();
+    shadow(g, 23, 58.4, 18, 3);
+    const B = ['#5e4e36', '#3a2e1c', '#1c140a', '#0c0804'];
+    const br = (pts, w0) => { const n = pts.length / 2 - 1; for (let i = 0; i < n; i++) P.limb(g, pts[i * 2], pts[i * 2 + 1], pts[i * 2 + 2], pts[i * 2 + 3], w0 * (1 - i / n * 0.75), w0 * (1 - (i + 1) / n * 0.75), B[1]); };
+    const tw = (x1, y1, x2, y2) => { g.lineCap = 'round'; P.line(g, x1, y1, x2, y2, 0.6, B[2]); };
+    br([19, 28, 12, 21.4, 6, 18.4, 2.2, 16.4], 1.9); tw(6, 18.4, 4, 13.6); tw(12, 21.4, 10.4, 16.6); tw(2.2, 16.4, 0.8, 17.8);
+    br([22, 17, 19.8, 9, 18.2, 4, 19.6, 1], 1.6); tw(19.8, 9, 22.6, 5.6); tw(18.2, 4, 15.8, 2.2);
+    br([26, 25, 32, 16.4, 38, 12.6, 43.6, 10], 2); tw(32, 16.4, 33.2, 10.6); tw(38, 12.6, 40.2, 7.6); tw(43.6, 10, 45.2, 11.8);
+    br([24.4, 20, 27, 12.4, 26.6, 6.4], 1.2);
+    // buttress roots
+    P.limb(g, 18, 50, 9, 58.4, 2.6, 0.9, B[1]); P.limb(g, 28.6, 50, 38, 58.2, 2.6, 0.9, B[1]); P.limb(g, 21, 55, 17, 60, 2, 0.8, B[2]); P.limb(g, 30, 55, 43, 60, 1.6, 0.6, B[2]);
+    const trunk = [13, 58.6, 16.6, 50, 17.8, 42, 16.8, 34, 18.2, 26, 20.6, 18, 22.6, 13.6, 25, 18, 26.8, 26, 27.6, 34, 28.8, 44, 30.6, 52, 34.4, 58.6];
+    P.path(g, trunk); P.fill(g, P.lg(g, 15, 0, 31, 0, [B[0], B[1], B[2], B[3]]));
+    g.save(); P.path(g, trunk); g.clip();
+    for (let i = 0; i < 9; i++) {
+      const x = 15.4 + i * 1.9, ph = i * 1.7;
+      g.beginPath(); g.moveTo(x, 59); for (let y = 56; y > 12; y -= 4) g.lineTo(x + Math.sin(y * 0.18 + ph) * 0.8 + (56 - y) * 0.04 * (i - 4) * 0.3, y);
+      g.strokeStyle = 'rgba(0,0,0,0.5)'; g.lineWidth = 0.55; g.stroke();
+      g.save(); g.translate(-0.6, 0); g.strokeStyle = 'rgba(255,230,190,' + (i < 4 ? 0.12 : 0.05) + ')'; g.lineWidth = 0.35; g.stroke(); g.restore();
+    }
+    g.restore();
+    // the hollow, and what looks out of it
+    P.ell(g, 23, 38.4, 3, 4.2, B[0]); P.ell(g, 23.2, 38.6, 2.5, 3.7, '#060402');
+    if (c.glow !== '#000000') for (const x of [22.2, 24.2]) { P.glow(g, x, 37.8, 2, c.glow, 0.7); P.circle(g, x, 37.8, 0.42, c.glow); }
+    P.ell(g, 19.4, 47.6, 1, 1.4, B[3]); // a knot
+    // a frayed rope hanging from the big branch
+    P.line(g, 35.4, 14.6, 35.8, 26, 0.5, '#8a7a58');
+    g.strokeStyle = '#8a7a58'; g.lineWidth = 0.5; g.beginPath(); g.ellipse(35.8, 28, 1.2, 1.9, 0, 0, Math.PI * 2); g.stroke();
     // hanging moss
-    g.strokeStyle = G.rgba(c.acc === VAR.bog.acc ? '#7a9a30' : '#5a6a3a', 0.85); g.lineWidth = 0.9;
-    for (const [x, y, l] of [[6, 17, 9], [12, 18, 6], [36, 14, 10], [40, 11, 7], [20, 6, 5], [30, 20, 8]]) { g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 1, y + l / 2, x - 0.6, y + l); g.stroke(); }
-    P.ell(g, 23, 40, 2.4, 3.4, '#0a0602'); // a knot hole
+    const M = c.acc === VAR.bog.acc ? ['#3a4c20', '#7a9a30'] : ['#2e3a22', '#5a6a3a'];
+    g.lineCap = 'round';
+    for (const [x, y, l] of [[6, 18.4, 9], [11, 21, 7], [36, 14.6, 10], [40.6, 11.6, 7], [19.6, 7, 6], [30.6, 19.6, 8], [3, 16.6, 6]]) {
+      g.strokeStyle = M[0]; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 1, y + l / 2, x - 0.6, y + l); g.stroke();
+      g.strokeStyle = M[1]; g.lineWidth = 0.45; g.beginPath(); g.moveTo(x - 0.2, y); g.quadraticCurveTo(x + 0.6, y + l / 2, x - 0.6, y + l * 0.85); g.stroke();
+    }
+    for (const [x, s] of [[10, 1], [14, -1], [33, 1], [37, -1]]) { g.strokeStyle = M[0]; g.lineWidth = 0.5; g.beginPath(); g.moveTo(x, 59); g.quadraticCurveTo(x + s * 0.4, 57, x + s * 1.2, 55.6); g.stroke(); }
   } });
   // an abandoned hut sinking into the bog, swallowed by moss, ivy and ferns; one window still holds a dim candle
   land('lm_hut', { w: 68, h: 72, cy: 66, frames: 2, draw(g, f, c) {
     shadow(g, 34, 66.4, 31, 3.6);
     const leaf = (x, y, r, col) => P.ell(g, x, y, r, r * 0.62, col, (x * 7 + y) % 3 - 1);
-    const MOSS = ['#1c2610', '#2a3818', '#3a4c20', '#4e6428'], wood = (x0, x1) => P.lg(g, x0, 0, x1, 0, ['#4e4838', '#2e2a20', '#16140e']);
+    const MOSS = ['#1c2610', '#2a3818', '#3a4c20', '#4e6428'];
     // short, sagging stilts sunk in the mud, furred with moss, pale mushrooms on them
     for (const [x, lean] of [[14, -1.6], [30, 0.6], [44, -0.8], [56, 1.6]]) {
       g.strokeStyle = '#0c0a06'; g.lineWidth = 3.4; g.beginPath(); g.moveTo(x, 50); g.lineTo(x + lean, 65); g.stroke();
@@ -478,9 +607,16 @@
     P.path(g, [8, 49, 60, 47, 61, 51.6, 7, 53.4]); P.fill(g, P.lg(g, 0, 47, 0, 53, ['#4a4434', '#1a1810']));
     g.strokeStyle = 'rgba(0,0,0,0.55)'; g.lineWidth = 0.5; for (let x = 12; x < 60; x += 5) { g.beginPath(); g.moveTo(x, 48); g.lineTo(x - 0.3, 53); g.stroke(); }
     // walls of grey, weathered planks, one side bowed
-    P.path(g, [12, 49, 11.4, 27, 56.6, 25, 56, 47.6]); P.fill(g, wood(11, 57));
-    g.strokeStyle = 'rgba(0,0,0,0.6)'; g.lineWidth = 0.6; for (let i = 0; i < 12; i++) { const x = 14.6 + i * 3.7; g.beginPath(); g.moveTo(x, 26.8 - i * 0.16); g.lineTo(x, 48.4); g.stroke(); }
-    g.strokeStyle = 'rgba(200,200,170,0.07)'; for (let i = 0; i < 12; i++) { const x = 15.6 + i * 3.7; g.beginPath(); g.moveTo(x, 27 - i * 0.16); g.lineTo(x, 48.2); g.stroke(); }
+    P.path(g, [12, 49, 11.4, 27, 56.6, 25, 56, 47.6]); P.fill(g, '#0c0a06');
+    g.save(); P.path(g, [12, 49, 11.4, 27, 56.6, 25, 56, 47.6]); g.clip();
+    for (let i = 0; i < 12; i++) {
+      const x = 11.4 + i * 3.77, k = ((i * 5) % 4) / 3 - 0.5;
+      P.rect(g, x + 0.3, 20, 3.3, 30, P.lg(g, 0, 25, 0, 50, [sh('#4e4838', k * 0.3 - i * 0.03), sh('#262219', k * 0.3 - i * 0.03)]));
+      P.rect(g, x + 0.3, 20, 0.5, 30, 'rgba(220,210,170,0.1)');
+      if (i % 3 === 1) P.ell(g, x + 1.9, 33 + (i * 7 % 10), 0.5, 0.8, 'rgba(0,0,0,0.5)');
+      for (const y of [30.6, 45]) P.circle(g, x + 1.9, y - i * 0.16, 0.25, '#7a6a52');
+    }
+    g.restore();
     P.path(g, [40, 31, 44, 30.6, 43, 36, 40.6, 35]); P.fill(g, '#0a0806'); // a plank torn away
     // a low doorway, half hidden behind hanging vines
     P.path(g, [24, 48.6, 24, 34, 33, 33.2, 33, 48.4]); P.fill(g, '#060504');
@@ -492,6 +628,9 @@
     P.path(g, [42.4, 36, 43.6, 36.6, 43.6, 42.6, 42, 43.4]); P.fill(g, '#3a3426'); // a hanging shutter
     P.rect(g, 15, 35, 6.4, 6.4, '#0a0806'); // the other window, boarded up
     for (const y of [35.6, 38.4]) { P.path(g, [14.4, y + 0.6, 22, y - 0.4, 22, y + 1.2, 14.4, y + 2.2]); P.fill(g, '#4a4434'); }
+    // a crude ladder down from the door to the mud
+    for (const [x0, x1] of [[25, 23.4], [32, 33.6]]) { P.line(g, x0, 48.6, x1, 66, 1.3, '#0c0a06'); P.line(g, x0, 48.6, x1, 66, 0.7, '#4a4232'); }
+    for (let y = 51.4; y < 65; y += 3.2) { const t = (y - 48.6) / 17.4; P.line(g, 25 - 1.6 * t, y, 32 + 1.6 * t, y, 0.7, '#3a3426'); }
     // a crooked stone chimney, cold and overgrown
     P.path(g, [46, 16, 45.4, 4, 51, 3.4, 51.4, 15]); P.fill(g, P.lg(g, 45, 0, 52, 0, ['#5a5a50', '#34342e', '#1a1a16']));
     g.strokeStyle = 'rgba(0,0,0,0.5)'; g.lineWidth = 0.5; for (const y of [6.4, 9.4, 12.4]) { g.beginPath(); g.moveTo(45.6, y); g.lineTo(51.2, y - 0.3); g.stroke(); }
@@ -508,6 +647,9 @@
       g.strokeStyle = MOSS[1]; g.lineWidth = 1.4; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + (f ? 0.8 : -0.4), y + l * 0.6, x + (f ? 0.4 : -0.2), y + l); g.stroke();
       g.strokeStyle = MOSS[3]; g.lineWidth = 0.5; g.beginPath(); g.moveTo(x - 0.3, y); g.lineTo(x - 0.2, y + l * 0.8); g.stroke();
     }
+    // a charm of bones and a small skull hung from the eaves
+    P.line(g, 40.4, 27.4, 40.4, 32.4, 0.3, '#8a7a58'); P.line(g, 38.8, 33, 42, 35.6, 0.6, '#d8ccb0'); P.line(g, 42, 33, 38.8, 35.6, 0.6, '#d8ccb0');
+    P.ell(g, 40.4, 33.6, 1.1, 1, '#e0d4b8'); for (const x of [40, 40.8]) P.circle(g, x, 33.6, 0.28, '#1a1208');
     g.strokeStyle = '#1e2a12'; g.lineWidth = 0.8;
     for (const pts of [[12, 49, 13, 42, 11.6, 36, 13.4, 30], [34, 48.4, 35.6, 40, 34, 33], [56, 47.6, 54.6, 40, 56.4, 32]]) {
       g.beginPath(); g.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) g.lineTo(pts[i], pts[i + 1]); g.stroke();
@@ -517,6 +659,9 @@
     const fern = (x, y, s, col) => { g.strokeStyle = col; g.lineWidth = 0.9; for (let k = -2; k <= 2; k++) { g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + k * 2.4 * s, y - 4 * s, x + k * 4.4 * s, y - (5.4 - Math.abs(k)) * s); g.stroke(); } };
     fern(6, 66, 1.3, MOSS[2]); fern(20, 66.4, 1, MOSS[3]); fern(38, 66.6, 1.1, MOSS[2]); fern(62, 66, 1.3, MOSS[3]); fern(50, 67, 0.9, MOSS[1]);
     for (const [x, y, r] of [[2.4, 64, 3.4], [9, 65, 2.6], [64.6, 64, 3.2], [27, 66, 2.2]]) { leaf(x, y, r, MOSS[1]); leaf(x + 1, y - 1.4, r * 0.7, MOSS[2]); }
+    // a skull on a stake by the ladder, watching the way in
+    P.line(g, 19, 66.6, 19.4, 55, 0.9, '#3a3020'); P.ell(g, 19.4, 54, 1.9, 1.7, P.vol(g, 19.4, 54, 1.9, '#d8ccb0')); P.rrect(g, 18.4, 55, 2, 1.2, 0.4, '#c8bca0');
+    for (const x of [18.7, 20.1]) { P.ell(g, x, 54.1, 0.5, 0.55, '#120c06'); if (c.glow !== '#000000') { P.circle(g, x, 54.1, 0.3, c.glow); P.glow(g, x, 54.1, 1.6, c.glow, 0.6); } }
     P.glow(g, 34, 62, 30, '#8aa070', 0.12);
   } });
   // cattails and sedge in a pool of black water, swaying
@@ -560,13 +705,42 @@
   } });
 
   /* ---------- Sealed Reliquary ---------- */
+
+  // a hoard gone cold: a heap of coins, an open chest spilling more, a crown, a goblet, a sword and a skull half buried
   land('lm_hoard', { w: 34, h: 22, cy: 18, draw(g, f, c) {
-    shadow(g, 17, 18.4, 16, 2.6);
-    P.path(g, [1, 18, 5, 11, 11, 7, 17, 5, 24, 7, 30, 11, 33, 18]); P.fill(g, P.lg(g, 0, 5, 0, 18, ['#fff0a0', '#e0b040', '#8a5a10']));
-    for (let i = 0; i < 26; i++) { const x = 3 + (i * 53 % 29), y = 8 + (i * 31 % 9); P.ell(g, x, y, 1.3, 0.7, i % 3 ? '#ffe070' : '#b07a18'); }
-    // a goblet and a spilled chest lid
-    P.path(g, [6, 11, 10, 11, 9, 14, 8.6, 16, 10, 16.6, 6, 16.6, 7.4, 16, 7, 14]); P.fill(g, P.lg(g, 6, 0, 10, 0, ['#fff0a0', '#c89030', '#6a4a14'])); P.circle(g, 8, 12.6, 0.7, '#ff3040');
-    P.rrect(g, 22, 4, 10, 5, 1, P.lg(g, 0, 4, 0, 9, ['#8a4a24', '#4a2410'])); P.rect(g, 22, 6, 10, 1, '#e0b040');
-    for (const [x, y] of [[14, 7], [26, 12], [18, 13]]) { P.glow(g, x, y, 3, '#fff4c0', 0.8); P.circle(g, x, y, 0.5, '#ffffff'); }
+    shadow(g, 17, 18.6, 16.4, 2.6);
+    const GOLD = ['#fff4b0', '#f0c040', '#b07a18', '#5a3a08'];
+    // the chest behind, its lid thrown back
+    P.path(g, [21.4, 3.2, 31.8, 2.2, 32.2, 7.4, 21.8, 8]); P.fill(g, P.lg(g, 0, 2, 0, 8, ['#6a3a1c', '#2a140a']));
+    P.rect(g, 21.6, 2.9, 10.4, 0.8, '#c89030');
+    P.rrect(g, 21, 8, 11.6, 6.6, 0.6, P.lg(g, 0, 8, 0, 14.6, ['#7a4424', '#3a1c0c']));
+    P.rect(g, 21, 10.6, 11.6, 1, '#c89030'); P.rrect(g, 26, 10.2, 1.8, 2.2, 0.3, '#e8c050');
+    P.ell(g, 26.8, 8.4, 5.4, 1.4, P.lg(g, 21, 0, 32, 0, [GOLD[0], GOLD[1], GOLD[2]])); P.glow(g, 26.8, 8, 5, '#ffd040', 0.45);
+    // a sword thrust into the pile
+    P.path(g, [7.6, 1.6, 8.6, 1.2, 11.8, 10, 10.6, 10.4]); P.fill(g, P.lg(g, 7.6, 0, 11.8, 0, ['#e8eef4', '#8a96a4']));
+    P.line(g, 5.6, 3.4, 10.2, 1.8, 0.8, '#c89030'); P.line(g, 7.2, 1.4, 6.4, -0.6, 0.8, '#4a2c18'); P.circle(g, 6.2, -0.4, 0.6, '#e8c050');
+    // the heap
+    g.beginPath(); g.moveTo(1, 18.6); g.quadraticCurveTo(5, 8.4, 16, 8); g.quadraticCurveTo(28, 8.4, 33, 18.6); g.closePath();
+    P.fill(g, P.lg(g, 0, 8, 0, 18.6, [GOLD[1], GOLD[2], GOLD[3]]));
+    const surf = (x) => 18.6 - 10.4 * Math.sin(Math.PI * (x - 1) / 32);
+    // a skull half sunk in the gold
+    P.ell(g, 24.4, 15, 2.1, 1.8, P.vol(g, 24.4, 15, 2.1, '#d8ccb0'));
+    for (const x of [23.6, 25.2]) P.ell(g, x, 15.2, 0.55, 0.6, '#1a1208');
+    const coins = [];
+    for (let i = 0; i < 38; i++) { const x = 2.6 + (i * 53 % 29), y = surf(x) + 0.8 + (i * 31 % 9) * 0.95; if (y < 18.4) coins.push([x, y, i]); }
+    coins.sort((a, b) => a[1] - b[1]);
+    for (const [x, y, i] of coins) { P.ell(g, x, y, 1.35, 0.72, GOLD[3]); P.ell(g, x, y - 0.1, 1.1, 0.5, i % 3 ? GOLD[1] : GOLD[2]); P.rect(g, x - 0.6, y - 0.4, 0.5, 0.25, GOLD[0]); }
+    for (const [x, y] of [[8.4, 11.8], [18.6, 12.4]]) { P.ell(g, x, y, 0.5, 1.3, GOLD[2]); P.ell(g, x - 0.1, y, 0.3, 1.1, GOLD[0]); } // coins on edge
+    // the goblet
+    P.path(g, [3.4, 10.4, 7.2, 10.4, 6.4, 13.2, 5.8, 13.4, 5.8, 15.2, 7, 15.8, 3.6, 15.8, 4.8, 15.2, 4.8, 13.4, 4.2, 13.2]); P.fill(g, P.lg(g, 3, 0, 7, 0, [GOLD[0], GOLD[1], GOLD[3]]));
+    P.ell(g, 5.3, 10.5, 1.9, 0.5, GOLD[3]); P.circle(g, 5.3, 12, 0.5, '#ff3040');
+    // the crown, fallen askew on top
+    g.save(); g.translate(15.4, 7.6); g.rotate(-0.22);
+    P.path(g, [-3, 0, -3.2, -2.6, -1.6, -1.2, 0, -3.4, 1.6, -1.2, 3.2, -2.6, 3, 0]); P.fill(g, P.lg(g, -3, 0, 3, 0, [GOLD[0], GOLD[1], GOLD[2]]));
+    for (const x of [-3.2, 0, 3.2]) P.circle(g, x, x ? -2.8 : -3.6, 0.45, GOLD[0]);
+    P.rect(g, -3, -0.9, 6, 0.9, GOLD[2]); P.circle(g, -1.4, -0.45, 0.4, '#ff3040'); P.circle(g, 1.4, -0.45, 0.4, '#40a0ff');
+    g.restore();
+    for (const [x, y, col] of [[12, 15.6, '#40d070'], [28.4, 16.2, '#ff3040'], [19.6, 16.8, '#40a0ff']]) { P.path(g, [x, y - 0.8, x + 0.7, y, x, y + 0.6, x - 0.7, y]); P.fill(g, col); P.rect(g, x - 0.2, y - 0.5, 0.3, 0.3, '#ffffff'); }
+    for (const [x, y] of [[13, 9.4], [27, 12.6], [9.6, 4.6]]) { P.glow(g, x, y, 2.6, '#fff4c0', 0.7); P.line(g, x - 1.1, y, x + 1.1, y, 0.3, '#ffffff'); P.line(g, x, y - 1.1, x, y + 1.1, 0.3, '#ffffff'); }
   } });
 })(window.DH);
