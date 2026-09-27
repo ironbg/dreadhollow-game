@@ -111,6 +111,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'affix.swift': 'Swift', 'affix.gunner': 'Gunner', 'affix.summoner': 'Summoner', 'affix.ironclad': 'Ironclad', 'affix.regen': 'Regenerating', 'affix.volatile': 'Volatile', 'affix.charger': 'Charger',
   'hud.march': 'The Procession marches! Step aside', 'enemy.marcher': 'Procession Monk',
   'enemy.bonemage': 'Bone Mage', 'enemy.gravechief': 'Grave Chieftain', 'enemy.bonetyrant': 'Bone Tyrant',
+  'enemy.mosquito': 'Blight Mosquito', 'enemy.bogcorpse': 'Bog Corpse', 'enemy.bogwraith': 'Bog Wraith', 'enemy.toad': 'Bog Toad', 'enemy.treant': 'Treant', 'enemy.blightfiend': 'Blightfiend', 'enemy.bogserpent': 'Bog Serpent', 'enemy.eldertreant': 'Elder Treant', 'enemy.rotlord': 'Lord of Rot',
   'enemy.homunculus': 'Homunculus', 'enemy.capra': 'Capra Fiend', 'enemy.fiendcaster': 'Fiend Caster', 'enemy.shapeshifter': 'Shapeshifter', 'enemy.syphon': 'Void Syphon', 'enemy.clockwork': 'Clockwork Construct', 'enemy.voidcaller': 'Void Caller', 'enemy.twistedknight': 'Twisted Knight',
   'enemy.frostcrawler': 'Frost Crawler', 'enemy.iceskull': 'Ice Skull', 'enemy.frostghoul': 'Frost Ghoul', 'enemy.frostguard': 'Frost Guard', 'enemy.icebear': 'Ice Bear', 'enemy.frostconstruct': 'Frost Construct', 'enemy.iceprism': 'Ice Prism', 'hud.iceArmor': 'Its ice thickens!',
   'enemy.spirit': 'Drowned Spirit', 'enemy.drowned': 'The Drowned', 'enemy.gargoyle': 'Gargoyle', 'enemy.arbalist': 'Skeletal Arbalist', 'enemy.hydra': 'Cistern Hydra', 'enemy.bellwarden': 'Bell Warden', 'enemy.sunkknight': 'Sunken Knight',

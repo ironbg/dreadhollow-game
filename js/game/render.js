@@ -200,6 +200,7 @@
       g.drawImage(A.glow(b.color), x - 8, y - 8, 16, 16);
       if (b.kind === 'curse') { g.drawImage(A.glow('#a040ff'), x - 16, y - 16, 32, 32); G.P.circle(g, x, y, 4, '#2a0840'); G.P.circle(g, x - 1.3, y - 0.6, 1, '#e080ff'); G.P.circle(g, x + 1.3, y - 0.6, 1, '#e080ff'); }
       else if (b.kind === 'skull') { G.P.circle(g, x, y, 2.4, '#e8d8ff'); G.P.circle(g, x - 0.8, y - 0.3, 0.6, '#300050'); G.P.circle(g, x + 0.8, y - 0.3, 0.6, '#300050'); }
+      else if (b.kind === 'web') { const P = G.P; for (let k = 0; k < 4; k++) { const a = k * Math.PI / 4; P.line(g, x - Math.cos(a) * 3, y - Math.sin(a) * 3, x + Math.cos(a) * 3, y + Math.sin(a) * 3, 0.5, '#e8e8d8'); } g.strokeStyle = '#e8e8d8'; g.lineWidth = 0.4; g.beginPath(); g.arc(x, y, 1.8, 0, TAU); g.stroke(); }
       else if (b.kind === 'frost') { const l = Math.hypot(b.vx, b.vy) || 1, ux = b.vx / l, uy = b.vy / l; G.P.path(g, [x + ux * 3, y + uy * 3, x - uy * 1.2, y + ux * 1.2, x - ux * 3, y - uy * 3, x + uy * 1.2, y - ux * 1.2]); G.P.fill(g, '#d8f4ff'); }
       else if (b.kind === 'bolt') { const l = Math.hypot(b.vx, b.vy) || 1, ux = b.vx / l, uy = b.vy / l; G.P.line(g, x - ux * 6, y - uy * 6, x + ux * 2, y + uy * 2, 1, '#e8e0c8'); G.P.line(g, x + ux * 1, y + uy * 1, x + ux * 3, y + uy * 3, 1.4, '#c8ccd8'); }
       else { g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x, y, 1.4, 0, TAU); g.fill(); }
@@ -428,6 +429,11 @@
     const blink = p.inv > 0 && Math.floor(p.inv * 20) % 2 === 0;
     const bob = p.moving ? -Math.abs(Math.sin(p.anim * 1.9)) : 0;
     this.sprite(g, this.hero.painter || this.heroId, null, fr, p.x - cx, p.y - cy + bob, p.face < 0, 1, blink, this.buffs && this.buffs.wraith > 0 ? 0.55 : 1);
+    if (this.proot > 0) { // roots coiled round the legs
+      const x = p.x - cx, y = p.y - cy, P = G.P;
+      for (let k = 0; k < 5; k++) { const a = k / 5 * TAU + 0.3, bx = x + Math.cos(a) * 6, by = y + 1 + Math.sin(a) * 2.4; g.strokeStyle = k % 2 ? '#5a4024' : '#7a5a34'; g.lineWidth = 1.4; g.lineCap = 'round'; g.beginPath(); g.moveTo(bx, by); g.quadraticCurveTo(bx + (x - bx) * 0.3, by - 6, x + (k - 2) * 1.2, y - 7 - (k % 2) * 2); g.stroke(); }
+      P.ell(g, x, y + 1.4, 7, 2, 'rgba(60,40,20,0.6)');
+    }
   };
   R.drawProj = function (g, b, cx, cy, lights, now) {
     const x = b.x - cx, y = b.y - cy;

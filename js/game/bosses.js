@@ -27,7 +27,7 @@
   };
   R.updateHazards = function (dt) {
     const p = this.player;
-    this.pslow = Math.max(0, (this.pslow || 0) - dt);
+    this.pslow = Math.max(0, (this.pslow || 0) - dt); this.proot = Math.max(0, (this.proot || 0) - dt);
     for (let i = this.hazards.length - 1; i >= 0; i--) {
       const h = this.hazards[i]; h.t += dt;
       if (!h.fired && h.t >= h.delay) {
@@ -347,6 +347,63 @@
     if (e.c2 > 8 && e.phase === 0) {
       e.c2 = 0; e.split = !e.split; const a0 = (e.split ? 0 : Math.PI / 6) + Math.atan2(dy, dx);
       for (let i = 0; i < 6; i++) run.hazard({ kind: 'line', x: e.x, y: e.y, ang: a0 + i / 6 * TAU, len: 180, w: 12, delay: 0.9, dmg: e.dmg * 1.1 * e.enr, color: '#e060ff', src: e, boss: true, sound: i ? null : 'frost' });
+    }
+  };
+  /* ---------- the Blightmire ---------- */
+  // Blightfiend: vomits a cone of bile that lingers on the ground; calls a cloud of mosquitoes; brings its fists down when you close in
+  AI.b_blightfiend = function (run, e, dt, dx, dy, dist) {
+    e.slam = Math.max(0, (e.slam || 0) - dt); e.cspd = e.slam > 0 ? 0 : e.spd; e.mx = dx; e.my = dy;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 4.2) { e.c1 = 0; e.slam = 0.8; run.hazard({ kind: 'cone', x: e.x, y: e.y, ang: Math.atan2(dy, dx), arc: 0.9, len: 115, delay: 0.8, dur: 2.5, dmg: e.dmg * 0.6 * e.enr, color: '#90b030', src: e, boss: true, sound: 'fire' }); }
+    if (e.c2 > 9) { e.c2 = 0; for (let i = 0; i < 5; i++) { const a = i / 5 * TAU; run.spawnEnemy('mosquito', e.x + Math.cos(a) * 20, e.y + Math.sin(a) * 20); } DH.audio.play('roar'); }
+    if (e.c3 > 2.6 && dist < 60) { e.c3 = 0; e.slam = 0.7; run.hazard({ kind: 'circle', x: e.x, y: e.y, r: 46, delay: 0.7, dmg: e.dmg * 1.2 * e.enr, color: '#c8a060', src: e, boss: true, sound: 'boom' }); }
+  };
+  // Bog Serpent: lunges along a marked line; spits acid in pools that burn and drag at you; sweeps its tail round in a ring
+  AI.b_serpent = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    charge(run, e, dt, dx, dy, dist, 260);
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt;
+    if (e.c1 > 3.6 && e.phase === 0) { e.c1 = 0; for (let i = 0; i < 3; i++) run.hazard({ kind: 'circle', x: p.x + U.rand(-36, 36), y: p.y + U.rand(-36, 36), r: 20, delay: 1.1, dur: 2.5, dmg: e.dmg * 0.5 * e.enr, slow: 1, color: '#a0e040', src: e, boss: true, sound: i ? null : 'fire' }); DH.audio.play('throw'); }
+    if (e.c2 > 4 && e.phase === 0 && dist < 80) { e.c2 = 0; run.hazard({ kind: 'ring', x: e.x, y: e.y, r0: 16, r: 80, delay: 0.8, dmg: e.dmg * 1.2 * e.enr, color: '#6a9a3a', src: e, boss: true, sound: 'swing' }); }
+  };
+  // Elder Treant: roots burst from the ground in three lines toward you and hold you fast; spores fall and fester;
+  // wakes treants from the mire
+  AI.b_eldertreant = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    e.cspd = e.spd; e.mx = dx; e.my = dy;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 5) {
+      e.c1 = 0; const a0 = Math.atan2(dy, dx); run.enemyAttackAnim(e);
+      for (const o of [-0.35, 0, 0.35]) for (let i = 0; i < 6; i++) run.after(i * 0.12, () => run.hazard({ kind: 'circle', x: e.x + Math.cos(a0 + o) * (26 + i * 24), y: e.y + Math.sin(a0 + o) * (26 + i * 24), r: 13, delay: 0.7, dmg: e.dmg * 0.9 * e.enr, color: '#8a6a3a', src: e, boss: true, sound: i || o ? null : 'swing', onFire: (r, h) => { if (r.inHazard(h, r.player.x, r.player.y)) r.proot = 1; } }));
+    }
+    if (e.c3 > 4.5) { e.c3 = 0; for (let i = 0; i < 4; i++) run.hazard({ kind: 'circle', x: p.x + U.rand(-60, 60), y: p.y + U.rand(-60, 60), r: 16, delay: 1.2, dur: 2, dmg: e.dmg * 0.4 * e.enr, color: '#b0c040', src: e, boss: true }); }
+    if (e.c2 > 11) { e.c2 = 0; for (const s of [-1, 1]) run.spawnEnemy('treant', e.x + s * 30, e.y + 10); run.burst(e.x, e.y, 20, ['#4a3a24', '#4a6a1a'], 80); DH.audio.play('roar'); }
+  };
+  // Lord of Rot: swings its censer and a ring of blight clouds settles round it; a plague rolls out in waves with gaps;
+  // the dead of the mire rise around you
+  AI.b_rotlord = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    e.swing = Math.max(0, (e.swing || 0) - dt); e.cspd = e.swing > 0 ? 0 : e.spd; e.mx = dx; e.my = dy;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt; e.c3 = (e.c3 || 0) + dt;
+    if (e.c1 > 6) { e.c1 = 0; e.swing = 1; const o = Math.random() * TAU; for (let i = 0; i < 8; i++) { const a = o + i / 8 * TAU; run.hazard({ kind: 'circle', x: e.x + Math.cos(a) * 62, y: e.y + Math.sin(a) * 62, r: 20, delay: 0.8, dur: 4, dmg: e.dmg * 0.45 * e.enr, color: '#90b030', src: e, boss: true, sound: i ? null : 'fire' }); } }
+    if (e.c2 > 9) {
+      e.c2 = 0; e.swing = 1.6; DH.audio.play('roar');
+      const g0 = Math.atan2(dy, dx) + U.rand(-1, 1), turn = Math.random() < 0.5 ? -0.8 : 0.8;
+      for (let i = 0; i < 3; i++) { const r0 = 24 + i * 44; run.hazard({ kind: 'ring', x: e.x, y: e.y, r0, r: r0 + 26, gap: g0 + i * turn, gw: 0.45, delay: 1.0 + i * 0.45, dmg: e.dmg * 1.1 * e.enr, color: '#b0d040', src: e, boss: true, sound: i ? null : 'boom' }); }
+    }
+    if (e.c3 > 12) { e.c3 = 0; for (let i = 0; i < 4; i++) { const a = i / 4 * TAU + 0.4; run.spawnEnemy('bogcorpse', p.x + Math.cos(a) * 90, p.y + Math.sin(a) * 90); } }
+  };
+  // Blight Worm (secret): spits fans of acid; sinks into the mire (untouchable) and erupts beneath you, a ring of spit around it
+  AI.b_blightworm = function (run, e, dt, dx, dy, dist) {
+    const p = run.player;
+    if (e.sub) { e.mx = 0; e.my = 0; e.cspd = 0; e.kx = e.ky = 0; return; }
+    e.cspd = e.spd * 0.6; e.mx = dx; e.my = dy;
+    e.c1 = (e.c1 || 0) + dt; e.c2 = (e.c2 || 0) + dt;
+    if (e.c1 > 2.4) { e.c1 = 0; const a = Math.atan2(dy, dx); for (const o of [-0.4, -0.2, 0, 0.2, 0.4]) shot(run, e, a + o, 100, 0.45, '#b0d040'); DH.audio.play('fire'); }
+    if (e.c2 > 8) {
+      e.c2 = 0; e.sub = true; e.eth = 99; run.burst(e.x, e.y, 24, ['#3a4a1a', '#8a6a5a'], 90); DH.audio.play('boom');
+      run.hazard({ kind: 'circle', x: p.x, y: p.y, r: 36, delay: 1.5, dmg: e.dmg * 1.3 * e.enr, color: '#b0d040', src: e, boss: true, sound: 'boom',
+        onFire: (r, h) => { if (e.dead) return; e.x = h.x; e.y = h.y; e.sub = false; e.eth = 0; r.shake = 7; r.burst(h.x, h.y, 30, ['#3a4a1a', '#b0d040'], 110); for (let i = 0; i < 10; i++) r.enemyShot({ x: h.x, y: h.y }, i / 10 * TAU, 80, e.dmg * 0.45 * e.enr, '#b0d040'); } });
     }
   };
   C.BOSS_AI = AI;

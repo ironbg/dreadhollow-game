@@ -110,7 +110,7 @@
       const ax = DH.input.axis();
       p.moving = ax.x !== 0 || ax.y !== 0;
       if (p.moving) {
-        const sk = (this.pslow > 0 ? 0.5 : 1) * (this.plantSlow || 1); // Crone's Curse: every plant slows her a little
+        const sk = (this.proot > 0 ? 0.06 : this.pslow > 0 ? 0.5 : 1) * (this.plantSlow || 1); // roots hold you all but still; // Crone's Curse: every plant slows her a little
         p.x += ax.x * st.speed * sk * dt; p.y += ax.y * st.speed * sk * dt;
         const d = Math.hypot(ax.x, ax.y); p.dirX = ax.x / d; p.dirY = ax.y / d;
         if (Math.abs(ax.x) > 0.1) p.face = ax.x > 0 ? 1 : -1;
@@ -455,8 +455,42 @@
             e.lz = 1.5; e.lzCd = U.rand(5, 6.5); const a0 = Math.atan2(dy, dx), s = Math.random() < 0.5 ? -1 : 1;
             for (let i = 0; i < 3; i++) this.hazard({ kind: 'line', x: e.x, y: e.y, ang: a0 + s * (i - 1) * 0.3, len: 200, w: 7, delay: 0.8 + i * 0.2, dmg: e.dmg * 0.8, color: '#ff4080', src: e, sound: i ? null : 'zap' });
           }
+        } else if (ai === 'drink') { // the blight mosquito: darts in to drink, swells, darts off; full, it bursts in a spray of blight
+          e.drCd = (e.drCd || 0) - dt;
+          if (e.drCd > 0.4) { mx = -dx; my = -dy; spd *= 1.2; }
+          else { const w = Math.sin(e.t * 7 + e.anim) * 0.8; mx = dx - dy * w; my = dy + dx * w; }
+          if (e.drCd <= 0 && dist < e.r + p.r + 3) {
+            this.hurtPlayer(e.dmg, e); e.drCd = 1.4; e.drank = (e.drank || 0) + 1; e.hp = Math.min(e.maxHp * 1.5, e.hp + e.maxHp * 0.5); e.scale *= 1.18; e.spd *= 0.9;
+            if (e.drank >= 3) { e.dead = true; this.burst(e.x, e.y, 18, ['#a02030', '#b0d040'], 80); this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 18, delay: 0.1, dur: 2.5, dmg: e.dmg * 0.4, color: '#90b030', src: e }); DH.audio.play('hit'); continue; }
+          }
+        } else if (ai === 'hands') { // the bog wraith: steps through the mist to your side and calls the drowned hands up around you
+          e.hdT = (e.hdT == null ? U.rand(2, 4) : e.hdT) - dt;
+          if (dist < 70) { mx = -dy; my = dx; spd *= 0.6; }
+          if (e.hdT <= 0 && dist < 190) {
+            e.hdT = U.rand(6, 7.5); this.burst(e.x, e.y, 12, ['#8aa070', '#1e2614'], 60);
+            const a = Math.random() * TAU; e.x = p.x + Math.cos(a) * 75; e.y = p.y + Math.sin(a) * 75; this.burst(e.x, e.y, 12, ['#8aa070', '#1e2614'], 60);
+            this.hazard({ kind: 'circle', x: p.x, y: p.y, r: 26, delay: 1.0, dur: 2.2, dmg: e.dmg * 0.5, slow: 1, hands: true, color: '#6a1020', src: e, sound: 'frost' });
+          }
+        } else if (ai === 'tongue') { // the bog toad: hops about; its tongue lashes along a marked line and reels you in
+          if (e.tng > 0) { e.tng -= dt; spd = 0; }
+          else {
+            const n = Math.floor(e.t / 1.2); if (n !== e.hopN) { e.hopN = n; e.hopA = U.rand(-0.8, 0.8); }
+            const ca = Math.cos(e.hopA), sa = Math.sin(e.hopA), c = e.t % 1.2; mx = dx * ca - dy * sa; my = dx * sa + dy * ca; spd *= c < 0.4 ? 2.4 : 0.1;
+            e.tgCd = (e.tgCd == null ? U.rand(2, 4) : e.tgCd) - dt;
+            if (e.tgCd <= 0 && dist < 120) {
+              e.tgCd = U.rand(4.5, 6); e.tng = 1; const a = Math.atan2(dy, dx), tx = e.x, ty = e.y;
+              this.hazard({ kind: 'line', x: e.x, y: e.y, ang: a, len: 130, w: 8, delay: 0.6, dmg: e.dmg, color: '#c85060', src: e, sound: 'swing',
+                onFire: (r, h) => { const q = r.player; if (r.inHazard(h, q.x, q.y)) { q.x += (tx - q.x) * 0.6; q.y += (ty - q.y) * 0.6; } } });
+            }
+          }
+        } else if (ai === 'root') { // the treant: plods on; the ground under you bursts into roots that hold you fast
+          e.rtT = (e.rtT == null ? U.rand(2, 4) : e.rtT) - dt;
+          if (e.rtT <= 0 && dist < 150) { e.rtT = U.rand(5.5, 7); this.enemyAttackAnim(e); this.hazard({ kind: 'circle', x: p.x, y: p.y, r: 20, delay: 1.1, dmg: e.dmg * 0.6, color: '#8a6a3a', src: e, sound: 'swing', onFire: (r, h) => { if (r.inHazard(h, r.player.x, r.player.y)) r.proot = 1.1; } }); }
         } else if (ai === 'flutter') { const w = Math.sin(e.anim * 5 + e.x * 0.01) * 0.6; mx = dx - dy * w; my = dy + dx * w; }
-        else if (ai === 'dash') { const c = e.t % 1.6; spd *= c < 1.0 ? 0.35 : 3.2; }
+        else if (ai === 'dash') { // spiders: creep, then a sudden rush; now and then spit a web that tangles your feet
+          const c = e.t % 1.6; spd *= c < 1.0 ? 0.35 : 3.2;
+          if (e.def.web) { e.webT = (e.webT == null ? U.rand(2, 5) : e.webT) - dt; if (e.webT <= 0 && dist < 150) { e.webT = U.rand(5, 7); this.enemyShot(e, Math.atan2(dy, dx), 85, e.dmg * 0.5, '#e8e8d8', 'web'); } }
+        }
         else if (ai === 'ranged') {
           if (dist < 90) { mx = -dx; my = -dy; } else if (dist < 130) { mx = -dy; my = dx; spd *= 0.5; }
           if (e.t > e.def.shot.cd && dist < 200) { e.t = 0; this.enemyShot(e, Math.atan2(dy, dx), e.def.shot.spd, e.def.shot.dmg * this.stage.dmgMult, '#c070ff'); }
@@ -718,6 +752,7 @@
       let xp = e.final && !this.bosses.some((b) => b.final && !b.dead && b !== e) ? 0 : e.xp; // the last Lord ends the hall: no pointless level-ups after victory
       for (const [v] of C.GEM_TIERS) { while (xp >= v) { this.drop('xp', e.x + U.rand(-5, 5), e.y + U.rand(-5, 5), v); xp -= v; } }
       this.mergeGems();
+      if (e.def.gas) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 22, delay: 0.2, dur: 3, dmg: e.dmg * 0.3, color: '#90b030', src: e }); // a bog corpse bursts in a cloud of foul gas
       if (e.def.shards) { const o = Math.random() * TAU; for (let i = 0; i < e.def.shards; i++) this.enemyShot(e, o + i / e.def.shards * TAU, 75, e.dmg * 0.6, '#a8e0ff', 'frost'); } // an ice skull bursts into frost shards
       if (e.def.puddle) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 20, delay: 0.2, dur: 4, dmg: 0, slow: 1, color: '#3a8aa0', src: e }); // the drowned leave a pool that drags at your feet
       if (e.def.deathFire && Math.random() < 0.5) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 9, delay: 0.3, dur: 1.6, dmg: e.dmg * 0.25, color: '#ff7a20', src: e }); // a husk burns on where it falls

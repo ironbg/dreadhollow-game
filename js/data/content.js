@@ -51,7 +51,7 @@
   // the deed that puts an Arcane Tome beside the hero at the start of each hall
   C.START_TOME_QUEST = { crypt: { kills: 2000 }, abyss: { kills: 2000 }, catacombs: { survive: 6 }, blightmire: { survive: 4 }, reliquary: { kills: 2000 } };
   // new boss deed <- the old one it replaces (see save.migrate); [old, v]: only for saves older than version v (the old boss lives on elsewhere)
-  C.BOSS_DEED_OLD = { d_boss_gravechief: 'd_boss_colossus', d_boss_bellwarden: ['d_boss_lich', 7] };
+  C.BOSS_DEED_OLD = { d_boss_gravechief: 'd_boss_colossus', d_boss_bellwarden: ['d_boss_lich', 7], d_boss_bogserpent: 'd_boss_mirebasilisk', d_boss_rotlord: 'd_boss_rotwyrm' };
   C.START_TOME_DEED = {
     crypt: 'd_start_crypt', abyss: 'd_start_abyss', aqueduct: 'd_boss_bellwarden', catacombs: 'd_start_catacombs',
     discord: 'd_boss_discolossus', blightmire: 'd_start_blightmire', reliquary: 'd_start_reliquary',
@@ -257,7 +257,7 @@
     avalanche: 'd_stage_abyss_s8', smite: 'd_stage_abyss_s8', hail: 'd_dmg_ice', chakrams: 'd_dmg_weapon', hexlance: 'd_crits',
     wyrmfire: 'd_dmg_fire', halo: 'd_dmg_magic', golem: 'd_dmg_summon', skyfall: 'd_dmg_lightning', stormsphere: 'd_dmg_shieldbash',
     rifts: 'd_stage_catacombs_kills', phantom: 'd_dmg_physical', flail: 'd_dmg_projectile', fists: 'd_dmg_abilities',
-    thorns: 'd_stage_blightmire_s5', illumination: 'd_stage_blightmire_win', prism: 'd_boss_mirebasilisk',
+    thorns: 'd_stage_blightmire_s5', illumination: 'd_stage_blightmire_win', prism: 'd_boss_bogserpent',
   };
   C.DMG_DEEDS = { fire: 40000, ice: 60000, lightning: 50000, magic: 60000, summon: 40000, physical: 120000, projectile: 150000, weapon: 60000, abilities: 400000 };
   C.TRAIT_UNLOCK_DMG = [30000, 90000, 250000, 700000]; // ability traits 3..6
@@ -355,7 +355,7 @@
     skeleton: { painter: 'skeleton', hp: 13,  spd: 36, dmg: 7,  xp: 1, r: 6,  mass: 1, reform: 0.35 }, // may fall to a heap of bones and rise again
     ghoul:    { painter: 'ghoul',    hp: 28,  spd: 28, dmg: 10, xp: 2, r: 7,  mass: 1.6 },
     ghost:    { painter: 'ghost',    hp: 16,  spd: 46, dmg: 7,  xp: 2, r: 6,  mass: 0.8, ai: 'float', fly: true, alpha: 0.85 },
-    spider:   { painter: 'spider',   hp: 10,  spd: 40, dmg: 6,  xp: 1, r: 6,  mass: 0.8, ai: 'dash', anim: 0.18 },
+    spider:   { painter: 'spider', variant: 'bog', hp: 10,  spd: 40, dmg: 6,  xp: 1, r: 6,  mass: 0.8, ai: 'dash', anim: 0.18, web: true }, // creeps, rushes, spits webs
     cultist:  { painter: 'cultist',  hp: 22,  spd: 32, dmg: 8,  xp: 3, r: 6,  mass: 1, ai: 'ranged', shot: { dmg: 9, spd: 95, cd: 2.8 } },
     imp:      { painter: 'imp',      hp: 18,  spd: 54, dmg: 7,  xp: 2, r: 6,  mass: 0.8, fly: true, ai: 'imp' }, // flits about, flicks fire darts
     wraith:   { painter: 'ghost', variant: 'wraith', hp: 44, spd: 50, dmg: 13, xp: 4, r: 7, mass: 1.2, ai: 'float', fly: true, alpha: 0.92 },
@@ -372,15 +372,14 @@
     jotun:       { painter: 'jotun', hp: 4200, spd: 30, dmg: 30, xp: 450, r: 18, mass: 120, def: 0.25, ai: 'b_jotun', boss: true, lord: true },
     discolossus: { painter: 'colossus', variant: 'purple', hp: 1600, spd: 34, dmg: 26, xp: 250, r: 16, mass: 60, def: 0.2, ai: 'b_charge', boss: true },
     archdemon:   { painter: 'demon', variant: 'purple', hp: 4600, spd: 38, dmg: 30, xp: 500, r: 18, mass: 100, def: 0.25, ai: 'b_demon', boss: true, lord: true },
-    mirebasilisk:{ painter: 'basilisk', variant: 'bog', hp: 2800, spd: 36, dmg: 26, xp: 260, r: 16, mass: 70, def: 0.2, ai: 'b_basilisk', boss: true },
-    rotwyrm:     { painter: 'wyrm', variant: 'bog', hp: 5200, spd: 38, dmg: 32, xp: 550, r: 18, mass: 90, def: 0.25, ai: 'b_wyrm', boss: true, lord: true, fly: true },
+    rotlord:     { painter: 'rotlord', hp: 5200, spd: 30, dmg: 32, xp: 550, r: 18, mass: 100, def: 0.25, ai: 'b_rotlord', boss: true, lord: true },
     echoanguish: { painter: 'anguish', painter2: 'anguish_foot', hp: 3600, spd: 46, dmg: 30, xp: 300, r: 17, mass: 80, def: 0.2, ai: 'b_lord', boss: true },
     effigy:      { painter: 'effigy', hp: 10, spd: 24, dmg: 9, xp: 3, r: 7, mass: 2, dmgFactor: 0.17, noPierce: true }, // Snow Effigy: shrugs off direct hits, not burns and frost
     pylon:       { painter: 'pylon', hp: 400, spd: 0, dmg: 0, xp: 60, r: 10, mass: 999 },
     // hall secrets: guardians and breakables (secrets.js)
     cyclops:     { painter: 'colossus', variant: 'fire', hp: 1700, spd: 34, dmg: 24, xp: 200, r: 16, mass: 60, def: 0.15, ai: 'b_charge', boss: true },
     ghoullt:     { painter: 'ghoul', variant: 'ice', hp: 1600, spd: 40, dmg: 22, xp: 200, r: 14, mass: 50, def: 0.15, ai: 'b_charge', boss: true, scale: 2.4 },
-    blightworm:  { painter: 'wyrm', variant: 'bog', hp: 1900, spd: 40, dmg: 24, xp: 220, r: 15, mass: 60, def: 0.15, ai: 'b_wyrm', boss: true, fly: true, scale: 0.8 },
+    blightworm:  { painter: 'blightworm', hp: 1900, spd: 40, dmg: 24, xp: 220, r: 15, mass: 60, def: 0.15, ai: 'b_blightworm', boss: true },
     sarcophagus: { painter: 'sarcophagus', hp: 900, spd: 0, dmg: 0, xp: 40, r: 12, mass: 999, noPierce: true },
     eviltree:    { painter: 'eviltree', hp: 1400, spd: 0, dmg: 0, xp: 60, r: 14, mass: 999, noPierce: true },
     custodian:   { painter: 'lich', variant: 'gold', hp: 6400, spd: 36, dmg: 34, xp: 700, r: 15, mass: 60, def: 0.3, ai: 'b_caster', boss: true, lord: true },
@@ -428,13 +427,21 @@
   C.enemies.clockwork = { painter: 'clockwork', hp: 70, spd: 22, dmg: 14, xp: 5, r: 8, mass: 3, def: 0.2, ai: 'laser', particles: ['#b08a3a', '#3a3a44'] }; // halts and sweeps a beam
   C.enemies.voidcaller = { painter: 'voidcaller', hp: 900, spd: 30, dmg: 22, xp: 150, r: 14, mass: 60, def: 0.1, ai: 'b_voidcaller', boss: true, fly: true };
   C.enemies.twistedknight = { painter: 'twistedknight', hp: 1800, spd: 36, dmg: 26, xp: 220, r: 14, mass: 70, def: 0.2, ai: 'b_twisted', boss: true };
+  // the Blightmire
+  C.enemies.mosquito = { painter: 'mosquito', hp: 6, spd: 60, dmg: 4, xp: 1, r: 5, mass: 0.4, ai: 'drink', fly: true, anim: 0.1, particles: ['#a02030', '#3a3a1e'] }; // drinks, swells, bursts
+  C.enemies.bogcorpse = { painter: 'bogcorpse', hp: 36, spd: 24, dmg: 11, xp: 3, r: 7, mass: 2, gas: true, particles: ['#6a7a4a', '#b0d040'] }; // bursts in a cloud of foul gas
+  C.enemies.bogwraith = { painter: 'bogwraith', hp: 24, spd: 40, dmg: 9, xp: 3, r: 6, mass: 0.8, ai: 'hands', fly: true, alpha: 0.9 }; // calls up drowned hands around you
+  C.enemies.toad = { painter: 'toad', hp: 30, spd: 36, dmg: 10, xp: 3, r: 7, mass: 1.6, ai: 'tongue', particles: ['#5a6a2a', '#c8c080'] }; // its tongue reels you in
+  C.enemies.treant = { painter: 'treant', hp: 90, spd: 18, dmg: 16, xp: 7, r: 10, mass: 5, def: 0.15, ai: 'root', particles: ['#4a3a24', '#4a6a1a'] }; // roots you fast
+  C.enemies.blightfiend = { painter: 'blightfiend', hp: 1000, spd: 30, dmg: 24, xp: 160, r: 16, mass: 70, def: 0.15, ai: 'b_blightfiend', boss: true };
+  C.enemies.bogserpent = { painter: 'bogserpent', hp: 1700, spd: 36, dmg: 26, xp: 220, r: 15, mass: 70, def: 0.2, ai: 'b_serpent', boss: true };
+  C.enemies.eldertreant = { painter: 'eldertreant', hp: 2100, spd: 20, dmg: 28, xp: 260, r: 18, mass: 120, def: 0.25, ai: 'b_eldertreant', boss: true };
   C.enemies.hydra = { painter: 'hydra', hp: 700, spd: 22, dmg: 18, xp: 120, r: 16, mass: 70, def: 0.1, ai: 'b_hydra', boss: true };
   C.enemies.bellwarden = { painter: 'bellwarden', hp: 1000, spd: 26, dmg: 20, xp: 150, r: 14, mass: 60, def: 0.15, ai: 'b_bell', boss: true };
   C.enemies.sunkknight = { painter: 'sunkknight', hp: 1300, spd: 34, dmg: 22, xp: 180, r: 14, mass: 60, def: 0.2, ai: 'b_sunken', boss: true };
   C.enemies.bloater = { painter: 'slime', variant: 'volatile', hp: 14, spd: 44, dmg: 0, xp: 2, r: 7, mass: 1, ai: 'fuse', boom: { R: 28, dmg: 15, fuse: 1.0 }, scale: 0.62, anim: 0.2, particles: ['#ff7030', '#ffd060', '#401008'] };
   // [enemy, from (timeline s), weight, variant override]
   C.HALL_FOES = {
-    blightmire: [['ooze', 60, 1.2], ['bloater', 150, 1], ['hound', 240, 0.9]],
     reliquary: [['shieldbearer', 60, 1.4], ['watcher', 150, 1.2], ['hound', 240, 1]],
   };
   C.enemies.gildedooze = { painter: 'slime', variant: 'gold', hp: 1, hits: 45, spd: 40, dmg: 0, xp: 0, r: 8, mass: 99, ai: 'flee', life: 20, gilded: true, anim: 0.3 };
@@ -457,7 +464,8 @@
     golem: 'slam', shieldbearer: 'slam', effigy: 'slam', ooze: 'slam', bloater: 'slam',
     bat: 'summon', bonemage: 'volley', spirit: 'volley', drowned: 'slam', gargoyle: 'charge', arbalist: 'volley',
     frostghoul: 'charge', frostcrawler: 'slam', iceskull: 'summon', frostguard: 'slam', icebear: 'charge',
-    homunculus: 'summon', capra: 'slam', fiendcaster: 'volley', shapeshifter: 'charge', syphon: 'volley', clockwork: 'slam' };
+    homunculus: 'summon', capra: 'slam', fiendcaster: 'volley', shapeshifter: 'charge', syphon: 'volley', clockwork: 'slam',
+    mosquito: 'summon', bogcorpse: 'slam', bogwraith: 'volley', toad: 'charge', treant: 'slam' };
   C.CHAMPION = { hp: 18, dmg: 1.7, scale: 1.8, def: 0.2 };
   // Champion affixes: one each (two from Agony III), from its hall's list. Their health also grows with the hall's progress:
   // x0.7 at the start to x1.3 at the end (the hall's strength).
@@ -538,8 +546,10 @@
       remap: { bat: 'homunculus', rat: 'homunculus', skeleton: 'homunculus', ghoul: 'shapeshifter', ghost: 'capra', spider: 'capra', cultist: 'fiendcaster', wraith: 'syphon', hknight: 'clockwork', golem: 'clockwork' },
       bosses: [{ t: 150, id: 'voidcaller' }, { t: 300, id: 'discolossus' }, { t: 450, id: 'twistedknight' }, { t: 600, id: 'archdemon', final: true }],
       theme: { floorA: [68, 52, 84], floorB: [52, 38, 66], mortar: [18, 10, 26], moss: [170, 80, 200], dark: [10, 4, 16], darkness: 0.82, lightTint: 'rgba(230,140,255,', accent: '#e080ff', crystals: [220, 110, 255], accentRate: 0.1 } },
-    blightmire: { index: 5, agonyXp: 0.13, hpMult: 8.0, dmgMult: 3.3, goldMult: 4.6, variant: 'bog', remap: { cultist: 'spider', bat: 'bat' }, herb: 'moss', lordKills: 3000,
-      bosses: [{ t: 300, id: 'mirebasilisk' }, { t: 600, id: 'rotwyrm', final: true }],
+    blightmire: { index: 5, agonyXp: 0.13, hpMult: 8.0, dmgMult: 3.3, goldMult: 4.6, variant: 'bog', foeVariant: false, herb: 'moss', lordKills: 3000,
+      // spiders, blight mosquitoes, bog corpses, bog wraiths, bog toads, treants
+      remap: { bat: 'mosquito', rat: 'mosquito', skeleton: 'spider', ghoul: 'bogcorpse', ghost: 'bogwraith', spider: 'toad', cultist: 'bogwraith', wraith: 'toad', hknight: 'treant', golem: 'treant' },
+      bosses: [{ t: 150, id: 'blightfiend' }, { t: 300, id: 'bogserpent' }, { t: 450, id: 'eldertreant' }, { t: 600, id: 'rotlord', final: true }],
       theme: { floorA: [64, 70, 46], floorB: [50, 54, 36], mortar: [16, 18, 8], moss: [120, 150, 40], dark: [6, 8, 2], darkness: 0.82, lightTint: 'rgba(200,255,120,', accent: '#b0ff50', pools: [50, 70, 30], accentRate: 0.22, blood: '#2a3a0a' } },
     reliquary: { index: 6, agonyXp: 0.1, hpMult: 10, dmgMult: 3.6, goldMult: 6, variant: 'gold', remap: { rat: 'hknight', bat: 'ghost' }, herb: 'dust', vault: true,
       bosses: [{ t: 300, id: 'echoanguish' }, { t: 600, id: 'custodian', final: true }],

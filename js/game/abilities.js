@@ -746,7 +746,7 @@
       }
       if (U.dist2(b.x, b.y, p.x, p.y) < (b.r + p.r - 1) * (b.r + p.r - 1)) {
         if (b.kind === 'curse' && !(p.inv > 0) && !(this.buffs.wraith > 0) && !(this.curse > 0)) { this.curse = C.STATUS.curse; DH.audio.play('roar'); DH.events.emit('run:warning', t('hud.cursed')); } // Curse Bolt
-        if (b.kind === 'frost') this.pslow = Math.max(this.pslow || 0, 1); // frost shards numb your step
+        if (b.kind === 'frost' || b.kind === 'web') this.pslow = Math.max(this.pslow || 0, b.kind === 'web' ? 1.8 : 1); // frost shards numb your step
         this.hurtPlayer(b.dmg); this.eproj.splice(i, 1); continue;
       }
       if (b.life <= 0) this.eproj.splice(i, 1);
