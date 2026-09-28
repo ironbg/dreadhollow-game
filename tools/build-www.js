@@ -7,6 +7,9 @@ const FILES = ['index.html', 'legal.html', 'manifest.webmanifest', 'sw.js', 'liv
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out);
 FILES.forEach((f) => fs.cpSync(path.join(root, f), path.join(out, f), { recursive: true }));
+// app-ads.txt: AdMob checks it at the root of the developer website given in the Play listing (added once the AdMob
+// account exists: google.com, pub-…, DIRECT, f08c47fec0942fa0)
+if (fs.existsSync(path.join(root, 'app-ads.txt'))) fs.copyFileSync(path.join(root, 'app-ads.txt'), path.join(out, 'app-ads.txt'));
 // live.json: the newest web version is the one being built
 const live = JSON.parse(fs.readFileSync(path.join(root, 'live.json'), 'utf8'));
 live.web = Object.assign({}, live.web, { latest: require(path.join(root, 'package.json')).version });

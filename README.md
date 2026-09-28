@@ -202,15 +202,17 @@ Controls: drag anywhere on the screen (floating joystick) or use WASD / arrow ke
 * **Main quests:** a guided path through the deeds. The next one is shown on the home screen and pays gems.
 * Reviving drains a fifth of the Agony gauge (one rank).
 
-## Monetization integration (currently in TEST MODE)
+## Monetization
 
-All money flows go through two adapters, so no game code changes are needed to go live:
+All money flows go through two adapters:
 
-* `js/services/iap.js`: `DH.iap.buy(productId)`. The mock provider shows a confirmation dialog and charges nothing.
-  To ship, implement a provider around **cordova-plugin-purchase** or **RevenueCat** (mobile) or **Stripe Checkout / Xsolla** (web).
-  Validate receipts server-side, then call `DH.meta.fulfillProduct(id)`. Product ids and prices live in `js/data/economy.js` (`E.products`).
-* `js/services/ads.js`: `DH.ads.rewarded(placement)` and `DH.ads.interstitial(placement)`. The mock shows a 5-second placeholder.
-  To ship, wrap **AdMob** (`@capacitor-community/admob`), Unity Ads or AppLovin MAX.
+* `js/services/iap.js`: `DH.iap.buy(productId)`. In the app: Google Play Billing (`@capgo/native-purchases`); with the
+  server on, every purchase is checked with Google by the server before it is delivered (`functions/play.js`). In the
+  browser: a mock dialog that charges nothing (off once the server is on). Product ids and prices: `js/data/economy.js`
+  (`E.products`), created with the same ids in the Play Console (`store/LISTING.md`).
+* `js/services/ads.js`: `DH.ads.rewarded(placement)` and `DH.ads.interstitial(placement)`. In the app: AdMob
+  (`@capacitor-community/admob`) with Google's consent form; ad unit ids in `live.json` `"ads"`; the server can require
+  AdMob's own confirmation of each rewarded ad (`functions/ads.js`). In the browser: a 5-second placeholder.
 
 ## Adding a language
 
@@ -221,18 +223,17 @@ All money flows go through two adapters, so no game code changes are needed to g
 
 The language is auto-detected from the device and can be changed in Settings.
 
-## Building the mobile app (later)
+## The Android app
 
-```bash
-npm i -D @capacitor/cli @capacitor/core @capacitor/android @capacitor/ios
-mkdir -p www && cp -r index.html manifest.webmanifest sw.js css js assets www/
-npx cap add android      # and/or: npx cap add ios
-npx cap sync && npx cap open android
-```
+The Capacitor 8 project is in `android/` (target API 36). The game's files are copied into it by
+`node tools/build-www.js && npx cap sync android` (`DH_BUILD=debug|release` marks the build: test phones only ever get
+test ads).
 
-The game already handles touch, safe areas (notches), pause on background, vibration, and offline assets (fonts are bundled).
-
-The store rating sheet (`js/services/review.js`) needs `npm i @capacitor-community/in-app-review && npx cap sync`; without the plugin it is skipped.
+* **Build in the cloud:** GitHub → Actions → *Android app* → Run workflow: *debug* gives an APK to install on a phone,
+  *release* the AAB for Google Play (secrets listed at the top of `.github/workflows/android.yml`).
+* **Build locally:** Android Studio or `cd android && ./gradlew assembleDebug` (needs `android/app/google-services.json`).
+* The version (and Play's versionCode) comes from `package.json`: every upload to Play needs a higher version.
+* Store listing texts, in-app product ids and images: `store/`.
 
 ## Project layout
 
