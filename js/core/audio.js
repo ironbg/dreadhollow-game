@@ -70,6 +70,9 @@
     return noiseBuf;
   }
 
+  /** The reverb input for a voice: a music session sends through its own gate, so stopping it silences its tails too. */
+  const revFor = (dest) => (dest && dest._rsend) || reverb;
+
   /** Oscillator voice. o: {type, f, f2, t, vol, attack, delay, dest, filter, ff, ff2, q, rev, vib, vibRate, detune} */
   function tone(o) {
     const t0 = ctx.currentTime + (o.delay || 0), end = t0 + o.t;
@@ -91,7 +94,7 @@
       f.Q.value = o.q || 1; osc.connect(f); node = f;
     }
     node.connect(g); g.connect(o.dest || sfxBus);
-    if (o.rev) { const s = ctx.createGain(); s.gain.value = o.rev === true ? 1 : o.rev; g.connect(s); s.connect(reverb); }
+    if (o.rev) { const s = ctx.createGain(); s.gain.value = o.rev === true ? 1 : o.rev; g.connect(s); s.connect(revFor(o.dest)); }
     osc.start(t0); osc.stop(end + 0.05);
   }
   /** Filtered noise. o: {t, vol, filter, ff, ff2, q, attack, delay, dest, rev} */
@@ -106,7 +109,7 @@
     else g.gain.setValueAtTime(o.vol || 0.3, t0);
     g.gain.exponentialRampToValueAtTime(0.0001, end);
     src.connect(f); f.connect(g); g.connect(o.dest || sfxBus);
-    if (o.rev) { const s = ctx.createGain(); s.gain.value = o.rev === true ? 1 : o.rev; g.connect(s); s.connect(reverb); }
+    if (o.rev) { const s = ctx.createGain(); s.gain.value = o.rev === true ? 1 : o.rev; g.connect(s); s.connect(revFor(o.dest)); }
     src.start(t0, Math.random() * 1.2); src.stop(end + 0.05);
   }
   /** Inharmonic metal (clinks, clangs, bells). ratios of a struck plate / bell. */
@@ -123,12 +126,83 @@
     burst({ t: t * 0.7, ff: o.ff || 500, ff2: 90, vol: vol * 0.8, delay: o.delay, dest: o.dest, rev: o.rev });
   }
 
-  const SFX = {
-    hit() { burst({ t: 0.08, ff: 900, ff2: 160, vol: 0.2 }); tone({ type: 'sine', f: 140, f2: 60, t: 0.08, vol: 0.14 }); },
-    kill() {
-      burst({ t: 0.18, filter: 'bandpass', ff: 520, ff2: 160, q: 1.4, vol: 0.28 }); tone({ type: 'sine', f: 95, f2: 38, t: 0.16, vol: 0.18 });
-      if (Math.random() < 0.4) burst({ t: 0.03, filter: 'highpass', ff: 2200, vol: 0.12, delay: 0.02 }); // bone crack
+  /* What a foe is made of decides how it takes a blow and how it dies. Keyed by painter; flesh is the rest. */
+  const MAT = {};
+  Object.entries({
+    bone: 'skeleton shieldskel bonemage gravechief bonetyrant lich',
+    metal: 'hknight treasuregolem frostguard clockwork gildedknight vaultwarden sentinel sunkknight twistedknight ashwarlord custodian magistrate bellwarden',
+    slime: 'slime gildedooze blightworm',
+    spirit: 'ghost bogwraith coinwraith voidcaller syphon anguish',
+    stone: 'colossus gargoyle weeper pylon sarcophagus',
+    wood: 'treant eldertreant eviltree effigy mimic mimicking',
+    chitin: 'spider scarab mosquito frostcrawler',
+    ice: 'iceskull frostconstruct iceprism',
+    ash: 'husk cinderbloat magmacrawler salamander flamedancer ashcultist',
+  }).forEach(([m, list]) => list.split(' ').forEach((p) => { MAT[p] = m; }));
+
+  /** A blow landing on a foe: short and dry, one voice per material. */
+  const HIT = {
+    flesh(k) { burst({ t: 0.08, ff: 900 * k, ff2: 160, vol: 0.2 }); tone({ type: 'sine', f: 140 * k, f2: 60, t: 0.08, vol: 0.14 }); },
+    bone(k) { burst({ t: 0.03, filter: 'bandpass', ff: 2300 * k, q: 3, vol: 0.2 }); tone({ type: 'triangle', f: 620 * k, f2: 380, t: 0.035, vol: 0.05 }); thud(110, 0.06, 0.08); },
+    metal(k) { burst({ t: 0.04, filter: 'bandpass', ff: 2600 * k, q: 2, vol: 0.16 }); metal(rnd(480, 620), 0.07, 0.03, PLATE); thud(120, 0.07, 0.1); },
+    slime(k) { tone({ type: 'sine', f: 320 * k, f2: 110, t: 0.09, vol: 0.12 }); burst({ t: 0.08, ff: 650, ff2: 150, vol: 0.14 }); },
+    spirit(k) { burst({ t: 0.13, filter: 'bandpass', ff: 1700 * k, ff2: 600, q: 2, vol: 0.12, attack: 0.02 }); tone({ type: 'sine', f: 520 * k, f2: 300, t: 0.1, vol: 0.03 }); },
+    stone(k) { burst({ t: 0.05, filter: 'bandpass', ff: 1400 * k, q: 1.5, vol: 0.2 }); burst({ t: 0.02, filter: 'highpass', ff: 3200, vol: 0.08, delay: 0.01 }); thud(90, 0.07, 0.1); },
+    wood(k) { tone({ type: 'triangle', f: 230 * k, f2: 170, t: 0.06, vol: 0.12 }); burst({ t: 0.05, filter: 'bandpass', ff: 850 * k, q: 4, vol: 0.14 }); },
+    chitin(k) { burst({ t: 0.03, filter: 'highpass', ff: 2600, vol: 0.12 }); burst({ t: 0.045, filter: 'bandpass', ff: 1250 * k, q: 3, vol: 0.14, delay: 0.008 }); },
+    ice(k) { burst({ t: 0.04, filter: 'highpass', ff: 3600 * k, vol: 0.12 }); burst({ t: 0.03, filter: 'bandpass', ff: 2100 * k, q: 5, vol: 0.08 }); thud(130, 0.05, 0.07); },
+    ash(k) { burst({ t: 0.1, ff: 1300 * k, ff2: 200, vol: 0.16 }); for (let i = 0; i < 2; i++) burst({ t: 0.015, filter: 'highpass', ff: 2400, vol: 0.05, delay: rnd(0.01, 0.07) }); },
+  };
+  /** A foe dying: a little longer, with the sound of its body coming apart. */
+  const DIE = {
+    flesh(k) {
+      burst({ t: 0.18, filter: 'bandpass', ff: 520 * k, ff2: 160, q: 1.4, vol: 0.28 }); tone({ type: 'sine', f: 95 * k, f2: 38, t: 0.16, vol: 0.18 });
+      burst({ t: 0.16, filter: 'bandpass', ff: 750, ff2: 220, q: 1, vol: 0.1, delay: 0.04 }); // wet
+      if (Math.random() < 0.3) burst({ t: 0.03, filter: 'highpass', ff: 2200, vol: 0.1, delay: 0.02 }); // a crack
     },
+    bone(k) { // a clatter of bones falling to the floor
+      thud(80 * k, 0.12, 0.14);
+      const n = 4 + (Math.random() * 3 | 0);
+      for (let i = 0; i < n; i++) burst({ t: 0.025, filter: 'bandpass', ff: rnd(1500, 3400), q: 4, vol: rnd(0.08, 0.16), delay: 0.02 + i * rnd(0.035, 0.07) });
+    },
+    metal(k) { // armour crashing down
+      thud(70 * k, 0.25, 0.26);
+      burst({ t: 0.25, filter: 'bandpass', ff: 1800 * k, ff2: 700, q: 1.2, vol: 0.14 });
+      for (let i = 0; i < 3; i++) metal(rnd(330, 520), 0.1, 0.03, PLATE, { delay: 0.05 + i * rnd(0.06, 0.12) });
+    },
+    slime(k) { // a splat and a few bubbles
+      burst({ t: 0.3, ff: 900 * k, ff2: 140, vol: 0.24 }); tone({ type: 'sine', f: 230 * k, f2: 70, t: 0.25, vol: 0.16 });
+      for (let i = 0; i < 3; i++) { const f = rnd(200, 420); tone({ type: 'sine', f, f2: f * 1.7, t: 0.06, vol: 0.04, delay: 0.1 + i * rnd(0.05, 0.1) }); }
+    },
+    spirit(k) { // a wail blown away
+      tone({ type: 'sawtooth', f: 620 * k, f2: 190, t: 0.5, vol: 0.05, attack: 0.03, filter: 'bandpass', ff: 900, q: 5, vib: 12, vibRate: 7, rev: 0.6 });
+      burst({ t: 0.5, filter: 'bandpass', ff: 2100, ff2: 400, q: 1.5, vol: 0.12, attack: 0.05, rev: 0.4 });
+    },
+    stone(k) { // crumbling rock
+      thud(60 * k, 0.3, 0.26); burst({ t: 0.45, ff: 1500 * k, ff2: 200, vol: 0.2 });
+      for (let i = 0; i < 5; i++) burst({ t: 0.02, filter: 'highpass', ff: rnd(2000, 3500), vol: 0.06, delay: rnd(0.02, 0.35) });
+    },
+    wood(k) { // a crack and a groan of timber
+      burst({ t: 0.1, filter: 'bandpass', ff: 950 * k, q: 2, vol: 0.2 }); thud(75, 0.2, 0.16, { delay: 0.03 });
+      tone({ type: 'sawtooth', f: 110 * k, f2: 70, t: 0.35, vol: 0.05, filter: 'bandpass', ff: 420, q: 6, vib: 10, vibRate: 22, delay: 0.05 });
+    },
+    chitin(k) { // a shell crunched, then the squish inside
+      for (let i = 0; i < 3; i++) burst({ t: 0.03, filter: 'bandpass', ff: rnd(1400, 2600), q: 3, vol: 0.13, delay: i * 0.03 });
+      burst({ t: 0.15, filter: 'bandpass', ff: 420 * k, q: 1.2, vol: 0.14, delay: 0.07 });
+    },
+    ice(k) { // shattering: noise shards only, so it cannot ring
+      thud(90 * k, 0.12, 0.12); burst({ t: 0.25, filter: 'highpass', ff: 2500, ff2: 5000, vol: 0.12 });
+      for (let i = 0; i < 5; i++) burst({ t: 0.02, filter: 'bandpass', ff: rnd(3000, 5200), q: 6, vol: 0.08, delay: rnd(0.02, 0.25) });
+    },
+    ash(k) { // a gust of embers
+      burst({ t: 0.4, ff: 800 * k, ff2: 100, vol: 0.22 }); tone({ type: 'sine', f: 80 * k, f2: 34, t: 0.25, vol: 0.14 });
+      for (let i = 0; i < 5; i++) burst({ t: 0.015, filter: 'highpass', ff: rnd(1800, 3200), vol: 0.06, delay: rnd(0.03, 0.4) });
+    },
+  };
+
+  const SFX = {
+    hit(painter) { (HIT[MAT[painter]] || HIT.flesh)(rnd(0.9, 1.1)); },
+    kill(painter) { (DIE[MAT[painter]] || DIE.flesh)(rnd(0.9, 1.1)); },
     xp() { const f = [440, 523, 587, 659, 784][Math.random() * 5 | 0]; tone({ type: 'sine', f, t: 0.22, vol: 0.035, rev: 0.4 }); tone({ type: 'sine', f: f * 2.76, t: 0.08, vol: 0.01 }); },
     coin() { const f = rnd(1050, 1250); metal(f, 0.28, 0.05, PLATE); metal(f * 1.06, 0.2, 0.035, PLATE, { delay: 0.05 }); },
     levelup() {
@@ -251,7 +325,7 @@
     const f1 = ctx.createBiquadFilter(); f1.type = 'bandpass'; f1.frequency.value = fm[0]; f1.Q.value = 5;
     const f2 = ctx.createBiquadFilter(); f2.type = 'bandpass'; f2.frequency.value = fm[1]; f2.Q.value = 7;
     const mixG = ctx.createGain(); mixG.gain.value = 1;
-    f1.connect(mixG); f2.connect(mixG); mixG.connect(g); g.connect(dest); const s = ctx.createGain(); s.gain.value = 0.9; g.connect(s); s.connect(reverb);
+    f1.connect(mixG); f2.connect(mixG); mixG.connect(g); g.connect(dest); const s = ctx.createGain(); s.gain.value = 0.9; g.connect(s); s.connect(revFor(dest));
     [-9, 0, 8].forEach((dt) => {
       const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = midi(n); o.detune.value = dt;
       const lfo = ctx.createOscillator(); lfo.frequency.value = rnd(4.5, 5.5); const lg = ctx.createGain(); lg.gain.value = 3; lfo.connect(lg); lg.connect(o.detune);
@@ -389,9 +463,12 @@
   function startMusic(mood, hall) {
     if (!ctx) { musicState = { mood, hall, pending: true }; return; }
     stopMusic();
-    const H = HALL_MUSIC[hall] || HALL_MUSIC.crypt, battle = mood === 'battle', out = musicBus;
+    const H = HALL_MUSIC[hall] || HALL_MUSIC.crypt, battle = mood === 'battle';
     setSpace(hall);
-    const st = { mood, hall, alive: true, step: 0, nodes: [] };
+    // every voice of this session, dry and reverb send, passes one gate that closes when the music stops
+    const out = ctx.createGain(); out.connect(musicBus);
+    out._rsend = ctx.createGain(); out._rsend.connect(reverb);
+    const st = { mood, hall, alive: true, step: 0, nodes: [], out };
     musicState = st;
     // low drone of the hall, slowly breathing filter
     const droneG = ctx.createGain(); droneG.gain.value = 0.0001; droneG.connect(out);
@@ -454,8 +531,9 @@
     const st = musicState; if (!st || !ctx || st.pending) { musicState = null; return; }
     st.alive = false; clearInterval(st.timer);
     const t = ctx.currentTime;
-    [st.droneG, st.windG, st.texG].forEach((g) => { if (g) { g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(Math.max(0.0001, g.gain.value), t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.8); } });
+    [st.droneG, st.windG, st.texG, st.out, st.out && st.out._rsend].forEach((g) => { if (g) { g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(Math.max(0.0001, g.gain.value), t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.8); } });
     st.nodes.forEach((n) => { try { n.stop(t + 0.9); } catch (e) { /* already stopped */ } });
+    const out = st.out; if (out) setTimeout(() => { try { out.disconnect(); out._rsend.disconnect(); } catch (e) { /* already gone */ } }, 1500);
     musicState = null;
   }
 
@@ -500,12 +578,13 @@
 
   DH.audio = {
     ambience,
-    play(name) {
+    /** Play an effect. arg goes to the effect: for 'hit' and 'kill' it is the foe's painter, which picks its material. */
+    play(name, arg) {
       if (!ctx || settings.sfx <= 0 || ctx.state !== 'running') return;
       const gap = MIN_GAP[name] || 0.02, now = ctx.currentTime;
       if (last[name] && now - last[name] < gap) return;
       last[name] = now;
-      try { SFX[name] && SFX[name](); } catch (e) { /* ignore audio errors */ }
+      try { SFX[name] && SFX[name](arg); } catch (e) { /* ignore audio errors */ }
     },
     /** Play the score of a hall (the selected one when not given) for a mood: 'menu' or 'battle'. */
     music(mood, hall) {

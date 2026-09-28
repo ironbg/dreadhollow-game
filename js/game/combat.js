@@ -178,7 +178,7 @@
     if (s.stun && !e.boss && Math.random() < s.stun) e.stun = C.STATUS.stun; // Stun: frozen in place; re-stunning refreshes, never stacks
     if (this.settings.dmgNumbers) this.text(e.x + U.rand(-4, 4), e.y - e.r - 4, Math.round(dmg), crit ? '#ffd35a' : '#ffffff', crit);
     this.hitSpark(e, a.tags, crit);
-    DH.audio.play('hit');
+    DH.audio.play('hit', e.painter);
     if (e.hp <= 0) this.killEnemy(e);
     else {
       if (S.frost >= C.STATUS.frost.max) this.frostExplode(e);

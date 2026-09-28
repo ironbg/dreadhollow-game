@@ -737,7 +737,7 @@
       if (e.dead) return;
       // a skeleton may fall to a heap of bones and rise again once, at half strength (not Elites, Champions or those with Frost)
       if (e.def.reform && !e.reformed && !e.elite && !e.champion && !(e.st.frost > 0) && Math.random() < e.def.reform) {
-        e.reformed = true; e.hp = e.maxHp * 0.5; e.down = 2.6; e.st.burn = 0; this.burst(e.x, e.y, 10, ['#e6dcc0', '#8a6a4a'], 70); DH.audio.play('kill'); return;
+        e.reformed = true; e.hp = e.maxHp * 0.5; e.down = 2.6; e.st.burn = 0; this.burst(e.x, e.y, 10, ['#e6dcc0', '#8a6a4a'], 70); DH.audio.play('kill', e.painter); return;
       }
       e.dead = true;
       const cols = e.def.particles || ['#e6dcc0', '#8a6a4a', '#7c1624'];
@@ -776,7 +776,7 @@
       if (this.P.killHealChance && Math.random() < this.P.killHealChance) this.heal(this.P.maxHp * 0.02);
       if (this.hero.afflictHeal && e.st.affl > 0 && U.dist2(e.x, e.y, this.player.x, this.player.y) < this.P.pickupR * this.P.pickupR * 4) this.heal(this.P.maxHp * this.hero.afflictHeal, true);
       this.spreadAffliction(e);
-      DH.audio.play('kill');
+      DH.audio.play('kill', e.painter);
       this.burst(e.x, e.y, e.boss ? 60 : (e.elite || e.champion) ? 24 : 7, cols, e.boss ? 140 : 70);
       if (this.decals.length > 120) this.decals.shift();
       this.decals.push({ x: e.x, y: e.y + e.r * 0.5, r: e.r * (0.6 + Math.random() * 0.5) * e.scale, life: 14, kind: e.painter === 'skeleton' || e.painter === 'golem' ? 'bone' : 'blood' });
