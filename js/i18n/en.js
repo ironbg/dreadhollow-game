@@ -117,7 +117,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'enemy.frostcrawler': 'Frost Crawler', 'enemy.iceskull': 'Ice Skull', 'enemy.frostghoul': 'Frost Ghoul', 'enemy.frostguard': 'Frost Guard', 'enemy.icebear': 'Ice Bear', 'enemy.frostconstruct': 'Frost Construct', 'enemy.iceprism': 'Ice Prism', 'hud.iceArmor': 'Its ice thickens!',
   'enemy.spirit': 'Drowned Spirit', 'enemy.drowned': 'The Drowned', 'enemy.gargoyle': 'Gargoyle', 'enemy.arbalist': 'Skeletal Arbalist', 'enemy.hydra': 'Cistern Hydra', 'enemy.bellwarden': 'Bell Warden', 'enemy.sunkknight': 'Sunken Knight',
   'enemy.husk': 'Charred Husk', 'enemy.cinderbloat': 'Cinder Bloater', 'enemy.magmacrawler': 'Magma Crawler', 'enemy.salamander': 'Ember Salamander', 'enemy.ashcultist': 'Ash Cultist', 'enemy.firedancer': 'Flamedancer', 'enemy.ashwarlord': 'Ashen Warlord', 'enemy.ashclone': 'Ashen Shade',
-  'nb.dh': '{d}d {h}h', 'nb.title': 'The Seven Nights',
+  'nb.title': 'The Seven Nights',
   'nb.short': '7 Nights',
   'nb.sub': 'A welcome for newcomers: each night opens new tasks. Tasks pay Seals; Seals fill the rewards track.',
   'nb.ends': 'Ends in {t}',
@@ -169,6 +169,8 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
 
   'device.android': 'Android', 'device.ios': 'iPhone / iPad', 'device.windows': 'Windows', 'device.mac': 'Mac', 'device.linux': 'Linux', 'device.web': 'Device',
   'device.app': 'app', 'device.browser': 'browser',
+  // time and units: short countdowns and distances, built by util.fmtDuration / fmtDays; keep them compact
+  'time.dh': '{d}d {h}h', 'time.hm': '{h}h {m}m', 'time.ms': '{m}m {s}s', 'time.s': '{s}s', 'unit.meters': '{n}m',
   'title.guest': 'Play as Guest', 'title.or': 'or sign in to keep your progress', 'title.tap': 'Tap to enter',
   'title.guestNote': 'As a guest your progress stays on this device. You can sign in later from Settings.',
   'title.asGuest': 'Playing as a guest', 'title.signedAs': 'Signed in as {name}', 'title.change': 'Change', 'title.signIn': 'Sign in',

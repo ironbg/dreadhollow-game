@@ -20,6 +20,18 @@ for names and lore; plain and exact for rules, stats and tutorials.
 - One concept = one word. Don't alternate "enemies"/"foes"/"monsters" inside the same kind of text:
   **foes** in flavor and deed goals, **enemies** in stat/effect descriptions.
 
+## Time and units
+Countdowns and distances are built from the keys below (util.fmtDuration / fmtDays, marker distances), never
+from letters in the code. A new language must translate them; keep them short, they sit on small buttons.
+
+| Key | English | Shown as |
+|---|---|---|
+| `time.dh` | `{d}d {h}h` | 9d 10h |
+| `time.hm` | `{h}h {m}m` | 10h 05m |
+| `time.ms` | `{m}m {s}s` | 4m 09s |
+| `time.s` | `{s}s` | 7s |
+| `unit.meters` | `{n}m` | 360m |
+
 ## Terms
 | Term | Use | Notes |
 |---|---|---|

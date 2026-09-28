@@ -853,7 +853,7 @@
         ctx.drawImage(img, Math.round(x - s.w * k / 2), Math.round(y - s.h * k / 2), Math.round(s.w * k), Math.round(s.h * k));
       }
       // distance, on the side facing the hero
-      const txt = Math.max(1, Math.round(m.dist / C.UNITS_PER_M)) + 'm', size = Math.max(10, Math.round(3.2 * u) * 2);
+      const txt = U.tr('unit.meters', { n: Math.max(1, Math.round(m.dist / C.UNITS_PER_M)) }, Math.max(1, Math.round(m.dist / C.UNITS_PER_M)) + 'm'), size = Math.max(10, Math.round(3.2 * u) * 2);
       ctx.font = '800 ' + size + 'px "DHNum", "Alegreya Sans", sans-serif';
       const half = ctx.measureText(txt).width / 2, tx = x - Math.cos(m.a) * (r + 3 * u + half), ty = y - Math.sin(m.a) * (r + 7 * u); ctx.lineWidth = Math.max(2, u * 1.1); ctx.strokeStyle = '#0b0610';
       ctx.strokeText(txt, tx, ty); ctx.fillStyle = '#f2e6c8'; ctx.fillText(txt, tx, ty);

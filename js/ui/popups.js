@@ -196,7 +196,7 @@
     return t(k, { n: U.fmt(tk.n), m: Math.round(tk.n / 60), a: ROMAN[tk.n] || tk.n, stage: tk.st ? t('stage.' + tk.st + '.name') : '' });
   };
   /** A long countdown in days and hours ("6d 4h"); under a day, hours and minutes. */
-  ui.fmtDays = (ms) => ms >= 86400000 ? t('nb.dh', { d: Math.floor(ms / 86400000), h: Math.floor(ms % 86400000 / 3600000) }) : U.fmtDuration(ms);
+  ui.fmtDays = (ms) => U.fmtDays(ms);
   const nbProg = (tk, v) => tk.k === 'survive' ? U.fmtTime(v) + '/' + U.fmtTime(tk.n) : tk.k === 'agony' ? ROMAN[v] + '/' + ROMAN[tk.n] : U.fmt(v) + '/' + U.fmt(tk.n);
   /** Where "Go" takes the player for each kind of task. */
   function nbGo(tk) {

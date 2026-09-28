@@ -10,7 +10,7 @@ langFiles.forEach((f) => vm.runInContext(fs.readFileSync(path.join(root, 'js/i18
 const DH = ctx.DH, C = DH.content, E = DH.economy;
 const used = new Set();
 const walk = (d) => fs.readdirSync(d).forEach((f) => { const p = path.join(d, f); if (fs.statSync(p).isDirectory()) walk(p); else if (p.endsWith('.js') && !p.includes('i18n')) {
-  const src = fs.readFileSync(p, 'utf8'); for (const m of src.matchAll(/\bt\('([a-zA-Z0-9_.]+)'/g)) if (!m[1].endsWith('.')) used.add(m[1]); } });
+  const src = fs.readFileSync(p, 'utf8'); for (const m of src.matchAll(/\b(?:t|tr)\('([a-zA-Z0-9_.]+)'/g)) if (!m[1].endsWith('.')) used.add(m[1]); } });
 walk(path.join(root, 'js'));
 // dynamic key families
 Object.keys(C.heroes).forEach((k) => { used.add(`hero.${k}.name`); used.add(`hero.${k}.desc`); });

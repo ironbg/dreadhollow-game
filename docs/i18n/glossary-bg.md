@@ -2,6 +2,19 @@
 
 Canonical Bulgarian terms. Use them everywhere (UI, descriptions, deeds, tutorials). Extend this list when you coin a term.
 
+## Време и мерни единици
+Таймерите и разстоянията се сглобяват от тези ключове, не от букви в кода. Всеки нов език трябва да ги преведе; да са къси, стоят на малки бутони.
+
+| Ключ | Български | Изглежда така |
+|---|---|---|
+| `time.dh` | `{d}д {h}ч` | 9д 10ч |
+| `time.hm` | `{h}ч {m}м` | 10ч 05м |
+| `time.ms` | `{m}м {s}с` | 4м 09с |
+| `time.s` | `{s}с` | 7с |
+| `unit.meters` | `{n}м` | 360м |
+
+## Термини
+
 | English | Български | Notes |
 |---|---|---|
 | Hall | Зала | the levels |

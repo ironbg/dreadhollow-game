@@ -117,7 +117,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'enemy.frostcrawler': 'Ледена гъсеница', 'enemy.iceskull': 'Леден череп', 'enemy.frostghoul': 'Леден гул', 'enemy.frostguard': 'Леден страж', 'enemy.icebear': 'Леден мечок', 'enemy.frostconstruct': 'Леденият голем', 'enemy.iceprism': 'Ледената призма', 'hud.iceArmor': 'Ледът му се сгъстява!',
   'enemy.spirit': 'Удавен дух', 'enemy.drowned': 'Удавник', 'enemy.gargoyle': 'Гаргойл', 'enemy.arbalist': 'Скелет арбалетчик', 'enemy.hydra': 'Хидрата от цистерната', 'enemy.bellwarden': 'Камбанният страж', 'enemy.sunkknight': 'Потъналият рицар',
   'enemy.husk': 'Овъглен труп', 'enemy.cinderbloat': 'Жарав издут', 'enemy.magmacrawler': 'Магмена гъсеница', 'enemy.salamander': 'Жарав саламандър', 'enemy.ashcultist': 'Пепелен култист', 'enemy.firedancer': 'Огнена танцьорка', 'enemy.ashwarlord': 'Пепелен пълководец', 'enemy.ashclone': 'Пепелна сянка',
-  'nb.dh': '{d}д {h}ч', 'nb.title': 'Седемте нощи',
+  'nb.title': 'Седемте нощи',
   'nb.short': '7 нощи',
   'nb.sub': 'Посрещане за новодошлите: всяка нощ отваря нови задачи. Задачите дават Печати, а Печатите пълнят наградите горе.',
   'nb.ends': 'Край след {t}',
@@ -169,6 +169,8 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
 
   'device.android': 'Android', 'device.ios': 'iPhone / iPad', 'device.windows': 'Windows', 'device.mac': 'Mac', 'device.linux': 'Linux', 'device.web': 'Устройство',
   'device.app': 'приложение', 'device.browser': 'браузър',
+  // време и мерни единици: кратки таймери и разстояния (util.fmtDuration / fmtDays); да са къси
+  'time.dh': '{d}д {h}ч', 'time.hm': '{h}ч {m}м', 'time.ms': '{m}м {s}с', 'time.s': '{s}с', 'unit.meters': '{n}м',
   'title.guest': 'Играй като гост', 'title.or': 'или влез, за да пазиш прогреса си', 'title.tap': 'Докосни, за да влезеш',
   'title.guestNote': 'Като гост прогресът ти остава само на това устройство. Можеш да влезеш по-късно от Настройките.',
   'title.asGuest': 'Играеш като гост', 'title.signedAs': 'Влязъл като {name}', 'title.change': 'Смени', 'title.signIn': 'Влез',

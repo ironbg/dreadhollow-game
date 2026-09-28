@@ -82,13 +82,20 @@ window.DH = window.DH || {};
       const m = Math.floor(sec / 60), s = sec % 60;
       return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
     },
+    /** A countdown in the player's language: "10h 05m", "4m 09s", "7s" (keys time.hm / time.ms / time.s). */
     fmtDuration(ms) {
       const s = Math.max(0, Math.floor(ms / 1000));
-      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
-      if (h > 0) return h + 'h ' + String(m).padStart(2, '0') + 'm';
-      if (m > 0) return m + 'm ' + String(ss).padStart(2, '0') + 's';
-      return ss + 's';
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60, p2 = (v) => String(v).padStart(2, '0');
+      if (h > 0) return U.tr('time.hm', { h, m: p2(m) }, h + 'h ' + p2(m) + 'm');
+      if (m > 0) return U.tr('time.ms', { m, s: p2(ss) }, m + 'm ' + p2(ss) + 's');
+      return U.tr('time.s', { s: ss }, ss + 's');
     },
+    /** Days and hours: "9d 10h" (key time.dh); under a day, as fmtDuration. */
+    fmtDays(ms) {
+      return ms >= 86400000 ? U.tr('time.dh', { d: Math.floor(ms / 86400000), h: Math.floor(ms % 86400000 / 3600000) }, Math.floor(ms / 86400000) + 'd') : U.fmtDuration(ms);
+    },
+    /** A translated string, or the fallback while the languages are not loaded yet. */
+    tr(key, params, fallback) { return DH.i18n && DH.i18n.has(key) ? DH.i18n.t(key, params) : fallback; },
     pct(v) { return Math.round(v * 100) + '%'; },
 
     /** Tiny DOM builder: h('div.cls#id', {attrs/on*}, children...) */
@@ -131,5 +138,5 @@ window.DH = window.DH || {};
   };
 
   DH.util = U;
-  DH.VERSION = '1.60.39';
+  DH.VERSION = '1.60.40';
 })(window.DH);
