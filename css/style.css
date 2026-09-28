@@ -1096,3 +1096,9 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 /* the battle plaque stays in view: on a screen too short for the whole home page it rests on the bottom edge
    while the rest scrolls behind it (when everything fits, nothing moves) */
 .home .bbwrap { position: sticky; bottom: 6px; z-index: 4; filter: drop-shadow(0 -6px 10px rgba(0,0,0,.65)); }
+/* shop: the chest buttons rest on the bottom of each card, so the rows line up across the three chests
+   (bottom row: gold, gems, gems); the gem packs keep two tag rows, red first-purchase tag on top */
+.chest .cbtns { margin-top: auto; width: 100%; display: flex; flex-direction: column; gap: 4px; }
+.pack .ptags { min-height: 36px; }
+.pack .ptags span { height: 17px; }
+.pack .ptags .tag { letter-spacing: 0; padding: 1px 2px; }

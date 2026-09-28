@@ -507,18 +507,20 @@
       const chestTimer = h('span');
       ch.append(h('div.panel.chest',
         A.img('c_wood'), h('div.t', t('chest.wood')),
-        freeIn <= 0 ? h('button.btn.small.ad.shine', { onclick: async () => { const r = await M.freeChestAd(); if (r) chestResult(r); } }, h('span.adtag', 'AD'), t('common.free'))
-          : h('button.btn.small.ghost.off', chestTimer),
-        h('button.btn.small.gold', { onclick: () => buyChest('wood') }, A.img('i_gold'), U.fmt(E.chests.wood.price.gold))));
+        h('div.cbtns',
+          freeIn <= 0 ? h('button.btn.small.ad.shine', { onclick: async () => { const r = await M.freeChestAd(); if (r) chestResult(r); } }, h('span.adtag', 'AD'), t('common.free'))
+            : h('button.btn.small.ghost.off', chestTimer),
+          h('button.btn.small.gold', { onclick: () => buyChest('wood') }, A.img('i_gold'), U.fmt(E.chests.wood.price.gold)))));
       ch.append(h('div.panel.chest',
         A.img('c_silver'), h('div.t', t('chest.silver')),
         h('div.small.muted', t('shop.epicChance', { v: 10 })),
-        h('button.btn.small.gem', { onclick: () => buyChest('silver') }, A.img('i_gem'), E.chests.silver.price.gems)));
+        h('div.cbtns', h('button.btn.small.gem', { onclick: () => buyChest('silver') }, A.img('i_gem'), E.chests.silver.price.gems))));
       ch.append(h('div.panel.chest.gold',
         A.img('c_gold'), h('div.t', t('chest.gold')),
         h('div.small.goldtxt', t('shop.pity', { n: M.pityLeft() })),
-        h('button.btn.small.gem', { onclick: () => buyChest('gold') }, A.img('i_gem'), E.chests.gold.price.gems),
-        h('button.btn.small.red', { onclick: () => buyChest('gold', true) }, 'x10 ', A.img('i_gem'), U.fmt(E.chests.gold.x10))));
+        h('div.cbtns',
+          h('button.btn.small.red', { onclick: () => buyChest('gold', true) }, 'x10 ', A.img('i_gem'), U.fmt(E.chests.gold.x10)),
+          h('button.btn.small.gem', { onclick: () => buyChest('gold') }, A.img('i_gem'), E.chests.gold.price.gems))));
       root.append(ch);
       root.append(h('div.center', { style: { marginTop: '6px' } }, h('button.btn.tiny.ghost', { onclick: () => ui.openRates() }, t('shop.rates'))));
 
@@ -528,7 +530,7 @@
       E.gemPackOrder.forEach((id) => {
         const p = E.products[id], first = !s.purchases.firstGems[id];
         gp.append(h('div.panel.pack', { onclick: () => DH.iap.buy(id) },
-          h('div.ptags', p.tag ? h('span.tag', t('shop.tag.' + p.tag)) : null, first ? h('span.x2', t('shop.x2')) : null), // stacked inside the card, never cut
+          h('div.ptags', first ? h('span.x2', t('shop.x2')) : null, p.tag ? h('span.tag', t('shop.tag.' + p.tag)) : null), // stacked inside the card, never cut: the red first-purchase tag always on the top row
           h('div', { style: { position: 'relative' } }, A.img('i_gem')),
           h('div.amt', U.fmt(p.gems)),
           p.bonus ? h('div.bonus', t('shop.bonus', { v: p.bonus })) : h('div.bonus', ' '),
