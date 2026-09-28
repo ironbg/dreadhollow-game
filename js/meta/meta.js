@@ -569,9 +569,12 @@
   };
 
   /* ---------------- Vigil (idle rewards) ---------------- */
+  /** The Vigil opens once a hall has been cleared (the first victory); until then nothing piles up. */
+  meta.vigilOpen = () => Object.keys(S().cleared).length > 0;
   meta.vigil = () => {
-    const s = S(), ms = Math.min(E.VIGIL_CAP_MS, Date.now() - s.vigil.ts);
-    const r = E.vigilRates(Object.keys(s.cleared).length), mins = ms / 60000;
+    const s = S(), r = E.vigilRates(Object.keys(s.cleared).length);
+    if (!meta.vigilOpen()) return { ms: 0, gold: 0, xp: 0, full: false, rate: r, locked: true };
+    const ms = Math.min(E.VIGIL_CAP_MS, Date.now() - s.vigil.ts), mins = ms / 60000;
     return { ms, gold: Math.floor(r.goldPerMin * mins), xp: Math.floor(r.xpPerMin * mins), full: ms >= E.VIGIL_CAP_MS, rate: r };
   };
   meta.claimVigil = (double) => {
@@ -580,6 +583,7 @@
     return meta.grant({ gold: v.gold * (double ? 2 : 1), accountXp: v.xp });
   };
   meta.quickVigil = async (mode) => {
+    if (!meta.vigilOpen()) return null;
     const d = meta.ensureDaily();
     if (mode === 'free') { if (!d.quickVigilFree) return null; d.quickVigilFree = false; }
     else if (mode === 'ad') { if (d.ads.vigil >= E.QUICK_VIGIL_ADS) return null; if (!(await DH.ads.rewarded('quick_vigil'))) return null; d.ads.vigil++; }
@@ -662,6 +666,7 @@
     };
     if (r.victory) {
       if (!s.cleared[r.stage]) { res.firstClear = true; res.gems = 150 + st.index * 100; }
+      if (!meta.vigilOpen()) { s.vigil.ts = Date.now(); res.vigilOpened = true; } // the first victory opens the Vigil: it starts from now
       s.cleared[r.stage] = (s.cleared[r.stage] || 0) + 1;
       // boss trophy: one piece of gear, better odds on harder stages
       const odds = st.index === 0 ? [40, 40, 17, 3, 0, 0] : st.index === 1 ? [0, 45, 40, 13, 2, 0] : [0, 10, 50, 32, 7.5, 0.5];

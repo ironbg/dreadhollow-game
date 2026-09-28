@@ -16,7 +16,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'nav.shop': 'Shop', 'nav.armory': 'Armory', 'nav.home': 'Battle', 'nav.shrine': 'Shrine', 'nav.quests': 'Quests',
 
   'home.login': 'Daily', 'home.offer': 'Offer', 'home.freeGems': 'Free', 'home.settings': 'Settings', 'home.pass': 'Pass', 'home.achievements': 'Trophies',
-  'home.power': 'Power', 'home.vigil': 'Vigil Rewards', 'home.vigilFull': 'Storage full! Claim now', 'home.vigilTime': '{t} / {max}h',
+  'home.power': 'Power', 'home.vigilLocked': 'Clear “{hall}” to open the Vigil', 'home.vigil': 'Vigil Rewards', 'home.vigilFull': 'Storage full! Claim now', 'home.vigilTime': '{t} / {max}h',
   'home.best': 'Best {t}', 'home.cleared': 'CLEARED', 'home.lockedStage': 'Clear {name} to unlock', 'home.lockedShort': 'Hall locked',
   'home.battle': 'BATTLE', 'home.energyNext': '+1 torch in {t}', 'home.energyFull': 'Torches full',
 

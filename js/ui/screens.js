@@ -47,11 +47,12 @@
       root.append(h('div.home-top', left, h('div.hero-stage',
         h('div.hero-name', t('hero.' + s.selectedHero + '.name')),
         h('div.power', { onclick: () => ui.go('armory') }, t('home.power'), h('b', U.fmt(M.powerScore())))), right));
-      const vText = h('div.small.muted'), vGold = h('span.num.goldtxt');
-      const vig = h('div.panel.vigil', { onclick: () => { click(); ui.openVigil(); } },
-        A.img('c_wood'), h('div.grow', h('div', { style: { fontWeight: 800 } }, t('home.vigil')), vText), h('div.row', A.img('i_gold'), vGold));
+      const vText = h('div.small.muted'), vGold = h('span.num.goldtxt'), vLocked = !M.vigilOpen();
+      const vig = h('div.panel.vigil' + (vLocked ? '.locked' : ''), { onclick: () => { click(); if (vLocked) ui.toast(t('home.vigilLocked', { hall: t('stage.' + C.stageOrder[0] + '.name') })); else ui.openVigil(); } },
+        A.img('c_wood'), h('div.grow', h('div', { style: { fontWeight: 800 } }, t('home.vigil')), vText), vLocked ? h('div.row', A.img('u_lock')) : h('div.row', A.img('i_gold'), vGold));
       const updVigil = () => {
         const x = M.vigil();
+        if (x.locked) { vText.textContent = t('home.vigilLocked', { hall: t('stage.' + C.stageOrder[0] + '.name') }); return; }
         vText.textContent = x.full ? t('home.vigilFull') : t('home.vigilTime', { t: U.fmtDuration(x.ms), max: 12 });
         vText.className = x.full ? 'small full' : 'small muted';
         vGold.textContent = U.fmt(x.gold);

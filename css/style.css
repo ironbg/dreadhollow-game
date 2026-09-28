@@ -1179,3 +1179,13 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 /* graphics effects: the three-stop slider with its step named beside it */
 .setrow .fxstep { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .setrow .fxname { font-size: 11.5px; line-height: 1.15; color: var(--gold); white-space: nowrap; }
+/* the Vigil before the first victory: dimmed, with a lock where the gold would be */
+.vigil.locked { filter: grayscale(.7); opacity: .72; }
+.vigil.locked .row img, .vigil.locked > img.ic:last-child { width: 22px; height: 22px; }
+/* results: completed deeds wrap under their own text, not under the check mark; each damage bar carries its ability's name */
+.deedsdone .dd { display: flex; align-items: flex-start; gap: 6px; }
+.deedsdone .dd > img { flex: none; margin-top: 2px; }
+.dmgrow .dmgcol { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dmgrow .dn { font-size: 10.5px; line-height: 1.1; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dmgrow .dmgcol .bar { flex: none; }
+.dmgrow img { width: 24px; height: 24px; }

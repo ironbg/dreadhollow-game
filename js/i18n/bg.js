@@ -16,7 +16,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'nav.shop': 'Магазин', 'nav.armory': 'Оръжейна', 'nav.home': 'Битка', 'nav.shrine': 'Светилище', 'nav.quests': 'Мисии',
 
   'home.login': 'Дневни', 'home.offer': 'Оферта', 'home.freeGems': 'Безпл.', 'home.settings': 'Настройки', 'home.pass': 'Пропуск', 'home.achievements': 'Трофеи',
-  'home.power': 'Сила', 'home.vigil': 'Награди от бдението', 'home.vigilFull': 'Хранилището е пълно! Вземи сега', 'home.vigilTime': '{t} / {max} ч',
+  'home.power': 'Сила', 'home.vigilLocked': 'Премини „{hall}“, за да отключиш бдението', 'home.vigil': 'Награди от бдението', 'home.vigilFull': 'Хранилището е пълно! Вземи сега', 'home.vigilTime': '{t} / {max} ч',
   'home.best': 'Рекорд {t}', 'home.cleared': 'ПРЕМИНАТА', 'home.lockedStage': 'Премини {name}, за да отключиш', 'home.lockedShort': 'Залата е заключена',
   'home.battle': 'БИТКА', 'home.energyNext': '+1 факла след {t}', 'home.energyFull': 'Факлите са на максимум',
 

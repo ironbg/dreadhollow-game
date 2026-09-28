@@ -428,13 +428,14 @@
     if (res.gems) extras.push({ icon: 'i_gem', text: '+' + res.gems });
     res.gear.forEach((g) => extras.push({ icon: 'g_' + g.type, text: t('gear.' + g.type), rarity: g.rarity }));
     [sum.wellSent].concat(sum.wellExtra || []).forEach((w) => { if (w) extras.push({ icon: 'g_' + w.type, text: t('well.toKeeper'), rarity: w.rarity }); });
-    for (const k in sum.herbs) extras.push({ icon: 'herb_' + k, text: '+' + sum.herbs[k] });
+    for (const k in sum.herbs) extras.push({ icon: 'herb_' + k, text: t('herb.' + k) + ' ×' + sum.herbs[k] });
     if (res.shards) extras.push({ icon: 'shard', text: '+' + res.shards });
     (res.artifacts || []).forEach((k) => extras.push({ icon: 'a_' + k, text: t('artifact.' + k + '.name'), rarity: 4 }));
     const dblBtn = h('button.btn.ad.shine', { onclick: async () => {
       if (doubled) return;
       if (await DH.ads.rewarded('double_gold')) { doubled = true; DH.meta.doubleRunGold(res); goldEl.textContent = U.fmt(res.gold * 2); dblBtn.classList.add('off'); DH.audio.play('coin'); }
     } }, h('span.adtag', 'AD'), t('results.double'));
+    const hudEl = document.getElementById('hud'); if (hudEl) hudEl.classList.add('hidden'); // the run is over: its bars do not peek over the results
     ui.modal({ closable: false, cls: 'results wide', rays: win, body: (m) => h('div',
       h('div.big.' + (win ? 'win' : 'lose'), win ? t('results.victory') : t('results.defeat')),
       h('div.center.small.muted', t('stage.' + sum.stage + '.name') + (sum.agonyOn ? ' · ' + t('hud.agony') + ' ' + ['0', 'I', 'II', 'III', 'IV', 'V'][sum.agony] : '') + (res.firstClear ? ' · ' + t('results.firstClear') : '')),
@@ -447,9 +448,9 @@
       h('div.goldtotal', A.img('i_gold'), goldEl),
       extras.length ? h('div.reward-list', extras.map((e) => h('div.reward', h('div.slot' + (e.rarity != null ? '.rar' + e.rarity : ''), A.img(e.icon)), h('div.n' + (ui.isWord(e.text) ? '.word' : ''), e.text)))) : null,
       res.secret ? h('div.center.goldtxt', { style: { fontWeight: 800, margin: '6px 0' } }, A.img('u_secret', 'ci'), ' ' + t('results.secret', { n: C.HEX.firstShards })) : null,
-      res.deeds && res.deeds.length ? h('div.deedsdone', h('div.goldtxt', { style: { fontWeight: 800 } }, t('results.deeds', { n: res.deeds.length, x: Math.round(res.deeds.length * DH.deeds.XP_PER_DEED * 1000) / 10 })), res.deeds.slice(0, 6).map((d) => h('div.small', A.img('u_check', 'ci'), ' ' + ui.deedText(d))), res.deeds.length > 6 ? h('div.small.muted', '…') : null) : null,
+      res.deeds && res.deeds.length ? h('div.deedsdone', h('div.goldtxt', { style: { fontWeight: 800 } }, t('results.deeds', { n: res.deeds.length, x: Math.round(res.deeds.length * DH.deeds.XP_PER_DEED * 1000) / 10 })), res.deeds.slice(0, 6).map((d) => h('div.small.dd', A.img('u_check', 'ci'), h('span', ui.deedText(d)))), res.deeds.length > 6 ? h('div.small.muted', '…') : null) : null,
       h('div.center.small.muted', t('results.xp', { a: res.accountXp, p: res.passXp })),
-      dmg.length ? h('div', { style: { marginTop: '10px' } }, dmg.map(([id, v]) => h('div.dmgrow', A.img('ab_' + id), h('div.bar', h('i', { style: { width: (v / maxD * 100) + '%' } })), h('b', U.fmt(v))))) : null,
+      dmg.length ? h('div', { style: { marginTop: '10px' } }, dmg.map(([id, v]) => h('div.dmgrow', A.img('ab_' + id), h('div.dmgcol', h('span.dn', t('ab.' + id + '.name')), h('div.bar', h('i', { style: { width: (v / maxD * 100) + '%' } }))), h('b', U.fmt(v))))) : null,
       h('div.btns', dblBtn, h('button.btn.gold', { onclick: () => { click(); m.close(); DH.game.toMenu(win); } }, t('common.continue')))) });
   };
 })(window.DH);
