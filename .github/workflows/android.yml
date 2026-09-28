@@ -19,6 +19,10 @@ on:
         type: choice
         options: [debug, release]
         default: debug
+      check_only:
+        description: only check that the app builds (a stand-in google-services.json; Google sign-in will not work)
+        type: boolean
+        default: false
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,6 +40,7 @@ jobs:
           GS: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
           if [ -f android/app/google-services.json ]; then echo "using the committed google-services.json"; exit 0; fi
+          if [ "${{ inputs.check_only }}" = "true" ] && [ -z "$GS" ]; then cp tools/google-services.stand-in.json android/app/google-services.json; echo "::warning::stand-in google-services.json: Google sign-in will not work in this build"; exit 0; fi
           if [ -z "$GS" ]; then echo "::error::google-services.json is missing: add the secret GOOGLE_SERVICES_JSON (or commit android/app/google-services.json)"; exit 1; fi
           printf '%s' "$GS" > android/app/google-services.json
           grep -q '"com.dreadhollow.game"' android/app/google-services.json || { echo "::error::google-services.json is not for the package com.dreadhollow.game"; exit 1; }
