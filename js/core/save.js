@@ -75,7 +75,7 @@
     },
     migrate() {
       const d = this.data;
-      // graphics effects in three steps (2 all, 1 fewer, 0 the fewest, no shadows); older profiles had a single switch
+      // graphics effects in three steps (2 High, 1 Medium, 0 Low: no shadows, no dynamic lighting); older profiles had a single switch
       if (d.settings) { const st = d.settings; if (st.fxLevel == null) st.fxLevel = st.lowFx ? 1 : 2; st.lowFx = st.fxLevel < 2; st.minFx = st.fxLevel === 0; }
       // A newer build wrote this profile: keep its version so its migrations never run twice.
       this.newer = d.v > SAVE_VERSION;

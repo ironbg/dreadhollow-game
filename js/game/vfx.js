@@ -4,7 +4,7 @@
  *   - light shafts falling from cracks in the ceiling, with dust dancing inside them
  *   - glowing (additive) particles: spell trails, elemental hit sparks, level-up pillar, elite auras
  *   - flickering torchlight on the hero
- * Everything is cosmetic; the Graphics effects setting thins it out (lowFx: fewer, minFx: the fewest and no shadows). */
+ * Everything is cosmetic; the Graphics effects setting thins it out (lowFx: Medium, minFx: Low, no shadows and no dynamic lighting). */
 (function (DH) {
   'use strict';
   const U = DH.util, A = DH.art, G = DH.gfx;

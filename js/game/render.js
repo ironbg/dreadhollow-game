@@ -214,7 +214,8 @@
     this.drawWeatherGround(g, cx, cy, W, H, lights);
     this.renderFog(g, cx, cy, W, H);
 
-    this.renderLighting(g, lights, cx, cy, W, H);
+    // Low graphics: no dynamic lighting (the dearest pass); a curse of darkness keeps it, the darkness is part of the challenge
+    if (!this.settings.minFx || this.fx_.darkness) this.renderLighting(g, lights, cx, cy, W, H);
     this.renderVfxFront(g, cx, cy, W, H);
     this.drawWeatherSky(g, cx, cy, W, H);
 
