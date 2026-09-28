@@ -136,7 +136,14 @@
       [57, 60, 64, 69, 71].forEach((n, i) => { const f = midi(n); tone({ type: 'sawtooth', f, t: 1.8, vol: 0.05, attack: 0.5, filter: 'lowpass', ff: 400, ff2: 2400, q: 2, rev: true, delay: i * 0.03, detune: (i % 2 ? 6 : -6) }); });
       metal(220, 2.4, 0.08, BELL, { rev: true, delay: 0.35 });
     },
-    hurt() { tone({ type: 'sawtooth', f: 170, f2: 85, t: 0.28, vol: 0.2, filter: 'bandpass', ff: 520, q: 3 }); burst({ t: 0.18, ff: 700, ff2: 120, vol: 0.22 }); },
+    hurt() { // a blow that lands on the body: a dull punch into flesh, a short grunt, sometimes a crack; dry, close, never ringing
+      const k = rnd(0.88, 1.12);
+      tone({ type: 'sine', f: 120 * k, f2: 48, t: 0.2, vol: 0.3 });
+      burst({ t: 0.13, ff: 1100 * k, ff2: 140, vol: 0.3 });
+      tone({ type: 'sawtooth', f: 150 * k, f2: 100 * k, t: 0.17, vol: 0.07, attack: 0.012, filter: 'lowpass', ff: 700, ff2: 300, q: 0.7 });
+      burst({ t: 0.16, filter: 'bandpass', ff: 520 * k, q: 1.2, vol: 0.08, attack: 0.015, delay: 0.01 });
+      if (Math.random() < 0.35) burst({ t: 0.025, filter: 'highpass', ff: 1800, vol: 0.07, delay: 0.005 });
+    },
     swing() { burst({ t: 0.22, filter: 'bandpass', ff: 380, ff2: 1100, q: 1.6, vol: 0.2, attack: 0.05 }); },
     bow() { tone({ type: 'triangle', f: 196, f2: 98, t: 0.16, vol: 0.14 }); burst({ t: 0.12, filter: 'bandpass', ff: 1400, ff2: 500, q: 2, vol: 0.08 }); },
     fire() { burst({ t: 0.4, ff: 900, ff2: 180, vol: 0.22, attack: 0.04 }); for (let i = 0; i < 3; i++) burst({ t: 0.02, filter: 'highpass', ff: 1800, vol: 0.05, delay: rnd(0.02, 0.3) }); },
@@ -182,7 +189,12 @@
       tone({ type: 'sawtooth', f: midi(33), t: 4.5, vol: 0.06, attack: 1, filter: 'lowpass', ff: 300, rev: true });
     },
     heal() { [69, 72, 76].forEach((n, i) => tone({ type: 'sine', f: midi(n), t: 0.9, vol: 0.05, attack: 0.15, rev: true, delay: i * 0.08 })); burst({ t: 0.6, filter: 'bandpass', ff: 2400, q: 2, vol: 0.03, attack: 0.2 }); },
-    block() { metal(rnd(380, 460), 0.5, 0.1, PLATE, { rev: 0.5 }); burst({ t: 0.05, filter: 'highpass', ff: 1500, vol: 0.12 }); },
+    block() { // a blow caught on a shield: a heavy thunk and a short, damped clank that does not ring on
+      const k = rnd(0.9, 1.1);
+      tone({ type: 'sine', f: 170 * k, f2: 90, t: 0.12, vol: 0.2 });
+      burst({ t: 0.07, filter: 'bandpass', ff: 1300 * k, ff2: 500, q: 1.4, vol: 0.18 });
+      metal(rnd(300, 360), 0.09, 0.035, PLATE);
+    },
     reward() { metal(440, 1.6, 0.07, BELL, { rev: true }); metal(660, 1.4, 0.05, BELL, { rev: true, delay: 0.18 }); },
   };
   const MIN_GAP = { block: 0.08, hit: 0.05, xp: 0.04, kill: 0.06, coin: 0.06, swing: 0.07, bow: 0.05, fire: 0.1, throw: 0.07, zap: 0.1, glass: 0.08, boom: 0.1, gun: 0.08, roar: 0.4 };
