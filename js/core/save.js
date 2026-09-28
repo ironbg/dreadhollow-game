@@ -11,7 +11,7 @@
   const newMeta = () => ({ rev: 0, dirty: false, uid: null, syncedAt: 0, device: Math.random().toString(36).slice(2, 10) });
 
   function defaults() {
-    const now = Date.now();
+    const now = DH.util.now();
     return {
       v: SAVE_VERSION,
       created: now,
@@ -115,7 +115,7 @@
         for (const h in by) for (const id in by[h]) if (DH.economy.archive[id]) for (let l = 0; l < by[h][id]; l++) spent += DH.economy.archiveCost(id, l);
         d.shards = (d.shards || 0) + spent;
       }
-      if (!Number.isFinite(d.energy)) { d.energy = 30; d.energyTs = Date.now(); } // repair saves hit by the old run-cost bug
+      if (!Number.isFinite(d.energy)) { d.energy = 30; d.energyTs = DH.util.now(); } // repair saves hit by the old run-cost bug
       if (DH.content && !DH.content.heroes[d.selectedHero]) d.selectedHero = 'knight';
       if (DH.content && !DH.content.stages[d.selectedStage]) d.selectedStage = 'crypt';
       // the Starting Tome quests became gentler: whoever beat the old ones keeps the tome

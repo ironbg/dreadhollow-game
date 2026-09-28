@@ -13,7 +13,9 @@ window.DH = window.DH || {};
     pick: (arr) => arr[Math.floor(Math.random() * arr.length)],
     chance: (p) => Math.random() < p,
     dist2: (ax, ay, bx, by) => { const dx = ax - bx, dy = ay - by; return dx * dx + dy * dy; },
-    now: () => Date.now(),
+    /** The game's clock: the device's, corrected by the web host's when they disagree (DH.live). */
+    clockOffset: 0,
+    now: () => Date.now() + DH.util.clockOffset,
 
     /** Deterministic 2D hash -> [0,1). Used for infinite procedural floors. */
     hash2(x, y, seed) {
@@ -59,11 +61,11 @@ window.DH = window.DH || {};
 
     /** Local calendar day key, used for daily resets. */
     dayKey(ts) {
-      const d = ts ? new Date(ts) : new Date();
+      const d = new Date(ts || DH.util.now());
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     },
     msToMidnight() {
-      const d = new Date(); const m = new Date(d); m.setHours(24, 0, 0, 0); return m - d;
+      const d = new Date(DH.util.now()); const m = new Date(d); m.setHours(24, 0, 0, 0); return m - d;
     },
     daysBetween(k1, k2) {
       const a = new Date(k1 + 'T00:00:00'), b = new Date(k2 + 'T00:00:00');
@@ -134,9 +136,11 @@ window.DH = window.DH || {};
   DH.events = {
     on(ev, fn) { (listeners[ev] = listeners[ev] || []).push(fn); return () => this.off(ev, fn); },
     off(ev, fn) { const l = listeners[ev]; if (l) { const i = l.indexOf(fn); if (i >= 0) l.splice(i, 1); } },
+    /** Called on the next emit only. */
+    once(ev, fn) { const w = (d) => { this.off(ev, w); fn(d); }; return this.on(ev, w); },
     emit(ev, data) { (listeners[ev] || []).slice().forEach((fn) => { try { fn(data); } catch (e) { console.error(e); } }); },
   };
 
   DH.util = U;
-  DH.VERSION = '1.60.62';
+  DH.VERSION = '1.60.63';
 })(window.DH);

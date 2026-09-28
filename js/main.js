@@ -42,6 +42,7 @@
       ui.show(true);
       DH.audio.music('menu'); DH.audio.ambience(DH.save.data.selectedStage);
       ui.flushLevelUps();
+      DH.events.emit('menu'); // back in the menus: anything held during the fight (a version notice) shows now
       const s = DH.save.data;
       if (s.runsSinceAd >= E.INTERSTITIAL_EVERY && !s.purchases.noAds) {
         s.runsSinceAd = 0; DH.save.persist();
@@ -127,6 +128,7 @@
     setTimeout(() => bootEl.remove(), 650);
     requestAnimationFrame(frame);
     DH.cloud.init();
+    DH.live.init(); // versions, events and the real date from the web host
     // the title screen first; the daily calendar waits until the player has come through the window
     DH.title.show(() => {
       const calendar = () => { if (M.loginPending()) setTimeout(() => ui.openLogin(), 500); };

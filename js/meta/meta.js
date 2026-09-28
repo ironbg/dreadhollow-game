@@ -27,7 +27,8 @@
 
   /* ---------------- Energy ---------------- */
   meta.energy = () => {
-    const s = S(), now = Date.now();
+    const s = S(), now = U.now();
+    if (s.energyTs > now) s.energyTs = now; // written while the clock ran ahead
     if (s.energy >= E.ENERGY_MAX) return s.energy; // the regen clock restarts in useEnergy when it drops below full
     const gained = Math.floor((now - s.energyTs) / E.ENERGY_REGEN_MS);
     if (gained > 0) {
@@ -39,9 +40,9 @@
   };
   meta.energyNextMs = () => {
     const s = S(); if (meta.energy() >= E.ENERGY_MAX) return 0;
-    return E.ENERGY_REGEN_MS - (Date.now() - s.energyTs);
+    return E.ENERGY_REGEN_MS - (U.now() - s.energyTs);
   };
-  meta.useEnergy = (n) => { if (meta.energy() < n) return false; S().energy -= n; if (S().energy < E.ENERGY_MAX && S().energy + n >= E.ENERGY_MAX) S().energyTs = Date.now(); changed(); return true; };
+  meta.useEnergy = (n) => { if (meta.energy() < n) return false; S().energy -= n; if (S().energy < E.ENERGY_MAX && S().energy + n >= E.ENERGY_MAX) S().energyTs = U.now(); changed(); return true; };
   meta.addEnergy = (n) => { meta.energy(); S().energy += n; changed(); };
 
   /* ---------------- Rewards ---------------- */
@@ -420,7 +421,7 @@
         case 'shardsRun': ok = r && r.stage === c.stage && (r.shards || 0) >= c.n; break;
         default: break;
       }
-      if (ok) { s.deeds[d.id] = Date.now(); if (d.gold) s.gold += d.gold; done.push(d); }
+      if (ok) { s.deeds[d.id] = U.now(); if (d.gold) s.gold += d.gold; done.push(d); }
     }
     if (done.length) changed();
     return done;
@@ -453,7 +454,7 @@
     if (!meta.spend(price)) return null;
     return meta.openChestContents(type, x10 ? 10 : 1);
   };
-  meta.freeChestReadyIn = () => Math.max(0, S().freeChestTs + E.chests.wood.adEveryMs - Date.now());
+  meta.freeChestReadyIn = () => Math.max(0, S().freeChestTs + E.chests.wood.adEveryMs - U.now());
   meta.pityLeft = () => E.chests.gold.pity - S().chestPity;
 
   /* ---------------- Daily state ---------------- */
@@ -574,12 +575,12 @@
   meta.vigil = () => {
     const s = S(), r = E.vigilRates(Object.keys(s.cleared).length);
     if (!meta.vigilOpen()) return { ms: 0, gold: 0, xp: 0, full: false, rate: r, locked: true };
-    const ms = Math.min(E.VIGIL_CAP_MS, Date.now() - s.vigil.ts), mins = ms / 60000;
+    const ms = Math.max(0, Math.min(E.VIGIL_CAP_MS, U.now() - s.vigil.ts)), mins = ms / 60000;
     return { ms, gold: Math.floor(r.goldPerMin * mins), xp: Math.floor(r.xpPerMin * mins), full: ms >= E.VIGIL_CAP_MS, rate: r };
   };
   meta.claimVigil = (double) => {
     const v = meta.vigil(); if (v.gold <= 0) return null;
-    S().vigil.ts = Date.now();
+    S().vigil.ts = U.now();
     return meta.grant({ gold: v.gold * (double ? 2 : 1), accountXp: v.xp });
   };
   meta.quickVigil = async (mode) => {
@@ -605,7 +606,7 @@
     else if (p.type === 'noads') { s.purchases.noAds = true; out = [{ icon: 'n_ad', text: t('product.noads') }]; }
     else if (p.type === 'pass') { s.pass.premium = true; out = [{ icon: 'n_pass', text: t('pass.premiumOn') }]; }
     else if (p.type === 'sub') {
-      s.purchases.soulUntil = Math.max(Date.now(), s.purchases.soulUntil) + p.days * 86400e3;
+      s.purchases.soulUntil = Math.max(U.now(), s.purchases.soulUntil) + p.days * 86400e3;
       out = meta.grant(p.grant);
     }
     if (p.once) s.purchases.once[id] = true;
@@ -614,7 +615,7 @@
     if (!silent) { DH.audio.play('buy'); DH.ui.rewardPopup(t('iap.thanks'), out); }
     return out;
   };
-  meta.soulCardActive = () => S().purchases.soulUntil > Date.now();
+  meta.soulCardActive = () => S().purchases.soulUntil > U.now();
   meta.soulCardClaimable = () => meta.soulCardActive() && S().purchases.soulLastDay !== U.dayKey();
   meta.claimSoulCard = () => {
     if (!meta.soulCardClaimable()) return null;
@@ -647,7 +648,7 @@
   meta.freeChestAd = async () => {
     if (meta.freeChestReadyIn() > 0) return null;
     if (!(await DH.ads.rewarded('free_chest'))) return null;
-    S().freeChestTs = Date.now();
+    S().freeChestTs = U.now();
     return meta.openChestContents('wood', 1);
   };
 
@@ -666,7 +667,7 @@
     };
     if (r.victory) {
       if (!s.cleared[r.stage]) { res.firstClear = true; res.gems = 150 + st.index * 100; }
-      if (!meta.vigilOpen()) { s.vigil.ts = Date.now(); res.vigilOpened = true; } // the first victory opens the Vigil: it starts from now
+      if (!meta.vigilOpen()) { s.vigil.ts = U.now(); res.vigilOpened = true; } // the first victory opens the Vigil: it starts from now
       s.cleared[r.stage] = (s.cleared[r.stage] || 0) + 1;
       // boss trophy: one piece of gear, better odds on harder stages
       const odds = st.index === 0 ? [40, 40, 17, 3, 0, 0] : st.index === 1 ? [0, 45, 40, 13, 2, 0] : [0, 10, 50, 32, 7.5, 0.5];
@@ -677,10 +678,10 @@
     s.stats.championKills += r.championKills || 0; s.stats.tomes += r.tomes || 0;
     s.stats.oozes += r.oozes || 0;
     res.shards = r.shards || 0;
-    if (r.hexed && !s.secrets[r.stage]) { s.secrets[r.stage] = Date.now(); s.stats.secrets++; res.secret = true; res.shards += C.HEX.firstShards; }
+    if (r.hexed && !s.secrets[r.stage]) { s.secrets[r.stage] = U.now(); s.stats.secrets++; res.secret = true; res.shards += C.HEX.firstShards; }
     s.shards += res.shards; s.stats.shardsEarned += res.shards;
     res.artifacts = (r.artifactsFound || []).filter((k) => !s.artifactsOwned[k]);
-    res.artifacts.forEach((k) => { s.artifactsOwned[k] = Date.now(); });
+    res.artifacts.forEach((k) => { s.artifactsOwned[k] = U.now(); });
     for (const k in r.dmgByAb) if (C.abilities[k]) s.stats.abDmg[k] = (s.stats.abDmg[k] || 0) + Math.round(r.dmgByAb[k]);
     for (const k in r.herbs) s.herbs[k] = (s.herbs[k] || 0) + r.herbs[k];
     for (const k in r.potionsUsed) s.potions[k] = Math.max(0, (s.potions[k] || 0) - r.potionsUsed[k]);
@@ -718,7 +719,7 @@
   };
   /** Which night it is (1 on the first day); nights past the seventh only leave time to claim. */
   meta.nbDay = () => U.daysBetween(meta.newbie().start, U.dayKey()) + 1;
-  meta.nbEndsIn = () => { const d = new Date(meta.newbie().start + 'T00:00:00'); d.setDate(d.getDate() + NB.lengthDays); return Math.max(0, d - Date.now()); };
+  meta.nbEndsIn = () => { const d = new Date(meta.newbie().start + 'T00:00:00'); d.setDate(d.getDate() + NB.lengthDays); return Math.max(0, d - U.now()); };
   meta.nbTaskId = (night, i) => 'n' + night + '_' + i;
   meta.nbSeals = () => { const c = meta.newbie().claimed; let n = 0; NB.tasks.forEach((list, d) => list.forEach((tk, i) => { if (c[meta.nbTaskId(d + 1, i)]) n += tk.s; })); return n; };
   /** What a task counts, from everything done so far. */
@@ -749,11 +750,11 @@
   const sealEntry = (n) => ({ icon: 'u_seal', text: '+' + n, kind: 'seals' });
   meta.nbClaimTask = (night, i) => {
     const x = meta.nbTask(night, i); if (!x.open || !x.done || x.claimed) return null;
-    meta.newbie().claimed[x.id] = Date.now();
+    meta.newbie().claimed[x.id] = U.now();
     return [sealEntry(x.tk.s)].concat(meta.grant(x.tk.r));
   };
   meta.nbMilestoneReady = (i) => !meta.newbie().ms[i] && meta.nbSeals() >= NB.milestones[i].at && meta.nbDay() <= NB.lengthDays;
-  meta.nbClaimMilestone = (i) => { if (!meta.nbMilestoneReady(i)) return null; meta.newbie().ms[i] = Date.now(); return meta.grant(NB.milestones[i].r); };
+  meta.nbClaimMilestone = (i) => { if (!meta.nbMilestoneReady(i)) return null; meta.newbie().ms[i] = U.now(); return meta.grant(NB.milestones[i].r); };
   /** Tasks and track rewards waiting to be claimed. */
   meta.nbClaimable = (night) => {
     let n = 0;

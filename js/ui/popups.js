@@ -322,7 +322,7 @@
       m.set(h('div',
         h('div.nb-head', h('div.nb-medal', A.img('u_seal'), h('b', seals)), h('div.grow', h('div.small', t('nb.sub')), h('div.small.goldtxt', t('nb.ends', { t: ui.fmtDays(ends) })))),
         track, days,
-        night > M.nbDay() ? h('div.center.small.muted', { style: { margin: '6px 0' } }, t('nb.opens', { n: night, t: ui.fmtDays(Math.max(0, new Date(nb.start + 'T00:00:00').getTime() + (night - 1) * 86400000 - Date.now())) })) : null,
+        night > M.nbDay() ? h('div.center.small.muted', { style: { margin: '6px 0' } }, t('nb.opens', { n: night, t: ui.fmtDays(Math.max(0, new Date(nb.start + 'T00:00:00').getTime() + (night - 1) * 86400000 - U.now())) })) : null,
         list));
     };
     draw();
@@ -468,6 +468,24 @@
       h('div.center.goldtxt', { style: { fontWeight: 800, fontSize: '18px' } }, t('shop.value', { v: p.value + '%' })),
       h('div.btns', h('button.btn.gold.big.shine', { onclick: async () => { if (await DH.iap.buy('starter')) m.close(); } }, DH.iap.price('starter')))) });
   };
+
+  /* ---------------- Game versions (DH.live) ---------------- */
+  // never over a fight: a notice that arrives mid-run waits for the menus
+  const whenInMenus = (fn) => { if (DH.game && DH.game.mode === 'run') DH.events.once('menu', fn); else fn(); };
+  let forced = null;
+  /** Too old to play on: one window, no way past it, that takes the player to the new version. */
+  ui.forceUpdate = (r) => whenInMenus(() => {
+    if (forced && !forced.closed) return;
+    forced = ui.modal({ title: t('update.title'), closable: false, body: h('div',
+      h('div.center', { style: { lineHeight: '1.5', margin: '4px 0 14px' } }, t(DH.platform.native ? 'update.requiredApp' : 'update.required')),
+      h('div.btns', h('button.btn.gold', { onclick: () => DH.live.update(r) }, t('update.now')))) });
+  });
+  /** A newer version is out: say so once, and let the player carry on. */
+  ui.newVersion = (r) => whenInMenus(() => {
+    const m = ui.modal({ title: t('update.newTitle'), body: h('div',
+      h('div.center', { style: { lineHeight: '1.5', margin: '4px 0 14px' } }, t(DH.platform.native ? 'update.newApp' : 'update.newWeb')),
+      h('div.btns', h('button.btn.ghost', { onclick: () => m.close() }, t('update.later')), h('button.btn.gold', { onclick: () => DH.live.update(r) }, t('update.now')))) });
+  });
 
   /* ---------------- Account level up ---------------- */
   ui.flushLevelUps = () => {

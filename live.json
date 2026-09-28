@@ -1,0 +1,6 @@
+{
+  "_about": "Live settings read by every copy of the game at start and on return to the app. Edit, commit and push: the web version publishes it within minutes and the app reads it from there, no store update needed. web.latest is filled in by tools/build-www.js from package.json.",
+  "web": { "min": "1.60.0" },
+  "app": { "min": "0.0.0", "latest": "0.0.0", "store": "https://play.google.com/store/apps/details?id=com.dreadhollow.game" },
+  "events": []
+}

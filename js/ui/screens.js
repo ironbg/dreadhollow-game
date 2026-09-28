@@ -475,7 +475,7 @@
       root.append(h('h3.sect', { id: 'shop-offers' }, t('shop.offers')));
       if (!s.purchases.once.starter) root.append(offerCard('starter', 'offer', t('shop.starterDesc'), '-80%'));
       if (M.soulCardActive()) {
-        const left = Math.ceil((s.purchases.soulUntil - Date.now()) / 86400e3);
+        const left = Math.ceil((s.purchases.soulUntil - U.now()) / 86400e3);
         root.append(h('div.panel.offer.blue', { style: { marginTop: '8px' } },
           h('div.ot', t('product.soulcard')), h('div.small', t('shop.soulActive', { d: left })),
           h('div.contents', M.rewardPreview(E.products.soulcard.daily).map(ui.rw)),
