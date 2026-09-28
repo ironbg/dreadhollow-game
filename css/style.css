@@ -1,4 +1,5 @@
 /* ===================== Fonts (bundled for offline / app builds) ===================== */
+@font-face { font-family: 'Unifraktur'; src: url('../assets/fonts/unifrakturmaguntia-latin-400-normal.woff2') format('woff2'); font-display: block; }
 @font-face { font-family: 'Cinzel'; src: url('../assets/fonts/cinzel-latin-700-normal.woff2') format('woff2'); font-weight: 700; font-display: swap; }
 @font-face { font-family: 'Alegreya Sans'; src: url('../assets/fonts/alegreya-sans-latin-500-normal.woff2') format('woff2'); size-adjust: 108%; font-weight: 500; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: 'Alegreya Sans'; src: url('../assets/fonts/alegreya-sans-cyrillic-500-normal.woff2') format('woff2'); size-adjust: 108%; font-weight: 500; font-display: swap; unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
@@ -46,12 +47,14 @@ img.px, .px { image-rendering: pixelated; image-rendering: crisp-edges; }
 #game { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 
 /* ===================== Boot ===================== */
-#boot { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(ellipse at 50% 40%, #2a1420 0%, #0a070d 70%); z-index: 100; transition: opacity .6s; }
-#boot .logo { font-family: var(--title); font-size: clamp(34px, 10vw, 64px); letter-spacing: .08em; color: var(--gold); text-shadow: 0 0 24px rgba(226,56,74,.6), 0 3px 0 #3a0a10; }
-#boot .sub { color: var(--muted); margin-top: 8px; letter-spacing: .3em; text-transform: uppercase; font-size: 12px; }
+#boot { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(ellipse at 50% 40%, #1a0e14 0%, #07050a 70%); z-index: 100; transition: opacity .6s; }
+#boot .logo { font-family: 'Unifraktur', var(--title); font-size: clamp(52px, 16vw, 92px); line-height: 1; letter-spacing: .01em; color: #f0c860; background: linear-gradient(180deg, #fff6c8 0%, #f4cc58 38%, #c8902c 62%, #7a5214 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 3px 0 #1a0406) drop-shadow(0 0 1px #000) drop-shadow(0 0 18px rgba(226,56,74,.55)); }
+#boot .sub { font-family: var(--title); color: #d8c8a8; margin-top: 6px; letter-spacing: .34em; text-transform: uppercase; font-size: 12px; text-shadow: 0 2px 0 #000, 0 0 10px rgba(0,0,0,.9); display: flex; align-items: center; gap: 10px; }
+#boot .sub::before, #boot .sub::after { content: ''; width: 34px; height: 1px; background: linear-gradient(90deg, transparent, #c8902c); }
+#boot .sub::after { transform: scaleX(-1); }
 #boot .emblem { width: clamp(96px, 30vw, 150px); height: auto; margin-bottom: 14px; border-radius: 22%; box-shadow: 0 0 0 2px #050308, 0 0 0 3px #8a6a2a, 0 10px 30px rgba(0,0,0,.7); filter: drop-shadow(0 0 18px rgba(226,56,74,.35)); animation: bootpulse 2.4s infinite ease-in-out; }
 @keyframes bootpulse { 0%,100% { filter: drop-shadow(0 0 14px rgba(226,56,74,.25)); } 50% { filter: drop-shadow(0 0 26px rgba(226,56,74,.55)); } }
-#boot::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(180deg, transparent, rgba(90,10,20,.25)); pointer-events: none; }
+#boot::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(180deg, transparent 70%, rgba(90,10,20,.25)), url('../assets/boot-bg.svg') center / auto 100% no-repeat; }
 #boot .bar { width: 200px; height: 8px; background: #140c12; margin-top: 28px; border: 2px solid #050308; box-shadow: 0 0 0 1px #8a6a2a, inset 0 0 4px #000; border-radius: 0; overflow: hidden; }
 #boot .bar i { display: block; height: 100%; width: 30%; background: var(--blood-hi); animation: load 1.2s infinite ease-in-out; }
 @keyframes load { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
@@ -966,3 +969,5 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .modal > .mhead::after { right: -4px; top: 0; background: var(--corner-tr, none) 0 0 / 26px 26px no-repeat; }
 .modal > .mfoot::before { left: -4px; bottom: 0; background: var(--corner-bl, none) 0 0 / 26px 26px no-repeat; }
 .modal > .mfoot::after { right: -4px; bottom: 0; background: var(--corner-br, none) 0 0 / 26px 26px no-repeat; }
+/* on a wide screen the cathedral is fitted to the height; a dim, blurred copy of it fills the sides */
+#boot::before { content: ''; position: absolute; inset: -20px; z-index: -1; background: url('../assets/boot-bg.svg') center / cover no-repeat; filter: blur(12px) brightness(.4); }
