@@ -133,6 +133,7 @@
     setInterval(() => { const d = DH.util.dayKey(); if (d !== day) { day = d; M.ensureDaily(); DH.events.emit('meta'); } }, 30000);
   }
 
-  const fontsReady = document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();
+  // the canvas draws damage numbers in DHNum, which no element may have asked for yet
+  const fontsReady = document.fonts && document.fonts.ready ? Promise.race([Promise.all([document.fonts.load('800 12px DHNum').catch(() => {}), document.fonts.ready]), new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve();
   window.addEventListener('load', () => { fontsReady.then(boot).catch((e) => console.error('boot failed', e)); });
 })(window.DH);

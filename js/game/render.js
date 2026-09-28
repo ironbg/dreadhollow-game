@@ -818,8 +818,8 @@
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
     for (const x of this.texts) {
       const a = Math.min(1, x.life / x.max * 2), pop = 1 + Math.max(0, (x.life / x.max) - 0.8) * 2;
-      const size = Math.round((x.big ? 7 : 5) * S * pop * 0.5) * 2;
-      ctx.font = size + 'px "PressStart", monospace'; ctx.globalAlpha = a;
+      const size = Math.round((x.big ? 9 : 6.5) * S * pop * 0.5) * 2;
+      ctx.font = '800 ' + size + 'px "DHNum", "Alegreya Sans", sans-serif'; ctx.globalAlpha = a;
       ctx.lineWidth = Math.max(2, S * 1.2); ctx.strokeStyle = '#0b0610';
       const sx = (x.x - cx) * S, sy = (x.y - cy) * S;
       ctx.strokeText(x.str, sx, sy); ctx.fillStyle = x.c; ctx.fillText(x.str, sx, sy);
@@ -854,7 +854,7 @@
       }
       // distance, on the side facing the hero
       const txt = Math.max(1, Math.round(m.dist / C.UNITS_PER_M)) + 'm', size = Math.max(10, Math.round(3.2 * u) * 2);
-      ctx.font = size + 'px "PressStart", monospace';
+      ctx.font = '800 ' + size + 'px "DHNum", "Alegreya Sans", sans-serif';
       const half = ctx.measureText(txt).width / 2, tx = x - Math.cos(m.a) * (r + 3 * u + half), ty = y - Math.sin(m.a) * (r + 7 * u); ctx.lineWidth = Math.max(2, u * 1.1); ctx.strokeStyle = '#0b0610';
       ctx.strokeText(txt, tx, ty); ctx.fillStyle = '#f2e6c8'; ctx.fillText(txt, tx, ty);
     }

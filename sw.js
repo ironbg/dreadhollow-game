@@ -1,5 +1,5 @@
 /* Offline cache (PWA). Bump CACHE when shipping new files. */
-const CACHE = 'dreadhollow-v150';
+const CACHE = 'dreadhollow-v151';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css', 'assets/icon.svg', 'assets/boot-bg.svg', 'assets/fonts/unifrakturmaguntia-latin-400-normal.woff2',
   'js/core/ns.js', 'js/i18n/i18n.js', 'js/i18n/en.js', 'js/i18n/bg.js', 'js/data/content.js', 'js/data/economy.js', 'js/data/artifacts.js', 'js/data/deeds.js',
@@ -10,7 +10,6 @@ const FILES = [
   'js/ui/ui.js', 'js/ui/screens.js', 'js/ui/popups.js', 'js/ui/runui.js', 'js/ui/menuscene.js', 'js/main.js',
   'assets/fonts/cinzel-latin-700-normal.woff2', 'assets/fonts/alegreya-sans-latin-500-normal.woff2', 'assets/fonts/alegreya-sans-latin-800-normal.woff2',
   'assets/fonts/alegreya-sans-cyrillic-500-normal.woff2', 'assets/fonts/alegreya-sans-cyrillic-800-normal.woff2',
-  'assets/fonts/press-start-2p-latin-400-normal.woff2', 'assets/fonts/press-start-2p-cyrillic-400-normal.woff2',
 ];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => {
