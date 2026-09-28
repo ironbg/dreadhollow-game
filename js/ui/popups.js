@@ -96,6 +96,7 @@
   /* ---------------- Account + cloud save ---------------- */
   const cloudErrText = (code) => t(DH.i18n.has('cloud.err.' + code) ? 'cloud.err.' + code : 'cloud.err.network');
   const cloudErr = (e) => ui.toast(cloudErrText(e && e.code), 'bad');
+  ui.cloudErr = cloudErr;
   /** Run an account action with the buttons locked; errors become a toast. */
   const act = async (btns, fn) => {
     btns.forEach((b) => { b.disabled = true; });

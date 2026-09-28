@@ -169,6 +169,10 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
 
   'device.android': 'Android', 'device.ios': 'iPhone / iPad', 'device.windows': 'Windows', 'device.mac': 'Mac', 'device.linux': 'Linux', 'device.web': 'Устройство',
   'device.app': 'приложение', 'device.browser': 'браузър',
+  'title.guest': 'Играй като гост', 'title.or': 'или влез, за да пазиш прогреса си', 'title.tap': 'Докосни, за да влезеш',
+  'title.guestNote': 'Като гост прогресът ти остава само на това устройство. Можеш да влезеш по-късно от Настройките.',
+  'title.asGuest': 'Играеш като гост', 'title.signedAs': 'Влязъл като {name}', 'title.change': 'Смени', 'title.signIn': 'Влез',
+  'title.terms': 'Условия за ползване', 'title.privacy': 'Поверителност', 'title.support': 'Поддръжка',
   'cloud.title': 'Акаунт и облачен запис', 'cloud.account': 'Акаунт и облачен запис', 'cloud.signInSave': 'Влез, за да запазиш прогреса',
   'cloud.why': 'Влез, за да пазиш прогреса си в облака и да продължаваш на телефона или в браузъра на компютъра.',
   'cloud.google': 'Вход с Google', 'cloud.emailSignIn': 'Вход с имейл', 'cloud.emailSignUp': 'Регистрация с имейл',

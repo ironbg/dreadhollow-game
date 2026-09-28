@@ -330,6 +330,13 @@
       for (let i = 0; i < n; i++) metal(rnd(950, 1400), 0.14, 0.035, PLATE, { delay: i * rnd(0.035, 0.07) });
       thud(120, 0.15, 0.12, { delay: n * 0.05 + 0.04 });
     },
+    enter() { // through the title into the halls: a great door's boom, a choir rising with a rush of air, a bell as the light breaks
+      const H = curHall(), k = H.root - 57;
+      thud(52, 0.9, 0.34); burst({ t: 0.6, ff: 500, ff2: 60, vol: 0.2, rev: 0.8 });
+      [45, 52, 57, 60, 64].forEach((n, i) => tone({ type: 'sawtooth', f: midi(n + k), t: 1.9, vol: 0.04, attack: 1.1, filter: 'lowpass', ff: 300, ff2: 2600, q: 2, detune: (i % 2 ? 7 : -7), rev: true, delay: 0.1 }));
+      burst({ t: 1.6, filter: 'bandpass', ff: 250, ff2: 3200, q: 1.2, vol: 0.16, attack: 1.3, delay: 0.1 });
+      metal(midi(H.toll + 12), 3.2, 0.09, BELL, { rev: true, delay: 1.6 }); thud(46, 0.8, 0.3, { delay: 1.6 });
+    },
     page() { // turning to another screen: a leaf of parchment turned over
       burst({ t: 0.13, filter: 'bandpass', ff: 1900, ff2: 700, q: 1.5, vol: 0.07, attack: 0.03 });
       thud(130, 0.06, 0.04, { delay: 0.08 });
@@ -435,7 +442,7 @@
       burst({ t: 0.18, filter: 'highpass', ff: 3000, ff2: 1500, vol: 0.05 });
     },
   };
-  const MIN_GAP = { block: 0.08, hit: 0.05, xp: 0.04, page: 0.1, open: 0.15, close: 0.15, herb: 0.08, eat: 0.2, rune: 0.3, kill: 0.06, coin: 0.06, swing: 0.07, bow: 0.05, fire: 0.1, throw: 0.07, zap: 0.1, glass: 0.08, boom: 0.1, gun: 0.08, roar: 0.4,
+  const MIN_GAP = { block: 0.08, hit: 0.05, xp: 0.04, enter: 2, page: 0.1, open: 0.15, close: 0.15, herb: 0.08, eat: 0.2, rune: 0.3, kill: 0.06, coin: 0.06, swing: 0.07, bow: 0.05, fire: 0.1, throw: 0.07, zap: 0.1, glass: 0.08, boom: 0.1, gun: 0.08, roar: 0.4,
     wisp: 0.08, arcane: 0.2, blood: 0.3, flask: 0.08, hex: 0.08, blade: 0.08, dart: 0.05, phantom: 0.6, punch: 0.07, storm: 0.1, axe: 0.1, plague: 0.1, deathwall: 0.8, thorns: 0.12, prism: 0.1 };
 
   /* ---------------- Music ---------------- */

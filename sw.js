@@ -1,5 +1,5 @@
 /* Offline cache (PWA). Bump CACHE when shipping new files. */
-const CACHE = 'dreadhollow-v159';
+const CACHE = 'dreadhollow-v160';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css', 'assets/icon.svg', 'assets/boot-bg.svg', 'assets/fonts/unifrakturmaguntia-latin-400-normal.woff2',
   'js/core/ns.js', 'js/i18n/i18n.js', 'js/i18n/en.js', 'js/i18n/bg.js', 'js/data/content.js', 'js/data/economy.js', 'js/data/artifacts.js', 'js/data/deeds.js',
@@ -7,7 +7,7 @@ const FILES = [
   'js/core/audio.js', 'js/core/input.js', 'js/core/platform.js', 'js/core/save.js', 'js/services/ads.js', 'js/services/iap.js', 'js/services/review.js', 'js/services/firebase.js', 'js/services/cloud.js',
   'js/vendor/firebase/firebase-app.js', 'js/vendor/firebase/firebase-auth.js', 'js/vendor/firebase/firebase-firestore-lite.js',
   'js/meta/meta.js', 'js/game/view.js', 'js/game/run.js', 'js/game/combat.js', 'js/game/abilities.js', 'js/game/bosses.js', 'js/game/render.js', 'js/game/vfx.js', 'js/game/artifacts.js', 'js/game/halls.js', 'js/game/secrets.js', 'js/game/hazards.js', 'js/game/landmarks.js', 'js/game/weather.js',
-  'js/ui/ui.js', 'js/ui/screens.js', 'js/ui/popups.js', 'js/ui/runui.js', 'js/ui/menuscene.js', 'js/main.js',
+  'js/ui/ui.js', 'js/ui/screens.js', 'js/ui/popups.js', 'js/ui/runui.js', 'js/ui/menuscene.js', 'js/ui/title.js', 'js/main.js',
   'assets/fonts/cinzel-latin-700-normal.woff2', 'assets/fonts/alegreya-sans-latin-500-normal.woff2', 'assets/fonts/alegreya-sans-latin-800-normal.woff2',
   'assets/fonts/alegreya-sans-cyrillic-500-normal.woff2', 'assets/fonts/alegreya-sans-cyrillic-800-normal.woff2',
 ];

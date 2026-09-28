@@ -126,8 +126,9 @@
     bootEl.style.opacity = '0';
     setTimeout(() => bootEl.remove(), 650);
     requestAnimationFrame(frame);
-    if (M.loginPending()) setTimeout(() => ui.openLogin(), 700);
     DH.cloud.init();
+    // the title screen first; the daily calendar waits until the player has come through the window
+    DH.title.show(() => { if (M.loginPending()) setTimeout(() => ui.openLogin(), 900); });
     // daily rollover while the app stays open
     let day = DH.util.dayKey();
     setInterval(() => { const d = DH.util.dayKey(); if (d !== day) { day = d; M.ensureDaily(); DH.events.emit('meta'); } }, 30000);

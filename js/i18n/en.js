@@ -169,6 +169,10 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
 
   'device.android': 'Android', 'device.ios': 'iPhone / iPad', 'device.windows': 'Windows', 'device.mac': 'Mac', 'device.linux': 'Linux', 'device.web': 'Device',
   'device.app': 'app', 'device.browser': 'browser',
+  'title.guest': 'Play as Guest', 'title.or': 'or sign in to keep your progress', 'title.tap': 'Tap to enter',
+  'title.guestNote': 'As a guest your progress stays on this device. You can sign in later from Settings.',
+  'title.asGuest': 'Playing as a guest', 'title.signedAs': 'Signed in as {name}', 'title.change': 'Change', 'title.signIn': 'Sign in',
+  'title.terms': 'Terms of Service', 'title.privacy': 'Privacy Policy', 'title.support': 'Support',
   'cloud.title': 'Account & cloud save', 'cloud.account': 'Account & cloud save', 'cloud.signInSave': 'Sign in to save progress',
   'cloud.why': 'Sign in to keep your progress safe in the cloud and continue on your phone or in a browser on your computer.',
   'cloud.google': 'Sign in with Google', 'cloud.emailSignIn': 'Sign in with email', 'cloud.emailSignUp': 'Create account with email',
