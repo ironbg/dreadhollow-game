@@ -147,7 +147,7 @@
     } });
 
   /* ---------- Archdemon: a hulking horned fiend, lava in its veins, fire in its maw ---------- */
-  def('demon', { w: 60, h: 52, frames: 2,
+  def('demon', { w: 60, h: 52, grow: [4, 8, 5, 0], frames: 2,
     colors: { skin: '#8a1a22', wing: '#3a0a10', eye: '#ffc030', horn: '#241410' },
     variants: { purple: { skin: '#5e1a78', wing: '#26082e', eye: '#ff80ff', horn: '#140a14' } },
     draw(g, f, c) {
@@ -450,7 +450,7 @@
     } });
 
   /* ---------- Wyrm Matriarch: a dragon — serpent neck, open jaws full of fire, torn wings, spiked tail ---------- */
-  def('wyrm', { w: 66, h: 50, frames: 2,
+  def('wyrm', { w: 66, h: 50, grow: [3, 14, 0, 0], frames: 2,
     colors: { scale: '#6a1e14', belly: '#c8864a', wing: '#3e100c', eye: '#ffd040' },
     variants: { ice: { scale: '#2a5480', belly: '#b4d8ec', wing: '#142c48', eye: '#ffffff' }, bog: { scale: '#2e4a22', belly: '#a8a868', wing: '#1a2a12', eye: '#d0ff40' } },
     draw(g, f, c) {

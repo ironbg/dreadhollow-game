@@ -55,7 +55,7 @@
     } });
 
   /* ---------- Grave Chieftain (boss): a hulking corpse-giant with a bare skull for a head, a tombstone hammer on its shoulder ---------- */
-  def('gravechief', { w: 52, h: 50, cy: 30, frames: 2,
+  def('gravechief', { w: 52, h: 50, cy: 30, grow: [3, 0, 0, 0], frames: 2,
     colors: { skin: '#8e6c68', rag: '#3a2e26', eye: '#ff5a2a', stone: '#9a9aa4' },
     draw(g, f, c) {
       // three masses: a huge hunched ribcage, a small pelvis, a skull slung low and forward; rot has opened the belly to the ribs
@@ -1600,7 +1600,7 @@
   /* ---------- Lord of Rot (boss): a tall gaunt king of the mire in rotting robes of state, antlers grown up through his crown,
    *            a skull for a face with moss in the sockets and cold light behind them, a censer on a crook pouring plague gas,
    *            flies about him ---------- */
-  def('rotlord', { w: 60, h: 64, cy: 42, frames: 2,
+  def('rotlord', { w: 60, h: 64, cy: 42, grow: [2, 0, 0, 0], frames: 2,
     colors: { flesh: '#7a8a4a', mantle: '#3a3018', gold: '#8a7a3a', gas: '#b0d040', eye: '#e0ff50' },
     draw(g, f, c) {
       const r = '#3a3a1e', rl = sh(r, 0.5), rd = sh(r, -0.5), gold = c.gold, bone = '#d4c8a4', bd = sh(bone, -0.4), w = f ? 0.8 : -0.8, gas = c.gas;
@@ -2059,7 +2059,7 @@
   /* ---------- Cyclops (secret boss): a hunched one-eyed giant, a small head thrust forward under a brow horn with one huge
    *            burning eye and an underbite of tusks, a broken shackle on its wrist, a great club of iron-banded trunk
    *            swung over its shoulder, knuckles of the other hand dragging ---------- */
-  def('cyclops', { w: 50, h: 56, cy: 36, frames: 2,
+  def('cyclops', { w: 50, h: 56, cy: 36, grow: [0, 0, 4, 0], frames: 2,
     colors: { skin: '#a86a4a', hide: '#4a3020', eye: '#ffb030', club: '#4a3420' },
     draw(g, f, c) {
       const sk = sh(c.skin, -0.05), sl = sh(sk, 0.4), sd = sh(sk, -0.45), hd = c.hide, hl = sh(hd, 0.35), w = f ? 1.2 : -1.2, iron = '#4a4a50', nail = '#d8ccb0';

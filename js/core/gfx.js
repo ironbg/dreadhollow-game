@@ -47,8 +47,8 @@
       const p = this.painters[name];
       if (!p) throw new Error('no painter ' + name);
       const col = this.colors(name, variant);
-      const pad = 1.5;
-      const W = p.w + pad * 2, H = p.h + pad * 2;
+      const pad = 1.5, gr = p.grow || [0, 0, 0, 0]; // grow: extra room [top, left, right, bottom] for parts that reach past the model's box
+      const W = p.w + gr[1] + gr[2] + pad * 2, H = p.h + gr[0] + gr[3] + pad * 2;
       const frames = [], flash = [];
       const nf = p.frames || 1;
       for (let f = 0; f < nf; f++) {
@@ -59,14 +59,14 @@
           frames.push(out); flash.push(whiten(out)); continue;
         }
         const c = canvas(W * res, H * res), g = c.getContext('2d');
-        g.scale(res, res); g.translate(pad, pad);
+        g.scale(res, res); g.translate(pad + gr[1], pad + gr[0]);
         g.lineJoin = 'round'; g.lineCap = 'round';
         p.draw(g, f, col, gfx.P);
         const out = p.soft ? c : classicize(c, p, res); // soft: keeps its translucency (ice, glass)
         frames.push(out);
         flash.push(whiten(out));
       }
-      return { frames, flash, w: W, h: H, res, ox: pad + (p.cx == null ? p.w / 2 : p.cx), oy: pad + (p.cy == null ? p.h / 2 : p.cy) };
+      return { frames, flash, w: W, h: H, res, ox: pad + gr[1] + (p.cx == null ? p.w / 2 : p.cx), oy: pad + gr[0] + (p.cy == null ? p.h / 2 : p.cy) };
     },
     /** Horizontally mirrored copy of a frame (cached) — cheaper than save/scale/restore per draw. */
     flip(img) {

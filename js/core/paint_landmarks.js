@@ -592,7 +592,7 @@
     for (const [x, s] of [[10, 1], [14, -1], [33, 1], [37, -1]]) { g.strokeStyle = M[0]; g.lineWidth = 0.5; g.beginPath(); g.moveTo(x, 59); g.quadraticCurveTo(x + s * 0.4, 57, x + s * 1.2, 55.6); g.stroke(); }
   } });
   // an abandoned hut sinking into the bog, swallowed by moss, ivy and ferns; one window still holds a dim candle
-  land('lm_hut', { w: 68, h: 72, cy: 66, frames: 2, draw(g, f, c) {
+  land('lm_hut', { w: 68, h: 72, grow: [0, 5, 5, 0], cy: 66, frames: 2, draw(g, f, c) {
     shadow(g, 34, 66.4, 31, 3.6);
     const leaf = (x, y, r, col) => P.ell(g, x, y, r, r * 0.62, col, (x * 7 + y) % 3 - 1);
     const MOSS = ['#1c2610', '#2a3818', '#3a4c20', '#4e6428'];
