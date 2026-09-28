@@ -215,6 +215,8 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'settings.adPrivacy': 'Ad privacy choices',
   'ad.notConfirmed': 'The ad could not be confirmed, so it gives no reward. Try again in a moment.',
   'iap.pending': 'Your payment is being processed. The purchase arrives as soon as it clears.', 'iap.failed': 'The store could not complete the purchase. Nothing was charged.',
+  'cloud.err.no-google': 'There is no Google account on this phone. Add one in the phone\'s Settings → Accounts, or sign in with email.',
+  'cloud.err.google-failed': 'Google sign-in did not work. Try again in a moment, or sign in with email.',
   'server.pendingDone': 'The rewards of your last fight have arrived.', 'server.unsettledTitle': 'No connection', 'server.unsettledBody': 'Your fight is saved on this phone. Its rewards arrive as soon as the game reaches its server.', 'server.retry': 'Try again', 'server.later': 'Later',
   'server.offline': 'No connection to the game server. Check your internet.', 'server.login': 'Your session ended. Open the game again.', 'server.invalidRun': 'This fight could not be confirmed, so it gives no rewards.', 'server.outdated': 'Update the game to keep playing.', 'server.error': 'The game server could not do that. Try again.', 'server.needNet': 'Fights need an internet connection.',
   'iap.soon': 'Purchases open soon.', 'transfer.serverOn': 'Your progress is kept on the game server: sign in on the other device to continue there.',

@@ -59,7 +59,14 @@
   const Native = () => DH.platform.plugin('FirebaseAuthentication');
   /** A Google credential: the native account picker in the app, a popup in the browser. */
   const googleCredential = async () => {
-    const r = await Native().signInWithGoogle({ skipNativeAuth: true });
+    let r;
+    try { r = await Native().signInWithGoogle({ skipNativeAuth: true }); } catch (e) {
+      const why = String((e && (e.code || '')) + ' ' + ((e && e.message) || ''));
+      if (/cancel/i.test(why)) throw fail('cancelled');
+      if (/no credential|no account|NoCredential/i.test(why)) throw fail('no-google'); // no Google account on this phone
+      console.warn('google sign-in', why);
+      throw fail('google-failed');
+    }
     const idToken = r && r.credential && r.credential.idToken;
     if (!idToken) throw fail('cancelled');
     return A.GoogleAuthProvider.credential(idToken);
@@ -90,13 +97,17 @@
       const anon = auth.currentUser && auth.currentUser.isAnonymous;
       try {
         if (anon) { // a guest keeps their progress: Google is added to the same account
+          const cred = Native() ? await googleCredential() : null;
           try {
-            if (Native()) await A.linkWithCredential(auth.currentUser, await googleCredential());
+            if (cred) await A.linkWithCredential(auth.currentUser, cred);
             else await A.linkWithPopup(auth.currentUser, provider());
             this.notify(); return;
           } catch (e) {
             if (e.code !== 'auth/credential-already-in-use') throw e;
-            await A.signInWithCredential(auth, A.GoogleAuthProvider.credentialFromError(e)); // that Google account already plays: open it
+            // that Google account already plays: open it (in the app with the same credential; the error does not carry it)
+            const again = cred || A.GoogleAuthProvider.credentialFromError(e);
+            if (!again) throw e;
+            await A.signInWithCredential(auth, again);
             return;
           }
         }
