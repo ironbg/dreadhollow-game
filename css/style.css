@@ -1095,7 +1095,7 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 }
 /* the battle plaque stays in view: on a screen too short for the whole home page it rests on the bottom edge
    while the rest scrolls behind it (when everything fits, nothing moves) */
-.home .bbwrap { position: sticky; bottom: 6px; z-index: 4; filter: drop-shadow(0 -6px 10px rgba(0,0,0,.65)); }
+.home .bbwrap { position: sticky; bottom: 0; z-index: 4; filter: drop-shadow(0 -6px 10px rgba(0,0,0,.65)); }
 /* shop: the chest buttons rest on the bottom of each card, so the rows line up across the three chests
    (bottom row: gold, gems, gems); the gem packs keep two tag rows, red first-purchase tag on top */
 .chest .cbtns { margin-top: auto; width: 100%; display: flex; flex-direction: column; gap: 4px; }
@@ -1131,3 +1131,32 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .topbar .acct .xpbar span { position: relative; display: block; text-align: center; font: 8.5px/8px var(--num); color: #fff; text-shadow: 0 1px 0 #000, 0 0 2px #000, 0 0 3px #000; white-space: nowrap; }
 /* the bar's lower edge on the same line as the pills' */
 .topbar .acct { position: relative; top: -2px; }
+/* the home page fits the screen exactly, so it never slides under a finger: the hall card takes whatever height is left
+   (down to what its text needs), and on a tall screen the hero band shares the spare room; only a screen too short even
+   for that scrolls, with the battle plaque resting on the bottom edge */
+.home { height: 100%; min-height: 0; }
+.home > * { flex-shrink: 0; }
+.home > .home-top { flex: 1 0 auto; }
+.home > .stagecard { flex: 100 1 0; min-height: min-content; max-height: 240px; } /* never shorter than its own text */
+.stagecard .info { padding-top: 18px; }
+@media (max-height: 780px) { .home .stagecard .srule { -webkit-line-clamp: 2; } }
+.home .enote { margin-top: 6px; }
+/* a very short screen (a small phone with the browser bars showing): tighter panels; the hall card keeps its name and record */
+@media (max-height: 660px) {
+  .home .vigil { padding-top: 6px; padding-bottom: 6px; }
+  .home > .stagecard { margin-top: 6px !important; }
+  .home .stagecard .srule { display: none; }
+  .home .stagecard .chips { padding-top: 4px; }
+  .home .bbwrap { margin-top: 6px; }
+  .home .enote { margin-top: 2px; font-size: 11px; }
+}
+@media (max-height: 610px) {
+  .home .home-top .side { gap: 1px; }
+  .home .sidebtn { height: 42px; }
+  .home .sidebtn span.l { font-size: 8px; }
+  .home .sidebtn .ic, .sidebtn .ic { width: 32px; height: 32px; }
+  .home .sidebtn .ic > img { width: 22px; height: 22px; }
+  .home .sidebtn .tm { top: 23px; }
+  .home .enote { display: none; }
+  .home > .stagecard { margin-top: 4px !important; }
+}

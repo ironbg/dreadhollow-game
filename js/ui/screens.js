@@ -93,7 +93,7 @@
             h('span.bb-sub', t('stage.' + sid + '.name')),
             h('span.bb-tag' + (agonyOn ? '' : '.hide'), t('hud.agony'))), // its own line, always reserved: the text never shifts
           h('span.bb-cost', A.img('i_energy'), h('b', st.energy || C.RUN_ENERGY)))));
-      root.append(h('div.center.small.muted', { style: { marginTop: '6px' } }, en < E.ENERGY_MAX ? t('home.energyNext', { t: U.fmtDuration(M.energyNextMs()) }) : t('home.energyFull')));
+      root.append(h('div.center.small.muted.enote', en < E.ENERGY_MAX ? t('home.energyNext', { t: U.fmtDuration(M.energyNextMs()) }) : t('home.energyFull')));
       ui.tick = updVigil;
       return root;
     },
