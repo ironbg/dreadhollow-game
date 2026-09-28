@@ -115,8 +115,9 @@
     /** The app: the store's prices, and any purchase waiting to be delivered (after the account is known). */
     init() {
       if (!this.provider.init) return;
-      const go = () => this.provider.init().catch((e) => console.warn('store init', e));
-      if (DH.cloud.authReady) go(); else DH.events.once('cloud', go);
+      let started = false;
+      const go = () => { if (started) return; started = true; this.provider.init().catch((e) => console.warn('store init', e)); };
+      if (DH.cloud.authReady) go(); else { DH.events.once('cloud', go); setTimeout(go, 8000); } // no account service (offline): the store anyway
     },
     price(id) { return this.provider.price(id); },
     async buy(id) {

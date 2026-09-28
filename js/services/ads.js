@@ -81,11 +81,13 @@
       return new Promise((resolve) => {
         let earned = false, done = false;
         const handles = [];
+        // the app's bridge answers addListener with the handle itself, the npm wrapper with a promise of it: take both
+        const listen = (ev, fn) => handles.push(Promise.resolve(A.addListener(ev, fn)));
         const finish = (v) => { if (done) return; done = true; handles.forEach((hd) => hd.then((x) => x.remove()).catch(() => {})); resolve(v); };
         // the reward can be reported a moment after the window closes: wait a little before deciding
-        handles.push(A.addListener(pre + 'Dismissed', () => setTimeout(() => finish(rewarded ? earned : true), 400)));
-        handles.push(A.addListener(pre + 'FailedToShow', () => finish(false)));
-        if (rewarded) handles.push(A.addListener('onRewardedVideoAdReward', () => { earned = true; }));
+        listen(pre + 'Dismissed', () => setTimeout(() => finish(rewarded ? earned : true), 400));
+        listen(pre + 'FailedToShow', () => finish(false));
+        if (rewarded) listen('onRewardedVideoAdReward', () => { earned = true; });
         (rewarded ? A.showRewardVideoAd() : A.showInterstitial()).then(() => { if (rewarded) earned = true; }, () => finish(false));
       });
     },

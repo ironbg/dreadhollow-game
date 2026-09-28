@@ -1,4 +1,6 @@
 ext {
+    // @capacitor-firebase/authentication: include Google sign-in (off by default in the plugin; without it the app's Google button fails)
+    rgcfaIncludeGoogle = true
     minSdkVersion = 24
     compileSdkVersion = 36
     targetSdkVersion = 36
