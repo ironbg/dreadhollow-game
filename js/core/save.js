@@ -40,6 +40,7 @@
       tutorialDone: false,
       titleChosen: false, // the way in (guest or an account) was chosen on the title screen
       playerName: '', // chosen on the first visit, shown above the experience bar; changed from the profile
+      nameChanges: 0, // changes after the first choice: the first is free, then E.RENAME_GEMS each
       seen: {},
     };
   }

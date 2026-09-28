@@ -211,6 +211,7 @@
 
   /* ---------- Energy ---------- */
   E.ENERGY_MAX = 30;
+  E.RENAME_GEMS = 200; // changing the player's name: the first change is free, every one after costs this
   E.ENERGY_REGEN_MS = 6 * 60e3;
   E.ENERGY_AD_AMOUNT = 10;
   E.ENERGY_AD_LIMIT = 3;

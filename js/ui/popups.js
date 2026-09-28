@@ -34,8 +34,10 @@
   };
   const NAME_OK = /^[\p{L}\p{N}][\p{L}\p{N} _'.-]*$/u;
   /** Choose or change the player's name. first: the opening visit, which cannot be dismissed. then: runs after. */
+  /** What the next change of name costs in gems: nothing the first time, E.RENAME_GEMS after that. */
+  ui.renameCost = () => ((S().nameChanges || 0) >= 1 ? E.RENAME_GEMS : 0);
   ui.openName = (first, then) => {
-    const s = S();
+    const s = S(), cost = first ? 0 : ui.renameCost();
     const inp = h('input.nameinp', { type: 'text', maxLength: 16, value: s.playerName || ui.randomName(), autocomplete: 'off', spellcheck: 'false', 'aria-label': t('name.title') });
     const err = h('div.small.nameerr');
     const dice = h('button.btn.ghost.dice', { 'aria-label': t('name.random'), title: t('name.random'), onclick: () => { click(); inp.value = ui.randomName(); err.textContent = ''; } });
@@ -45,7 +47,10 @@
       const v = inp.value.replace(/\s+/g, ' ').trim();
       if (v.length < 3) { err.textContent = t('name.short'); return; }
       if (!NAME_OK.test(v)) { err.textContent = t('name.bad'); return; }
-      s.playerName = v; DH.save.persist(); DH.audio.play('reward'); done = true; m.close(); ui.renderTop();
+      if (!first && v === s.playerName) { done = true; m.close(); if (then) then(); return; } // unchanged: nothing to pay
+      if (cost > 0 && !M.spend({ gems: cost })) { ui.toast(t('common.notEnough'), 'bad'); return; }
+      s.playerName = v; if (!first) s.nameChanges = (s.nameChanges || 0) + 1;
+      DH.save.persist(); DH.audio.play('reward'); done = true; m.close(); ui.renderTop();
       if (then) then();
     };
     inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') ok(); });
@@ -54,7 +59,8 @@
       body: h('div',
         h('div.center.small.muted', { style: { lineHeight: '1.45', marginBottom: '10px' } }, t('name.desc')),
         h('div.namerow', inp, dice), err,
-        h('div.btns', h('button.btn.gold', { onclick: ok }, t('name.ok')))) });
+        first ? null : h('div.center.small', { style: { color: cost ? 'var(--muted)' : '#8fe08a', marginBottom: '6px' } }, cost ? t('name.costNote', { n: cost }) : t('name.freeNote', { n: E.RENAME_GEMS })),
+        h('div.btns', cost ? h('button.btn.gem', { onclick: ok }, A.img('i_gem'), U.fmt(cost)) : h('button.btn.gold', { onclick: ok }, t(first ? 'name.ok' : 'name.okFree')))) });
   };
 
   /* ---------------- Energy ---------------- */
