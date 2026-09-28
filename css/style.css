@@ -49,7 +49,10 @@ img.px, .px { image-rendering: pixelated; image-rendering: crisp-edges; }
 #boot { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(ellipse at 50% 40%, #2a1420 0%, #0a070d 70%); z-index: 100; transition: opacity .6s; }
 #boot .logo { font-family: var(--title); font-size: clamp(34px, 10vw, 64px); letter-spacing: .08em; color: var(--gold); text-shadow: 0 0 24px rgba(226,56,74,.6), 0 3px 0 #3a0a10; }
 #boot .sub { color: var(--muted); margin-top: 8px; letter-spacing: .3em; text-transform: uppercase; font-size: 12px; }
-#boot .bar { width: 180px; height: 4px; background: #2a1c24; margin-top: 28px; border-radius: 2px; overflow: hidden; }
+#boot .emblem { width: clamp(64px, 18vw, 96px); height: auto; margin-bottom: 10px; filter: drop-shadow(0 0 18px rgba(226,56,74,.35)); animation: bootpulse 2.4s infinite ease-in-out; }
+@keyframes bootpulse { 0%,100% { filter: drop-shadow(0 0 14px rgba(226,56,74,.25)); } 50% { filter: drop-shadow(0 0 26px rgba(226,56,74,.55)); } }
+#boot::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(180deg, transparent, rgba(90,10,20,.25)); pointer-events: none; }
+#boot .bar { width: 200px; height: 8px; background: #140c12; margin-top: 28px; border: 2px solid #050308; box-shadow: 0 0 0 1px #8a6a2a, inset 0 0 4px #000; border-radius: 0; overflow: hidden; }
 #boot .bar i { display: block; height: 100%; width: 30%; background: var(--blood-hi); animation: load 1.2s infinite ease-in-out; }
 @keyframes load { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
 
@@ -526,7 +529,7 @@ html { image-rendering: pixelated; }
 .nav button.on { background: linear-gradient(180deg, transparent 0 60%, rgba(240,200,96,.12) 60%); }
 .nav button.on::before { content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 2px; background: var(--gold); }
 
-.modal { border: 2px solid #050308; background: var(--tex-panel, none) 0 0 / 64px 64px, #1f1624;
+.modal { border: 2px solid #050308; background: var(--corner-tl, none) 0 0 / 26px 26px no-repeat, var(--corner-tr, none) 100% 0 / 26px 26px no-repeat, var(--corner-bl, none) 0 100% / 26px 26px no-repeat, var(--corner-br, none) 100% 100% / 26px 26px no-repeat, var(--tex-panel, none) 0 0 / 64px 64px, #1f1624;
   box-shadow: inset 0 0 0 2px var(--ring-gold), inset 0 0 0 4px #050308, inset 6px 6px 0 0 var(--hi), inset -6px -6px 0 0 var(--lo), 0 0 0 2px #000, 0 12px 0 rgba(0,0,0,.5); }
 .modal-bg { backdrop-filter: none; }
 .modal .x { border: 2px solid #050308; background: #2a2030; box-shadow: inset 0 0 0 1px var(--ring), inset 2px 2px 0 1px var(--hi); color: var(--gold); }
@@ -953,3 +956,13 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .nb-row .btn { flex: none; min-width: 64px; }
 .nb-got, .nb-lockt { flex: none; min-width: 64px; text-align: center; font-size: 11px; font-weight: 800; color: #9a8a78; }
 .nb-got { color: #9af070; }
+
+/* forged iron corners on the gilded panels */
+.panel.gold::after { content: ''; position: absolute; inset: -3px; pointer-events: none; background: var(--corner-tl, none) 0 0 / 22px 22px no-repeat, var(--corner-tr, none) 100% 0 / 22px 22px no-repeat, var(--corner-bl, none) 0 100% / 22px 22px no-repeat, var(--corner-br, none) 100% 100% / 22px 22px no-repeat; image-rendering: pixelated; }
+.modal { background-origin: border-box; }
+/* the modal's header and footer are sticky and cover its own corners: they carry the forged corners instead */
+.modal > .mhead::before, .modal > .mhead::after, .modal > .mfoot::before, .modal > .mfoot::after { content: ''; position: absolute; width: 26px; height: 26px; pointer-events: none; image-rendering: pixelated; z-index: 4; }
+.modal > .mhead::before { left: -4px; top: 0; background: var(--corner-tl, none) 0 0 / 26px 26px no-repeat; }
+.modal > .mhead::after { right: -4px; top: 0; background: var(--corner-tr, none) 0 0 / 26px 26px no-repeat; }
+.modal > .mfoot::before { left: -4px; bottom: 0; background: var(--corner-bl, none) 0 0 / 26px 26px no-repeat; }
+.modal > .mfoot::after { right: -4px; bottom: 0; background: var(--corner-br, none) 0 0 / 26px 26px no-repeat; }

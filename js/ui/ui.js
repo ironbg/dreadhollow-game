@@ -154,8 +154,24 @@
     g.putImageData(id, 0, 0);
     return 'url(' + c.toDataURL() + ')';
   }
+  /** A forged iron corner for frames: an L-shaped plate, a spike pointing inward, gold rivets (one per corner, mirrored). */
+  function cornerPieces() {
+    const G = DH.gfx, P = G.P, R = 2, N = 13, out = {};
+    for (const [key, sx, sy] of [['tl', 1, 1], ['tr', -1, 1], ['bl', 1, -1], ['br', -1, -1]]) {
+      const c = G.canvas(N * R, N * R), g = c.getContext('2d');
+      g.scale(R, R); g.translate(sx < 0 ? N : 0, sy < 0 ? N : 0); g.scale(sx, sy); g.lineJoin = 'round';
+      const plate = [0, 0, 12.4, 0, 12.4, 1.2, 11.2, 2.8, 3.6, 2.8, 2.8, 3.6, 2.8, 11.2, 1.2, 12.4, 0, 12.4];
+      P.path(g, plate); g.strokeStyle = '#050308'; g.lineWidth = 1.2; g.stroke(); P.fill(g, P.lg(g, 0, 0, 6, 6, ['#b8b0c0', '#6a6272', '#34303c']));
+      P.path(g, [0.6, 0.6, 11.6, 0.6, 11.6, 1.2, 1.2, 1.2, 1.2, 11.6, 0.6, 11.6]); P.fill(g, 'rgba(255,255,255,0.35)');
+      P.path(g, [2.6, 2.6, 8.2, 4.6, 5.6, 5.6, 4.6, 8.2]); g.strokeStyle = '#050308'; g.lineWidth = 0.8; g.stroke(); P.fill(g, P.lg(g, 2, 2, 8, 8, ['#fff0a8', '#d8a030', '#6a4a10']));
+      for (const [x, y, r] of [[1.7, 1.7, 1.2], [9.6, 1.4, 0.7], [1.4, 9.6, 0.7]]) { P.circle(g, x, y, r + 0.3, '#050308'); P.circle(g, x, y, r, P.rg(g, x - r * 0.3, y - r * 0.3, r * 1.4, ['#fff4c0', '#e8b840', '#7a5414'])); }
+      out[key] = 'url(' + c.toDataURL() + ')';
+    }
+    return out;
+  }
   ui.textures = () => {
     const st = document.documentElement.style;
+    const cp = cornerPieces(); for (const k in cp) st.setProperty('--corner-' + k, cp[k]);
     st.setProperty('--tex-panel', stoneTexture('#2a2030', 0.55, 7));
     st.setProperty('--tex-dark', stoneTexture('#1a141e', 0.6, 11));
     st.setProperty('--tex-stone', ancientStone('#5a4c52', 23));
