@@ -1,5 +1,5 @@
 /* Offline cache (PWA). Bump CACHE when shipping new files. */
-const CACHE = 'dreadhollow-v158';
+const CACHE = 'dreadhollow-v159';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css', 'assets/icon.svg', 'assets/boot-bg.svg', 'assets/fonts/unifrakturmaguntia-latin-400-normal.woff2',
   'js/core/ns.js', 'js/i18n/i18n.js', 'js/i18n/en.js', 'js/i18n/bg.js', 'js/data/content.js', 'js/data/economy.js', 'js/data/artifacts.js', 'js/data/deeds.js',

@@ -202,6 +202,9 @@
     },
   };
 
+  /** The hall whose score is playing, or whose space we are in. */
+  const curHall = () => (musicState && HALL_MUSIC[musicState.hall]) || space || HALL_MUSIC.crypt;
+
   /** A foe's cry (a boss arriving, enraging, calling its brood): the voice of its material. */
   const ROAR = {
     flesh(k) { // a beast's roar
@@ -322,17 +325,35 @@
       metal(330, 1.8, 0.07, BELL, { rev: true, delay: 0.5 });
     },
     click() { burst({ t: 0.04, filter: 'bandpass', ff: 900, q: 2, vol: 0.12 }); tone({ type: 'sine', f: 260, f2: 170, t: 0.05, vol: 0.06 }); },
-    buy() { metal(1150, 0.3, 0.05, PLATE); metal(1010, 0.3, 0.05, PLATE, { delay: 0.07 }); thud(120, 0.15, 0.12, { delay: 0.1 }); },
+    buy() { // coins counted out onto a table, then the purse dropped
+      const n = 4 + (Math.random() * 3 | 0);
+      for (let i = 0; i < n; i++) metal(rnd(950, 1400), 0.14, 0.035, PLATE, { delay: i * rnd(0.035, 0.07) });
+      thud(120, 0.15, 0.12, { delay: n * 0.05 + 0.04 });
+    },
+    page() { // turning to another screen: a leaf of parchment turned over
+      burst({ t: 0.13, filter: 'bandpass', ff: 1900, ff2: 700, q: 1.5, vol: 0.07, attack: 0.03 });
+      thud(130, 0.06, 0.04, { delay: 0.08 });
+    },
+    open() { // a window opens: a heavy cover laid open, a creak of leather
+      thud(95, 0.18, 0.12);
+      burst({ t: 0.1, filter: 'bandpass', ff: 520, q: 1, vol: 0.05 });
+      tone({ type: 'sawtooth', f: 92, f2: 110, t: 0.15, vol: 0.018, filter: 'bandpass', ff: 360, q: 8, vib: 18, vibRate: 22 });
+    },
+    close() { // and shut again
+      thud(115, 0.1, 0.08); burst({ t: 0.05, filter: 'bandpass', ff: 720, q: 1, vol: 0.05 });
+    },
     error() { thud(110, 0.14, 0.16); thud(82, 0.2, 0.16, { delay: 0.12 }); },
     roar(painter) { (ROAR[MAT[painter]] || ROAR.flesh)(rnd(0.92, 1.08)); },
-    victory() { // minor turning to major (Picardy third), then bells
-      const ch = (ns, d, len) => ns.forEach((n, i) => tone({ type: 'sawtooth', f: midi(n), t: len, vol: 0.045, attack: 0.4, filter: 'lowpass', ff: 1400, q: 1.5, rev: true, delay: d, detune: (i % 2 ? 5 : -5) }));
+    victory() { // minor turning to major (Picardy third), then bells, in the key of the hall just won
+      const H = curHall(), k = H.root - 57, bf = midi(H.toll + 12);
+      const ch = (ns, d, len) => ns.forEach((n, i) => tone({ type: 'sawtooth', f: midi(n + k), t: len, vol: 0.045, attack: 0.4, filter: 'lowpass', ff: 1400, q: 1.5, rev: true, delay: d, detune: (i % 2 ? 5 : -5) }));
       ch([45, 57, 60, 64], 0, 1.4); ch([41, 57, 60, 65], 1.0, 1.4); ch([45, 57, 61, 64, 69], 2.0, 3);
-      metal(220, 3.5, 0.08, BELL, { rev: true, delay: 2.0 }); metal(330, 3, 0.05, BELL, { rev: true, delay: 2.4 });
+      metal(bf, 3.5, 0.08, BELL, { rev: true, delay: 2.0 }); metal(bf * 1.5, 3, 0.05, BELL, { rev: true, delay: 2.4 });
     },
-    defeat() { // slow funeral toll
-      [0, 1.4, 2.8].forEach((d, i) => metal(i === 2 ? 98 : 110, 4, 0.1, BELL, { rev: true, delay: d }));
-      tone({ type: 'sawtooth', f: midi(33), t: 4.5, vol: 0.06, attack: 1, filter: 'lowpass', ff: 300, rev: true });
+    defeat() { // slow funeral toll on the hall's own bell, over its low drone
+      const H = curHall(), bf = midi(H.toll);
+      [0, 1.4, 2.8].forEach((d, i) => metal(i === 2 ? bf * 0.89 : bf, 4, 0.1, BELL, { rev: true, delay: d }));
+      tone({ type: 'sawtooth', f: midi(H.root - 24), t: 4.5, vol: 0.06, attack: 1, filter: 'lowpass', ff: 300, rev: true });
     },
     heal() { [69, 72, 76].forEach((n, i) => tone({ type: 'sine', f: midi(n), t: 0.9, vol: 0.05, attack: 0.15, rev: true, delay: i * 0.08 })); burst({ t: 0.6, filter: 'bandpass', ff: 2400, q: 2, vol: 0.03, attack: 0.2 }); },
     block() { // a blow caught on a shield: a heavy thunk and a short, damped clank that does not ring on
@@ -414,7 +435,7 @@
       burst({ t: 0.18, filter: 'highpass', ff: 3000, ff2: 1500, vol: 0.05 });
     },
   };
-  const MIN_GAP = { block: 0.08, hit: 0.05, xp: 0.04, herb: 0.08, eat: 0.2, rune: 0.3, kill: 0.06, coin: 0.06, swing: 0.07, bow: 0.05, fire: 0.1, throw: 0.07, zap: 0.1, glass: 0.08, boom: 0.1, gun: 0.08, roar: 0.4,
+  const MIN_GAP = { block: 0.08, hit: 0.05, xp: 0.04, page: 0.1, open: 0.15, close: 0.15, herb: 0.08, eat: 0.2, rune: 0.3, kill: 0.06, coin: 0.06, swing: 0.07, bow: 0.05, fire: 0.1, throw: 0.07, zap: 0.1, glass: 0.08, boom: 0.1, gun: 0.08, roar: 0.4,
     wisp: 0.08, arcane: 0.2, blood: 0.3, flask: 0.08, hex: 0.08, blade: 0.08, dart: 0.05, phantom: 0.6, punch: 0.07, storm: 0.1, axe: 0.1, plague: 0.1, deathwall: 0.8, thorns: 0.12, prism: 0.1 };
 
   /* ---------------- Music ---------------- */

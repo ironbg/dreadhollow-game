@@ -45,6 +45,8 @@
 
   /* ---------------- modals ---------------- */
   const stack = [];
+  /** Windows in the menus open and shut with a sound; during a run they stay quiet (a level-up comes every few seconds). */
+  const inMenu = () => !(DH.game && DH.game.mode === 'run');
   ui.modal = (o) => {
     const layer = document.getElementById('modals');
     const box = h('div.modal' + (o.cls ? '.' + o.cls.split(' ').join('.') : ''));
@@ -54,6 +56,7 @@
       close(v) {
         if (api.closed) return; api.closed = true;
         bg.remove(); const i = stack.indexOf(api); if (i >= 0) stack.splice(i, 1);
+        if (inMenu() && !o.silent) DH.audio.play('close');
         if (o.onClose) o.onClose(v);
       },
       set(content) { box.innerHTML = ''; fill(content); },
@@ -61,7 +64,7 @@
     function fill(content) {
       if (o.rays) box.appendChild(h('div.raysbox', h('div.rays'))); // clipped: the spinning rays must not make a short window scroll
       // the title and the X stay pinned at the top while the window's content scrolls
-      const onX = o.onX || (o.closable !== false ? () => { DH.audio.play('click'); api.close(); } : null);
+      const onX = o.onX || (o.closable !== false ? () => { if (!inMenu()) DH.audio.play('click'); api.close(); } : null); // in the menus the close sound plays
       if (o.title || onX) box.appendChild(h('div.mhead' + (o.title ? '' : '.bare'), o.title ? h('div.mt', o.title) : null,
         onX ? h('button.x', { onclick: onX, 'aria-label': t('common.close') }, DH.icons.img('u_close', 'ci')) : null));
       if (typeof content === 'function') content = content(api);
@@ -72,6 +75,7 @@
     if (o.closable !== false) bg.addEventListener('click', (e) => { if (e.target === bg) api.close(); });
     layer.appendChild(bg);
     stack.push(api);
+    if (inMenu() && !o.silent) DH.audio.play('open');
     return api;
   };
   ui.closeAll = () => stack.slice().forEach((m) => m.close());
@@ -220,7 +224,7 @@
     NAV.forEach((n) => {
       const cnt = n.badge ? b[n.badge] : 0;
       ui.navEl.appendChild(h('button' + (ui.screen === n.id ? '.on' : '') + (n.cls ? '.' + n.cls : ''), {
-        onclick: () => { DH.audio.play('click'); ui.go(n.id); },
+        onclick: () => { DH.audio.play(ui.screen === n.id ? 'click' : 'page'); ui.go(n.id); },
       }, A.img(n.icon), h('span', t('nav.' + n.id)), cnt ? h('span.badge' + (n.dot ? '.dot' : ''), n.dot ? '' : cnt) : null));
     });
   };
