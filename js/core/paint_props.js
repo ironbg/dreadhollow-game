@@ -568,22 +568,36 @@
   } });
 
   /* ---------- Environmental hazards ---------- */
+  // an iron brazier on three clawed legs, embers heaped in its bowl; strike it and it tips its fire across the floor
   def('brazier', { w: 14, h: 22, cy: 20, frames: 2, draw(g, f) {
-    P.ell(g, 7, 20.4, 5.6, 1.6, 'rgba(0,0,0,0.5)');
-    g.strokeStyle = '#2a2a30'; g.lineWidth = 1.1; g.beginPath(); g.moveTo(7, 12); g.lineTo(2.4, 20.4); g.moveTo(7, 12); g.lineTo(11.6, 20.4); g.moveTo(7, 12); g.lineTo(7, 20); g.stroke();
-    P.path(g, [1.4, 9, 12.6, 9, 10.6, 13, 3.4, 13]); P.fill(g, P.lg(g, 0, 9, 0, 13, ['#6a6a74', '#2a2a32']));
-    P.rect(g, 1, 8.4, 12, 1.2, '#8a8a94');
-    P.ell(g, 7, 8.8, 5, 1.2, P.lg(g, 2, 8, 12, 9, ['#ff5020', '#ffd040', '#ff5020']));
-    P.glow(g, 7, 5, 8, '#ff8a20', f ? 0.9 : 0.7);
-    g.beginPath(); g.moveTo(4, 8.6); g.quadraticCurveTo(4.6, 3.6, 7, f ? 0.6 : 1.6); g.quadraticCurveTo(9.4, 3.6, 10, 8.6); g.closePath(); P.fill(g, P.lg(g, 0, 1, 0, 9, ['#fff4b0', '#ffb030', '#e04010']));
-    g.beginPath(); g.moveTo(5.6, 8.6); g.quadraticCurveTo(6, 5.4, 7, f ? 3.4 : 4.2); g.quadraticCurveTo(8, 5.4, 8.4, 8.6); g.closePath(); P.fill(g, '#fff8d0');
+    P.ell(g, 7, 20.4, 5.8, 1.6, 'rgba(0,0,0,0.5)');
+    g.lineCap = 'round';
+    for (const [x2, c] of [[2.2, '#3a3642'], [11.8, '#26222c'], [7, '#4a4654']]) { P.line(g, 7, 12.4, x2, 19.8, 1.5, '#0c0a10'); P.line(g, 7, 12.4, x2, 19.8, 0.8, c); P.ell(g, x2, 20, 1, 0.5, '#1a1620'); }
+    P.circle(g, 7, 15.4, 1, '#0c0a10'); P.circle(g, 7, 15.4, 0.6, '#6a6472');
+    P.path(g, [1, 8.6, 13, 8.6, 10.8, 13, 3.2, 13]); g.strokeStyle = '#0c0a10'; g.lineWidth = 0.7; g.stroke(); P.fill(g, P.lg(g, 1, 0, 13, 0, ['#7a7484', '#b8b2c4', '#3a3444', '#1e1a24']));
+    for (const x of [3.4, 7, 10.6]) { P.circle(g, x, 10.8, 0.4, '#1a1620'); P.circle(g, x - 0.1, 10.7, 0.22, '#c8c2d4'); }
+    P.rect(g, 0.6, 8, 12.8, 1.2, P.lg(g, 0, 0, 14, 0, ['#9a94a4', '#5a5464']));
+    P.ell(g, 7, 8.4, 5.6, 1.3, '#1a1210'); P.ell(g, 7, 8.2, 4.8, 1, P.lg(g, 2, 8, 12, 8, ['#a02808', '#ffc040', '#a02808']));
+    P.glow(g, 7, 5, 8, '#ff8a20', f ? 0.85 : 0.65);
+    const tongue = (x, w, top, lean, col) => { g.beginPath(); g.moveTo(x - w, 8.2); g.quadraticCurveTo(x - w * 0.6, top + (8.2 - top) * 0.4, x + lean, top); g.quadraticCurveTo(x + w * 0.7, top + (8.2 - top) * 0.45, x + w, 8.2); g.closePath(); P.fill(g, col); };
+    const fl = P.lg(g, 0, 0, 0, 8.2, ['#fff0a0', '#ffa030', '#d03808']);
+    tongue(4.4, 1.3, f ? 3 : 4.2, f ? -0.7 : 0.3, fl); tongue(9.6, 1.3, f ? 4 : 2.6, f ? 0.6 : -0.3, fl); tongue(7, 2, f ? 0.4 : 1.2, f ? 0.5 : -0.5, fl);
+    tongue(7, 0.9, f ? 3.4 : 4, f ? 0.2 : -0.2, '#fff6d0');
+    for (const [x, y] of f ? [[3, 1.4], [11.4, 0.6]] : [[4.6, 0.4], [10.4, 2]]) P.circle(g, x, y, 0.35, '#ffd070');
   } });
+  // a cluster of ice spikes risen from the floor: faceted, cloudy, rimed at the foot
   def('icespike', { w: 16, h: 20, cy: 18, frames: 1, draw(g) {
-    P.ell(g, 8, 18.4, 7, 1.8, 'rgba(0,0,0,0.45)');
-    P.glow(g, 8, 11, 8, '#8fe0ff', 0.45);
-    const ice = (pts, a) => { P.path(g, pts); P.fill(g, P.lg(g, pts[0], pts[1], pts[2], pts[3], ['#ffffff', '#9fdcff', '#3a7ab0'])); if (a) { P.path(g, a); P.fill(g, 'rgba(255,255,255,0.55)'); } };
-    ice([2.4, 18, 4.4, 7, 6.6, 18], [4.4, 7, 5, 12, 4.2, 12]);
-    ice([10, 18, 12.2, 9, 14.2, 18], [12.2, 9, 12.8, 13, 12, 13]);
-    ice([5.4, 18, 8, 1.2, 10.8, 18], [8, 1.2, 8.8, 9, 7.6, 9]);
+    P.ell(g, 8, 18.4, 7.4, 1.8, 'rgba(0,0,0,0.45)');
+    P.glow(g, 8, 11, 8, '#8fe0ff', 0.4);
+    const spike = (xb, w, tx, ty) => {
+      const x0 = xb - w / 2, x1 = xb + w / 2, rx = xb + (tx - xb) * 0.15 + w * 0.08;
+      P.path(g, [x0, 18, tx, ty, x1, 18]); g.strokeStyle = '#0c1826'; g.lineWidth = 0.6; g.stroke();
+      P.path(g, [x0, 18, tx, ty, rx, 18]); P.fill(g, P.lg(g, x0, ty, rx, 18, ['#ffffff', '#b8e6ff', '#6ab0e0']));
+      P.path(g, [rx, 18, tx, ty, x1, 18]); P.fill(g, P.lg(g, rx, 0, x1, 0, ['#5a9ccc', '#24507e']));
+      P.line(g, tx, ty + 0.4, rx, 18, 0.25, 'rgba(255,255,255,0.85)');
+    };
+    spike(3.6, 4, 3, 8.4); spike(12.6, 4.4, 13.4, 7); spike(8, 6, 7.6, 0.8); spike(5.6, 2.6, 5.2, 13); spike(10.6, 2.8, 11.2, 13.6);
+    g.strokeStyle = 'rgba(255,255,255,0.4)'; g.lineWidth = 0.25; g.beginPath(); g.moveTo(8.4, 6); g.lineTo(7.8, 9); g.lineTo(8.6, 11); g.stroke();
+    for (const [x, rx] of [[2.6, 2.4], [8, 3], [13.4, 2.4]]) P.ell(g, x, 17.8, rx, 1, P.lg(g, 0, 16.8, 0, 18.8, ['#ffffff', '#c8e4f4']));
   } });
 })(window.DH);
