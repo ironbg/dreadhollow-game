@@ -43,9 +43,9 @@
     const url = (f) => new URL('js/vendor/firebase/' + f + '.js', document.baseURI).href;
     const [app, a, f] = await Promise.all(['firebase-app', 'firebase-auth', 'firebase-firestore-lite'].map((m) => import(url(m))));
     A = a; F = f;
-    const cfg = Object.assign({}, CONFIG);
-    if (/\.(web\.app|firebaseapp\.com)$/.test(location.hostname)) cfg.authDomain = location.hostname; // same-site sign-in helper
-    const fb = app.initializeApp(cfg);
+    // sign-in always goes through the firebaseapp.com helper: it is the redirect address Google has on record for this
+    // project (the web.app one is not, and Google refused it with redirect_uri_mismatch); the popup works across the two sites
+    const fb = app.initializeApp(CONFIG);
     auth = A.initializeAuth(fb, {
       persistence: [A.indexedDBLocalPersistence, A.browserLocalPersistence],
       popupRedirectResolver: DH.platform.native ? undefined : A.browserPopupRedirectResolver,
