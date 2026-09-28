@@ -268,8 +268,8 @@
       burst({ t: 0.16, filter: 'bandpass', ff: 520 * k, q: 1.2, vol: 0.08, attack: 0.015, delay: 0.01 });
       if (Math.random() < 0.35) burst({ t: 0.025, filter: 'highpass', ff: 1800, vol: 0.07, delay: 0.005 });
     },
-    swing() { burst({ t: 0.22, filter: 'bandpass', ff: 380, ff2: 1100, q: 1.6, vol: 0.2, attack: 0.05 }); },
-    bow() { tone({ type: 'triangle', f: 196, f2: 98, t: 0.16, vol: 0.14 }); burst({ t: 0.12, filter: 'bandpass', ff: 1400, ff2: 500, q: 2, vol: 0.08 }); },
+    swing() { const k = rnd(0.85, 1.15); burst({ t: 0.22 * k, filter: 'bandpass', ff: 380 * k, ff2: 1100 * k, q: 1.6, vol: 0.2, attack: 0.05 }); },
+    bow() { const k = rnd(0.9, 1.1); tone({ type: 'triangle', f: 196 * k, f2: 98, t: 0.16, vol: 0.14 }); burst({ t: 0.12, filter: 'bandpass', ff: 1400 * k, ff2: 500, q: 2, vol: 0.08 }); },
     fire() { burst({ t: 0.4, ff: 900, ff2: 180, vol: 0.22, attack: 0.04 }); for (let i = 0; i < 3; i++) burst({ t: 0.02, filter: 'highpass', ff: 1800, vol: 0.05, delay: rnd(0.02, 0.3) }); },
     thunder() { // a crack overhead, then the long roll of thunder
       burst({ t: 0.25, filter: 'highpass', ff: 1400, ff2: 500, vol: 0.12 });
@@ -281,7 +281,7 @@
       burst({ t: 0.05, filter: 'highpass', ff: 2200, vol: 0.2 }); burst({ t: 0.5, ff: 1400, ff2: 90, vol: 0.3, rev: 0.5, delay: 0.01 }); tone({ type: 'sine', f: 110, f2: 40, t: 0.3, vol: 0.2 });
     },
     boom() { burst({ t: 0.9, ff: 900, ff2: 40, vol: 0.4, rev: 0.7 }); tone({ type: 'sine', f: 70, f2: 24, t: 0.8, vol: 0.34 }); },
-    zap() { tone({ type: 'sawtooth', f: 900, f2: 110, t: 0.22, vol: 0.09, filter: 'lowpass', ff: 2400 }); for (let i = 0; i < 4; i++) burst({ t: 0.03, filter: 'bandpass', ff: rnd(1500, 3000), q: 3, vol: 0.12, delay: i * 0.035 }); },
+    zap() { tone({ type: 'sawtooth', f: rnd(650, 800), f2: 90, t: 0.22, vol: 0.09, filter: 'lowpass', ff: 1900 }); for (let i = 0; i < 4; i++) burst({ t: 0.03, filter: 'bandpass', ff: rnd(1500, 3000), q: 3, vol: 0.12, delay: i * 0.035 }); },
     frost() { // ice forming: a cold hiss and crackling shards, all noise so nothing rings
       burst({ t: 0.35, filter: 'bandpass', ff: 1800, ff2: 4200, q: 1.5, vol: 0.12, attack: 0.04, rev: 0.3 });
       burst({ t: 0.18, filter: 'highpass', ff: 2600, vol: 0.08 });
@@ -290,7 +290,7 @@
     },
     bell() { metal(rnd(150, 170), 3.2, 0.14, BELL, { rev: 1 }); thud(70, 0.4, 0.2); }, // the Bell Warden's toll
     splash() { burst({ t: 0.35, filter: 'bandpass', ff: 900, ff2: 250, q: 0.9, vol: 0.22 }); for (let i = 0; i < 4; i++) tone({ type: 'sine', f: rnd(300, 700), f2: rnd(900, 1400), t: 0.07, vol: 0.04, delay: 0.05 + i * rnd(0.04, 0.09) }); },
-    throw() { burst({ t: 0.14, filter: 'bandpass', ff: 700, ff2: 300, q: 1.8, vol: 0.14, attack: 0.03 }); },
+    throw() { const k = rnd(0.85, 1.15); burst({ t: 0.14, filter: 'bandpass', ff: 700 * k, ff2: 300 * k, q: 1.8, vol: 0.14, attack: 0.03 }); },
     glass() { // clay urn shattering
       burst({ t: 0.16, filter: 'bandpass', ff: 1100, ff2: 400, q: 1.2, vol: 0.2 });
       for (let i = 0; i < 4; i++) burst({ t: 0.025, filter: 'bandpass', ff: rnd(1200, 2600), q: 4, vol: 0.08, delay: rnd(0.02, 0.18) });
@@ -321,8 +321,80 @@
       metal(rnd(300, 360), 0.09, 0.035, PLATE);
     },
     reward() { metal(440, 1.6, 0.07, BELL, { rev: true }); metal(660, 1.4, 0.05, BELL, { rev: true, delay: 0.18 }); },
+
+    /* ---- the hero's abilities: each weapon its own voice ---- */
+    wisp() { // grave spirits: a breath rising, a faint moan under it
+      const k = rnd(0.9, 1.1);
+      burst({ t: 0.35, filter: 'bandpass', ff: 700 * k, ff2: 1900 * k, q: 2.5, vol: 0.09, attack: 0.08, rev: 0.6 });
+      tone({ type: 'sine', f: 220 * k, f2: 180, t: 0.4, vol: 0.025, attack: 0.1, vib: 6, vibRate: 6, rev: 0.6 });
+    },
+    arcane() { // a slow orb: a low hum that swells, with a shimmer of air
+      const k = rnd(0.95, 1.05);
+      [110, 165].forEach((f, i) => tone({ type: 'sine', f: f * k, t: 0.6, vol: i ? 0.04 : 0.07, attack: 0.15, vib: 3, vibRate: 7, rev: 0.5 }));
+      burst({ t: 0.5, filter: 'bandpass', ff: 1500, ff2: 2600, q: 4, vol: 0.05, attack: 0.2 });
+    },
+    blood() { // blood pulse: two heavy heartbeats and a wet swell
+      tone({ type: 'sine', f: 70, f2: 38, t: 0.25, vol: 0.3 }); tone({ type: 'sine', f: 58, f2: 34, t: 0.22, vol: 0.2, delay: 0.16 });
+      burst({ t: 0.4, filter: 'bandpass', ff: 480, ff2: 180, q: 1.2, vol: 0.14, attack: 0.03, rev: 0.4 });
+    },
+    flask() { // a flask thrown: a glass clink and the slosh inside
+      burst({ t: 0.03, filter: 'bandpass', ff: rnd(2600, 3400), q: 6, vol: 0.1 });
+      burst({ t: 0.18, filter: 'bandpass', ff: 650, ff2: 380, q: 2, vol: 0.1, attack: 0.03, delay: 0.02 });
+      burst({ t: 0.14, filter: 'bandpass', ff: 520, ff2: 700, q: 2, vol: 0.07, attack: 0.03, delay: 0.12 });
+    },
+    hex() { // a hex lance: a dark hiss drawn out, a low growl beneath
+      burst({ t: 0.28, filter: 'bandpass', ff: 900, ff2: 2300, q: 4, vol: 0.1, attack: 0.02, rev: 0.4 });
+      tone({ type: 'sawtooth', f: rnd(52, 60), f2: 40, t: 0.3, vol: 0.08, filter: 'lowpass', ff: 320, q: 2 });
+    },
+    blade() { // spinning blades: a whirr of three passes and a scrape of steel
+      const k = rnd(0.9, 1.1);
+      [0, 0.06, 0.12].forEach((d, i) => burst({ t: 0.06, filter: 'bandpass', ff: (800 + i * 350) * k, q: 3, vol: 0.09, delay: d }));
+      burst({ t: 0.05, filter: 'highpass', ff: 3800, vol: 0.04, delay: 0.02 });
+    },
+    dart() { // a needle: one quick hiss through the air
+      burst({ t: 0.06, filter: 'bandpass', ff: rnd(2300, 2900), ff2: 1200, q: 2, vol: 0.08 });
+    },
+    phantom() { // phantom knights called: a ghostly horn under whispers
+      const k = rnd(0.95, 1.05);
+      tone({ type: 'sawtooth', f: 110 * k, t: 1.3, vol: 0.07, attack: 0.25, filter: 'bandpass', ff: 520, q: 6, vib: 4, vibRate: 5, rev: 1 });
+      tone({ type: 'sawtooth', f: 165 * k, t: 1.1, vol: 0.035, attack: 0.3, filter: 'bandpass', ff: 700, q: 6, vib: 4, vibRate: 5.5, rev: 1 });
+      burst({ t: 1.2, filter: 'bandpass', ff: 2200, ff2: 1300, q: 5, vol: 0.04, attack: 0.4, rev: 1 });
+    },
+    punch() { // phantom fists: a rush of air and a hollow impact
+      burst({ t: 0.1, filter: 'bandpass', ff: 500, ff2: 1300, q: 2, vol: 0.12, attack: 0.02 });
+      thud(rnd(85, 105), 0.12, 0.18, { delay: 0.06 });
+    },
+    storm() { // lightning called down: a crack overhead and a short roll
+      burst({ t: 0.06, filter: 'highpass', ff: 2200, vol: 0.14 });
+      for (let i = 0; i < 3; i++) burst({ t: 0.025, filter: 'bandpass', ff: rnd(1500, 3000), q: 3, vol: 0.08, delay: 0.02 + i * 0.03 });
+      burst({ t: 0.6, ff: 350, ff2: 60, vol: 0.14, attack: 0.03, rev: 0.5, delay: 0.04 });
+    },
+    axe() { // heavy axes: a deep whump, whump as they turn
+      const k = rnd(0.9, 1.1);
+      [0, 0.09, 0.18].forEach((d, i) => burst({ t: 0.08, filter: 'bandpass', ff: (320 + i * 60) * k, q: 2, vol: 0.12 - i * 0.02, delay: d }));
+    },
+    plague() { // a plague flask: glass and something bubbling inside
+      burst({ t: 0.03, filter: 'bandpass', ff: rnd(2400, 3000), q: 6, vol: 0.09 });
+      for (let i = 0; i < 4; i++) { const f = rnd(140, 300); tone({ type: 'sine', f, f2: f * 1.7, t: 0.06, vol: 0.04, delay: 0.04 + i * rnd(0.04, 0.08) }); }
+      burst({ t: 0.2, filter: 'bandpass', ff: 420, q: 1.5, vol: 0.06, attack: 0.05 });
+    },
+    deathwall() { // the wall of the dead: a low choir of the dead and bones rising
+      [45, 52, 57].forEach((n, i) => tone({ type: 'sawtooth', f: midi(n), t: 1.6, vol: 0.05, attack: 0.3, filter: 'bandpass', ff: 480, q: 4, vib: 4, vibRate: 5, detune: i * 7 - 7, rev: 1 }));
+      for (let i = 0; i < 8; i++) burst({ t: 0.02, filter: 'bandpass', ff: rnd(1500, 3200), q: 4, vol: 0.07, delay: rnd(0.1, 1) });
+      thud(55, 0.5, 0.2);
+    },
+    thorns() { // thorny roots: a rustle breaking through the ground and a creak of wood
+      for (let i = 0; i < 6; i++) burst({ t: 0.03, filter: 'bandpass', ff: rnd(1800, 3200), q: 1.5, vol: 0.06, delay: rnd(0, 0.2) });
+      tone({ type: 'sawtooth', f: rnd(80, 100), f2: 70, t: 0.3, vol: 0.05, filter: 'bandpass', ff: 420, q: 8, vib: 12, vibRate: 22 });
+      thud(90, 0.12, 0.12);
+    },
+    prism() { // a charge leaping between foes: dry crackles, no ringing
+      for (let i = 0; i < 5; i++) burst({ t: 0.02, filter: 'bandpass', ff: rnd(2000, 4200), q: 4, vol: 0.09, delay: i * 0.03 });
+      burst({ t: 0.18, filter: 'highpass', ff: 3000, ff2: 1500, vol: 0.05 });
+    },
   };
-  const MIN_GAP = { block: 0.08, hit: 0.05, xp: 0.04, kill: 0.06, coin: 0.06, swing: 0.07, bow: 0.05, fire: 0.1, throw: 0.07, zap: 0.1, glass: 0.08, boom: 0.1, gun: 0.08, roar: 0.4 };
+  const MIN_GAP = { block: 0.08, hit: 0.05, xp: 0.04, kill: 0.06, coin: 0.06, swing: 0.07, bow: 0.05, fire: 0.1, throw: 0.07, zap: 0.1, glass: 0.08, boom: 0.1, gun: 0.08, roar: 0.4,
+    wisp: 0.08, arcane: 0.2, blood: 0.3, flask: 0.08, hex: 0.08, blade: 0.08, dart: 0.05, phantom: 0.6, punch: 0.07, storm: 0.1, axe: 0.1, plague: 0.1, deathwall: 0.8, thorns: 0.12, prism: 0.1 };
 
   /* ---------------- Music ---------------- */
   function midi(n) { return 440 * Math.pow(2, (n - 69) / 12); }

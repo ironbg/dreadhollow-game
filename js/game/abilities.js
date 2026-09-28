@@ -84,7 +84,7 @@
         const ang = U.rand(0, TAU);
         run.allies.push({ kind: 'spirit', a, x: p.x, y: p.y, vx: Math.cos(ang) * 60, vy: Math.sin(ang) * 60, life: s.duration, t: 0 });
       }
-      DH.audio.play('throw');
+      DH.audio.play('wisp');
     } },
     shieldbash: { fire(run, a) {
       const p = run.player, s = a.s, R = 30 * s.area, arc = 2.4, man = run.manualAim(a), near = man == null ? run.nearest(p.x, p.y, R * 1.4) : null;
@@ -130,7 +130,7 @@
         // a slow, grinding sphere: it lingers in the horde and hits everything inside it five times a second
         proj(run, { k: 'orb', a, x: p.x, y: p.y - 3, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, r: 10 * Math.sqrt(s.area), pierce: 999, life: s.duration, cdHit: 0.2 });
       }
-      DH.audio.play('fire');
+      DH.audio.play('arcane');
     } },
     bloodpulse: { fire(run, a) {
       const p = run.player, s = a.s;
@@ -143,7 +143,7 @@
         run.fx.push({ k: 'pulse', x: p.x, y: p.y, R, life: 0.35, max: 0.35, follow: true, color: '#ff2040' });
         run.hitCircle(p.x, p.y, R, a);
       });
-      DH.audio.play('boom');
+      DH.audio.play('blood');
     } },
     scythes: { update(run, a, dt) { orbit(run, a, dt, 'scythe', 40, 8, 0.4); } },
 
@@ -191,7 +191,7 @@
         proj(run, { k: 'brewflask', a, el, x: p.x, y: p.y - 4, sx: p.x, sy: p.y - 4, tx: tg ? tg.x + U.rand(-5, 5) : p.x + Math.cos(ang) * d, ty: tg ? tg.y + U.rand(-4, 4) : p.y + Math.sin(ang) * d * 0.8, ft: 0, fd: 0.42, ang: 0, r: 0, pierce: 0, life: 2 });
       }
       if (man != null) p.face = Math.cos(man) >= 0 ? 1 : -1;
-      DH.audio.play('throw');
+      DH.audio.play('flask');
     } },
     bogplants: { update(run, a, dt) {
       const p = run.player, s = a.s, mine = [];
@@ -220,18 +220,18 @@
     hexlance: { fire(run, a) {
       const p = run.player, s = a.s;
       volley(run, a, 230, 0.12, false, (ang) => proj(run, { k: 'hex', a, x: p.x, y: p.y - 3, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 4, pierce: 999, life: 1.2, fork: s.fork }));
-      DH.audio.play('zap');
+      DH.audio.play('hex');
     } },
     chakrams: { fire(run, a) {
       const p = run.player, s = a.s;
       volley(run, a, 200, 0.3, false, (ang) => proj(run, { k: 'chakram', a, x: p.x, y: p.y, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 6 * Math.sqrt(s.area), pierce: 999, life: s.duration * 2 + 2, out: s.duration, cdHit: 0.3, orbit: s.orbit ? { a: ang, rad: 8, t: s.duration } : null }));
-      DH.audio.play('throw');
+      DH.audio.play('blade');
     } },
     orbs: { update(run, a, dt) { orbit(run, a, dt, 'orb', 30, 6, 0.5); } },
     darts: { fire(run, a) {
       const p = run.player, s = a.s;
       if (volley(run, a, 230, 0.08, true, (ang) => proj(run, { k: 'dart', a, x: p.x, y: p.y - 2, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 3, pierce: s.pierce, life: 0.8 })) == null) return false;
-      DH.audio.play('throw');
+      DH.audio.play('dart');
     } },
     wyrmfire: { fire(run, a) {
       const p = run.player, s = a.s, tg = run.nearest(p.x, p.y, 150);
@@ -277,7 +277,7 @@
     phantom: { fire(run, a) {
       const p = run.player, s = a.s;
       for (let i = 0; i < s.count; i++) run.allies.push({ kind: 'phantom', a, x: p.x + U.rand(-12, 12), y: p.y + U.rand(-12, 12), life: s.duration, t: 0, face: 1 });
-      DH.audio.play('roar');
+      DH.audio.play('phantom');
     } },
     avalanche: { fire(run, a) {
       const p = run.player, s = a.s, base = aimAt(run, 200);
@@ -321,7 +321,7 @@
     fists: { fire(run, a) {
       const p = run.player;
       if (volley(run, a, 80, 0.15, true, (ang) => proj(run, { k: 'fist', a, x: p.x + Math.cos(ang) * 6, y: p.y + Math.sin(ang) * 6, vx: Math.cos(ang) * 280, vy: Math.sin(ang) * 280, ang, r: 5, pierce: 0, life: 0.35 })) == null) return false;
-      DH.audio.play('swing');
+      DH.audio.play('punch');
     } },
     storm: { fire(run, a) {
       const s = a.s, used = new Set(); let n = 0;
@@ -336,7 +336,7 @@
         run.burst(tg.x, tg.y, 6, ['#fff0a0', '#ffffff', '#6ad8f0'], 70);
       }
       if (!n) return false;
-      DH.audio.play('zap');
+      DH.audio.play('storm');
     } },
     axes: { fire(run, a) {
       const p = run.player, s = a.s;
@@ -344,7 +344,7 @@
         const side = (i % 2 ? -1 : 1) * p.face;
         proj(run, { k: 'axe', a, x: p.x, y: p.y, vx: side * U.rand(30, 90) + p.dirX * 20, vy: -U.rand(210, 250), g: 420, ang: 0, spin: side * 14, r: 7 * s.area, pierce: 999, life: 1.6 });
       }
-      DH.audio.play('throw');
+      DH.audio.play('axe');
     } },
     nova: { fire(run, a) {
       const p = run.player, s = a.s;
@@ -358,7 +358,7 @@
         const tg = run.randomTarget(140); const tx = tg ? tg.x : p.x + U.rand(-80, 80), ty = tg ? tg.y : p.y + U.rand(-80, 80);
         proj(run, { k: 'flask', a, x: p.x, y: p.y, sx: p.x, sy: p.y, tx, ty, ft: 0, fd: 0.5, ang: 0, r: 0, pierce: 0, life: 1 });
       }
-      DH.audio.play('throw');
+      DH.audio.play('plague');
     } },
     /* ---------- Skald songs (on the beat) ---------- */
     chord: { fire(run, a) {
@@ -388,7 +388,7 @@
         const o = (i - (n - 1) / 2) * 16 * s.area;
         proj(run, { k: 'wall', a, x: sx + nx * o, y: sy + ny * o, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 8 * Math.sqrt(s.area), pierce: 999, life: 1.6 });
       }
-      DH.audio.play('roar');
+      DH.audio.play('deathwall');
     } },
     moshpit: { fire(run, a) {
       const p = run.player, s = a.s;
@@ -420,7 +420,7 @@
         const tg = run.randomTarget(120); const x = tg ? tg.x : p.x + U.rand(-70, 70), y = tg ? tg.y : p.y + U.rand(-60, 60);
         run.zones.push({ kind: 'thorns', a, x, y, r: 22 * s.area, life: s.duration, max: s.duration, tick: 0, seed: Math.random() * 99 });
       }
-      DH.audio.play('throw');
+      DH.audio.play('thorns');
     } },
     illumination: { fire(run, a) {
       const p = run.player, s = a.s;
@@ -451,7 +451,7 @@
         for (let k = 1; k < pts.length; k++) run.fx.push({ k: 'chain', pts: [pts[k - 1], pts[k]], life: 0.25, max: 0.25, seed: Math.random() * 999, color: EL[(k - 1) % 3][0] });
       }
       if (!fired) return false;
-      DH.audio.play('zap');
+      DH.audio.play('prism');
     } },
     fireball: { fire(run, a) {
       const p = run.player, s = a.s;
