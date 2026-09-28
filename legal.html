@@ -47,11 +47,13 @@
   var state = { doc: q.get('doc') === 'terms' ? 'terms' : 'privacy', lang: q.get('lang') === 'bg' ? 'bg' : (q.get('lang') ? 'en' : ((navigator.language || '').slice(0, 2) === 'bg' ? 'bg' : 'en')) };
   if (q.get('embed')) document.body.classList.add('embed');
 
+  var pick = function (v, lang) { return v && typeof v === 'object' ? v[lang] || v.en : v; };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var fill = function (lang) {
     var todo = function (en, bg) { return '<span class="todo">' + (lang === 'bg' ? bg : en) + '</span>'; };
     return {
-      owner: L.owner ? esc(L.owner) : todo('the developer of Dreadhollow (name to be added)', 'разработчикът на Dreadhollow (името предстои да бъде добавено)'),
+      owner: pick(L.owner, lang) ? esc(pick(L.owner, lang)) + (L.eik ? (lang === 'bg' ? ', ЕИК ' : ', UIC ') + esc(L.eik) : '') + (pick(L.address, lang) ? (lang === 'bg' ? ', със седалище и адрес на управление ' : ', with its registered office at ') + esc(pick(L.address, lang)) : '')
+        : todo('the developer of Dreadhollow (name to be added)', 'разработчикът на Dreadhollow (името предстои да бъде добавено)'),
       email: L.email ? '<a href="mailto:' + esc(L.email) + '">' + esc(L.email) + '</a>' : todo('(address to be added)', '(адресът предстои да бъде добавен)'),
       date: new Date(L.updated + 'T12:00:00').toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
     };
@@ -62,7 +64,7 @@
   var DOCS = {
     en: {
       privacy: { title: 'Privacy Policy', body: function (f) { return [
-        '<p>This policy explains what personal data Dreadhollow (the game, in its app and browser versions) processes, why, and what your rights are. The game is run by ' + f.owner + ', who is the controller of your data. Contact: ' + f.email + '.</p>',
+        '<p>This policy explains what personal data Dreadhollow (the game, in its app and browser versions) processes, why, and what your rights are. The game is run by ' + f.owner + ', which is the controller of your personal data. Contact: ' + f.email + '.</p>',
         '<h2>1. Playing as a guest</h2><p>If you play as a guest, your progress, settings and purchases are stored only on your device (in the app\'s storage or your browser\'s local storage). Nothing about you is sent to us. If you uninstall the app or clear the browser data, that progress is lost.</p>',
         '<h2>2. Signing in</h2><p>You can sign in to keep your progress in the cloud and continue on another device. Sign-in is optional. We then process:</p><ul>' +
           '<li><b>Account data:</b> your email address, and, if you sign in with Google, your Google account identifier and the name linked to it; whether your email is verified; the sign-in methods you use.</li>' +
@@ -99,7 +101,7 @@
     },
     bg: {
       privacy: { title: 'Политика за поверителност', body: function (f) { return [
-        '<p>Тази политика обяснява какви лични данни обработва Dreadhollow (играта, като приложение и в браузъра), защо и какви са правата ти. Играта се поддържа от ' + f.owner + ', който е администратор на данните ти. Връзка: ' + f.email + '.</p>',
+        '<p>Тази политика обяснява какви лични данни обработва Dreadhollow (играта, като приложение и в браузъра), защо и какви са правата ти. Играта се поддържа от ' + f.owner + '. Дружеството е администратор на личните ти данни. Връзка: ' + f.email + '.</p>',
         '<h2>1. Игра като гост</h2><p>Ако играеш като гост, прогресът, настройките и покупките ти се пазят само на устройството (в паметта на приложението или в локалното хранилище на браузъра). Нищо за теб не ни се изпраща. Ако изтриеш приложението или данните на браузъра, този прогрес се губи.</p>',
         '<h2>2. Вход в акаунт</h2><p>Можеш да влезеш, за да пазиш прогреса си в облака и да продължиш на друго устройство. Входът не е задължителен. Тогава обработваме:</p><ul>' +
           '<li><b>Данни за акаунта:</b> имейл адреса ти, а ако влизаш с Google, идентификатора на Google акаунта ти и свързаното с него име; дали имейлът е потвърден; кои начини за вход ползваш.</li>' +
