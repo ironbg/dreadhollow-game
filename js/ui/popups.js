@@ -59,8 +59,7 @@
       body: h('div',
         h('div.center.small.muted', { style: { lineHeight: '1.45', marginBottom: '10px' } }, t('name.desc')),
         h('div.namerow', inp, dice), err,
-        first ? null : h('div.center.small', { style: { color: cost ? 'var(--muted)' : '#8fe08a', marginBottom: '6px' } }, cost ? t('name.costNote', { n: cost }) : t('name.freeNote', { n: E.RENAME_GEMS })),
-        h('div.btns', cost ? h('button.btn.gem', { onclick: ok }, A.img('i_gem'), U.fmt(cost)) : h('button.btn.gold', { onclick: ok }, t(first ? 'name.ok' : 'name.okFree')))) });
+        h('div.btns', cost ? h('button.btn.gem', { onclick: ok }, A.img('i_gem'), U.fmt(cost)) : h('button.btn.gold', { onclick: ok }, t('name.ok')))) });
   };
 
   /* ---------------- Energy ---------------- */
