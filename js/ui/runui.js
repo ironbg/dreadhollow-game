@@ -43,7 +43,7 @@
     el.innerHTML = '';
     const r = hud.refs = {}, desk = DH.input.desktop;
     r.xpFill = h('i'); r.lvl = h('span');
-    r.timer = h('div.timer'); r.kills = h('span'); r.gold = h('span');
+    r.timer = h('div.timer'); r.fps = h('div.fps' + (DH.save.data.settings.showFps ? '' : '.hidden')); fpsN = 0; fpsT0 = 0; fpsLast = 0; fpsWorst = 0; r.kills = h('span'); r.gold = h('span');
     r.build = h('div.build'); r.buffs = h('div.buffs'); r.curse = h('div.cursed.hidden', A.img('u_agony', 'ci'), r.curseT = h('b'));
     r.boss = h('div.bossbar.hidden', r.bossName = h('div.n'), h('div.bar', r.bossFill = h('i')));
     r.agony = run.agonyOn ? h('div.agony', h('span.al', t('hud.agony')), r.agFill = h('div.agbar', h('i')), r.agNum = h('b')) : null;
@@ -53,7 +53,7 @@
         h('button.pause.bagbtn', { onclick: () => DH.game.openBag(), title: t('inv.title') + (desk ? ' [I]' : '') }, A.img('u_bag'), r.bagN = h('i'), desk ? h('b.key', 'I') : null),
         desk && DH.input.fullscreenAvailable() ? r.fsBtn = h('button.pause.fsbtn', { onclick: () => { DH.input.toggleFullscreen(); }, title: t('settings.fullscreen') + ' [F]' }, A.img(DH.input.isFullscreen() ? 'u_unfull' : 'u_full'), h('b.key', 'F')) : null), r.timer,
         h('div.stats', h('div', r.kills, A.img('n_skull')), h('div', r.gold, A.img('i_gold')))),
-      r.build, r.buffs, r.curse, r.boss, r.agony, r.track = hud.tracker(run), r.lordK = run.lordKills ? h('div.lordk', A.img('u_agony', 'ci'), r.lordKT = h('span')) : null].filter(Boolean)); // append() would print a null as text
+      r.fps, r.build, r.buffs, r.curse, r.boss, r.agony, r.track = hud.tracker(run), r.lordK = run.lordKills ? h('div.lordk', A.img('u_agony', 'ci'), r.lordKT = h('span')) : null].filter(Boolean)); // append() would print a null as text
     if (!DH.save.data.tutorialDone) { r.tut = h('div.tutorial', h('div', h('span.hand', A.img('u_hand', 'bigic')), t('tutorial.move'), h('br'), h('span.small.muted', t('tutorial.auto')))); el.append(r.tut); }
     hud.sig = ''; el.classList.remove('hidden');
   };
@@ -82,9 +82,22 @@
   }
   hud.banner = (text, sub, warn) => { if (!warn) bq.unshift({ text, sub, warn }); else bq.push({ text, sub, warn }); if (bq.length > 3) bq.length = 3; nextBanner(); };
   hud.hide = () => { const el = document.getElementById('hud'); el.classList.add('hidden'); el.innerHTML = ''; bq.length = 0; };
-  let lastTxt = 0;
+  let lastTxt = 0, fpsN = 0, fpsT0 = 0, fpsLast = 0, fpsWorst = 0;
+  /** The frame rate over the last second and its slowest frame, for checking the game on a given phone (Settings). */
+  const fpsTick = (r) => {
+    const now = performance.now();
+    if (fpsLast) fpsWorst = Math.max(fpsWorst, now - fpsLast);
+    fpsLast = now; fpsN++;
+    if (!fpsT0) { fpsT0 = now; fpsN = 0; fpsWorst = 0; return; }
+    if (now - fpsT0 < 1000) return;
+    const fps = Math.round(fpsN * 1000 / (now - fpsT0)), low = Math.round(1000 / Math.max(1, fpsWorst));
+    r.fps.textContent = fps + ' FPS · min ' + Math.min(fps, low);
+    r.fps.className = 'fps ' + (fps >= 50 ? 'ok' : fps >= 30 ? 'mid' : 'bad');
+    fpsT0 = now; fpsN = 0; fpsWorst = 0;
+  };
   hud.update = (run) => {
     const r = hud.refs; if (!r) return;
+    if (DH.save.data.settings.showFps) fpsTick(r); else if (!r.fps.classList.contains('hidden')) r.fps.classList.add('hidden');
     r.xpFill.style.width = Math.min(100, run.xp / run.xpNext * 100) + '%';
     const now = performance.now(); if (now - lastTxt < 120) return; lastTxt = now;
     r.lvl.textContent = t('common.lv') + ' ' + run.level;

@@ -115,6 +115,7 @@
       row('shake', sw('shake')),
       row('outlines', sw('outlines')),
       row('lowFx', sw('lowFx')),
+      row('showFps', sw('showFps')),
       h('div.setsec', t('settings.secGame')),
       h('div.setrow', h('label', t('settings.language')), langSel),
       h('div.col', { style: { marginTop: '14px' } },

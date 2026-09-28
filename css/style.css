@@ -1173,3 +1173,6 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 #boot::after { left: 50%; right: auto; width: auto; height: 100%; aspect-ratio: 390 / 844; transform: translateX(-50%);
   background: linear-gradient(180deg, transparent 70%, rgba(90,10,20,.25)), url('../assets/boot-bg.svg') center / 100% 100% no-repeat;
   -webkit-mask-image: var(--nave-fade); mask-image: var(--nave-fade); }
+/* the frame-rate readout (Settings): small, under the timer, green / amber / red */
+#hud .fps { position: absolute; left: 50%; top: calc(46px + var(--safe-t)); transform: translateX(-50%); padding: 1px 6px; font: 700 10px var(--body); letter-spacing: .04em; white-space: nowrap; color: #8fe08a; background: rgba(0,0,0,.55); pointer-events: none; }
+#hud .fps.mid { color: #f0c860; } #hud .fps.bad { color: #ff6a6a; }
