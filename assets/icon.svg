@@ -1,17 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
     <radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#1e1224"/><stop offset="1" stop-color="#050307"/></radialGradient>
-    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6a6070"/><stop offset=".45" stop-color="#3a3240"/><stop offset="1" stop-color="#16121a"/></linearGradient>
-    <linearGradient id="stoneV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a5060"/><stop offset="1" stop-color="#1e1824"/></linearGradient>
+    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a6e62"/><stop offset=".45" stop-color="#443a36"/><stop offset="1" stop-color="#18130f"/></linearGradient>
+    <linearGradient id="stoneV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#665a50"/><stop offset="1" stop-color="#1e1814"/></linearGradient>
     <radialGradient id="glass" cx="50%" cy="58%" r="62%"><stop offset="0" stop-color="#ff4a3a"/><stop offset=".45" stop-color="#b0101e"/><stop offset="1" stop-color="#3a0208"/></radialGradient>
     <radialGradient id="rose" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd070"/><stop offset=".5" stop-color="#e0402a"/><stop offset="1" stop-color="#5a0610"/></radialGradient>
     <radialGradient id="halo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ff3040" stop-opacity=".5"/><stop offset="1" stop-color="#ff3040" stop-opacity="0"/></radialGradient>
     <linearGradient id="bone" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6eed8"/><stop offset=".55" stop-color="#c4b894"/><stop offset="1" stop-color="#4a4232"/></linearGradient>
     <radialGradient id="eye" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff4c0"/><stop offset=".4" stop-color="#ff4a3a"/><stop offset="1" stop-color="#ff2030" stop-opacity="0"/></radialGradient>
+    <filter id="aged" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" seed="11" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 1" result="g"/>
+      <feComposite in="SourceGraphic" in2="g" operator="arithmetic" k1="0.7" k2="0.68" k3="0" k4="0" result="t"/>
+      <feComposite in="t" in2="SourceGraphic" operator="in"/>
+    </filter>
+    <filter id="glassy" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="4" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="1 0 0 0 0  1 0 0 0 0  1 0 0 0 0  0 0 0 0 1" result="g"/>
+      <feComposite in="SourceGraphic" in2="g" operator="arithmetic" k1="0.5" k2="0.78" k3="0" k4="0" result="t"/>
+      <feComposite in="t" in2="SourceGraphic" operator="in"/>
+    </filter>
+    <filter id="grime" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="3" seed="23" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.09  0 0 0 0 0.06  0 0 0 0 0.03  -2.4 0 0 0 1.35"/>
+    </filter>
+    <filter id="specks" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="turbulence" baseFrequency="2.2" numOctaves="1" seed="5" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.9  0 0 0 0 0.85  0 0 0 0 0.7  0 0 0 -6 1.9"/>
+    </filter>
+    <radialGradient id="vig" cx="50%" cy="48%" r="72%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".75"/></radialGradient>
   </defs>
   <rect width="64" height="64" fill="url(#bg)"/>
   <circle cx="32" cy="34" r="26" fill="url(#halo)"/>
   <!-- pinnacles: slim towers with crocketed spires and finials -->
+  <g filter="url(#aged)">
   <g stroke="#050307" stroke-width=".8" stroke-linejoin="round">
     <path d="M7 60V22H13V60Z" fill="url(#stone)"/><path d="M51 60V22H57V60Z" fill="url(#stone)"/>
     <path d="M6.4 22.6L10 6.6L13.6 22.6Z" fill="url(#stone)"/><path d="M50.4 22.6L54 6.6L57.6 22.6Z" fill="url(#stone)"/>
@@ -23,8 +45,9 @@
   <path d="M14 60V28Q14 10 32 3Q50 10 50 28V60Z" fill="url(#stone)" stroke="#050307" stroke-width="1"/>
   <path d="M16.6 60V28.6Q16.6 13 32 6.8Q47.4 13 47.4 28.6V60" fill="none" stroke="#7a7080" stroke-width=".7"/>
   <path d="M18.6 60V29Q18.6 15.6 32 10Q45.4 15.6 45.4 29V60Z" fill="#0a060c" stroke="#050307" stroke-width=".8"/>
+  </g>
   <!-- stained glass lit from within, split by tracery -->
-  <path d="M20 60V29.4Q20 17.2 32 12Q44 17.2 44 29.4V60Z" fill="url(#glass)"/>
+  <path d="M20 60V29.4Q20 17.2 32 12Q44 17.2 44 29.4V60Z" fill="url(#glass)" filter="url(#glassy)"/>
   <g fill="none" stroke="#0a060c" stroke-width="1.4" stroke-linejoin="round">
     <path d="M32 31V60"/>
     <path d="M20.6 60V36Q20.6 29.6 26.3 27Q32 29.6 32 36"/><path d="M32 36Q32 29.6 37.7 27Q43.4 29.6 43.4 36V60"/>
@@ -47,7 +70,18 @@
   <path d="M27.1 46.8h1.6v2.4h-1.6zM29.2 46.8h1.6v2.4h-1.6zM31.3 46.8h1.6v2.4h-1.6zM33.4 46.8h1.6v2.4h-1.6zM35.5 46.8h1.5v2.4h-1.5z" fill="#e8dcc0"/>
   <path d="M35 30.8L34 33.6L35.6 35L34.8 37" fill="none" stroke="#3a2a14" stroke-width=".6"/>
   <!-- a cornice below: a little arcade of pointed arches -->
+  <g filter="url(#aged)">
   <path d="M4 58H60V64H4Z" fill="url(#stoneV)" stroke="#050307" stroke-width=".8"/>
   <path d="M4 58.6H60" stroke="#7a7080" stroke-width=".6"/>
   <path d="M8 64V61.6Q8 60 9.6 59.6Q11.2 60 11.2 61.6V64M15.2 64V61.6Q15.2 60 16.8 59.6Q18.4 60 18.4 61.6V64M22.4 64V61.6Q22.4 60 24 59.6Q25.6 60 25.6 61.6V64M29.6 64V61.6Q29.6 60 31.2 59.6Q32.8 60 32.8 61.6V64M36.8 64V61.6Q36.8 60 38.4 59.6Q40 60 40 61.6V64M44 64V61.6Q44 60 45.6 59.6Q47.2 60 47.2 61.6V64M51.2 64V61.6Q51.2 60 52.8 59.6Q54.4 60 54.4 61.6V64" fill="#0a060c"/>
+  </g>
+  <!-- cracks and chips in the old stone -->
+  <g fill="none" stroke="#0a0604" stroke-width=".5" stroke-linecap="round">
+    <path d="M15.4 36l1.2 3-.8 2.6 1 3.4"/><path d="M48.6 20l-1.2 2.8.8 2.2"/><path d="M9.6 40l.8 2.4-.6 2"/><path d="M55 46l-.8 2.6.6 1.8"/><path d="M23 59l2 1.4 3-.6"/><path d="M44.6 44l1.4 3"/>
+  </g>
+  <path d="M13.9 30.6l1.4 1-1.4.9ZM50.1 40l-1.2.8 1.2.9Z" fill="#0a0604"/>
+  <!-- the dust and grime of centuries over everything -->
+  <rect width="64" height="64" filter="url(#grime)" opacity=".5"/>
+  <rect width="64" height="64" filter="url(#specks)" opacity=".08"/>
+  <rect width="64" height="64" fill="url(#vig)"/>
 </svg>
