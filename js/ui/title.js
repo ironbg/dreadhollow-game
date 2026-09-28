@@ -103,6 +103,7 @@
 
     /* the ways in */
     const googleIn = async (btn) => {
+      if (ui.signInElsewhere()) return;
       btn.disabled = true;
       try {
         const r = await C.signInGoogle();

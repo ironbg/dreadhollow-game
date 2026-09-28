@@ -115,6 +115,9 @@
 
   const cloud = {
     provider: MockCloud,
+    /** Where the game signs in for real (Firebase Hosting); used when this page cannot. */
+    playUrl: 'https://dreadhollow-b49c7.web.app/',
+    elsewhere: false,
     user: null,
     ready: null, authBusy: false, loginPending: false,
     /** off (signed out) | idle | syncing | error | outdated */
@@ -130,6 +133,9 @@
       document.addEventListener('visibilitychange', () => { if (document.hidden) this.flush('hide'); else this.check(); });
       window.addEventListener('online', () => { this.ensure().catch(() => {}); this.sync('online'); });
       this.provider = pickProvider();
+      // a host that cannot sign in (a preview page, a copy inside another site): the test accounts only stand in, and
+      // the account buttons send the player to the game's own address instead (?cloud=mock keeps the test accounts)
+      this.elsewhere = this.provider === MockCloud && !/[?&]cloud=mock\b/.test(location.search) && !DH.platform.native;
       return this.ensure().catch((e) => console.warn('cloud init failed', e));
     },
     /** Start the provider once; if that failed (offline at launch), the next account action retries. */

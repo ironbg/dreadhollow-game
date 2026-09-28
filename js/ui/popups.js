@@ -159,8 +159,20 @@
     btns.forEach((b) => { b.disabled = true; });
     try { return await fn(); } catch (e) { if (e.code !== 'cancelled') cloudErr(e); return null; } finally { btns.forEach((b) => { b.disabled = false; }); }
   };
+  /** Sign-in cannot work on this page (a preview inside another site): say so and offer the game's own address.
+   *  Returns true when the caller should stop. */
+  ui.signInElsewhere = () => {
+    const C = DH.cloud; if (!C.elsewhere || C.user) return false;
+    const m = ui.modal({ title: t('cloud.title'), body: h('div',
+      h('div.small', { style: { lineHeight: '1.5', marginBottom: '10px' } }, t('cloud.elsewhere')),
+      h('div.small.muted', { style: { lineHeight: '1.45', marginBottom: '14px' } }, t('cloud.elsewhereNote')),
+      h('div.btns', h('a.btn.gold', { href: C.playUrl, target: '_blank', rel: 'noopener', style: { textDecoration: 'none' }, onclick: () => setTimeout(() => m.close(), 50) }, t('cloud.openGame'))),
+      h('div.center.small.muted', { style: { marginTop: '8px', userSelect: 'text', webkitUserSelect: 'text' } }, C.playUrl.replace(/^https:\/\/|\/$/g, ''))) });
+    return true;
+  };
   ui.openAccount = () => {
     const C = DH.cloud;
+    if (ui.signInElsewhere()) return;
     const googleIn = async (btn) => {
       const r = await act([btn], () => C.signInGoogle());
       if (r && r.needPassword) { m.close(); ui.openEmailAuth('link', r); }
@@ -211,6 +223,7 @@
   /** Email forms. mode: signin | signup | link (Google met an email account: sign in with the password, then Google is linked). */
   ui.openEmailAuth = (mode, link) => {
     const C = DH.cloud;
+    if (ui.signInElsewhere()) return;
     const email = h('input.field', { type: 'email', placeholder: t('cloud.email'), autocomplete: 'email', value: (link && link.email) || '' });
     const pw = h('input.field', { type: 'password', placeholder: t('cloud.password'), autocomplete: mode === 'signup' ? 'new-password' : 'current-password' });
     const go = h('button.btn.gold.block', t(mode === 'signup' ? 'cloud.emailSignUp' : mode === 'link' ? 'cloud.signInLink' : 'cloud.emailSignIn'));
