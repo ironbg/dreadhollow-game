@@ -78,10 +78,16 @@
         h('button.btn.small.gold.block', { onclick: () => ui.openAccount() }, t(DH.cloud.user ? 'cloud.account' : 'cloud.signInSave')),
         h('button.btn.small.ghost.block', { onclick: () => DH.iap.restore() }, t('shop.restore')),
         h('button.btn.small.ghost.block', { onclick: () => ui.openSaveTransfer() }, t('settings.transfer')),
+        h('div.btns', h('button.btn.small.ghost', { onclick: () => ui.openLegal('terms') }, t('title.terms')), h('button.btn.small.ghost', { onclick: () => ui.openLegal('privacy') }, t('title.privacy'))),
         h('button.btn.small.red.block', { onclick: async () => {
           if (await ui.confirm({ title: t('settings.reset'), body: t(DH.cloud.user ? 'settings.resetConfirmCloud' : 'settings.resetConfirm'), okCls: 'red', ok: t('settings.reset') })) { await DH.save.reset(); location.reload(); }
         } }, t('settings.reset'))),
       h('div.note', 'Dreadhollow v' + DH.VERSION + ' · ' + t('settings.credits'))) });
+  };
+  /** The Terms of Service or the Privacy Policy (legal.html), in the game's language. */
+  ui.openLegal = (doc) => {
+    const src = 'legal.html?doc=' + doc + '&lang=' + (DH.i18n.current === 'bg' ? 'bg' : 'en') + '&embed=1';
+    ui.modal({ title: t(doc === 'terms' ? 'title.terms' : 'title.privacy'), cls: 'legal', body: h('iframe.legal-frame', { src, title: t(doc === 'terms' ? 'title.terms' : 'title.privacy') }) });
   };
   ui.openSaveTransfer = () => {
     const ta = h('textarea', { style: { width: '100%', height: '110px', background: '#120c16', color: 'var(--text)', border: '1px solid var(--line)', borderRadius: '8px', fontSize: '10px', userSelect: 'text' } });

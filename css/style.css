@@ -1053,3 +1053,6 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
   .t-low { gap: 8px; }
   #title .t-main { min-height: 52px; }
 }
+/* the terms and the privacy policy, read inside the game */
+.modal.legal { width: min(560px, 94vw); }
+.legal-frame { display: block; width: 100%; height: min(68vh, 620px); border: 0; background: #0b080d; }

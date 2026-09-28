@@ -8,9 +8,6 @@
   const U = DH.util, h = U.h, ui = DH.ui;
   const S = () => DH.save.data;
 
-  /* Links shown under the buttons once they exist. Stores expect the terms and the privacy policy to be reachable
-   * before signing in; fill these in with the published pages and a support address. Empty ones stay hidden. */
-  const LEGAL = { terms: '', privacy: '', support: '' };
 
   const SVG = (w, body) => '<svg viewBox="0 0 ' + w + ' ' + w + '" aria-hidden="true">' + body + '</svg>';
   const ICON = {
@@ -131,12 +128,13 @@
           h('div.t-who', u ? t('title.signedAs', { name: u.name || u.email || '—' }) : t('title.asGuest'),
             h('button.t-link', { onclick: tap(() => ui.openAccount()) }, t(u ? 'title.change' : 'title.signIn'))));
       }
-      const links = [];
-      if (LEGAL.terms) links.push(h('a', { href: LEGAL.terms, target: '_blank', rel: 'noopener', onclick: (e) => e.stopPropagation() }, t('title.terms')));
-      if (LEGAL.privacy) links.push(h('a', { href: LEGAL.privacy, target: '_blank', rel: 'noopener', onclick: (e) => e.stopPropagation() }, t('title.privacy')));
-      if (LEGAL.support) links.push(h('a', { href: 'mailto:' + LEGAL.support, onclick: (e) => e.stopPropagation() }, t('title.support')));
+      // stores expect the terms and the privacy policy to be reachable before signing in (the documents: legal.html)
+      const links = [
+        h('a', { href: '#', onclick: tap((e) => { e.preventDefault(); ui.openLegal('terms'); }) }, t('title.terms')),
+        h('a', { href: '#', onclick: tap((e) => { e.preventDefault(); ui.openLegal('privacy'); }) }, t('title.privacy'))];
+      if (DH.legal && DH.legal.email) links.push(h('a', { href: 'mailto:' + DH.legal.email, onclick: (e) => e.stopPropagation() }, t('title.support')));
       foot.append(h('span.t-ver', 'v' + DH.VERSION));
-      if (links.length) foot.append(h('span.t-legal', ...links));
+      foot.append(h('span.t-legal', ...links));
     };
     draw();
     DH.events.on('cloud', draw);

@@ -3,7 +3,7 @@
  * Usage: node tools/build-www.js */
 const fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..'), out = path.join(root, 'www');
-const FILES = ['index.html', 'manifest.webmanifest', 'sw.js', 'css', 'js', 'assets'];
+const FILES = ['index.html', 'legal.html', 'manifest.webmanifest', 'sw.js', 'css', 'js', 'assets'];
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out);
 FILES.forEach((f) => fs.cpSync(path.join(root, f), path.join(out, f), { recursive: true }));

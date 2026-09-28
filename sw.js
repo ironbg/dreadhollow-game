@@ -1,8 +1,8 @@
 /* Offline cache (PWA). Bump CACHE when shipping new files. */
-const CACHE = 'dreadhollow-v160';
+const CACHE = 'dreadhollow-v161';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css', 'assets/icon.svg', 'assets/boot-bg.svg', 'assets/fonts/unifrakturmaguntia-latin-400-normal.woff2',
-  'js/core/ns.js', 'js/i18n/i18n.js', 'js/i18n/en.js', 'js/i18n/bg.js', 'js/data/content.js', 'js/data/economy.js', 'js/data/artifacts.js', 'js/data/deeds.js',
+  'js/core/ns.js', 'js/i18n/i18n.js', 'js/i18n/en.js', 'js/i18n/bg.js', 'js/data/content.js', 'js/data/economy.js', 'js/data/artifacts.js', 'js/data/deeds.js', 'js/data/legal.js', 'legal.html',
   'js/core/art.js', 'js/core/gfx.js', 'js/core/paint_heroes.js', 'js/core/paint_enemies.js', 'js/core/paint_bosses.js', 'js/core/paint_foes.js', 'js/core/paint_pixel.js', 'js/core/paint_props.js', 'js/core/paint_landmarks.js', 'js/core/stageart.js', 'js/core/icons.js',
   'js/core/audio.js', 'js/core/input.js', 'js/core/platform.js', 'js/core/save.js', 'js/services/ads.js', 'js/services/iap.js', 'js/services/review.js', 'js/services/firebase.js', 'js/services/cloud.js',
   'js/vendor/firebase/firebase-app.js', 'js/vendor/firebase/firebase-auth.js', 'js/vendor/firebase/firebase-firestore-lite.js',
