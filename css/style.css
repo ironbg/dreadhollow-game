@@ -1056,3 +1056,43 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 /* the terms and the privacy policy, read inside the game */
 .modal.legal { width: min(560px, 94vw); }
 .legal-frame { display: block; width: 100%; height: min(68vh, 620px); border: 0; background: #0b080d; }
+/* home: side columns and the hero in one band, so nothing below can slide under the buttons;
+   every button takes the same height (a timer sits on the icon's lower rim), so the rows line up left and right */
+.home-top { display: grid; grid-template-columns: 64px 1fr 64px; align-items: start; column-gap: 2px; margin: 0 -6px; }
+.home .home-top .side { position: static; display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 4px; z-index: 3; }
+.home-top .hero-stage { align-self: stretch; min-height: 190px; }
+.home .sidebtn { width: 64px; height: 66px; justify-content: flex-start; gap: 3px; }
+.home .sidebtn span.l { max-width: 64px; font-size: 10px; line-height: 1.1; }
+.home .sidebtn .tm { position: absolute; top: 37px; left: 50%; transform: translateX(-50%); z-index: 2; padding: 1px 4px; white-space: nowrap; font-size: 8px; line-height: 10px; color: #ffd98a; background: rgba(8,5,10,.92); border: 1px solid #7a5c34; }
+.home .sidebtn .badge { right: 2px; }
+/* a short screen: smaller buttons, so the battle plaque stays in view */
+@media (max-height: 780px) {
+  .home-top { grid-template-columns: 56px 1fr 56px; }
+  .home .home-top .side { gap: 5px; padding-top: 2px; }
+  .home .sidebtn { width: 56px; height: 56px; gap: 2px; }
+  .home .sidebtn .ic, .sidebtn .ic { width: 40px; height: 40px; }
+  .home .sidebtn .ic > img { width: 28px; height: 28px; }
+  .home .sidebtn span.l { font-size: 9px; max-width: 56px; }
+  .home .sidebtn .tm { top: 31px; }
+  .home-top .hero-stage { min-height: 160px; }
+}
+@media (max-height: 700px) {
+  .home-top { grid-template-columns: 50px 1fr 50px; }
+  .home .home-top .side { gap: 3px; padding-top: 0; }
+  .home .sidebtn { width: 50px; height: 48px; gap: 1px; }
+  .home .sidebtn .ic, .sidebtn .ic { width: 34px; height: 34px; }
+  .home .sidebtn .ic > img { width: 24px; height: 24px; }
+  .home .sidebtn span.l { font-size: 8.5px; max-width: 50px; }
+  .home .sidebtn .tm { top: 25px; font-size: 7px; line-height: 9px; }
+  .home .sidebtn .badge { transform: scale(.85); }
+  .home-top .hero-stage { min-height: 130px; }
+}
+@media (max-height: 700px) {
+  .home-top .hero-stage { min-height: 116px; }
+  .stagecard { min-height: 118px; }
+  .stagecard .info { padding-top: 6px; }
+  .stagecard .chips { padding-top: 5px; }
+}
+/* the battle plaque stays in view: on a screen too short for the whole home page it rests on the bottom edge
+   while the rest scrolls behind it (when everything fits, nothing moves) */
+.home .bbwrap { position: sticky; bottom: 6px; z-index: 4; filter: drop-shadow(0 -6px 10px rgba(0,0,0,.65)); }

@@ -40,10 +40,13 @@
       right.append(sideBtn('n_pass', t('home.pass'), () => ui.go('quests', 'pass'), b.pass));
       right.append(sideBtn('n_book', t('home.deeds'), () => ui.go('quests', 'deeds')));
       if (DH.input.desktop && DH.input.fullscreenAvailable()) right.append(sideBtn(DH.input.isFullscreen() ? 'u_unfull' : 'u_full', t('settings.fullscreen'), () => { DH.input.toggleFullscreen(); setTimeout(() => ui.refresh(), 300); }));
-      root.append(left, right);
-      root.append(h('div.hero-stage',
+      // the two columns stay within one button of each other, so their rows line up side by side
+      while (left.children.length > right.children.length + 1) right.append(left.lastElementChild);
+      while (right.children.length > left.children.length + 1) left.append(right.lastElementChild);
+      // the columns and the hero share one band: the panels below always start under the taller column
+      root.append(h('div.home-top', left, h('div.hero-stage',
         h('div.hero-name', t('hero.' + s.selectedHero + '.name')),
-        h('div.power', { onclick: () => ui.go('armory') }, t('home.power'), h('b', U.fmt(M.powerScore())))));
+        h('div.power', { onclick: () => ui.go('armory') }, t('home.power'), h('b', U.fmt(M.powerScore())))), right));
       const vText = h('div.small.muted'), vGold = h('span.num.goldtxt');
       const vig = h('div.panel.vigil', { onclick: () => { click(); ui.openVigil(); } },
         A.img('c_wood'), h('div.grow', h('div', { style: { fontWeight: 800 } }, t('home.vigil')), vText), h('div.row', A.img('i_gold'), vGold));
