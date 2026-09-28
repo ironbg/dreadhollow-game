@@ -89,7 +89,25 @@
     async reload() { const db = this.db(), u = db.users[db.session]; if (u && u.sent) { u.verified = true; this.put(db); } this.notify(); },
     async resetPassword() { await this.lag(); },
     async signOut() { const db = this.db(); db.session = null; this.put(db); this.notify(); },
-    async deleteAccount() { const db = this.db(); delete db.users[db.session]; delete db.saves[db.session]; db.session = null; this.put(db); this.notify(); },
+    async deleteAccount() { const db = this.db(); this.dropBoards(db, db.session); delete db.users[db.session]; delete db.saves[db.session]; db.session = null; this.put(db); this.notify(); },
+    // leaderboards, kept in the same pretend server
+    dropBoards(db, uid) { for (const k in db.boards || {}) delete db.boards[k][uid]; },
+    async boardSubmit(key, entry) {
+      await this.lag(); const db = this.db(); if (!db.session) throw fail('requires-login');
+      db.boards = db.boards || {}; const b = db.boards[key] = db.boards[key] || {}, cur = b[db.session];
+      if (cur && !(entry.score > cur.score || (entry.score === cur.score && entry.name !== cur.name))) throw fail('denied');
+      b[db.session] = Object.assign({}, entry, { at: Date.now() }); this.put(db);
+    },
+    async boardTop(key, n) {
+      await this.lag(); const b = (this.db().boards || {})[key] || {};
+      return Object.keys(b).map((uid) => Object.assign({ uid }, b[uid])).sort((x, y) => y.score - x.score || x.at - y.at).slice(0, n);
+    },
+    async boardMine(key) {
+      const db = this.db(), b = (db.boards || {})[key] || {}, me = db.session && b[db.session];
+      if (!me) return null;
+      return Object.assign({ uid: db.session, rank: Object.values(b).filter((e) => e.score > me.score).length + 1 }, me);
+    },
+    async boardRemove() { const db = this.db(); this.dropBoards(db, db.session); this.put(db); },
     async getSave(uid) { await this.lag(); return this.db().saves[uid] || null; },
     async putSave(uid, doc, expectedRev) {
       await this.lag();
@@ -211,6 +229,21 @@
       location.reload();
     },
 
+    /* ---------- leaderboards (the boards themselves are set in live.json, see DH.meta.boards) ---------- */
+    /** Send every best score not yet on its board; quietly retried after the next run or sign-in if it fails. */
+    async submitBoards() {
+      if (!this.user || this.boardBusy) return;
+      const list = DH.meta.boardPending(); if (!list.length) return;
+      this.boardBusy = true;
+      try {
+        for (const b of list) {
+          try { await this.provider.boardSubmit(b.key, b.entry); DH.meta.boardSent(b.key, b.entry.score); } catch (e) { console.warn('leaderboard', b.key, e.code || e); }
+        }
+      } finally { this.boardBusy = false; }
+    },
+    async boardTop(key, n) { await this.ensure().catch(() => {}); return this.provider.boardTop(key, n || 50); },
+    async boardMine(key) { if (!this.user) return null; return this.provider.boardMine(key); },
+
     /* ---------- sync ---------- */
     /** Upload soon after a change: at most once a minute. */
     schedule() {
@@ -242,6 +275,7 @@
       }
       this.busy = false; this.emit();
       if (this.again) { this.again = false; this.sync('again'); }
+      else if (this.state === 'idle') this.submitBoards(); // the profile is settled: new best scores go to their boards
     },
     async syncOnce() {
       const S = DH.save, meta = S.meta, uid = this.user.uid;

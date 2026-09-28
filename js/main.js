@@ -134,7 +134,7 @@
       const calendar = () => { ui.flushSeason(); if (M.loginPending()) setTimeout(() => ui.openLogin(), 500); };
       if (!DH.save.data.playerName) setTimeout(() => ui.openName(true, calendar), 700); else calendar();
     });
-    DH.events.on('live', () => { if (game.mode !== 'run') ui.refresh(); }); // an event started or ended: the home buttons follow
+    DH.events.on('live', () => { if (game.mode !== 'run') ui.refresh(); DH.cloud.submitBoards(); }); // an event started or ended: the home buttons follow
     // daily rollover while the app stays open
     let day = DH.util.dayKey();
     setInterval(() => { const d = DH.util.dayKey(); if (d !== day) { day = d; M.ensureDaily(); DH.events.emit('meta'); } }, 30000);

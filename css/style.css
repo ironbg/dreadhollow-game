@@ -1204,3 +1204,21 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .evitem .btn img { width: 20px; height: 20px; }
 .evitem.sold { opacity: .55; }
 .evitem .evsold { font-weight: 800; padding: 6px 0; }
+/* leaderboards */
+.lbtabs { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 10px; }
+.lbtabs .chip { padding: 5px 10px; font-size: 12px; background: rgba(10,6,12,.72); border: 1px solid rgba(214,164,70,.55); color: #e8dcc8; }
+.lbtabs .chip.on { background: linear-gradient(180deg, #6a4a14, #3a2408); color: #fff0c0; border-color: #f0c860; }
+.lbhead { text-align: center; margin-bottom: 8px; }
+.lbhead .lbt { font-family: var(--title); color: var(--gold); font-size: 16px; }
+.lbsign { display: flex; align-items: center; gap: 10px; justify-content: space-between; padding: 8px 10px; margin-bottom: 8px; background: rgba(240,200,96,.08); border: 1px solid #6a5030; }
+.lblist { display: flex; flex-direction: column; gap: 3px; }
+.lbrow { display: flex; align-items: center; gap: 8px; padding: 5px 8px; background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.05); }
+.lbrow .lbrank { width: 30px; text-align: center; font: 700 12px var(--num); color: var(--muted); }
+.lbrow img, .lbrow .lbnohero { width: 26px; height: 26px; flex: none; }
+.lbrow .lbname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 800; }
+.lbrow .lbscore { font: 700 12px var(--num); color: #f0e0c0; }
+.lbrow.top1 .lbrank { color: #ffd35a; } .lbrow.top2 .lbrank { color: #d8dce8; } .lbrow.top3 .lbrank { color: #e0955a; }
+.lbrow.top1 { border-color: rgba(255,211,90,.45); }
+.lbrow.me { background: rgba(120,200,110,.14); border-color: rgba(143,224,138,.55); }
+.lbgap { text-align: center; color: var(--muted); line-height: 1; }
+.lbnote { padding: 10px 0; }

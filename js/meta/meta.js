@@ -722,6 +722,7 @@
       const n = meta.eventTokensFor(ev, r); meta.eventState(ev).tokens += n;
       return { id: ev.id, n, icon: meta.eventIcon(ev), name: meta.loc(ev.token) };
     }).filter((e) => e.n > 0);
+    meta.boardRecord(r, res);
     s.runsSinceAd++;
     changed();
     return res;
@@ -757,6 +758,60 @@
   };
   /** Shop items the player can buy right now, across the running events (the home badge). */
   meta.eventAffordable = () => meta.liveEvents().reduce((n, ev) => n + ev.shop.filter((it) => it && it.cost <= meta.eventState(ev).tokens && meta.eventItemLeft(ev, it) > 0).length, 0);
+  /* ---------------- Leaderboards: which boards exist is set in live.json ('boards'), nothing here decides it ----------------
+   * A board: { id, metric, mode: best|total, period: all|month|week|event, event (for period event), stage, hero, win,
+   * start, end, name { bg, en } }. Scores live in boards/<id>__<period>/scores/<uid>; months and weeks count in UTC. */
+  const pad2 = (n) => String(n).padStart(2, '0');
+  /** How one run scores on a board. total boards add the runs up over the board's period. */
+  const METRICS = {
+    kills: (r) => r.kills, time: (r) => Math.floor(r.time), level: (r) => r.level, bosses: (r) => r.bossKills,
+    gold: (r, res) => res.goldRun, wins: (r) => (r.victory ? 1 : 0), agony: (r) => (r.victory && r.agonyOn ? r.agony : 0),
+    tokens: (r, res, b) => ((res.events || []).find((e) => e.id === b.event) || {}).n || 0,
+  };
+  meta.BOARD_METRICS = Object.keys(METRICS);
+  meta.boardPeriodKey = (b) => {
+    const d = new Date(U.now());
+    if (b.period === 'month') return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1);
+    if (b.period === 'week') { // ISO week: the week of the Thursday
+      const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())), day = t.getUTCDay() || 7;
+      t.setUTCDate(t.getUTCDate() + 4 - day);
+      const w = Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
+      return t.getUTCFullYear() + '-w' + pad2(w);
+    }
+    if (b.period === 'event') return String(b.event || 'event');
+    return 'all';
+  };
+  meta.boardKey = (b) => (b.id + '__' + meta.boardPeriodKey(b)).replace(/[^A-Za-z0-9_-]/g, '-');
+  /** The boards open now. An event board is open while its event is collecting. */
+  meta.boards = () => {
+    const cfg = DH.live && DH.live.config, now = U.now();
+    return ((cfg && cfg.boards) || []).filter((b) => b && b.id && METRICS[b.metric]
+      && !(b.start && now < Date.parse(b.start)) && !(b.end && now >= Date.parse(b.end))
+      && (b.period !== 'event' || meta.liveEvents().some((ev) => ev.id === b.event && meta.eventCollecting(ev))));
+  };
+  const boardStore = () => { const s = S(); return s.boards || (s.boards = { best: {}, sent: {} }); };
+  /** After a run: the player's best (or running total) on every open board the run counts for. */
+  meta.boardRecord = (r, res) => {
+    const bs = boardStore();
+    for (const b of meta.boards()) {
+      if ((b.stage && b.stage !== r.stage) || (b.hero && b.hero !== r.hero) || (b.win && !r.victory)) continue;
+      const v = Math.floor(METRICS[b.metric](r, res, b) || 0); if (v <= 0) continue;
+      const key = meta.boardKey(b), cur = bs.best[key], score = b.mode === 'total' ? (cur ? cur.score : 0) + v : v;
+      if (!cur || score > cur.score) bs.best[key] = { score, hero: r.hero, stage: r.stage };
+    }
+  };
+  /** Best scores not yet on their (open) boards, ready to send. */
+  meta.boardPending = () => {
+    const s = S(), bs = boardStore(), open = new Set(meta.boards().map(meta.boardKey));
+    return Object.keys(bs.best).filter((k) => open.has(k) && bs.best[k].score > (bs.sent[k] || 0)).map((k) => ({
+      key: k, entry: { name: (s.playerName || '').slice(0, 24) || '?', score: bs.best[k].score, hero: String(bs.best[k].hero || ''), stage: String(bs.best[k].stage || ''), ver: DH.VERSION } }));
+  };
+  meta.boardSent = (key, score) => { const bs = boardStore(); bs.sent[key] = Math.max(bs.sent[key] || 0, score); changed(); };
+  meta.boardBest = (key) => boardStore().best[key] || null;
+  /** A new name: the entries on the open boards are sent again, to carry it. */
+  meta.boardRename = () => { const bs = boardStore(); meta.boards().forEach((b) => { const k = meta.boardKey(b); if (bs.best[k]) bs.sent[k] = 0; }); changed(); };
+  /** Every board this profile ever scored on (to remove its entries with the account). */
+  meta.boardKeysPlayed = () => Object.keys(boardStore().best);
   meta.doubleRunGold = (res) => { S().gold += res.gold; S().stats.goldEarned += res.gold; changed(); };
 
   /* ---------------- The Seven Nights (a newcomer event, see E.NEWBIE) ---------------- */

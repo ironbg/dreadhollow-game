@@ -50,6 +50,7 @@
       if (!first && v === s.playerName) { done = true; m.close(); if (then) then(); return; } // unchanged: nothing to pay
       if (cost > 0 && !M.spend({ gems: cost })) { ui.toast(t('common.notEnough'), 'bad'); return; }
       s.playerName = v; if (!first) s.nameChanges = (s.nameChanges || 0) + 1;
+      M.boardRename(); DH.cloud.submitBoards(); // the leaderboards show the new name
       DH.save.persist(); DH.audio.play('reward'); done = true; m.close(); ui.renderTop();
       if (then) then();
     };
@@ -499,6 +500,48 @@
     if (!ps || (DH.title && DH.title.el) || (DH.game && DH.game.mode === 'run')) return;
     M.pendingSeason = null;
     setTimeout(() => ui.rewardPopup(t('pass.seasonEnded', { n: ps.n }), ps.rewards), 400);
+  };
+
+  /* ---------------- Leaderboards (DH.meta.boards: set in live.json) ---------------- */
+  ui.openBoards = (startKey) => {
+    const C = DH.cloud, boards = M.boards(); if (!boards.length) return;
+    let cur = boards.find((b) => M.boardKey(b) === startKey) || boards[0], m = null;
+    const list = h('div.lblist');
+    const score = (b, v) => (b.metric === 'time' ? U.fmtTime(v) : U.fmt(v));
+    const eventOf = (b) => M.liveEvents().find((e) => e.id === b.event);
+    const title = (b) => M.loc(b.name) || t('lb.m.' + b.metric + (b.mode === 'total' ? 'T' : ''), { name: M.loc((eventOf(b) || {}).token) });
+    const period = (b) => b.period === 'month' ? new Date(U.now()).toLocaleDateString(DH.i18n.current, { month: 'long', year: 'numeric', timeZone: 'UTC' })
+      : b.period === 'week' ? t('lb.p.week') : b.period === 'event' ? M.loc((eventOf(b) || {}).name) : t('lb.p.all');
+    const row = (e, rank, me) => h('div.lbrow' + (me ? '.me' : '') + (rank <= 3 ? '.top' + rank : ''),
+      h('span.lbrank', rank), DH.content.heroes[e.hero] ? A.img('h_' + e.hero) : h('span.lbnohero'),
+      h('span.lbname', e.name + (me ? ' (' + t('lb.you') + ')' : '')), h('b.lbscore', score(cur, e.score)));
+    const load = async () => {
+      const b = cur, key = M.boardKey(b);
+      list.innerHTML = ''; list.append(h('div.small.muted.center.lbnote', t('lb.loading')));
+      try {
+        const [top, mine] = await Promise.all([C.boardTop(key, 50), C.boardMine(key).catch(() => null)]);
+        if (b !== cur) return;
+        list.innerHTML = '';
+        const uid = C.user && C.user.uid;
+        if (!top.length) list.append(h('div.small.muted.center.lbnote', t('lb.empty')));
+        top.forEach((e, i) => list.append(row(e, i + 1, e.uid === uid)));
+        if (mine && !top.some((e) => e.uid === mine.uid)) list.append(h('div.lbgap', '…'), row(mine, mine.rank, true));
+        const best = M.boardBest(key);
+        if (C.user && best && (!mine || best.score > mine.score)) list.append(h('div.small.muted.center.lbnote', t('lb.pending', { v: score(b, best.score) })));
+        else if (C.user && !mine) list.append(h('div.small.muted.center.lbnote', t('lb.noEntry')));
+      } catch (e) {
+        if (b !== cur) return;
+        list.innerHTML = ''; list.append(h('div.small.center.lbnote.bad', t('lb.error')));
+      }
+    };
+    const body = () => h('div.lbwin',
+      boards.length > 1 ? h('div.lbtabs', boards.map((b) => h('button.chip' + (b === cur ? '.on' : ''), { onclick: () => { click(); cur = b; m.set(body()); load(); } }, title(b)))) : null,
+      h('div.lbhead', h('div.lbt', title(cur)),
+        h('div.small.muted', [period(cur), cur.stage ? t('stage.' + cur.stage + '.name') : null, cur.hero ? t('hero.' + cur.hero + '.name') : null, cur.win ? t('lb.onlyWins') : null].filter(Boolean).join(' · '))),
+      !C.user ? h('div.lbsign', h('div.small', t('lb.signIn')), h('button.btn.small.gold', { onclick: () => { m.close(); ui.openAccount(); } }, t('title.signIn'))) : null,
+      list);
+    m = ui.modal({ title: t('lb.title'), cls: 'boards', body: () => body() });
+    load();
   };
 
   /* ---------------- Game versions (DH.live) ---------------- */

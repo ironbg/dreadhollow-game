@@ -43,6 +43,7 @@
       right.append(sideBtn('u_cog', t('home.settings'), () => ui.openSettings()));
       right.append(sideBtn('n_pass', t('home.pass'), () => ui.go('quests', 'pass'), b.pass));
       right.append(sideBtn('n_book', t('home.deeds'), () => ui.go('quests', 'deeds')));
+      if (M.boards().length) right.append(sideBtn('n_trophy', t('lb.short'), () => ui.openBoards())); // only while live.json runs a leaderboard
       if (DH.input.desktop && DH.input.fullscreenAvailable()) right.append(sideBtn(DH.input.isFullscreen() ? 'u_unfull' : 'u_full', t('settings.fullscreen'), () => { DH.input.toggleFullscreen(); setTimeout(() => ui.refresh(), 300); }));
       // the two columns stay within one button of each other, so their rows line up side by side
       while (left.children.length > right.children.length + 1) right.append(left.lastElementChild);

@@ -15,7 +15,7 @@
   };
   /** Hosts where Firebase sign-in is allowed (Authentication → Settings → Authorized domains). */
   const HOSTS = ['dreadhollow-b49c7.web.app', 'dreadhollow-b49c7.firebaseapp.com', 'localhost', '127.0.0.1'];
-  const SAVES = 'saves';
+  const SAVES = 'saves', BOARDS = 'boards';
   const RECENT_MS = 5 * 60e3; // Firebase refuses to delete an account whose last sign-in is older than this
 
   const fail = (code, extra) => Object.assign(new Error(code), { code }, extra);
@@ -134,6 +134,7 @@
       // check first, so the cloud save is never deleted while the account itself survives
       if (Date.now() - Date.parse(u.metadata.lastSignInTime) > RECENT_MS) throw fail('requires-login');
       try {
+        await this.boardRemove(DH.meta.boardKeysPlayed()); // the account's leaderboard entries go with it
         await F.deleteDoc(F.doc(db, SAVES, u.uid));
         await A.deleteUser(u);
       } catch (e) { throw wrap(e); }
@@ -144,6 +145,32 @@
         const snap = await F.getDoc(F.doc(db, SAVES, uid));
         return snap.exists() ? snap.data() : null;
       } catch (e) { throw wrap(e); }
+    },
+    /* ---------- leaderboards: boards/{key}/scores/{uid} ---------- */
+    async boardSubmit(key, entry) {
+      const u = auth.currentUser; if (!u) throw fail('requires-login');
+      try { await F.setDoc(F.doc(db, BOARDS, key, 'scores', u.uid), Object.assign({}, entry, { at: F.serverTimestamp() })); } catch (e) { throw wrap(e); }
+    },
+    async boardTop(key, n) {
+      await load();
+      try {
+        const snap = await F.getDocs(F.query(F.collection(db, BOARDS, key, 'scores'), F.orderBy('score', 'desc'), F.limit(n)));
+        return snap.docs.map((d) => Object.assign({ uid: d.id }, d.data()));
+      } catch (e) { throw wrap(e); }
+    },
+    /** The signed-in player's entry and place (players with a higher score, plus one). */
+    async boardMine(key) {
+      const u = auth && auth.currentUser; if (!u) return null;
+      try {
+        const snap = await F.getDoc(F.doc(db, BOARDS, key, 'scores', u.uid));
+        if (!snap.exists()) return null;
+        const d = snap.data(), c = await F.getCount(F.query(F.collection(db, BOARDS, key, 'scores'), F.where('score', '>', d.score)));
+        return Object.assign({ uid: u.uid, rank: c.data().count + 1 }, d);
+      } catch (e) { throw wrap(e); }
+    },
+    async boardRemove(keys) {
+      const u = auth.currentUser; if (!u || !keys || !keys.length) return;
+      await Promise.all(keys.map((k) => F.deleteDoc(F.doc(db, BOARDS, k, 'scores', u.uid)).catch(() => {})));
     },
     /** Write only if the cloud is still at expectedRev (a transaction, so two devices can never overwrite each other). */
     async putSave(uid, doc, expectedRev) {
