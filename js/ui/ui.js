@@ -198,30 +198,16 @@
     ui.renderNav();
   };
 
-  /** The portrait medallion: a gold rim with a groove the experience fills, the hero inside, the level on a seal. */
-  function medallion(hero, p, level) {
-    const R = 20.5, L = 2 * Math.PI * R;
-    const ring = h('span.mring');
-    ring.innerHTML = '<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="mxp" x1="0" y1="0" x2="1" y2="1">' +
-      '<stop offset="0" stop-color="#fff2c0"/><stop offset=".5" stop-color="#f2b640"/><stop offset="1" stop-color="#d0681c"/></linearGradient></defs>' +
-      '<circle cx="24" cy="24" r="' + R + '" class="mtrk"/>' +
-      '<circle cx="24" cy="24" r="' + R + '" class="mprg" stroke-dasharray="' + L.toFixed(2) + '" stroke-dashoffset="' + (L * (1 - p)).toFixed(2) + '" transform="rotate(-90 24 24)"/></svg>';
-    return h('div.medal', h('span.mdisc'), ring, h('span.mpic', A.img('h_' + hero)), h('span.mseal', h('b', level)));
-  }
-
   ui.renderTop = () => {
     const s = S(), el = ui.topEl; if (!el) return;
     const need = E.accountXpNext(s.accountLevel);
     const en = DH.meta.energy();
     el.innerHTML = '';
     el.append(
-      // the player: the hero's portrait in a gold medallion whose rim fills with experience, the level on a wax seal
-      // hung from it, and the name beside it with the level and points beneath; all of it opens the profile
-      h('div.who', { onclick: () => ui.openProfile(), 'aria-label': t('top.level', { n: s.accountLevel }) },
-        medallion(s.selectedHero, Math.min(1, s.accountXp / need), s.accountLevel),
-        h('div.whotxt',
-          h('div.wname', s.playerName || t('top.level', { n: s.accountLevel })),
-          h('div.wsub', h('span', t('top.level', { n: s.accountLevel })), h('span.wxp', U.fmt(Math.floor(s.accountXp)) + ' / ' + U.fmt(need))))),
+      h('div.avatar', { onclick: () => ui.openProfile() }, A.img('h_' + s.selectedHero), h('div.lvl', s.accountLevel)),
+      h('div.acct', { onclick: () => ui.openProfile() },
+        h('div.name', s.playerName || t('top.level', { n: s.accountLevel })),
+        h('div.xpbar', h('i', { style: { width: Math.min(100, s.accountXp / need * 100) + '%' } }), h('span', U.fmt(Math.floor(s.accountXp)) + ' / ' + U.fmt(need)))),
       h('div.pill', { onclick: () => ui.openEnergy() }, A.img('i_energy'), h('span', en + '/' + E.ENERGY_MAX), h('span.plus', '+')),
       h('div.pill', { onclick: () => ui.go('shop', 'gold') }, A.img('i_gold'), h('span', U.fmt(s.gold)), h('span.plus', '+')),
       h('div.pill', { onclick: () => ui.go('shop', 'gems') }, A.img('i_gem'), h('span', U.fmt(s.gems)), h('span.plus', '+')));

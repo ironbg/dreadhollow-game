@@ -1119,59 +1119,15 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .btn.dice { width: 48px; padding: 0; }
 .btn.dice svg { width: 24px; height: 24px; }
 .nameerr { min-height: 18px; margin-top: 4px; color: var(--blood-hi); text-align: center; }
-/* v1.60.43 account plate: same height, frame and notch as the currency pills, so the top bar reads as one row */
-.topbar .acct { flex: 1; min-width: 0; height: 32px; display: flex; flex-direction: row; align-items: center; gap: 0; padding: 0; cursor: pointer; }
-.topbar .acct .lvshield { position: relative; z-index: 2; flex: none; width: 26px; height: 32px; margin-right: -9px;
-  clip-path: polygon(50% 0, 100% 14%, 100% 58%, 50% 100%, 0 58%, 0 14%); background: linear-gradient(180deg, #fff0b0, #e0a93e 45%, #8a5a18); filter: drop-shadow(0 2px 0 #000); }
-.topbar .acct .lvshield::before { content: ''; position: absolute; inset: 2px; clip-path: inherit; background: radial-gradient(circle at 50% 30%, #b8323e, #6a0c16 60%, #2a0408); }
-.topbar .acct .lvshield b { position: relative; display: block; text-align: center; font: 11px/30px var(--num); color: #fff; text-shadow: 0 1px 0 #000, 0 0 3px #000; }
-.topbar .acct .aplate { flex: 1; min-width: 0; height: 28px; display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 0 7px 0 13px;
-  border: 2px solid #050308; background: #0c080e; box-shadow: inset 0 0 0 1px var(--ring); clip-path: var(--notch); }
-.topbar .acct .arow { display: flex; align-items: baseline; justify-content: space-between; gap: 5px; min-width: 0; }
-.topbar .acct .name { display: block; min-width: 0; font-family: var(--title); font-size: 11px; line-height: 11px; color: #f0c860; text-shadow: 0 1px 0 #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.topbar .acct .xpn { flex: none; font: 8px/10px var(--num); color: #b8c8e8; text-shadow: 0 1px 0 #000; }
-.topbar .acct .xpbar { position: relative; max-width: none; height: 6px; margin: 0; border: 1px solid #050308; border-radius: 0; box-shadow: none; background: #1a1420; overflow: hidden; }
-.topbar .acct .xpbar i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(180deg, #c8e8ff 0 35%, #5a90f0 35% 75%, #2a5aa8 75%); box-shadow: 0 0 5px rgba(120,180,255,.6); }
-.topbar .acct .xpbar span { display: none; }
-.topbar .acct .aplate { gap: 2px; padding: 0 6px 0 12px; }
-.topbar .acct .name { line-height: 11px; }
-.topbar .acct .xpbar { height: 11px; }
-.topbar .acct .xpbar span { position: relative; display: block; text-align: center; font: 7.5px/9px var(--num); color: #fff; text-shadow: 0 1px 0 #000, 0 0 2px #000, 0 0 3px #000; white-space: nowrap; }
-/* v1.60.44 the player in the top bar: a gold medallion with an experience rim, a wax seal for the level, the name beside it */
-.who { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; cursor: pointer; padding-left: 2px; }
-.medal { position: relative; flex: none; width: 48px; height: 48px; border-radius: 50%;
-  background: conic-gradient(from 200deg, #6a4414, #f6d48a, #a8742a, #fff0bc, #7a5018, #e0b050, #6a4414); box-shadow: 0 2px 0 #000, 0 0 0 1px #050308, 0 4px 10px rgba(0,0,0,.6); }
-.medal .mring { position: absolute; inset: 0; }
-.medal .mring svg { width: 100%; height: 100%; display: block; }
-.medal .mtrk { fill: none; stroke: #140a0e; stroke-width: 5; }
-.medal .mprg { fill: none; stroke: url(#mxp); stroke-width: 3.2; stroke-linecap: round; filter: drop-shadow(0 0 2px rgba(255,190,80,.9)); transition: stroke-dashoffset .6s ease-out; }
-.medal .mpic { position: absolute; inset: 6px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(circle at 50% 38%, #4a2a36, #160c12 72%); box-shadow: inset 0 0 0 1px #050308, inset 0 3px 6px rgba(0,0,0,.8); }
-.medal .mpic img { width: 118%; height: 118%; object-fit: cover; margin-top: 12%; image-rendering: pixelated; }
-.medal .mseal { position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); min-width: 22px; height: 18px; padding: 0 4px; border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(circle at 50% 30%, #d24a4e, #8a1420 55%, #4a060c); box-shadow: 0 0 0 1.5px #f2c460, 0 0 0 2.5px #050308, 0 2px 3px rgba(0,0,0,.7); }
-.medal .mseal b { font: 9.5px/1 var(--num); color: #fff; text-shadow: 0 1px 0 #000; }
-.whotxt { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.wname { font-family: var(--title); font-size: 14px; line-height: 1.1; color: #f4cc6a; text-shadow: 0 1px 0 #000, 0 0 8px rgba(0,0,0,.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wsub { display: flex; align-items: baseline; gap: 6px; font-size: 10.5px; line-height: 1.1; color: #c8b89a; text-shadow: 0 1px 0 #000; white-space: nowrap; overflow: hidden; }
-.wsub .wxp { font: 8.5px var(--num); color: #f0c860; opacity: .85; }
-@media (max-width: 400px) { .who { gap: 7px; } .wname { font-size: 13px; } .wsub span:first-child { display: none; } }
-/* the menus square every corner (border-radius 0 !important), so the medallion's circles are cut with clip-path */
-.medal { background: none; box-shadow: none; filter: drop-shadow(0 2px 0 #000) drop-shadow(0 3px 6px rgba(0,0,0,.6)); }
-.medal .mdisc { position: absolute; inset: 0; clip-path: circle(50%); background: conic-gradient(from 200deg, #6a4414, #f6d48a, #a8742a, #fff0bc, #7a5018, #e0b050, #6a4414); }
-.medal .mdisc::after { content: ''; position: absolute; inset: 1px; clip-path: circle(50%); background: conic-gradient(from 20deg, #8a5a1c, #f0cc78, #9a6824, #ffe6a0, #8a5a1c); opacity: .0; }
-.medal .mpic { clip-path: circle(50%); box-shadow: none; border: 0; }
-.medal .mpic::after { content: ''; position: absolute; inset: 0; clip-path: circle(50%); box-shadow: inset 0 0 0 1.5px #050308, inset 0 4px 8px rgba(0,0,0,.75); pointer-events: none; }
-.medal .mpic img { border: 0 !important; background: none !important; box-shadow: none !important; outline: 0; }
-.medal .mseal { clip-path: inset(0 round 9px); box-shadow: none; border: 0; padding: 0 5px; min-width: 24px; height: 17px;
-  background: radial-gradient(circle at 50% 28%, #d8545a, #8e1622 55%, #4a060c); }
-.medal .mseal::before { content: ''; position: absolute; inset: 0; clip-path: inset(0 round 9px); box-shadow: inset 0 0 0 1.5px #f2c460, inset 0 0 0 2.5px #3a0408; pointer-events: none; }
-.medal .mseal b { position: relative; }
-/* the level: a small engraved coin on the medallion's lower right, gold figures on dark bronze */
-.medal .mseal { left: auto; right: -5px; bottom: -4px; transform: none; width: 21px; min-width: 0; height: 21px; padding: 0; clip-path: circle(50%);
-  background: radial-gradient(circle at 50% 35%, #3a2a1c, #140c0a 70%); }
-.medal .mseal::before { clip-path: circle(50%); box-shadow: inset 0 0 0 1.5px #e8b850, inset 0 0 0 2.5px #2a1a0a, inset 0 2px 3px rgba(255,220,150,.18); }
-.medal .mseal b { font: 9px/1 var(--num); color: #ffd98a; text-shadow: 0 1px 0 #000; }
-/* the unfilled part of the rim: a quiet groove, not a band of its own */
-.medal .mtrk { stroke: rgba(20,10,14,.55); stroke-width: 3.2; }
+/* v1.60.45 the level: a small round coin on the portrait's corner (gold figures on dark bronze, a gold rim);
+   the menus square every corner, so the circle is cut with clip-path */
+.topbar .avatar .lvl { right: -7px; bottom: -7px; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 0; clip-path: circle(50%);
+  display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 35%, #3e2c1c, #140c0a 72%);
+  font: 9px/1 var(--num); color: #ffd98a; text-shadow: 0 1px 0 #000; box-shadow: none; }
+.topbar .avatar .lvl::before { content: ''; position: absolute; inset: 0; clip-path: circle(50%); pointer-events: none;
+  box-shadow: inset 0 0 0 1.5px #e8b850, inset 0 0 0 2.5px #2a1a0a, inset 0 2px 3px rgba(255,220,150,.2); }
+.topbar .avatar { overflow: visible; }
+/* the experience bar without a box behind it: the empty part is a faint groove, the fill glows, the points sit on it */
+.topbar .acct .xpbar { height: 10px; border: 0; box-shadow: none; background: rgba(255,255,255,.07); }
+.topbar .acct .xpbar i { background: linear-gradient(180deg, #d8f0ff 0%, #8cc4ff 40%, #3a78e0 100%); box-shadow: 0 0 6px rgba(120,180,255,.55); }
+.topbar .acct .xpbar span { font: 8.5px/10px var(--num); }
