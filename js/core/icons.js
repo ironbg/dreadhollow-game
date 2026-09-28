@@ -1706,6 +1706,7 @@
     P.line(g, 16, 5.2, 16, 9, 0.35, 'rgba(60,50,30,0.5)');
     g.restore();
   }
+  const UIB = ['#ffffff', '#e4e8f0', '#b4bccc', '#7a8294', '#3a3e4a'], UIL = ['#fff4dc', '#f4c890', '#d09858', '#8a5a2c', '#3a2410']; // bright steel and light leather for marks that sit on dark buttons
   const MISC = {
     i_gold(g) { // two stacks of coins and one standing before them
       const stackCoin = (x, y, rx, ry) => {
@@ -1835,18 +1836,19 @@
     u_star(g) { const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 5.6 : 13; pts.push(16 + Math.cos(a) * r, 16.6 + Math.sin(a) * r); } P.glow(g, 16, 16, 12, '#ffd040', 0.4); sil(g, pts, mfill(g, 3, 3, 29, 29, MAT.gold), 1.4); P.path(g, [16, 3.6, 18, 12, 16, 16.6, 14, 12]); P.fill(g, 'rgba(255,255,255,0.4)'); },
     u_star0(g) { const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 5.6 : 13; pts.push(16 + Math.cos(a) * r, 16.6 + Math.sin(a) * r); } sil(g, pts, P.lg(g, 0, 3, 0, 29, ['#4a4452', '#1e1a24']), 1.4); },
     u_bag(g) {
-      inkPath(g, () => { g.beginPath(); g.moveTo(11, 11); g.quadraticCurveTo(4, 17, 5.6, 24); g.quadraticCurveTo(7, 29, 16, 29); g.quadraticCurveTo(25, 29, 26.4, 24); g.quadraticCurveTo(28, 17, 21, 11); g.closePath(); }, mfill(g, 5, 11, 27, 29, MAT.leather), 1.3);
-      inkPath(g, () => { g.beginPath(); g.moveTo(11, 11.4); g.lineTo(8.4, 5.6); g.lineTo(12.6, 7.6); g.lineTo(16, 4.4); g.lineTo(19.4, 7.6); g.lineTo(23.6, 5.6); g.lineTo(21, 11.4); g.closePath(); }, mfill(g, 8, 4, 24, 12, MAT.leather), 1.1);
+      P.glow(g, 16, 19, 15, '#ffe0a8', 0.35);
+      inkPath(g, () => { g.beginPath(); g.moveTo(11, 11); g.quadraticCurveTo(4, 17, 5.6, 24); g.quadraticCurveTo(7, 29, 16, 29); g.quadraticCurveTo(25, 29, 26.4, 24); g.quadraticCurveTo(28, 17, 21, 11); g.closePath(); }, mfill(g, 5, 11, 27, 29, UIL), 1.4);
+      inkPath(g, () => { g.beginPath(); g.moveTo(11, 11.4); g.lineTo(8.4, 5.6); g.lineTo(12.6, 7.6); g.lineTo(16, 4.4); g.lineTo(19.4, 7.6); g.lineTo(23.6, 5.6); g.lineTo(21, 11.4); g.closePath(); }, mfill(g, 8, 4, 24, 12, UIL), 1.2);
       inkLine(g, 10.4, 11.6, 21.6, 11.6, 0.8, '#c8a060'); inkLine(g, 21, 11.6, 24.4, 16, 0.6, '#c8a060');
-      P.path(g, [8, 17, 10.6, 13.6, 11, 22, 8.6, 24]); P.fill(g, 'rgba(255,255,255,0.14)');
-      coinAt(g, 16, 21, 3);
+      P.path(g, [8, 17, 10.6, 13.6, 11, 22, 8.6, 24]); P.fill(g, 'rgba(255,255,255,0.35)');
+      inkCircle(g, 16, 21, 3.6, P.rg(g, 14.8, 19.8, 4.4, ['#fff8d0', '#f0c040', '#a86a10'])); P.circle(g, 14.8, 19.8, 1, '#ffffff');
     },
     u_close(g) { for (const a of [0.78, -0.78]) { g.save(); g.translate(16, 16); g.rotate(a); inkPath(g, () => { P.rrect(g, -2, -12, 4, 24, 1.6); }, P.lg(g, -2, 0, 2, 0, ['#ff8080', '#c01828', '#5a0610']), 1.3); g.restore(); } },
     u_cog(g) {
       const pts = []; for (let t = 0; t < 8; t++) { const a = t * Math.PI / 4; for (const [d, r] of [[-0.2, 13.4], [0.2, 13.4], [0.3, 9.6], [Math.PI / 4 - 0.3, 9.6]]) pts.push(16 + Math.cos(a + d) * r, 16 + Math.sin(a + d) * r); }
-      sil(g, pts, mfill(g, 3, 3, 29, 29, MAT.iron), 1.3);
-      inkCircle(g, 16, 16, 5.4, mfill(g, 10, 10, 22, 22, DARKSTEEL)); P.circle(g, 16, 16, 2.4, INK);
-      for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + 0.6; rivet(g, 16 + Math.cos(a) * 7.6, 16 + Math.sin(a) * 7.6, 0.7, MAT.iron); }
+      sil(g, pts, mfill(g, 3, 3, 29, 29, UIB), 1.4);
+      inkCircle(g, 16, 16, 5.4, mfill(g, 10, 10, 22, 22, MAT.iron)); P.circle(g, 16, 16, 2.4, INK);
+      for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + 0.6; rivet(g, 16 + Math.cos(a) * 7.6, 16 + Math.sin(a) * 7.6, 0.7, UIB); }
     },
     u_hand(g) { g.strokeStyle = INK; g.lineWidth = 3.6; g.beginPath(); g.arc(16, 16, 11, 0, Math.PI * 2); g.stroke(); g.strokeStyle = mfill(g, 5, 5, 27, 27, MAT.gold); g.lineWidth = 2.2; g.stroke(); inkCircle(g, 16, 16, 5, P.rg(g, 14.6, 14.6, 6, ['#fff6c8', '#e8b840', '#7a5414'])); },
     u_left(g) { sil(g, [22, 4.4, 22, 27.6, 6, 16], mfill(g, 6, 4, 22, 28, MAT.gold), 1.4); P.path(g, [21, 6.6, 21, 16, 8.4, 16]); P.fill(g, 'rgba(255,255,255,0.3)'); },
@@ -1857,9 +1859,9 @@
       g.strokeStyle = 'rgba(40,0,6,0.8)'; g.lineWidth = 0.8; g.beginPath(); g.arc(16, 16, 7.6, 0, Math.PI * 2); g.stroke();
       P.glow(g, 16, 16, 5, '#ff8060', 0.6); for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; P.line(g, 16 + Math.cos(a) * 1.4, 16 + Math.sin(a) * 1.4, 16 + Math.cos(a) * 5, 16 + Math.sin(a) * 5, 0.7, '#ffc0a0'); }
     },
-    u_pause(g) { for (const x of [8, 19]) inkPath(g, () => { P.rrect(g, x, 5, 5, 22, 1.4); }, mfill(g, x, 5, x + 5, 27, MAT.iron), 1.3); },
-    u_full(g) { for (const [x, y, sx, sy] of [[5, 5, 1, 1], [27, 5, -1, 1], [5, 27, 1, -1], [27, 27, -1, -1]]) sil(g, [x, y, x + sx * 9, y, x + sx * 9, y + sy * 3, x + sx * 3, y + sy * 3, x + sx * 3, y + sy * 9, x, y + sy * 9], mfill(g, 5, 5, 27, 27, MAT.iron), 1.2); },
-    u_unfull(g) { for (const [x, y, sx, sy] of [[13, 13, -1, -1], [19, 13, 1, -1], [13, 19, -1, 1], [19, 19, 1, 1]]) sil(g, [x, y, x + sx * 9, y, x + sx * 9, y + sy * 3, x + sx * 3, y + sy * 3, x + sx * 3, y + sy * 9, x, y + sy * 9], mfill(g, 4, 4, 28, 28, MAT.iron), 1.2); },
+    u_pause(g) { for (const x of [8, 19]) { inkPath(g, () => { P.rrect(g, x, 5, 5, 22, 1.4); }, mfill(g, x, 5, x + 5, 27, UIB), 1.4); P.rect(g, x + 0.9, 6.4, 1.1, 19.2, 'rgba(255,255,255,0.75)'); } },
+    u_full(g) { for (const [x, y, sx, sy] of [[5, 5, 1, 1], [27, 5, -1, 1], [5, 27, 1, -1], [27, 27, -1, -1]]) sil(g, [x, y, x + sx * 9, y, x + sx * 9, y + sy * 3, x + sx * 3, y + sy * 3, x + sx * 3, y + sy * 9, x, y + sy * 9], mfill(g, 5, 5, 27, 27, UIB), 1.3); },
+    u_unfull(g) { for (const [x, y, sx, sy] of [[13, 13, -1, -1], [19, 13, 1, -1], [13, 19, -1, 1], [19, 19, 1, 1]]) sil(g, [x, y, x + sx * 9, y, x + sx * 9, y + sy * 3, x + sx * 3, y + sy * 3, x + sx * 3, y + sy * 9, x, y + sy * 9], mfill(g, 4, 4, 28, 28, UIB), 1.3); },
     u_pin(g) { // a long pin with a red glass head, driven in at a slant
       P.ell(g, 22, 27.4, 3.4, 1, 'rgba(0,0,0,0.45)');
       inkPath(g, () => { g.beginPath(); g.moveTo(11.4, 12.6); g.lineTo(13.6, 10.6); g.lineTo(23.4, 27); g.lineTo(22.6, 27.4); g.closePath(); }, P.lg(g, 11, 10, 14, 13, ['#f0f2f8', '#8a92a4', '#3a3e48']), 0.9);
