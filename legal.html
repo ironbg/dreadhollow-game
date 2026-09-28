@@ -23,7 +23,14 @@
     nav button { font: 800 13px 'Alegreya Sans', sans-serif; color: var(--text); background: var(--panel); border: 1px solid var(--line); padding: 7px 12px; cursor: pointer; }
     nav button.on { color: #2a1604; background: linear-gradient(180deg, #ffe39a, #d9a13c); border-color: #d9a13c; }
     h1 { font: 700 26px 'Cinzel', Georgia, serif; color: var(--gold); margin: 10px 0 2px; letter-spacing: .03em; }
-    .updated { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 4px 18px; color: var(--muted); font-size: 14px; margin: 4px 0 18px; padding: 8px 12px; border-left: 3px solid var(--gold); background: var(--panel); }
+    .meta b { color: var(--text); }
+    .box { margin: 12px 0; padding: 12px 14px; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--gold); line-height: 1.6; }
+    .brand { text-decoration: none; font-size: 15px; }
+    @media print {
+      :root { --bg: #fff; --panel: #f6f2ea; --text: #222; --muted: #555; --gold: #7a5214; --line: #cbb68a; }
+      header { display: none; } body { padding: 0; } a { color: #222; }
+    }
     h2 { font: 800 18px 'Alegreya Sans', sans-serif; color: var(--gold); margin: 26px 0 6px; }
     p, li { margin: 6px 0; }
     ul { padding-left: 22px; }
@@ -36,7 +43,7 @@
 </head>
 <body>
 <main>
-  <header><span class="brand">Dreadhollow</span><nav id="nav"></nav></header>
+  <header><a id="back" class="brand" href="index.html"></a><nav id="nav"></nav></header>
   <article id="doc"></article>
 </main>
 <script src="js/data/legal.js"></script>
@@ -54,6 +61,8 @@
     return {
       owner: pick(L.owner, lang) ? esc(pick(L.owner, lang)) + (L.eik ? (lang === 'bg' ? ', ЕИК ' : ', UIC ') + esc(L.eik) : '') + (pick(L.address, lang) ? (lang === 'bg' ? ', със седалище и адрес на управление ' : ', with its registered office at ') + esc(pick(L.address, lang)) : '')
         : todo('the developer of Dreadhollow (name to be added)', 'разработчикът на Dreadhollow (името предстои да бъде добавено)'),
+      name: pick(L.owner, lang) ? esc(pick(L.owner, lang)) : todo('(name to be added)', '(името предстои да бъде добавено)'),
+      eik: L.eik ? esc(L.eik) : '', addr: pick(L.address, lang) ? esc(pick(L.address, lang)) : '',
       email: L.email ? '<a href="mailto:' + esc(L.email) + '">' + esc(L.email) + '</a>' : todo('(address to be added)', '(адресът предстои да бъде добавен)'),
       date: new Date(L.updated + 'T12:00:00').toLocaleDateString(lang === 'bg' ? 'bg-BG' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
     };
@@ -64,25 +73,33 @@
   var DOCS = {
     en: {
       privacy: { title: 'Privacy Policy', body: function (f) { return [
-        '<p>This policy explains what personal data Dreadhollow (the game, in its app and browser versions) processes, why, and what your rights are. The game is run by ' + f.owner + ', which is the controller of your personal data. Contact: ' + f.email + '.</p>',
-        '<h2>1. Playing as a guest</h2><p>If you play as a guest, your progress, settings and purchases are stored only on your device (in the app\'s storage or your browser\'s local storage). Nothing about you is sent to us. If you uninstall the app or clear the browser data, that progress is lost.</p>',
-        '<h2>2. Signing in</h2><p>You can sign in to keep your progress in the cloud and continue on another device. Sign-in is optional. We then process:</p><ul>' +
-          '<li><b>Account data:</b> your email address, and, if you sign in with Google, your Google account identifier and the name linked to it; whether your email is verified; the sign-in methods you use.</li>' +
-          '<li><b>Your cloud save:</b> your game progress and settings, a short summary of it (such as your level), the kind of device it came from (for example "Android · app") and the times it was saved.</li></ul>' +
-          '<p>We use this data only to sign you in, keep your save and restore it on your devices. The legal basis is the performance of our agreement with you (the Terms of Service) when you ask for a cloud save.</p>',
-        '<h2>3. Who processes it for us</h2><p>Sign-in and the cloud save run on Google Firebase (Firebase Authentication and Cloud Firestore), provided by Google. The web version is served by Firebase Hosting. Google processes this data on our behalf and may store it on servers outside the European Economic Area, under the safeguards of the European Commission\'s standard contractual clauses. See <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase privacy information</a>.</p>' +
-          '<p>Your cloud save can be read and changed only by your own account. We do not sell your data and do not share it with anyone else.</p>',
-        '<h2>4. Purchases, ratings and advertising</h2><p>Purchases in the app are made through Google Play or the App Store. They handle the payment under their own privacy policies; we never see your payment details, only a confirmation of what was bought. The app may show the store\'s own rating window; your rating goes to the store, not to us.</p>' +
-          '<p>This version of the game shows no third-party advertising and contains no analytics or tracking tools. If that changes, this policy will be updated first and, where the law requires it, your consent will be asked.</p>',
-        '<h2>5. Storage on your device</h2><p>The game stores its save and settings on your device, and the browser version keeps an offline copy of the game files. These are needed for the game to work and are not used to track you.</p>',
-        '<h2>6. How long we keep it</h2><p>Your account and cloud save are kept until you delete them. When you delete your account in the game, the account and its cloud save are deleted at once. Copies in Google\'s backups are removed within the periods Google applies.</p>',
-        '<h2>7. Your rights</h2><p>You can ask for access to your data, correction, deletion, restriction or a copy of it (portability), and you can object to its processing. You can do most of this in the game itself:</p><ul>' +
-          '<li><b>Delete your account and cloud save:</b> Settings → Account &amp; cloud save → Delete account.</li>' +
-          '<li><b>Export your save:</b> Settings → Transfer progress.</li></ul>' +
-          '<p>For anything else, write to ' + f.email + '. You also have the right to complain to a data protection authority; in Bulgaria this is the Commission for Personal Data Protection (<a href="https://www.cpdp.bg" target="_blank" rel="noopener">cpdp.bg</a>).</p>',
-        '<h2>8. Children</h2><p>The game is not directed at children under 13, and we do not knowingly collect their data. Where local law sets a higher age for consenting to online services, a parent or guardian must agree before a younger player signs in. If you believe a child has given us data, write to us and we will delete it.</p>',
-        '<h2>9. Security</h2><p>Data travels over encrypted connections, and access to each cloud save is limited to its owner by the database rules.</p>',
-        '<h2>10. Changes</h2><p>If this policy changes, the new version is published here with a new date, and important changes are announced in the game.</p>',
+        '<p>This Privacy Policy applies to the game <b>Dreadhollow</b> (the "Game"), in its mobile app and browser versions, developed and published by ' + f.owner + ' ("we", "us", "our"). It explains what information is processed when you play, how it is used, which third-party services are involved, and what your rights are. We are the controller of your personal data.</p>',
+        '<h2>1. Accounts and player data</h2><p>Dreadhollow can be played without an account. Signing in is optional and serves one purpose: keeping your progress in the cloud so you can restore it or continue on another device.</p><ul>' +
+          '<li><b>Guest play:</b> your progress, settings and purchases are stored only on your device (in the app\'s storage or your browser\'s local storage). Nothing about you is sent to us.</li>' +
+          '<li><b>Authentication:</b> if you sign in, Firebase Authentication (Google) processes your email address and, if you use Google Sign-In, your Google account identifier and the name linked to it, whether your email is verified, and the sign-in methods you use.</li>' +
+          '<li><b>Cloud save:</b> for signed-in players, your save is stored in Google Cloud Firestore. It contains game data such as your level, heroes, equipment, in-game currencies, unlocked items, deeds, statistics and settings, a short summary of your progress, the kind of device it came from (for example "Android · app") and the times it was saved.</li>' +
+          '<li><b>Locally stored data:</b> the Game keeps its save and settings on your device, and the browser version keeps an offline copy of the game files.</li></ul>',
+        '<h2>2. No multiplayer, chat or leaderboards</h2><p>Dreadhollow is a single-player game. It has no multiplayer, no chat or other communication between players, and no public leaderboards. Nothing about you is shown to other players.</p>',
+        '<h2>3. Advertising</h2><p>This version of the Game shows no third-party advertisements and contains no analytics, tracking or advertising identifiers. Some screens offer optional "watch an ad" rewards; in this version they show an in-game placeholder and send nothing anywhere.</p><p>If we add an advertising network (such as Google AdMob), this policy will be updated before it goes live, and where the law requires it you will be asked for consent to personalised advertising.</p>',
+        '<h2>4. In-app purchases</h2><p>The Game may offer optional in-app purchases. They are processed by Google Play Billing on Android and by the App Store on iOS. We never receive or store your card number or other payment credentials. The Game receives only the confirmation needed to know that a purchase was completed and which in-game item to grant, and records the item in your save.</p>',
+        '<h2>5. Store ratings</h2><p>The app may show the store\'s own rating window after a victory. Your rating and review go to Google Play or the App Store under their policies; we do not receive them through the Game.</p>',
+        '<h2>6. Third-party services</h2><p>The Game uses these services, which process information under their own policies:</p><ul>' +
+          '<li><b>Firebase Authentication</b> (Google): sign-in with email or Google. <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase privacy information</a></li>' +
+          '<li><b>Google Cloud Firestore</b> (Firebase): storage of the cloud save.</li>' +
+          '<li><b>Firebase Hosting</b> (Google): delivery of the browser version.</li>' +
+          '<li><b>Google Sign-In</b>: signing in with a Google account, if you choose it. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a></li>' +
+          '<li><b>Google Play</b> and the <b>Apple App Store</b>: distribution, in-app purchases and ratings. <a href="https://www.apple.com/legal/privacy/" target="_blank" rel="noopener">Apple Privacy Policy</a></li></ul>',
+        '<h2>7. Device permissions</h2><p>The Game does not request access to your camera, microphone, location, contacts, photos or files. It uses the internet only for signing in and the cloud save (the game itself can be played offline), and may use vibration for feedback, which you can turn off in Settings.</p>',
+        '<h2>8. Children\'s privacy</h2><p>The Game is not directed at children under 13, and we do not knowingly collect their personal data. Where local law sets a higher age for consenting to online services, a parent or guardian must agree before a younger player signs in. A parent or guardian who believes a child has given us personal data can contact us and we will delete it.</p>',
+        '<h2>9. How we use information</h2><p>We use the information described above only to:</p><ul><li>provide and operate the Game;</li><li>sign players in and keep their accounts secure;</li><li>save, restore and synchronise game progress between devices;</li><li>grant in-game items that were purchased;</li><li>prevent fraud, cheating and misuse of the service;</li><li>answer support and privacy requests; and</li><li>comply with legal obligations.</li></ul><p>We do not sell personal data, do not use it for advertising and do not share it with anyone other than the services listed above.</p>',
+        '<h2>10. Data retention and account deletion</h2><div class="box"><b>Delete your account and data at any time</b><br>In the Game: <b>Settings → Account &amp; cloud save → Delete account</b>. Your account and its cloud save are deleted at once. You can also ask us to do it by writing to ' + f.email + '.<br>Guest progress on this device: <b>Settings → Reset progress</b>, or uninstall the app or clear the browser data.</div>' +
+          '<p>Your account and cloud save are kept until you delete them. Copies in Google\'s backups are removed within the periods Google applies. If we must keep a record for legal reasons (for example, of a disputed purchase), we keep only what is needed and only as long as needed.</p>',
+        '<h2>11. Your privacy rights</h2><p>Under data protection law (such as the EU General Data Protection Regulation), you have the right to:</p><ul><li>know how your personal data is processed and get access to it;</li><li>have inaccurate data corrected;</li><li>have your data deleted;</li><li>restrict or object to certain processing;</li><li>receive your data in a portable form (in the Game: <b>Settings → Transfer progress</b>);</li><li>withdraw consent where processing is based on consent; and</li><li>lodge a complaint with a data protection authority; in Bulgaria this is the Commission for Personal Data Protection (<a href="https://www.cpdp.bg" target="_blank" rel="noopener">cpdp.bg</a>).</li></ul><p>To make a request, write to ' + f.email + '. We answer within one month.</p>',
+        '<h2>12. Security</h2><p>Data travels over encrypted connections. Access to each cloud save is limited to its owner by the database rules, and sign-in is handled by an established provider. No method of transmission or storage is completely secure, but we take reasonable steps to protect your information.</p>',
+        '<h2>13. International processing</h2><p>Google may process data on servers outside the European Economic Area. Such transfers are protected by the European Commission\'s standard contractual clauses and the other safeguards described in Google\'s terms.</p>',
+        '<h2>14. Legal bases for processing</h2><ul><li><b>Performance of a contract:</b> signing you in, keeping your cloud save and granting purchased items, when you ask for them.</li><li><b>Legitimate interests:</b> security, fraud and cheating prevention, and keeping the service running.</li><li><b>Legal obligations:</b> keeping records required by law, for example for purchases.</li><li><b>Consent:</b> only if a feature ever needs it (such as personalised advertising); you can withdraw it at any time.</li></ul>',
+        '<h2>15. Changes to this policy</h2><p>We will update this policy when the Game, its features or the services it uses change. The latest version is always published on this page with its date, and important changes are announced in the Game.</p>',
+        '<h2>16. Contact us</h2><div class="box">For questions, requests about your data or support:<br><b>Developer:</b> ' + f.name + '<br>' + (f.eik ? '<b>UIC:</b> ' + f.eik + '<br>' : '') + (f.addr ? '<b>Address:</b> ' + f.addr + '<br>' : '') + '<b>Game:</b> Dreadhollow<br><b>Email:</b> ' + f.email + '</div>',
       ]; } },
       terms: { title: 'Terms of Service', body: function (f) { return [
         '<p>These terms are an agreement between you and ' + f.owner + ' ("we") about your use of Dreadhollow (the game, in its app and browser versions). By playing, you accept them. If you do not agree, please do not play. Contact: ' + f.email + '.</p>',
@@ -101,25 +118,33 @@
     },
     bg: {
       privacy: { title: 'Политика за поверителност', body: function (f) { return [
-        '<p>Тази политика обяснява какви лични данни обработва Dreadhollow (играта, като приложение и в браузъра), защо и какви са правата ти. Играта се поддържа от ' + f.owner + '. Дружеството е администратор на личните ти данни. Връзка: ' + f.email + '.</p>',
-        '<h2>1. Игра като гост</h2><p>Ако играеш като гост, прогресът, настройките и покупките ти се пазят само на устройството (в паметта на приложението или в локалното хранилище на браузъра). Нищо за теб не ни се изпраща. Ако изтриеш приложението или данните на браузъра, този прогрес се губи.</p>',
-        '<h2>2. Вход в акаунт</h2><p>Можеш да влезеш, за да пазиш прогреса си в облака и да продължиш на друго устройство. Входът не е задължителен. Тогава обработваме:</p><ul>' +
-          '<li><b>Данни за акаунта:</b> имейл адреса ти, а ако влизаш с Google, идентификатора на Google акаунта ти и свързаното с него име; дали имейлът е потвърден; кои начини за вход ползваш.</li>' +
-          '<li><b>Облачния ти запис:</b> прогреса и настройките в играта, кратко резюме (например нивото ти), вида устройство, от което е дошъл (например „Android · приложение“), и кога е записан.</li></ul>' +
-          '<p>Използваме тези данни само за да те впишем, да пазим записа ти и да го възстановяваме на устройствата ти. Правното основание е изпълнението на договора ни с теб (Условията за ползване), когато поискаш облачен запис.</p>',
-        '<h2>3. Кой ги обработва за нас</h2><p>Входът и облачният запис работят чрез Google Firebase (Firebase Authentication и Cloud Firestore), предоставяни от Google. Уеб версията се доставя чрез Firebase Hosting. Google обработва тези данни от наше име и може да ги съхранява на сървъри извън Европейското икономическо пространство, при защитата на стандартните договорни клаузи на Европейската комисия. Виж <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">информацията за поверителност на Firebase</a>.</p>' +
-          '<p>Облачният ти запис може да се чете и променя само от твоя акаунт. Не продаваме данните ти и не ги споделяме с никой друг.</p>',
-        '<h2>4. Покупки, оценки и реклама</h2><p>Покупките в приложението се правят чрез Google Play или App Store. Те обработват плащането по собствените си политики за поверителност; ние никога не виждаме данните ти за плащане, а само потвърждение какво е купено. Приложението може да покаже прозореца за оценка на магазина; оценката ти отива при магазина, не при нас.</p>' +
-          '<p>Тази версия на играта не показва реклами от трети страни и не съдържа инструменти за анализ или проследяване. Ако това се промени, първо ще обновим тази политика и, където законът го изисква, ще поискаме съгласието ти.</p>',
-        '<h2>5. Съхранение на устройството</h2><p>Играта пази записа и настройките си на устройството ти, а версията в браузъра пази копие на файловете на играта, за да работи без връзка. Това е нужно, за да работи играта, и не се използва за проследяване.</p>',
-        '<h2>6. Колко дълго ги пазим</h2><p>Акаунтът и облачният ти запис се пазят, докато не ги изтриеш. Когато изтриеш акаунта си от играта, акаунтът и облачният запис се изтриват веднага. Копията в резервните копия на Google се премахват в сроковете, които Google прилага.</p>',
-        '<h2>7. Твоите права</h2><p>Можеш да поискаш достъп до данните си, поправка, изтриване, ограничаване или копие от тях (преносимост), както и да възразиш срещу обработването им. Повечето от това можеш да направиш направо в играта:</p><ul>' +
-          '<li><b>Изтриване на акаунта и облачния запис:</b> Настройки → Акаунт и облачен запис → Изтрий акаунта.</li>' +
-          '<li><b>Износ на записа:</b> Настройки → Пренос на прогреса.</li></ul>' +
-          '<p>За всичко друго ни пиши на ' + f.email + '. Имаш право и да подадеш жалба до надзорен орган; в България това е Комисията за защита на личните данни (<a href="https://www.cpdp.bg" target="_blank" rel="noopener">cpdp.bg</a>).</p>',
-        '<h2>8. Деца</h2><p>Играта не е предназначена за деца под 13 години и не събираме съзнателно техни данни. В България съгласие за онлайн услуги може да се дава самостоятелно от 14 години; за по-малки играчи родител или настойник трябва да се съгласи, преди да влязат в акаунт. Ако смяташ, че дете ни е дало данни, пиши ни и ще ги изтрием.</p>',
-        '<h2>9. Сигурност</h2><p>Данните се пренасят по криптирани връзки, а достъпът до всеки облачен запис е ограничен само до собственика му чрез правилата на базата данни.</p>',
-        '<h2>10. Промени</h2><p>Ако тази политика се промени, новата версия се публикува тук с нова дата, а важните промени се обявяват в играта.</p>',
+        '<p>Тази политика за поверителност се отнася за играта <b>Dreadhollow</b> („Играта“), като мобилно приложение и в браузъра, разработена и издадена от ' + f.owner + ' („ние“). Тя обяснява каква информация се обработва, докато играеш, как се използва, кои външни услуги участват и какви са правата ти. Ние сме администратор на личните ти данни.</p>',
+        '<h2>1. Акаунти и данни на играча</h2><p>Dreadhollow може да се играе без акаунт. Входът е по желание и служи за едно: да пазиш прогреса си в облака, за да го възстановиш или да продължиш на друго устройство.</p><ul>' +
+          '<li><b>Игра като гост:</b> прогресът, настройките и покупките ти се пазят само на устройството (в паметта на приложението или в локалното хранилище на браузъра). Нищо за теб не ни се изпраща.</li>' +
+          '<li><b>Вход:</b> ако влезеш, Firebase Authentication (Google) обработва имейл адреса ти, а ако влизаш с Google, и идентификатора на Google акаунта ти и свързаното с него име, дали имейлът е потвърден и кои начини за вход ползваш.</li>' +
+          '<li><b>Облачен запис:</b> за влезлите играчи записът се пази в Google Cloud Firestore. Той съдържа данни от играта като ниво, герои, екипировка, валути в играта, отключени предмети, подвизи, статистика и настройки, кратко резюме на прогреса, вида устройство, от което е дошъл (например „Android · приложение“), и кога е записан.</li>' +
+          '<li><b>Данни на устройството:</b> Играта пази записа и настройките си на устройството ти, а версията в браузъра пази копие на файловете на играта, за да работи без връзка.</li></ul>',
+        '<h2>2. Без мултиплейър, чат и класации</h2><p>Dreadhollow е игра за един играч. Няма мултиплейър, чат или друга връзка между играчи и няма публични класации. Нищо за теб не се показва на други играчи.</p>',
+        '<h2>3. Реклама</h2><p>Тази версия на Играта не показва реклами от трети страни и не съдържа инструменти за анализ, проследяване или рекламни идентификатори. Някои екрани предлагат награди срещу „гледане на реклама“ по желание; в тази версия те показват временна заставка в играта и не изпращат нищо никъде.</p><p>Ако добавим рекламна мрежа (например Google AdMob), ще обновим тази политика, преди тя да заработи, и където законът го изисква, ще поискаме съгласието ти за персонализирана реклама.</p>',
+        '<h2>4. Покупки в приложението</h2><p>Играта може да предлага покупки по желание. Те се обработват от Google Play Billing на Android и от App Store на iOS. Никога не получаваме и не пазим номера на картата ти или други данни за плащане. Играта получава само потвърждението, нужно да разбере, че покупката е завършена и кой предмет да даде, и го отбелязва в записа ти.</p>',
+        '<h2>5. Оценки в магазина</h2><p>Приложението може да покаже прозореца за оценка на магазина след победа. Оценката и отзивът ти отиват в Google Play или App Store по техните правила; ние не ги получаваме чрез Играта.</p>',
+        '<h2>6. Външни услуги</h2><p>Играта ползва тези услуги, които обработват информация по собствените си правила:</p><ul>' +
+          '<li><b>Firebase Authentication</b> (Google): вход с имейл или Google. <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Поверителност при Firebase</a></li>' +
+          '<li><b>Google Cloud Firestore</b> (Firebase): съхранение на облачния запис.</li>' +
+          '<li><b>Firebase Hosting</b> (Google): доставяне на версията в браузъра.</li>' +
+          '<li><b>Вход с Google</b>: вход с Google акаунт, ако го избереш. <a href="https://policies.google.com/privacy?hl=bg" target="_blank" rel="noopener">Политика за поверителност на Google</a></li>' +
+          '<li><b>Google Play</b> и <b>Apple App Store</b>: разпространение, покупки в приложението и оценки. <a href="https://www.apple.com/legal/privacy/" target="_blank" rel="noopener">Политика за поверителност на Apple</a></li></ul>',
+        '<h2>7. Разрешения на устройството</h2><p>Играта не иска достъп до камерата, микрофона, местоположението, контактите, снимките или файловете ти. Ползва интернет само за вход и облачен запис (самата игра може да се играе без връзка) и може да ползва вибрация, която можеш да изключиш от Настройките.</p>',
+        '<h2>8. Деца</h2><p>Играта не е предназначена за деца под 13 години и не събираме съзнателно техни лични данни. В България съгласие за онлайн услуги може да се дава самостоятелно от 14 години; за по-малки играчи родител или настойник трябва да се съгласи, преди да влязат в акаунт. Родител или настойник, който смята, че дете ни е дало лични данни, може да се свърже с нас и ще ги изтрием.</p>',
+        '<h2>9. За какво ползваме информацията</h2><p>Ползваме описаната информация само за да:</p><ul><li>предоставяме Играта и да я поддържаме;</li><li>вписваме играчите и пазим акаунтите им;</li><li>записваме, възстановяваме и синхронизираме прогреса между устройствата;</li><li>даваме купените предмети в играта;</li><li>предотвратяваме измами, мамене и злоупотреби;</li><li>отговаряме на запитвания за поддръжка и за лични данни; и</li><li>изпълняваме законовите си задължения.</li></ul><p>Не продаваме лични данни, не ги ползваме за реклама и не ги споделяме с никого освен с изброените по-горе услуги.</p>',
+        '<h2>10. Съхранение и изтриване на акаунта</h2><div class="box"><b>Изтрий акаунта и данните си по всяко време</b><br>В Играта: <b>Настройки → Акаунт и облачен запис → Изтрий акаунта</b>. Акаунтът и облачният му запис се изтриват веднага. Можеш и да ни помолиш да го направим на ' + f.email + '.<br>Прогрес като гост на това устройство: <b>Настройки → Изтрий прогреса</b>, или изтрий приложението или данните на браузъра.</div>' +
+          '<p>Акаунтът и облачният ти запис се пазят, докато не ги изтриеш. Копията в резервните копия на Google се премахват в сроковете, които Google прилага. Ако законът ни задължава да пазим някакъв запис (например за оспорена покупка), пазим само нужното и само колкото е нужно.</p>',
+        '<h2>11. Твоите права</h2><p>Според законите за защита на данните (например Общия регламент на ЕС) имаш право:</p><ul><li>да знаеш как се обработват личните ти данни и да получиш достъп до тях;</li><li>да поправиш неточни данни;</li><li>да поискаш изтриването им;</li><li>да ограничиш или да възразиш срещу някои видове обработване;</li><li>да получиш данните си в преносим вид (в Играта: <b>Настройки → Пренос на прогреса</b>);</li><li>да оттеглиш съгласие, когато обработването се основава на съгласие; и</li><li>да подадеш жалба до надзорен орган; в България това е Комисията за защита на личните данни (<a href="https://www.cpdp.bg" target="_blank" rel="noopener">cpdp.bg</a>).</li></ul><p>За искане ни пиши на ' + f.email + '. Отговаряме до един месец.</p>',
+        '<h2>12. Сигурност</h2><p>Данните се пренасят по криптирани връзки. Достъпът до всеки облачен запис е ограничен само до собственика му чрез правилата на базата данни, а входът се обслужва от утвърден доставчик. Никой начин за пренос или съхранение не е напълно сигурен, но вземаме разумни мерки да пазим информацията ти.</p>',
+        '<h2>13. Обработване извън ЕС</h2><p>Google може да обработва данни на сървъри извън Европейското икономическо пространство. Тези прехвърляния са защитени със стандартните договорни клаузи на Европейската комисия и другите гаранции в условията на Google.</p>',
+        '<h2>14. Правни основания</h2><ul><li><b>Изпълнение на договор:</b> вписване, пазене на облачния запис и даване на купените предмети, когато ги поискаш.</li><li><b>Легитимен интерес:</b> сигурност, предотвратяване на измами и мамене и поддържане на услугата.</li><li><b>Законово задължение:</b> пазене на записи, които законът изисква, например за покупки.</li><li><b>Съгласие:</b> само ако някоя възможност го изисква (например персонализирана реклама); можеш да го оттеглиш по всяко време.</li></ul>',
+        '<h2>15. Промени в политиката</h2><p>Ще обновяваме тази политика, когато Играта, възможностите ѝ или услугите, които ползва, се променят. Последната версия винаги е на тази страница с датата си, а важните промени се обявяват в Играта.</p>',
+        '<h2>16. Връзка с нас</h2><div class="box">За въпроси, искания за данните ти или поддръжка:<br><b>Разработчик:</b> ' + f.name + '<br>' + (f.eik ? '<b>ЕИК:</b> ' + f.eik + '<br>' : '') + (f.addr ? '<b>Адрес:</b> ' + f.addr + '<br>' : '') + '<b>Игра:</b> Dreadhollow<br><b>Имейл:</b> ' + f.email + '</div>',
       ]; } },
       terms: { title: 'Условия за ползване', body: function (f) { return [
         '<p>Тези условия са споразумение между теб и ' + f.owner + ' („ние“) за ползването на Dreadhollow (играта, като приложение и в браузъра). Като играеш, ги приемаш. Ако не си съгласен, моля, не играй. Връзка: ' + f.email + '.</p>',
@@ -137,13 +162,15 @@
       ]; } },
     },
   };
-  var UI = { en: { privacy: 'Privacy', terms: 'Terms', updated: 'Last updated: ' }, bg: { privacy: 'Поверителност', terms: 'Условия', updated: 'Последна промяна: ' } };
+  var UI = { en: { privacy: 'Privacy', terms: 'Terms', game: 'Game', updated: 'Effective date', dev: 'Developer', back: '← Back to Dreadhollow' },
+    bg: { privacy: 'Поверителност', terms: 'Условия', game: 'Игра', updated: 'В сила от', dev: 'Разработчик', back: '← Към Dreadhollow' } };
 
   function render() {
     var D = DOCS[state.lang][state.doc], f = fill(state.lang), u = UI[state.lang];
     document.documentElement.lang = state.lang;
     document.title = 'Dreadhollow · ' + D.title;
-    document.getElementById('doc').innerHTML = '<h1>' + D.title + '</h1><div class="updated">' + u.updated + f.date + '</div>' + D.body(f).join('');
+    document.getElementById('back').textContent = u.back;
+    document.getElementById('doc').innerHTML = '<h1>' + D.title + '</h1><div class="meta"><span><b>' + u.game + ':</b> Dreadhollow</span><span><b>' + u.updated + ':</b> ' + f.date + '</span><span><b>' + u.dev + ':</b> ' + f.name + '</span></div>' + D.body(f).join('');
     var nav = document.getElementById('nav');
     nav.innerHTML = '';
     [['doc', 'privacy', u.privacy], ['doc', 'terms', u.terms], ['lang', 'en', 'English'], ['lang', 'bg', 'Български']].forEach(function (b) {
