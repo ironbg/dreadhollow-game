@@ -1054,7 +1054,7 @@
 
     /* ---------------- misc ---------------- */
     burst(x, y, n, colors, spd) {
-      if (this.settings.lowFx) n = Math.ceil(n / 2);
+      if (this.settings.lowFx) n = Math.ceil(n / (this.settings.minFx ? 4 : 2));
       for (let i = 0; i < n; i++) {
         if (this.parts.length > 700) this.parts.shift();
         const a = Math.random() * TAU, s = Math.random() * spd;

@@ -140,7 +140,7 @@
    *  glints on ice, crystal and gold, dust trickling off old stone, leaves and drips in the bog. */
   const STONE = { lm_column: 1, lm_colbroken: 1, lm_wall: 1, lm_arch: 1, lm_statue: 1 };
   R.landmarkFx = function (dt) {
-    const p = this.player, V = DH.view, hw = (V.w || 270) / 2 + 20, hh = (V.h || 480) / 2 + 60, lowK = this.settings.lowFx ? 0.35 : 1, ice = this.stage.variant === 'ice';
+    const p = this.player, V = DH.view, hw = (V.w || 270) / 2 + 20, hh = (V.h || 480) / 2 + 60, lowK = this.settings.minFx ? 0.15 : this.settings.lowFx ? 0.35 : 1, ice = this.stage.variant === 'ice';
     const chance = (rate) => Math.random() < rate * dt * lowK;
     const glint = (x, y, c) => this.gpart({ x, y, vx: 0, vy: 0, life: 0.32, max: 0.32, c, r: 1, core: '#ffffff' });
     for (const q of this.lmNear) {

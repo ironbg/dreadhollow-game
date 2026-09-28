@@ -4,7 +4,7 @@
  *   - light shafts falling from cracks in the ceiling, with dust dancing inside them
  *   - glowing (additive) particles: spell trails, elemental hit sparks, level-up pillar, elite auras
  *   - flickering torchlight on the hero
- * Everything is cosmetic; the Battery saver setting (lowFx) thins it out. */
+ * Everything is cosmetic; the Graphics effects setting thins it out (lowFx: fewer, minFx: the fewest and no shadows). */
 (function (DH) {
   'use strict';
   const U = DH.util, A = DH.art, G = DH.gfx;
@@ -66,7 +66,7 @@
   R.vfxAtmo = function () { return ATMO[this.stageId] || ATMO.crypt; };
   R.updateVfx = function (dt) {
     const at = this.vfxAtmo(), V = DH.view, p = this.player, W = V.w, H = V.h;
-    const want = Math.round(at.n * (W * H) / (270 * 480) * (this.settings.lowFx ? 0.4 : 1));
+    const want = Math.round(at.n * (W * H) / (270 * 480) * (this.settings.minFx ? 0 : this.settings.lowFx ? 0.4 : 1));
     this.atmo = this.atmo || [];
     const list = this.atmo, left = p.x - W / 2 - 20, top = p.y - H / 2 - 20;
     while (list.length < want) {
@@ -135,6 +135,7 @@
   }
   const near = []; // reused each frame: who may throw a projected shadow
   R.renderShadows = function (g, cx, cy, W, H, lights) {
+    if (this.settings.minFx) return; // the fewest effects: no shadows at all
     const px = DH.view.px, rd = this.rd, p = this.player;
     const put = (x, y, rw, rh) => { // centred at x, y (world units), snapped to the buffer grid, drawn 1:1
       const wp = Math.max(2, Math.round(rw * px)), hp = Math.max(2, Math.round(rh * px));
@@ -267,7 +268,7 @@
   };
 
   /* ---------------- glowing particle system ---------------- */
-  R.gpart = function (o) { const L = this.gparts || (this.gparts = []); if (L.length > (this.settings.lowFx ? 120 : 320)) L.shift(); L.push(o); };
+  R.gpart = function (o) { const L = this.gparts || (this.gparts = []); if (L.length > (this.settings.minFx ? 50 : this.settings.lowFx ? 120 : 320)) L.shift(); L.push(o); };
   R.updateGparts = function (dt) {
     if (this.lightFlash > 0) this.lightFlash = this.lightFlash < 0.01 ? 0 : this.lightFlash * Math.pow(0.0015, dt);
     const L = this.gparts; if (!L) return;
@@ -275,7 +276,7 @@
   };
   /** Elemental impact sparks. */
   R.hitSpark = function (e, tags, crit) {
-    if (this.settings.lowFx && Math.random() < 0.6) return;
+    if (this.settings.lowFx && Math.random() < (this.settings.minFx ? 0.9 : 0.6)) return;
     const c = elemColor(tags), n = crit ? 5 : 2;
     const fire = tags && tags.includes('fire'), ice = tags && tags.includes('ice'), bolt = tags && tags.includes('lightning');
     for (let i = 0; i < n; i++) {
@@ -285,7 +286,7 @@
   };
   /** Trails behind spell projectiles (called while rendering them). */
   R.projTrail = function (b) {
-    if (!b.a || Math.random() < (this.settings.lowFx ? 0.8 : 0.45)) return;
+    if (!b.a || this.settings.minFx || Math.random() < (this.settings.lowFx ? 0.8 : 0.45)) return;
     const c = b.k === 'flame' || b.k === 'fireball' || b.k === 'wave' ? '#ff8a30' : elemColor(b.a.tags);
     if (b.k === 'arrow' || b.k === 'dart' || b.k === 'axe' || b.k === 'chakram' || b.k === 'flask') { if (Math.random() < 0.5) return; }
     this.gpart({ x: b.x + U.rand(-1.5, 1.5), y: b.y + U.rand(-1.5, 1.5), vx: -b.vx * 0.05, vy: -b.vy * 0.05 - 4, life: 0.35, max: 0.35, c, r: 0.8, core: c });

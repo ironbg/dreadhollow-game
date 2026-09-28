@@ -36,7 +36,7 @@
       purchases: { noAds: false, once: {}, firstGems: {}, soulUntil: 0, soulLastDay: null, total: 0 },
       chestPity: 0, freeChestTs: 0,
       runsSinceAd: 0,
-      settings: { music: 0.5, sfx: 0.8, vibration: true, lang: null, dmgNumbers: true, shake: true, lowFx: false, outlines: true, fxAlpha: 1, twinStick: false, mouseAim: false, master: 1, pauseOnBlur: true, hideJoystick: false, aimLine: false, flash: 1, showFps: false },
+      settings: { music: 0.5, sfx: 0.8, vibration: true, lang: null, dmgNumbers: true, shake: true, fxLevel: 2, lowFx: false, minFx: false, outlines: true, fxAlpha: 1, twinStick: false, mouseAim: false, master: 1, pauseOnBlur: true, hideJoystick: false, aimLine: false, flash: 1, showFps: false },
       tutorialDone: false,
       titleChosen: false, // the way in (guest or an account) was chosen on the title screen
       playerName: '', // chosen on the first visit, shown above the experience bar; changed from the profile
@@ -75,6 +75,8 @@
     },
     migrate() {
       const d = this.data;
+      // graphics effects in three steps (2 all, 1 fewer, 0 the fewest, no shadows); older profiles had a single switch
+      if (d.settings) { const st = d.settings; if (st.fxLevel == null) st.fxLevel = st.lowFx ? 1 : 2; st.lowFx = st.fxLevel < 2; st.minFx = st.fxLevel === 0; }
       // A newer build wrote this profile: keep its version so its migrations never run twice.
       this.newer = d.v > SAVE_VERSION;
       if (this.newer) return;

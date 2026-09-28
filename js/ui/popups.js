@@ -86,6 +86,12 @@
     };
     const slider = (key) => h('input', { type: 'range', min: 0, max: 100, value: Math.round(s[key] * 100), oninput: (e) => { s[key] = e.target.value / 100; DH.audio.setVolumes(s.sfx * s.master, s.music * s.master); DH.save.persist(); } });
     const desk = DH.input.desktop, row = (key, ctl, hint) => [h('div.setrow', h('label', t('settings.' + key)), ctl), hint ? h('div.small.muted.sethint', t('settings.' + key + 'Hint')) : null];
+    // graphics effects: a slider with three stops, its step named beside it
+    const fxName = h('span.fxname', t('settings.fxLevel' + s.fxLevel));
+    const fxStep = h('div.fxstep', h('input', { type: 'range', min: 0, max: 2, step: 1, value: s.fxLevel, oninput: (e) => {
+      const v = +e.target.value; if (v === s.fxLevel) return;
+      s.fxLevel = v; s.lowFx = v < 2; s.minFx = v === 0; fxName.textContent = t('settings.fxLevel' + v); click(); DH.save.persist();
+    } }), fxName);
     const autoAim = h('div.switch' + (!s.mouseAim ? '.on' : ''), { onclick: () => { s.mouseAim = !s.mouseAim; autoAim.classList.toggle('on', !s.mouseAim); click(); DH.save.persist(); } });
     const fsSw = h('div.switch' + (DH.input.isFullscreen() ? '.on' : ''), { onclick: () => { click(); DH.input.toggleFullscreen(); setTimeout(() => fsSw.classList.toggle('on', DH.input.isFullscreen()), 250); } });
     // the language picker: a forged drop-down in the game's style (a native <select> looks like the system's)
@@ -114,7 +120,7 @@
       row('fxAlpha', slider('fxAlpha')),
       row('shake', sw('shake')),
       row('outlines', sw('outlines')),
-      row('lowFx', sw('lowFx')),
+      row('fxLevel', fxStep),
       row('showFps', sw('showFps')),
       h('div.setsec', t('settings.secGame')),
       h('div.setrow', h('label', t('settings.language')), langSel),

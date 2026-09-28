@@ -40,7 +40,7 @@
     if (!this.w8) this.initWeather();
     const S = this.w8, w = S.cfg, V = DH.view, p = this.player, lowFx = this.settings.lowFx;
     const W = V.w || 270, H = V.h || 480, left = p.x - W / 2 - 40, top = p.y - H / 2 - 60, box = { l: left, t: top, r: left + W + 80, b: top + H + 120 };
-    const mult = lowFx ? 0.4 : 1;
+    const mult = this.settings.minFx ? 0.15 : lowFx ? 0.4 : 1;
     // gusts: a swell of wind that rises and fades over ~3 s
     if (w.gust) {
       S.gustT -= dt;

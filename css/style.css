@@ -1176,3 +1176,6 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 /* the frame-rate readout (Settings): small, under the timer, green / amber / red */
 #hud .fps { position: absolute; left: 50%; top: calc(46px + var(--safe-t)); transform: translateX(-50%); padding: 1px 6px; font: 700 10px var(--body); letter-spacing: .04em; white-space: nowrap; color: #8fe08a; background: rgba(0,0,0,.55); pointer-events: none; }
 #hud .fps.mid { color: #f0c860; } #hud .fps.bad { color: #ff6a6a; }
+/* graphics effects: the three-stop slider with its step named beside it */
+.setrow .fxstep { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.setrow .fxname { font-size: 11.5px; line-height: 1.15; color: var(--gold); white-space: nowrap; }

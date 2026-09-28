@@ -160,7 +160,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'nb.t.equip': 'Equip {n} relics',
   'nb.t.equip1': 'Equip a relic on your hero',
   'settings.title': 'Settings', 'settings.music': 'Music', 'settings.sfx': 'Sound effects', 'settings.vibration': 'Vibration',
-  'settings.dmgNumbers': 'Damage numbers', 'settings.shake': 'Screen shake', 'settings.outlines': 'Enemy outlines', 'settings.twinStick': 'Twin-stick aim', 'settings.twinStickHint': 'Left half of the screen moves, right half aims your main weapon; let go to auto-aim.', 'hud.aimMouse': 'Mouse aim', 'hud.aimAuto': 'Auto-aim', 'settings.fxAlpha': 'Ability effects', 'settings.lowFx': 'Battery saver (fewer effects)', 'settings.showFps': 'Show frame rate (FPS)',
+  'settings.dmgNumbers': 'Damage numbers', 'settings.shake': 'Screen shake', 'settings.outlines': 'Enemy outlines', 'settings.twinStick': 'Twin-stick aim', 'settings.twinStickHint': 'Left half of the screen moves, right half aims your main weapon; let go to auto-aim.', 'hud.aimMouse': 'Mouse aim', 'hud.aimAuto': 'Auto-aim', 'settings.fxAlpha': 'Ability effects', 'settings.fxLevel': 'Graphics effects', 'settings.fxLevel2': 'All', 'settings.fxLevel1': 'Fewer', 'settings.fxLevel0': 'Minimum, no shadows', 'settings.showFps': 'Show frame rate (FPS)',
   'settings.language': 'Language', 'settings.transfer': 'Transfer progress', 'settings.reset': 'Reset progress',
   'settings.resetConfirm': 'Erase ALL progress and purchases on this device? This cannot be undone.', 'settings.credits': 'Made with love and pixels',
   'settings.transferDesc': 'Copy this code to back up your progress, or paste a code and tap Import.', 'settings.copy': 'Copy', 'settings.copied': 'Copied!',
