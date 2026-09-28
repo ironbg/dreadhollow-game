@@ -32,6 +32,7 @@
       const p = DH.economy.products[id];
       if (!p) return false;
       if (p.once && DH.save.data.purchases.once[id]) { DH.ui.toast(t('iap.owned'), 'bad'); return false; }
+      if (DH.server.remote() && this.provider.name === 'mock') { DH.ui.toast(t('iap.soon'), 'bad'); return false; } // no free purchases once the server holds the profile
       let ok = false;
       try { ok = await this.provider.buy(id); } catch (e) { console.warn(e); }
       if (!ok) return false;
@@ -40,6 +41,7 @@
       return true;
     },
     async restore() {
+      if (DH.server.remote() && this.provider.name === 'mock') { DH.ui.toast(t('iap.soon'), 'bad'); return; }
       const ids = await this.provider.restore();
       ids.forEach((id) => { const p = DH.economy.products[id]; if (p && (p.once || p.type === 'noads')) DH.meta.fulfillProduct(id, true); });
       DH.ui.toast(t('iap.restored'));

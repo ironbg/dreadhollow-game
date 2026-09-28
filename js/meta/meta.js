@@ -242,6 +242,15 @@
     changed();
     return true;
   };
+  /** Merge everything that can merge, lowest first, until nothing can: what each merge made (type and new rarity). */
+  meta.mergeAll = () => {
+    const out = []; let again = true;
+    while (again) {
+      again = false;
+      for (const g of S().gear.slice().sort((a, b) => a.rarity - b.rarity)) if (meta.gearById(g.id) && meta.mergeCandidates(g.id).length >= 2) { meta.merge(g.id); out.push({ id: g.id, type: g.type, rarity: g.rarity }); again = true; break; }
+    }
+    return out;
+  };
   meta.salvageValue = (g) => Math.floor(80 * Math.pow(2.2, g.rarity) + (g.level - 1) * 40 * (1 + g.rarity * 0.6));
   meta.salvage = (id) => {
     const g = meta.gearById(id); if (!g) return 0;
@@ -710,6 +719,7 @@
     s.bestTime[r.stage] = Math.max(s.bestTime[r.stage] || 0, r.time);
     s.stats.goldEarned += gold;
     s.gold += gold; s.gems += res.gems;
+    s.lastRun = { gold, doubled: false };
     meta.addAccountXp(res.accountXp);
     meta.addPassXp(res.passXp);
     // missions
@@ -812,7 +822,28 @@
   meta.boardRename = () => { const bs = boardStore(); meta.boards().forEach((b) => { const k = meta.boardKey(b); if (bs.best[k]) bs.sent[k] = 0; }); changed(); };
   /** Every board this profile ever scored on (to remove its entries with the account). */
   meta.boardKeysPlayed = () => Object.keys(boardStore().best);
-  meta.doubleRunGold = (res) => { S().gold += res.gold; S().stats.goldEarned += res.gold; changed(); };
+  /** The run just settled pays its gold once more (after an ad); only the gold the profile recorded, and only once. */
+  meta.doubleRunGold = () => { const s = S(), l = s.lastRun; if (!l || l.doubled) return 0; l.doubled = true; s.gold += l.gold; s.stats.goldEarned += l.gold; changed(); return l.gold; };
+  /** Gold for gems (the shop's gold packs). */
+  meta.buyGoldPack = (i) => { const p = E.goldPacks[i]; if (!p || !meta.spend({ gems: p.gems })) return null; return meta.grant({ gold: p.gold }); };
+  /** A revive for gems during a fight: the price of the n-th one (0-based). */
+  meta.reviveGems = (n) => { const cost = E.REVIVE_GEMS[n]; return cost != null && meta.spend({ gems: cost }); };
+  /** The event shop by ids (as the server takes it): the event and the item come from live.json, never from the caller. */
+  meta.eventBuyById = (eventId, itemId) => { const ev = meta.liveEvents().find((e) => e.id === eventId), it = ev && ev.shop.find((x) => x && x.id === itemId); return it ? meta.eventBuy(ev, it) : null; };
+  /** The player's name: 3 to 16 letters, digits and a few marks; the first change after the first choice is free, then E.RENAME_GEMS. */
+  meta.NAME_OK = /^[\p{L}\p{N}][\p{L}\p{N} _'.-]*$/u;
+  meta.renameCost = (first) => (first ? 0 : (S().nameChanges || 0) >= 1 ? E.RENAME_GEMS : 0);
+  meta.rename = (name, first) => {
+    const s = S(), v = String(name || '').replace(/\s+/g, ' ').trim();
+    if (v.length < 3 || v.length > 16 || !meta.NAME_OK.test(v)) return { error: 'bad' };
+    first = !!first && !s.playerName; // only a profile without a name gets the opening choice
+    if (!first && v === s.playerName) return { same: true };
+    const cost = meta.renameCost(first);
+    if (cost > 0 && !meta.spend({ gems: cost })) return { error: 'gems' };
+    s.playerName = v; if (!first) s.nameChanges = (s.nameChanges || 0) + 1;
+    meta.boardRename(); changed();
+    return { ok: true };
+  };
 
   /* ---------------- The Seven Nights (a newcomer event, see E.NEWBIE) ---------------- */
   const NB = E.NEWBIE;

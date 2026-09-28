@@ -5,10 +5,20 @@
 
   const game = {
     run: null, mode: 'menu',
-    startRun() {
+    async startRun() {
       const s = DH.save.data, st = C.stages[s.selectedStage];
       if (!ui.stageUnlocked(s.selectedStage)) { ui.toast(t('home.lockedShort'), 'bad'); return; }
-      if (!M.useEnergy(st.energy || C.RUN_ENERGY)) { ui.toast(t('energy.notEnough'), 'bad'); ui.openEnergy(); return; }
+      if (this.starting) return;
+      // the torches are paid where the profile lives: on the server (which notes the start) once it is switched on
+      this.starting = true;
+      let paid = false;
+      try { paid = await DH.server.runStart(st.energy || C.RUN_ENERGY); } catch (e) {
+        this.starting = false;
+        if (e.code === 'offline') ui.toast(t('server.needNet'), 'bad'); else ui.serverErr(e);
+        return;
+      }
+      this.starting = false;
+      if (!paid) { ui.toast(t('energy.notEnough'), 'bad'); ui.openEnergy(); return; }
       DH.audio.play('click');
       ui.closeAll(); ui.show(false);
       this.run = new DH.Run({ hero: s.selectedHero, stage: s.selectedStage, agony: !!(s.cleared[s.selectedStage] && s.agony[s.selectedStage]) });
@@ -33,8 +43,12 @@
       run.finished = true;
       if (run.state !== 'victory') run.state = 'over';
       DH.input.enable(false);
-      const res = M.settleRun(run.summary());
-      ui.openResults(run, res);
+      const sum = run.summary();
+      DH.server.runEnd(sum).then((res) => ui.openResults(run, res), (e) => {
+        // not settled (no connection, or the server would not confirm it): back to the menus with the reason
+        ui.serverErr(e);
+        this.toMenu(false);
+      });
     },
     async toMenu(win) {
       ui.hud.hide();

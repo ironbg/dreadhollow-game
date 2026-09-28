@@ -35,6 +35,17 @@
   ui.rewardChips = (rw) => h('div.rewards', DH.meta.rewardPreview(rw).map(ui.rw));
 
   /* ---------------- toasts ---------------- */
+  /** A player action (DH.actions) through DH.server: resolves to its result (null or false: not enough, not allowed),
+   *  or undefined after telling the player the call itself failed (no connection, the server refused). */
+  ui.act = async (name, args) => {
+    try { return await DH.server.act(name, args); } catch (e) { ui.serverErr(e); return undefined; }
+  };
+  /** What a failed call to the game's server means for the player. */
+  ui.serverErr = (e) => {
+    const c = e && e.code;
+    ui.toast(t(c === 'offline' ? 'server.offline' : c === 'requires-login' ? 'server.login' : c === 'invalid-run' ? 'server.invalidRun' : c === 'outdated' ? 'server.outdated' : 'server.error'), 'bad');
+    if (!(e && e.code)) console.error(e);
+  };
   ui.toast = (msg, kind) => {
     const box = document.getElementById('toasts');
     const el = h('div.toast' + (kind ? '.' + kind : ''), msg);

@@ -21,19 +21,22 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           projectId: dreadhollow-b49c7
           channelId: live
-  # The Firestore rules (cloud saves, leaderboards) from firestore.rules. A separate job that may fail without
-  # holding the web version back: the service account needs the "Firebase Rules Admin" role for it.
-  rules:
+  # The game's server: Firestore rules (profiles, leaderboards) and Cloud Functions (functions/). A separate job that
+  # may fail without holding the web version back. The service account needs (Google Cloud → IAM): Firebase Rules
+  # Admin, Cloud Functions Admin, Service Account User, and the project on the Blaze plan.
+  backend:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - name: Deploy Firestore rules
+        with: { node-version: 22 }
+      - run: npm ci --prefix functions
+      - run: node tools/build-functions.js && node functions/test/engine.js
+      - name: Deploy rules and functions
         env:
           SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
           printf '%s' "$SA" > "$RUNNER_TEMP/sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
-          npx --yes firebase-tools@13 deploy --only firestore:rules --project dreadhollow-b49c7 --non-interactive
+          npx --yes firebase-tools@13 deploy --only firestore:rules,functions --project dreadhollow-b49c7 --non-interactive --force

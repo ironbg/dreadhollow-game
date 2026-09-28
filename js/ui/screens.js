@@ -64,7 +64,7 @@
       };
       updVigil(); root.append(vig);
       const mq = M.mainQuest();
-      if (mq) root.append(h('div.panel.mainq' + (mq.done ? '.done' : ''), { onclick: () => { click(); if (mq.done) { const g = M.claimMainQuest(); DH.audio.play('reward'); ui.toast(t('main.claimed', { n: g }), 'good'); ui.refresh(); } else ui.go('quests', 'deeds'); } },
+      if (mq) root.append(h('div.panel.mainq' + (mq.done ? '.done' : ''), { onclick: () => { click(); if (mq.done) ui.act('claimMainQuest').then((g) => { if (!g) return; DH.audio.play('reward'); ui.toast(t('main.claimed', { n: g }), 'good'); ui.refresh(); }); else ui.go('quests', 'deeds'); } },
         h('span.mqt', t('main.title', { n: mq.idx + 1 })), h('span.grow.mqd', ui.deedText(mq.deed)),
         mq.done ? h('button.btn.tiny.green', t('common.claim')) : h('span.row.mqr', A.img('i_gem'), mq.gems)));
       // stage card
@@ -130,19 +130,20 @@
         const hd = C.heroes[id], owned = M.heroOwned(id), sel = s.selectedHero === id;
         let action;
         if (sel) action = h('button.btn.small.ghost.off', t('armory.selected'));
-        else if (owned) action = h('button.btn.small.gold', { onclick: (e) => { e.stopPropagation(); click(); s.heroes[id] = true; s.selectedHero = id; DH.save.persist(); ui.refresh(); } }, t('armory.select'));
+        else if (owned) action = h('button.btn.small.gold', { onclick: async (e) => { e.stopPropagation(); click(); if (!s.heroes[id] && !(await ui.act('unlockHero', { id }))) return; S().selectedHero = id; DH.save.persist(); ui.refresh(); } }, t('armory.select'));
         else {
           const u = hd.unlock;
           action = h('div.col', { style: { gap: '4px', alignItems: 'stretch' } },
-            h('button.btn.small.gem', { onclick: (e) => {
+            h('button.btn.small.gem', { onclick: async (e) => {
               e.stopPropagation();
-              if (M.unlockHero(id)) { DH.audio.play('buy'); s.selectedHero = id; DH.save.persist(); ui.rewardPopup(t('armory.unlocked'), [{ icon: 'h_' + id, text: t('hero.' + id + '.name') }]); }
-              else { ui.toast(t('common.notEnough'), 'bad'); ui.go('shop', 'gems'); }
+              const ok = await ui.act('unlockHero', { id });
+              if (ok) { DH.audio.play('buy'); S().selectedHero = id; DH.save.persist(); ui.rewardPopup(t('armory.unlocked'), [{ icon: 'h_' + id, text: t('hero.' + id + '.name') }]); }
+              else if (ok === false) { ui.toast(t('common.notEnough'), 'bad'); ui.go('shop', 'gems'); }
             } }, A.img('i_gem'), U.fmt(u.gems)),
             u.premium ? h('button.btn.tiny.red', { onclick: (e) => { e.stopPropagation(); ui.go('shop', 'offers'); } }, t('armory.bundle')) : null);
         }
         const aff = Object.entries(hd.affinity || {}).filter(([, v]) => v === 2).map(([k]) => t('trait.' + k)).join(', ');
-        box.append(h('div.panel.hero-card' + (sel ? '.sel' : '') + (owned ? '' : '.locked'), { style: { marginBottom: '8px' }, onclick: () => { if (owned && !sel) { click(); s.heroes[id] = true; s.selectedHero = id; DH.save.persist(); ui.refresh(); } } },
+        box.append(h('div.panel.hero-card' + (sel ? '.sel' : '') + (owned ? '' : '.locked'), { style: { marginBottom: '8px' }, onclick: async () => { if (owned && !sel) { click(); if (!s.heroes[id] && !(await ui.act('unlockHero', { id }))) return; S().selectedHero = id; DH.save.persist(); ui.refresh(); } } },
           h('div.pic', A.img('h_' + id)),
           h('div.grow',
             h('div', { style: { fontWeight: 800, fontSize: '16px' } }, t('hero.' + id + '.name')),
@@ -199,8 +200,8 @@
           h('div', { style: { width: '52px', flex: 'none' } }, h('div.slot.rar' + it.rarity, A.img('g_' + it.type))),
           h('div.grow', h('div.t', t('gear.' + it.type)), h('div.rar' + it.rarity, h('span.rtxt', t('rarity.' + E.rarities[it.rarity]))), h('div.d', ui.fmtStats(E.gearStat(it.type, it.rarity, 1)))),
           h('div.col', { style: { gap: '4px' } },
-            h('button.btn.small.gold' + (s.gold >= E.wellPrice(it.rarity) ? '' : '.off'), { onclick: () => { const g = M.wellClaim(i, false); if (g) { DH.audio.play('buy'); ui.rewardPopup(t('well.claimed'), [{ icon: 'g_' + g.type, text: t('gear.' + g.type), rarity: g.rarity }]); } else ui.toast(t('common.notEnough'), 'bad'); } }, A.img('i_gold'), U.fmt(E.wellPrice(it.rarity))),
-            h('button.btn.tiny.gem', { onclick: () => { const g = M.wellClaim(i, true); if (g) { DH.audio.play('buy'); ui.rewardPopup(t('well.claimed'), [{ icon: 'g_' + g.type, text: t('gear.' + g.type), rarity: g.rarity }]); } else ui.toast(t('common.notEnough'), 'bad'); } }, A.img('i_gem'), E.wellGems(it.rarity)))));
+            h('button.btn.small.gold' + (s.gold >= E.wellPrice(it.rarity) ? '' : '.off'), { onclick: async () => { const g = await ui.act('wellClaim', { idx: i, withGems: false }); if (g) { DH.audio.play('buy'); ui.rewardPopup(t('well.claimed'), [{ icon: 'g_' + g.type, text: t('gear.' + g.type), rarity: g.rarity }]); } else ui.toast(t('common.notEnough'), 'bad'); } }, A.img('i_gold'), U.fmt(E.wellPrice(it.rarity))),
+            h('button.btn.tiny.gem', { onclick: async () => { const g = await ui.act('wellClaim', { idx: i, withGems: true }); if (g) { DH.audio.play('buy'); ui.rewardPopup(t('well.claimed'), [{ icon: 'g_' + g.type, text: t('gear.' + g.type), rarity: g.rarity }]); } else ui.toast(t('common.notEnough'), 'bad'); } }, A.img('i_gem'), E.wellGems(it.rarity)))));
       });
       return box;
     },
@@ -212,12 +213,11 @@
       !hideEq && M.mergeCandidates(g.id).length >= 2 ? h('span.mergeb', '▲') : null); // three alike: ready to merge
   }
   ui.gearSlot = gearSlot;
-  function autoMerge() {
-    const merged = []; let again = true;
-    while (again) {
-      again = false;
-      for (const g of S().gear.slice().sort((a, b) => a.rarity - b.rarity)) if (M.gearById(g.id) && M.mergeCandidates(g.id).length >= 2) { M.merge(g.id); merged.push(g); again = true; break; }
-    }
+  async function autoMerge() {
+    const all = await ui.act('mergeAll'); if (!all) return;
+    const last = {}; all.forEach((g) => { last[g.id] = g; }); // an item merged twice shows once, at its final rarity
+    const merged = Object.values(last);
+    ui.refresh();
     if (merged.length) { DH.audio.play('chest'); ui.rewardPopup(t('armory.merged'), [...new Set(merged)].map((g) => ({ icon: 'g_' + g.type, text: t('gear.' + g.type), rarity: g.rarity }))); }
   }
 
@@ -247,7 +247,7 @@
           h('div.d', t('shrine.perLevel', { v: ui.fmtStats(def.per) }), h('br'), lvl ? h('span.good', t('shrine.total', { v: ui.fmtStats(def.per, lvl) })) : null),
           !open ? h('div.sealnote', A.img('u_lock'), ui.deedText(DH.deeds.byId[def.unlock]))
           : max ? h('button.btn.small.ghost.off.block', t('common.max'))
-            : h('button.btn.small.gold.block' + (s.gold >= cost ? '' : '.off'), { onclick: () => { if (M.buyShrine(id)) DH.audio.play('buy'); else ui.toast(t('common.notEnough'), 'bad'); } }, A.img('i_gold'), U.fmt(cost))));
+            : h('button.btn.small.gold.block' + (s.gold >= cost ? '' : '.off'), { onclick: async () => { const ok = await ui.act('buyShrine', { id }); if (ok) DH.audio.play('buy'); else if (ok === false) ui.toast(t('common.notEnough'), 'bad'); ui.refresh(); } }, A.img('i_gold'), U.fmt(cost))));
       });
       root.append(grid);
       return root;
@@ -271,7 +271,7 @@
           h('div.ico', { style: un ? null : { filter: 'grayscale(1) brightness(0.55)' } }, A.img('a_' + k)),
           h('div.grow', h('div.t', un ? t('artifact.' + k + '.name') : '???'), h('div.d', un ? t('artifact.' + k + '.desc') : null),
             !un ? h('div.small.muted', hint(a)) : null),
-          un ? h('div.switch' + (on ? '.on' : ''), { onclick: () => { click(); M.toggleArtifact(k); } }) : A.img('u_lock', 'ci')));
+          un ? h('div.switch' + (on ? '.on' : ''), { onclick: async () => { click(); await ui.act('toggleArtifact', { k }); ui.refresh(); } }) : A.img('u_lock', 'ci')));
       });
       return root;
     },
@@ -283,7 +283,7 @@
       root.append(h('div.heropick', C.heroOrder.filter((id) => M.heroOwned(id)).map((id) => h('button.hp' + (id === s.selectedHero ? '.on' : ''), { onclick: () => { click(); s.selectedHero = id; DH.save.persist(); ui.refresh(); } }, A.img('h_' + id)))));
       const spent = M.archiveSpent();
       root.append(h('div.row.archhead', h('div.grow', h('b', t('hero.' + s.selectedHero + '.name')), h('span.small.muted', ' · ' + t('archive.spent', { n: spent }))),
-        spent ? h('button.btn.small.ghost', { onclick: async () => { if (await ui.confirm({ title: t('archive.reset'), body: t('archive.resetBody', { n: spent }), ok: t('archive.reset') })) { M.resetArchive(); DH.audio.play('coin'); ui.refresh(); } } }, t('archive.reset')) : null));
+        spent ? h('button.btn.small.ghost', { onclick: async () => { if (await ui.confirm({ title: t('archive.reset'), body: t('archive.resetBody', { n: spent }), ok: t('archive.reset') })) { await ui.act('resetArchive'); DH.audio.play('coin'); ui.refresh(); } } }, t('archive.reset')) : null));
       const grid = h('div.shrine-grid');
       E.archiveOrder.forEach((id) => {
         const def = E.archive[id], lvl = M.archiveLevel(id), max = lvl >= def.max, cost = max ? 0 : E.archiveCost(id, lvl);
@@ -293,7 +293,7 @@
           A.img(ic), h('div.t', t('archive.' + id)), pips,
           h('div.d', t('shrine.perLevel', { v: ui.fmtStats(def.per) }), h('br'), lvl ? h('span.good', t('shrine.total', { v: ui.fmtStats(def.per, lvl) })) : null),
           max ? h('button.btn.small.ghost.off.block', t('common.max'))
-            : h('button.btn.small.gem.block' + (M.shardsFree() >= cost ? '' : '.off'), { onclick: () => { if (M.buyArchive(id)) { DH.audio.play('buy'); ui.refresh(); } else ui.toast(t('archive.notEnough'), 'bad'); } }, A.img('shard'), cost)));
+            : h('button.btn.small.gem.block' + (M.shardsFree() >= cost ? '' : '.off'), { onclick: async () => { const ok = await ui.act('buyArchive', { id }); if (ok) { DH.audio.play('buy'); ui.refresh(); } else if (ok === false) ui.toast(t('archive.notEnough'), 'bad'); } }, A.img('shard'), cost)));
       });
       root.append(grid);
       root.append(h('div.center.small.muted', { style: { marginTop: '8px' } }, t('archive.how')));
@@ -310,8 +310,8 @@
           h('div.grow', h('div.t', t('potion.' + k + '.name')), h('div.d', t('potion.' + k + '.desc')),
             un ? h('div.rewards', Object.keys(p.recipe).map((hb) => ui.rw({ icon: 'herb_' + hb, text: p.recipe[hb] })), ui.rw({ icon: 'i_gold', text: U.fmt(p.gold) })) : h('div.small.muted', A.img('u_lock', 'ci'), ' ' + ui.deedText(DH.deeds.byId[p.unlock]))),
           un ? h('div.col', { style: { gap: '4px' } },
-            h('button.btn.small.green' + (M.canBrew(k) ? '' : '.off'), { onclick: () => { if (M.brew(k)) { DH.audio.play('reward'); ui.toast(t('brew.done', { name: t('potion.' + k + '.name') }), 'good'); } } }, t('brew.brew')),
-            h('button.btn.tiny.gem', { onclick: () => { if (M.buyPotion(k)) DH.audio.play('buy'); else ui.toast(t('common.notEnough'), 'bad'); } }, A.img('i_gem'), p.gems)) : null));
+            h('button.btn.small.green' + (M.canBrew(k) ? '' : '.off'), { onclick: async () => { if (await ui.act('brew', { k })) { DH.audio.play('reward'); ui.toast(t('brew.done', { name: t('potion.' + k + '.name') }), 'good'); ui.refresh(); } } }, t('brew.brew')),
+            h('button.btn.tiny.gem', { onclick: async () => { const ok = await ui.act('buyPotion', { k }); if (ok) DH.audio.play('buy'); else if (ok === false) ui.toast(t('common.notEnough'), 'bad'); ui.refresh(); } }, A.img('i_gem'), p.gems)) : null));
       });
       return root;
     },
@@ -375,7 +375,7 @@
           h('div.grow', h('div.t', ui.deedText(d)), h('div.d.goldtxt', ui.deedReward(d)),
             pr && !ok ? h('div.prog', h('div.bar', h('i', { style: { width: Math.min(100, pr.v / pr.n * 100) + '%' } })), h('div.v', U.fmt(Math.min(pr.v, pr.n)) + ' / ' + U.fmt(pr.n))) : null),
           ok ? h('span.good', { style: { fontSize: '20px', fontWeight: 800 } }, A.img('u_check', 'bigic'))
-            : h('button.pinbtn' + (d.id === pinned ? '.on' : ''), { title: t('deeds.pin'), onclick: (e) => { e.stopPropagation(); click(); const on = M.trackDeed(d.id); ui.toast(t(on ? 'deeds.pinned' : 'deeds.unpinned'), on ? 'good' : null); ui.refresh(); } }, A.img('u_pin'))));
+            : h('button.pinbtn' + (d.id === pinned ? '.on' : ''), { title: t('deeds.pin'), onclick: async (e) => { e.stopPropagation(); click(); const on = await ui.act('trackDeed', { id: d.id }); ui.toast(t(on ? 'deeds.pinned' : 'deeds.unpinned'), on ? 'good' : null); ui.refresh(); } }, A.img('u_pin'))));
       });
       if (list.length > 80) box.append(h('div.center.small.muted', '…'));
       return box;
@@ -392,7 +392,7 @@
         const pv = m.id === 'survive' ? U.fmtTime(m.p) + ' / ' + U.fmtTime(def.target) : U.fmt(m.p) + ' / ' + U.fmt(def.target);
         let btn;
         if (m.claimed) btn = h('button.btn.small.ghost.off', A.img('u_check', 'ci'));
-        else if (m.done) btn = h('button.btn.small.green.shine', { onclick: () => { const r = M.claimMission(i); ui.rewardPopup(t('quests.complete'), r); } }, t('common.claim'));
+        else if (m.done) btn = h('button.btn.small.green.shine', { onclick: async () => { const r = await ui.act('claimMission', { i }); if (r) ui.rewardPopup(t('quests.complete'), r); ui.refresh(); } }, t('common.claim'));
         else btn = h('button.btn.small.ghost', { onclick: () => { click(); missionGo(m.id); } }, t('common.go'));
         box.append(h('div.panel.item' + (m.done && !m.claimed ? '.done' : '') + (m.claimed ? '.claimed' : ''),
           h('div.ico', A.img(missionIcon(m.id))),
@@ -405,7 +405,7 @@
         h('div.ico', A.img('c_silver')),
         h('div.grow', h('div.t', t('quests.bonus')), h('div.d', t('quests.bonusDesc')), ui.rewardChips(E.missionBonus)),
         d.bonusClaimed ? h('button.btn.small.ghost.off', A.img('u_check', 'ci'))
-          : h('button.btn.small.gold' + (allDone ? '.shine' : '.off'), { onclick: () => { const r = M.claimMissionBonus(); if (r) ui.rewardPopup(t('quests.bonus'), r); } }, t('common.claim'))));
+          : h('button.btn.small.gold' + (allDone ? '.shine' : '.off'), { onclick: async () => { const r = await ui.act('claimMissionBonus'); if (r) ui.rewardPopup(t('quests.bonus'), r); ui.refresh(); } }, t('common.claim'))));
       return box;
     },
     pass() {
@@ -422,8 +422,8 @@
         h('div.bar.blue', { style: { marginTop: '8px' } }, h('i', { style: { width: (tier >= E.PASS_TIERS ? 100 : inTier / E.PASS_XP_PER_TIER * 100) + '%' } })),
         h('div.row', { style: { marginTop: '6px' } },
           h('div.small.muted.grow', tier >= E.PASS_TIERS ? t('pass.maxed') : t('pass.xpToNext', { v: E.PASS_XP_PER_TIER - inTier })),
-          tier < E.PASS_TIERS ? h('button.btn.tiny.gem', { onclick: () => { if (M.buyPassTier()) DH.audio.play('buy'); else ui.toast(t('common.notEnough'), 'bad'); } }, t('pass.buyTier'), A.img('i_gem'), E.PASS_TIER_GEM_COST) : null,
-          M.badges().pass ? h('button.btn.tiny.green', { onclick: () => { const r = M.claimAllPass(); ui.rewardPopup(t('pass.rewards'), r); } }, t('pass.claimAll')) : null)));
+          tier < E.PASS_TIERS ? h('button.btn.tiny.gem', { onclick: async () => { const ok = await ui.act('buyPassTier'); if (ok) DH.audio.play('buy'); else if (ok === false) ui.toast(t('common.notEnough'), 'bad'); ui.refresh(); } }, t('pass.buyTier'), A.img('i_gem'), E.PASS_TIER_GEM_COST) : null,
+          M.badges().pass ? h('button.btn.tiny.green', { onclick: async () => { const r = await ui.act('claimAllPass'); if (r) ui.rewardPopup(t('pass.rewards'), r); ui.refresh(); } }, t('pass.claimAll')) : null)));
       box.append(h('div.pass-row', { style: { marginTop: '10px' } }, h('div.center.small.muted', t('pass.free')), h('div'), h('div.center.small.goldtxt', { style: { fontWeight: 800 } }, t('pass.premium'))));
       for (let i = 1; i <= E.PASS_TIERS; i++) {
         const cell = (track) => {
@@ -431,7 +431,7 @@
           const pv = M.rewardPreview(rw)[0];
           return h('div.pass-cell' + (track === 'prem' ? '.prem' : '') + (got ? '.got' : '') + (can ? '.can' : ''), {
             onclick: () => {
-              if (can) { const r = M.claimPass(i, track); ui.rewardPopup(t('pass.rewards'), r); }
+              if (can) { ui.act('claimPass', { tier: i, track }).then((r) => { if (r) ui.rewardPopup(t('pass.rewards'), r); ui.refresh(); }); }
               else if (track === 'prem' && !p.premium) DH.iap.buy('pass');
             } },
             h('div.slot' + (pv.rarity != null ? '.rar' + pv.rarity : ''), { style: { width: '38px', flex: 'none' } }, A.img(pv.icon)),
@@ -456,7 +456,7 @@
             h('div.d', t('ach.' + a.id + '.desc', { n: U.fmt(target) })),
             h('div.prog', h('div.bar', h('i', { style: { width: Math.min(100, val / target * 100) + '%' } })), h('div.v', U.fmt(Math.min(val, target)) + ' / ' + U.fmt(target)))),
           done ? h('button.btn.small.ghost.off', A.img('u_check', 'ci'))
-            : h('button.btn.small.' + (can ? 'green.shine' : 'ghost.off'), { onclick: () => { const r = M.claimAch(a.id); if (r) ui.rewardPopup(t('ach.unlocked'), r); } }, A.img('i_gem'), a.gems[c])));
+            : h('button.btn.small.' + (can ? 'green.shine' : 'ghost.off'), { onclick: async () => { const r = await ui.act('claimAch', { id: a.id }); if (r) ui.rewardPopup(t('ach.unlocked'), r); ui.refresh(); } }, A.img('i_gem'), a.gems[c])));
       });
       return box;
     },
@@ -486,7 +486,7 @@
         root.append(h('div.panel.offer.blue', { style: { marginTop: '8px' } },
           h('div.ot', t('product.soulcard')), h('div.small', t('shop.soulActive', { d: left })),
           h('div.contents', M.rewardPreview(E.products.soulcard.daily).map(ui.rw)),
-          M.soulCardClaimable() ? h('button.btn.green.block.shine', { onclick: () => { const r = M.claimSoulCard(); ui.rewardPopup(t('product.soulcard'), r); } }, t('shop.claimDaily'))
+          M.soulCardClaimable() ? h('button.btn.green.block.shine', { onclick: async () => { const r = await ui.act('claimSoulCard'); if (r) ui.rewardPopup(t('product.soulcard'), r); ui.refresh(); } }, t('shop.claimDaily'))
             : h('button.btn.ghost.block.off', t('shop.claimedToday'))));
       } else root.append(offerCard('soulcard', 'offer blue', t('shop.soulDesc'), t('shop.value', { v: '600%' })));
       if (!s.heroes.reaper && !s.purchases.once.reaper) root.append(offerCard('reaper', 'offer red', t('shop.reaperDesc'), t('shop.hero')));
@@ -501,8 +501,8 @@
         const def = E.dealPool[deal.i], pv = M.rewardPreview(def.grant)[0];
         let btn;
         if (deal.bought) btn = h('button.btn.small.ghost.off', t('shop.soldOut'));
-        else if (def.cost.ad) btn = h('button.btn.small.ad', { onclick: async () => { const r = await M.buyDeal(i); if (r) ui.rewardPopup(t('shop.deals'), r); } }, h('span.adtag', 'AD'), t('common.free'));
-        else btn = h('button.btn.small.' + (def.cost.gems ? 'gem' : 'gold'), { onclick: async () => { const r = await M.buyDeal(i); if (r) ui.rewardPopup(t('shop.deals'), r); else ui.toast(t('common.notEnough'), 'bad'); } },
+        else if (def.cost.ad) btn = h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('buyDeal', { idx: i }); if (r) ui.rewardPopup(t('shop.deals'), r); ui.refresh(); } }, h('span.adtag', 'AD'), t('common.free'));
+        else btn = h('button.btn.small.' + (def.cost.gems ? 'gem' : 'gold'), { onclick: async () => { const r = await ui.act('buyDeal', { idx: i }); if (r) ui.rewardPopup(t('shop.deals'), r); else if (r !== undefined) ui.toast(t('common.notEnough'), 'bad'); ui.refresh(); } },
           A.img(def.cost.gems ? 'i_gem' : 'i_gold'), U.fmt(def.cost.gems || def.cost.gold));
         deals.append(h('div.panel.chest', h('div.slot' + (pv.rarity != null ? '.rar' + pv.rarity : ''), { style: { width: '56px' } }, A.img(pv.icon)), h('div.small', { style: { fontWeight: 800 } }, pv.text), btn));
       });
@@ -516,7 +516,7 @@
       ch.append(h('div.panel.chest',
         A.img('c_wood'), h('div.t', t('chest.wood')),
         h('div.cbtns',
-          freeIn <= 0 ? h('button.btn.small.ad.shine', { onclick: async () => { const r = await M.freeChestAd(); if (r) chestResult(r); } }, h('span.adtag', 'AD'), t('common.free'))
+          freeIn <= 0 ? h('button.btn.small.ad.shine', { onclick: async () => { const r = await ui.act('freeChestAd'); if (r) chestResult(r); ui.refresh(); } }, h('span.adtag', 'AD'), t('common.free'))
             : h('button.btn.small.ghost.off', chestTimer),
           h('button.btn.small.gold', { onclick: () => buyChest('wood') }, A.img('i_gold'), U.fmt(E.chests.wood.price.gold)))));
       ch.append(h('div.panel.chest',
@@ -551,7 +551,7 @@
       const gg = h('div.grid3');
       E.goldPacks.forEach((p) => {
         gg.append(h('div.panel.pack', A.img('i_gold'), h('div.amt', U.fmt(p.gold)),
-          h('button.btn.small.gem', { onclick: () => { if (M.spend({ gems: p.gems })) { const r = M.grant({ gold: p.gold }); ui.rewardPopup(t('shop.gold'), r); } else { ui.toast(t('common.notEnough'), 'bad'); } } }, A.img('i_gem'), p.gems)));
+          h('button.btn.small.gem', { onclick: async () => { const r = await ui.act('buyGoldPack', { i: E.goldPacks.indexOf(p) }); if (r) ui.rewardPopup(t('shop.gold'), r); else if (r !== undefined) ui.toast(t('common.notEnough'), 'bad'); ui.refresh(); } }, A.img('i_gem'), p.gems)));
       });
       root.append(gg);
 
@@ -560,10 +560,10 @@
       const gemsLeft = E.FREE_GEM_ADS - d.ads.gems, enLeft = E.ENERGY_AD_LIMIT - d.ads.energy;
       root.append(h('div.panel.item', h('div.ico', A.img('i_gem')),
         h('div.grow', h('div.t', t('shop.freeGems', { n: E.FREE_GEM_AMOUNT })), h('div.d', t('shop.leftToday', { n: gemsLeft }))),
-        h('button.btn.small.ad' + (gemsLeft > 0 ? '.shine' : '.off'), { onclick: async () => { const r = await M.adGems(); if (r) ui.rewardPopup(t('shop.free'), r); } }, h('span.adtag', 'AD'), t('common.watch'))));
+        h('button.btn.small.ad' + (gemsLeft > 0 ? '.shine' : '.off'), { onclick: async () => { const r = await ui.act('adGems'); if (r) ui.rewardPopup(t('shop.free'), r); ui.refresh(); } }, h('span.adtag', 'AD'), t('common.watch'))));
       root.append(h('div.panel.item', h('div.ico', A.img('i_energy')),
         h('div.grow', h('div.t', t('shop.freeEnergy', { n: E.ENERGY_AD_AMOUNT })), h('div.d', t('shop.leftToday', { n: enLeft }))),
-        h('button.btn.small.ad' + (enLeft > 0 ? '' : '.off'), { onclick: async () => { const r = await M.adEnergy(); if (r) ui.rewardPopup(t('shop.free'), r); } }, h('span.adtag', 'AD'), t('common.watch'))));
+        h('button.btn.small.ad' + (enLeft > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('adEnergy'); if (r) ui.rewardPopup(t('shop.free'), r); ui.refresh(); } }, h('span.adtag', 'AD'), t('common.watch'))));
 
       root.append(h('div.center', { style: { margin: '18px 0 6px' } }, h('button.btn.tiny.ghost', { onclick: () => DH.iap.restore() }, t('shop.restore'))));
       root.append(h('div.center.small', { style: { color: 'var(--dim)' } }, t('shop.testMode')));
@@ -592,9 +592,10 @@
       contents.length ? h('div.contents', contents.map(ui.rw)) : null,
       h('button.btn.gold.block.shine', { onclick: () => DH.iap.buy(id) }, DH.iap.price(id)));
   }
-  function buyChest(type, x10) {
-    const r = M.buyChest(type, x10);
-    if (!r) { ui.toast(t('common.notEnough'), 'bad'); return; }
+  async function buyChest(type, x10) {
+    const r = await ui.act('buyChest', { type, x10: !!x10 });
+    ui.refresh();
+    if (!r) { if (r !== undefined) ui.toast(t('common.notEnough'), 'bad'); return; }
     chestResult(r);
   }
   function chestResult(items) {

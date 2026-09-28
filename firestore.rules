@@ -32,8 +32,13 @@ service cloud.firestore {
           || (request.resource.data.score == resource.data.score && request.resource.data.name != resource.data.name);
       }
       allow read: if true;
-      allow create, update: if mine() && entry() && better();
+      allow create, update: if false; // written by the game's server only (functions/), from fights it settled
       allow delete: if mine();
+    }
+    // The profile on the game's server: the player may read their own; only the server (functions/) writes it.
+    match /players/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
     }
     match /{document=**} { allow read, write: if false; }
   }

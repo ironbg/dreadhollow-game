@@ -154,6 +154,8 @@
       Object.assign(this.meta, { rev, uid, dirty: false, syncedAt: Date.now() });
       await Promise.all([done, this.writeMeta()]);
     },
+    /** Take a profile as it comes (from the game's server): filled in with defaults and brought to this version. */
+    adopt(obj) { this.data = merge(defaults(), JSON.parse(JSON.stringify(obj))); this.migrate(); return this.data; },
     /** Forget the cloud account (sign-out / account deleted); `wipe` also starts a fresh profile. */
     async detach(wipe) {
       clearTimeout(this._t); this._t = null;

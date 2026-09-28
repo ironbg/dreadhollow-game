@@ -1,0 +1,14 @@
+{
+  "name": "dreadhollow-functions",
+  "private": true,
+  "description": "Dreadhollow's server: the profile, player actions and fights (Cloud Functions for Firebase)",
+  "main": "index.js",
+  "engines": { "node": "22" },
+  "scripts": {
+    "test": "node test/engine.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  }
+}

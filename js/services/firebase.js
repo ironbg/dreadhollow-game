@@ -16,6 +16,8 @@
   /** Hosts where Firebase sign-in is allowed (Authentication → Settings → Authorized domains). */
   const HOSTS = ['dreadhollow-b49c7.web.app', 'dreadhollow-b49c7.firebaseapp.com', 'localhost', '127.0.0.1'];
   const SAVES = 'saves', BOARDS = 'boards';
+  /** Local tests only: ?emu=1 on this machine talks to the Firebase emulators (functions/test). */
+  const EMU = /[?&]emu=1\b/.test(location.search) && ['localhost', '127.0.0.1'].includes(location.hostname);
   const RECENT_MS = 5 * 60e3; // Firebase refuses to delete an account whose last sign-in is older than this
 
   const fail = (code, extra) => Object.assign(new Error(code), { code }, extra);
@@ -51,6 +53,7 @@
       popupRedirectResolver: DH.platform.native ? undefined : A.browserPopupRedirectResolver,
     });
     db = F.getFirestore(fb);
+    if (EMU) { A.connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true }); F.connectFirestoreEmulator(db, '127.0.0.1', 8081); }
   };
 
   const Native = () => DH.platform.plugin('FirebaseAuthentication');
@@ -69,7 +72,7 @@
     available() { return DH.platform.native || HOSTS.includes(location.hostname); },
     map(u) {
       if (!u) return null;
-      return { uid: u.uid, email: u.email, emailVerified: u.emailVerified, name: u.displayName,
+      return { uid: u.uid, anonymous: !!u.isAnonymous, email: u.email, emailVerified: u.emailVerified, name: u.displayName,
         providers: u.providerData.map((p) => (p.providerId === 'google.com' ? 'google' : p.providerId)) };
     },
     /** onAuthStateChanged skips links and reloads: report the user again after those. */
@@ -80,9 +83,23 @@
       auth.languageCode = DH.i18n.current; // verification and reset emails in the player's language
       A.onAuthStateChanged(auth, (u) => cb(this.map(u)));
     },
+    /** A guest's invisible account (server mode): the server keeps their profile; Google or email can claim it later. */
+    async guest() { await load(); if (!auth.currentUser) await A.signInAnonymously(auth); },
     async signInGoogle() {
       await load();
+      const anon = auth.currentUser && auth.currentUser.isAnonymous;
       try {
+        if (anon) { // a guest keeps their progress: Google is added to the same account
+          try {
+            if (Native()) await A.linkWithCredential(auth.currentUser, await googleCredential());
+            else await A.linkWithPopup(auth.currentUser, provider());
+            this.notify(); return;
+          } catch (e) {
+            if (e.code !== 'auth/credential-already-in-use') throw e;
+            await A.signInWithCredential(auth, A.GoogleAuthProvider.credentialFromError(e)); // that Google account already plays: open it
+            return;
+          }
+        }
         if (Native()) await A.signInWithCredential(auth, await googleCredential());
         else await A.signInWithPopup(auth, provider());
       } catch (e) {
@@ -96,7 +113,11 @@
     },
     async signUpEmail(email, pw) {
       auth.languageCode = DH.i18n.current;
-      try { await A.createUserWithEmailAndPassword(auth, email, pw); } catch (e) { throw wrap(e); }
+      try {
+        const u = auth.currentUser;
+        if (u && u.isAnonymous) { await A.linkWithCredential(u, A.EmailAuthProvider.credential(email, pw)); this.notify(); } // the guest's account gets the address
+        else await A.createUserWithEmailAndPassword(auth, email, pw);
+      } catch (e) { throw wrap(e); }
     },
     async signInEmail(email, pw) {
       try { await A.signInWithEmailAndPassword(auth, email, pw); } catch (e) { throw wrap(e); }
@@ -146,6 +167,8 @@
         return snap.exists() ? snap.data() : null;
       } catch (e) { throw wrap(e); }
     },
+    /** The signed-in account's ID token, for calls to the game's server. */
+    async idToken() { const u = auth && auth.currentUser; return u ? u.getIdToken() : null; },
     /* ---------- leaderboards: boards/{key}/scores/{uid} ---------- */
     async boardSubmit(key, entry) {
       const u = auth.currentUser; if (!u) throw fail('requires-login');

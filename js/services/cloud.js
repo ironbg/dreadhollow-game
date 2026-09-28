@@ -136,7 +136,10 @@
     /** Where the game signs in for real (Firebase Hosting); used when this page cannot. */
     playUrl: 'https://dreadhollow-b49c7.web.app/',
     elsewhere: false,
+    /** The signed-in account the player chose (Google or email). A guest's invisible account is authUser only. */
     user: null,
+    /** Whoever the server knows this device as: the chosen account, or a guest's anonymous one (server mode). */
+    authUser: null, authReady: false,
     ready: null, authBusy: false, loginPending: false,
     /** off (signed out) | idle | syncing | error | outdated */
     state: 'off',
@@ -150,6 +153,7 @@
       DH.events.on('app:resume', () => this.check());
       document.addEventListener('visibilitychange', () => { if (document.hidden) this.flush('hide'); else this.check(); });
       window.addEventListener('online', () => { this.ensure().catch(() => {}); this.sync('online'); });
+      DH.events.on('live', () => this.ensureGuest()); // the server was switched on: a guest gets their account
       this.provider = pickProvider();
       // a host that cannot sign in (a preview page, a copy inside another site): the test accounts only stand in, and
       // the account buttons send the player to the game's own address instead (?cloud=mock keeps the test accounts)
@@ -162,15 +166,25 @@
       return this.ready;
     },
     onUser(u) {
-      const prev = this.user;
-      this.user = u;
-      if (!u) this.state = 'off';
+      const prevAuth = this.authUser;
+      this.authUser = u; this.authReady = true;
+      this.user = u && !u.anonymous ? u : null;
+      if (!this.syncer()) this.state = 'off';
       else if (this.state === 'off') this.state = 'idle';
       this.emit();
-      if (u && (!prev || prev.uid !== u.uid)) {
+      if (u && (!prevAuth || prevAuth.uid !== u.uid)) {
         if (this.authBusy) this.loginPending = true; // sync once the sign-in flow (e.g. sign in + link Google) is complete
         else this.sync('login');
       }
+      this.ensureGuest();
+    },
+    /** Who syncs: the chosen account; with the server on, a guest's anonymous account too. */
+    syncer() { return this.user || (DH.server && DH.server.remote() ? this.authUser : null); },
+    /** Server mode needs an account for everyone: a guest quietly gets an anonymous one (kept by Google or email later). */
+    ensureGuest() {
+      if (!this.authReady || this.authUser || this.guesting || !DH.server || !DH.server.remote() || !this.provider.guest) return;
+      this.guesting = true;
+      this.provider.guest().catch((e) => console.warn('guest account', e)).then(() => { this.guesting = false; });
     },
     /** Run a sign-in step with the provider ready and the first sync held until it finishes. */
     async auth(fn) {
@@ -178,7 +192,7 @@
       this.authBusy = true;
       try { return await fn(); } finally {
         this.authBusy = false;
-        if (this.loginPending) { this.loginPending = false; if (this.user) this.sync('login'); }
+        if (this.loginPending) { this.loginPending = false; if (this.syncer()) this.sync('login'); }
       }
     },
     emit() { DH.events.emit('cloud'); },
@@ -224,6 +238,7 @@
     },
     /** Delete the account and its cloud save; progress on this device stays, unlinked. */
     async deleteAccount() {
+      if (DH.server.remote()) await DH.server.call('wipe', {}); // the server's profile and leaderboard entries first
       await this.provider.deleteAccount();
       await DH.save.detach(false);
       location.reload();
@@ -232,7 +247,7 @@
     /* ---------- leaderboards (the boards themselves are set in live.json, see DH.meta.boards) ---------- */
     /** Send every best score not yet on its board; quietly retried after the next run or sign-in if it fails. */
     async submitBoards() {
-      if (!this.user || this.boardBusy) return;
+      if (!this.user || this.boardBusy || DH.server.remote()) return; // with the server on, it writes the boards itself
       const list = DH.meta.boardPending(); if (!list.length) return;
       this.boardBusy = true;
       try {
@@ -241,32 +256,35 @@
         }
       } finally { this.boardBusy = false; }
     },
+    /** An ID token for the game's server (Firebase only). */
+    idToken() { return this.authUser && this.provider.idToken ? this.provider.idToken() : Promise.resolve(null); },
     async boardTop(key, n) { await this.ensure().catch(() => {}); return this.provider.boardTop(key, n || 50); },
-    async boardMine(key) { if (!this.user) return null; return this.provider.boardMine(key); },
+    async boardMine(key) { if (!this.authUser) return null; return this.provider.boardMine(key); },
 
     /* ---------- sync ---------- */
     /** Upload soon after a change: at most once a minute. */
     schedule() {
-      if (!this.user || this.timer) return;
+      if (!this.syncer() || this.timer) return;
       const wait = Math.max(5000, 60000 - (Date.now() - this.lastUpload));
       this.timer = setTimeout(() => { this.timer = null; this.sync('auto'); }, wait);
     },
     /** Upload now (end of a run, purchase, app to background). */
     flush(reason) {
-      if (!this.user) return Promise.resolve();
+      if (!this.syncer()) return Promise.resolve();
       clearTimeout(this.timer); this.timer = null;
       DH.save.persist(true);
       if (this.deferred || DH.save.meta.dirty || reason === 'run') return this.sync(reason);
       return Promise.resolve();
     },
     /** Look for progress made on another device (on resume, at most every 30 s). */
-    check() { if (this.user && Date.now() - this.lastCheck > 30000) this.sync('resume'); },
+    check() { if (this.syncer() && Date.now() - this.lastCheck > 30000) this.sync('resume'); },
     async sync(reason) {
-      if (!this.user || this.state === 'outdated') return;
+      if (!this.syncer() || this.state === 'outdated') return;
       if (this.busy) { this.again = true; return; }
       this.busy = true; this.state = 'syncing'; this.emit();
       try {
-        await this.syncOnce(reason);
+        // server mode: the server holds the profile; this device sends its free fields and takes the rest back
+        if (DH.server.remote()) { this.lastCheck = Date.now(); await DH.server.sync(); } else await this.syncOnce(reason);
         this.state = 'idle'; this.error = null;
       } catch (e) {
         if (e.code === 'conflict') { this.again = true; this.state = 'idle'; } // the cloud moved on mid-upload: look again

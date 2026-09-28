@@ -43,15 +43,18 @@
     const dice = h('button.btn.ghost.dice', { 'aria-label': t('name.random'), title: t('name.random'), onclick: () => { click(); inp.value = ui.randomName(); err.textContent = ''; } });
     dice.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.6" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.6" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.6" fill="currentColor"/></svg>';
     let done = false;
-    const ok = () => {
+    let busy = false;
+    const ok = async () => {
       const v = inp.value.replace(/\s+/g, ' ').trim();
       if (v.length < 3) { err.textContent = t('name.short'); return; }
       if (!NAME_OK.test(v)) { err.textContent = t('name.bad'); return; }
-      if (!first && v === s.playerName) { done = true; m.close(); if (then) then(); return; } // unchanged: nothing to pay
-      if (cost > 0 && !M.spend({ gems: cost })) { ui.toast(t('common.notEnough'), 'bad'); return; }
-      s.playerName = v; if (!first) s.nameChanges = (s.nameChanges || 0) + 1;
-      M.boardRename(); DH.cloud.submitBoards(); // the leaderboards show the new name
-      DH.save.persist(); DH.audio.play('reward'); done = true; m.close(); ui.renderTop();
+      if (busy) return; busy = true;
+      const r = await ui.act('rename', { name: v, first }); busy = false;
+      if (!r) return;
+      if (r.error === 'gems') { ui.toast(t('common.notEnough'), 'bad'); return; }
+      if (r.error) { err.textContent = t('name.bad'); return; }
+      if (r.ok) { DH.cloud.submitBoards(); DH.audio.play('reward'); ui.renderTop(); } // the leaderboards show the new name
+      done = true; m.close();
       if (then) then();
     };
     inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') ok(); });
@@ -71,9 +74,9 @@
       h('div.center', A.img('i_energy', 'bigicon'), h('div.num', { style: { fontSize: '14px', margin: '6px 0' } }, M.energy() + ' / ' + E.ENERGY_MAX)),
       h('div.center.small.muted', t('energy.desc', { n: C.RUN_ENERGY, m: Math.round(E.ENERGY_REGEN_MS / 60000) })),
       h('div.col', { style: { marginTop: '12px' } },
-        h('button.btn.ad.block' + (left > 0 ? '' : '.off'), { onclick: async () => { const r = await M.adEnergy(); if (r) { m.close(); ui.rewardPopup(t('energy.title'), r); } } },
+        h('button.btn.ad.block' + (left > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('adEnergy'); if (r) { m.close(); ui.rewardPopup(t('energy.title'), r); } } },
           h('span.adtag', 'AD'), t('energy.ad', { n: E.ENERGY_AD_AMOUNT }), h('span.small', '(' + left + ')')),
-        h('button.btn.gem.block', { onclick: () => { const r = M.gemEnergy(); if (r) { m.close(); ui.rewardPopup(t('energy.title'), r); } else ui.toast(t('common.notEnough'), 'bad'); } },
+        h('button.btn.gem.block', { onclick: async () => { const r = await ui.act('gemEnergy'); if (r) { m.close(); ui.rewardPopup(t('energy.title'), r); } else ui.toast(t('common.notEnough'), 'bad'); } },
           t('energy.gems', { n: E.ENERGY_GEM_AMOUNT }), A.img('i_gem'), E.ENERGY_GEM_COST))) });
     m.el.querySelector('.bigicon').style.cssText = 'width:64px;height:64px';
   };
@@ -132,7 +135,10 @@
         h('button.btn.small.ghost.block', { onclick: () => ui.openSaveTransfer() }, t('settings.transfer')),
         h('div.btns', h('button.btn.small.ghost', { onclick: () => ui.openLegal('terms') }, t('title.terms')), h('button.btn.small.ghost', { onclick: () => ui.openLegal('privacy') }, t('title.privacy'))),
         h('button.btn.small.red.block', { onclick: async () => {
-          if (await ui.confirm({ title: t('settings.reset'), body: t(DH.cloud.user ? 'settings.resetConfirmCloud' : 'settings.resetConfirm'), okCls: 'red', ok: t('settings.reset') })) { await DH.save.reset(); location.reload(); }
+          if (await ui.confirm({ title: t('settings.reset'), body: t(DH.cloud.user ? 'settings.resetConfirmCloud' : 'settings.resetConfirm'), okCls: 'red', ok: t('settings.reset') })) {
+            if (DH.server.remote()) { try { DH.server.adopt((await DH.server.call('reset', {})).save); } catch (e) { ui.serverErr(e); return; } } else await DH.save.reset();
+            location.reload();
+          }
         } }, t('settings.reset'))),
       h('div.note', 'Dreadhollow v' + DH.VERSION + ' · ' + t('settings.credits'))) });
   };
@@ -142,6 +148,7 @@
     ui.modal({ title: t(doc === 'terms' ? 'title.terms' : 'title.privacy'), cls: 'legal', body: h('iframe.legal-frame', { src, title: t(doc === 'terms' ? 'title.terms' : 'title.privacy') }) });
   };
   ui.openSaveTransfer = () => {
+    if (DH.server.remote()) { ui.toast(t('transfer.serverOn'), 'bad'); return; } // the profile lives on the server: signing in carries it
     const ta = h('textarea', { style: { width: '100%', height: '110px', background: '#120c16', color: 'var(--text)', border: '1px solid var(--line)', borderRadius: '8px', fontSize: '10px', userSelect: 'text' } });
     ta.value = DH.save.exportString();
     ui.modal({ title: t('settings.transfer'), body: (m) => h('div',
@@ -294,7 +301,7 @@
         h('div.nb-ms-row', ms.map((x, i) => {
           const pv = M.rewardPreview(x.r)[0], got = !!nb.ms[i], ready = M.nbMilestoneReady(i);
           return h('button.nb-ms' + (got ? '.got' : ready ? '.ready' : '') + (i === ms.length - 1 ? '.big' : '') + (pv.rarity != null ? '.rar' + pv.rarity : ''),
-            { onclick: () => { if (ready) { const r = M.nbClaimMilestone(i); if (r) claimed(t('nb.track'), r); } else { click(); ui.toast(ui.isWord(pv.text) ? pv.text : pv.text + ' · ' + t('nb.at', { n: x.at }), null); } } },
+            { onclick: async () => { if (ready) { const r = await ui.act('nbClaimMilestone', { i }); if (r) claimed(t('nb.track'), r); } else { click(); ui.toast(ui.isWord(pv.text) ? pv.text : pv.text + ' · ' + t('nb.at', { n: x.at }), null); } } },
             A.img(pv.icon), h('b', pv.rarity != null || ui.isWord(pv.text) ? '' : pv.text), got ? h('i.nb-tick', A.img('u_check', 'ci')) : !ready ? h('i.nb-lock', A.img('u_lock', 'ci')) : null);
         })),
         h('div.nb-bar', h('i', { style: { width: (fill * 100) + '%' } })),
@@ -310,7 +317,7 @@
           const ready = x.open && x.done && !x.claimed, pv = M.rewardPreview(x.tk.r)[0];
           const act = x.claimed ? h('span.nb-got', A.img('u_check', 'ci'), t('nb.claimed'))
             : !x.open ? h('span.nb-lockt', t('nb.locked'))
-            : ready ? h('button.btn.small.red.shine', { onclick: () => { const r = M.nbClaimTask(night, i); if (r) claimed(t('nb.title'), r); } }, t('common.claim'))
+            : ready ? h('button.btn.small.red.shine', { onclick: async () => { const r = await ui.act('nbClaimTask', { night, i }); if (r) claimed(t('nb.title'), r); } }, t('common.claim'))
             : x.tk.k === 'login' ? h('span.nb-lockt', t('nb.tomorrow'))
             : h('button.btn.small.ghost', { onclick: () => { click(); m.close(); nbGo(x.tk); } }, t('nb.go'));
           return h('div.nb-row' + (ready ? '.ready' : '') + (x.claimed ? '.claimed' : '') + (!x.open ? '.shut' : ''),
@@ -345,8 +352,8 @@
       h('div.center.small.muted', { style: { marginBottom: '8px' } }, t('login.desc')),
       cal,
       pending ? h('div.btns',
-        h('button.btn.gold', { onclick: () => { const r = M.claimLogin(false); m.close(); ui.rewardPopup(t('login.title'), r); } }, t('common.claim')),
-        h('button.btn.ad.shine', { onclick: async () => { if (await DH.ads.rewarded('login_x2')) { const r = M.claimLogin(true); m.close(); ui.rewardPopup(t('login.title'), r); } } }, h('span.adtag', 'AD'), t('common.claimX2')))
+        h('button.btn.gold', { onclick: async () => { const r = await ui.act('claimLogin', { double: false }); if (!r) return; m.close(); ui.rewardPopup(t('login.title'), r); } }, t('common.claim')),
+        h('button.btn.ad.shine', { onclick: async () => { if (await DH.ads.rewarded('login_x2')) { const r = await ui.act('claimLogin', { double: true }); if (!r) return; m.close(); ui.rewardPopup(t('login.title'), r); } } }, h('span.adtag', 'AD'), t('common.claimX2')))
         : h('div.note', t('login.comeBack', { t: U.fmtDuration(U.msToMidnight()) }))) });
   };
 
@@ -361,14 +368,14 @@
       h('div.goldtotal', A.img('i_gold'), U.fmt(v.gold)),
       h('div.center.small.muted', t('home.vigilTime', { t: U.fmtDuration(v.ms), max: 12 })),
       h('div.btns',
-        h('button.btn.gold' + (v.gold > 0 ? '' : '.off'), { onclick: () => { const r = M.claimVigil(false); m.close(); if (r) ui.rewardPopup(t('vigil.title'), r); } }, t('common.claim')),
-        h('button.btn.ad' + (v.gold > 0 ? '.shine' : '.off'), { onclick: async () => { if (await DH.ads.rewarded('vigil_x2')) { const r = M.claimVigil(true); m.close(); if (r) ui.rewardPopup(t('vigil.title'), r); } } }, h('span.adtag', 'AD'), t('common.claimX2'))),
+        h('button.btn.gold' + (v.gold > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('claimVigil', { double: false }); m.close(); if (r) ui.rewardPopup(t('vigil.title'), r); } }, t('common.claim')),
+        h('button.btn.ad' + (v.gold > 0 ? '.shine' : '.off'), { onclick: async () => { if (await DH.ads.rewarded('vigil_x2')) { const r = await ui.act('claimVigil', { double: true }); m.close(); if (r) ui.rewardPopup(t('vigil.title'), r); } } }, h('span.adtag', 'AD'), t('common.claimX2'))),
       h('h3.sect', t('vigil.quick')),
       h('div.small.muted', t('vigil.quickDesc', { h: E.QUICK_VIGIL_MS / 3600e3 })),
       h('div.col', { style: { marginTop: '8px' } },
-        d.quickVigilFree ? h('button.btn.green.block', { onclick: async () => { const r = await M.quickVigil('free'); m.close(); if (r) ui.rewardPopup(t('vigil.quick'), r); } }, t('common.free'))
-          : h('button.btn.ad.block' + (adsLeft > 0 ? '' : '.off'), { onclick: async () => { const r = await M.quickVigil('ad'); if (r) { m.close(); ui.rewardPopup(t('vigil.quick'), r); } } }, h('span.adtag', 'AD'), t('common.watch'), h('span.small', '(' + adsLeft + ')')),
-        h('button.btn.gem.block', { onclick: async () => { const r = await M.quickVigil('gems'); if (r) { m.close(); ui.rewardPopup(t('vigil.quick'), r); } else ui.toast(t('common.notEnough'), 'bad'); } }, A.img('i_gem'), E.QUICK_VIGIL_GEMS))) })
+        d.quickVigilFree ? h('button.btn.green.block', { onclick: async () => { const r = await ui.act('quickVigil', { mode: 'free' }); m.close(); if (r) ui.rewardPopup(t('vigil.quick'), r); } }, t('common.free'))
+          : h('button.btn.ad.block' + (adsLeft > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('quickVigil', { mode: 'ad' }); if (r) { m.close(); ui.rewardPopup(t('vigil.quick'), r); } } }, h('span.adtag', 'AD'), t('common.watch'), h('span.small', '(' + adsLeft + ')')),
+        h('button.btn.gem.block', { onclick: async () => { const r = await ui.act('quickVigil', { mode: 'gems' }); if (r) { m.close(); ui.rewardPopup(t('vigil.quick'), r); } else ui.toast(t('common.notEnough'), 'bad'); } }, A.img('i_gem'), E.QUICK_VIGIL_GEMS))) })
       .el.querySelector('.bigicon').style.cssText = 'width:64px;height:64px';
   };
 
@@ -386,8 +393,8 @@
       const cur = E.gearStat(g.type, g.rarity, g.level), nxt = g.level < maxL ? E.gearStat(g.type, g.rarity, g.level + 1) : null;
       const sp = E.gearSpecial(g.type, g.rarity);
       const cands = M.mergeCandidates(g.id), cost = E.gearLevelCost(g.rarity, g.level);
-      const equipBtns = eq ? [h('button.btn.ghost.block', { onclick: () => { click(); M.unequipItem(g.id); draw(); } }, t('gear.unequip'))]
-        : slots.map((sl) => h('button.btn.blue.block', { onclick: () => { click(); M.equip(g.id, sl); draw(); } }, slots.length > 1 ? t('gear.equipIn', { slot: t('slot.' + sl) }) : t('gear.equip')));
+      const equipBtns = eq ? [h('button.btn.ghost.block', { onclick: async () => { click(); await ui.act('unequipItem', { id: g.id }); draw(); } }, t('gear.unequip'))]
+        : slots.map((sl) => h('button.btn.blue.block', { onclick: async () => { click(); await ui.act('equip', { id: g.id, slot: sl }); draw(); } }, slots.length > 1 ? t('gear.equipIn', { slot: t('slot.' + sl) }) : t('gear.equip')));
       m.set(h('div',
         h('div.row', { style: { alignItems: 'flex-start' } },
           h('div', { style: { width: '84px', flex: 'none' } }, ui.gearSlot(g, true)),
@@ -398,15 +405,15 @@
             sp ? h('div.small.goldtxt', { style: { marginTop: '4px' } }, ui.gearSpecialText(g.type, sp)) : null)),
         h('div.col', { style: { marginTop: '12px' } },
           equipBtns,
-          g.level < maxL ? h('button.btn.gold.block' + (S().gold >= cost ? '' : '.off'), { onclick: () => { if (M.levelGear(g.id)) { DH.audio.play('buy'); draw(); } else ui.toast(t('common.notEnough'), 'bad'); } },
+          g.level < maxL ? h('button.btn.gold.block' + (S().gold >= cost ? '' : '.off'), { onclick: async () => { const ok = await ui.act('levelGear', { id: g.id }); if (ok) { DH.audio.play('buy'); draw(); } else if (ok === false) ui.toast(t('common.notEnough'), 'bad'); } },
             t('gear.levelUp'), A.img('i_gold'), U.fmt(cost)) : h('button.btn.ghost.block.off', t('common.max')),
-          g.rarity < 5 ? h('button.btn.gem.block' + (cands.length >= 2 ? '.shine' : '.dim'), { onclick: () => {
+          g.rarity < 5 ? h('button.btn.gem.block' + (cands.length >= 2 ? '.shine' : '.dim'), { onclick: async () => {
             if (cands.length < 2) { ui.toast(t('gear.mergeNeed', { n: 2 - cands.length, g: t('gear.' + g.type), r: t('rarity.' + E.rarities[g.rarity]) }), 'bad'); return; }
-            if (M.merge(g.id)) { DH.audio.play('chest'); const gg = M.gearById(id); ui.rewardPopup(t('armory.merged'), [{ icon: 'g_' + gg.type, text: t('gear.' + gg.type), rarity: gg.rarity }]); draw(); }
+            if (await ui.act('merge', { id: g.id })) { DH.audio.play('chest'); const gg = M.gearById(id); ui.rewardPopup(t('armory.merged'), [{ icon: 'g_' + gg.type, text: t('gear.' + gg.type), rarity: gg.rarity }]); draw(); }
           } }, t('gear.merge', { n: Math.min(3, cands.length + 1) })) : null,
           h('div.small.muted.center', g.rarity < 5 ? t('gear.mergeHint', { r: t('rarity.' + E.rarities[g.rarity + 1]) }) : ''),
           h('button.btn.small.red', { onclick: async () => {
-            if (await ui.confirm({ title: t('gear.salvage'), body: t('gear.salvageConfirm', { g: U.fmt(M.salvageValue(g)) }), okCls: 'red' })) { const v = M.salvage(g.id); ui.toast('+' + U.fmt(v) + ' ' + t('common.gold'), 'good'); m.close(); }
+            if (await ui.confirm({ title: t('gear.salvage'), body: t('gear.salvageConfirm', { g: U.fmt(M.salvageValue(g)) }), okCls: 'red' })) { const v = await ui.act('salvage', { id: g.id }); if (v == null) return; ui.toast('+' + U.fmt(v) + ' ' + t('common.gold'), 'good'); m.close(); }
           } }, t('gear.salvage'), A.img('i_gold'), U.fmt(M.salvageValue(g))))));
     };
     draw();
@@ -415,7 +422,7 @@
   ui.openSlotPicker = (slot) => {
     const row = (g, worn, m) => {
       const sp = E.gearSpecial(g.type, g.rarity), other = !worn && M.isEquipped(g.id) ? M.slotsFor(g.type).find((sl) => sl !== slot && M.eq()[sl] === g.id) : null;
-      return h('div.panel.item.pick' + (worn ? '.done' : ''), { onclick: () => { click(); m.close(); if (worn) ui.openGear(g.id); else M.equip(g.id, slot); } },
+      return h('div.panel.item.pick' + (worn ? '.done' : ''), { onclick: () => { click(); m.close(); if (worn) ui.openGear(g.id); else ui.act('equip', { id: g.id, slot }).then(() => ui.refresh()); } },
         h('div', { style: { width: '52px', flex: 'none' } }, h('div.slot.rar' + g.rarity, A.img('g_' + g.type), g.isNew ? h('span.newdot') : null)),
         h('div.grow',
           h('div.t', t('gear.' + g.type)),
@@ -423,7 +430,7 @@
           h('div.d', ui.fmtStats(E.gearStat(g.type, g.rarity, g.level))),
           sp ? h('div.small.goldtxt', ui.gearSpecialText(g.type, sp)) : null,
           other ? h('div', h('span.wornpill', A.img('u_check', 'ci'), t('armory.alreadyWorn'))) : null),
-        worn ? h('button.btn.small.ghost', { onclick: (e) => { e.stopPropagation(); click(); M.unequipItem(g.id); m.close(); } }, t('gear.unequip'))
+        worn ? h('button.btn.small.ghost', { onclick: (e) => { e.stopPropagation(); click(); ui.act('unequipItem', { id: g.id }).then(() => ui.refresh()); m.close(); } }, t('gear.unequip'))
           : h('button.btn.small.ghost.infob', { onclick: (e) => { e.stopPropagation(); click(); m.close(); ui.openGear(g.id); } }, 'i'));
     };
     ui.modal({ title: t('slot.' + slot), body: (m) => {
@@ -441,10 +448,10 @@
     const s = S();
     ui.modal({ title: t('marks.title'), body: (m) => h('div',
       h('div.center.small.muted', { style: { marginBottom: '8px' } }, t('marks.desc')),
-      M.eq().mark ? h('button.btn.small.ghost.block', { style: { marginBottom: '8px' }, onclick: () => { M.equipMark(null); m.close(); } }, t('gear.unequip')) : null,
+      M.eq().mark ? h('button.btn.small.ghost.block', { style: { marginBottom: '8px' }, onclick: () => { ui.act('equipMark', { hero: null }).then(() => ui.refresh()); m.close(); } }, t('gear.unequip')) : null,
       C.heroOrder.map((hid) => {
         const un = M.markUnlocked(hid), on = M.eq().mark === hid;
-        return h('div.panel.item' + (on ? '.done' : '') + (un ? '' : '.claimed'), { onclick: () => { if (un) { M.equipMark(hid); m.close(); } } },
+        return h('div.panel.item' + (on ? '.done' : '') + (un ? '' : '.claimed'), { onclick: () => { if (un) { ui.act('equipMark', { hero: hid }).then(() => ui.refresh()); m.close(); } } },
           h('div.ico', A.img('m_' + hid)),
           h('div.grow', h('div.t', t('marks.name', { hero: t('hero.' + hid + '.name') })), h('div.d', ui.fmtStats(C.heroes[hid].mark) + ' · ' + t('marks.access')),
             !un ? h('div.small.muted', A.img('u_lock', 'ci'), ' ' + ui.deedText(DH.deeds.byId['d_mark_' + hid])) : null),
@@ -485,8 +492,8 @@
             h('div.reward-list', M.rewardPreview(it.reward).map((r) => h('div.reward', h('div.slot' + (r.rarity != null ? '.rar' + r.rarity : ''), A.img(r.icon)), h('div.n' + (ui.isWord(r.text) ? '.word' : ''), r.text)))),
             it.limit ? h('div.small.muted', t('ev.left', { n: left, m: it.limit })) : null,
             left <= 0 ? h('div.small.good.evsold', t('ev.soldOut'))
-              : h('button.btn.small' + (can ? '.gold' : '.off'), { onclick: () => {
-                const r = M.eventBuy(ev, it);
+              : h('button.btn.small' + (can ? '.gold' : '.off'), { onclick: async () => {
+                const r = await ui.act('eventBuy', { eventId: ev.id, itemId: it.id });
                 if (!r) { ui.toast(t('common.notEnough'), 'bad'); return; }
                 DH.audio.play('buy'); m.set(body(m)); ui.rewardPopup(M.loc(ev.name), r);
               } }, A.img(icon), U.fmt(it.cost)));

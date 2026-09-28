@@ -412,7 +412,7 @@
       h('div.center.muted', t('revive.desc')), cnt,
       h('div.col',
         !run.usedAdRevive ? h('button.btn.ad.block.shine', { onclick: async () => { clearInterval(iv); if (await DH.ads.rewarded('revive')) { run.usedAdRevive = true; revived(); } else startTimer(); } }, h('span.adtag', 'AD'), t('revive.free')) : null,
-        cost == null ? h('div.center.small.muted', t('revive.noMore')) : h('button.btn.gem.block', { onclick: () => { if (DH.meta.spend({ gems: cost })) { run.usedGemRevive++; DH.audio.play('buy'); revived(); } else { clearInterval(iv); ui.toast(t('common.notEnough'), 'bad'); startTimer(); } } }, t('revive.gems'), A.img('i_gem'), cost, h('small', { style: { opacity: 0.75, marginLeft: '6px' } }, t('revive.left', { n: gemsLeft }))),
+        cost == null ? h('div.center.small.muted', t('revive.noMore')) : h('button.btn.gem.block', { onclick: async () => { clearInterval(iv); const ok = await ui.act('reviveGems', { n: run.usedGemRevive }); if (ok) { run.usedGemRevive++; DH.audio.play('buy'); revived(); } else { if (ok === false) ui.toast(t('common.notEnough'), 'bad'); startTimer(); } } }, t('revive.gems'), A.img('i_gem'), cost, h('small', { style: { opacity: 0.75, marginLeft: '6px' } }, t('revive.left', { n: gemsLeft }))),
         h('button.btn.ghost.block', { onclick: () => { click(); giveUp(); } }, t('revive.giveUp')))) });
     startTimer();
   };
@@ -434,7 +434,7 @@
     (res.artifacts || []).forEach((k) => extras.push({ icon: 'a_' + k, text: t('artifact.' + k + '.name'), rarity: 4 }));
     const dblBtn = h('button.btn.ad.shine', { onclick: async () => {
       if (doubled) return;
-      if (await DH.ads.rewarded('double_gold')) { doubled = true; DH.meta.doubleRunGold(res); goldEl.textContent = U.fmt(res.gold * 2); dblBtn.classList.add('off'); DH.audio.play('coin'); }
+      const g = await ui.act('doubleRunGold'); if (g) { doubled = true; goldEl.textContent = U.fmt(res.gold * 2); dblBtn.classList.add('off'); DH.audio.play('coin'); }
     } }, h('span.adtag', 'AD'), t('results.double'));
     const hudEl = document.getElementById('hud'); if (hudEl) hudEl.classList.add('hidden'); // the run is over: its bars do not peek over the results
     ui.modal({ closable: false, cls: 'results wide', rays: win, body: (m) => h('div',
