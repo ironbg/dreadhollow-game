@@ -101,25 +101,57 @@
       const B = this.bridge, T = this.stage.theme;
       const top = -B - cy, bot = B - cy;
       const dark = 'rgb(' + T.dark.join(',') + ')';
+      const hsh = (i, s) => { let h = (i * 73856093) ^ s; h = Math.imul(h ^ (h >>> 13), 0x5bd1e995); return ((h ^ (h >>> 15)) >>> 0) / 4294967296; };
       const chasm = (y0, y1, dir) => {
         if (y1 <= 0 || y0 >= H) return;
-        const gr = g.createLinearGradient(0, dir > 0 ? y0 : y1, 0, dir > 0 ? y0 + 90 : y1 - 90);
-        gr.addColorStop(0, 'rgba(20,40,44,0.92)'); gr.addColorStop(0.35, dark); gr.addColorStop(1, '#010203');
+        const gr = g.createLinearGradient(0, dir > 0 ? y0 : y1, 0, dir > 0 ? y0 + 120 : y1 - 120);
+        gr.addColorStop(0, 'rgba(18,34,38,0.95)'); gr.addColorStop(0.4, dark); gr.addColorStop(1, '#010203');
         g.fillStyle = gr; g.fillRect(0, Math.max(0, y0), W, Math.min(H, y1) - Math.max(0, y0));
-        // far-below water glints
-        g.fillStyle = 'rgba(110,220,200,0.08)';
-        for (let i = 0; i < 6; i++) { const x = ((i * 97 + Math.floor(cx * 0.4)) % (W + 40) + W + 40) % (W + 40) - 20, y = dir > 0 ? y0 + 60 + (i % 3) * 30 : y1 - 60 - (i % 3) * 30; g.fillRect(x, y + Math.sin(now + i) * 2, 14, 1); }
+        // far below: another aqueduct's arches, drifting slower than the bridge, lost in the mist
+        const ay = dir > 0 ? y0 + 70 : y1 - 70, par = 0.35, sp = 46, ox = -(((cx * par) % sp) + sp) % sp;
+        g.fillStyle = 'rgba(30,58,62,0.55)';
+        for (let x = ox - sp; x < W + sp; x += sp) {
+          g.fillRect(Math.round(x), ay - 16, sp, 6);
+          g.beginPath(); g.moveTo(x + 4, ay - 10); g.lineTo(x + 4, ay + 26); g.lineTo(x + 10, ay + 26); g.lineTo(x + 10, ay + 6); g.arc(x + 23, ay + 6, 13, Math.PI, 0); g.lineTo(x + 36, ay + 26); g.lineTo(x + 42, ay + 26); g.lineTo(x + 42, ay - 10); g.closePath(); g.fill();
+        }
+        const fog = g.createLinearGradient(0, ay - 20, 0, ay + 40); fog.addColorStop(0, 'rgba(60,110,110,0)'); fog.addColorStop(0.5, 'rgba(60,110,110,0.18)'); fog.addColorStop(1, 'rgba(60,110,110,0)');
+        g.fillStyle = fog; g.fillRect(0, ay - 20, W, 60);
+        g.fillStyle = 'rgba(110,220,200,0.1)'; // glints on the water far below
+        for (let i = 0; i < 7; i++) { const x = ((i * 97 + Math.floor(cx * 0.2)) % (W + 40) + W + 40) % (W + 40) - 20, y = dir > 0 ? y0 + 100 + (i % 3) * 26 : y1 - 100 - (i % 3) * 26; g.fillRect(x, y + Math.sin(now + i) * 2, 8 + (i % 3) * 5, 1); }
       };
-      chasm(-1e4, top, -1); chasm(bot, 1e4, 1);
-      // parapet stones along both edges, broken here and there
+      chasm(-1e4, top, -1); chasm(bot + 40, 1e4, 1);
+      // the near side of the bridge: its outer wall and arches dropping into the dark
+      if (bot > -60 && bot < H + 10) {
+        const sp = 48, x0 = -((cx % sp) + sp) % sp;
+        g.fillStyle = '#2e3a3c'; g.fillRect(0, bot, W, 44);
+        for (let r = 0; r < 5; r++) { const y = bot + 3 + r * 8, off = (r & 1) ? 6 : 0; g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(0, y, W, 1); for (let x = -((cx + off) % 12 + 12) % 12; x < W; x += 12) g.fillRect(Math.round(x), y, 1, 8); }
+        for (let x = x0 - sp; x < W + sp; x += sp) {
+          const ax = Math.round(x + sp / 2);
+          g.fillStyle = '#060a0c'; g.beginPath(); g.moveTo(ax - 12, bot + 46); g.lineTo(ax - 12, bot + 22); g.arc(ax, bot + 22, 12, Math.PI, 0); g.lineTo(ax + 12, bot + 46); g.closePath(); g.fill();
+          g.strokeStyle = 'rgba(150,180,175,0.35)'; g.lineWidth = 1; g.beginPath(); g.arc(ax, bot + 22, 13, Math.PI, 0); g.stroke(); // the voussoirs
+          for (let k = 0; k < 5; k++) { const a = Math.PI + (k + 0.5) / 5 * Math.PI; g.strokeStyle = 'rgba(0,0,0,0.5)'; g.beginPath(); g.moveTo(ax + Math.cos(a) * 12, bot + 22 + Math.sin(a) * 12); g.lineTo(ax + Math.cos(a) * 15, bot + 22 + Math.sin(a) * 15); g.stroke(); }
+          const wi = Math.floor((x + cx) / sp);
+          if (hsh(wi, 7) < 0.6) { g.fillStyle = 'rgba(170,220,215,0.18)'; g.fillRect(Math.round(ax + 16 + hsh(wi, 3) * 8), bot + 3, 1, 30 + hsh(wi, 5) * 12); } // water weeping down the stones
+          if (hsh(wi, 9) < 0.5) { g.fillStyle = 'rgba(60,138,106,0.55)'; g.fillRect(Math.round(ax - 20), bot + 1, 10, 3); g.fillRect(Math.round(ax - 18), bot + 4, 2, 5); }
+        }
+        const sh = g.createLinearGradient(0, bot, 0, bot + 46); sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(1, dark);
+        g.fillStyle = sh; g.fillRect(0, bot, W, 46);
+      }
+      // parapets: dressed coping stones with a lit top and a face, broken here and there
       for (const [y, s] of [[top, -1], [bot, 1]]) {
-        if (y < -8 || y > H + 8) continue;
-        g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(0, y + (s > 0 ? 0 : -3), W, 3);
+        if (y < -12 || y > H + 12) continue;
+        g.fillStyle = 'rgba(0,0,0,0.45)'; g.fillRect(0, y + (s > 0 ? -4 : 1), W, 3); // its shadow on the deck
         const x0 = -((cx % 12) + 12) % 12;
         for (let x = x0 - 12; x < W + 12; x += 12) {
-          const wx = Math.floor((x + cx) / 12); if ((wx * 7919) % 11 === 0) continue;
-          g.fillStyle = (wx & 1) ? '#5a6a6c' : '#4a585a'; g.fillRect(Math.round(x), Math.round(y - (s > 0 ? 0 : 5)), 11, 5);
-          g.fillStyle = 'rgba(255,255,255,0.12)'; g.fillRect(Math.round(x), Math.round(y - (s > 0 ? 0 : 5)), 11, 1);
+          const wx = Math.floor((x + cx) / 12), rx = Math.round(x);
+          if (hsh(wx, s > 0 ? 11 : 13) < 0.09) { g.fillStyle = '#3a4648'; g.fillRect(rx + 3, Math.round(y - (s > 0 ? 1 : 3)), 3, 2); g.fillRect(rx + 7, Math.round(y - (s > 0 ? 0 : 2)), 2, 2); continue; } // a gap, rubble in it
+          const k = hsh(wx, 17), yy = Math.round(y - (s > 0 ? 2 : 6)), hgt = s > 0 ? 5 : 7;
+          g.fillStyle = '#0c1214'; g.fillRect(rx, yy - 1, 12, hgt + 1);
+          g.fillStyle = k < 0.33 ? '#5a6a6c' : k < 0.66 ? '#4e5c5e' : '#465456'; g.fillRect(rx + 0.5, yy, 11, hgt);
+          g.fillStyle = 'rgba(210,235,230,0.3)'; g.fillRect(rx + 0.5, yy, 11, 2); // lit top
+          g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(rx + 0.5, yy + hgt - 1.5, 11, 1.5);
+          if (k > 0.8) { g.fillStyle = 'rgba(60,138,106,0.7)'; g.fillRect(rx + 2, yy + 2, 4, 1.5); }
+          if (k > 0.55 && k < 0.62) { g.fillStyle = 'rgba(0,0,0,0.5)'; g.fillRect(rx + 6, yy + 2, 1, hgt - 3); }
         }
       }
     }
