@@ -1160,3 +1160,9 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
   .home .enote { display: none; }
   .home > .stagecard { margin-top: 4px !important; }
 }
+/* title: on a screen wider than the nave drawing, its sides melt into black instead of ending on a hard edge;
+   the soft backdrop behind them sinks to near black, so there are no bands at the sides */
+#title { background: #030205; }
+#title::before { filter: blur(14px) brightness(.16); }
+.t-stage { -webkit-mask-image: linear-gradient(90deg, transparent 0, rgba(0,0,0,.55) 4%, #000 12%, #000 88%, rgba(0,0,0,.55) 96%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, rgba(0,0,0,.55) 4%, #000 12%, #000 88%, rgba(0,0,0,.55) 96%, transparent 100%); }
