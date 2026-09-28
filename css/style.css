@@ -1164,5 +1164,12 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
    the soft backdrop behind them sinks to near black, so there are no bands at the sides */
 #title { background: #030205; }
 #title::before { filter: blur(14px) brightness(.16); }
-.t-stage { -webkit-mask-image: linear-gradient(90deg, transparent 0, rgba(0,0,0,.55) 4%, #000 12%, #000 88%, rgba(0,0,0,.55) 96%, transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0, rgba(0,0,0,.55) 4%, #000 12%, #000 88%, rgba(0,0,0,.55) 96%, transparent 100%); }
+:root { --nave-fade: linear-gradient(90deg, transparent 0, rgba(0,0,0,.06) 3%, rgba(0,0,0,.18) 6%, rgba(0,0,0,.36) 9%, rgba(0,0,0,.56) 12%, rgba(0,0,0,.74) 15%, rgba(0,0,0,.88) 18%, rgba(0,0,0,.97) 21%, #000 24%,
+  #000 76%, rgba(0,0,0,.97) 79%, rgba(0,0,0,.88) 82%, rgba(0,0,0,.74) 85%, rgba(0,0,0,.56) 88%, rgba(0,0,0,.36) 91%, rgba(0,0,0,.18) 94%, rgba(0,0,0,.06) 97%, transparent 100%); }
+.t-stage { -webkit-mask-image: var(--nave-fade); mask-image: var(--nave-fade); }
+/* the loading screen: the same nave in the same frame, fading out the same way */
+#boot { background: #030205; }
+#boot::before { filter: blur(14px) brightness(.16); }
+#boot::after { left: 50%; right: auto; width: auto; height: 100%; aspect-ratio: 390 / 844; transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent 70%, rgba(90,10,20,.25)), url('../assets/boot-bg.svg') center / 100% 100% no-repeat;
+  -webkit-mask-image: var(--nave-fade); mask-image: var(--nave-fade); }
