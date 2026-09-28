@@ -1119,3 +1119,21 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .btn.dice { width: 48px; padding: 0; }
 .btn.dice svg { width: 24px; height: 24px; }
 .nameerr { min-height: 18px; margin-top: 4px; color: var(--blood-hi); text-align: center; }
+/* v1.60.43 account plate: same height, frame and notch as the currency pills, so the top bar reads as one row */
+.topbar .acct { flex: 1; min-width: 0; height: 32px; display: flex; flex-direction: row; align-items: center; gap: 0; padding: 0; cursor: pointer; }
+.topbar .acct .lvshield { position: relative; z-index: 2; flex: none; width: 26px; height: 32px; margin-right: -9px;
+  clip-path: polygon(50% 0, 100% 14%, 100% 58%, 50% 100%, 0 58%, 0 14%); background: linear-gradient(180deg, #fff0b0, #e0a93e 45%, #8a5a18); filter: drop-shadow(0 2px 0 #000); }
+.topbar .acct .lvshield::before { content: ''; position: absolute; inset: 2px; clip-path: inherit; background: radial-gradient(circle at 50% 30%, #b8323e, #6a0c16 60%, #2a0408); }
+.topbar .acct .lvshield b { position: relative; display: block; text-align: center; font: 11px/30px var(--num); color: #fff; text-shadow: 0 1px 0 #000, 0 0 3px #000; }
+.topbar .acct .aplate { flex: 1; min-width: 0; height: 28px; display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 0 7px 0 13px;
+  border: 2px solid #050308; background: #0c080e; box-shadow: inset 0 0 0 1px var(--ring); clip-path: var(--notch); }
+.topbar .acct .arow { display: flex; align-items: baseline; justify-content: space-between; gap: 5px; min-width: 0; }
+.topbar .acct .name { display: block; min-width: 0; font-family: var(--title); font-size: 11px; line-height: 11px; color: #f0c860; text-shadow: 0 1px 0 #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar .acct .xpn { flex: none; font: 8px/10px var(--num); color: #b8c8e8; text-shadow: 0 1px 0 #000; }
+.topbar .acct .xpbar { position: relative; max-width: none; height: 6px; margin: 0; border: 1px solid #050308; border-radius: 0; box-shadow: none; background: #1a1420; overflow: hidden; }
+.topbar .acct .xpbar i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(180deg, #c8e8ff 0 35%, #5a90f0 35% 75%, #2a5aa8 75%); box-shadow: 0 0 5px rgba(120,180,255,.6); }
+.topbar .acct .xpbar span { display: none; }
+.topbar .acct .aplate { gap: 2px; padding: 0 6px 0 12px; }
+.topbar .acct .name { line-height: 11px; }
+.topbar .acct .xpbar { height: 11px; }
+.topbar .acct .xpbar span { position: relative; display: block; text-align: center; font: 7.5px/9px var(--num); color: #fff; text-shadow: 0 1px 0 #000, 0 0 2px #000, 0 0 3px #000; white-space: nowrap; }
