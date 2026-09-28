@@ -5,6 +5,11 @@
   const S = () => DH.save.data;
   const click = () => DH.audio.play('click');
   const thumbs = {};
+  /** Choose a hall on the home screen: its score and its ambience follow. */
+  function pickHall(id) {
+    S().selectedStage = id; DH.save.persist(); ui.refresh();
+    DH.audio.music('menu', id); DH.audio.ambience(id);
+  }
 
   function stageUnlocked(id) {
     const i = C.stageOrder.indexOf(id);
@@ -71,8 +76,8 @@
           h('div.sname', (idx + 1) + '. ' + t('stage.' + sid + '.name')),
           h('div.srule', t('stage.' + sid + '.rule')), // every hall shows its character
           h('div.sdiff', t('stage.' + sid + '.desc') + ' · ' + t('home.best', { t: U.fmtTime(s.bestTime[sid] || 0) }) + (s.stats.maxAgony[sid] ? ' · ' + t('hud.agony') + ' ' + ['0', 'I', 'II', 'III', 'IV', 'V'][s.stats.maxAgony[sid]] : ''))),
-        idx > 0 ? h('button.arrow.l', { onclick: () => { click(); s.selectedStage = C.stageOrder[idx - 1]; DH.save.persist(); ui.refresh(); } }, A.img('u_left', 'ci')) : null,
-        idx < C.stageOrder.length - 1 ? h('button.arrow.r', { onclick: () => { click(); s.selectedStage = C.stageOrder[idx + 1]; DH.save.persist(); ui.refresh(); } }, A.img('u_right', 'ci')) : null,
+        idx > 0 ? h('button.arrow.l', { onclick: () => { click(); pickHall(C.stageOrder[idx - 1]); } }, A.img('u_left', 'ci')) : null,
+        idx < C.stageOrder.length - 1 ? h('button.arrow.r', { onclick: () => { click(); pickHall(C.stageOrder[idx + 1]); } }, A.img('u_right', 'ci')) : null,
         !unlocked ? h('div.lock', A.img('u_lock', 'bigic'), t('home.lockedStage', { name: t('stage.' + C.stageOrder[idx - 1] + '.name') })) : null);
       root.append(card);
       const en = M.energy();

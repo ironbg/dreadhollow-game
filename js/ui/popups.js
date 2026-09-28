@@ -194,7 +194,7 @@
   /** Where "Go" takes the player for each kind of task. */
   function nbGo(tk) {
     const battle = ['runs', 'kills', 'bosses', 'elites', 'champions', 'tomes', 'wins', 'level', 'survive', 'clear', 'agony', 'acct'];
-    if (battle.includes(tk.k)) { if (tk.st && ui.stageUnlocked(tk.st)) { S().selectedStage = tk.st; DH.save.persist(); } ui.go('home'); }
+    if (battle.includes(tk.k)) { if (tk.st && ui.stageUnlocked(tk.st)) { S().selectedStage = tk.st; DH.save.persist(); DH.audio.music('menu', tk.st); DH.audio.ambience(tk.st); } ui.go('home'); }
     else if (tk.k === 'shrine') ui.go('shrine', 'bless');
     else if (tk.k === 'brew') ui.go('shrine', 'brew');
     else if (['equip', 'gearLv', 'merge'].includes(tk.k)) ui.go('armory', 'gear');
