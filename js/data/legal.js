@@ -7,7 +7,7 @@
     owner: { bg: 'НОЛИНА МЕД ЕООД', en: 'NOLINA MED EOOD' }, // the company, as registered in the Commercial Register
     eik: '204109102',
     address: { bg: 'гр. Хисаря, обл. Пловдив, „Деветте деца на Еани“ № 2, България', en: '2 Devette Detsa na Eani, Hisarya, Plovdiv Province, Bulgaria' },
-    email: '',   // a support address players can write to about their account, purchases and personal data
+    email: 'nikolov@nolina-med.eu', // a support address players can write to about their account, purchases and personal data
     country: 'BG', // governing law and the data protection authority players can complain to
     updated: '2026-09-28',
   };
