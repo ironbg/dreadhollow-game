@@ -143,4 +143,7 @@ window.DH = window.DH || {};
 
   DH.util = U;
   DH.VERSION = '1.60.66';
+  /** Which build this is: 'web' (the browser version), or the app's 'debug' (test phones: test ads only) or 'release'
+   *  (Google Play). tools/build-www.js sets it from DH_BUILD when it packs the app. */
+  DH.BUILD = 'web';
 })(window.DH);

@@ -44,10 +44,15 @@
       if (run.state !== 'victory') run.state = 'over';
       DH.input.enable(false);
       const sum = run.summary();
-      DH.server.runEnd(sum).then((res) => ui.openResults(run, res), (e) => {
-        // not settled (no connection, or the server would not confirm it): back to the menus with the reason
-        ui.serverErr(e);
-        this.toMenu(false);
+      DH.server.runEnd(sum).then((res) => ui.openResults(run, res), (e) => this.unsettled(run, e));
+    },
+    /** The server did not settle the fight. Refused (not confirmed): back to the menus with the reason. No connection:
+     *  the fight is kept on this device; try again now, or later (it is sent by itself when the connection is back). */
+    unsettled(run, e) {
+      if (!DH.server.RETRY.includes(e && e.code)) { ui.serverErr(e); this.toMenu(false); return; }
+      ui.confirm({ title: t('server.unsettledTitle'), body: t('server.unsettledBody'), ok: t('server.retry'), cancel: t('server.later') }).then((yes) => {
+        if (!yes) { this.toMenu(false); return; }
+        DH.server.sendPending(true, true).then((res) => (res ? ui.openResults(run, res) : this.toMenu(false)), (err) => this.unsettled(run, err));
       });
     },
     async toMenu(win) {
@@ -143,6 +148,8 @@
     requestAnimationFrame(frame);
     DH.cloud.init();
     DH.live.init(); // versions, events and the real date from the web host
+    DH.ads.init(); // the app: ad consent where the law asks for it, then the ads SDK
+    DH.iap.init(); // the app: the store's products and any purchase not yet delivered
     // the title screen first; the daily calendar waits until the player has come through the window
     DH.title.show(() => {
       const calendar = () => { ui.flushSeason(); if (M.loginPending()) setTimeout(() => ui.openLogin(), 500); };

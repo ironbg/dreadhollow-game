@@ -134,6 +134,7 @@
         h('button.btn.small.ghost.block', { onclick: () => DH.iap.restore() }, t('shop.restore')),
         h('button.btn.small.ghost.block', { onclick: () => ui.openSaveTransfer() }, t('settings.transfer')),
         h('div.btns', h('button.btn.small.ghost', { onclick: () => ui.openLegal('terms') }, t('title.terms')), h('button.btn.small.ghost', { onclick: () => ui.openLegal('privacy') }, t('title.privacy'))),
+        DH.ads.privacyRequired() ? h('button.btn.small.ghost.block', { onclick: () => DH.ads.privacyOptions() }, t('settings.adPrivacy')) : null,
         h('button.btn.small.red.block', { onclick: async () => {
           if (await ui.confirm({ title: t('settings.reset'), body: t(DH.cloud.user ? 'settings.resetConfirmCloud' : 'settings.resetConfirm'), okCls: 'red', ok: t('settings.reset') })) {
             if (DH.server.remote()) { try { DH.server.adopt((await DH.server.call('reset', {})).save); } catch (e) { ui.serverErr(e); return; } } else await DH.save.reset();

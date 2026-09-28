@@ -3,15 +3,19 @@
  *   act       one player action from js/meta/actions.js (the same list the game uses), run on the server's copy
  *   runStart  a fight begins: torches are paid and the server notes the time, the hall, the hero and the Agony
  *   runEnd    a fight ends: its summary is checked against that (runcheck.js) and only then rewarded
+ *   purchase  a Google Play purchase: checked with Google (play.js), delivered once
+ *   adReward  AdMob's confirmation that a rewarded ad was watched (ads.js); actions paid by an ad take one
  * Every write is a transaction on the player's document, so two devices can never double-spend. */
 'use strict';
-const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
 const { setGlobalOptions } = require('firebase-functions/v2');
 const admin = require('firebase-admin');
 const { FieldValue } = require('firebase-admin/firestore');
 const crypto = require('crypto');
 const { boot, withProfile, freshProfile } = require('./engine');
 const { checkRun } = require('./runcheck');
+const play = require('./play');
+const ads = require('./ads');
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -21,6 +25,10 @@ setGlobalOptions({ region: 'europe-west1', maxInstances: 20, memory: '512MiB', t
 const LIVE_URL = 'https://dreadhollow-b49c7.web.app/live.json';
 let live = null, liveAt = 0;
 async function liveConfig() {
+  if (process.env.FUNCTIONS_EMULATOR === 'true') { // tests: live.json as the test sets it (test/live), else the deployed copy
+    const t = await db.collection('test').doc('live').get();
+    if (t.exists) return Object.assign({}, require('./game/live.json'), t.data());
+  }
   if (live && Date.now() - liveAt < 60e3) return live;
   try { const r = await fetch(LIVE_URL, { cache: 'no-store' }); if (r.ok) { live = await r.json(); liveAt = Date.now(); return live; } } catch (e) { /* fall back */ }
   if (!live) { try { live = require('./game/live.json'); } catch (e) { live = {}; } liveAt = Date.now(); }
@@ -32,8 +40,12 @@ const fail = (code, msg, status) => new HttpsError(status || 'failed-preconditio
 const isGuest = (req) => !!(req.auth && req.auth.token && req.auth.token.firebase && req.auth.token.firebase.sign_in_provider === 'anonymous');
 const uidOf = (req) => { if (!req.auth || !req.auth.uid) throw fail('requires-login', 'sign in first', 'unauthenticated'); return req.auth.uid; };
 const cmp = (a, b) => { const x = String(a || '0').split('.').map(Number), y = String(b || '0').split('.').map(Number); for (let i = 0; i < 4; i++) { const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
-/** Too old a game build is turned away (its economy code would not match the server's). */
-function checkVersion(v, cfg) { const min = cfg && cfg.web && cfg.web.min; if (min && cmp(v, min) < 0) throw fail('outdated', 'update the game'); }
+/** Too old a game build is turned away (its economy code would not match the server's). The store app (p: 'app') has
+ *  its own minimum (live.json app.min): an app update takes days to reach every phone, the web version minutes. */
+function checkVersion(d, cfg) {
+  const rules = (cfg && (d.p === 'app' ? cfg.app : cfg.web)) || {};
+  if (rules.min && cmp(d.v, rules.min) < 0) throw fail('outdated', 'update the game');
+}
 
 /* ---------- the first time an account reaches the server: its profile so far, with sane ceilings ---------- */
 const CAPS = { gold: 3e6, gems: 3e4, shards: 5000, energy: 300, accountLevel: 250 };
@@ -74,7 +86,7 @@ function rate(doc) {
 /* ---------- sync ---------- */
 exports.sync = onCall(async (req) => {
   const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
-  checkVersion(d.v, cfg);
+  checkVersion(d, cfg);
   const out = await onProfile(uid, async (profile, doc) => {
     let from = profile, extra = {};
     if (!profile) { // first visit: the old cloud save if there is one, else what this device holds
@@ -91,11 +103,30 @@ exports.sync = onCall(async (req) => {
 /* ---------- act ---------- */
 exports.act = onCall(async (req) => {
   const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
-  checkVersion(d.v, cfg);
+  checkVersion(d, cfg);
   const name = String(d.name || '');
-  if (!boot(cfg).actions.list[name]) throw fail('unknown-action', name);
-  const out = await onProfile(uid, async (profile, doc) => {
+  const def = boot(cfg).actions.list[name];
+  if (!def) throw fail('unknown-action', name);
+  // an action paid by a rewarded ad: with verification on, AdMob must have confirmed one (ads.js)
+  let needAd = false;
+  if (def.ad && cfg.ads && cfg.ads.verify) {
+    const snap = await db.collection('players').doc(uid).get();
+    if (snap.exists) {
+      const r = await withProfile(JSON.parse(snap.data().save), cfg, (DH) => {
+        DH.actions.overlayFree(DH.save.data, d.free);
+        return !DH.save.data.purchases.noAds && !!def.ad(d.args || {}); // No Ads: the reward comes without an ad
+      });
+      needAd = !!r.result;
+    }
+    if (needAd && !(await ads.waitTicket(db, uid))) throw fail('ad-not-verified');
+  }
+  const out = await onProfile(uid, async (profile, doc, tx) => {
     if (!profile) throw fail('no-profile', 'sync first');
+    if (needAd) {
+      const ticket = await ads.takeTicket(tx, db, uid);
+      if (!ticket) throw fail('ad-not-verified');
+      tx.update(ticket, { used: true, usedFor: name });
+    }
     const r = await withProfile(profile, cfg, async (DH) => {
       DH.actions.overlayFree(DH.save.data, d.free);
       return DH.actions.list[name].run(d.args || {});
@@ -109,7 +140,7 @@ exports.act = onCall(async (req) => {
 /* ---------- a fight ---------- */
 exports.runStart = onCall(async (req) => {
   const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
-  checkVersion(d.v, cfg);
+  checkVersion(d, cfg);
   const out = await onProfile(uid, async (profile, doc) => {
     if (!profile) throw fail('no-profile', 'sync first');
     let ticket = null;
@@ -130,7 +161,7 @@ exports.runStart = onCall(async (req) => {
 
 exports.runEnd = onCall(async (req) => {
   const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
-  checkVersion(d.v, cfg);
+  checkVersion(d, cfg);
   const out = await onProfile(uid, async (profile, doc) => {
     if (!profile) throw fail('no-profile', 'sync first');
     const run = doc.run;
@@ -146,6 +177,41 @@ exports.runEnd = onCall(async (req) => {
   if (out.invalid) throw fail('invalid-run', out.invalid);
   if (!isGuest(req)) await sendBoards(uid, out.profile, cfg);
   return { save: out.profile, rev: out.rev, result: out.result };
+});
+
+/* ---------- a Google Play purchase ---------- */
+exports.purchase = onCall(async (req) => {
+  const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
+  checkVersion(d, cfg);
+  const productId = String(d.productId || ''), token = String(d.token || '');
+  if (!boot(cfg).economy.products[productId] || !token || token.length > 2000) throw fail('bad-purchase');
+  let g;
+  try { g = await play.verify(productId, token); } catch (e) { throw fail(e.code || 'store-unreachable', 'try later', 'unavailable'); }
+  if (!g) throw fail('bad-purchase');
+  if (g.purchaseState === 2) throw fail('pending');
+  if (g.purchaseState !== 0) throw fail('bad-purchase'); // cancelled or refunded
+  if (g.obfuscatedExternalAccountId && g.obfuscatedExternalAccountId !== play.accountHash(uid)) throw fail('other-account');
+  const ref = db.collection('purchases').doc(play.tokenId(token));
+  const out = await onProfile(uid, async (profile, doc, tx) => {
+    if (!profile) throw fail('no-profile', 'sync first');
+    const seen = await tx.get(ref);
+    if (seen.exists) { // delivered before (a retry, a restore): nothing more
+      if (seen.data().uid !== uid) throw fail('other-account');
+      return { write: false, profile, result: [] };
+    }
+    if (g.consumptionState === 1) throw fail('bad-purchase'); // used up without ever reaching the game
+    const r = await withProfile(profile, cfg, (DH) => DH.meta.fulfillProduct(productId, true));
+    tx.set(ref, { uid, productId, orderId: g.orderId || null, test: g.purchaseType === 0, at: FieldValue.serverTimestamp() });
+    return { profile: r.profile, result: r.result, extra: { rate: rate(doc) } };
+  });
+  if (g.acknowledgementState === 0) await play.acknowledge(productId, token).catch((e) => console.warn('acknowledge', e.message));
+  return { save: out.profile, rev: out.rev, result: out.result || [] };
+});
+
+/* ---------- AdMob's confirmation of a watched rewarded ad (a plain web address, called by Google) ---------- */
+exports.adReward = onRequest(async (req, res) => {
+  const q = (req.originalUrl || '').split('?')[1] || '';
+  try { const r = await ads.onCallback(db, q); res.status(r.status).send(r.body); } catch (e) { console.error('adReward', e); res.status(500).send('error'); }
 });
 
 /* ---------- leaderboards: only the server writes them, from profiles it settled itself ---------- */

@@ -184,7 +184,11 @@
     ensureGuest() {
       if (!this.authReady || this.authUser || this.guesting || !DH.server || !DH.server.remote() || !this.provider.guest) return;
       this.guesting = true;
-      this.provider.guest().catch((e) => console.warn('guest account', e)).then(() => { this.guesting = false; });
+      this.provider.guest().catch((e) => {
+        console.warn('guest account', e);
+        // guest accounts are switched off for the project (Firebase console): guests keep playing on this device
+        if (e && /operation-not-allowed|admin-restricted/.test(e.code || '')) { this.guestBlocked = true; this.emit(); }
+      }).then(() => { this.guesting = false; });
     },
     /** Run a sign-in step with the provider ready and the first sync held until it finishes. */
     async auth(fn) {

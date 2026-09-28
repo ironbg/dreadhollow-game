@@ -8,6 +8,7 @@
   const HOST = 'https://dreadhollow-b49c7.web.app/';
   const HOSTS = ['dreadhollow-b49c7.web.app', 'dreadhollow-b49c7.firebaseapp.com', 'localhost', '127.0.0.1'];
   const KEY = 'dh_live';
+  const STORE = 'https://play.google.com/store/apps/details?id=com.dreadhollow.game';
   const SKEW_MS = 60e3; // a phone within a minute of the host is left alone
   const RECHECK_MS = 10 * 60e3;
 
@@ -65,9 +66,12 @@
       if (r.min && cmp(v, r.min) < 0) { DH.ui.forceUpdate(r); return; }
       if (r.latest && cmp(v, r.latest) < 0 && this.told !== r.latest) { this.told = r.latest; DH.ui.newVersion(r); }
     },
-    /** Get the new version: the web page reloads past its offline cache; the app opens its store page. */
+    /** The game's server turned this copy away as too old (it may know before live.json does): the update window. */
+    outdated() { DH.ui.forceUpdate(this.rules()); },
+    /** Get the new version: the web page reloads past its offline cache; the app opens its page in the store
+     *  (a link outside the game leaves the app for the Play Store). */
     update(r) {
-      if (DH.platform.native) { window.open((r && r.store) || (this.config && this.config.app && this.config.app.store), '_system'); return; }
+      if (DH.platform.native) { location.href = (r && r.store) || (this.config && this.config.app && this.config.app.store) || STORE; return; }
       const go = () => location.reload();
       if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) navigator.serviceWorker.getRegistration().then((g) => (g ? g.update() : null)).catch(() => {}).then(go);
       else go();

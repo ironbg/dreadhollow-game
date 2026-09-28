@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Dreadhollow</string>
+    <string name="title_activity_main">Dreadhollow</string>
+    <string name="package_name">com.dreadhollow.game</string>
+    <string name="custom_url_scheme">com.dreadhollow.game</string>
+</resources>

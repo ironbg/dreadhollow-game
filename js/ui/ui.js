@@ -43,7 +43,7 @@
   /** What a failed call to the game's server means for the player. */
   ui.serverErr = (e) => {
     const c = e && e.code;
-    ui.toast(t(c === 'offline' ? 'server.offline' : c === 'requires-login' ? 'server.login' : c === 'invalid-run' ? 'server.invalidRun' : c === 'outdated' ? 'server.outdated' : 'server.error'), 'bad');
+    ui.toast(t(c === 'offline' ? 'server.offline' : c === 'requires-login' ? 'server.login' : c === 'invalid-run' ? 'server.invalidRun' : c === 'outdated' ? 'server.outdated' : c === 'ad-not-verified' ? 'ad.notConfirmed' : 'server.error'), 'bad');
     if (!(e && e.code)) console.error(e);
   };
   ui.toast = (msg, kind) => {

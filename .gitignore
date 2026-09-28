@@ -1,9 +1,15 @@
 node_modules/
 www/
-android/
 ios/
 .DS_Store
 preview.html
 functions/game/
 functions/node_modules/
 *-debug.log
+# Android: the upload key never goes into the repository (the debug key does, on purpose)
+*.jks
+*.keystore
+!android/app/debug.keystore
+android/local.properties
+android/app/google-services.json
+resources/

@@ -71,6 +71,52 @@ const call = async (name, data, token) => { const r = await post(FN + name, { da
   // an old game build is turned away
   assert.strictEqual((await call('sync', { free: {}, v: '1.0.0' }, token)).error, 'outdated');
 
+  // ---- Google Play purchases (on the emulators a pretend Google accepts tokens "test-ok-...") ----
+  const V = '9.9.9';
+  assert.strictEqual((await call('purchase', { productId: 'gems_1', token: 'forged-token', v: V }, token)).error, 'bad-purchase');
+  assert.strictEqual((await call('purchase', { productId: 'nothing', token: 'test-ok-x', v: V }, token)).error, 'bad-purchase');
+  const gems0 = (await call('sync', { free: {}, v: V }, token)).save.gems;
+  r = await call('purchase', { productId: 'gems_1', token: 'test-ok-aaa111', v: V }, token);
+  assert.strictEqual(r.save.gems, gems0 + 160, 'first gem pack doubled'); assert.ok(r.result.length);
+  r = await call('purchase', { productId: 'gems_1', token: 'test-ok-aaa111', v: V }, token);
+  assert.strictEqual(r.save.gems, gems0 + 160, 'one token delivers once'); assert.strictEqual(r.result.length, 0);
+  assert.strictEqual((await call('purchase', { productId: 'gems_1', token: 'test-ok-pending1', v: V }, token)).error, 'pending');
+  assert.strictEqual((await call('purchase', { productId: 'gems_1', token: 'test-ok-other1', v: V }, token)).error, 'other-account');
+  const su2 = await post(AUTH + '/identitytoolkit.googleapis.com/v1/accounts:signUp?key=test', { returnSecureToken: true });
+  await call('sync', { free: {}, v: V }, su2.json.idToken);
+  assert.strictEqual((await call('purchase', { productId: 'gems_1', token: 'test-ok-aaa111', v: V }, su2.json.idToken)).error, 'other-account', 'a token is not handed on');
+  r = await call('purchase', { productId: 'noads', token: 'test-ok-noads1', v: V }, token);
+  assert.strictEqual(r.save.purchases.noAds, true);
+  assert.ok((await db.collection('purchases').get()).size >= 2);
+
+  // ---- rewarded ads confirmed by AdMob (live.json ads.verify) ----
+  const crypto = require('crypto');
+  const kp = crypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
+  await db.collection('test').doc('adkeys').set({ keys: { 77: kp.publicKey.export({ type: 'spki', format: 'pem' }) } });
+  await db.collection('test').doc('live').set({ ads: { verify: true } });
+  const u2 = su2.json.idToken, uid2 = su2.json.localId; // a player without No Ads
+  const signed = (q) => q + '&signature=' + crypto.sign('sha256', Buffer.from(q), { key: kp.privateKey, dsaEncoding: 'der' }).toString('base64url') + '&key_id=77';
+  const cb = (q) => fetch(FN + 'adReward?' + q).then((x) => x.status);
+  let g = (await call('sync', { free: {}, v: V }, u2)).save.gems;
+  assert.strictEqual((await call('act', { name: 'adGems', v: V }, u2)).error, 'ad-not-verified', 'no ad, no reward');
+  const q1 = 'ad_network=5450213213286189855&ad_unit=1&custom_data=dh&reward_amount=1&reward_item=r&timestamp=' + Date.now() + '&transaction_id=tx1&user_id=' + uid2;
+  assert.strictEqual(await cb(q1.replace('tx1', 'tx0') + '&signature=AAAA&key_id=77'), 400, 'unsigned callback refused');
+  assert.strictEqual(await cb(signed(q1)), 200);
+  assert.strictEqual(await cb(signed(q1)), 200, 'a retried callback is fine');
+  r = await call('act', { name: 'adGems', v: V }, u2);
+  assert.ok(r.save.gems > g, 'a confirmed ad pays'); g = r.save.gems;
+  assert.strictEqual((await call('act', { name: 'adGems', v: V }, u2)).error, 'ad-not-verified', 'one ad pays once');
+  // No Ads: the reward comes without an ad
+  r = await call('act', { name: 'adGems', v: V }, token);
+  assert.ok(r.save && !r.error, 'No Ads needs no ticket');
+  await db.collection('test').doc('live').delete();
+
+  // an app build older than live.json app.min is turned away, the web one is not
+  await db.collection('test').doc('live').set({ app: { min: '9.9.10' } });
+  assert.strictEqual((await call('sync', { free: {}, v: V, p: 'app' }, token)).error, 'outdated');
+  assert.ok((await call('sync', { free: {}, v: V, p: 'web' }, token)).save);
+  await db.collection('test').doc('live').delete();
+
   // deleting the account removes what the server holds
   r = await call('wipe', {}, token);
   assert.ok(r.ok); assert.ok(!(await db.collection('players').doc(uid).get()).exists);

@@ -1,0 +1,92 @@
+apply plugin: 'com.android.application'
+
+/* Dreadhollow's app. The version comes from package.json (1.60.66 -> versionCode 1060066), so every release
+ * that raises the game's version is a valid update on Google Play.
+ * Signing: debug builds use debug.keystore in this folder (committed on purpose, so its SHA-1 stays the same and
+ * Google sign-in works on test phones). Release builds use the upload key from the environment
+ * (DH_KEYSTORE, DH_KEYSTORE_PASSWORD, DH_KEY_ALIAS, DH_KEY_PASSWORD), as the CI sets them from its secrets.
+ * AdMob: DH_ADMOB_APP_ID, or Google's test app id when it is not set. */
+def pkg = new groovy.json.JsonSlurper().parse(file('../../package.json'))
+def (vMaj, vMin, vPatch) = pkg.version.tokenize('.').collect { it as int }
+def env = { String k -> System.getenv(k) ?: (project.findProperty(k) ?: '') }
+def ADMOB_TEST_APP = 'ca-app-pub-3940256099942544~3347511713'
+
+android {
+    namespace = "com.dreadhollow.game"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.dreadhollow.game"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode vMaj * 1000000 + vMin * 1000 + vPatch
+        versionName pkg.version
+        manifestPlaceholders = [admobAppId: env('DH_ADMOB_APP_ID') ?: ADMOB_TEST_APP]
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
+            if (env('DH_KEYSTORE')) {
+                storeFile file(env('DH_KEYSTORE'))
+                storePassword env('DH_KEYSTORE_PASSWORD')
+                keyAlias env('DH_KEY_ALIAS')
+                keyPassword env('DH_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig env('DH_KEYSTORE') ? signingConfigs.release : null
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+// google-services.json (Firebase console -> Project settings -> the Android app) is required: without it the
+// sign-in plugin cannot start and the app would close at launch, so the build stops here instead.
+if (!file('google-services.json').exists()) {
+    throw new GradleException('android/app/google-services.json is missing: download it from the Firebase console ' +
+        '(Project settings -> Your apps -> the Android app com.dreadhollow.game) and put it in android/app/.')
+}
+apply plugin: 'com.google.gms.google-services'
+
+// A release for Google Play must be signed with the upload key; stop early with a clear message if it is not there.
+gradle.taskGraph.whenReady { g ->
+    if (g.allTasks.any { it.name.toLowerCase().contains('release') } && !env('DH_KEYSTORE')) {
+        throw new GradleException('Release build without the upload key: set DH_KEYSTORE, DH_KEYSTORE_PASSWORD, DH_KEY_ALIAS and DH_KEY_PASSWORD.')
+    }
+}
