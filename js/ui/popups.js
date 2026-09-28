@@ -472,6 +472,13 @@
   /* ---------------- Account level up ---------------- */
   ui.flushLevelUps = () => {
     const q = M.pendingLevelUps || []; M.pendingLevelUps = [];
-    q.forEach((l) => ui.rewardPopup(t('account.levelUp', { n: l.level }), [{ icon: 'i_gem', text: '+' + l.reward.gems }, { icon: 'i_gold', text: '+' + U.fmt(l.reward.gold) }]));
+    const pay = (gems, gold) => [{ icon: 'i_gem', text: '+' + gems }, { icon: 'i_gold', text: '+' + U.fmt(gold) }];
+    if (q.length > 3) { // a long climb: one window for all of it
+      ui.rewardPopup(t('account.levelsUp', { a: q[0].level - 1, b: q[q.length - 1].level }), pay(q.reduce((n, l) => n + l.reward.gems, 0), q.reduce((n, l) => n + l.reward.gold, 0)));
+      return;
+    }
+    // one level at a time, lowest first: the next window opens when this one is collected
+    const next = () => { const l = q.shift(); if (l) ui.rewardPopup(t('account.levelUp', { n: l.level }), pay(l.reward.gems, l.reward.gold), null, () => setTimeout(next, 180)); };
+    next();
   };
 })(window.DH);

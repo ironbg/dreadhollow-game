@@ -211,7 +211,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'login.day': 'Ден {n}', 'login.title': 'Дневни награди', 'login.desc': 'Влизай всеки ден за все по-големи награди!', 'login.comeBack': 'Следваща награда след {t}',
   'vigil.title': 'Награди от бдението', 'vigil.desc': 'Героят ти пази криптата, докато те няма: {g} злато на час, до {max} часа. Преминавай зали, за да печелиш повече.',
   'vigil.quick': 'Бързо бдение', 'vigil.quickDesc': 'Получи веднага награди за {h} часа бдение.',
-  'account.levelUp': 'Ниво на профила: {n}!',
+  'account.levelsUp': 'Ниво на профила: {a} → {b}!', 'account.levelUp': 'Ниво на профила: {n}!',
 
   'stat.might': 'Щети', 'stat.haste': 'Скорост на атака', 'stat.maxHpPct': 'Макс. живот', 'stat.speedPct': 'Скорост на движение', 'stat.area': 'Обхват',
   'stat.magnet': 'Обхват за събиране', 'stat.crit': 'Шанс за крит', 'stat.duration': 'Продължителност', 'stat.growth': 'Опит', 'stat.greed': 'Злато',

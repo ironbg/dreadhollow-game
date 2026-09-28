@@ -211,7 +211,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'login.day': 'Day {n}', 'login.title': 'Daily Rewards', 'login.desc': 'Log in every day for growing rewards!', 'login.comeBack': 'Next reward in {t}',
   'vigil.title': 'Vigil Rewards', 'vigil.desc': 'Your hero keeps watch over the crypt while you\'re away: {g} gold per hour, up to {max} hours. Clear halls to earn more.',
   'vigil.quick': 'Quick Vigil', 'vigil.quickDesc': 'Instantly collect {h} hours of Vigil rewards.',
-  'account.levelUp': 'Account level {n}!',
+  'account.levelsUp': 'Account level {a} → {b}!', 'account.levelUp': 'Account level {n}!',
 
   'stat.might': 'Damage', 'stat.haste': 'Attack Speed', 'stat.maxHpPct': 'Max HP', 'stat.speedPct': 'Move Speed', 'stat.area': 'Area',
   'stat.magnet': 'Pickup Range', 'stat.crit': 'Crit Chance', 'stat.duration': 'Duration', 'stat.growth': 'XP Gain', 'stat.greed': 'Gold Gain',

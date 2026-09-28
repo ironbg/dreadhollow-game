@@ -94,11 +94,11 @@
     });
   });
 
-  ui.rewardPopup = (title, entries, extra) => {
+  ui.rewardPopup = (title, entries, extra, onClose) => {
     if (!entries || !entries.length) return null;
     DH.audio.play('reward');
     return ui.modal({
-      title, rays: true,
+      title, rays: true, onClose,
       body: (m) => h('div',
         h('div.reward-list', entries.map((e, i) => {
           const r = e.rarity != null ? e.rarity : null;
