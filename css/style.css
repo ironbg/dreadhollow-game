@@ -1119,15 +1119,13 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .btn.dice { width: 48px; padding: 0; }
 .btn.dice svg { width: 24px; height: 24px; }
 .nameerr { min-height: 18px; margin-top: 4px; color: var(--blood-hi); text-align: center; }
-/* v1.60.45 the level: a small round coin on the portrait's corner (gold figures on dark bronze, a gold rim);
-   the menus square every corner, so the circle is cut with clip-path */
-.topbar .avatar .lvl { right: -7px; bottom: -7px; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 0; clip-path: circle(50%);
-  display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 35%, #3e2c1c, #140c0a 72%);
-  font: 9px/1 var(--num); color: #ffd98a; text-shadow: 0 1px 0 #000; box-shadow: none; }
-.topbar .avatar .lvl::before { content: ''; position: absolute; inset: 0; clip-path: circle(50%); pointer-events: none;
-  box-shadow: inset 0 0 0 1.5px #e8b850, inset 0 0 0 2.5px #2a1a0a, inset 0 2px 3px rgba(255,220,150,.2); }
+/* v1.60.46 the level and the experience bar in the same dress as the currency pills beside them:
+   dark iron, a black edge, a thin bronze line inside and notched corners */
 .topbar .avatar { overflow: visible; }
-/* the experience bar without a box behind it: the empty part is a faint groove, the fill glows, the points sit on it */
-.topbar .acct .xpbar { height: 10px; border: 0; box-shadow: none; background: rgba(255,255,255,.07); }
-.topbar .acct .xpbar i { background: linear-gradient(180deg, #d8f0ff 0%, #8cc4ff 40%, #3a78e0 100%); box-shadow: 0 0 6px rgba(120,180,255,.55); }
-.topbar .acct .xpbar span { font: 8.5px/10px var(--num); }
+.topbar .avatar .lvl { right: -8px; bottom: -8px; min-width: 22px; height: 18px; padding: 0 4px; border: 2px solid #050308; border-radius: 0;
+  display: flex; align-items: center; justify-content: center; background: #0c080e; box-shadow: inset 0 0 0 1px var(--ring); clip-path: var(--notch);
+  font: 9px/1 var(--num); color: #ffd98a; text-shadow: 0 1px 0 #000; }
+.topbar .acct .xpbar { position: relative; height: 16px; padding: 3px; border: 2px solid #050308; border-radius: 0; background: #0c080e;
+  box-shadow: inset 0 0 0 1px var(--ring); clip-path: var(--notch); overflow: hidden; }
+.topbar .acct .xpbar i { position: absolute; left: 3px; top: 3px; bottom: 3px; max-width: calc(100% - 6px); background: linear-gradient(180deg, #d8f0ff 0%, #8cc4ff 40%, #3a78e0 100%); box-shadow: 0 0 6px rgba(120,180,255,.5); }
+.topbar .acct .xpbar span { position: relative; display: block; text-align: center; font: 8.5px/8px var(--num); color: #fff; text-shadow: 0 1px 0 #000, 0 0 2px #000, 0 0 3px #000; white-space: nowrap; }
