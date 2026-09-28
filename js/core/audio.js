@@ -6,7 +6,7 @@
  * recorded assets later by replacing SFX entries with AudioBuffer playback. */
 (function (DH) {
   'use strict';
-  let ctx = null, master = null, sfxBus = null, musicBus = null, reverb = null, revOut = null, darkF = null, space = null;
+  let ctx = null, master = null, sfxBus = null, musicBus = null, musicLP = null, reverb = null, revOut = null, darkF = null, space = null;
   const last = {};
   let musicState = null;
   const settings = { sfx: 0.8, music: 0.5 };
@@ -39,7 +39,9 @@
     // no chiptune sparkle: effects are darkened before the mix
     darkF = ctx.createBiquadFilter(); darkF.type = 'lowpass'; darkF.frequency.value = 5200; darkF.Q.value = 0.5; darkF.connect(comp);
     sfxBus = ctx.createGain(); sfxBus.gain.value = settings.sfx; sfxBus.connect(darkF);
-    musicBus = ctx.createGain(); musicBus.gain.value = settings.music * 0.6; musicBus.connect(comp);
+    // the music passes a lowpass that closes as the hero nears death
+    musicLP = ctx.createBiquadFilter(); musicLP.type = 'lowpass'; musicLP.frequency.value = 16000; musicLP.Q.value = 0.7; musicLP.connect(comp);
+    musicBus = ctx.createGain(); musicBus.gain.value = settings.music * 0.6; musicBus.connect(musicLP);
     revOut = ctx.createGain(); revOut.gain.value = 0.42; revOut.connect(comp);
     reverb = ctx.createConvolver(); reverb.buffer = hallImpulse(3.4); reverb.connect(revOut);
     return true;
@@ -577,6 +579,21 @@
     return g;
   }
 
+  /** How the fight is going: the hero's share of life and how many foes are close. null out of a run. */
+  function danger() {
+    const r = DH.game && DH.game.run;
+    if (!r || r.state !== 'playing' || !r.player || !r.P) return null;
+    const p = r.player; let crowd = 0;
+    if (r.enemies) for (const e of r.enemies) if (e && !e.dead && !(e.def && e.def.prop) && Math.abs(e.x - p.x) < 170 && Math.abs(e.y - p.y) < 170) crowd++;
+    return { hp: Math.max(0, p.hp / Math.max(1, r.P.maxHp)), crowd };
+  }
+
+  /** Close or open the music's lowpass, dry and reverb send alike. */
+  function muffle(st, f, tc) {
+    musicLP.frequency.setTargetAtTime(f, ctx.currentTime, tc);
+    if (st && st.rlp) st.rlp.frequency.setTargetAtTime(f, ctx.currentTime, tc);
+  }
+
   /** A boss is on the field: the music takes on brass and heavier drums. */
   function bossNear() {
     const r = DH.game && DH.game.run;
@@ -590,8 +607,9 @@
     setSpace(hall);
     // every voice of this session, dry and reverb send, passes one gate that closes when the music stops
     const out = ctx.createGain(); out.connect(musicBus);
-    out._rsend = ctx.createGain(); out._rsend.connect(reverb);
-    const st = { mood, hall, alive: true, step: 0, nodes: [], out };
+    out._rsend = ctx.createGain();
+    const rlp = ctx.createBiquadFilter(); rlp.type = 'lowpass'; rlp.frequency.value = 16000; out._rsend.connect(rlp); rlp.connect(reverb);
+    const st = { mood, hall, alive: true, step: 0, nodes: [], out, rlp };
     musicState = st;
     // low drone of the hall, slowly breathing filter
     const droneG = ctx.createGain(); droneG.gain.value = 0.0001; droneG.connect(out);
@@ -631,6 +649,19 @@
           if (H.lead === 'pluck') { if (s % 4 === 2 && Math.random() < 0.6) lead('pluck', melNote(s >> 2), d, 0.04, out, beat); }
           else if (s8 === 4 && Math.random() < 0.6) lead(H.lead, melNote(s >> 3), d, 0.035, out, beat * 3);
           if (H.lead === 'organ' && s % 16 === 0) voices.forEach((n) => lead('organ', n, d, 0.012, out, beat * 7));
+          const dg = s % 2 === 0 ? danger() : st.dg; st.dg = dg;
+          if (dg) {
+            // near death: the music goes dull, as if heard through water, and a heart pounds, faster the closer the end
+            const low = dg.hp < 0.35 ? dg.hp / 0.35 : 1;
+            if (s % 2 === 0) muffle(st, low < 1 ? 450 + low * 2600 : 16000, 0.5);
+            if (low < 1 && (low < 0.4 ? true : s % 2 === 0)) {
+              tone({ type: 'sine', f: 62, f2: 38, t: 0.24, vol: 0.34, dest: out, delay: d });
+              tone({ type: 'sine', f: 52, f2: 34, t: 0.2, vol: 0.22, dest: out, delay: d + Math.min(0.22, beat * 0.28) });
+            }
+            // surrounded: more drums, then a nervous tremolo of low strings
+            if (dg.crowd > 22 && (s8 === 3 || s8 === 7)) drum(d, 0.13, out);
+            if (dg.crowd > 45) [0, 0.25].forEach((q) => tone({ type: 'sawtooth', f: midi(bass + 19), t: beat * 0.22, vol: 0.016, attack: 0.01, filter: 'lowpass', ff: 1400, q: 2, dest: out, delay: d + beat * q }));
+          } else if (s % 2 === 0) muffle(st, 16000, 0.3); // paused, won or lost
           if (boss) { // brass stabs on each chord and a heavier beat
             if (s % 16 === 0) [bass + 12, bass + 19].forEach((n, i) => tone({ type: 'sawtooth', f: midi(n), t: beat * 3, vol: 0.055, attack: 0.05, filter: 'lowpass', ff: 800, ff2: 200, q: 2, detune: i ? 8 : -8, dest: out, rev: 0.5, delay: d }));
             if (s8 === 2 || s8 === 6) drum(d, 0.16, out, true);
@@ -652,6 +683,7 @@
   }
   function stopMusic() {
     const st = musicState; if (!st || !ctx || st.pending) { musicState = null; return; }
+    musicLP.frequency.setTargetAtTime(16000, ctx.currentTime, 0.3);
     st.alive = false; clearInterval(st.timer);
     const t = ctx.currentTime;
     [st.droneG, st.windG, st.texG, st.out, st.out && st.out._rsend].forEach((g) => { if (g) { g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(Math.max(0.0001, g.gain.value), t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.8); } });
