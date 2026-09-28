@@ -205,7 +205,9 @@
     el.innerHTML = '';
     el.append(
       h('div.avatar', { onclick: () => ui.openProfile() }, A.img('h_' + s.selectedHero), h('div.lvl', s.accountLevel)),
-      h('div.acct', h('div.name', t('top.level', { n: s.accountLevel })), h('div.xpbar', h('i', { style: { width: (s.accountXp / need * 100) + '%' } }))),
+      h('div.acct', { onclick: () => ui.openProfile() },
+        h('div.name', s.playerName || t('top.level', { n: s.accountLevel })),
+        h('div.xpbar', h('i', { style: { width: Math.min(100, s.accountXp / need * 100) + '%' } }), h('span', U.fmt(Math.floor(s.accountXp)) + ' / ' + U.fmt(need)))),
       h('div.pill', { onclick: () => ui.openEnergy() }, A.img('i_energy'), h('span', en + '/' + E.ENERGY_MAX), h('span.plus', '+')),
       h('div.pill', { onclick: () => ui.go('shop', 'gold') }, A.img('i_gold'), h('span', U.fmt(s.gold)), h('span.plus', '+')),
       h('div.pill', { onclick: () => ui.go('shop', 'gems') }, A.img('i_gem'), h('span', U.fmt(s.gems)), h('span.plus', '+')));

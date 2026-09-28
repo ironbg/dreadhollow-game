@@ -39,6 +39,7 @@
       settings: { music: 0.5, sfx: 0.8, vibration: true, lang: null, dmgNumbers: true, shake: true, lowFx: false, outlines: true, fxAlpha: 1, twinStick: false, mouseAim: false, master: 1, pauseOnBlur: true, hideJoystick: false, aimLine: false, flash: 1 },
       tutorialDone: false,
       titleChosen: false, // the way in (guest or an account) was chosen on the title screen
+      playerName: '', // chosen on the first visit, shown above the experience bar; changed from the profile
       seen: {},
     };
   }

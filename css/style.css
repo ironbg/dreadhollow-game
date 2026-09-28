@@ -1102,3 +1102,20 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .pack .ptags { min-height: 36px; }
 .pack .ptags span { height: 17px; }
 .pack .ptags .tag { letter-spacing: 0; padding: 1px 2px; }
+/* the account block: the player's name over a framed experience bar with the numbers inside; the whole block opens the profile */
+.acct { cursor: pointer; display: flex; flex-direction: column; justify-content: center; gap: 3px; padding-left: 2px; }
+.acct .name { display: block; font-family: var(--title); font-size: 12.5px; line-height: 1.1; color: #f0c860; text-shadow: 0 1px 0 #000, 0 0 6px rgba(0,0,0,.8); overflow: hidden; text-overflow: ellipsis; }
+.acct .xpbar { position: relative; max-width: 132px; height: 12px; margin-top: 0; border-radius: 0; overflow: hidden;
+  background: linear-gradient(180deg, #0c0810, #1d1522); border: 1px solid #050308; box-shadow: 0 0 0 1px #7a5c34, inset 0 1px 3px rgba(0,0,0,.8); }
+.acct .xpbar i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(180deg, #d8f0ff 0%, #8cc4ff 35%, #3a78e0 70%, #24509a 100%); box-shadow: inset -1px 0 0 rgba(255,255,255,.55), 0 0 6px rgba(120,180,255,.6); transition: width .5s ease-out; }
+.acct .xpbar span { position: relative; display: block; text-align: center; font: 9px/11px var(--num); color: #fff; text-shadow: 0 1px 0 #000, 0 0 2px #000, 0 0 3px #000; white-space: nowrap; }
+@media (max-width: 430px) { .acct .name { display: block; } }
+/* profile and the name window */
+.pname { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; }
+.pname b { font-family: var(--title); font-size: 20px; color: var(--gold); text-shadow: 0 2px 0 #000; }
+.namerow { display: flex; gap: 8px; align-items: stretch; }
+.nameinp { flex: 1; min-width: 0; height: 44px; padding: 0 12px; font: 800 18px var(--body); color: #f4e6c4; background: #0e0a12; border: 1px solid #050308; box-shadow: inset 0 0 0 1px #7a5c34, inset 0 2px 6px rgba(0,0,0,.7); outline: none; }
+.nameinp:focus { box-shadow: inset 0 0 0 1px #f0c860, inset 0 2px 6px rgba(0,0,0,.7); }
+.btn.dice { width: 48px; padding: 0; }
+.btn.dice svg { width: 24px; height: 24px; }
+.nameerr { min-height: 18px; margin-top: 4px; color: var(--blood-hi); text-align: center; }

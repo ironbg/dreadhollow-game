@@ -171,6 +171,9 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'device.app': 'app', 'device.browser': 'browser',
   // time and units: short countdowns and distances, built by util.fmtDuration / fmtDays; keep them compact
   'time.dh': '{d}d {h}h', 'time.hm': '{h}h {m}m', 'time.ms': '{m}m {s}s', 'time.s': '{s}s', 'unit.meters': '{n}m',
+  'name.titleFirst': 'Choose Your Name', 'name.title': 'Change Name', 'name.change': 'Change name', 'name.random': 'Random name',
+  'name.desc': 'This is how the halls will know you. You can change it any time from your profile.', 'name.ok': 'Confirm',
+  'name.short': 'At least 3 characters.', 'name.bad': 'Use letters, digits and spaces only.',
   'title.guest': 'Play as Guest', 'title.or': 'or sign in to keep your progress', 'title.tap': 'Tap to enter',
   'title.guestNote': 'As a guest your progress stays on this device. You can sign in later from Settings.',
   'title.asGuest': 'Playing as a guest', 'title.signedAs': 'Signed in as {name}', 'title.change': 'Change', 'title.signIn': 'Sign in',

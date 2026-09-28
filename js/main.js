@@ -128,7 +128,10 @@
     requestAnimationFrame(frame);
     DH.cloud.init();
     // the title screen first; the daily calendar waits until the player has come through the window
-    DH.title.show(() => { if (M.loginPending()) setTimeout(() => ui.openLogin(), 900); });
+    DH.title.show(() => {
+      const calendar = () => { if (M.loginPending()) setTimeout(() => ui.openLogin(), 500); };
+      if (!DH.save.data.playerName) setTimeout(() => ui.openName(true, calendar), 700); else calendar();
+    });
     // daily rollover while the app stays open
     let day = DH.util.dayKey();
     setInterval(() => { const d = DH.util.dayKey(); if (d !== day) { day = d; M.ensureDaily(); DH.events.emit('meta'); } }, 30000);

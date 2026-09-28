@@ -14,9 +14,47 @@
       ['profile.maxLevel', st.maxLevel], ['profile.gold', U.fmt(st.goldEarned)], ['profile.playTime', U.fmtDuration(st.playTime * 1000)],
       ['profile.chests', U.fmt(st.chestsOpened)],
     ];
-    ui.modal({ title: t('profile.title'), body: h('div',
+    const m = ui.modal({ title: t('profile.title'), body: h('div',
+      h('div.pname', h('b', s.playerName || '—'), h('button.btn.tiny.ghost', { onclick: () => { click(); m.close(); ui.openName(false, () => ui.openProfile()); } }, t('name.change'))),
       h('div.center', h('span.power', t('top.level', { n: s.accountLevel }))),
       h('div.statgrid', rows.map(([k, v]) => h('div', h('span', t(k)), h('b', v))))) });
+  };
+
+  /* ---------------- Player name ---------------- */
+  // syllables for a random name that sounds like the halls; each language its own, in its own script
+  const NAME_PARTS = {
+    en: [['Mor', 'Vael', 'Dra', 'Kor', 'Sar', 'Ul', 'Ash', 'Grim', 'Nyx', 'Thal', 'Bel', 'Os', 'Ryn', 'Zar', 'Hel', 'Cael', 'Vor', 'Ez', 'Mal', 'Syl'],
+      ['eth', 'grim', 'vek', 'os', 'ra', 'dun', 'ith', 'mar', 'gor', 'ys', 'an', 'rok', 'iel', 'wyn', 'ath', 'ul', 'en', 'ax']],
+    bg: [['Мор', 'Вейл', 'Дра', 'Кор', 'Сар', 'Ул', 'Аш', 'Грим', 'Никс', 'Тал', 'Бел', 'Ос', 'Рин', 'Зар', 'Хел', 'Кейл', 'Вор', 'Ез', 'Мал', 'Сил'],
+      ['ет', 'грим', 'век', 'ос', 'ра', 'дун', 'ит', 'мар', 'гор', 'ис', 'ан', 'рок', 'иел', 'вин', 'ат', 'ул', 'ен', 'акс']],
+  };
+  ui.randomName = () => {
+    const P = NAME_PARTS[DH.i18n.current] || NAME_PARTS.en, pick = (a) => a[Math.random() * a.length | 0];
+    return pick(P[0]) + pick(P[1]) + (Math.random() < 0.35 ? pick(P[1]) : '');
+  };
+  const NAME_OK = /^[\p{L}\p{N}][\p{L}\p{N} _'.-]*$/u;
+  /** Choose or change the player's name. first: the opening visit, which cannot be dismissed. then: runs after. */
+  ui.openName = (first, then) => {
+    const s = S();
+    const inp = h('input.nameinp', { type: 'text', maxLength: 16, value: s.playerName || ui.randomName(), autocomplete: 'off', spellcheck: 'false', 'aria-label': t('name.title') });
+    const err = h('div.small.nameerr');
+    const dice = h('button.btn.ghost.dice', { 'aria-label': t('name.random'), title: t('name.random'), onclick: () => { click(); inp.value = ui.randomName(); err.textContent = ''; } });
+    dice.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="8.5" r="1.6" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.6" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.6" fill="currentColor"/></svg>';
+    let done = false;
+    const ok = () => {
+      const v = inp.value.replace(/\s+/g, ' ').trim();
+      if (v.length < 3) { err.textContent = t('name.short'); return; }
+      if (!NAME_OK.test(v)) { err.textContent = t('name.bad'); return; }
+      s.playerName = v; DH.save.persist(); DH.audio.play('reward'); done = true; m.close(); ui.renderTop();
+      if (then) then();
+    };
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') ok(); });
+    inp.addEventListener('input', () => { err.textContent = ''; });
+    const m = ui.modal({ title: t(first ? 'name.titleFirst' : 'name.title'), closable: !first, onClose: () => { if (!done && !first && then) then(); },
+      body: h('div',
+        h('div.center.small.muted', { style: { lineHeight: '1.45', marginBottom: '10px' } }, t('name.desc')),
+        h('div.namerow', inp, dice), err,
+        h('div.btns', h('button.btn.gold', { onclick: ok }, t('name.ok')))) });
   };
 
   /* ---------------- Energy ---------------- */

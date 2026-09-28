@@ -171,6 +171,9 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'device.app': 'приложение', 'device.browser': 'браузър',
   // време и мерни единици: кратки таймери и разстояния (util.fmtDuration / fmtDays); да са къси
   'time.dh': '{d}д {h}ч', 'time.hm': '{h}ч {m}м', 'time.ms': '{m}м {s}с', 'time.s': '{s}с', 'unit.meters': '{n}м',
+  'name.titleFirst': 'Избери име', 'name.title': 'Смяна на името', 'name.change': 'Смени името', 'name.random': 'Случайно име',
+  'name.desc': 'С това име ще те познават залите. Можеш да го смениш по всяко време от профила си.', 'name.ok': 'Потвърди',
+  'name.short': 'Поне 3 знака.', 'name.bad': 'Само букви, цифри и интервали.',
   'title.guest': 'Играй като гост', 'title.or': 'или влез, за да пазиш прогреса си', 'title.tap': 'Докосни, за да влезеш',
   'title.guestNote': 'Като гост прогресът ти остава само на това устройство. Можеш да влезеш по-късно от Настройките.',
   'title.asGuest': 'Играеш като гост', 'title.signedAs': 'Влязъл като {name}', 'title.change': 'Смени', 'title.signIn': 'Влез',
