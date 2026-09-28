@@ -81,7 +81,7 @@
     if (!e) return null;
     e.keep = true; e.secret = true; e.ax = x; e.ay = y;
     if (e.def.scale) e.scale = e.def.scale;
-    if (boss) { this.bosses.push(e); DH.audio.play('roar'); this.shake = 6; DH.events.emit('run:boss', { name: t('enemy.' + id), final: false, sub: t('sec.guardian') }); }
+    if (boss) { this.bosses.push(e); DH.audio.play('roar', e.painter); this.shake = 6; DH.events.emit('run:boss', { name: t('enemy.' + id), final: false, sub: t('sec.guardian') }); }
     this.sec.target = e;
     return e;
   };

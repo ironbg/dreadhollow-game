@@ -200,6 +200,56 @@
     },
   };
 
+  /** A foe's cry (a boss arriving, enraging, calling its brood): the voice of its material. */
+  const ROAR = {
+    flesh(k) { // a beast's roar
+      tone({ type: 'sawtooth', f: 78 * k, f2: 42, t: 1.5, vol: 0.28, attack: 0.08, filter: 'bandpass', ff: 420, q: 2.5, vib: 6, vibRate: 11, rev: 0.8 });
+      tone({ type: 'sawtooth', f: 117 * k, f2: 60, t: 1.2, vol: 0.12, attack: 0.1, filter: 'lowpass', ff: 700, vib: 8, vibRate: 7 });
+      burst({ t: 1.3, ff: 600, ff2: 120, vol: 0.28, attack: 0.08, rev: 0.8 });
+    },
+    bone(k) { // a dry, rattling shriek over clattering bones
+      tone({ type: 'sawtooth', f: 330 * k, f2: 170, t: 1.1, vol: 0.12, attack: 0.05, filter: 'bandpass', ff: 1300, q: 4, vib: 20, vibRate: 31, rev: 0.8 });
+      burst({ t: 1, filter: 'bandpass', ff: 1800, ff2: 700, q: 2, vol: 0.12, attack: 0.06, rev: 0.6 });
+      for (let i = 0; i < 8; i++) burst({ t: 0.02, filter: 'bandpass', ff: rnd(1600, 3400), q: 4, vol: 0.08, delay: i * rnd(0.05, 0.1) });
+    },
+    metal(k) { // armour grinding, a hollow bellow from inside a helm
+      tone({ type: 'sawtooth', f: 62 * k, f2: 44, t: 1.4, vol: 0.24, attack: 0.1, filter: 'bandpass', ff: 380, q: 5, vib: 4, vibRate: 9, rev: 0.7 });
+      burst({ t: 1.2, filter: 'bandpass', ff: 2600, ff2: 1400, q: 7, vol: 0.1, attack: 0.15, rev: 0.5 });
+      for (let i = 0; i < 3; i++) metal(rnd(300, 450), 0.12, 0.04, PLATE, { delay: 0.1 + i * rnd(0.2, 0.35) });
+    },
+    slime(k) { // a deep gurgle
+      tone({ type: 'sine', f: 120 * k, f2: 55, t: 1.2, vol: 0.26, attack: 0.08, vib: 25, vibRate: 17, rev: 0.6 });
+      burst({ t: 1.1, ff: 420, ff2: 90, vol: 0.22, attack: 0.1 });
+      for (let i = 0; i < 6; i++) { const f = rnd(150, 380); tone({ type: 'sine', f, f2: f * 1.8, t: 0.07, vol: 0.05, delay: rnd(0.1, 1) }); }
+    },
+    spirit(k) { // a wail that rises and falls away
+      [-12, 10].forEach((dt) => tone({ type: 'sawtooth', f: 480 * k, f2: 260, t: 1.8, vol: 0.06, attack: 0.3, filter: 'bandpass', ff: 1000, q: 6, vib: 18, vibRate: 5.5, detune: dt, rev: 1 }));
+      burst({ t: 1.6, filter: 'bandpass', ff: 2200, ff2: 700, q: 1.5, vol: 0.1, attack: 0.4, rev: 1 });
+    },
+    stone(k) { // rock grinding on rock
+      burst({ t: 1.6, ff: 260 * k, ff2: 60, vol: 0.3, attack: 0.15, rev: 0.7 }); tone({ type: 'sine', f: 46 * k, f2: 32, t: 1.4, vol: 0.2, attack: 0.1, vib: 3, vibRate: 13 });
+      for (let i = 0; i < 7; i++) burst({ t: 0.02, filter: 'highpass', ff: rnd(1800, 3200), vol: 0.05, delay: rnd(0.1, 1.3) });
+    },
+    wood(k) { // a long groan of timber and a crack
+      tone({ type: 'sawtooth', f: 72 * k, f2: 50, t: 1.6, vol: 0.12, attack: 0.2, filter: 'bandpass', ff: 360, q: 8, vib: 14, vibRate: 24, rev: 0.7 });
+      tone({ type: 'sawtooth', f: 108 * k, f2: 80, t: 1.2, vol: 0.05, attack: 0.3, filter: 'bandpass', ff: 520, q: 9, vib: 10, vibRate: 19 });
+      burst({ t: 0.08, filter: 'bandpass', ff: 1000, q: 2, vol: 0.18, delay: 1.1 }); thud(70, 0.25, 0.14, { delay: 1.1 });
+    },
+    chitin(k) { // a chittering screech
+      burst({ t: 1, filter: 'bandpass', ff: 3200 * k, ff2: 2200, q: 6, vol: 0.1, attack: 0.05, rev: 0.4 });
+      for (let i = 0; i < 24; i++) burst({ t: 0.012, filter: 'bandpass', ff: rnd(1800, 3000), q: 5, vol: 0.08, delay: i * 0.035 });
+    },
+    ice(k) { // a cold, howling gust with cracking ice
+      burst({ t: 1.6, filter: 'bandpass', ff: 1300 * k, ff2: 500, q: 3, vol: 0.18, attack: 0.25, rev: 0.8 }); tone({ type: 'sine', f: 60 * k, f2: 40, t: 1.2, vol: 0.14, attack: 0.1 });
+      for (let i = 0; i < 6; i++) burst({ t: 0.02, filter: 'bandpass', ff: rnd(3000, 5000), q: 6, vol: 0.07, delay: rnd(0.1, 1.2) });
+    },
+    ash(k) { // a roar that comes with a rush of flame
+      ROAR.flesh(k * 0.9);
+      burst({ t: 1.2, ff: 1100, ff2: 200, vol: 0.14, attack: 0.1 });
+      for (let i = 0; i < 8; i++) burst({ t: 0.015, filter: 'highpass', ff: rnd(1800, 3200), vol: 0.06, delay: rnd(0.05, 1.1) });
+    },
+  };
+
   const SFX = {
     hit(painter) { (HIT[MAT[painter]] || HIT.flesh)(rnd(0.9, 1.1)); },
     kill(painter) { (DIE[MAT[painter]] || DIE.flesh)(rnd(0.9, 1.1)); },
@@ -232,7 +282,12 @@
     },
     boom() { burst({ t: 0.9, ff: 900, ff2: 40, vol: 0.4, rev: 0.7 }); tone({ type: 'sine', f: 70, f2: 24, t: 0.8, vol: 0.34 }); },
     zap() { tone({ type: 'sawtooth', f: 900, f2: 110, t: 0.22, vol: 0.09, filter: 'lowpass', ff: 2400 }); for (let i = 0; i < 4; i++) burst({ t: 0.03, filter: 'bandpass', ff: rnd(1500, 3000), q: 3, vol: 0.12, delay: i * 0.035 }); },
-    frost() { burst({ t: 0.18, filter: 'highpass', ff: 2600, vol: 0.12 }); metal(rnd(700, 900), 0.6, 0.03, PLATE, { rev: true }); },
+    frost() { // ice forming: a cold hiss and crackling shards, all noise so nothing rings
+      burst({ t: 0.35, filter: 'bandpass', ff: 1800, ff2: 4200, q: 1.5, vol: 0.12, attack: 0.04, rev: 0.3 });
+      burst({ t: 0.18, filter: 'highpass', ff: 2600, vol: 0.08 });
+      for (let i = 0; i < 5; i++) burst({ t: 0.018, filter: 'bandpass', ff: rnd(2800, 5000), q: 6, vol: rnd(0.05, 0.09), delay: rnd(0.02, 0.3) });
+      thud(140, 0.08, 0.06);
+    },
     bell() { metal(rnd(150, 170), 3.2, 0.14, BELL, { rev: 1 }); thud(70, 0.4, 0.2); }, // the Bell Warden's toll
     splash() { burst({ t: 0.35, filter: 'bandpass', ff: 900, ff2: 250, q: 0.9, vol: 0.22 }); for (let i = 0; i < 4; i++) tone({ type: 'sine', f: rnd(300, 700), f2: rnd(900, 1400), t: 0.07, vol: 0.04, delay: 0.05 + i * rnd(0.04, 0.09) }); },
     throw() { burst({ t: 0.14, filter: 'bandpass', ff: 700, ff2: 300, q: 1.8, vol: 0.14, attack: 0.03 }); },
@@ -248,11 +303,7 @@
     click() { burst({ t: 0.04, filter: 'bandpass', ff: 900, q: 2, vol: 0.12 }); tone({ type: 'sine', f: 260, f2: 170, t: 0.05, vol: 0.06 }); },
     buy() { metal(1150, 0.3, 0.05, PLATE); metal(1010, 0.3, 0.05, PLATE, { delay: 0.07 }); thud(120, 0.15, 0.12, { delay: 0.1 }); },
     error() { thud(110, 0.14, 0.16); thud(82, 0.2, 0.16, { delay: 0.12 }); },
-    roar() {
-      tone({ type: 'sawtooth', f: 78, f2: 42, t: 1.5, vol: 0.28, attack: 0.08, filter: 'bandpass', ff: 420, q: 2.5, vib: 6, vibRate: 11, rev: 0.8 });
-      tone({ type: 'sawtooth', f: 117, f2: 60, t: 1.2, vol: 0.12, attack: 0.1, filter: 'lowpass', ff: 700, vib: 8, vibRate: 7 });
-      burst({ t: 1.3, ff: 600, ff2: 120, vol: 0.28, attack: 0.08, rev: 0.8 });
-    },
+    roar(painter) { (ROAR[MAT[painter]] || ROAR.flesh)(rnd(0.92, 1.08)); },
     victory() { // minor turning to major (Picardy third), then bells
       const ch = (ns, d, len) => ns.forEach((n, i) => tone({ type: 'sawtooth', f: midi(n), t: len, vol: 0.045, attack: 0.4, filter: 'lowpass', ff: 1400, q: 1.5, rev: true, delay: d, detune: (i % 2 ? 5 : -5) }));
       ch([45, 57, 60, 64], 0, 1.4); ch([41, 57, 60, 65], 1.0, 1.4); ch([45, 57, 61, 64, 69], 2.0, 3);

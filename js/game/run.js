@@ -207,7 +207,7 @@
         if (b.final) this.lordUp = true;
         if (e && b.final && this.stage.vault) this.sealLord(e);
         this.bosses.push(e);
-        this.shake = 6; DH.audio.play('roar'); DH.audio.vibrate(120);
+        this.shake = 6; DH.audio.play('roar', e.painter); DH.audio.vibrate(120);
         DH.events.emit('run:boss', { name: t('enemy.' + b.id), final: !!b.final });
       }
       if (this.time >= this.oozeT && !this.bosses.some((b) => b.def.lord)) {
@@ -439,7 +439,7 @@
           if (e.t > e.def.shot.cd && dist < 210) { e.t = 0; const b = this.enemyShot(e, Math.atan2(dy, dx), 62, e.def.shot.dmg * this.stage.dmgMult, '#ff60d0'); b.home = 1.4; b.life = 4.5; DH.audio.play('zap'); }
         } else if (ai === 'mimic') { // the shapeshifter: comes as a homunculus; close by (or hurt) it shows its true shape
           if (e.disg == null) { e.disg = true; e.painter = 'homunculus'; }
-          if (e.disg) { spd *= 0.8; if (dist < 55 || e.hp < e.maxHp) { e.disg = false; e.painter = e.def.painter; e.spd *= 1.25; this.burst(e.x, e.y, 18, ['#6a3a5a', '#ffe060', '#2a0e22'], 80); DH.audio.play('roar'); } }
+          if (e.disg) { spd *= 0.8; if (dist < 55 || e.hp < e.maxHp) { e.disg = false; e.painter = e.def.painter; e.spd *= 1.25; this.burst(e.x, e.y, 18, ['#6a3a5a', '#ffe060', '#2a0e22'], 80); DH.audio.play('roar', e.painter); } }
         } else if (ai === 'tether') { // the void syphon: latches a beam onto you, drags you in and drinks
           e.tthCd = (e.tthCd == null ? U.rand(1, 3) : e.tthCd) - dt;
           if (e.tether > 0) {
@@ -495,7 +495,7 @@
           }
         } else if (ai === 'ambush') { // the mimic: a chest, still and harmless, until you come near or strike it: then it springs
           if (e.shut == null) { e.shut = true; e.disg = true; e.fr = 0; }
-          if (e.shut) { spd = 0; e.kx = e.ky = 0; e.anim -= dt; if (dist < 50 || e.hp < e.maxHp) { e.shut = false; e.disg = false; e.fr = 1; e.spd *= 1.5; this.burst(e.x, e.y, 16, ['#c89a3a', '#6a3a1a', '#ffe060'], 80); DH.audio.play('roar'); } }
+          if (e.shut) { spd = 0; e.kx = e.ky = 0; e.anim -= dt; if (dist < 50 || e.hp < e.maxHp) { e.shut = false; e.disg = false; e.fr = 1; e.spd *= 1.5; this.burst(e.x, e.y, 16, ['#c89a3a', '#6a3a1a', '#ffe060'], 80); DH.audio.play('roar', e.painter); } }
           else if (e.lng > 0) { e.lng -= dt; mx = e.lockX; my = e.lockY; spd *= 3.6; }
           else { e.lngCd = (e.lngCd || 0) - dt; if (e.lngCd <= 0 && dist < 60) { e.lng = 0.3; e.lockX = dx; e.lockY = dy; e.lngCd = U.rand(2, 3); } }
         } else if (ai === 'guard') { // the gilded knight: raises its shield (all but proof), then strikes back where it stands
@@ -540,7 +540,7 @@
             e.packT = (e.packT == null ? 2 : e.packT) - dt; e.slotA = (e.slotA == null ? Math.atan2(-dy, -dx) : e.slotA) + dt * 0.8;
             const tx = p.x + Math.cos(e.slotA) * 48 - e.x, ty = p.y + Math.sin(e.slotA) * 48 - e.y, tl = Math.hypot(tx, ty) || 1;
             mx = tx / tl; my = ty / tl; if (tl < 8) spd *= tl / 8;
-            if (e.packT <= 0) { e.rushT = 1.1; DH.audio.play('roar'); }
+            if (e.packT <= 0) { e.rushT = 1.1; DH.audio.play('roar', e.painter); }
           }
         } else if (ai === 'watch') { // the Watcher: stone while the hero faces it, swift the moment they turn away
           const seen = (p.dirX * -dx + p.dirY * -dy) > 0.3;
@@ -574,7 +574,7 @@
           if (e.boss) {
             const a = Math.atan2(p.dirY, p.dirX) + U.rand(-1, 1), d = Math.hypot(v.w, v.h) / 2 * 0.7 + 12;
             e.x = p.x + Math.cos(a) * d; e.y = p.y + Math.sin(a) * d; e.phase = e.phase === 2 ? 0 : e.phase; e.phaseT = 0; e.tele = false;
-            this.burst(e.x, e.y, 30, ['#ff3b3b', '#52287e', '#000000'], 90); DH.audio.play('roar');
+            this.burst(e.x, e.y, 30, ['#ff3b3b', '#52287e', '#000000'], 90); DH.audio.play('roar', e.painter);
           } else e.dead = true; // despawned — no experience (moving fast has a cost)
         }
       }
@@ -630,7 +630,7 @@
       if (mv === 'summon') {
         e.mvT = U.rand(5, 6.5);
         for (let i = 0; i < 4; i++) { const a = i / 4 * TAU; const m = this.spawnEnemy(e.id, e.x + Math.cos(a) * 14, e.y + Math.sin(a) * 14); if (m) m.xp = 0; }
-        this.burst(e.x, e.y, 18, ['#c070ff', '#2a1040'], 80); DH.audio.play('roar');
+        this.burst(e.x, e.y, 18, ['#c070ff', '#2a1040'], 80); DH.audio.play('roar', e.painter);
       }
       return null;
     }
