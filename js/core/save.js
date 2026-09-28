@@ -36,7 +36,7 @@
       purchases: { noAds: false, once: {}, firstGems: {}, soulUntil: 0, soulLastDay: null, total: 0 },
       chestPity: 0, freeChestTs: 0,
       runsSinceAd: 0,
-      settings: { music: 0.5, sfx: 0.8, vibration: true, lang: null, dmgNumbers: true, shake: true, fxLevel: 2, lowFx: false, minFx: false, outlines: true, fxAlpha: 1, twinStick: false, mouseAim: false, master: 1, pauseOnBlur: true, hideJoystick: false, aimLine: false, flash: 1, showFps: false },
+      settings: { music: 0.5, sfx: 0.8, vibration: true, lang: null, dmgNumbers: true, shake: true, fxLevel: 2, lowFx: false, minFx: false, outlines: true, fxAlpha: 1, twinStick: false, mouseAim: false, master: 1, pauseOnBlur: true, hideJoystick: false, aimLine: false, flash: 1, showFps: false, autoFx: true },
       tutorialDone: false,
       titleChosen: false, // the way in (guest or an account) was chosen on the title screen
       playerName: '', // chosen on the first visit, shown above the experience bar; changed from the profile

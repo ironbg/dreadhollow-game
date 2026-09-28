@@ -121,6 +121,7 @@
       row('shake', sw('shake')),
       row('outlines', sw('outlines')),
       row('fxLevel', fxStep),
+      row('autoFx', sw('autoFx'), true),
       row('showFps', sw('showFps')),
       h('div.setsec', t('settings.secGame')),
       h('div.setrow', h('label', t('settings.language')), langSel),

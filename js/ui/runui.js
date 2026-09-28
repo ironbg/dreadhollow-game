@@ -95,8 +95,27 @@
     r.fps.className = 'fps ' + (fps >= 50 ? 'ok' : fps >= 30 ? 'mid' : 'bad');
     fpsT0 = now; fpsN = 0; fpsWorst = 0;
   };
+  /* Auto quality (Settings): while the fight runs, frames are counted in 5-second windows; two slow windows in a row
+     (under 40 per second) lower the graphics effects one step, at most once per run. Pauses, menus and a hidden tab
+     are left out, and so are single long hitches (loading a sprite, the tab coming back). */
+  const AQ = { run: null, t: 0, n: 0, last: 0, slow: 0, done: false };
+  const autoQuality = (run) => {
+    const s = DH.save.data.settings, now = performance.now();
+    if (AQ.run !== run) Object.assign(AQ, { run, t: 0, n: 0, last: 0, slow: 0, done: false });
+    const dt = AQ.last ? now - AQ.last : 0; AQ.last = now;
+    if (AQ.done || !s.autoFx || !(s.fxLevel > 0) || run.state !== 'playing' || document.hidden || run.time < 8 || dt > 250) return;
+    AQ.t += dt; AQ.n++;
+    if (AQ.t < 5000) return;
+    const fps = AQ.n * 1000 / AQ.t; AQ.t = 0; AQ.n = 0;
+    AQ.slow = fps < 40 ? AQ.slow + 1 : 0;
+    if (AQ.slow < 2) return;
+    AQ.done = true;
+    s.fxLevel -= 1; s.lowFx = s.fxLevel < 2; s.minFx = s.fxLevel === 0; DH.save.persist();
+    ui.toast(t('settings.autoFxDown', { q: t('settings.fxLevel' + s.fxLevel) }));
+  };
   hud.update = (run) => {
     const r = hud.refs; if (!r) return;
+    autoQuality(run);
     if (DH.save.data.settings.showFps) fpsTick(r); else if (!r.fps.classList.contains('hidden')) r.fps.classList.add('hidden');
     r.xpFill.style.width = Math.min(100, run.xp / run.xpNext * 100) + '%';
     const now = performance.now(); if (now - lastTxt < 120) return; lastTxt = now;
