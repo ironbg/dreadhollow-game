@@ -529,7 +529,8 @@
   /* Stages. theme colours are RGB arrays for the procedural floor. variant tints the hall's stonework and props; foeVariant: false
    * keeps it off the foes (a hall with its own roster needs no recoloured ones). */
   C.stages = {
-    crypt: { index: 0, agonyXp: 0.529, hpMult: 1, dmgMult: 1, goldMult: 1, variant: null, herb: 'moss',
+    // dmgGrow: how fast the hall's blows harden, per minute (0.07 elsewhere: x1.7 at ten minutes); bossHp: its bosses' life
+    crypt: { index: 0, agonyXp: 0.529, hpMult: 1.15, dmgMult: 1, dmgGrow: 0.11, bossHp: 2.4, goldMult: 1, variant: null, herb: 'moss',
       // the hall's own six: bats, rising skeletons, hound packs, splitting oozes, bone mages, shieldbearers
       remap: { bat: 'bat', rat: 'bat', skeleton: 'skeleton', ghoul: 'ooze', ghost: 'ooze', spider: 'hound', cultist: 'bonemage', wraith: 'bonemage', hknight: 'shieldbearer', golem: 'shieldbearer' },
       bosses: [{ t: 150, id: 'gravechief' }, { t: 300, id: 'bonetyrant' }, { t: 450, id: 'lich' }, { t: 600, id: 'anguish', final: true }],

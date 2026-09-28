@@ -204,7 +204,7 @@
 
   /* ---------- Vigil (idle) rewards ---------- */
   E.VIGIL_CAP_MS = 12 * 3600e3;
-  E.vigilRates = (stagesCleared) => ({ goldPerMin: 6 + stagesCleared * 6, xpPerMin: 1 + stagesCleared });
+  E.vigilRates = (stagesCleared) => ({ goldPerMin: 2 + stagesCleared * 3, xpPerMin: 1 + stagesCleared }); // one hall: 5 a minute, 3600 over the full 12 hours (about one won run)
   E.QUICK_VIGIL_MS = 2 * 3600e3;
   E.QUICK_VIGIL_ADS = 3;
   E.QUICK_VIGIL_GEMS = 40;

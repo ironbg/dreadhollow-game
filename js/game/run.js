@@ -281,14 +281,14 @@
       const ts = 1 + this.time / 60 * 0.22 * (C.RUN_LENGTH / this.runLength);
       const rank = o.champion ? C.CHAMPION : o.elite ? C.ELITE : null;
       const T = E.TORMENT, tr = def.prop ? 0 : this.dread, fx = this.fx_;
-      const hpMult = def.prop ? 1 : this.stage.hpMult * (def.boss ? 1 + this.stage.index * 0.1 : ts) * (rank ? rank.hp : 1) * Math.pow(T.hp, tr) * (fx.giants && !def.boss ? 2 : 1)
+      const hpMult = def.prop ? 1 : this.stage.hpMult * (def.boss ? (1 + this.stage.index * 0.1) * (this.stage.bossHp || 1) : ts) * (rank ? rank.hp : 1) * Math.pow(T.hp, tr) * (fx.giants && !def.boss ? 2 : 1)
         * (1 + this.agony * 0.25) * (this.fx_.enemyHp || 1);
       const fv = !def.variant && (C.HALL_FOES[this.stageId] || []).find((f) => f[0] === id && f[3]);
       const variant = (o.variant || def.variant || (fv && fv[3])) || (this.stage.variant && this.stage.foeVariant !== false && DH.gfx.painters[def.painter] && DH.gfx.painters[def.painter].variants && DH.gfx.painters[def.painter].variants[this.stage.variant] ? this.stage.variant : null);
       const e = {
         id, def, x, y, kx: 0, ky: 0, hp: def.hp * hpMult, maxHp: def.hp * hpMult,
         r: def.r * (rank ? rank.scale * 0.85 : 1), spd: def.spd * (rank ? 0.9 : 1) * U.rand(0.92, 1.08) * (fx.enemySpeed || 1) * (fx.allSpeed || 1) * (1 + T.speed * tr) * (fx.giants && !def.boss ? 0.8 : 1),
-        dmg: def.dmg * this.stage.dmgMult * (1 + this.time / 60 * 0.07) * (rank ? rank.dmg : 1) * (1 + this.agony * 0.1) * (1 + T.dmg * tr) * (fx.enemyDmg || 1),
+        dmg: def.dmg * this.stage.dmgMult * (1 + this.time / 60 * (this.stage.dmgGrow || 0.07)) * (rank ? rank.dmg : 1) * (1 + this.agony * 0.1) * (1 + T.dmg * tr) * (fx.enemyDmg || 1),
         xp: def.xp * (o.champion ? 30 : o.elite ? 12 : 1) * (fx.giants && !def.boss ? 1.8 : 1), scale: (rank ? rank.scale : 1) * (fx.giants && !def.boss && !def.prop ? 1.35 : 1),
         mass: (def.mass || 1) * (rank ? 4 : 1), armor: Math.min(0.75, (def.def || 0) * Math.pow(1.1, tr) + (rank ? rank.def : 0) + T.armor * tr), // Torment: base defense x1.10 per rank
         elite: !!o.elite, champion: !!o.champion, boss: !!def.boss, final: !!o.final, flash: 0, anim: Math.random() * 10,
@@ -369,7 +369,7 @@
           const a = e.zz * 0.6, ca = Math.cos(a), sa = Math.sin(a); mx = dx * ca - dy * sa; my = dx * sa + dy * ca; spd *= c < 0.45 ? 2.5 : 0.3;
         } else if (ai === 'lobber') { // keeps back and lobs fire onto the ground where you stand (a marked circle)
           if (dist < 90) { mx = -dx; my = -dy; } else if (dist < 140) { mx = -dy; my = dx; spd *= 0.4; }
-          if (e.t > e.def.shot.cd && dist < 210) { e.t = 0; this.enemyAttackAnim(e); this.hazard({ kind: 'circle', x: p.x, y: p.y, r: 16, delay: 1.1, dmg: e.def.shot.dmg * this.stage.dmgMult * (1 + this.time / 60 * 0.07), color: '#ff7a20', src: e, sound: 'fire', fire: true }); DH.audio.play('throw'); }
+          if (e.t > e.def.shot.cd && dist < 210) { e.t = 0; this.enemyAttackAnim(e); this.hazard({ kind: 'circle', x: p.x, y: p.y, r: 16, delay: 1.1, dmg: e.def.shot.dmg * this.stage.dmgMult * (1 + this.time / 60 * (this.stage.dmgGrow || 0.07)), color: '#ff7a20', src: e, sound: 'fire', fire: true }); DH.audio.play('throw'); }
         } else if (ai === 'clone') { // the Ashen Warlord's cast shadow: waits, then dashes along its line
           e.cw = (e.cw || 0) + dt; if (e.cw < 0.8) { mx = 0; my = 0; spd = 0; } else { mx = e.mdx; my = e.mdy; spd = 300; } e.kx = e.ky = 0;
         } else if (ai === 'frenzy') { // rats: the more of them close by, the faster they scurry
@@ -639,7 +639,7 @@
       const B = e.def.boom, p = this.player, R = B.R * (e.scale > 1 ? 1.4 : 1);
       e.dead = true;
       for (let v = Math.ceil(e.xp / 2); v > 0; v--) this.drop('xp', e.x + U.rand(-5, 5), e.y + U.rand(-5, 5), 1); // half its worth, scattered
-      if (U.dist2(e.x, e.y, p.x, p.y) < (R + p.r) * (R + p.r)) this.hurtPlayer(B.dmg * this.stage.dmgMult * (1 + this.time / 60 * 0.07) * (e.champion ? 1.7 : 1), e);
+      if (U.dist2(e.x, e.y, p.x, p.y) < (R + p.r) * (R + p.r)) this.hurtPlayer(B.dmg * this.stage.dmgMult * (1 + this.time / 60 * (this.stage.dmgGrow || 0.07)) * (e.champion ? 1.7 : 1), e);
       for (const o of this.enemies) if (o !== e && !o.dead && !o.boss && !o.def.prop && U.dist2(e.x, e.y, o.x, o.y) < R * R) this.rawDamage(o, o.maxHp * 0.4, '#ff9040');
       this.fx.push({ k: 'explosion', x: e.x, y: e.y, R, life: 0.45, max: 0.45 });
       this.burst(e.x, e.y, 22, ['#ff7030', '#ffd060', '#401008'], 120); this.shake = Math.max(this.shake, 5); DH.audio.play('boom');

@@ -27,7 +27,7 @@
   R.updateArtifacts = function (dt) {
     const fx = this.fx_, A = this.art, p = this.player, st = this.stage;
     if (!A) return;
-    const dm = st.dmgMult * (1 + this.time / 60 * 0.07), hm = st.hpMult * (1 + this.time / 60 * 0.22);
+    const dm = st.dmgMult * (1 + this.time / 60 * (this.stage.dmgGrow || 0.07)), hm = st.hpMult * (1 + this.time / 60 * 0.22);
     const near = (r0, r1) => { const a = Math.random() * TAU, d = U.rand(r0, r1); return { x: p.x + Math.cos(a) * d + p.dirX * (p.moving ? 30 : 0), y: p.y + Math.sin(a) * d + p.dirY * (p.moving ? 30 : 0) }; };
     const hurtEnemies = (x, y, r, dmg) => { for (const e of this.enemies) if (!e.dead && !e.def.prop && U.dist2(x, y, e.x, e.y) < (r + e.r) * (r + e.r)) this.rawDamage(e, e.boss ? dmg * 0.3 : dmg, '#ffb060'); };
     if (this.victoryT <= 0) {
