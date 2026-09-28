@@ -430,6 +430,7 @@
     [sum.wellSent].concat(sum.wellExtra || []).forEach((w) => { if (w) extras.push({ icon: 'g_' + w.type, text: t('well.toKeeper'), rarity: w.rarity }); });
     for (const k in sum.herbs) extras.push({ icon: 'herb_' + k, text: t('herb.' + k) + ' ×' + sum.herbs[k] });
     if (res.shards) extras.push({ icon: 'shard', text: '+' + res.shards });
+    (res.events || []).forEach((e) => extras.push({ icon: e.icon, text: e.name ? e.name + ' +' + e.n : '+' + e.n }));
     (res.artifacts || []).forEach((k) => extras.push({ icon: 'a_' + k, text: t('artifact.' + k + '.name'), rarity: 4 }));
     const dblBtn = h('button.btn.ad.shine', { onclick: async () => {
       if (doubled) return;

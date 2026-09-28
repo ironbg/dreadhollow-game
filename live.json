@@ -1,6 +1,29 @@
 {
-  "_about": "Live settings read by every copy of the game at start and on return to the app. Edit, commit and push: the web version publishes it within minutes and the app reads it from there, no store update needed. web.latest is filled in by tools/build-www.js from package.json.",
+  "_about": "Live settings read by every copy of the game at start and on return to the app. Edit, commit and push: the web version publishes it within minutes and the app reads it from there, no store update needed. web.latest is filled in by tools/build-www.js from package.json. Events: type 'collect' (tokens from every run, spent in the event shop); times in UTC; the shop stays open 3 days after 'end' unless 'shopEnd' is given; earn: perKill, perMinute, perBoss, win, perHall (extra share per hall index), rate multiplies all; icon: candle or bone; shop rewards: gold, gems, energy, passXp, chest (wood/silver/gold), gear { rarity 0-5 }, hero.",
   "web": { "min": "1.60.0" },
   "app": { "min": "0.0.0", "latest": "0.0.0", "store": "https://play.google.com/store/apps/details?id=com.dreadhollow.game" },
-  "events": []
+  "events": [
+    {
+      "id": "2026-10-harvest",
+      "type": "collect",
+      "start": "2026-09-28T00:00:00Z",
+      "end": "2026-10-31T21:59:59Z",
+      "name": { "bg": "Жътвата на сенките", "en": "Harvest of Shades" },
+      "short": { "bg": "Жътва", "en": "Harvest" },
+      "desc": { "bg": "Докато листата падат, мъртвите палят свещи из залите. Събирай бледите им свещи и ги размени за награди, преди жътвата да свърши.", "en": "As the leaves fall, the dead light candles through the halls. Gather their pale candles and trade them for rewards before the harvest ends." },
+      "token": { "bg": "Бледи свещи", "en": "Pale Candles" },
+      "icon": "candle",
+      "earn": { "perKill": 0.01, "perMinute": 1.5, "perBoss": 3, "win": 15, "perHall": 0.15 },
+      "shop": [
+        { "id": "hero", "cost": 1200, "limit": 1, "reward": { "hero": "bloodsaint" } },
+        { "id": "epic", "cost": 400, "limit": 2, "reward": { "gear": { "rarity": 3 } } },
+        { "id": "goldchest", "cost": 300, "limit": 2, "reward": { "chest": "gold" } },
+        { "id": "silverchest", "cost": 150, "limit": 4, "reward": { "chest": "silver" } },
+        { "id": "passtier", "cost": 60, "limit": 10, "reward": { "passXp": 300 } },
+        { "id": "gems", "cost": 80, "limit": 10, "reward": { "gems": 50 } },
+        { "id": "gold", "cost": 40, "limit": 10, "reward": { "gold": 3000 } },
+        { "id": "energy", "cost": 30, "limit": 10, "reward": { "energy": 10 } }
+      ]
+    }
+  ]
 }

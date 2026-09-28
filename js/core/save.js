@@ -24,7 +24,7 @@
       gear: [], equipped: { head: null, neck: null, chest: null, hands: null, feet: null, ring1: null, ring2: null, mark: null }, nextGearId: 1,
       loadouts: {}, archiveBy: {}, // per hero: equipped gear + Mark, and Archive shards
       discovered: {}, potions: {}, herbs: {}, wellkeeper: [], deeds: {}, artifacts: {}, agony: {},
-      shards: 0, archive: {}, secrets: {}, mainQuest: 0, artifactsOwned: {},
+      shards: 0, archive: {}, secrets: {}, mainQuest: 0, artifactsOwned: {}, events: {},
       stats: { kills: 0, runs: 0, wins: 0, bossKills: 0, eliteKills: 0, goldEarned: 0, maxLevel: 0,
         itemsMerged: 0, chestsOpened: 0, loginDays: 0, adsWatched: 0, playTime: 0, gemsSpent: 0, bestSurvival: 0,
         championKills: 0, tomes: 0, wellSent: 0, brewed: 0, abDmg: {}, maxAgony: {}, oozes: 0, secrets: 0, shardsEarned: 0 },

@@ -211,6 +211,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'login.day': 'Day {n}', 'login.title': 'Daily Rewards', 'login.desc': 'Log in every day for growing rewards!', 'login.comeBack': 'Next reward in {t}',
   'vigil.title': 'Vigil Rewards', 'vigil.desc': 'Your hero keeps watch over the crypt while you\'re away: {g} gold per hour, up to {max} hours. Clear halls to earn more.',
   'vigil.quick': 'Quick Vigil', 'vigil.quickDesc': 'Instantly collect {h} hours of Vigil rewards.',
+  'ev.endsIn': 'Collecting ends in {t}', 'ev.shopOnly': 'Collecting is over. The shop stays open for {t}.', 'ev.how': 'Every fight earns {name}: for foes slain, minutes survived, bosses and a victory. Harder halls give more.', 'ev.left': '{n} of {m} left', 'ev.soldOut': 'Sold out', 'pass.seasonEnds': 'season ends in {t}', 'pass.seasonEnded': 'Season {n} is over: your unclaimed rewards',
   'update.title': 'Update needed', 'update.required': 'This version of the game is too old to play on. Load the new one: your progress stays.', 'update.requiredApp': 'This version of the game is too old to play on. Update it in the store: your progress stays.', 'update.now': 'Update', 'update.later': 'Later', 'update.newTitle': 'A new version is out', 'update.newWeb': 'Reload to play the newest version of the game.', 'update.newApp': 'Update the game in the store to get the newest version.',
   'account.levelsUp': 'Account level {a} → {b}!', 'account.levelUp': 'Account level {n}!',
 

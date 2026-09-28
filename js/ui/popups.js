@@ -469,6 +469,38 @@
       h('div.btns', h('button.btn.gold.big.shine', { onclick: async () => { if (await DH.iap.buy('starter')) m.close(); } }, DH.iap.price('starter')))) });
   };
 
+  /* ---------------- Live events (DH.meta.liveEvents): the event window and its shop ---------------- */
+  ui.openEvent = (ev) => {
+    const body = (m) => {
+      const st = M.eventState(ev), now = U.now(), collecting = M.eventCollecting(ev), icon = M.eventIcon(ev), token = M.loc(ev.token);
+      return h('div.evwin',
+        ev.desc ? h('div.small.center', { style: { lineHeight: '1.45', marginBottom: '8px' } }, M.loc(ev.desc)) : null,
+        h('div.small.center.evtime' + (collecting ? '' : '.closing'), collecting ? t('ev.endsIn', { t: ui.fmtDays(M.eventEnd(ev) - now) }) : t('ev.shopOnly', { t: ui.fmtDays(M.eventShopEnd(ev) - now) })),
+        h('div.evbal', A.img(icon), h('b.num', U.fmt(st.tokens)), h('span', token)),
+        collecting ? h('div.small.muted.center', { style: { lineHeight: '1.4', marginBottom: '10px' } }, t('ev.how', { name: token })) : null,
+        h('div.evshop', ev.shop.filter((it) => it && it.id && it.reward).map((it) => {
+          const left = M.eventItemLeft(ev, it), can = left > 0 && st.tokens >= it.cost;
+          return h('div.evitem' + (left <= 0 ? '.sold' : ''),
+            h('div.reward-list', M.rewardPreview(it.reward).map((r) => h('div.reward', h('div.slot' + (r.rarity != null ? '.rar' + r.rarity : ''), A.img(r.icon)), h('div.n' + (ui.isWord(r.text) ? '.word' : ''), r.text)))),
+            it.limit ? h('div.small.muted', t('ev.left', { n: left, m: it.limit })) : null,
+            left <= 0 ? h('div.small.good.evsold', t('ev.soldOut'))
+              : h('button.btn.small' + (can ? '.gold' : '.off'), { onclick: () => {
+                const r = M.eventBuy(ev, it);
+                if (!r) { ui.toast(t('common.notEnough'), 'bad'); return; }
+                DH.audio.play('buy'); m.set(body(m)); ui.rewardPopup(M.loc(ev.name), r);
+              } }, A.img(icon), U.fmt(it.cost)));
+        })));
+    };
+    ui.modal({ title: M.loc(ev.name), cls: 'event', body, onClose: () => { if (!(DH.game && DH.game.mode === 'run')) ui.refresh(); } });
+  };
+  /** A season just ended: the rewards it still owed were handed over; say so once the player is in the menus. */
+  ui.flushSeason = () => {
+    const ps = M.pendingSeason;
+    if (!ps || (DH.title && DH.title.el) || (DH.game && DH.game.mode === 'run')) return;
+    M.pendingSeason = null;
+    setTimeout(() => ui.rewardPopup(t('pass.seasonEnded', { n: ps.n }), ps.rewards), 400);
+  };
+
   /* ---------------- Game versions (DH.live) ---------------- */
   // never over a fight: a notice that arrives mid-run waits for the menus
   const whenInMenus = (fn) => { if (DH.game && DH.game.mode === 'run') DH.events.once('menu', fn); else fn(); };

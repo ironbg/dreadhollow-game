@@ -33,6 +33,10 @@
       const root = h('div.home');
       const left = h('div.side.l'), right = h('div.side.r');
       if (M.nbActive()) left.append(sideBtn('u_seal', t('nb.short'), () => ui.openNights(), b.nights, { hot: true, timer: ui.fmtDays(M.nbEndsIn()) }));
+      M.liveEvents().forEach((ev) => {
+        const st = M.eventState(ev), can = ev.shop.filter((it) => it && it.cost <= st.tokens && M.eventItemLeft(ev, it) > 0).length;
+        left.append(sideBtn(M.eventIcon(ev), M.loc(ev.short || ev.name), () => ui.openEvent(ev), can, { hot: true, timer: ui.fmtDays((M.eventCollecting(ev) ? M.eventEnd(ev) : M.eventShopEnd(ev)) - U.now()) }));
+      });
       left.append(sideBtn('n_calendar', t('home.login'), () => ui.openLogin(), b.login ? '!' : 0, { hot: b.login }));
       if (!s.purchases.once.starter) left.append(sideBtn('c_gold', t('home.offer'), () => ui.openStarter(), 0, { hot: true, timer: U.fmtDuration(U.msToMidnight()) }));
       left.append(sideBtn('n_ad', t('home.freeGems'), () => ui.go('shop', 'free')));
@@ -96,6 +100,7 @@
           h('span.bb-cost', A.img('i_energy'), h('b', st.energy || C.RUN_ENERGY)))));
       root.append(h('div.center.small.muted.enote', en < E.ENERGY_MAX ? t('home.energyNext', { t: U.fmtDuration(M.energyNextMs()) }) : t('home.energyFull')));
       ui.tick = updVigil;
+      ui.flushSeason();
       return root;
     },
   };
@@ -403,13 +408,14 @@
       return box;
     },
     pass() {
+      M.ensureSeason(); // a new month starts a new season before anything is read
       const s = S(), p = s.pass, tier = M.passTier(), box = h('div');
       const inTier = p.xp - tier * E.PASS_XP_PER_TIER;
       box.append(h('div.panel.gold.passhead',
         h('div.row',
           A.img('n_pass'),
           h('div.grow', h('div', { style: { fontFamily: 'var(--title)', color: 'var(--gold)', fontSize: '17px' } }, t('pass.season', { n: p.season })),
-            h('div.small.muted', t('pass.tierOf', { n: tier, max: E.PASS_TIERS }))),
+            h('div.small.muted', t('pass.tierOf', { n: tier, max: E.PASS_TIERS }) + ' · ' + t('pass.seasonEnds', { t: ui.fmtDays(M.seasonEndsIn()) }))),
           p.premium ? h('span.small.good', { style: { fontWeight: 800 } }, t('pass.premiumOn'))
             : h('button.btn.small.gold.shine', { onclick: () => DH.iap.buy('pass') }, t('pass.unlock', { price: DH.iap.price('pass') }))),
         h('div.bar.blue', { style: { marginTop: '8px' } }, h('i', { style: { width: (tier >= E.PASS_TIERS ? 100 : inTier / E.PASS_XP_PER_TIER * 100) + '%' } })),

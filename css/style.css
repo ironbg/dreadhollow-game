@@ -1189,3 +1189,18 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .dmgrow .dn { font-size: 10.5px; line-height: 1.1; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dmgrow .dmgcol .bar { flex: none; }
 .dmgrow img { width: 24px; height: 24px; }
+/* live events: the event window, its balance and its shop */
+.modal.event .evtime { color: #8fe08a; font-weight: 800; margin-bottom: 8px; }
+.modal.event .evtime.closing { color: #f0c860; }
+.evbal { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px 0 8px; }
+.evbal img { width: 40px; height: 40px; }
+.evbal b { font-size: 22px; color: #f0e0ff; }
+.evbal span { color: var(--muted); font-weight: 800; }
+.evshop { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.evitem { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 6px; background: rgba(0,0,0,.28); border: 1px solid rgba(200,144,44,.35); }
+.evitem .reward-list { margin: 0; gap: 6px; }
+.evitem .reward .slot { width: 52px; }
+.evitem .btn { min-width: 96px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+.evitem .btn img { width: 20px; height: 20px; }
+.evitem.sold { opacity: .55; }
+.evitem .evsold { font-weight: 800; padding: 6px 0; }

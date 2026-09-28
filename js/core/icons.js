@@ -1708,6 +1708,27 @@
   }
   const UIB = ['#ffffff', '#e4e8f0', '#b4bccc', '#7a8294', '#3a3e4a'], UIL = ['#fff4dc', '#f4c890', '#d09858', '#8a5a2c', '#3a2410']; // bright steel and light leather for marks that sit on dark buttons
   const MISC = {
+    ev_candle(g) { // event token: a pale tallow candle, its wax running, a violet flame over an iron dish
+      P.glow(g, 16, 8, 10, '#c890ff', 0.75);
+      inkPath(g, () => { g.beginPath(); g.ellipse(16, 27.2, 10.4, 3, 0, 0, Math.PI * 2); }, P.lg(g, 0, 24, 0, 30, ['#5a5664', '#24222c']), 1.1);
+      P.ell(g, 16, 26.4, 8.2, 1.8, 'rgba(255,255,255,0.14)');
+      inkPath(g, () => { g.beginPath(); g.moveTo(10.6, 13.6); g.lineTo(21.4, 13.6); g.lineTo(21.6, 26.4); g.quadraticCurveTo(16, 28.2, 10.4, 26.4); g.closePath(); }, P.lg(g, 10, 0, 22, 0, ['#fffaf0', '#ece4d4', '#b8ae9c']), 1.1);
+      g.beginPath(); g.moveTo(10.6, 13.6); g.quadraticCurveTo(16, 11.8, 21.4, 13.6); g.quadraticCurveTo(16, 15.4, 10.6, 13.6); P.fill(g, '#fffdf6');
+      for (const [x, l] of [[12.4, 5.4], [17.8, 8.6], [20.2, 3.8]]) { g.beginPath(); g.moveTo(x - 0.9, 14); g.lineTo(x - 0.9, 14 + l); g.quadraticCurveTo(x, 15.4 + l, x + 0.9, 14 + l); g.lineTo(x + 0.9, 14); P.fill(g, '#fffdf6'); }
+      P.line(g, 16, 13.4, 16, 11.2, 0.6, '#2a2028');
+      g.beginPath(); g.moveTo(16, 2.2); g.bezierCurveTo(20.6, 6.4, 20, 10, 16, 11.4); g.bezierCurveTo(12, 10, 11.6, 6.4, 16, 2.2); P.fill(g, P.lg(g, 0, 2, 0, 11.4, ['#f0d8ff', '#b070ff', '#5a18b0']));
+      g.beginPath(); g.moveTo(16, 5.6); g.quadraticCurveTo(18, 8.4, 16, 10.6); g.quadraticCurveTo(14, 8.4, 16, 5.6); P.fill(g, '#f6ecff');
+      glint(g, 12.6, 17, 1.2, '#ffffff');
+    },
+    ev_bone(g) { // event token: a coin carved from bone, a skull cut into its face
+      P.glow(g, 16, 16, 13, '#f0e0b0', 0.35);
+      inkPath(g, () => { g.beginPath(); g.arc(16, 16, 12.6, 0, Math.PI * 2); }, P.lg(g, 4, 4, 28, 28, ['#fff6dc', '#e0d0a8', '#9a8a64']), 1.2);
+      g.strokeStyle = 'rgba(90,70,40,0.55)'; g.lineWidth = 0.9; g.beginPath(); g.arc(16, 16, 10, 0, Math.PI * 2); g.stroke();
+      P.ell(g, 16, 14.6, 5.2, 4.8, '#6a5a3c'); P.rect(g, 13.4, 17.6, 5.2, 3.4, '#6a5a3c');
+      P.circle(g, 14, 14.6, 1.4, '#f4e8c8'); P.circle(g, 18, 14.6, 1.4, '#f4e8c8');
+      for (let i = 0; i < 3; i++) P.rect(g, 14 + i * 1.6, 19, 0.6, 2, '#f4e8c8');
+      glint(g, 10.6, 9.6, 1.4, '#ffffff');
+    },
     i_gold(g) { // two stacks of coins and one standing before them
       const stackCoin = (x, y, rx, ry) => {
         P.ell(g, x, y + 1.3, rx + 0.6, ry + 0.6, INK);

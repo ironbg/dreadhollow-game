@@ -522,10 +522,25 @@
     return meta.grant({ gems: a.gems[c] });
   };
 
-  /* ---------------- Season pass ---------------- */
-  meta.passTier = () => Math.min(E.PASS_TIERS, Math.floor(S().pass.xp / E.PASS_XP_PER_TIER));
-  meta.addPassXp = (n) => { S().pass.xp = Math.min(S().pass.xp + Math.floor(n), E.PASS_TIERS * E.PASS_XP_PER_TIER); persist(); };
+  /* ---------------- Season pass: a new season every calendar month ---------------- */
+  // Season 1 is September 2026, each month after it the next (on the game clock, in the player's time zone)
+  meta.seasonNow = () => { const d = new Date(U.now()); return (d.getFullYear() - 2026) * 12 + d.getMonth() - 8 + 1; };
+  meta.seasonEndsIn = () => { const d = new Date(U.now()); return new Date(d.getFullYear(), d.getMonth() + 1, 1) - d; };
+  /** A new month: what was earned and not taken is handed over (shown on the home screen), then the pass starts again. */
+  meta.ensureSeason = () => {
+    const s = S(), p = s.pass, cur = meta.seasonNow();
+    if (!(p.season < cur)) return;
+    let out = [];
+    const reached = Math.min(E.PASS_TIERS, Math.floor(p.xp / E.PASS_XP_PER_TIER));
+    for (let i = 1; i <= reached; i++) ['free', 'prem'].forEach((tr) => { if ((tr === 'free' || p.premium) && !p[tr][i]) { p[tr][i] = true; out = out.concat(meta.grant(E.passRewards[tr][i - 1])); } });
+    if (out.length) meta.pendingSeason = { n: p.season, rewards: out };
+    s.pass = { season: cur, xp: 0, premium: false, free: {}, prem: {} };
+    changed();
+  };
+  meta.passTier = () => { meta.ensureSeason(); return Math.min(E.PASS_TIERS, Math.floor(S().pass.xp / E.PASS_XP_PER_TIER)); };
+  meta.addPassXp = (n) => { meta.ensureSeason(); S().pass.xp = Math.min(S().pass.xp + Math.floor(n), E.PASS_TIERS * E.PASS_XP_PER_TIER); persist(); };
   meta.passClaimable = (tier, track) => {
+    meta.ensureSeason();
     const p = S().pass;
     if (tier > meta.passTier()) return false;
     if (track === 'prem' && !p.premium) return false;
@@ -604,7 +619,8 @@
       out = meta.grant({ gems: n });
     } else if (p.type === 'bundle') { out = meta.grant(p.grant); }
     else if (p.type === 'noads') { s.purchases.noAds = true; out = [{ icon: 'n_ad', text: t('product.noads') }]; }
-    else if (p.type === 'pass') { s.pass.premium = true; out = [{ icon: 'n_pass', text: t('pass.premiumOn') }]; }
+    else if (p.type === 'pass') { meta.ensureSeason(); S().pass.premium = true; // premium for the season it is bought in
+      out = [{ icon: 'n_pass', text: t('pass.premiumOn') }]; }
     else if (p.type === 'sub') {
       s.purchases.soulUntil = Math.max(U.now(), s.purchases.soulUntil) + p.days * 86400e3;
       out = meta.grant(p.grant);
@@ -701,10 +717,46 @@
     meta.track('level', r.level, true); meta.track('boss', r.bossKills); meta.track('gold', gold); meta.track('elites', r.eliteKills);
     meta.track('tomes', r.tomes || 0); meta.track('champions', r.championKills || 0);
     res.deeds = meta.checkDeeds(r);
+    // event tokens: every running collect event takes its share of the run
+    res.events = meta.liveEvents().filter(meta.eventCollecting).map((ev) => {
+      const n = meta.eventTokensFor(ev, r); meta.eventState(ev).tokens += n;
+      return { id: ev.id, n, icon: meta.eventIcon(ev), name: meta.loc(ev.token) };
+    }).filter((e) => e.n > 0);
     s.runsSinceAd++;
     changed();
     return res;
   };
+  /* ---------------- Live events (live.json, type 'collect'): tokens from every run, spent in the event's shop ---------------- */
+  const SHOP_GRACE_MS = 3 * 86400e3; // after the collecting ends, the shop stays open this long (unless shopEnd says otherwise)
+  const num = (v, d) => (typeof v === 'number' && isFinite(v) ? v : d);
+  /** A text from live.json in the player's language ({ bg, en }), English when missing. */
+  meta.loc = (o) => (o && typeof o === 'object' ? o[DH.i18n.current] || o.en || '' : o || '');
+  meta.eventEnd = (ev) => Date.parse(ev.end);
+  meta.eventShopEnd = (ev) => Date.parse(ev.shopEnd || '') || meta.eventEnd(ev) + SHOP_GRACE_MS;
+  /** Events that are collecting now, or whose shop is still open. */
+  meta.liveEvents = () => {
+    const now = U.now(), cfg = DH.live && DH.live.config;
+    return ((cfg && cfg.events) || []).filter((ev) => ev && ev.type === 'collect' && ev.id && Array.isArray(ev.shop)
+      && Date.parse(ev.start) <= now && now < meta.eventShopEnd(ev));
+  };
+  meta.eventCollecting = (ev) => U.now() < meta.eventEnd(ev);
+  meta.eventIcon = (ev) => 'ev_' + (['candle', 'bone'].includes(ev.icon) ? ev.icon : 'candle');
+  meta.eventState = (ev) => { const s = S(); s.events = s.events || {}; return s.events[ev.id] || (s.events[ev.id] = { tokens: 0, bought: {} }); };
+  /** Tokens for one run: kills, minutes survived, bosses and a win, more in the harder halls (all tunable in live.json). */
+  meta.eventTokensFor = (ev, r) => {
+    const k = ev.earn || {}, st = C.stages[r.stage], idx = st ? st.index : 0;
+    const base = r.kills * num(k.perKill, 0.01) + r.time / 60 * num(k.perMinute, 1.5) + r.bossKills * num(k.perBoss, 3) + (r.victory ? num(k.win, 15) : 0);
+    return Math.max(0, Math.round(base * (1 + idx * num(k.perHall, 0.15)) * num(ev.rate, 1)));
+  };
+  meta.eventItemLeft = (ev, item) => (item.limit ? Math.max(0, item.limit - (meta.eventState(ev).bought[item.id] || 0)) : Infinity);
+  meta.eventBuy = (ev, item) => {
+    const st = meta.eventState(ev);
+    if (meta.eventItemLeft(ev, item) <= 0 || st.tokens < item.cost) return null;
+    st.tokens -= item.cost; st.bought[item.id] = (st.bought[item.id] || 0) + 1;
+    return meta.grant(item.reward);
+  };
+  /** Shop items the player can buy right now, across the running events (the home badge). */
+  meta.eventAffordable = () => meta.liveEvents().reduce((n, ev) => n + ev.shop.filter((it) => it && it.cost <= meta.eventState(ev).tokens && meta.eventItemLeft(ev, it) > 0).length, 0);
   meta.doubleRunGold = (res) => { S().gold += res.gold; S().stats.goldEarned += res.gold; changed(); };
 
   /* ---------------- The Seven Nights (a newcomer event, see E.NEWBIE) ---------------- */
