@@ -879,14 +879,14 @@
     collect(k) {
       switch (k.type) {
         case 'xp': DH.audio.play('xp'); this.gainXp(k.val, k.xm); break;
-        case 'food': DH.audio.play('heal'); this.heal(C.FOOD_HEAL); break;
+        case 'food': DH.audio.play('eat'); this.heal(C.FOOD_HEAL); break;
         case 'coin': DH.audio.play('coin'); this.gold += k.val * this.P.greed; if (this.fx_.scarab) this.player.hp = Math.max(1, this.player.hp - k.val); break;
         case 'artifact':
           if (!this.artifactsFound.includes(k.sub)) this.artifactsFound.push(k.sub);
           DH.audio.play('chest'); this.levelUpVfx && this.levelUpVfx();
           DH.events.emit('run:boss', { name: t('artifact.' + k.sub + '.name'), final: false, artifact: true }); break;
         case 'ulcer': { const p = this.player; DH.audio.play('hurt'); this.gainXp(this.xpNext * 0.3); p.hp = Math.max(1, p.hp - this.P.maxHp * 0.12); this.text(p.x, p.y - 14, t('hud.ulcer'), '#b060ff'); break; }
-        case 'herb': DH.audio.play('coin'); this.herbs[k.sub] = (this.herbs[k.sub] || 0) + 1; this.text(this.player.x, this.player.y - 14, '+1 ' + t('herb.' + k.sub), '#b0ff80'); break;
+        case 'herb': DH.audio.play('herb'); this.herbs[k.sub] = (this.herbs[k.sub] || 0) + 1; this.text(this.player.x, this.player.y - 14, '+1 ' + t('herb.' + k.sub), '#b0ff80'); break;
         case 'potion': DH.audio.play('heal'); if (this.hero.potionBrew) { this.brews = (this.brews || 0) + 1; this.recompute(); this.text(this.player.x, this.player.y - 18, t('hud.brew'), '#b0ff80', true); } this.heal(C.POTION_HEAL[0] + this.P.maxHp * C.POTION_HEAL[1]); break; // 25 + 5% of max HP; the Alchemist's brews grow stronger
         case 'bucket': DH.audio.play('reward'); if (this.well && this.well.used) this.well.used = false; else this.buckets++; this.text(this.player.x, this.player.y - 14, t('hud.bucket'), '#5ab8ff', true); break;
         case 'rune_fury': case 'rune_haste': case 'rune_wraith': this.buff(k.type.slice(5)); break;
@@ -1019,7 +1019,7 @@
     buff(kind) {
       const fresh = !(this.buffs[kind] > 0);
       this.buffs[kind] = C.BUFFS[kind].dur;
-      DH.audio.play('reward'); this.shake = Math.max(this.shake, 3);
+      DH.audio.play('rune', kind); this.shake = Math.max(this.shake, 3);
       this.fx.push({ k: 'ring', x: this.player.x, y: this.player.y, life: 0.5, max: 0.5, r0: 6, r1: 60, color: C.BUFFS[kind].color });
       DH.events.emit('run:warning', t('buff.' + kind));
       if (fresh) this.recompute();

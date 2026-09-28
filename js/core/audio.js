@@ -255,7 +255,26 @@
   const SFX = {
     hit(painter) { (HIT[MAT[painter]] || HIT.flesh)(rnd(0.9, 1.1)); },
     kill(painter) { (DIE[MAT[painter]] || DIE.flesh)(rnd(0.9, 1.1)); },
-    xp() { const f = [440, 523, 587, 659, 784][Math.random() * 5 | 0]; tone({ type: 'sine', f, t: 0.22, vol: 0.035, rev: 0.4 }); tone({ type: 'sine', f: f * 2.76, t: 0.08, vol: 0.01 }); },
+    xp() { // a soul drawn in: a short breath and a soft low note gliding up, no ringing partials
+      const f = [220, 262, 294, 330, 392][Math.random() * 5 | 0];
+      tone({ type: 'sine', f, f2: f * 1.5, t: 0.13, vol: 0.032, attack: 0.01 });
+      burst({ t: 0.1, filter: 'bandpass', ff: 1200, ff2: 2600, q: 3, vol: 0.025, attack: 0.02 });
+    },
+    herb() { // leaves rustling as a herb is picked
+      for (let i = 0; i < 4; i++) burst({ t: 0.04, filter: 'bandpass', ff: rnd(2400, 4200), q: 1.2, vol: 0.06, delay: i * rnd(0.03, 0.06) });
+      burst({ t: 0.06, ff: 600, vol: 0.05 });
+    },
+    eat() { // a bite of food: two crunches and a swallow
+      [0, 0.09].forEach((d) => burst({ t: 0.05, filter: 'bandpass', ff: rnd(800, 1200), q: 2, vol: 0.12, delay: d }));
+      tone({ type: 'sine', f: 160, f2: 90, t: 0.1, vol: 0.07, delay: 0.2 });
+      [69, 72].forEach((n, i) => tone({ type: 'sine', f: midi(n), t: 0.6, vol: 0.025, attack: 0.1, rev: true, delay: 0.25 + i * 0.07 }));
+    },
+    rune(kind) { // a rune taken: fury drums and growls, haste is a rising rush of wind, the wraith a ghostly breath
+      if (kind === 'fury') { thud(70, 0.3, 0.26); tone({ type: 'sawtooth', f: 90, f2: 60, t: 0.6, vol: 0.12, attack: 0.04, filter: 'bandpass', ff: 420, q: 3, vib: 8, vibRate: 12, rev: 0.4 }); }
+      else if (kind === 'haste') { burst({ t: 0.5, filter: 'bandpass', ff: 500, ff2: 3200, q: 2, vol: 0.14, attack: 0.1 }); tone({ type: 'sine', f: 330, f2: 660, t: 0.4, vol: 0.03, attack: 0.1, rev: 0.3 }); }
+      else { burst({ t: 0.8, filter: 'bandpass', ff: 1800, ff2: 600, q: 4, vol: 0.09, attack: 0.2, rev: 1 }); tone({ type: 'sawtooth', f: 220, f2: 180, t: 0.8, vol: 0.03, attack: 0.25, filter: 'bandpass', ff: 700, q: 6, vib: 10, vibRate: 5, rev: 1 }); }
+      thud(110, 0.1, 0.08);
+    },
     coin() { const f = rnd(1050, 1250); metal(f, 0.28, 0.05, PLATE); metal(f * 1.06, 0.2, 0.035, PLATE, { delay: 0.05 }); },
     levelup() {
       // a dark choir swell: A minor add9 rising out of the dark, then a bell
@@ -395,7 +414,7 @@
       burst({ t: 0.18, filter: 'highpass', ff: 3000, ff2: 1500, vol: 0.05 });
     },
   };
-  const MIN_GAP = { block: 0.08, hit: 0.05, xp: 0.04, kill: 0.06, coin: 0.06, swing: 0.07, bow: 0.05, fire: 0.1, throw: 0.07, zap: 0.1, glass: 0.08, boom: 0.1, gun: 0.08, roar: 0.4,
+  const MIN_GAP = { block: 0.08, hit: 0.05, xp: 0.04, herb: 0.08, eat: 0.2, rune: 0.3, kill: 0.06, coin: 0.06, swing: 0.07, bow: 0.05, fire: 0.1, throw: 0.07, zap: 0.1, glass: 0.08, boom: 0.1, gun: 0.08, roar: 0.4,
     wisp: 0.08, arcane: 0.2, blood: 0.3, flask: 0.08, hex: 0.08, blade: 0.08, dart: 0.05, phantom: 0.6, punch: 0.07, storm: 0.1, axe: 0.1, plague: 0.1, deathwall: 0.8, thorns: 0.12, prism: 0.1 };
 
   /* ---------------- Music ---------------- */
