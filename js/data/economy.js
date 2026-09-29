@@ -6,24 +6,25 @@
 
   /* ---------- Shrine (permanent gold upgrades) ---------- */
   E.shrine = {
-    might:    { icon: 'fistup',    per: { dmgPct: 0.05 },   max: 10, cost: 300,  growth: 1.45, unlock: 'd_level_30' },
-    vitality: { icon: 'heart',     per: { maxHpPct: 0.08 }, max: 10, cost: 250,  growth: 1.45 },
-    armor:    { icon: 'hide',      per: { defense: 0.02 },  max: 5,  cost: 600,  growth: 1.8 },
-    fortitude:{ icon: 'shield',    per: { block: 1.5 },     max: 5,  cost: 700,  growth: 1.8, unlock: 'd_stage_crypt_s8' },
-    recovery: { icon: 'cross',     per: { regen: 0.2 },     max: 5,  cost: 500,  growth: 1.7, unlock: 'd_brew_1' },
-    swiftness:{ icon: 'boot',      per: { speedPct: 0.04 }, max: 5,  cost: 400,  growth: 1.7 },
-    haste:    { icon: 'hourglass', per: { as: 0.03 },       max: 5,  cost: 700,  growth: 1.75, unlock: 'd_kills_run_1000' },
-    reach:    { icon: 'rings',     per: { area: 0.05 },     max: 5,  cost: 500,  growth: 1.7 },
-    magnet:   { icon: 'magnet',    per: { pickup: 0.12 },   max: 5,  cost: 300,  growth: 1.6 },
-    greed:    { icon: 'i_gold',    per: { greed: 0.08 },    max: 10, cost: 400,  growth: 1.5, unlock: 'd_elites_50' },
-    wisdom:   { icon: 't_wisdom',  per: { growth: 0.06 },   max: 5,  cost: 500,  growth: 1.7, unlock: 'd_tomes_20' },
-    luck:     { icon: 'target',    per: { critPct: 0.05 },  max: 5,  cost: 600,  growth: 1.7, unlock: 'd_crits' },
-    revival:  { icon: 'i_revive',  per: { revives: 1 },     max: 2,  cost: 6000, growth: 3, unlock: 'd_stage_crypt_s3' },
-    reroll:   { icon: 'i_reroll',  per: { rerolls: 1 },     max: 3,  cost: 1500, growth: 2.2, unlock: 'd_champions_10' },
+    might:    { icon: 'fistup',    per: { dmgPct: 0.05 },   cost: [450, 600, 850, 1200, 1700, 2300, 3200, 4400, 6100, 8500], unlock: 'd_level_30' },
+    vitality: { icon: 'heart',     per: { maxHpPct: 0.08 }, cost: [400, 500, 700, 1000, 1400, 1900, 2700, 3700, 5100, 7100] },
+    armor:    { icon: 'hide',      per: { defense: 0.02 },  cost: [900, 1500, 2400, 3900, 6300] },
+    fortitude:{ icon: 'shield',    per: { block: 1.5 },     cost: [1100, 1700, 2800, 4500, 7300], unlock: 'd_stage_crypt_s8' },
+    recovery: { icon: 'cross',     per: { regen: 0.2 },     cost: [750, 1200, 1800, 2700, 4200], unlock: 'd_brew_1' },
+    swiftness:{ icon: 'boot',      per: { speedPct: 0.04 }, cost: [600, 900, 1400, 2200, 3300] },
+    haste:    { icon: 'hourglass', per: { as: 0.03 },       cost: [1100, 1700, 2600, 4200, 6600], unlock: 'd_kills_run_1000' },
+    reach:    { icon: 'rings',     per: { area: 0.05 },     cost: [750, 1200, 1800, 2700, 4200] },
+    magnet:   { icon: 'magnet',    per: { pickup: 0.12 },   cost: [450, 650, 950, 1400, 2000] },
+    greed:    { icon: 'i_gold',    per: { greed: 0.08 },    cost: [600, 850, 1200, 1800, 2500, 3600, 5200, 7500, 11000, 15000], unlock: 'd_elites_50' },
+    wisdom:   { icon: 't_wisdom',  per: { growth: 0.06 },   cost: [750, 1200, 1800, 2700, 4200], unlock: 'd_tomes_20' },
+    luck:     { icon: 'target',    per: { critPct: 0.05 },  cost: [900, 1400, 2100, 3300, 5000], unlock: 'd_crits' },
+    revival:  { icon: 'i_revive',  per: { revives: 1 },     cost: [9000, 18000], unlock: 'd_stage_crypt_s3' },
+    reroll:   { icon: 'i_reroll',  per: { rerolls: 1 },     cost: [2300, 4000, 7300], unlock: 'd_champions_10' },
   };
   // unlock: the deed that opens a Blessing (as Blessings open with quests); the rest are open from the start
   E.shrineOrder = Object.keys(E.shrine);
-  E.shrineCost = (id, level) => Math.floor(E.shrine[id].cost * Math.pow(E.shrine[id].growth, level) / 10) * 10;
+  Object.values(E.shrine).forEach((d) => { d.max = d.cost.length; }); // one price per level: the level count follows the list
+  E.shrineCost = (id, level) => E.shrine[id].cost[level];
 
   /* ---------- Gear: 7 slots, named items, 6 rarities ---------- */
   E.rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'];

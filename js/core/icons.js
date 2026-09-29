@@ -1729,24 +1729,17 @@
       for (let i = 0; i < 3; i++) P.rect(g, 14 + i * 1.6, 19, 0.6, 2, '#f4e8c8');
       glint(g, 10.6, 9.6, 1.4, '#ffffff');
     },
-    i_gold(g) { // two stacks of coins and one standing before them
-      const stackCoin = (x, y, rx, ry) => {
-        P.ell(g, x, y + 1.3, rx + 0.6, ry + 0.6, INK);
-        P.rect(g, x - rx, y, rx * 2, 1.3, P.lg(g, x - rx, 0, x + rx, 0, ['#8a5a10', '#f0c040', '#c88a18', '#6a4008']));
-        P.ell(g, x, y + 1.3, rx, ry, P.lg(g, x - rx, 0, x + rx, 0, ['#8a5a10', '#e0a020', '#6a4008']));
-        for (let i = 1; i < 8; i++) { const t = i / 8, xx = x - rx + t * rx * 2; P.line(g, xx, y + ry * Math.sin(Math.PI * t) * 0.9, xx, y + 1.3 + ry * Math.sin(Math.PI * t) * 0.9, 0.3, 'rgba(90,50,0,0.6)'); }
-        P.ell(g, x, y, rx + 0.6, ry + 0.6, INK); P.ell(g, x, y, rx, ry, P.lg(g, x - rx, y - ry, x + rx, y + ry, ['#fff4c0', '#f0c040', '#b07818']));
-        P.ell(g, x, y, rx * 0.66, ry * 0.62, 'rgba(160,100,10,0.35)');
-      };
-      P.ell(g, 16, 28.4, 13, 2.2, 'rgba(0,0,0,0.5)');
-      for (let i = 0; i < 6; i++) stackCoin(10.4, 25.4 - i * 2.4, 6.4, 2.4);
-      for (let i = 0; i < 3; i++) stackCoin(21.4, 26 - i * 2.4, 6, 2.3);
-      inkCircle(g, 21, 15.4, 7, P.rg(g, 18.6, 13, 9, ['#fff8d0', '#f0c040', '#a86a10']));
-      g.strokeStyle = '#8a5a10'; g.lineWidth = 0.6; g.beginPath(); g.arc(21, 15.4, 5.6, 0, Math.PI * 2); g.stroke();
-      for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; P.circle(g, 21 + Math.cos(a) * 4.4, 15.4 + Math.sin(a) * 4.4, 0.4, '#a86a10'); }
-      P.circle(g, 21, 15.4, 2.2, P.rg(g, 20.4, 14.8, 2.6, ['#fff0a0', '#c88a18']));
-      P.ell(g, 18.4, 12.4, 1.8, 0.9, 'rgba(255,255,255,0.8)', -0.7);
-      glint(g, 7.6, 12.2, 1.6, '#fff8d0');
+    i_gold(g) { // one old minted coin seen three-quarter: a stamped star on its face, a thick milled edge
+      const face = () => { g.beginPath(); g.ellipse(16, 14, 12.4, 10.4, 0, 0, Math.PI * 2); };
+      g.fillStyle = INK; g.beginPath(); g.ellipse(16, 18.4, 13.1, 11.1, 0, 0, Math.PI * 2); g.fill(); P.rect(g, 2.9, 14, 26.2, 4.4, INK); face(); g.lineWidth = 1.4; g.strokeStyle = INK; g.stroke();
+      g.fillStyle = P.lg(g, 3.6, 0, 28.4, 0, ['#7a4a0c', '#e0a030', '#b07018', '#5a3406']); g.beginPath(); g.ellipse(16, 18.4, 12.4, 10.4, 0, 0, Math.PI); g.fill(); P.rect(g, 3.6, 14, 24.8, 4.4, g.fillStyle);
+      for (let i = 1; i < 14; i++) { const x = 3.6 + i * 24.8 / 14, t = (x - 16) / 12.4, dy = 10.4 * Math.sqrt(Math.max(0, 1 - t * t)); P.line(g, x, 14 + dy + 0.4, x, 18.4 + dy - 0.4, 0.5, 'rgba(60,30,0,0.55)'); }
+      face(); P.fill(g, P.rg(g, 12, 10, 15, ['#fff6c8', '#f4c648', '#c8861c', '#8a5410']));
+      g.strokeStyle = '#8a5a10'; g.lineWidth = 1.1; g.beginPath(); g.ellipse(16, 14, 9.4, 7.8, 0, 0, Math.PI * 2); g.stroke();
+      g.save(); g.translate(16, 14); g.scale(1, 10.4 / 12.4); g.translate(-16, -16);
+      const star = (r, w, col) => { P.path(g, [16, 16 - r, 16 + w, 16 - w, 16 + r, 16, 16 + w, 16 + w, 16, 16 + r, 16 - w, 16 + w, 16 - r, 16, 16 - w, 16 - w]); P.fill(g, col); };
+      star(6.4, 2, '#8a5410'); star(5, 1.3, '#ffe890'); g.restore();
+      glint(g, 9.6, 8.6, 2.2, '#ffffff');
     },
     i_gem(g) {
       P.glow(g, 16, 16, 13, '#ff5ad8', 0.45);
