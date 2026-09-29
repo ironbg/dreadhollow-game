@@ -480,7 +480,7 @@
 
       // ---- special offers
       root.append(h('h3.sect', { id: 'shop-offers' }, t('shop.offers')));
-      if (!s.purchases.once.starter) root.append(offerCard('starter', 'offer', t('shop.starterDesc'), '-80%'));
+      if (!s.purchases.once.starter) root.append(offerCard('starter', 'offer', t('shop.starterDesc'), t('shop.value', { v: E.products.starter.value + '%' })));
       if (M.soulCardActive()) {
         const left = Math.ceil((s.purchases.soulUntil - U.now()) / 86400e3);
         root.append(h('div.panel.offer.blue', { style: { marginTop: '8px' } },
@@ -490,8 +490,9 @@
             : h('button.btn.ghost.block.off', t('shop.claimedToday'))));
       } else root.append(offerCard('soulcard', 'offer blue', t('shop.soulDesc'), t('shop.value', { v: '600%' })));
       if (!s.heroes.reaper && !s.purchases.once.reaper) root.append(offerCard('reaper', 'offer red', t('shop.reaperDesc'), t('shop.hero')));
-      if (!s.purchases.once.legend) root.append(offerCard('legend', 'offer', t('shop.legendDesc'), '-70%'));
+      if (!s.purchases.once.legend) root.append(offerCard('legend', 'offer', t('shop.legendDesc'), t('shop.value', { v: E.products.legend.value + '%' })));
       if (!s.purchases.noAds) root.append(offerCard('noads', 'offer blue', t('shop.noadsDesc'), null));
+      root.append(ui.ratesLink()); // the packs hold random relics and chests: their odds, before buying
 
       // ---- daily deals
       const dealTimer = h('span.timer');
@@ -507,6 +508,7 @@
         deals.append(h('div.panel.chest', h('div.slot' + (pv.rarity != null ? '.rar' + pv.rarity : ''), { style: { width: '56px' } }, A.img(pv.icon)), h('div.small', { style: { fontWeight: 800 } }, pv.text), btn));
       });
       root.append(deals);
+      if (d.deals.some((deal) => E.dealPool[deal.i].grant.gear || E.dealPool[deal.i].grant.chest)) root.append(ui.ratesLink());
 
       // ---- chests
       root.append(h('h3.sect', { id: 'shop-chests' }, t('shop.chests')));
@@ -566,7 +568,7 @@
         h('button.btn.small.ad' + (enLeft > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('adEnergy'); if (r) ui.rewardPopup(t('shop.free'), r); ui.refresh(); } }, h('span.adtag', 'AD'), t('common.watch'))));
 
       root.append(h('div.center', { style: { margin: '18px 0 6px' } }, h('button.btn.tiny.ghost', { onclick: () => DH.iap.restore() }, t('shop.restore'))));
-      root.append(h('div.center.small', { style: { color: 'var(--dim)' } }, t('shop.testMode')));
+      if (DH.iap.provider.name === 'mock') root.append(h('div.center.small', { style: { color: 'var(--dim)' } }, t('shop.testMode'))); // the browser's pretend store only
 
       const upd = () => {
         dealTimer.textContent = t('quests.resetsIn', { t: U.fmtDuration(U.msToMidnight()) });

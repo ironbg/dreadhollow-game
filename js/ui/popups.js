@@ -461,12 +461,20 @@
   };
 
   /* ---------------- Drop rates (store compliance) ---------------- */
+  // Every paid way to a random relic says here, before the purchase, what it can give and how likely each result is.
   ui.openRates = () => {
-    ui.modal({ title: t('shop.rates'), body: h('div', Object.keys(E.chests).map((k) => h('div', { style: { marginBottom: '10px' } },
-      h('div', { style: { fontWeight: 800 } }, t('chest.' + k)),
-      h('div.small', E.chests[k].odds.map((o, i) => o > 0 ? h('span.rar' + i, { style: { marginRight: '10px' } }, h('span.rtxt', t('rarity.' + E.rarities[i])), ' ' + o + '%') : null)),
-      E.chests[k].pity ? h('div.small.muted', t('shop.pityRule', { n: E.chests[k].pity })) : null))) });
+    ui.modal({ title: t('shop.rates'), body: h('div',
+      Object.keys(E.chests).map((k) => h('div', { style: { marginBottom: '10px' } },
+        h('div', { style: { fontWeight: 800 } }, t('chest.' + k)),
+        h('div.small', E.chests[k].odds.map((o, i) => o > 0 ? h('span.rar' + i, { style: { marginRight: '10px' } }, h('span.rtxt', t('rarity.' + E.rarities[i])), ' ' + o + '%') : null)),
+        E.chests[k].pity ? h('div.small.muted', t('shop.pityRule', { n: E.chests[k].pity })) : null)),
+      h('div', { style: { fontWeight: 800, marginTop: '4px' } }, t('shop.ratesTypeTitle')),
+      h('div.small', t('shop.ratesType', { n: E.gearOrder.length })),
+      h('div', { style: { fontWeight: 800, marginTop: '10px' } }, t('shop.ratesOffersTitle')),
+      h('div.small', t('shop.ratesOffers'))) });
   };
+  /** The small "Drop rates" link placed under every offer that holds a random relic or a chest. */
+  ui.ratesLink = () => h('div.center', { style: { marginTop: '6px' } }, h('button.btn.tiny.ghost', { onclick: () => ui.openRates() }, t('shop.rates')));
 
   /* ---------------- Starter pack ---------------- */
   ui.openStarter = () => {
@@ -475,7 +483,8 @@
       h('div.center.small', t('shop.starterDesc')),
       h('div.reward-list', { style: { marginTop: '10px' } }, M.rewardPreview(p.grant).map((e, i) => h('div.reward', { style: { animationDelay: i * 0.08 + 's' } }, h('div.slot' + (e.rarity != null ? '.rar' + e.rarity : ''), A.img(e.icon)), h('div.n', e.text)))),
       h('div.center.goldtxt', { style: { fontWeight: 800, fontSize: '18px' } }, t('shop.value', { v: p.value + '%' })),
-      h('div.btns', h('button.btn.gold.big.shine', { onclick: async () => { if (await DH.iap.buy('starter')) m.close(); } }, DH.iap.price('starter')))) });
+      h('div.btns', h('button.btn.gold.big.shine', { onclick: async () => { if (await DH.iap.buy('starter')) m.close(); } }, DH.iap.price('starter'))),
+      ui.ratesLink()) });
   };
 
   /* ---------------- Live events (DH.meta.liveEvents): the event window and its shop ---------------- */

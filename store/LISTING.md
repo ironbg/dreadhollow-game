@@ -25,9 +25,8 @@ Your hero fights on their own: you move, dodge and choose. Every level brings a 
 • DEEP BUILDS – burn, spark, frost, decay and affliction; crits above 100%, multistrike, block and more.
 • RELICS AND MARKS – find, level, merge and send your best items up the Well.
 • AGONY AND TORMENT – when a hall falls, raise the stakes for artifacts, rarer loot and Lament Shards.
-• 280 DEEDS – permanent quests that unlock heroes, abilities and blessings.
+• 400+ DEEDS – permanent quests that unlock heroes, abilities and blessings.
 • MONTHLY EVENTS AND SEASON PASS – new rewards every month.
-• LEADERBOARDS – measure yourself against other players.
 • Full English and Bulgarian.
 
 Short runs, lasting progress, and a dark hand-drawn world. Play as a guest, or sign in with Google or email to keep your progress on every device.
@@ -55,9 +54,8 @@ An internet connection is needed for battles and rewards.
 • ДЪЛБОКИ БИЛДОВЕ – горене, искри, лед, разложение и проклятие; критични удари над 100%, многократни удари, блок и още.
 • РЕЛИКВИ И ЗНАЦИ – намирай, усилвай, сливай и изпращай най-добрите си предмети нагоре по Кладенеца.
 • АГОНИЯ И МЪЧЕНИЕ – щом една зала падне, вдигни залога за артефакти, по-редки предмети и Скръбни отломки.
-• 280 ПОДВИГА – постоянни задачи, които отключват герои, умения и благословии.
+• 400+ ПОДВИГА – постоянни задачи, които отключват герои, умения и благословии.
 • МЕСЕЧНИ ЕВЕНТИ И СЕЗОНЕН ПРОПУСК – нови награди всеки месец.
-• КЛАСАЦИИ – премери сили с другите играчи.
 • Изцяло на български и английски.
 
 Кратки битки, траен напредък и мрачен рисуван свят. Играй като гост или влез с Google или имейл, за да пазиш прогреса си на всяко устройство.
