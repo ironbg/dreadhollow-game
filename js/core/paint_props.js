@@ -137,6 +137,17 @@
     for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2 - 1.57; P.ell(g, 4 + Math.cos(a) * 1.2, 3 + Math.sin(a) * 1.2, 1, 0.65, P.lg(g, 2, 1, 6, 5, [sh(c, 0.4), c, sh(c, -0.4)]), a); }
     P.circle(g, 4, 3, 0.7, sh(c, 0.7));
   } }));
+  // forging materials: an ingot of each metal, a bevelled bar with a lit top face; starsteel glints
+  const MATS = { iron: ['#b4bcc6', '#5a626c'], silver: ['#f4f8ff', '#8a96a8'], gold: ['#ffe07a', '#b07a10'], starsteel: ['#b8d8ff', '#3a5aa8'] };
+  Object.keys(MATS).forEach((k) => def('mat_' + k, { w: 10, h: 8, draw(g) {
+    const [hi, lo] = MATS[k];
+    if (k !== 'iron') P.glow(g, 5, 4.5, 4.6, hi, k === 'starsteel' ? 0.55 : 0.3);
+    P.path(g, [0.6, 6.6, 9.4, 6.6, 8, 3.4, 2, 3.4]); P.fill(g, P.lg(g, 0, 3.4, 0, 6.6, [sh(hi, -0.15), lo])); // the sides
+    P.path(g, [2, 3.4, 8, 3.4, 7.2, 1.8, 2.8, 1.8]); P.fill(g, P.lg(g, 2, 1.8, 8, 3.4, [sh(hi, 0.4), hi, sh(hi, -0.2)])); // the top face
+    P.line(g, 2.9, 2.2, 6.2, 2.2, 0.35, 'rgba(255,255,255,0.8)'); // a gleam along the top edge
+    P.line(g, 0.6, 6.6, 9.4, 6.6, 0.4, sh(lo, -0.45)); // the shadowed foot
+    if (k === 'starsteel') for (const [x, y, r] of [[7.4, 1.4, 1.2], [2.4, 4.8, 0.8]]) { P.line(g, x - r, y, x + r, y, 0.3, '#ffffff'); P.line(g, x, y - r, x, y + r, 0.3, '#ffffff'); }
+  } }));
   def('urn', { w: 10, h: 12, draw(g) { // a funerary urn of fired clay: a lid, two handles, a band of painted figures, a crack
     for (const s of [-1, 1]) { g.beginPath(); g.arc(5 + s * 3.8, 4.4, 1.1, s < 0 ? Math.PI * 0.5 : -Math.PI * 0.5, s < 0 ? Math.PI * 1.5 : Math.PI * 0.5); g.strokeStyle = '#7a4424'; g.lineWidth = 0.6; g.stroke(); } // handles
     g.beginPath(); g.moveTo(3.4, 2); g.quadraticCurveTo(0.2, 5, 1.6, 9.4); g.quadraticCurveTo(2.4, 11.4, 5, 11.4); g.quadraticCurveTo(7.6, 11.4, 8.4, 9.4); g.quadraticCurveTo(9.8, 5, 6.6, 2); g.closePath();

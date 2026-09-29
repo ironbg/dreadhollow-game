@@ -170,6 +170,7 @@
       const mk = eqp.mark;
       eq.append(h('div', h('div.slot.mark' + (mk ? '.rar4' : '.empty'), { onclick: () => ui.openMarks() }, A.img(mk ? 'm_' + mk : 'm_knight')), h('div.center.small.muted', t('slot.mark'))));
       box.append(eq);
+      box.append(ui.matsRow(), h('div.small.muted.center', { style: { marginBottom: '6px' } }, t('armory.matsHint')));
       box.append(h('h3.sect', t('armory.inventory', { n: s.gear.length })));
       const canMerge = s.gear.some((g) => M.mergeCandidates(g.id).length >= 2);
       box.append(h('div.row', { style: { marginBottom: '8px' } },

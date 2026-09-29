@@ -131,6 +131,7 @@
       const g = (runGear && runGear[slot]) || meta.gearById(eqp[slot]);
       if (!g) continue;
       meta.addStats(st, E.gearStat(g.type, g.rarity, g.level));
+      meta.addStats(st, E.gearMilestones(g.type, g.rarity, g.level));
       const sp = E.gearSpecial(g.type, g.rarity); if (sp) meta.addStats(st, sp);
     }
     const mk = eqp.mark;
@@ -235,10 +236,33 @@
   meta.unequip = (slot) => { meta.eq()[slot] = null; changed(); };
   meta.unequipItem = (id) => { const eqp = meta.eq(); E.slots.forEach((sl) => { if (eqp[sl] === id) eqp[sl] = null; }); changed(); };
   meta.gearMaxLevel = (g) => E.rarityMaxLevel[g.rarity];
+  meta.mats = () => { const s = S(); if (!s.mats) s.mats = {}; return s.mats; };
+  meta.matCount = (k) => meta.mats()[k] || 0;
+  /** What the next level of an item costs: gold and a material. */
+  meta.gearLevelPrice = (g) => Object.assign({ gold: E.gearLevelCost(g.rarity, g.level) }, E.gearMatCost(g.rarity, g.level));
+  meta.canLevelGear = (g) => { if (!g || g.level >= meta.gearMaxLevel(g)) return false; const p = meta.gearLevelPrice(g); return S().gold >= p.gold && meta.matCount(p.mat) >= p.n; };
   meta.levelGear = (id) => {
-    const g = meta.gearById(id); if (!g || g.level >= meta.gearMaxLevel(g)) return false;
-    if (!meta.spend({ gold: E.gearLevelCost(g.rarity, g.level) })) return false;
+    const g = meta.gearById(id); if (!meta.canLevelGear(g)) return false;
+    const p = meta.gearLevelPrice(g);
+    if (!meta.spend({ gold: p.gold })) return false;
+    meta.mats()[p.mat] -= p.n;
     g.level++; meta.track('upgrade', 1); changed(); return true;
+  };
+  /** Level an item as far as gold and materials reach (up to its cap): how many levels it gained. */
+  meta.levelGearAll = (id) => {
+    let n = 0; while (meta.levelGear(id)) n++;
+    return n;
+  };
+  /** How many levels "Upgrade all" would give now, and what it would spend: { n, gold, mats }. */
+  meta.levelGearAllPreview = (g) => {
+    const out = { n: 0, gold: 0, mats: {} }; if (!g) return out;
+    let gold = S().gold; const have = Object.assign({}, meta.mats());
+    for (let lv = g.level; lv < meta.gearMaxLevel(g); lv++) {
+      const c = E.gearLevelCost(g.rarity, lv), m = E.gearMatCost(g.rarity, lv);
+      if (gold < c || (have[m.mat] || 0) < m.n) break;
+      gold -= c; have[m.mat] -= m.n; out.n++; out.gold += c; out.mats[m.mat] = (out.mats[m.mat] || 0) + m.n;
+    }
+    return out;
   };
   meta.mergeCandidates = (id) => {
     const g = meta.gearById(id); if (!g || g.rarity >= 5) return [];
@@ -267,12 +291,22 @@
     return out;
   };
   meta.salvageValue = (g) => Math.floor(80 * Math.pow(2.2, g.rarity) + (g.level - 1) * 40 * (1 + g.rarity * 0.6));
+  /** The materials a salvaged item gives back: a little of its rarity's metal, and half of what its levels cost. */
+  meta.salvageMats = (g) => {
+    const out = {}, add = (k, n) => { if (n > 0) out[k] = (out[k] || 0) + n; };
+    add(E.materials[[0, 0, 1, 1, 2, 3][g.rarity]], 1 + g.rarity);
+    const spent = {}; for (let lv = 1; lv < g.level; lv++) { const m = E.gearMatCost(g.rarity, lv); spent[m.mat] = (spent[m.mat] || 0) + m.n; }
+    for (const k in spent) add(k, Math.floor(spent[k] / 2));
+    return out;
+  };
   meta.salvage = (id) => {
     const g = meta.gearById(id); if (!g) return 0;
-    const s = S();
+    const s = S(), mats = meta.salvageMats(g);
     meta.unequipEverywhere(id);
     s.gear = s.gear.filter((o) => o !== g);
-    const v = meta.salvageValue(g); s.gold += v; changed();
+    const v = meta.salvageValue(g); s.gold += v;
+    for (const k in mats) meta.mats()[k] = meta.matCount(k) + mats[k];
+    changed();
     return v;
   };
   /** Loot type: items you have discovered but are NOT wearing are strongly preferred
@@ -735,6 +769,7 @@
     res.artifacts.forEach((k) => { s.artifactsOwned[k] = U.now(); });
     for (const k in r.dmgByAb) if (C.abilities[k]) s.stats.abDmg[k] = (s.stats.abDmg[k] || 0) + Math.round(r.dmgByAb[k]);
     for (const k in r.herbs) s.herbs[k] = (s.herbs[k] || 0) + r.herbs[k];
+    for (const k in r.mats || {}) if (E.materials.includes(k)) meta.mats()[k] = meta.matCount(k) + Math.max(0, Math.floor(r.mats[k]) || 0);
     for (const k in r.potionsUsed) s.potions[k] = Math.max(0, (s.potions[k] || 0) - r.potionsUsed[k]);
     [r.wellSent].concat(r.wellExtra || []).forEach((w) => { if (!w) return; s.stats.wellSent++; s.wellkeeper.push({ type: w.type, rarity: w.rarity }); if (s.wellkeeper.length > E.WELL_MAX) s.wellkeeper.shift(); s.discovered[w.type] = true; });
     if (r.agonyOn) s.stats.maxAgony[r.stage] = Math.max(s.stats.maxAgony[r.stage] || 0, r.agony);

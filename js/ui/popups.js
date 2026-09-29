@@ -480,6 +480,8 @@
   /* ---------------- Gear detail ---------------- */
   /** The special line of a gear piece (e.g. Defiant Plate's defense after each hit). */
   ui.gearSpecialText = (type, sp) => t('gearsp.' + type, Object.fromEntries(Object.entries(sp).map(([k, v]) => [k, E.ITEM_FMT[k] ? E.ITEM_FMT[k](v) : k === 'hitRegen' || k === 'imps' ? Math.round(v * 10) / 10 : k.startsWith('sig_') ? Math.min(3, Math.floor(v + 1e-6)) : Math.round(v * 1000) / 10])));
+  /** The forging materials the player holds, one tile each. */
+  ui.matsRow = () => h('div.row.herbs.mats', E.materials.map((k) => h('div.panel.herb', A.img('mat_' + k), h('b', U.fmt(M.matCount(k))), h('span.small', t('mat.' + k)))));
   ui.openGear = (id) => {
     const g0 = M.gearById(id); if (!g0) return;
     g0.isNew = false; DH.save.persist();
@@ -490,7 +492,9 @@
       const def = E.gear[g.type], maxL = M.gearMaxLevel(g), eq = M.isEquipped(g.id), slots = M.slotsFor(g.type);
       const cur = E.gearStat(g.type, g.rarity, g.level), nxt = g.level < maxL ? E.gearStat(g.type, g.rarity, g.level + 1) : null;
       const sp = E.gearSpecial(g.type, g.rarity);
-      const cands = M.mergeCandidates(g.id), cost = E.gearLevelCost(g.rarity, g.level);
+      const cands = M.mergeCandidates(g.id), price = M.gearLevelPrice(g), canLv = M.canLevelGear(g), all = M.levelGearAllPreview(g);
+      const hasMat = M.matCount(price.mat) >= price.n, hasGold = S().gold >= price.gold;
+      const msDefs = E.gearMilestoneDefs(g.type).filter((ms) => ms.lv <= maxL);
       const equipBtns = eq ? [h('button.btn.ghost.block', { onclick: async () => { click(); await ui.act('unequipItem', { id: g.id }); draw(); } }, t('gear.unequip'))]
         : slots.map((sl) => h('button.btn.blue.block', { onclick: async () => { click(); await ui.act('equip', { id: g.id, slot: sl }); draw(); } }, slots.length > 1 ? t('gear.equipIn', { slot: t('slot.' + sl) }) : t('gear.equip')));
       m.set(h('div',
@@ -501,17 +505,27 @@
             h('div.small.muted', t('slot.' + (def.slot === 'ring' ? 'ring1' : def.slot)) + ' · ' + t('common.lv') + ' ' + g.level + '/' + maxL),
             h('div', { style: { marginTop: '6px' } }, Object.keys(cur).map((k) => h('div.small', ui.fmtStat(k, cur[k]), nxt ? h('span.good', '  → ' + ui.fmtStat(k, nxt[k]).split(' ')[0]) : null))),
             sp ? h('div.small.goldtxt', { style: { marginTop: '4px' } }, ui.gearSpecialText(g.type, sp)) : null)),
+        msDefs.length ? h('div.gms',
+          h('div.gms-h', t('gear.levelBonus')),
+          msDefs.map((ms) => { const on = g.level >= ms.lv; return h('div.small.gms-row' + (on ? '.on' : ''), ui.fmtStat(ms.k, ms.v * E.rarityMult[g.rarity]), on ? null : h('span.muted', ' ' + t('gear.unlocksAt', { n: ms.lv }))); })) : null,
         h('div.col', { style: { marginTop: '12px' } },
           equipBtns,
-          g.level < maxL ? h('button.btn.gold.block' + (S().gold >= cost ? '' : '.off'), { onclick: async () => { const ok = await ui.act('levelGear', { id: g.id }); if (ok) { DH.audio.play('buy'); draw(); } else if (ok === false) ui.toast(t('common.notEnough'), 'bad'); } },
-            t('gear.levelUp'), A.img('i_gold'), U.fmt(cost)) : h('button.btn.ghost.block.off', t('common.max')),
+          g.level < maxL ? h('div.gcost',
+            h('span.gcost-i' + (hasMat ? '' : '.bad'), A.img('mat_' + price.mat), M.matCount(price.mat) + ' / ' + price.n),
+            h('span.gcost-i' + (hasGold ? '' : '.bad'), A.img('i_gold'), U.fmt(price.gold))) : null,
+          g.level < maxL ? h('div.row', { style: { gap: '6px' } },
+            h('button.btn.gold.grow' + (canLv ? '' : '.off'), { onclick: async () => { const ok = await ui.act('levelGear', { id: g.id }); if (ok) { DH.audio.play('buy'); draw(); } else if (ok === false) ui.toast(t(hasMat ? 'common.notEnough' : 'gear.needMat', { m: t('mat.' + price.mat) }), 'bad'); } },
+              t('gear.levelUp')),
+            h('button.btn.blue.grow' + (all.n >= 1 ? '' : '.off'), { onclick: async () => { if (all.n < 1) { ui.toast(t(hasMat ? 'common.notEnough' : 'gear.needMat', { m: t('mat.' + price.mat) }), 'bad'); return; } const n = await ui.act('levelGearAll', { id: g.id }); if (n) { DH.audio.play('buy'); ui.toast(t('gear.leveledBy', { n }), 'good'); draw(); } } },
+              t('gear.levelAll'), all.n >= 1 ? h('span.small', ' +' + all.n) : null)) : h('button.btn.ghost.block.off', t('common.max')),
           g.rarity < 5 ? h('button.btn.gem.block' + (cands.length >= 2 ? '.shine' : '.dim'), { onclick: async () => {
             if (cands.length < 2) { ui.toast(t('gear.mergeNeed', { n: 2 - cands.length, g: t('gear.' + g.type), r: t('rarity.' + E.rarities[g.rarity]) }), 'bad'); return; }
             if (await ui.act('merge', { id: g.id })) { DH.audio.play('chest'); const gg = M.gearById(id); ui.rewardPopup(t('armory.merged'), [{ icon: 'g_' + gg.type, text: t('gear.' + gg.type), rarity: gg.rarity }]); draw(); }
           } }, t('gear.merge', { n: Math.min(3, cands.length + 1) })) : null,
           h('div.small.muted.center', g.rarity < 5 ? t('gear.mergeHint', { r: t('rarity.' + E.rarities[g.rarity + 1]) }) : ''),
           h('button.btn.small.red', { onclick: async () => {
-            if (await ui.confirm({ title: t('gear.salvage'), body: t('gear.salvageConfirm', { g: U.fmt(M.salvageValue(g)) }), okCls: 'red' })) { const v = await ui.act('salvage', { id: g.id }); if (v == null) return; ui.toast('+' + U.fmt(v) + ' ' + t('common.gold'), 'good'); m.close(); }
+            const sm = M.salvageMats(g), smTxt = Object.keys(sm).map((k) => sm[k] + ' ' + t('mat.' + k)).join(', ');
+            if (await ui.confirm({ title: t('gear.salvage'), body: t('gear.salvageConfirm', { g: U.fmt(M.salvageValue(g)) }) + (smTxt ? ' ' + t('gear.salvageMats', { m: smTxt }) : ''), okCls: 'red' })) { const v = await ui.act('salvage', { id: g.id }); if (v == null) return; ui.toast('+' + U.fmt(v) + ' ' + t('common.gold') + (smTxt ? ', ' + smTxt : ''), 'good'); m.close(); }
           } }, t('gear.salvage'), A.img('i_gold'), U.fmt(M.salvageValue(g))))));
     };
     draw();

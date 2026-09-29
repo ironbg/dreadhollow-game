@@ -25,7 +25,7 @@
       shrine: {}, tributes: [], runTributes: [], npcs: {}, avatar: null, pid: newPid(),
       gear: [], equipped: { head: null, neck: null, chest: null, hands: null, feet: null, ring1: null, ring2: null, mark: null }, nextGearId: 1,
       loadouts: {}, archiveBy: {}, // per hero: equipped gear + Mark, and Archive shards
-      discovered: {}, potions: {}, herbs: {}, wellkeeper: [], deeds: {}, artifacts: {}, agony: {},
+      discovered: {}, potions: {}, herbs: {}, mats: { iron: 10, silver: 0, gold: 0, starsteel: 0 }, wellkeeper: [], deeds: {}, artifacts: {}, agony: {},
       shards: 0, archive: {}, secrets: {}, mainQuest: 0, artifactsOwned: {}, events: {}, boards: { best: {}, sent: {} },
       stats: { kills: 0, runs: 0, wins: 0, bossKills: 0, eliteKills: 0, goldEarned: 0, maxLevel: 0,
         itemsMerged: 0, chestsOpened: 0, loginDays: 0, adsWatched: 0, playTime: 0, gemsSpent: 0, bestSurvival: 0,

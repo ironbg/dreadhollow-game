@@ -43,6 +43,7 @@
     unequipItem: { run: (a) => M().unequipItem(int(a.id)) },
     equipMark: { run: (a) => M().equipMark(a.hero == null ? null : str(a.hero, 24)) },
     levelGear: { run: (a) => M().levelGear(int(a.id)) },
+    levelGearAll: { run: (a) => M().levelGearAll(int(a.id)) },
     merge: { run: (a) => M().merge(int(a.id)) },
     mergeAll: { run: () => M().mergeAll() },
     salvage: { run: (a) => M().salvage(int(a.id)) },

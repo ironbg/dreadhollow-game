@@ -124,6 +124,7 @@
       let name;
       if (k.type === 'xp') name = k.cluster ? (k.val >= 1000 ? 'clusterX' : 'cluster') : (GEM[k.val] || 'gem1');
       else if (k.type === 'herb') name = 'herb_' + k.sub;
+      else if (k.type === 'mat') name = 'mat_' + k.sub;
       else if (k.type === 'coin' && k.sub) name = 'coin_' + k.sub;
       else if (k.type === 'food') name = 'food_' + k.sub;
       else name = k.type;

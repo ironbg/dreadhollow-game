@@ -2234,6 +2234,7 @@
     else if (pre === 'g' && GEAR[id]) GEAR[id](g);
     else if (pre === 's') { g.globalAlpha = 0.25; const t = { head: 'warden_helm', neck: 'wrath_amulet', chest: 'stalwart_cuirass', hands: 'stalker_grips', feet: 'striders', ring1: 'oak_band', ring2: 'oak_band' }[id]; if (GEAR[t]) GEAR[t](g); }
     else if (pre === 'p') { const col = { remembrance: '#60a0ff', resonance: '#ff9a30', lethe: '#8a8a9a', renewal: '#50e0a0', visions: '#e070ff' }[id]; P.glow(g, 16, 20, 12, col, 0.5); GL.flask(g, col); }
+    else if (pre === 'mat' && G.painters['mat_' + id]) { g.save(); g.translate(16 - 5 * 2.8, 16 - 4.2 * 2.8); g.scale(2.8, 2.8); G.painters['mat_' + id].draw(g); g.restore(); } // the ingot drawn at icon size
     else if (pre === 'herb') spriteIcon(g, 'herb_' + id, 46); // the sprig is small inside its glow: a larger box fills the slot
     else if (pre === 'a' && ART[id]) { reliquary(g, (ARTIFACT[id] || [0, '#6a5a7a'])[1]); g.save(); arch(g, 4.5, 27.5, 4.3, 27.9, 13.2); g.clip(); ART[id](g); g.restore(); }
     else if (pre === 'a' && ARTIFACT[id]) { badge(g, ARTIFACT[id][1], true); g.save(); g.translate(16, 16); g.scale(0.7, 0.7); g.translate(-16, -16); GL[ARTIFACT[id][0]](g); g.restore(); }

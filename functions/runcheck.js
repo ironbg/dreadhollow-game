@@ -45,6 +45,8 @@ function checkRun(sum, run, now, DH) {
   if (!(int(sum.shards || 0) >= 0) || (sum.shards || 0) > 60) return 'shards';
   const herbs = sum.herbs || {};
   for (const k in herbs) if (!(E.herbs || []).concat('dust').includes(k) || !(int(herbs[k]) >= 0) || herbs[k] > 40) return 'herbs';
+  const mats = sum.mats || {};
+  for (const k in mats) if (!(E.materials || []).includes(k) || !(int(mats[k]) >= 0) || mats[k] > (E.MAT_RUN_MAX || 250)) return 'mats';
   const arts = sum.artifactsFound || [];
   if (!Array.isArray(arts) || arts.length > 3 || arts.some((k) => !E.artifacts[k])) return 'artifacts';
   const wells = [sum.wellSent].concat(sum.wellExtra || []).filter(Boolean);

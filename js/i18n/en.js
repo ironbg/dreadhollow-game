@@ -449,6 +449,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'gearsp.signet_arcana': '+{sig_magic} trait picks and +1 max trait rank for Magic abilities',
   'gearsp.signet_steel': '+{sig_physical} trait picks and +1 max trait rank for Physical abilities',
   'gearsp.signet_legion': '+{sig_summon} trait picks and +1 max trait rank for Summon abilities',
+  'mat.iron': 'Iron', 'mat.silver': 'Silver', 'mat.gold': 'Gold ingot', 'mat.starsteel': 'Starsteel', 'gear.levelBonus': 'Level bonus', 'gear.unlocksAt': '(unlocks at level {n})', 'gear.needMat': 'Not enough {m}: elites, champions and bosses drop it', 'gear.levelAll': 'Upgrade all', 'gear.leveledBy': '+{n} levels', 'gear.salvageMats': 'You also get back: {m}.', 'armory.matsHint': 'Materials fall from elites, champions and bosses: iron in the first halls, then silver, gold and starsteel.',
   'ct.kn_coverage': 'Weapon Mastery: Coverage', 'ct.kn_power': 'Weapon Mastery: Power', 'ct.kn_dexterity': 'Stance: Dexterity', 'ct.kn_reach': 'Stance: Reach', 'ct.kn_health': 'Dedication: Health',
   'ct.kn_regen': 'Dedication: Regeneration', 'ct.rg_pierce': 'Weapon Mastery: Pierce', 'ct.rg_pinpoint': 'Weapon Mastery: Pinpoint', 'ct.rg_barrage': 'Stance: Barrage', 'ct.rg_quickdraw': 'Stance: Quickdraw',
   'ct.rg_agility': 'Dedication: Agility', 'ct.rg_survival': 'Dedication: Survival', 'ct.tp_propagation': 'Weapon Mastery: Propagation', 'ct.tp_punishment': 'Weapon Mastery: Punishment', 'ct.tp_purgation': 'Stance: Purgation',

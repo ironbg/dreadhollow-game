@@ -437,6 +437,7 @@
     res.gear.forEach((g) => extras.push({ icon: 'g_' + g.type, text: t('gear.' + g.type), rarity: g.rarity }));
     [sum.wellSent].concat(sum.wellExtra || []).forEach((w) => { if (w) extras.push({ icon: 'g_' + w.type, text: t('well.toKeeper'), rarity: w.rarity }); });
     for (const k in sum.herbs) extras.push({ icon: 'herb_' + k, text: t('herb.' + k) + ' ×' + sum.herbs[k] });
+    for (const k in sum.mats || {}) extras.push({ icon: 'mat_' + k, text: t('mat.' + k) + ' ×' + sum.mats[k] });
     if (res.shards) extras.push({ icon: 'shard', text: '+' + res.shards });
     (res.events || []).forEach((e) => extras.push({ icon: e.icon, text: e.name ? e.name + ' +' + e.n : '+' + e.n }));
     (res.artifacts || []).forEach((k) => extras.push({ icon: 'a_' + k, text: t('artifact.' + k + '.name'), rarity: 4 }));

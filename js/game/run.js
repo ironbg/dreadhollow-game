@@ -54,7 +54,7 @@
       this.bosses = []; this.dmgByAb = {};
       this.bag = []; this.runGear = {}; this.wellSent = null; this.well = null; this.wellExtra = []; this.buckets = 0;
       this.champDrops = {};
-      this.herbs = {};
+      this.herbs = {}; this.mats = {};
       this.buffs = { fury: 0, haste: 0, wraith: 0 }; this.shards = 0; this.hexed = false; this.oozes = 0;
       { const a = Math.random() * TAU, d = U.rand(C.HEX.dist[0], C.HEX.dist[1]); this.hex = { x: Math.cos(a) * d, y: Math.sin(a) * d, taken: false, hinted: false }; }
       this.oozeT = U.rand(C.OOZE_EVERY[0], C.OOZE_EVERY[1]);
@@ -822,11 +822,12 @@
       const gm = this.stage.goldMult;
       if (Math.random() < 0.08) this.drop('coin', e.x, e.y, Math.ceil(U.randi(1, 3) * gm));
       if (e.elite || e.champion || e.boss) { if (this.P.eliteHeal) this.heal(this.P.maxHp * this.P.eliteHeal); }
-      if (e.elite) { this.eliteKills++; this.shake = 3; this.scrollDrop(e.x, e.y); if (Math.random() < (this.P.chestDrop || 0)) this.drop('chest_red', e.x - 10, e.y); /* Plunder (Blessing) */ if (Math.random() < (this.trib.eliteChest || 0)) this.drop('chest_red', e.x + 10, e.y); /* the tribute of Plunder */ if (Math.random() < 0.5) this.drop('herb', e.x, e.y, 0, this.stage.herb === 'dust' ? U.pick(E.herbs) : this.stage.herb); for (let i = 0; i < 4; i++) this.drop('coin', e.x, e.y, Math.ceil(3 * gm)); }
+      if (e.elite) { this.eliteKills++; this.shake = 3; this.scrollDrop(e.x, e.y); if (Math.random() < (this.P.chestDrop || 0)) this.drop('chest_red', e.x - 10, e.y); /* Plunder (Blessing) */ if (Math.random() < (this.trib.eliteChest || 0)) this.drop('chest_red', e.x + 10, e.y); /* the tribute of Plunder */ if (Math.random() < 0.5) this.drop('herb', e.x, e.y, 0, this.stage.herb === 'dust' ? U.pick(E.herbs) : this.stage.herb); for (let i = 0; i < 4; i++) this.drop('coin', e.x, e.y, Math.ceil(3 * gm)); if (Math.random() < Math.min(0.8, 0.4 + 0.05 * this.dread)) this.matDrop(e.x, e.y, 1); }
       if (e.champion) {
         this.championKills++; this.shake = 4;
         if (e.agonyChamp) this.championDrop(e);
         else { this.scrollDrop(e.x, e.y); for (let i = 0; i < 8; i++) this.drop('coin', e.x, e.y, Math.ceil(4 * gm)); if (Math.random() < 0.3) this.drop('potion', e.x + 8, e.y); } // the hall's own champions: an ability scroll, no item chest
+        this.matDrop(e.x, e.y, U.randi(1, 2));
       }
       if (e.boss) {
         this.bossKills++; this.bossesKilled.push(e.id); this.shake = 10; this.whiteFlash = 0.8;
@@ -836,6 +837,7 @@
         this.drop('chest_gold', e.x, e.y); if (!e.def.lord) this.drop('tome', e.x + 12, e.y); // the Lord's death ends the hall: no scroll
         for (let i = 0; i < 25; i++) this.drop('coin', e.x, e.y, Math.ceil(5 * gm));
         this.drop('potion', e.x - 10, e.y);
+        this.matDrop(e.x, e.y, e.def.lord ? 5 + 2 * this.dread : 3); // forging materials: a Lord gives more, the more under Torment
         if (e.def.lord) {
           // Lament Shards: only with Agony or Torment; 1 to 4 by Torment Rank
           const n = (this.agonyOn || this.dread ? this.shardCount() : 0) + (this.trib.shards || 0); // + the tribute of the Shard
@@ -850,7 +852,7 @@
           this.victoryT = 2.5;
           for (const o of this.enemies) if (!o.dead && o !== e && !o.def.prop) { o.dead = true; this.burst(o.x, o.y, 4, ['#fff', '#aaa'], 50); }
           this.eproj.length = 0; this.hazards.length = 0;
-          this.pickups.forEach((pk) => { if (pk.type === 'xp' || pk.type === 'coin' || pk.type === 'shard' || pk.type === 'artifact') pk.mag = true; });
+          this.pickups.forEach((pk) => { if (pk.type === 'xp' || pk.type === 'coin' || pk.type === 'shard' || pk.type === 'artifact' || pk.type === 'mat' || pk.type === 'herb') pk.mag = true; });
         }
       }
     }
@@ -865,6 +867,8 @@
       });
       if (c) { this.drop('xp', cx / c, cy / c, sum, null, true); this.pickups[this.pickups.length - 1].xm = 1; } // the cluster holds worth already multiplied
     }
+    /** Forging materials: n pieces, each the hall's metal (or one finer or coarser). */
+    matDrop(x, y, n) { for (let i = 0; i < n; i++) this.drop('mat', x + U.rand(-8, 8), y + U.rand(-5, 5), 1, E.rollMat(this.stageId, this.dread)); }
     drop(type, x, y, val, sub, cluster) {
       const k = { type, x, y, val: val || 1, sub, cluster: !!cluster, vx: U.rand(-40, 40), vy: U.rand(-60, -10), z: 0, vz: type === 'xp' ? 0 : 60, mag: false, t: 0 };
       if (type === 'xp') k.xm = this.xpMult();
@@ -892,7 +896,7 @@
         if (k.vz || k.z > 0) { k.z += k.vz * dt; k.vz -= 260 * dt; if (k.z <= 0) { k.z = 0; k.vz = 0; } }
         if (k.t < 0.35 && !k.mag) { k.x += k.vx * dt; k.y += k.vy * dt * 0.3; k.vx *= 0.9; }
         const d2 = U.dist2(k.x, k.y, p.x, p.y);
-        const range = k.type === 'xp' || k.type === 'coin' || k.type === 'herb' || k.type === 'shard' ? mag : 16;
+        const range = k.type === 'xp' || k.type === 'coin' || k.type === 'herb' || k.type === 'mat' || k.type === 'shard' ? mag : 16;
         if (k.mag || d2 < range * range) {
           k.mag = true; k.sp = Math.min(420, (k.sp || 60) + 500 * dt);
           const d = Math.sqrt(d2) || 1; k.x += (p.x - k.x) / d * k.sp * dt; k.y += (p.y - k.y) / d * k.sp * dt;
@@ -911,12 +915,13 @@
           DH.audio.play('chest'); this.levelUpVfx && this.levelUpVfx();
           DH.events.emit('run:boss', { name: t('artifact.' + k.sub + '.name'), final: false, artifact: true }); break;
         case 'ulcer': { const p = this.player; DH.audio.play('hurt'); this.gainXp(this.xpNext * 0.3); p.hp = Math.max(1, p.hp - this.P.maxHp * 0.12); this.text(p.x, p.y - 14, t('hud.ulcer'), '#b060ff'); break; }
+        case 'mat': DH.audio.play('coin'); this.mats[k.sub] = Math.min(E.MAT_RUN_MAX, (this.mats[k.sub] || 0) + 1); this.text(this.player.x, this.player.y - 14, '+1 ' + t('mat.' + k.sub), E.MAT_COLOR[k.sub]); break;
         case 'herb': DH.audio.play('herb'); this.herbs[k.sub] = (this.herbs[k.sub] || 0) + 1; this.text(this.player.x, this.player.y - 14, '+1 ' + t('herb.' + k.sub), '#b0ff80'); break;
         case 'potion': DH.audio.play('heal'); this.itemsOnPotion(); if (this.hero.potionBrew) { this.brews = (this.brews || 0) + 1; this.recompute(); this.text(this.player.x, this.player.y - 18, t('hud.brew'), '#b0ff80', true); } this.heal(C.POTION_HEAL[0] + this.P.maxHp * C.POTION_HEAL[1]); break; // 25 + 5% of max HP; the Alchemist's brews grow stronger
         case 'bucket': DH.audio.play('reward'); if (this.well && this.well.used) this.well.used = false; else this.buckets++; this.text(this.player.x, this.player.y - 14, t('hud.bucket'), '#5ab8ff', true); break;
         case 'rune_fury': case 'rune_haste': case 'rune_wraith': this.buff(k.type.slice(5)); break;
         case 'shard': DH.audio.play('reward'); this.shards++; this.text(this.player.x, this.player.y - 16, t('hud.shard'), '#ff70c0', true); break;
-        case 'magnet': DH.audio.play('reward'); this.pickups.forEach((o) => { if (o.type === 'xp' || o.type === 'coin' || o.type === 'herb') o.mag = true; }); break;
+        case 'magnet': DH.audio.play('reward'); this.pickups.forEach((o) => { if (o.type === 'xp' || o.type === 'coin' || o.type === 'herb' || o.type === 'mat') o.mag = true; }); break;
         case 'bomb': this.nova(this.player.x, this.player.y, 200 * this.stage.hpMult, Math.hypot(DH.view.w, DH.view.h) / 2, 'bomb'); break;
         case 'tome': this.tomes++; DH.audio.play('chest'); this.queue.push({ state: 'tome', ev: 'run:tome', data: Object.assign(this.tomeChoices(k.sub === 'mastery' ? 99 : 3), { mastery: k.sub === 'mastery' }) }); this.pump(); break; // a Tome of Mastery offers everything
         case 'chest_red': case 'chest_gold': case 'chest_new': DH.audio.play('chest'); if (this.art) this.art.treasure = this.art.treasure.filter((x) => x !== k); this.queue.push({ state: 'loot', ev: 'run:loot', data: this.openLoot(k.type) }); this.pump(); break;
@@ -1122,7 +1127,7 @@
       return { stage: this.stageId, hero: this.heroId, time: this.time, kills: this.kills, gold: this.gold, level: this.level,
         bossKills: this.bossKills, eliteKills: this.eliteKills, championKills: this.championKills, tomes: this.tomes, bosses: this.bossesKilled.slice(),
         victory: this.state === 'victory', agony: this.agonyOn ? Math.floor(this.maxAgony + 1e-6) : 0, agonyOn: this.agonyOn,
-        dmgByAb: Object.assign({}, this.dmgByAb), wellSent: this.wellSent, wellExtra: this.wellExtra.slice(), herbs: Object.assign({}, this.herbs), dread: this.dread, tributes: this.tributes.slice(), rescued: this.rescued || null,
+        dmgByAb: Object.assign({}, this.dmgByAb), wellSent: this.wellSent, wellExtra: this.wellExtra.slice(), herbs: Object.assign({}, this.herbs), mats: Object.assign({}, this.mats), dread: this.dread, tributes: this.tributes.slice(), rescued: this.rescued || null,
         potionsUsed: Object.assign({}, this.potionsUsed), lateLevels: this.lateLevels || 0, runLength: this.runLength, artifactsFound: this.artifactsFound.slice(),
         shards: this.shards, hexed: this.hexed || !!this.dissoSolved || !!this.secretDone, secretT: this.secretT, elemApplied: !!this.elemApplied, abTimes: (this.abTimes || []).slice(), oozes: this.oozes, crits: this.crits || 0, dmgTags: this.dmgTags() };
     }

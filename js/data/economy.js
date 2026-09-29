@@ -6,28 +6,28 @@
 
   /* ---------- Shrine (permanent gold upgrades) ---------- */
   E.shrine = {
-    might:    { icon: 'fistup',    per: { dmgPct: 0.05 },   cost: [450, 600, 850, 1200, 1700, 2300, 3200, 4400, 6100, 8500], unlock: 'd_level_30' },
-    vitality: { icon: 'heart',     per: { maxHpPct: 0.08 }, cost: [400, 500, 700, 1000, 1400, 1900, 2700, 3700, 5100, 7100] },
-    armor:    { icon: 'hide',      per: { defense: 0.02 },  cost: [900, 1500, 2400, 3900, 6300] },
-    fortitude:{ icon: 'shield',    per: { block: 1.5 },     cost: [1100, 1700, 2800, 4500, 7300], unlock: 'd_stage_crypt_s8' },
-    recovery: { icon: 'cross',     per: { regen: 0.2 },     cost: [750, 1200, 1800, 2700, 4200], unlock: 'd_brew_1' },
-    swiftness:{ icon: 'boot',      per: { speedPct: 0.04 }, cost: [600, 900, 1400, 2200, 3300] },
-    haste:    { icon: 'hourglass', per: { as: 0.03 },       cost: [1100, 1700, 2600, 4200, 6600], unlock: 'd_kills_run_1000' },
-    reach:    { icon: 'rings',     per: { area: 0.05 },     cost: [750, 1200, 1800, 2700, 4200] },
-    magnet:   { icon: 'magnet',    per: { pickup: 0.12 },   cost: [450, 650, 950, 1400, 2000] },
-    greed:    { icon: 'i_gold',    per: { greed: 0.08 },    cost: [600, 850, 1200, 1800, 2500, 3600, 5200, 7500, 11000, 15000], unlock: 'd_elites_50' },
-    wisdom:   { icon: 't_wisdom',  per: { growth: 0.06 },   cost: [750, 1200, 1800, 2700, 4200], unlock: 'd_tomes_20' },
-    luck:     { icon: 'target',    per: { critPct: 0.05 },  cost: [900, 1400, 2100, 3300, 5000], unlock: 'd_crits' },
-    revival:  { icon: 'i_revive',  per: { revives: 1 },     cost: [9000, 18000], unlock: 'd_stage_crypt_s3' },
-    reroll:   { icon: 'i_reroll',  per: { rerolls: 1 },     cost: [2300, 4000, 7300], unlock: 'd_champions_10' },
-    echo:     { icon: 'tr_multistrike', per: { ms: 0.04 },  cost: [800, 1300, 2100, 3300, 5200], unlock: 'd_level_50' },
-    ferocity: { icon: 'tr_brutality',   per: { critBonus: 0.06 }, cost: [700, 1100, 1700, 2700, 4200], unlock: 'd_stage_abyss_win' },
-    sorcery:  { icon: 'tr_afflictor',   per: { effectPct: 0.06 }, cost: [700, 1100, 1700, 2700, 4200], unlock: 'd_stage_aqueduct_win' },
-    elements: { icon: 'tr_elementalist', per: { firePct: 0.06, icePct: 0.06, lightningPct: 0.06 }, cost: [900, 1400, 2200, 3500, 5500], unlock: 'd_dmg_lightning' },
-    brawn:    { icon: 'tr_honed',       per: { physPct: 0.08 }, cost: [700, 1100, 1700, 2700, 4200], unlock: 'd_dmg_physical' },
-    arcana:   { icon: 'tr_arcana',      per: { magicPct: 0.08 }, cost: [700, 1100, 1700, 2700, 4200], unlock: 'd_dmg_magic' },
-    plunder:  { icon: 'tr_plunder',      per: { chestDrop: 0.03 }, cost: [1200, 2000, 3200, 5000, 8000], unlock: 'd_elites_300' },
-    scholar:  { icon: 'tr_scholar',      per: { tomeDrop: 0.1 }, cost: [1000, 1600, 2600, 4100, 6500], unlock: 'd_tomes_100' },
+    might:    { icon: 'fistup',    per: { dmgPct: 0.05 },   cost: [1350, 1800, 2550, 3600, 5100, 6900, 9600, 13200, 18300, 25500], unlock: 'd_level_30' },
+    vitality: { icon: 'heart',     per: { maxHpPct: 0.08 }, cost: [1200, 1500, 2100, 3000, 4200, 5700, 8100, 11100, 15300, 21300] },
+    armor:    { icon: 'hide',      per: { defense: 0.02 },  cost: [2700, 4500, 7200, 11700, 18900] },
+    fortitude:{ icon: 'shield',    per: { block: 1.5 },     cost: [3300, 5100, 8400, 13500, 21900], unlock: 'd_stage_crypt_s8' },
+    recovery: { icon: 'cross',     per: { regen: 0.2 },     cost: [2250, 3600, 5400, 8100, 12600], unlock: 'd_brew_1' },
+    swiftness:{ icon: 'boot',      per: { speedPct: 0.04 }, cost: [1800, 2700, 4200, 6600, 9900] },
+    haste:    { icon: 'hourglass', per: { as: 0.03 },       cost: [3300, 5100, 7800, 12600, 19800], unlock: 'd_kills_run_1000' },
+    reach:    { icon: 'rings',     per: { area: 0.05 },     cost: [2250, 3600, 5400, 8100, 12600] },
+    magnet:   { icon: 'magnet',    per: { pickup: 0.12 },   cost: [1350, 1950, 2850, 4200, 6000] },
+    greed:    { icon: 'i_gold',    per: { greed: 0.08 },    cost: [1800, 2550, 3600, 5400, 7500, 10800, 15600, 22500, 33000, 45000], unlock: 'd_elites_50' },
+    wisdom:   { icon: 't_wisdom',  per: { growth: 0.06 },   cost: [2250, 3600, 5400, 8100, 12600], unlock: 'd_tomes_20' },
+    luck:     { icon: 'target',    per: { critPct: 0.05 },  cost: [2700, 4200, 6300, 9900, 15000], unlock: 'd_crits' },
+    revival:  { icon: 'i_revive',  per: { revives: 1 },     cost: [27000, 54000], unlock: 'd_stage_crypt_s3' },
+    reroll:   { icon: 'i_reroll',  per: { rerolls: 1 },     cost: [6900, 12000, 21900], unlock: 'd_champions_10' },
+    echo:     { icon: 'tr_multistrike', per: { ms: 0.04 },  cost: [2400, 3900, 6300, 9900, 15600], unlock: 'd_level_50' },
+    ferocity: { icon: 'tr_brutality',   per: { critBonus: 0.06 }, cost: [2100, 3300, 5100, 8100, 12600], unlock: 'd_stage_abyss_win' },
+    sorcery:  { icon: 'tr_afflictor',   per: { effectPct: 0.06 }, cost: [2100, 3300, 5100, 8100, 12600], unlock: 'd_stage_aqueduct_win' },
+    elements: { icon: 'tr_elementalist', per: { firePct: 0.06, icePct: 0.06, lightningPct: 0.06 }, cost: [2700, 4200, 6600, 10500, 16500], unlock: 'd_dmg_lightning' },
+    brawn:    { icon: 'tr_honed',       per: { physPct: 0.08 }, cost: [2100, 3300, 5100, 8100, 12600], unlock: 'd_dmg_physical' },
+    arcana:   { icon: 'tr_arcana',      per: { magicPct: 0.08 }, cost: [2100, 3300, 5100, 8100, 12600], unlock: 'd_dmg_magic' },
+    plunder:  { icon: 'tr_plunder',      per: { chestDrop: 0.03 }, cost: [3600, 6000, 9600, 15000, 24000], unlock: 'd_elites_300' },
+    scholar:  { icon: 'tr_scholar',      per: { tomeDrop: 0.1 }, cost: [3000, 4800, 7800, 12300, 19500], unlock: 'd_tomes_100' },
   };
   // unlock: the deed that opens a Blessing (as Blessings open with quests); the rest are open from the start
   E.shrineOrder = Object.keys(E.shrine);
@@ -152,6 +152,53 @@
     return out;
   };
   E.gearLevelCost = (rarity, level) => Math.floor(60 * Math.pow(level, 1.35) * (1 + rarity * 0.6) / 5) * 5;
+  /* ---------- Forging materials: every level of an item costs gold and a material. The metal follows the level being
+   * reached (to 10 iron, to 20 silver, to 30 gold, beyond that starsteel); the count grows within each ten and with the
+   * rarity. They fall from elites, champions and bosses (the deeper the hall, the finer the metal) and come back from
+   * salvaged items. ---------- */
+  E.materials = ['iron', 'silver', 'gold', 'starsteel'];
+  E.MAT_COLOR = { iron: '#9aa4ae', silver: '#dfe8f2', gold: '#ffcf4a', starsteel: '#8ab8ff' };
+  /** The metal of a hall: iron in the first two, then silver, gold, and starsteel in the Reliquary. */
+  E.MAT_HALL = { crypt: 0, abyss: 0, aqueduct: 1, catacombs: 1, discord: 2, blightmire: 2, reliquary: 3 };
+  /** The material that lifts an item of this rarity from `level` to the next: { mat, n }. */
+  E.gearMatCost = (rarity, level) => ({ mat: E.materials[Math.min(3, Math.floor(level / 10))], n: (1 + Math.floor((level % 10) / 3)) * (1 + Math.floor(rarity / 2)) });
+  /** Level milestones: at these levels an item gains one more stat, drawn for its type from its slot's pool (so two
+   *  items of one slot differ). Its size grows with the rarity as the item's own stats do. */
+  E.GEAR_MILESTONES = [10, 20, 30, 40];
+  E.MILESTONE_POOL = {
+    head:  { area: 0.03, effectPct: 0.03, growth: 0.04, critPct: 0.02, pickup: 0.1, tomeDrop: 0.04 },
+    neck:  { dmgPct: 0.025, growth: 0.04, greed: 0.04, as: 0.02, maxHpPct: 0.03, effectPct: 0.03 },
+    chest: { maxHpPct: 0.03, defense: 0.012, regen: 0.1, block: 0.6, chestDrop: 0.01, dmgPct: 0.02 },
+    hands: { as: 0.02, critPct: 0.02, ms: 0.03, critBonus: 0.05, dmgPct: 0.02, area: 0.03 },
+    feet:  { speedPct: 0.02, pickup: 0.1, area: 0.03, chestDrop: 0.01, regen: 0.1, defense: 0.01 },
+    ring:  { critPct: 0.02, greed: 0.04, as: 0.02, dmgPct: 0.02, growth: 0.03, critBonus: 0.05 },
+  };
+  const typeHash = (s) => { let x = 7; for (let i = 0; i < s.length; i++) x = (x * 31 + s.charCodeAt(i)) >>> 0; return x; };
+  const msCache = {};
+  /** The stats an item type gains at its milestones, in order: [{ lv, k, v }] (v before the rarity). Its own stats come
+   *  last in the draw, so a milestone mostly brings something new. */
+  E.gearMilestoneDefs = (type) => {
+    if (msCache[type]) return msCache[type];
+    const g = E.gear[type], pool = E.MILESTONE_POOL[g.slot], keys = Object.keys(pool);
+    let x = typeHash(type);
+    const order = keys.map((k) => { x = (x * 1103515245 + 12345) >>> 0; return { k, r: (k in g.stats ? 1 : 0) + (x % 1000) / 1000 }; }).sort((a, b) => a.r - b.r);
+    return (msCache[type] = E.GEAR_MILESTONES.map((lv, i) => ({ lv, k: order[i % order.length].k, v: pool[order[i % order.length].k] })));
+  };
+  /** What an item's milestones give at this rarity and level (only those reached). */
+  E.gearMilestones = (type, rarity, level) => {
+    const out = {};
+    for (const m of E.gearMilestoneDefs(type)) if (level >= m.lv) out[m.k] = (out[m.k] || 0) + m.v * E.rarityMult[rarity];
+    return out;
+  };
+  /** A material drop in a run: the hall's metal, now and then one finer (by Torment Rank) or one coarser. */
+  E.rollMat = (stage, dread, rnd) => {
+    const r = rnd || Math.random;
+    let t = E.MAT_HALL[stage] || 0;
+    if (t > 0 && r() < 0.35) t--;
+    else if (t < 3 && r() < 0.05 + 0.06 * (dread || 0)) t++;
+    return E.materials[t];
+  };
+  E.MAT_RUN_MAX = 250; // the most of one material a run can bring home (the server checks it)
   /* Wellkeeper redemption price for items sent up the Well */
   E.wellPrice = (rarity) => [300, 700, 1600, 3500, 8000, 18000][rarity];
   E.wellGems = (rarity) => [10, 20, 40, 80, 150, 300][rarity];
