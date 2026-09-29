@@ -6,7 +6,7 @@
   'use strict';
   const KEY = 'dreadhollow.save.v1';
   const META_KEY = 'dreadhollow.sync.v1';
-  const SAVE_VERSION = 7;
+  const SAVE_VERSION = 8;
   const store = () => DH.platform.storage;
   const newMeta = () => ({ rev: 0, dirty: false, uid: null, syncedAt: 0, device: Math.random().toString(36).slice(2, 10) });
 
@@ -20,7 +20,7 @@
       accountLevel: 1, accountXp: 0,
       heroes: { knight: true }, selectedHero: 'knight',
       selectedStage: 'crypt', trackedDeed: null, newbie: null, cleared: {}, bestTime: {},
-      shrine: {},
+      shrine: {}, tributes: [], runTributes: [], npcs: {},
       gear: [], equipped: { head: null, neck: null, chest: null, hands: null, feet: null, ring1: null, ring2: null, mark: null }, nextGearId: 1,
       loadouts: {}, archiveBy: {}, // per hero: equipped gear + Mark, and Archive shards
       discovered: {}, potions: {}, herbs: {}, wellkeeper: [], deeds: {}, artifacts: {}, agony: {},
@@ -114,6 +114,9 @@
         let spent = 0; const by = d.archiveBy || {};
         for (const h in by) for (const id in by[h]) if (DH.economy.archive[id]) for (let l = 0; l < by[h][id]; l++) spent += DH.economy.archiveCost(id, l);
         d.shards = (d.shards || 0) + spent;
+      }
+      if (d.v < 8 && d.stats && d.stats.runs > 0) { // v8: the keepers of the camp must be rescued; whoever already played has them at work
+        d.npcs = d.npcs || {}; for (const k of ['wellkeeper', 'cupbearer', 'scriptor']) if (!d.npcs[k]) d.npcs[k] = Date.now();
       }
       if (!Number.isFinite(d.energy)) { d.energy = 30; d.energyTs = DH.util.now(); } // repair saves hit by the old run-cost bug
       if (DH.content && !DH.content.heroes[d.selectedHero]) d.selectedHero = 'knight';

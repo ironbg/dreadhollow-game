@@ -735,7 +735,7 @@
     if (this.P.imps) { let n = 0; for (const al of this.allies) if (al.kind === 'imp') n++; if (n < this.P.imps) this.allies.push({ kind: 'imp', a: this.impAbility(), x: p.x, y: p.y, t: 0, life: Infinity, face: 1 }); }
     for (let i = this.allies.length - 1; i >= 0; i--) {
       const al = this.allies[i]; al.t += dt; al.life -= dt;
-      if (al.life <= 0 || !this.abilities.includes(al.a) && al.kind !== 'imp') { this.allies.splice(i, 1); continue; }
+      if (al.life <= 0 || !this.abilities.includes(al.a) && al.kind !== 'imp' && !al.item) { this.allies.splice(i, 1); continue; }
       const s = al.a.s;
       if (al.kind === 'spirit') {
         const tg = this.nearest(al.x, al.y, 200);
@@ -755,7 +755,7 @@
       const tg = this.nearest(al.x, al.y, 140);
       const tooFar = U.dist2(al.x, al.y, p.x, p.y) > leash * leash;
       let tx = p.x + Math.cos(al.t + i) * 18, ty = p.y + Math.sin(al.t + i) * 12;
-      if (tg && !tooFar) { tx = tg.x; ty = tg.y; }
+      if (tg && !tooFar) { tx = tg.x + Math.cos(i * 2.4) * 7; ty = tg.y + Math.sin(i * 2.4) * 5; } // each takes its own side of the foe, not one heap
       const spd = (al.kind === 'golem' ? s.speed : al.kind === 'phantom' ? s.speed * 1.4 : al.kind === 'imp' ? 90 : s.speed) * (tooFar ? 1.8 : 1);
       const dx = tx - al.x, dy = ty - al.y, d = Math.hypot(dx, dy);
       const reach = al.kind === 'golem' ? 14 : 10;

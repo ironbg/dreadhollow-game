@@ -128,7 +128,7 @@
     g.strokeStyle = '#9ab4ff'; g.lineWidth = 0.45; g.beginPath(); g.arc(6, 5.5, 1.9, 0, Math.PI * 2); g.moveTo(6, 3.2); g.lineTo(6, 7.8); g.moveTo(3.8, 5.5); g.lineTo(8.2, 5.5); g.stroke(); P.glow(g, 6, 5.5, 2.6, '#8ab0ff', 0.6);
     P.rrect(g, 10.2, 4.6, 1.4, 1.8, 0.3, '#c9a24a'); // the clasp
   } });
-  const HERBS = { moss: '#7ad04a', ember: '#ff7a2a', lily: '#8ae8ff', dust: '#fff0a0' };
+  const HERBS = { moss: '#7ad04a', ember: '#ff7a2a', lily: '#8ae8ff', frostcap: '#8a9cff', nightshade: '#b060ff', dust: '#fff0a0' };
   Object.keys(HERBS).forEach((k) => def('herb_' + k, { w: 8, h: 8, draw(g) { // a sprig: two leaves, a small flower glowing
     const c = HERBS[k];
     P.line(g, 4, 7.6, 4, 3.6, 0.45, '#4a6a2a');

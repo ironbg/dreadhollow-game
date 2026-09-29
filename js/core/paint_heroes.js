@@ -524,4 +524,13 @@
     variants: { fire: { robe: '#6a1a10', glow: '#ffa030' }, ice: { robe: '#1e3a6a', glow: '#8ff0ff' }, bog: { robe: '#3a4a1a', glow: '#b0ff50' }, gold: { robe: '#6a5a2a', glow: '#fff0a0' }, purple: { robe: '#3a1450', glow: '#ff60c0' }, drowned: { robe: '#1a4a4a', glow: '#70ffd0' } } };
   G.painters.hknight = { w: 20, h: 23, cy: 14, frames: 2, colors: { metal: '#4a4a56', glow: '#ff3a3a', cloth: '#3a1a1a' }, draw: (g, f, c) => { g.translate(0, 3); humanoid(g, f, { body: c.metal, trim: sh(c.metal, 0.3), arms: c.metal, legs: sh(c.metal, -0.2), boots: sh(c.metal, -0.4), head: 'hornedhelm', headCol: c.metal, eyeGlow: c.glow, weapon: 'sword', shield: sh(c.metal, -0.1), emblem: false, cape: c.cloth, pauldron: sh(c.metal, 0.2), gloves: c.metal, skin: '#3a3040' }); },
     variants: { gold: { metal: '#8a7a4a', glow: '#fff0a0', cloth: '#5a1a2a' }, purple: { metal: '#3a2a4a', glow: '#ff60c0', cloth: '#2a0a3a' }, drowned: { metal: '#3a5a5a', glow: '#70ffd0', cloth: '#1a3a3a' }, ice: { metal: '#5a7a9a', glow: '#8ff0ff', cloth: '#1a2a4a' } } };
+  /* the three keepers of the camp, found in the halls (js/game/rescues.js) and seen in the camp afterwards */
+  const NPC = (name, o) => { G.painters[name] = { w: 20, h: 22, cy: 13, frames: 2, colors: {}, draw: (g, f) => { g.translate(0, 2); humanoid(g, f, o); } }; };
+  // the Wellkeeper: an old man in a grey robe, long white hair and beard, the lantern of the Well on his crook
+  NPC('npc_wellkeeper', { robe: '#5a6070', body: '#6a7080', trim: '#9ab0c8', arms: '#5a6070', hair: '#e8e8e8', hairStyle: 'long', beard: '#eeeeee', skin: '#d8a888', weapon: 'soullantern', wcol: '#8ad8ff' });
+  // the Cupbearer: a stout innkeeper in a red vest and a white apron, a cloth tied round his brow, his cup raised
+  NPC('npc_cupbearer', { body: '#9a3424', trim: '#e8c070', arms: '#e8d8c0', legs: '#4a3424', boots: '#3a2616', head: 'bandana', headCol: '#c8a040', hair: '#6a3a20', beard: '#7a4a2a', skin: '#e8a880', weapon: 'chalice',
+    chest: (g, bx) => { P.path(g, [bx - 2.2, 9.6, bx + 2.2, 9.6, bx + 2.6, 15.6, bx - 2.6, 15.6]); P.fill(g, P.lg(g, 0, 9.6, 0, 15.6, ['#f4ecdc', '#c8bca8'])); P.line(g, bx - 2.2, 9.7, bx + 2.2, 9.7, 0.4, '#8a7a60'); } });
+  // the Scriptor: a scholar in a deep-blue cap and robe, a white beard, an open book glowing in his hand
+  NPC('npc_scriptor', { robe: '#2a3a78', body: '#34468a', trim: '#e8d070', arms: '#2a3a78', head: 'cap', headCol: '#22306a', headCol2: '#10183a', hair: '#dcdcdc', beard: '#e8e8e8', skin: '#d8a888', weapon: 'book', wcol: '#ffe080' });
 })(window.DH);

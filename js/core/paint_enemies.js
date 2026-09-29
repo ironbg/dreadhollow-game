@@ -60,7 +60,7 @@
   /* ---------- Skeleton: a hunched dead warrior with a rusted helm and a notched blade ---------- */
   def('skeleton', { w: 20, h: 21, cy: 12, frames: 2,
     colors: { bone: '#d8ccaa', eye: '#ff3a2a', rust: '#7a5a3a' },
-    variants: { ice: { bone: '#c8e0ee', eye: '#8ff0ff', rust: '#5a7a98' }, fire: { bone: '#e0b890', eye: '#ffd040', rust: '#8a3a18' }, bog: { bone: '#bcbc8e', eye: '#b0ff50', rust: '#4a5a22' }, gold: { bone: '#eadaa4', eye: '#fff0a0', rust: '#a8843a' }, purple: { bone: '#d0c4e0', eye: '#ff50c0', rust: '#5a3a7a' }, drowned: { bone: '#b0c8bc', eye: '#70ffd0', rust: '#2e5a5a' } },
+    variants: { ice: { bone: '#c8e0ee', eye: '#8ff0ff', rust: '#5a7a98' }, fire: { bone: '#e0b890', eye: '#ffd040', rust: '#8a3a18' }, bog: { bone: '#bcbc8e', eye: '#b0ff50', rust: '#4a5a22' }, gold: { bone: '#eadaa4', eye: '#fff0a0', rust: '#a8843a' }, purple: { bone: '#d0c4e0', eye: '#ff50c0', rust: '#5a3a7a' }, drowned: { bone: '#b0c8bc', eye: '#70ffd0', rust: '#2e5a5a' }, ally: { bone: '#e4ecd8', eye: '#50ff90', rust: '#3a6a4a' } },
     draw(g, f, c) {
       // a hunched dead soldier: skull thrust forward, curved ribs over a hollow, a pelvis bowl, a notched sword raised to strike
       const b = c.bone, bd = sh(b, -0.5), bm = sh(b, -0.2), w = f ? 1 : 0, steel = '#9aa0ac';
@@ -410,7 +410,7 @@
   /* ---------- Rat: a mangy plague rat with bristles, a bald tail and yellow teeth ---------- */
   def('rat', { w: 18, h: 12, frames: 2,
     colors: { fur: '#4e4038', eye: '#ff2a2a' },
-    variants: { drowned: { fur: '#3a5652', eye: '#70ffd0' }, bog: { fur: '#48482c', eye: '#d0ff40' } },
+    variants: { drowned: { fur: '#3a5652', eye: '#70ffd0' }, bog: { fur: '#48482c', eye: '#d0ff40' }, ally: { fur: '#5a4a3e', eye: '#50ff90' } },
     draw(g, f, c) {
       // a sewer rat the size of a dog: humped, patchy, a naked ringed tail, a long head and one yellow pair of incisors
       const s = c.fur, sd = sh(s, -0.55), w = f ? 0.8 : -0.8, skin = '#9a7474';

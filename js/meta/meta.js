@@ -42,6 +42,21 @@
     const s = S(); if (meta.energy() >= E.ENERGY_MAX) return 0;
     return E.ENERGY_REGEN_MS - (U.now() - s.energyTs);
   };
+  /* ---------------- Tributes (the Reliquary) ---------------- */
+  meta.tributes = () => (S().tributes || []).filter((id) => E.tributes[id]);
+  meta.setTributes = (ids) => {
+    const list = []; (Array.isArray(ids) ? ids : []).forEach((id) => { if (E.tributes[id] && !list.includes(id)) list.push(id); });
+    S().tributes = list; changed(); return true;
+  };
+  /** A fight begins: its torches and, for the Reliquary, its tributes (at least one, paid in gold). false: not enough. */
+  meta.beginRun = (energy) => {
+    const s = S(), due = s.selectedStage === E.TRIBUTE_STAGE, list = due ? meta.tributes() : [], cost = E.tributesCost(list.length);
+    if (due && (!list.length || s.gold < cost)) return false;
+    if (!meta.useEnergy(energy)) return false;
+    if (cost) meta.spend({ gold: cost });
+    s.runTributes = list; changed();
+    return true;
+  };
   meta.useEnergy = (n) => { if (meta.energy() < n) return false; S().energy -= n; if (S().energy < E.ENERGY_MAX && S().energy + n >= E.ENERGY_MAX) S().energyTs = U.now(); changed(); return true; };
   meta.addEnergy = (n) => { meta.energy(); S().energy += n; changed(); };
 
@@ -322,14 +337,18 @@
   meta.artifactsOwnedCount = () => E.artifactOrder.filter(meta.artifactUnlocked).length;
   meta.toggleArtifact = (k) => { const s = S(); if (!meta.artifactUnlocked(k)) return; s.artifacts[k] = !s.artifacts[k]; changed(); };
   /** The Altar opens after the Chapter V Lord falls (saves that already own Artifacts keep it open). */
+  /** Is this keeper of the camp free (rescued in their hall; profiles from before v8 have them all, see save.js)? */
+  meta.npcFreed = (id) => { const s = S(); return !!(s.npcs && s.npcs[id]); };
   meta.altarUnlocked = () => meta.deedDone('d_stage_discord_win') || Object.keys(S().artifactsOwned).length > 0;
   meta.activeArtifacts = () => meta.altarUnlocked() ? E.artifactOrder.filter((k) => S().artifacts[k] && meta.artifactUnlocked(k)) : [];
   /** Torment Rank: one per active Artifact. */
   meta.dreadRank = () => meta.activeArtifacts().length;
-  const FX_MULT = ['runLength', 'spawn', 'allSpeed', 'heal', 'enemyDmg', 'playerSpeed', 'enemySpeed', 'silver', 'apocrypha', 'deedXp'];
+  const FX_MULT = ['runLength', 'spawn', 'allSpeed', 'heal', 'enemyDmg', 'enemyHp', 'playerSpeed', 'enemySpeed', 'silver', 'apocrypha', 'deedXp'];
+  /** Adds effects f to fx: factors multiply, the rest add up. */
+  meta.addFx = (fx, f) => { for (const key in f) fx[key] = fx[key] == null ? f[key] : FX_MULT.includes(key) ? fx[key] * f[key] : fx[key] + f[key]; return fx; };
   meta.artifactFx = () => {
     const fx = {};
-    meta.activeArtifacts().forEach((k) => { const f = E.artifacts[k].fx; for (const key in f) fx[key] = fx[key] == null ? f[key] : FX_MULT.includes(key) ? fx[key] * f[key] : fx[key] + f[key]; });
+    meta.activeArtifacts().forEach((k) => meta.addFx(fx, E.artifacts[k].fx));
     if (fx.apocrypha) { // Apocryphal Tome: every penalty is 20% harsher
       const k = fx.apocrypha, worse = (v) => (v > 1 ? 1 + (v - 1) * k : v);
       ['spawn', 'enemyDmg', 'enemySpeed'].forEach((key) => { if (fx[key]) fx[key] = worse(fx[key]); });
@@ -704,6 +723,7 @@
     s.stats.oozes += r.oozes || 0;
     res.shards = r.shards || 0;
     if (r.hexed && !s.secrets[r.stage]) { s.secrets[r.stage] = U.now(); s.stats.secrets++; res.secret = true; res.shards += C.HEX.firstShards; }
+    if (r.rescued && C.RESCUE[r.stage] === r.rescued && !meta.npcFreed(r.rescued)) { s.npcs = s.npcs || {}; s.npcs[r.rescued] = U.now(); res.rescued = r.rescued; } // a keeper of the camp comes home
     s.shards += res.shards; s.stats.shardsEarned += res.shards;
     res.artifacts = (r.artifactsFound || []).filter((k) => !s.artifactsOwned[k]);
     res.artifacts.forEach((k) => { s.artifactsOwned[k] = U.now(); });

@@ -222,6 +222,23 @@ h3.sect .timer { font: 8px var(--num); color: var(--muted); letter-spacing: 0; }
 .hero-card.locked .pic img { filter: grayscale(1) brightness(0.45); }
 
 .shrine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* the keepers of the camp: a word from them, or where they are lost */
+.keeper .ico img { width: 44px; height: 44px; }
+.keeper .ico { overflow: hidden; }
+.keeper .ico img.portrait { width: auto; height: 68px; margin-top: 6px; image-rendering: pixelated; }
+.keeperline { font-style: italic; }
+.keeper.sealed { opacity: 0.85; }
+/* Tributes before the Reliquary: a list of pacts, each a boon and a hardship */
+.trib-list { display: flex; flex-direction: column; gap: 6px; max-height: 58vh; overflow-y: auto; }
+.trib { display: flex; align-items: center; gap: 10px; text-align: left; width: 100%; padding: 8px 10px; cursor: pointer; font: inherit; color: inherit; }
+.trib > img { width: 40px; height: 40px; flex: none; }
+.trib .tx { flex: 1; min-width: 0; }
+.trib .t { font-weight: 800; font-size: 14px; }
+.trib .tick { flex: none; min-width: 44px; text-align: right; }
+.trib .tick img { width: 22px; height: 22px; }
+.trib.on { border-color: var(--gold, #e8b840); box-shadow: 0 0 0 1px var(--gold, #e8b840) inset; }
+.trib-foot { justify-content: space-between; align-items: center; margin-top: 10px; gap: 8px; }
+.trib-foot img { width: 18px; height: 18px; vertical-align: -3px; margin: 0 2px; }
 .shrine { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 10px 8px; gap: 4px; }
 .shrine img { width: 36px; height: 36px; }
 .shrine .btn img { width: 20px; height: 20px; } /* the price coin: button size, not the Blessing's picture size */

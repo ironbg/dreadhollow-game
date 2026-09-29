@@ -23,6 +23,7 @@
     this.pylons = [];
     if (st.dissonator) { this.hex = null; this.initDissonator(); }
     this.initSecret();
+    this.initRescue();
   };
   /** Clamp a y coordinate onto the bridge (no-op elsewhere). */
   R.onBridge = function (y, pad) { return this.bridge ? U.clamp(y, -this.bridge + (pad || 0), this.bridge - (pad || 0)) : y; };
@@ -48,6 +49,7 @@
     const p = this.player;
     if (this.disso) this.updateDissonator(dt);
     this.updateSecret(dt);
+    this.updateRescue(dt);
     this.updateEnv(dt);
     if (this.bridge) {
       const B = this.bridge;

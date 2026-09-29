@@ -570,6 +570,10 @@
   C.BUFFS = { fury: { dur: 15, color: '#ff3a30' }, haste: { dur: 15, color: '#ffd040' }, wraith: { dur: 10, color: '#80e8ff' } };
   /* Lord's Hex: a hidden obelisk in every hall. Touching it weakens that hall's Lord. */
   C.HEX = { hp: 0.6, dmg: 0.8, enrageAt: 90, dist: [620, 860], firstShards: 2 };
+  /* The keepers of the camp, each lost in a hall until rescued (js/game/rescues.js): the Wellkeeper opens the Well,
+   * the Cupbearer the Apothecary, the Scriptor the Archive. */
+  C.RESCUE = { abyss: 'wellkeeper', aqueduct: 'cupbearer', catacombs: 'scriptor' };
+  C.RESCUE_OPENS = { wellkeeper: 'well', cupbearer: 'brew', scriptor: 'archive' };
   C.OOZE_EVERY = [150, 260];
   C.ELITE = { hp: 8, dmg: 1.4, scale: 1.5, def: 0.1 };
   // an Elite's signature move, by the kind of foe it is (Run.eliteMove): volley = a fan of three bolts and a blink around the hero,
@@ -653,12 +657,12 @@
       remap: { bat: 'rat', rat: 'rat', skeleton: 'spirit', ghoul: 'drowned', ghost: 'spirit', spider: 'gargoyle', cultist: 'arbalist', wraith: 'watcher', hknight: 'gargoyle', golem: 'drowned' },
       bosses: [{ t: 150, id: 'hydra' }, { t: 300, id: 'bellwarden' }, { t: 450, id: 'sunkknight' }, { t: 600, id: 'horseman', final: true }],
       theme: { floor: 'aqueduct', floorA: [58, 76, 78], floorB: [44, 60, 62], mortar: [12, 22, 24], moss: [60, 130, 110], dark: [3, 10, 12], darkness: 0.8, lightTint: 'rgba(140,255,220,', accent: '#70ffd0', pools: [30, 70, 80], accentRate: 0.14 } },
-    catacombs: { index: 3, agonyXp: 0.395, hpMult: 4.94, dmgMult: 2.3, dmgGrow: 0.11, bossHp: 2.4, goldMult: 3, variant: 'ice', foeVariant: false, herb: 'lily',
+    catacombs: { index: 3, agonyXp: 0.395, hpMult: 4.94, dmgMult: 2.3, dmgGrow: 0.11, bossHp: 2.4, goldMult: 3, variant: 'ice', foeVariant: false, herb: 'frostcap',
       // frost crawlers, ice skulls, frost ghouls, frost guards, snow effigies, ice bears
       remap: { bat: 'iceskull', rat: 'iceskull', skeleton: 'frostghoul', ghoul: 'frostcrawler', ghost: 'iceskull', spider: 'effigy', cultist: 'frostcrawler', wraith: 'frostguard', hknight: 'frostguard', golem: 'icebear' },
       bosses: [{ t: 150, id: 'frostconstruct' }, { t: 300, id: 'basilisk' }, { t: 450, id: 'iceprism' }, { t: 600, id: 'jotun', final: true }],
       theme: { floor: 'catacombs', floorA: [60, 74, 96], floorB: [46, 58, 78], mortar: [14, 20, 32], moss: [150, 200, 230], dark: [4, 8, 18], darkness: 0.8, lightTint: 'rgba(150,210,255,', accent: '#7fd0ff', crystals: [140, 220, 255], accentRate: 0.14 } },
-    discord: { index: 4, agonyXp: 0.13, hpMult: 6.9, dmgMult: 2.8, dmgGrow: 0.11, bossHp: 2.4, goldMult: 3.8, variant: 'purple', foeVariant: false, herb: 'ember', dissonator: true,
+    discord: { index: 4, agonyXp: 0.13, hpMult: 6.9, dmgMult: 2.8, dmgGrow: 0.11, bossHp: 2.4, goldMult: 3.8, variant: 'purple', foeVariant: false, herb: 'nightshade', dissonator: true,
       // merging homunculi, leaping capra fiends, fiend casters, shapeshifters, void syphons, clockwork constructs
       remap: { bat: 'homunculus', rat: 'homunculus', skeleton: 'homunculus', ghoul: 'shapeshifter', ghost: 'capra', spider: 'capra', cultist: 'fiendcaster', wraith: 'syphon', hknight: 'clockwork', golem: 'clockwork' },
       bosses: [{ t: 150, id: 'voidcaller' }, { t: 300, id: 'discolossus' }, { t: 450, id: 'twistedknight' }, { t: 600, id: 'archdemon', final: true }],

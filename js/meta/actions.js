@@ -48,6 +48,7 @@
     salvage: { run: (a) => M().salvage(int(a.id)) },
     wellClaim: { run: (a) => M().wellClaim(int(a.idx), bool(a.withGems)) },
     buyShrine: { run: (a) => M().buyShrine(str(a.id, 24)) },
+    setTributes: { run: (a) => M().setTributes(Array.isArray(a.ids) ? a.ids.slice(0, 12).map((x) => str(x, 24)) : []) },
     buyArchive: { run: (a) => M().buyArchive(str(a.id, 24)) },
     resetArchive: { run: (a) => M().resetArchive(a.hero == null ? undefined : str(a.hero, 24)) },
     toggleArtifact: { run: (a) => M().toggleArtifact(str(a.k, 24)) },

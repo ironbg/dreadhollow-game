@@ -115,6 +115,7 @@
     }
     this.drawDissonator(g, cx, cy, W, H, now, lights);
     this.drawSecret(g, cx, cy, W, H, now, lights);
+    this.drawRescue(g, cx, cy, W, H, now, lights);
     this.drawEnv(g, cx, cy, W, H, now, lights);
     // pickups
     for (const k of this.pickups) {
@@ -261,6 +262,7 @@
     if (this.well && !this.well.used) mark(this.well.x, this.well.y, '#5ab8ff', 'well');
     for (const q of this.pylons || []) if (!q.dead) mark(q.x, q.y, '#ffd060', 'pylon');
     this.secretMarks(mark);
+    this.rescueMarks(mark);
     if (this.disso) { const Z = this.disso; if (Z.solved) mark(Z.mono.x, Z.mono.y, '#c070ff', 'monolith'); else if (Z.found) { const q = Z.relays[this.dissoFirstWrong()]; mark(q.x, q.y, '#c070ff', 'relay'); } }
     for (const k of this.pickups) {
       if (k.type === 'artifact') mark(k.x, k.y, '#ff70ff', 'artifact');
@@ -413,13 +415,14 @@
       lights.push({ x: al.x, y: al.y - 4, r: 16, kind: 'tint', color: al.type === 'pod' ? '#b070ff' : '#9adf50', a: 0.2 * fade });
       return;
     }
-    const name = R.SUMMON[al.kind] || 'sum_imp', variant = al.kind === 'golem' ? 'bone' : null;
-    const sc = al.kind === 'golem' ? 0.75 : 1, fr = al.moving ? Math.floor(al.t * 6) % 2 : 0;
+    const name = R.SUMMON[al.kind] || 'sum_imp', variant = al.kind === 'golem' ? 'bone' : al.item ? 'ally' : null;
+    if (al.item) G.P.ell(g, x, y + 1, 7, 2.4, 'rgba(90,255,160,0.28)'); // the summons of items stand on a green glow, so they read as friends
+    const sc = al.kind === 'golem' ? 0.75 : al.kind === 'beast' ? 0.8 : al.kind === 'skel' ? 0.85 : 1, fr = al.moving ? Math.floor(al.t * 6) % 2 : 0;
     this.sprite(g, name, variant, fr, x, y, al.face < 0, sc, false, al.kind === 'phantom' ? 0.7 : 1);
     lights.push({ x: al.x, y: al.y, r: 20, kind: 'small' });
   };
   /** Each summon's own model (the golem is the stone golem in bone). */
-  R.SUMMON = { wolf: 'sum_wolf', golem: 'golem', phantom: 'sum_phantom', imp: 'sum_imp' };
+  R.SUMMON = { wolf: 'sum_wolf', golem: 'golem', phantom: 'sum_phantom', imp: 'sum_imp', skel: 'skeleton', rat: 'rat', beast: 'icebear' };
   const WALK = [1, 0, 5, 0];
   /** The flail's chain: iron links from the hero's hand to the ball, alternately face-on and edge-on, plus a faint swing trail. */
   R.drawChain = function (g, hx, hy, bx, by, trail, cx, cy, k) {
@@ -738,8 +741,8 @@
       }
       case 'spike': {
         const hgt = Math.sin(Math.min(1, k * 2) * Math.PI / 2) * 12 * (1 - Math.max(0, k - 0.6) * 2.5);
-        for (let i = 0; i < 3; i++) { const sx = x + (i - 1) * f.R * 0.45; P.path(g, [sx - 2.2, y + 2, sx + (i - 1) * 1.2, y - hgt - (i === 1 ? 4 : 0), sx + 2.2, y + 2]); P.fill(g, P.lg(g, sx - 2, 0, sx + 2, 0, ['#ffffff', '#9fe0ff', '#4a90c8'])); }
-        lights.push({ x: f.x, y: f.y, r: 22, kind: 'frost' });
+        for (let i = 0; i < 3; i++) { const sx = x + (i - 1) * f.R * 0.45; P.path(g, [sx - 2.2, y + 2, sx + (i - 1) * 1.2, y - hgt - (i === 1 ? 4 : 0), sx + 2.2, y + 2]); P.fill(g, P.lg(g, sx - 2, 0, sx + 2, 0, f.steel ? ['#ffffff', '#b8bcc8', '#50566a'] : ['#ffffff', '#9fe0ff', '#4a90c8'])); }
+        if (!f.steel) lights.push({ x: f.x, y: f.y, r: 22, kind: 'frost' });
         break;
       }
       case 'bolt': case 'spark': {

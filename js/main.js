@@ -5,9 +5,10 @@
 
   const game = {
     run: null, mode: 'menu',
-    async startRun() {
+    async startRun(opts) {
       const s = DH.save.data, st = C.stages[s.selectedStage];
       if (!ui.stageUnlocked(s.selectedStage)) { ui.toast(t('home.lockedShort'), 'bad'); return; }
+      if (s.selectedStage === E.TRIBUTE_STAGE && !(opts && opts.tributesOk)) { ui.openTributes(); return; } // the Reliquary takes its tributes first
       if (this.starting) return;
       // the torches are paid where the profile lives: on the server (which notes the start) once it is switched on
       this.starting = true;

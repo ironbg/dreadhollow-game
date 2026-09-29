@@ -29,7 +29,8 @@ function checkRun(sum, run, now, DH) {
   if (!(int(sum.eliteKills) >= 0) || sum.eliteKills > kills) return 'elites';
   if ((sum.championKills || 0) > 60 || (sum.tomes || 0) > 60 || (sum.oozes || 0) > kills + 1) return 'counts';
   const gold = num(sum.gold);
-  if (!(gold >= 0) || gold > (st.goldMult || 1) * (kills * 4 + T * 12) * (1 + (run.dread || 0) * 0.5) + 5000) return 'gold';
+  const tribGold = (run.tributes || []).reduce((a, id) => a + ((E.tributes && E.tributes[id] && E.tributes[id].boon.gold) || 0), 0); // the Reliquary's tribute of Fortune
+  if (!(gold >= 0) || gold > (st.goldMult || 1) * (kills * 4 + T * 12) * (1 + (run.dread || 0) * 0.5) * (1 + tribGold) + 5000) return 'gold';
   if (sum.agonyOn !== !!run.agony) return 'agony';
   if (!(int(sum.agony) >= 0) || sum.agony > C.AGONY_MAX) return 'agony-level';
   if (int(sum.dread) !== (run.dread || 0)) return 'dread';
@@ -39,16 +40,18 @@ function checkRun(sum, run, now, DH) {
     const byKills = st.lordKills ? kills >= st.lordKills : false;
     if (!byTime && !byKills) return 'victory-too-early';
   }
+  if (sum.rescued != null && (C.RESCUE || {})[run.stage] !== sum.rescued) return 'rescue';
   if (!(int(sum.lateLevels || 0) >= 0) || (sum.lateLevels || 0) > 300) return 'late-levels';
   if (!(int(sum.shards || 0) >= 0) || (sum.shards || 0) > 60) return 'shards';
   const herbs = sum.herbs || {};
-  for (const k in herbs) if (!['moss', 'ember', 'lily', 'dust'].includes(k) || !(int(herbs[k]) >= 0) || herbs[k] > 40) return 'herbs';
+  for (const k in herbs) if (!(E.herbs || []).concat('dust').includes(k) || !(int(herbs[k]) >= 0) || herbs[k] > 40) return 'herbs';
   const arts = sum.artifactsFound || [];
   if (!Array.isArray(arts) || arts.length > 3 || arts.some((k) => !E.artifacts[k])) return 'artifacts';
   const wells = [sum.wellSent].concat(sum.wellExtra || []).filter(Boolean);
   if (wells.length > 4 || wells.some((w) => !E.gear[w.type] || !(int(w.rarity) >= 0) || w.rarity > 4)) return 'well';
   for (const k in sum.potionsUsed || {}) if (!E.potions[k] || !(int(sum.potionsUsed[k]) >= 0) || sum.potionsUsed[k] > 20) return 'potions';
-  for (const k in sum.dmgByAb || {}) if (!C.abilities[k] || !(num(sum.dmgByAb[k]) >= 0) || sum.dmgByAb[k] > 1e10) return 'damage';
+  const OTHER = ['burn', 'spark', 'frost', 'decay', 'imp', 'item', 'revive']; // damage of effects, the imps and the items, not of an ability
+  for (const k in sum.dmgByAb || {}) if ((!C.abilities[k] && !OTHER.includes(k)) || !(num(sum.dmgByAb[k]) >= 0) || sum.dmgByAb[k] > 1e10) return 'damage';
   return null;
 }
 

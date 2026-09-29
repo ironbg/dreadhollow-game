@@ -31,6 +31,10 @@
       this.artifacts = DH.meta.activeArtifacts();
       this.dread = DH.meta.dreadRank();
       this.fx_ = DH.meta.artifactFx();
+      // the Reliquary's tributes, paid at the start: their hardships join the Artifacts' curses, their boons are this.trib
+      this.tributes = this.stageId === E.TRIBUTE_STAGE ? (S.runTributes || []).filter((id) => E.tributes[id]) : [];
+      this.trib = {};
+      for (const id of this.tributes) { const T = E.tributes[id]; for (const k in T.boon) this.trib[k] = (this.trib[k] || 0) + T.boon[k]; DH.meta.addFx(this.fx_, T.bane); }
       this.runLength = C.RUN_LENGTH * (this.fx_.runLength || 1);
       this.agonyOn = !!opts.agony;
       this.agony = 0; this.maxAgony = 0;
@@ -80,7 +84,7 @@
     /* ---------------- level & xp ---------------- */
     /** Experience multiplier now: Growth, Agony (per hall) and Torment. */
     // Agony's extra foes (+35% a rank) share the horde's usual XP between them: only the hall's Agony bonus raises it
-    xpMult() { return this.P.growth * (1 + this.agony * (this.stage.agonyXp || 0.15)) / (1 + this.agony * 0.35) * (this.tormentXp || 1); }
+    xpMult() { return (1 + (this.trib.xp || 0)) * this.P.growth * (1 + this.agony * (this.stage.agonyXp || 0.15)) / (1 + this.agony * 0.35) * (this.tormentXp || 1); }
     gainXp(v, mult) {
       this.xp += v * (mult == null ? this.xpMult() : mult); // a gem's worth is fixed when it drops
       while (this.xp >= this.xpNext) {
@@ -134,6 +138,7 @@
       for (const e of this.enemies) this.grid.insert(e);
       for (const a of this.abilities) this.updateAbility(a, dt);
       this.updateAllies(dt);
+      this.updateItems(dt);
       this.updateEnemies(dt);
       this.updateHall(dt);
       this.updateLandmarks(dt);
@@ -236,7 +241,7 @@
         const n = this.enemies.reduce((a, e) => a + (e.def.prop && !e.def.hazard ? 1 : 0), 0);
         if (n < 5) { const a = Math.random() * TAU, d = 90 + Math.random() * 90; this.spawnEnemy('urn', this.player.x + Math.cos(a) * d, this.player.y + Math.sin(a) * d); }
       }
-      if (!this.well) {
+      if (!this.well && this.wellOpen) { // the Well needs its keeper (js/game/rescues.js)
         this.wellT -= dt;
         if (this.wellT <= 0) { const a = Math.random() * TAU, d = 230; this.well = this.lmFree({ x: this.player.x + Math.cos(a) * d, y: this.player.y + Math.sin(a) * d, used: false }, 26); DH.events.emit('run:warning', t('hud.well')); }
       }
@@ -598,7 +603,7 @@
      *  at most 9 a run; otherwise more gold. */
     scrollDrop(x, y) {
       // bad-luck protection: every miss adds 15%, so a long dry spell cannot happen
-      const rank = (this.dread || 0) + (this.agonyOn ? Math.floor(this.agony || 0) : 0), ch = Math.min(0.6, C.SCROLL_DROP + 0.04 * rank) + 0.15 * (this.scrollMiss || 0);
+      const rank = (this.dread || 0) + (this.agonyOn ? Math.floor(this.agony || 0) : 0), ch = (Math.min(0.6, C.SCROLL_DROP + 0.04 * rank) + 0.15 * (this.scrollMiss || 0)) * (1 + (this.P.tomeDrop || 0)) * (1 + (this.trib.scrolls || 0)); // Scholar (Blessing), the tribute of the Scholar
       if ((this.scrolls || 0) < 9 && Math.random() < ch) { this.scrolls = (this.scrolls || 0) + 1; this.scrollMiss = 0; this.drop('tome', x, y); }
       else { this.scrollMiss = (this.scrollMiss || 0) + 1; for (let i = 0; i < 4; i++) this.drop('coin', x, y, Math.ceil(3 * this.stage.goldMult)); }
     }
@@ -674,8 +679,9 @@
       // Blazing Shell: foes that touch you may catch fire
       if (P.thornBurn && src && src.st && !src.dead && Math.random() < P.thornBurn) this.addBurn(src, 3, src.maxHp * (src.boss ? 0.0045 : 0.067)); // 3 stacks
       // Block: chance = min(1/2 * B/D, 1/2 * sqrt(B/D), 1)
+      if (this.itemsOnHurt()) return; // Spiked Boots, Maiden's Tear
       if (P.block > 0) {
-        const ratio = P.block / Math.max(1, dmg);
+        const ratio = P.block * (this.inShadow ? 1.5 : 1) / Math.max(1, dmg); // Shadow Cloak: +50% Block Strength in its shadow
         const chance = Math.min(0.5 * ratio, 0.5 * Math.sqrt(ratio), 1);
         if (Math.random() < chance) { p.inv = 0.25; this.text(p.x, p.y - 12, t('hud.block'), '#9ad0ff'); DH.audio.play('block'); return; }
       }
@@ -755,6 +761,7 @@
         e.reformed = true; e.hp = e.maxHp * 0.5; e.down = 2.6; e.st.burn = 0; this.burst(e.x, e.y, 10, ['#e6dcc0', '#8a6a4a'], 70); DH.audio.play('kill', e.painter); return;
       }
       e.dead = true;
+      this.itemsOnKill();
       if (e.plagued != null && this.time - e.plagued < 0.7) { const pa = this.abilities.find((x) => x.s && x.s.contagion); if (pa && this.zones.filter((z) => z.kind === 'pool').length < 14) this.zones.push({ kind: 'pool', a: pa, x: e.x, y: e.y, r: 16 * pa.s.area, life: 2, max: 2, tick: 0.2 }); } // Contagion
       if (e.st.burn > 0) { const wf = this.abilities.find((x) => x.s && x.s.wildfire); if (wf) { for (const o of this.grid.query(e.x, e.y, 34, [])) if (!o.dead && o !== e && U.dist2(o.x, o.y, e.x, e.y) < 34 * 34) this.addBurn(o, 2, wf.s.dmg + this.P.addBase); } } // Wildfire
       const cols = e.def.particles || ['#e6dcc0', '#8a6a4a', '#7c1624'];
@@ -773,6 +780,7 @@
         return;
       }
       if (this.sec) this.secretKill(e);
+      if (this.rescue) this.rescueKill(e);
       if (e.st.frost > 0 && e.st.frostArmed) this.frostExplode(e); // a death releases the stored Frost (not a one-hit kill)
       if (e.def.gilded) {
         this.oozes++; this.shake = 4; DH.audio.play('chest');
@@ -814,7 +822,7 @@
       const gm = this.stage.goldMult;
       if (Math.random() < 0.08) this.drop('coin', e.x, e.y, Math.ceil(U.randi(1, 3) * gm));
       if (e.elite || e.champion || e.boss) { if (this.P.eliteHeal) this.heal(this.P.maxHp * this.P.eliteHeal); }
-      if (e.elite) { this.eliteKills++; this.shake = 3; this.scrollDrop(e.x, e.y); if (Math.random() < 0.5) this.drop('herb', e.x, e.y, 0, this.stage.herb === 'dust' ? U.pick(E.herbs) : this.stage.herb); for (let i = 0; i < 4; i++) this.drop('coin', e.x, e.y, Math.ceil(3 * gm)); }
+      if (e.elite) { this.eliteKills++; this.shake = 3; this.scrollDrop(e.x, e.y); if (Math.random() < (this.P.chestDrop || 0)) this.drop('chest_red', e.x - 10, e.y); /* Plunder (Blessing) */ if (Math.random() < (this.trib.eliteChest || 0)) this.drop('chest_red', e.x + 10, e.y); /* the tribute of Plunder */ if (Math.random() < 0.5) this.drop('herb', e.x, e.y, 0, this.stage.herb === 'dust' ? U.pick(E.herbs) : this.stage.herb); for (let i = 0; i < 4; i++) this.drop('coin', e.x, e.y, Math.ceil(3 * gm)); }
       if (e.champion) {
         this.championKills++; this.shake = 4;
         if (e.agonyChamp) this.championDrop(e);
@@ -830,7 +838,7 @@
         this.drop('potion', e.x - 10, e.y);
         if (e.def.lord) {
           // Lament Shards: only with Agony or Torment; 1 to 4 by Torment Rank
-          const n = this.agonyOn || this.dread ? this.shardCount() : 0;
+          const n = (this.agonyOn || this.dread ? this.shardCount() : 0) + (this.trib.shards || 0); // + the tribute of the Shard
           for (let i = 0; i < n; i++) this.drop('shard', e.x + U.rand(-10, 10), e.y + U.rand(-6, 6));
         }
         if (e.def.lord && this.agonyOn && DH.meta.altarUnlocked()) {
@@ -904,7 +912,7 @@
           DH.events.emit('run:boss', { name: t('artifact.' + k.sub + '.name'), final: false, artifact: true }); break;
         case 'ulcer': { const p = this.player; DH.audio.play('hurt'); this.gainXp(this.xpNext * 0.3); p.hp = Math.max(1, p.hp - this.P.maxHp * 0.12); this.text(p.x, p.y - 14, t('hud.ulcer'), '#b060ff'); break; }
         case 'herb': DH.audio.play('herb'); this.herbs[k.sub] = (this.herbs[k.sub] || 0) + 1; this.text(this.player.x, this.player.y - 14, '+1 ' + t('herb.' + k.sub), '#b0ff80'); break;
-        case 'potion': DH.audio.play('heal'); if (this.hero.potionBrew) { this.brews = (this.brews || 0) + 1; this.recompute(); this.text(this.player.x, this.player.y - 18, t('hud.brew'), '#b0ff80', true); } this.heal(C.POTION_HEAL[0] + this.P.maxHp * C.POTION_HEAL[1]); break; // 25 + 5% of max HP; the Alchemist's brews grow stronger
+        case 'potion': DH.audio.play('heal'); this.itemsOnPotion(); if (this.hero.potionBrew) { this.brews = (this.brews || 0) + 1; this.recompute(); this.text(this.player.x, this.player.y - 18, t('hud.brew'), '#b0ff80', true); } this.heal(C.POTION_HEAL[0] + this.P.maxHp * C.POTION_HEAL[1]); break; // 25 + 5% of max HP; the Alchemist's brews grow stronger
         case 'bucket': DH.audio.play('reward'); if (this.well && this.well.used) this.well.used = false; else this.buckets++; this.text(this.player.x, this.player.y - 14, t('hud.bucket'), '#5ab8ff', true); break;
         case 'rune_fury': case 'rune_haste': case 'rune_wraith': this.buff(k.type.slice(5)); break;
         case 'shard': DH.audio.play('reward'); this.shards++; this.text(this.player.x, this.player.y - 16, t('hud.shard'), '#ff70c0', true); break;
@@ -974,7 +982,7 @@
      *  the Strange Pendulum's 1 piece you have never found. */
     openLoot(kind) {
       const boss = kind === 'chest_gold', fresh = kind === 'chest_new', tl = this.tormentLevel(), T = C.LOOT_TIERS;
-      const minR = kind === 'chest_red' ? (tl >= 10 ? 2 : 1) : 0, n = boss ? 3 : fresh ? 1 : 2;
+      const minR = kind === 'chest_red' ? (tl >= 10 ? 2 : 1) : 0, n = (boss ? 3 : fresh ? 1 : 2) + (fresh ? 0 : this.trib.loot || 0); // the tribute of the Relic: one more to choose from
       const score = tl + Math.floor(this.stage.index / 2) + (boss && tl > 0 ? 5 : 0), top = boss ? 5 : 4; // Torment Level (TR + AR) drives rarity: without Agony / Torment chests hold mostly Common pieces
       const s = DH.save.data, unseen = E.gearOrder.filter((t) => !s.discovered[t]);
       const items = [], types = new Set();
@@ -990,7 +998,7 @@
       this.gold += g;
       // Ivory Dice: the chest chooses for you
       const auto = this.fx_ && this.fx_.ivoryDice ? U.pick(items) : null;
-      const d = { items: auto ? [auto] : items, gold: g, boss, fresh, auto: !!auto };
+      const d = { items: auto ? [auto] : items, gold: g, boss, fresh, auto: !!auto, kind };
       if (auto) d.result = this.takeLoot(auto);
       this.lastLoot = d;
       return d;
@@ -1114,7 +1122,7 @@
       return { stage: this.stageId, hero: this.heroId, time: this.time, kills: this.kills, gold: this.gold, level: this.level,
         bossKills: this.bossKills, eliteKills: this.eliteKills, championKills: this.championKills, tomes: this.tomes, bosses: this.bossesKilled.slice(),
         victory: this.state === 'victory', agony: this.agonyOn ? Math.floor(this.maxAgony + 1e-6) : 0, agonyOn: this.agonyOn,
-        dmgByAb: Object.assign({}, this.dmgByAb), wellSent: this.wellSent, wellExtra: this.wellExtra.slice(), herbs: Object.assign({}, this.herbs), dread: this.dread,
+        dmgByAb: Object.assign({}, this.dmgByAb), wellSent: this.wellSent, wellExtra: this.wellExtra.slice(), herbs: Object.assign({}, this.herbs), dread: this.dread, tributes: this.tributes.slice(), rescued: this.rescued || null,
         potionsUsed: Object.assign({}, this.potionsUsed), lateLevels: this.lateLevels || 0, runLength: this.runLength, artifactsFound: this.artifactsFound.slice(),
         shards: this.shards, hexed: this.hexed || !!this.dissoSolved || !!this.secretDone, secretT: this.secretT, elemApplied: !!this.elemApplied, abTimes: (this.abTimes || []).slice(), oozes: this.oozes, crits: this.crits || 0, dmgTags: this.dmgTags() };
     }

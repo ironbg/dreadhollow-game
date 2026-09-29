@@ -186,7 +186,8 @@
         const n = run.potions[k] || 0;
         return h('button.potbtn' + (mode === k ? '.on' : '') + (n ? '' : '.off'), { onclick: () => { click(); mode = mode === k ? null : k; draw(); } }, A.img('p_' + k), h('span', n));
       };
-      const hasPot = E.potionOrder.some((k) => (run.potions[k] || 0) > 0);
+      const LV = E.potionOrder.filter((k) => E.potions[k].use === 'level');
+      const hasPot = LV.some((k) => (run.potions[k] || 0) > 0);
       const rerollBtn = run.rerolls > 0
         ? h('button.btn.small.blue', { onclick: () => { click(); run.reroll(); draw(); } }, A.img('i_reroll'), t('levelup.reroll', { n: run.rerolls }))
         : !run.usedAdReroll ? h('button.btn.small.ad', { onclick: async () => { if (await DH.ads.rewarded('reroll')) { run.usedAdReroll = true; run.reroll(true); draw(); } } }, h('span.adtag', 'AD'), t('levelup.rerollAd')) : null;
@@ -196,7 +197,7 @@
         buildRow(run),
         mode ? h('div.center.potionhint', t('potion.hint.' + mode)) : null,
         h('div', { style: { marginTop: '8px' } }, cards),
-        h('div.row.lvfoot', hasPot ? h('div.row.pots', E.potionOrder.map(pot)) : h('span'), h('span.grow'), rerollBtn)));
+        h('div.row.lvfoot', hasPot ? h('div.row.pots', LV.map(pot)) : h('span'), h('span.grow'), rerollBtn)));
     };
     draw();
   };
@@ -211,7 +212,13 @@
         const info = ui.choiceInfo(run, c);
         return h('div.choice.abt', { style: { animationDelay: (i * 0.06) + 's' }, onclick: () => { click(); m.close(); run.chooseTome(c); if (run.state === 'playing') DH.input.enable(true); } },
           h('div.ico', A.img(info.icon)), h('div.grow', h('div.tg', info.tag || ''), h('div.t', info.name), h('div.d', info.desc)));
-      }))) });
+      })),
+      ui.rerollPotion(run, 'renewal', !data.traitsOnly && data.choices.some((c) => c.kind === 'ability'), () => { m.close(); ui.openTome(run, run.rerollTome(data)); })) });
+  };
+  /** A flask that rolls a tome's or a chest's offer again: shown while the hero carries one. */
+  ui.rerollPotion = (run, kind, ok, then) => {
+    const n = run.potions[kind] || 0; if (!n || !ok) return null;
+    return h('div.row.lvfoot', h('span.grow'), h('button.btn.small.blue', { onclick: () => { click(); if (run.drinkReroll(kind)) { DH.audio.play('heal'); then(); } } }, A.img('p_' + kind), t('potion.drink.' + kind, { n })));
   };
 
   /* ---------------- Loot (champion / boss chest) ---------------- */
@@ -246,7 +253,8 @@
       })),
       h('div.center.small', { style: { marginTop: '6px' } }, A.img('i_gold', 'ci'), ' +' + d.gold),
       refuse ? h('div.center.small.muted', { style: { marginTop: '4px' } }, t('loot.xpHint', { v: Math.round(C.LOOT_XP * 100) })) : null,
-      h('div.note', t('loot.wellHint'))) });
+      h('div.note', t('loot.wellHint')),
+      ui.rerollPotion(run, 'visions', !d.auto, () => { lm.close(); ui.openLoot(run, run.rerollLoot(d)); })) });
   };
 
   /* ---------------- The Well ---------------- */
@@ -448,6 +456,7 @@
       res.winBonus ? h('div.goldline', h('span', t('results.goldWin')), h('b', U.fmt(res.winBonus))) : null,
       h('div.goldtotal', A.img('i_gold'), goldEl),
       extras.length ? h('div.reward-list', extras.map((e) => h('div.reward', h('div.slot' + (e.rarity != null ? '.rar' + e.rarity : ''), A.img(e.icon)), h('div.n' + (ui.isWord(e.text) ? '.word' : ''), e.text)))) : null,
+      res.rescued ? h('div.center.goldtxt', { style: { fontWeight: 800, margin: '6px 0' } }, A.img('npc_' + res.rescued, 'ci'), ' ' + t('results.rescued', { name: t('npc.' + res.rescued) })) : null,
       res.secret ? h('div.center.goldtxt', { style: { fontWeight: 800, margin: '6px 0' } }, A.img('u_secret', 'ci'), ' ' + t('results.secret', { n: C.HEX.firstShards })) : null,
       res.deeds && res.deeds.length ? h('div.deedsdone', h('div.goldtxt', { style: { fontWeight: 800 } }, t('results.deeds', { n: res.deeds.length, x: Math.round(res.deeds.length * DH.deeds.XP_PER_DEED * 1000) / 10 })), res.deeds.slice(0, 6).map((d) => h('div.small.dd', A.img('u_check', 'ci'), h('span', ui.deedText(d)))), res.deeds.length > 6 ? h('div.small.muted', '…') : null) : null,
       h('div.center.small.muted', t('results.xp', { a: res.accountXp, p: res.passXp })),

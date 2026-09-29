@@ -150,9 +150,9 @@ exports.runStart = onCall(async (req) => {
       const stage = s.selectedStage, hero = s.selectedHero, i = C.stageOrder.indexOf(stage);
       if (!(i === 0 || s.cleared[C.stageOrder[i - 1]])) throw fail('stage-locked', stage);
       if (!DH.meta.heroOwned(hero)) throw fail('hero-locked', hero);
-      if (!DH.meta.useEnergy(C.stages[stage].energy || C.RUN_ENERGY)) return; // not enough torches: no ticket
+      if (!DH.meta.beginRun(C.stages[stage].energy || C.RUN_ENERGY)) return; // not enough torches (or tributes for the Reliquary): no ticket
       ticket = { id: crypto.randomBytes(12).toString('hex'), stage, hero, start: Date.now(),
-        agony: !!(s.cleared[stage] && s.agony[stage]), dread: DH.meta.dreadRank() };
+        agony: !!(s.cleared[stage] && s.agony[stage]), dread: DH.meta.dreadRank(), tributes: (s.runTributes || []).slice() };
     });
     return { profile: r.profile, extra: { run: ticket, rate: rate(doc) }, ticket };
   });

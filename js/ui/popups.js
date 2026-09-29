@@ -380,9 +380,53 @@
       .el.querySelector('.bigicon').style.cssText = 'width:64px;height:64px';
   };
 
+  /* ---------------- The keepers of the camp ---------------- */
+  /** A keeper's panel: freed, their portrait and a word from them (a different one every few hours); still lost,
+   *  where to find them. */
+  ui.keeperPanel = (id) => {
+    if (!M.npcFreed(id)) return h('div.panel.item.keeper.sealed', h('div.ico', A.img('u_lock')), h('div.grow', h('div.t', t('npc.' + id)), h('div.d', t('resc.lost.' + id))));
+    const n = 1 + Math.floor(U.now() / (3 * 3600e3)) % 4;
+    let pic; try { pic = h('img.portrait', { src: DH.gfx.sprite('npc_' + id).frames[0].toDataURL() }); } catch (e) { pic = A.img('npc_' + id); } // the model itself, scaled up crisp
+    return h('div.panel.item.keeper', h('div.ico', pic), h('div.grow', h('div.t', t('npc.' + id)), h('div.d.keeperline', t('npc.' + id + '.line' + n))));
+  };
+
+  /* ---------------- Tributes: the price of the Reliquary ---------------- */
+  const TRIB_ICON = { enemyHp: 'a_giants', enemyDmg: 'a_scales', spawn: 'a_banner', darkness: 'a_darkness', magma: 'a_magma', urn: 'a_urn', heal: 'a_hunger', traps: 'a_chime' };
+  /** One tribute's boon and hardship as words (values from E.tributes). */
+  ui.tributeText = (id) => {
+    const T = E.tributes[id], bk = Object.keys(T.boon)[0], nk = Object.keys(T.bane)[0], bv = T.boon[bk], nv = T.bane[nk];
+    return { boon: t('trib.boon.' + bk, { v: ['shards', 'loot', 'revives'].includes(bk) ? bv : Math.round(bv * 100) }), bane: t('trib.bane.' + nk, { v: Math.round(Math.abs(nv - 1) * 100) }), icon: TRIB_ICON[nk] || 'a_mirror' };
+  };
+  /** Before the Reliquary: choose the tributes to pay (at least one; each further one costs more), then enter. */
+  ui.openTributes = () => {
+    const pick = M.tributes().slice();
+    const m = ui.modal({ title: t('trib.title'), cls: 'tributes', body: () => h('div') });
+    const draw = () => {
+      const s = DH.save.data, cost = E.tributesCost(pick.length), can = pick.length > 0 && s.gold >= cost;
+      const list = h('div.trib-list');
+      E.tributeOrder.forEach((id) => {
+        const on = pick.includes(id), tx = ui.tributeText(id), next = on ? null : E.tributeCost(pick.length);
+        list.append(h('button.panel.trib' + (on ? '.on' : ''), { onclick: () => { click(); if (on) pick.splice(pick.indexOf(id), 1); else pick.push(id); draw(); } },
+          A.img(tx.icon),
+          h('div.tx', h('div.t', t('trib.' + id)), h('div.small.good', tx.boon), h('div.small.bad', tx.bane)),
+          h('div.tick', on ? A.img('u_check') : h('span.small.muted', '+' + U.fmt(next)))));
+      });
+      m.set(h('div',
+        h('div.center.small.muted', { style: { marginBottom: '8px' } }, t('trib.desc')),
+        list,
+        h('div.row.trib-foot', h('div', t('trib.total'), ' ', A.img('i_gold'), h('b' + (s.gold >= cost ? '' : '.bad'), U.fmt(cost)), h('span.small.muted', ' / ' + U.fmt(Math.floor(s.gold)))),
+          h('button.btn.gold' + (can ? '' : '.off'), { onclick: async () => {
+            if (!pick.length) { ui.toast(t('trib.needOne'), 'bad'); return; }
+            if (s.gold < cost) { ui.toast(t('common.notEnough'), 'bad'); return; }
+            await ui.act('setTributes', { ids: pick.slice() }); m.close(); DH.game.startRun({ tributesOk: true });
+          } }, t('trib.enter')))));
+    };
+    draw();
+  };
+
   /* ---------------- Gear detail ---------------- */
   /** The special line of a gear piece (e.g. Defiant Plate's defense after each hit). */
-  ui.gearSpecialText = (type, sp) => t('gearsp.' + type, Object.fromEntries(Object.entries(sp).map(([k, v]) => [k, k === 'hitRegen' || k === 'imps' ? Math.round(v * 10) / 10 : k.startsWith('sig_') ? Math.min(3, Math.floor(v + 1e-6)) : Math.round(v * 1000) / 10])));
+  ui.gearSpecialText = (type, sp) => t('gearsp.' + type, Object.fromEntries(Object.entries(sp).map(([k, v]) => [k, E.ITEM_FMT[k] ? E.ITEM_FMT[k](v) : k === 'hitRegen' || k === 'imps' ? Math.round(v * 10) / 10 : k.startsWith('sig_') ? Math.min(3, Math.floor(v + 1e-6)) : Math.round(v * 1000) / 10])));
   ui.openGear = (id) => {
     const g0 = M.gearById(id); if (!g0) return;
     g0.isNew = false; DH.save.persist();

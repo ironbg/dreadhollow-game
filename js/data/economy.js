@@ -20,6 +20,14 @@
     luck:     { icon: 'target',    per: { critPct: 0.05 },  cost: [900, 1400, 2100, 3300, 5000], unlock: 'd_crits' },
     revival:  { icon: 'i_revive',  per: { revives: 1 },     cost: [9000, 18000], unlock: 'd_stage_crypt_s3' },
     reroll:   { icon: 'i_reroll',  per: { rerolls: 1 },     cost: [2300, 4000, 7300], unlock: 'd_champions_10' },
+    echo:     { icon: 'tr_multistrike', per: { ms: 0.04 },  cost: [800, 1300, 2100, 3300, 5200], unlock: 'd_level_50' },
+    ferocity: { icon: 'tr_brutality',   per: { critBonus: 0.06 }, cost: [700, 1100, 1700, 2700, 4200], unlock: 'd_stage_abyss_win' },
+    sorcery:  { icon: 'tr_afflictor',   per: { effectPct: 0.06 }, cost: [700, 1100, 1700, 2700, 4200], unlock: 'd_stage_aqueduct_win' },
+    elements: { icon: 'tr_elementalist', per: { firePct: 0.06, icePct: 0.06, lightningPct: 0.06 }, cost: [900, 1400, 2200, 3500, 5500], unlock: 'd_dmg_lightning' },
+    brawn:    { icon: 'tr_honed',       per: { physPct: 0.08 }, cost: [700, 1100, 1700, 2700, 4200], unlock: 'd_dmg_physical' },
+    arcana:   { icon: 'tr_arcana',      per: { magicPct: 0.08 }, cost: [700, 1100, 1700, 2700, 4200], unlock: 'd_dmg_magic' },
+    plunder:  { icon: 'tr_plunder',      per: { chestDrop: 0.03 }, cost: [1200, 2000, 3200, 5000, 8000], unlock: 'd_elites_300' },
+    scholar:  { icon: 'tr_scholar',      per: { tomeDrop: 0.1 }, cost: [1000, 1600, 2600, 4100, 6500], unlock: 'd_tomes_100' },
   };
   // unlock: the deed that opens a Blessing (as Blessings open with quests); the rest are open from the start
   E.shrineOrder = Object.keys(E.shrine);
@@ -64,7 +72,73 @@
     signet_arcana:    { slot: 'ring',  stats: { magicPct: 0.03 },         special: { sig_magic: 1 },     signet: 'magic' },
     signet_steel:     { slot: 'ring',  stats: { physPct: 0.03 },          special: { sig_physical: 1 },  signet: 'physical' },
     signet_legion:    { slot: 'ring',  stats: { summonPct: 0.03 },        special: { sig_summon: 1 },    signet: 'summon' },
+    // items that act on their own during a run (js/game/items.js); it_ specials are read by the run
+    cinder_treads:     { slot: 'feet',  stats: { speedPct: 0.03 },       special: { it_firewalk: 5 } },
+    storm_treads:      { slot: 'feet',  stats: { speedPct: 0.03 },       special: { it_stormstep: 5 } },
+    spiked_boots:      { slot: 'feet',  stats: { defense: 0.015 },       special: { it_spikes: 5 } },
+    mire_boots:        { slot: 'feet',  stats: { regen: 0.1 },           special: { it_goo: 1.2 } },
+    frost_greaves:     { slot: 'feet',  stats: { icePct: 0.04 },         special: { it_frostaura: 0.1 } },
+    pace_setter:       { slot: 'feet',  stats: { speedPct: 0.02 },       special: { it_pace: 0.06 } },
+    plated_boots:      { slot: 'feet',  stats: { defense: 0.015, block: 0.8 } },
+    shadow_cloak:      { slot: 'chest', stats: { block: 0.8 },           special: { it_shadow: 2 } },
+    thunder_mantle:    { slot: 'chest', stats: { lightningPct: 0.04 },   special: { it_thunder: 5 } },
+    brokers_cape:      { slot: 'chest', stats: { greed: 0.04 },          special: { it_broker: 0.08 } },
+    frostbeast_hide:   { slot: 'chest', stats: { maxHpPct: 0.03 },       special: { it_beast: 16 } },
+    toil_scars:        { slot: 'chest', stats: { maxHpPct: 0.03 },       special: { it_scars: 0.25 } },
+    fervor_mail:       { slot: 'chest', stats: { defense: 0.02 },        special: { it_fervor: 1.5 } },
+    blood_shirt:       { slot: 'chest', stats: { regen: 0.1 },           special: { it_bloodshirt: 0.1 } },
+    chain_mail:        { slot: 'chest', stats: { defense: 0.02, maxHpPct: 0.03 } },
+    war_horn:          { slot: 'neck',  stats: { dmgPct: 0.03 },         special: { it_warcry: 0.5 } },
+    seal_rebirth:      { slot: 'neck',  stats: { regen: 0.1 },           special: { it_seal: 1 } },
+    philosopher_stone: { slot: 'neck',  stats: { dmgPct: 0.015, as: 0.015, area: 0.015, critPct: 0.015, speedPct: 0.015 } },
+    collar_confidence: { slot: 'neck',  stats: { defense: 0.01 },        special: { it_collar: 0.1 } },
+    maiden_tear:       { slot: 'neck',  stats: { maxHpPct: 0.03 },       special: { it_tear: 1 } },
+    gorgon_mask:       { slot: 'head',  stats: { effectPct: 0.03 },      special: { it_gorgon: 3 } },
+    wind_crown:        { slot: 'head',  stats: { as: 0.015 },            special: { it_wind: 0.001 } },
+    madness_mask:      { slot: 'head',  stats: { critPct: 0.03 },        special: { it_madness: 0.005 } },
+    warchief_visor:    { slot: 'head',  stats: { defense: 0.015 },       special: { it_visor: 0.1 } },
+    ruby_circlet:      { slot: 'head',  stats: { firePct: 0.03 },        special: { it_ruby: 0.15 } },
+    thunder_crown:     { slot: 'head',  stats: { magicPct: 0.03 },       special: { it_tcrown: 5 } },
+    necro_clutch:      { slot: 'hands', stats: { summonPct: 0.05 },      special: { it_skeletons: 1 } },
+    longfinger_gloves: { slot: 'hands', stats: { pickup: 0.1, greed: 0.03 } },
+    spellcaster_gloves:{ slot: 'hands', stats: { effectPct: 0.02 },      special: { it_spell: 0.06 } },
+    frost_thorns:      { slot: 'hands', stats: { icePct: 0.03 },         special: { it_frostthorn: 3 } },
+    unholy_touch:      { slot: 'hands', stats: { dmgPct: 0.02 },         special: { it_unholy: 0.15 } },
+    leech_fingers:     { slot: 'hands', stats: { regen: 0.1 },           special: { it_leech: 0.3 } },
+    hunting_gloves:    { slot: 'hands', stats: { ms: 0.05, critPct: 0.02 } },
+    pest_ring:         { slot: 'ring',  stats: { summonPct: 0.03 },      special: { it_rats: 1.5 } },
+    ring_ember:        { slot: 'ring',  stats: { firePct: 0.03 },        special: { wBurn: 0.1 } },
+    ring_rime:         { slot: 'ring',  stats: { icePct: 0.03 },         special: { wFrost: 0.1 } },
+    ring_storm:        { slot: 'ring',  stats: { lightningPct: 0.03 },   special: { wSpark: 0.1 } },
+    ring_earth:        { slot: 'ring',  stats: { physPct: 0.03 },        special: { wDecay: 0.1 } },
+    echo_band:         { slot: 'ring',  stats: { physPct: 0.03 },        special: { it_echoring: 0.1 } },
+    blight_ring:       { slot: 'ring',  stats: { effectPct: 0.02 },      special: { it_blight: 0.1 } },
   };
+  /** How an item special reads (and, for counts and times, what the run uses): base damage whole, counts and seconds
+   *  derived from the rarity-scaled value; any other key is a share shown as a percent. */
+  const whole = (v) => Math.round(v), tenth = (v) => Math.round(v * 10) / 10;
+  E.ITEM_FMT = { it_firewalk: whole, it_stormstep: whole, it_spikes: whole, it_shadow: whole, it_thunder: whole, it_gorgon: whole, it_beast: whole, it_tcrown: whole, it_frostthorn: tenth,
+    it_goo: tenth, it_fervor: tenth, it_leech: tenth,
+    it_skeletons: (v) => Math.min(4, Math.floor(v + 1e-6)), it_rats: (v) => Math.min(6, Math.floor(v + 1e-6)), it_seal: (v) => (v >= 4.6 - 1e-6 ? 2 : 1), it_tear: (v) => Math.round(30 / (0.6 + 0.4 * v)) };
+  E.itemCount = (k, v) => E.ITEM_FMT[k](v);
+
+  /* ---------- Tributes: the Reliquary is entered only after paying at least one. Each is a pact: a boon for the fight
+   * and a hardship (the same effects as the Artifacts' curses). Every further tribute costs more. ---------- */
+  E.TRIBUTE_STAGE = 'reliquary';
+  E.tributes = {
+    shard:   { boon: { shards: 1 },       bane: { enemyHp: 1.3 } },
+    scholar: { boon: { scrolls: 0.5 },    bane: { enemyDmg: 1.25 } },
+    plunder: { boon: { eliteChest: 0.3 }, bane: { spawn: 1.25 } },
+    insight: { boon: { xp: 0.3 },         bane: { darkness: 1 } },
+    fortune: { boon: { gold: 0.5 },       bane: { magma: 1 } },
+    relic:   { boon: { loot: 1 },         bane: { urn: 0.06 } },
+    fury:    { boon: { dmg: 0.2 },        bane: { heal: 0.5 } },
+    vigil:   { boon: { revives: 1 },      bane: { traps: 1 } },
+  };
+  E.tributeOrder = Object.keys(E.tributes);
+  /** The price of the k-th tribute of one fight (0-based): 600, 1000, 1750, 2950, ... */
+  E.tributeCost = (k) => Math.round(600 * Math.pow(1.7, k) / 50) * 50;
+  E.tributesCost = (n) => { let c = 0; for (let k = 0; k < n; k++) c += E.tributeCost(k); return c; };
   E.gearOrder = Object.keys(E.gear);
   E.STARTER_GEAR = ['wrath_amulet', 'striders', 'oak_band', 'warden_helm', 'gore_tunic', 'tempo_treads'];
   E.gearStat = (type, rarity, level) => {
@@ -84,13 +158,16 @@
   E.WELL_MAX = 12;
 
   /* ---------- Potions (Apothecary) & ingredients ---------- */
-  E.herbs = ['moss', 'ember', 'lily'];
+  E.herbs = ['moss', 'ember', 'lily', 'frostcap', 'nightshade'];
+  // use: where it is drunk (level: on a level-up card; tome: rerolls a tome's abilities; chest: rerolls a chest's items)
   E.potions = {
-    remembrance: { recipe: { moss: 3, lily: 2 }, gold: 500, gems: 40, unlock: 'd_boss_gravechief' },
-    resonance:   { recipe: { ember: 3, moss: 2 }, gold: 800, gems: 60, unlock: 'd_stage_abyss_win' },
-    lethe:       { recipe: { lily: 2, ember: 2 }, gold: 400, gems: 25, unlock: 'd_stage_crypt_win' },
+    remembrance: { recipe: { moss: 3, lily: 2 }, gold: 500, gems: 40, unlock: 'd_boss_gravechief', use: 'level' },
+    resonance:   { recipe: { ember: 3, moss: 2 }, gold: 800, gems: 60, unlock: 'd_stage_abyss_win', use: 'level' },
+    lethe:       { recipe: { lily: 2, ember: 2 }, gold: 400, gems: 25, unlock: 'd_stage_crypt_win', use: 'level' },
+    renewal:     { recipe: { frostcap: 3, moss: 2 }, gold: 600, gems: 45, unlock: 'd_stage_catacombs_win', use: 'tome' },
+    visions:     { recipe: { nightshade: 3, lily: 2 }, gold: 700, gems: 50, unlock: 'd_stage_discord_win', use: 'chest' },
   };
-  E.potionOrder = ['remembrance', 'resonance', 'lethe'];
+  E.potionOrder = ['remembrance', 'resonance', 'lethe', 'renewal', 'visions'];
   E.POTION_USES_PER_RUN = 2;
 
   /* ---------- Altar of Anguish: artifacts raise the Dread Rank ---------- */

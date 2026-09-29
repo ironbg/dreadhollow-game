@@ -36,8 +36,11 @@
     if (fx.regret) { const n = Math.floor(this.kills / 100) * fx.regret; st.as = (st.as || 0) - n; st.area = (st.area || 0) - n; }
     if (fx.ms) st.ms = (st.ms || 0) + fx.ms;
     if (fx.silver) ['dmgPct', 'as', 'area', 'critPct', 'maxHpPct', 'speedPct', 'duration', 'critBonus', 'regen', 'block', 'defense'].forEach((k) => { if (st[k] > 0) st[k] *= fx.silver; });
+    if (this.trib) { if (this.trib.dmg) st.dmgPct = (st.dmgPct || 0) + this.trib.dmg; if (this.trib.revives) st.revives = (st.revives || 0) + this.trib.revives; } // the Reliquary's tributes of Fury and the Vigil
     const B = this.buffs;
     if (B) { if (B.fury > 0) st.dmgPct = (st.dmgPct || 0) + 1; if (B.haste > 0) st.as = (st.as || 0) + 1; if (B.wraith > 0) st.speedPct = (st.speedPct || 0) + 0.5; }
+    const it = {}; for (const k in st) if (k.startsWith('it_') && st[k]) it[k.slice(3)] = st[k]; // items that act on their own (items.js)
+    this.itemStats(st, it);
     const prevMax = this.P ? this.P.maxHp : 0;
     const tag = {}; TAGS.forEach((t) => { tag[t] = st[(t === 'physical' ? 'phys' : t) + 'Pct'] || 0; });
     this.P = {
@@ -50,11 +53,11 @@
       as: st.as || 0, area: st.area || 0, duration: st.duration || 0, count: Math.floor(st.count || 0), pierce: Math.floor(st.pierce || 0),
       ms: st.ms || 0, pickupR: 30 * (1 + (st.pickup || 0)), summonPct: st.summonPct || 0, summons: Math.floor(st.summons || 0),
       burn: st.burn || 0, spark: st.spark || 0, frost: st.frost || 0, decay: st.decay || 0, fragile: st.fragile || 0, affliction: st.affliction || 0,
-      tag, growth: 1 + (st.growth || 0), greed: (1 + (st.greed || 0)) * (1 + this.dread * DH.economy.DREAD.gold),
-      revives: st.revives || 0, rerolls: st.rerolls || 0,
+      tag, growth: 1 + (st.growth || 0), greed: (1 + (st.greed || 0)) * (1 + this.dread * DH.economy.DREAD.gold) * (1 + ((this.trib && this.trib.gold) || 0)),
+      revives: st.revives || 0, rerolls: st.rerolls || 0, chestDrop: st.chestDrop || 0, tomeDrop: st.tomeDrop || 0,
       killAs: st.killAs || 0, eliteHeal: st.eliteHeal || 0, killHealChance: st.killHealChance || 0, killHeal: st.killHeal || 0,
       hitRegen: st.hitRegen || 0, thornBurn: st.thornBurn || 0, hitDefense: st.hitDefense || 0, stillDmg: st.stillDmg || 0, fireSpark: st.fireSpark || 0, imps: Math.floor(st.imps || 0),
-      grenadePct: st.grenadePct || 0, effectPct: st.effectPct || 0, wBurn: st.wBurn || 0, wSpark: st.wSpark || 0, wFrost: st.wFrost || 0,
+      grenadePct: st.grenadePct || 0, effectPct: st.effectPct || 0, wBurn: st.wBurn || 0, wSpark: st.wSpark || 0, wFrost: st.wFrost || 0, wDecay: st.wDecay || 0, it,
       sig: { fire: st.sig_fire || 0, ice: st.sig_ice || 0, lightning: st.sig_lightning || 0, magic: st.sig_magic || 0, physical: st.sig_physical || 0, summon: st.sig_summon || 0 },
     };
     const p = this.player;
@@ -101,7 +104,7 @@
       blockDmg: (b.blockDmg || 0) + (m.blockDmg || 0), hpCost: b.hpCost || 0,
       // effect chances; Marks of Incineration / Sorcery / the Beast add to the main weapon only
       burn: ((b.burn || 0) + (m.burn || 0) + P.burn + w * P.wBurn + (fx.scorch || 0)) * eff, spark: ((b.spark || 0) + (m.spark || 0) + P.spark + w * P.wSpark) * eff,
-      frost: ((b.frost || 0) + (m.frost || 0) + P.frost + w * P.wFrost) * eff, decay: ((b.decay || 0) + (m.decay || 0) + P.decay) * eff,
+      frost: ((b.frost || 0) + (m.frost || 0) + P.frost + w * P.wFrost) * eff, decay: ((b.decay || 0) + (m.decay || 0) + P.decay + w * P.wDecay) * eff,
       fragile: ((b.fragile || 0) + (m.fragile || 0) + P.fragile) * eff, affliction: ((b.affliction || 0) + (m.affliction || 0) + P.affliction) * eff,
       stun: ((b.stun || 0) + (m.stun || 0)) * eff,
       purge: m.purge || 0, pulse: m.pulse || 0, falloff: def.falloff || 0,
@@ -159,6 +162,7 @@
     for (const tg of a.tags) if (P.tag[tg]) pct += P.tag[tg];
     if (a.tags.includes('summon')) pct += P.summonPct;
     if (P.stillDmg && this.stillT > 0.4) pct += P.stillDmg;
+    pct += this.itemPct(a);
     const cm = this.critRoll(a), crit = cm > 1; this.lastCrit = crit;
     const S = e.st;
     // Fragile / Affliction are applied before the damage of the same hit
@@ -189,6 +193,7 @@
     if (this.settings.dmgNumbers) this.text(e.x + U.rand(-4, 4), e.y - e.r - 4, Math.round(dmg), crit ? '#ffd35a' : '#ffffff', crit);
     this.hitSpark(e, a.tags, crit);
     DH.audio.play('hit', e.painter);
+    this.itemsOnHit(e, a, dmg);
     if (e.hp <= 0) this.killEnemy(e);
     else {
       if (S.frost >= C.STATUS.frost.max) this.frostExplode(e);
@@ -201,6 +206,7 @@
     if (!e || e.dead) return;
     if (e.def.prop) { this.killEnemy(e); return; }
     if (e.def.hits || e.sealed || e.eth > 0) return;
+    if (abId === 'burn' && this.P.it.ruby) dmg *= 1 + this.P.it.ruby; // Ruby Circlet
     const S = e.st, d = dmg * (1 + C.AFFLICT_PER * S.affl) * (1 - Math.max(0, e.armor - 0.06 * S.decay)); // Affliction: +5% effect damage per stack
     e.hp -= d;
     if (abId) this.dmgByAb[abId] = (this.dmgByAb[abId] || 0) + d;
@@ -232,7 +238,7 @@
     if (n > add) { this.rawDamage(e, per * Z.overflow * (n - add), '#fff27a', 'spark'); this.fx.push({ k: 'spark', x: e.x, y: e.y, life: 0.2, max: 0.2, seed: Math.random() * 999 }); }
   };
   /** Slow: stacks multiply speed by 0.91 each (up to 20). */
-  R.addSlow = function (e, n) { const L = C.STATUS.slow; if (!e.slowS) e.slowT = L.tick / Math.max(1, n); e.slowS = Math.min(L.max, (e.slowS || 0) + n); };
+  R.addSlow = function (e, n) { const L = C.STATUS.slow; if (!e.slowS) e.slowT = L.tick / Math.max(1, n); e.slowS = Math.min(L.max, (e.slowS || 0) + n); if (this.P.it.blight) this.itemsOnSlow(e); };
   R.slowFactor = function (e) { return e.slowS > 0 ? Math.pow(C.STATUS.slow.mult, e.slowS) : 1; };
 
   R.tickStatus = function (e, dt) {
@@ -407,6 +413,10 @@
     this.choices = this.rollChoices(this.levelFor || this.level);
     return true;
   };
+  /** Renewal (a tome's abilities offered afresh) and Visions (a chest's items rolled again): a flask spent, new choices back. */
+  R.drinkReroll = function (kind) { if (!this.potions[kind]) return false; this.potions[kind]--; this.potionsUsed[kind] = (this.potionsUsed[kind] || 0) + 1; return true; };
+  R.rerollTome = function (data) { return Object.assign(this.tomeChoices(data.mastery ? 99 : 3), { mastery: data.mastery }); };
+  R.rerollLoot = function (d) { const g = this.gold, nd = this.openLoot(d.kind); this.gold = g; nd.gold = d.gold; return nd; }; // the gold came with the first opening
   R.usePotion = function (kind, c) {
     if (!this.potions[kind]) return false;
     this.potions[kind]--; this.potionsUsed[kind] = (this.potionsUsed[kind] || 0) + 1;

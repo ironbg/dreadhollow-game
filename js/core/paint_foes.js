@@ -912,6 +912,7 @@
    *            black claws, a few shards of ice grown out of its hackles, frost steaming off its breath ---------- */
   def('icebear', { w: 36, h: 24, cy: 16, frames: 2,
     colors: { fur: '#c8d4dc', dark: '#6a7a8a', eye: '#40c8ff', ice: '#a8e0ff' },
+    variants: { ally: { fur: '#d8e4dc', dark: '#5a7a6a', eye: '#50ff90', ice: '#a8ffd0' } },
     draw(g, f, c) {
       const s = c.fur, sl = sh(s, 0.2), sd = sh(s, -0.25), dk = c.dark, w = f ? 1 : -1, G0 = 22.4, claw = '#1a1a22';
       P.ell(g, 18, G0 + 0.3, 14, 1.3, 'rgba(0,0,0,0.4)');

@@ -106,7 +106,7 @@
     },
     /** A fight starts: torches are paid (on the server, which also notes the time). */
     async runStart(cost) {
-      if (!this.remote()) return DH.meta.useEnergy(cost);
+      if (!this.remote()) return DH.meta.beginRun(cost);
       await this.ready();
       await this.sendPending(true); // the last fight first: a new start would close it unrewarded
       const s = DH.save.data;

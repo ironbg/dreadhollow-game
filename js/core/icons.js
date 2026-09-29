@@ -896,6 +896,10 @@
     g.strokeStyle = G.rgba(col, 0.5); g.lineWidth = 0.6; g.beginPath(); g.arc(16, 16, 11.4, 0, Math.PI * 2); g.stroke();
   }
   const TRA = {
+    // Blessings of the Shrine that have no trait of their own
+    arcana: ['#7a3ab0', (g) => { GL.orb(g, '#c890ff'); for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; P.circle(g, 16 + Math.cos(a) * 9.5, 16 + Math.sin(a) * 9.5, 0.8, '#f0dcff'); } }],
+    plunder: ['#8a2034', (g) => { g.save(); g.translate(16, 17); g.scale(0.72, 0.72); g.translate(-16, -16); GL.chest(g, '#8a2034'); g.restore(); }],
+    scholar: ['#6a5020', (g) => { g.save(); g.translate(16, 16); g.scale(0.78, 0.78); g.translate(-16, -16); GL.scroll(g); g.restore(); }],
     strength: ['#c03020', (g) => {
       P.glow(g, 16, 14, 11, '#ff5030', 0.5);
       for (const [x, y] of [[8, 9], [24, 10], [9.4, 21]]) P.line(g, x, y, x + (16 - x) * 0.3, y + (16 - y) * 0.3, 0.8, 'rgba(255,150,110,0.7)');
@@ -1270,6 +1274,252 @@
     signet_arcana(g) { signet2(g, '#9a50e0', 'arcaneorb'); },
     signet_steel(g) { signet2(g, '#8a92a6', 'cleave'); },
     signet_legion(g) { signet2(g, '#40b080', 'golem'); },
+  });
+  /* ---------- items that act on their own (js/game/items.js) ---------- */
+  const itFlame = (g, x, y, s, a) => { g.beginPath(); g.moveTo(x, y - s * 1.6); g.bezierCurveTo(x + s, y - s * 0.4, x + s * 0.9, y + s * 0.7, x, y + s); g.bezierCurveTo(x - s * 0.9, y + s * 0.7, x - s, y - s * 0.4, x, y - s * 1.6); P.fill(g, P.lg(g, 0, y - s * 1.6, 0, y + s, ['#fff6b0', '#ffb030', '#e04810'])); if (a) P.glow(g, x, y, s * 2.4, '#ff7020', a); };
+  const itChain = (g, m, y) => { chain(g, 7, 2, 12.6, y || 9, m); chain(g, 25, 2, 19.4, y || 9, m); };
+  const itCrown = (g, m, pts) => { // a crown seen from the front: a band and its points
+    inkPath(g, () => { g.beginPath(); g.moveTo(5, 24); for (let i = 0; i < pts.length; i++) { const x = 5 + 22 * i / (pts.length - 1); g.lineTo(x, pts[i]); if (i < pts.length - 1) g.lineTo(x + 11 / (pts.length - 1), 15); } g.lineTo(27, 24); g.closePath(); }, mfill(g, 5, 6, 27, 24, m), 1.2);
+    inkPath(g, () => { g.beginPath(); g.rect(4.4, 21, 23.2, 5); }, mfill(g, 4, 21, 28, 26, m), 1.1);
+  };
+  const IT_FUR = ['#ffffff', '#e0e6ea', '#aab6c0', '#6a7a88', '#34404a'];
+  const IT_ICE = ['#ffffff', '#c8ecff', '#7ac0e8', '#3a78a8', '#163452'];
+  const IT_BONE = ['#fffae8', '#e8dcc0', '#b8a888', '#7a6a50', '#3a3024'];
+  Object.assign(GEAR2, {
+    cinder_treads(g) {
+      bootShape(g, ['#6a4a3a', '#443026', '#2c1e18', '#1a100c', '#0a0604'], MAT.bronze);
+      g.lineCap = 'round'; for (const [w, c] of [[1.6, 'rgba(255,90,20,0.45)'], [0.6, '#ffb040']]) { g.strokeStyle = c; g.lineWidth = w; g.beginPath(); g.moveTo(12, 10); g.lineTo(14.4, 14); g.lineTo(12.6, 18); g.moveTo(14.4, 14); g.lineTo(18, 16); g.moveTo(17, 21); g.lineTo(21, 22.4); g.stroke(); }
+      for (const [x, s] of [[11, 2.2], [17.4, 3], [24, 2.4]]) itFlame(g, x, 27.4 - s * 0.6, s, 0.35);
+    },
+    storm_treads(g) {
+      bootShape(g, ['#b8c8e0', '#7a8aa8', '#4e5a76', '#2e364a', '#141824'], MAT.silver);
+      P.glow(g, 16, 14, 8, '#fff080', 0.35);
+      zig(g, [13, 7, 17, 12.4, 13.6, 13.6, 18, 19.6], '#fff080', 0.8);
+      for (const [x, y] of [[25, 18.6], [27.6, 21.6]]) glint(g, x, y, 1.6, '#fff4a0');
+    },
+    spiked_boots(g) {
+      for (const [pts, x0] of [[[20.2, 11, 26.4, 8.6, 20.2, 15], 20], [[24.4, 19.4, 29.6, 15, 26.4, 20.4], 24], [[28.4, 24.6, 31.4, 22.4, 28.6, 26.6], 28]]) sil(g, pts, mfill(g, x0, 8, x0 + 6, 27, DARKSTEEL), 0.9);
+      bootShape(g, MAT.iron, DARKSTEEL);
+      for (const y of [11.4, 16.4]) { P.rect(g, 9.4, y, 11.2, 1.8, INK); P.rect(g, 9.4, y + 0.3, 11.2, 1.2, MAT.leather[3]); }
+      for (const [x, y] of [[12, 22.6], [16, 22.6], [22.6, 23]]) rivet(g, x, y, 0.9, DARKSTEEL);
+    },
+    mire_boots(g) {
+      P.ell(g, 18, 28.4, 13, 2.6, 'rgba(70,90,30,0.75)'); P.ell(g, 14, 28, 5, 1.1, 'rgba(160,190,80,0.5)');
+      bootShape(g, ['#8a8a5a', '#5e6036', '#3e4222', '#262a14', '#10120a'], MAT.leather);
+      for (const [x, y, l] of [[11.6, 7.4, 5], [15.4, 7.4, 3], [18.6, 7.4, 6.4], [24, 19.8, 3.4]]) { P.path(g, [x - 1, y, x + 1, y, x + 0.8, y + l, x, y + l + 1, x - 0.8, y + l]); P.fill(g, '#6a7a2a'); P.circle(g, x - 0.3, y + 1, 0.35, '#b0c060'); }
+      for (const [x, y] of [[21, 26], [9.6, 24]]) P.circle(g, x, y, 0.9, 'rgba(180,210,90,0.8)');
+    },
+    frost_greaves(g) {
+      bootShape(g, IT_ICE, MAT.silver);
+      for (const [x, y, l, a] of [[20.6, 9, 6, -0.6], [20.6, 14, 5, -0.2], [9.4, 12, 4.6, 3.6]]) { g.save(); g.translate(x, y); g.rotate(a); sil(g, [0, -1.2, l, 0, 0, 1.2], P.lg(g, 0, 0, l, 0, ['#e8f8ff', '#80c8f0']), 0.7); g.restore(); }
+      P.glow(g, 15, 15, 6, '#a0e8ff', 0.4); glint(g, 15, 15, 2.6, '#ffffff');
+    },
+    pace_setter(g) {
+      bootShape(g, ['#e0b888', '#b08050', '#7a5230', '#4a3018', '#22140a'], MAT.gold);
+      for (const [x, y, l] of [[9.6, 9.4, 8], [9.6, 12.4, 7], [9.6, 15.4, 5.4]]) sil(g, [x, y, x - l, y - 3.6, x - l * 0.7, y + 0.6, x, y + 1.8], P.lg(g, x - l, 0, x, 0, ['#ffffff', '#e8e0c8']), 0.8); // a wing on the ankle
+      inkCircle(g, 15.4, 14.6, 2, mfill(g, 13, 12, 18, 17, MAT.gold)); P.circle(g, 15.4, 14.6, 0.7, '#ff5030');
+    },
+    plated_boots(g) {
+      bootShape(g, DARKSTEEL, MAT.gold);
+      for (const y of [8.6, 12.6, 16.6]) { g.strokeStyle = G.rgba(DARKSTEEL[4], 0.9); g.lineWidth = 0.8; g.beginPath(); g.moveTo(9.6, y); g.quadraticCurveTo(15, y + 1.2, 20.4, y); g.stroke(); }
+      inkPath(g, () => { g.beginPath(); g.moveTo(20.4, 18.6); g.quadraticCurveTo(26.6, 19.4, 28, 23.6); g.lineTo(21, 23.6); g.closePath(); }, mfill(g, 20, 18, 28, 24, DARKSTEEL), 0.9);
+      for (const [x, y] of [[11, 10.6], [19, 10.6], [11, 14.6], [19, 14.6], [24.6, 22]]) rivet(g, x, y, 0.8, MAT.gold);
+    },
+    shadow_cloak(g) {
+      const C = ['#6a5a8a', '#443a60', '#2a2240', '#181428', '#0a0812'];
+      P.glow(g, 16, 26, 12, '#8040ff', 0.45);
+      inkPath(g, () => { g.beginPath(); g.moveTo(16, 2); g.quadraticCurveTo(22.6, 2.4, 23, 9); g.lineTo(28.6, 13); g.lineTo(27, 29); g.lineTo(21.4, 27); g.lineTo(16, 29.6); g.lineTo(10.6, 27); g.lineTo(5, 29); g.lineTo(3.4, 13); g.lineTo(9, 9); g.quadraticCurveTo(9.4, 2.4, 16, 2); }, mfill(g, 3, 2, 29, 30, C), 1.3);
+      inkPath(g, () => { g.beginPath(); g.moveTo(16, 4.4); g.quadraticCurveTo(20.6, 4.8, 20.4, 10.4); g.quadraticCurveTo(16, 12.6, 11.6, 10.4); g.quadraticCurveTo(11.4, 4.8, 16, 4.4); }, '#030206', 0.8);
+      for (const x of [14.4, 17.6]) P.eye(g, x, 8.6, 0.6, '#c080ff');
+      g.strokeStyle = 'rgba(160,110,255,0.5)'; g.lineWidth = 0.7; for (const [x0, x1] of [[10, 8.6], [16, 16], [22, 23.4]]) { g.beginPath(); g.moveTo(x0, 14); g.lineTo(x1, 27); g.stroke(); }
+      P.rrect(g, 14.4, 12.4, 3.2, 2.2, 0.5, mfill(g, 14, 12, 18, 15, MAT.silver));
+    },
+    thunder_mantle(g) {
+      cuirass(g, ['#c8d4ec', '#8898bc', '#56628a', '#323a58', '#161a2a'], { trim: '#fff080' });
+      P.glow(g, 16, 15.6, 8, '#fff080', 0.5);
+      zig(g, [17.6, 9.6, 13.6, 15.6, 17, 15.8, 14, 22.6], '#fff080', 1);
+      for (const [x, y] of [[4.4, 6], [27.6, 6.4]]) glint(g, x, y, 1.6, '#fff4a0');
+    },
+    brokers_cape(g) {
+      tunic(g, ['#b080d0', '#7a4aa0', '#52307a', '#321a50', '#180a28']);
+      for (const s of [-1, 1]) P.line(g, 16 + s * 3, 4.4, 16 + s * 1.2, 27.6, 1.2, MAT.gold[2]);
+      inkCircle(g, 16, 16, 3.6, mfill(g, 12, 12, 20, 20, MAT.gold)); P.circle(g, 16, 16, 2.4, MAT.gold[2]); P.rect(g, 15.4, 14.2, 1.2, 3.6, MAT.gold[4]); // a coin with a slot
+      for (const [x, y] of [[9.6, 24], [22.4, 24]]) inkCircle(g, x, y, 1.3, mfill(g, x - 1, y - 1, x + 1, y + 1, MAT.gold));
+    },
+    frostbeast_hide(g) {
+      tunic(g, IT_FUR);
+      for (const s of [-1, 1]) { inkCircle(g, 16 + s * 9, 4.4, 2.4, IT_FUR[2]); P.circle(g, 16 + s * 9, 4.4, 1.2, '#6a5a60'); } // the bear's ears on the shoulders
+      g.strokeStyle = 'rgba(52,64,74,0.8)'; g.lineWidth = 0.6; for (let i = 0; i < 9; i++) { const x = 9.6 + i * 1.6, y = 14 + (i % 3) * 4; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 0.6, y + 1.8); g.stroke(); }
+      for (let i = 0; i < 3; i++) P.line(g, 12 + i * 2.6, 18, 14 + i * 2.6, 25, 1, 'rgba(90,200,255,0.8)'); // claw marks of ice
+      P.glow(g, 16, 21, 6, '#80d8ff', 0.3);
+    },
+    toil_scars(g) {
+      tunic(g, ['#c8a888', '#9a7a5a', '#6e5238', '#463220', '#20160c']);
+      for (const [x0, y0, x1, y1] of [[10, 11, 15, 17], [18, 10, 22.6, 14.6], [12, 20, 20, 23]]) { P.line(g, x0, y0, x1, y1, 1.6, 'rgba(120,20,24,0.85)'); const n = 4; for (let i = 1; i < n; i++) { const x = x0 + (x1 - x0) * i / n, y = y0 + (y1 - y0) * i / n, dx = (y1 - y0) / Math.hypot(x1 - x0, y1 - y0) * 1.4, dy = -(x1 - x0) / Math.hypot(x1 - x0, y1 - y0) * 1.4; P.line(g, x - dx, y - dy, x + dx, y + dy, 0.5, '#e8d0b0'); } }
+      P.rect(g, 8.6, 25, 15, 1.2, 'rgba(20,12,6,0.6)');
+    },
+    fervor_mail(g) {
+      cuirass(g, ['#ffc8a0', '#d87a4a', '#9a4424', '#5a2410', '#240c04'], { trim: MAT.gold[1] });
+      itFlame(g, 16, 15.4, 3.6, 0.5);
+      for (const s of [-1, 1]) P.line(g, 16 + s * 5, 21, 16 + s * 2, 26, 1, MAT.gold[1]);
+      for (const [x, y] of [[9.4, 12], [22.6, 12]]) rivet(g, x, y, 0.8, MAT.gold);
+    },
+    blood_shirt(g) {
+      tunic(g, ['#f4ece0', '#dcd0c0', '#b0a290', '#766a5a', '#3a342c']);
+      g.save(); g.beginPath(); g.rect(0, 15, 32, 17); g.clip(); tunic(g, BLOOD); g.restore(); // soaked from the hem up
+      g.beginPath(); g.moveTo(8.6, 15.2); for (let x = 8.6; x <= 23.6; x += 2.5) g.quadraticCurveTo(x + 1.25, 13.4 + (x % 5 ? 1 : 0), x + 2.5, 15.2); P.fill(g, BLOOD[2]);
+      for (const [x, l] of [[11, 3], [15.4, 4.6], [20, 2.4]]) { P.path(g, [x - 0.8, 14.6, x + 0.8, 14.6, x + 0.5, 14.6 - l, x, 13.6 - l, x - 0.5, 14.6 - l]); P.fill(g, BLOOD[2]); }
+      P.ell(g, 12, 21, 1.6, 0.9, 'rgba(255,140,150,0.45)');
+    },
+    chain_mail(g) {
+      tunic(g, MAT.steel);
+      g.save(); g.beginPath(); g.rect(8, 9, 16, 19); g.clip(); g.strokeStyle = G.rgba(MAT.steel[4], 0.75); g.lineWidth = 0.5;
+      for (let r = 0; r < 9; r++) for (let c = 0; c < 8; c++) { g.beginPath(); g.ellipse(8.6 + c * 2.2 + (r % 2) * 1.1, 10 + r * 2, 1, 0.8, 0, 0, Math.PI * 2); g.stroke(); }
+      g.restore();
+      P.rect(g, 8.6, 18.6, 15, 2.4, INK); P.rect(g, 8.6, 19, 15, 1.6, mfill(g, 8, 19, 24, 21, MAT.leather)); P.rrect(g, 14.6, 18.4, 2.8, 2.8, 0.4, mfill(g, 14, 18, 18, 22, MAT.iron));
+    },
+    war_horn(g) {
+      g.strokeStyle = INK; g.lineWidth = 1.8; g.beginPath(); g.moveTo(6, 17); g.bezierCurveTo(4, -2, 26, -4, 24.6, 24); g.stroke(); g.strokeStyle = MAT.leather[1]; g.lineWidth = 1; g.stroke(); // the strap
+      inkPath(g, () => { g.beginPath(); g.moveTo(4.6, 14); g.quadraticCurveTo(10, 29, 24, 24.6); g.lineTo(28.4, 20.6); g.lineTo(28.8, 29); g.lineTo(24.6, 28.6); g.quadraticCurveTo(8, 32, 3, 15.4); g.closePath(); }, mfill(g, 3, 14, 29, 30, IT_BONE), 1.2);
+      for (const [x, y] of [[9, 24.4], [17, 27]]) { g.strokeStyle = INK; g.lineWidth = 2.6; g.beginPath(); g.moveTo(x - 1.2, y - 2.2); g.lineTo(x + 1.2, y + 2.2); g.stroke(); g.strokeStyle = MAT.bronze[1]; g.lineWidth = 1.6; g.stroke(); }
+      P.ell(g, 26.6, 24.8, 1.2, 3.4, '#1a0e06'); P.glow(g, 28, 24.6, 6, '#ffb070', 0.35);
+    },
+    seal_rebirth(g) {
+      itChain(g, MAT.gold);
+      P.glow(g, 16, 19, 11, '#ff9030', 0.45);
+      inkCircle(g, 16, 19, 8.4, mfill(g, 8, 11, 24, 27, MAT.gold));
+      P.circle(g, 16, 19, 6.4, P.rg(g, 16, 18, 7, ['#ffb070', '#b02a10', '#4a0a04']));
+      for (const s of [-1, 1]) sil(g, [16, 18, 16 + s * 5.4, 14.4, 16 + s * 4.4, 18.4, 16 + s * 2.4, 20.6], P.lg(g, 16, 0, 16 + s * 5, 0, ['#fff0a0', '#ff9030']), 0.6); // a phoenix's wings
+      itFlame(g, 16, 20.6, 1.8); P.circle(g, 16, 16.4, 1.1, '#fff0a0');
+    },
+    philosopher_stone(g) {
+      itChain(g, MAT.gold, 10);
+      P.glow(g, 16, 19.6, 10, '#ff3040', 0.55);
+      inkPath(g, () => { g.beginPath(); g.moveTo(16, 10); g.lineTo(22.6, 16.4); g.lineTo(20.4, 26.4); g.lineTo(11.6, 26.4); g.lineTo(9.4, 16.4); g.closePath(); }, P.rg(g, 14.4, 16, 12, ['#ffb0b0', '#e0182c', '#5a0410']), 1.2);
+      g.strokeStyle = 'rgba(255,200,200,0.55)'; g.lineWidth = 0.5; g.beginPath(); g.moveTo(16, 10); g.lineTo(16, 26.4); g.moveTo(9.4, 16.4); g.lineTo(16, 19); g.lineTo(22.6, 16.4); g.moveTo(11.6, 26.4); g.lineTo(16, 19); g.lineTo(20.4, 26.4); g.stroke();
+      for (const [x0, y0, x1, y1] of [[9.4, 16.4, 22.6, 16.4], [11.6, 26.4, 16, 10], [20.4, 26.4, 16, 10]]) inkLine(g, x0, y0, x1, y1, 0.6, MAT.gold[1]); // a cage of gold wire
+      P.rect(g, 13.4, 13.4, 1.2, 1.2, '#ffffff');
+    },
+    collar_confidence(g) {
+      band(g, 16, 14.6, 11.4, 7, MAT.leather, 4.6);
+      for (let i = 0; i < 7; i++) { const a = Math.PI * (0.15 + i * 0.12); rivet(g, 16 + Math.cos(a) * 11.4, 14.6 + Math.sin(a) * 7, 0.95, MAT.silver); }
+      inkPath(g, () => { g.beginPath(); g.rect(12.6, 18.6, 6.8, 5); }, mfill(g, 12, 18, 20, 24, MAT.gold), 1); P.rect(g, 14.2, 20, 3.6, 2.2, '#2a1a0a');
+      chain(g, 16, 23.6, 16, 27, MAT.silver); inkCircle(g, 16, 28.6, 1.8, mfill(g, 14, 27, 18, 31, MAT.gold));
+    },
+    maiden_tear(g) {
+      itChain(g, MAT.silver);
+      P.glow(g, 16, 20, 10, '#a0e8ff', 0.5);
+      inkPath(g, () => { g.beginPath(); g.moveTo(16, 9.6); g.bezierCurveTo(19, 15, 22.6, 18.6, 22.6, 22); g.arc(16, 22, 6.6, 0, Math.PI); g.bezierCurveTo(9.4, 18.6, 13, 15, 16, 9.6); }, P.rg(g, 14, 20, 10, ['#ffffff', '#a0e0ff', '#3a78c8']), 1.1);
+      sil(g, [13.4, 8.6, 18.6, 8.6, 17.6, 11.4, 14.4, 11.4], mfill(g, 13, 8, 19, 12, MAT.silver), 0.8);
+      P.ell(g, 13.4, 21, 1.2, 2.4, 'rgba(255,255,255,0.75)', 0.3);
+    },
+    gorgon_mask(g) {
+      for (const [x0, y0, x1, y1, x2, y2] of [[9, 9, 3, 6, 4, 1.6], [12, 6, 9, 1, 12.6, 0.6], [20, 6, 23, 1, 19.4, 0.6], [23, 9, 29, 6, 28, 1.6], [7.6, 14, 2, 14, 2.6, 9.6], [24.4, 14, 30, 14, 29.4, 9.6]]) {
+        g.lineCap = 'round'; g.strokeStyle = INK; g.lineWidth = 2.6; g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo(x1, y1, x2, y2); g.stroke(); g.strokeStyle = '#5aa050'; g.lineWidth = 1.6; g.stroke(); P.circle(g, x2, y2, 1.3, '#3a7a34');
+      }
+      inkPath(g, () => { g.beginPath(); g.moveTo(16, 4); g.quadraticCurveTo(25.6, 4.6, 25, 15); g.quadraticCurveTo(24, 25, 16, 29); g.quadraticCurveTo(8, 25, 7, 15); g.quadraticCurveTo(6.4, 4.6, 16, 4); }, mfill(g, 7, 4, 25, 29, ['#c8f0b0', '#86c070', '#5a8a48', '#34562a', '#162412']), 1.3);
+      for (const x of [12.4, 19.6]) { P.ell(g, x, 14, 2.6, 1.6, INK); P.ell(g, x, 14, 2, 1.1, '#ffe040'); P.ell(g, x, 14, 0.35, 1, INK); P.glow(g, x, 14, 3.4, '#ffe040', 0.5); }
+      P.line(g, 13.4, 23, 18.6, 23, 0.8, INK); for (const x of [14, 18]) P.path(g, [x - 0.5, 23, x + 0.5, 23, x, 24.6]), P.fill(g, '#ffffff');
+    },
+    wind_crown(g) {
+      g.strokeStyle = 'rgba(200,240,255,0.7)'; g.lineWidth = 0.8; for (const [x, y, r, a0, a1] of [[5, 10, 3, 0.4, 3.8], [27, 9, 2.6, -0.6, 2.8], [16, 3, 2.2, 0.2, 3]]) { g.beginPath(); g.arc(x, y, r, a0, a1); g.stroke(); }
+      itCrown(g, MAT.silver, [10, 6, 10]);
+      for (const x of [5, 16, 27]) gemCut(g, x, x === 16 ? 7.4 : 11.4, 1.3, '#60d8ff');
+      g.strokeStyle = '#ffffff'; g.lineWidth = 0.7; g.beginPath(); g.moveTo(7, 23.6); g.bezierCurveTo(11, 21.6, 14, 25.4, 18, 23.4); g.bezierCurveTo(21, 22, 23, 24.6, 25.6, 23); g.stroke();
+    },
+    madness_mask(g) {
+      P.glow(g, 16, 16, 13, '#c040ff', 0.35);
+      inkPath(g, () => { g.beginPath(); g.moveTo(16, 3.6); g.quadraticCurveTo(26.4, 4, 25.6, 15); g.quadraticCurveTo(24.4, 25, 16, 28.6); g.quadraticCurveTo(7.6, 25, 6.4, 15); g.quadraticCurveTo(5.6, 4, 16, 3.6); }, mfill(g, 6, 4, 26, 29, ['#ffffff', '#ece6f0', '#bab0c4', '#7a6e86', '#3a3244']), 1.3);
+      g.save(); g.beginPath(); g.moveTo(16, 3.6); g.quadraticCurveTo(26.4, 4, 25.6, 15); g.quadraticCurveTo(24.4, 25, 16, 28.6); g.quadraticCurveTo(7.6, 25, 6.4, 15); g.quadraticCurveTo(5.6, 4, 16, 3.6); g.clip(); // the dark half, inside the mask
+      g.beginPath(); g.moveTo(16, 3); g.lineTo(14.6, 10); g.lineTo(17.4, 16); g.lineTo(15, 22); g.lineTo(16.4, 29.4); g.lineTo(28, 29.4); g.lineTo(28, 3); g.closePath(); g.clip();
+      P.rect(g, 0, 0, 32, 32, mfill(g, 6, 4, 26, 29, ['#6a5a7a', '#3a2e4a', '#241a30', '#140e1c', '#06040a'])); g.restore();
+      for (const [x, c] of [[11.6, '#e040ff'], [20.4, '#ffe040']]) { P.ell(g, x, 13, 2.4, 1.8, INK); P.eye(g, x + (x < 16 ? 0.4 : -0.6), 13.2, 0.7, c); }
+      g.strokeStyle = INK; g.lineWidth = 1.2; g.beginPath(); g.moveTo(9.6, 20); g.quadraticCurveTo(14, 25.6, 22.6, 19); g.stroke(); // a crooked grin
+      for (const x of [12, 15, 18.4]) P.line(g, x, 21 + (x - 9.6) * 0.1, x + 0.2, 22.8, 0.5, INK);
+    },
+    warchief_visor(g) {
+      for (const s of [-1, 1]) sil(g, [16 + s * 9, 11, 16 + s * 15, 5, 16 + s * 13.4, 0.8, 16 + s * 12.6, 5.6, 16 + s * 8, 8], mfill(g, 1, 0, 31, 12, IT_BONE), 1); // horns
+      g.beginPath(); g.moveTo(16, 3.4); g.quadraticCurveTo(21, 0, 24, 3.4); g.quadraticCurveTo(20, 2.6, 16, 5.4); P.fill(g, '#a01424'); // a red plume
+      inkPath(g, () => { g.beginPath(); g.moveTo(6, 28); g.lineTo(6, 14); g.quadraticCurveTo(6, 4.2, 16, 3.8); g.quadraticCurveTo(26, 4.2, 26, 14); g.lineTo(26, 28); g.lineTo(19, 28); g.lineTo(16, 24); g.lineTo(13, 28); g.closePath(); }, mfill(g, 6, 4, 26, 28, MAT.iron), 1.4);
+      P.rect(g, 7, 13, 18, 2.6, INK); P.glow(g, 16, 14.3, 6, '#ff3020', 0.5); for (const x of [11.6, 20.4]) P.rect(g, x - 1.2, 13.8, 2.4, 1, '#ff6040');
+      for (const [x, y] of [[8, 10], [24, 10], [8, 25], [24, 25]]) rivet(g, x, y, 0.9, MAT.bronze);
+      P.line(g, 16, 16, 16, 23, 1, MAT.iron[4]);
+    },
+    ruby_circlet(g) {
+      band(g, 16, 18.6, 11.6, 5.6, MAT.gold, 2.6);
+      for (const s of [-1, 1]) sil(g, [16 + s * 3.6, 15.4, 16 + s * 8, 11, 16 + s * 7, 16.2], mfill(g, 8, 11, 24, 17, MAT.gold), 0.9);
+      sil(g, [11.8, 15.4, 16, 7.6, 20.2, 15.4, 16, 18], mfill(g, 11, 7, 21, 18, MAT.gold), 1);
+      P.glow(g, 16, 13.6, 7, '#ff2030', 0.55); gemCut(g, 16, 13.6, 2.8, '#e8102a');
+      for (const x of [8, 24]) gemCut(g, x, 20.8, 1.1, '#ff4050');
+      for (const [x, y] of [[5, 9], [27, 9.6]]) itFlame(g, x, y, 1.2);
+    },
+    thunder_crown(g) {
+      P.glow(g, 16, 12, 12, '#fff080', 0.35);
+      itCrown(g, ['#8a8aa8', '#5a5a78', '#3a3a52', '#22223a', '#0e0e1a'], [8, 4, 8, 4, 8]);
+      for (const [x, y] of [[5, 9], [16, 5.4], [27, 9]]) zig(g, [x - 0.8, y - 3.4, x + 0.8, y - 1.6, x - 0.6, y - 1, x + 0.6, y + 1], '#fff080', 0.4);
+      gemCut(g, 16, 23.4, 2, '#ffe040'); for (const x of [9, 23]) gemCut(g, x, 23.4, 1.2, '#b060ff');
+    },
+    necro_clutch(g) {
+      P.glow(g, 16, 10, 11, '#60ff90', 0.4);
+      gauntlet(g, IT_BONE, ['#4a5a4a', '#2e3a2e', '#1e281e', '#121812', '#060806'], { claws: true });
+      for (let i = 0; i < 4; i++) P.circle(g, 10.9 + i * 3.5, 9.6, 0.6, IT_BONE[3]);
+      inkCircle(g, 16, 18, 2.4, P.vol(g, 16, 18, 2.4, '#e8dcc0')); for (const x of [15.2, 16.8]) P.circle(g, x, 17.8, 0.5, '#50ff90'); // a skull on the back of the hand
+    },
+    longfinger_gloves(g) {
+      g.save(); g.translate(16, 16); g.scale(1, 1.08); g.translate(-16, -17); gauntlet(g, ['#9a7a9a', '#6a4a6a', '#482e48', '#2c1a2c', '#140a14'], MAT.leather); g.restore();
+      stitch(g, [10, 17, 22.4, 17], 'rgba(230,200,230,0.6)');
+      inkCircle(g, 25.6, 5.6, 3, mfill(g, 22, 2, 29, 9, MAT.gold)); P.rect(g, 25, 4, 1.2, 3.2, MAT.gold[3]); // a coin held up
+    },
+    spellcaster_gloves(g) {
+      P.glow(g, 16, 7, 10, '#b070ff', 0.45);
+      gauntlet(g, ['#b8a0e0', '#7a5ab0', '#52387e', '#321e52', '#160a28'], MAT.gold);
+      g.strokeStyle = '#e0c0ff'; g.lineWidth = 0.7; g.beginPath(); g.arc(16, 18, 2.8, 0, Math.PI * 2); g.moveTo(16, 14.4); g.lineTo(16, 21.6); g.moveTo(12.6, 18); g.lineTo(19.4, 18); g.stroke();
+      for (const [x, y] of [[9, 3], [16.8, 1.6], [23, 4]]) glint(g, x, y, 1.4, '#e8d0ff');
+    },
+    frost_thorns(g) {
+      gauntlet(g, IT_ICE, MAT.silver);
+      for (const [x, y, a, l] of [[9, 16, 3.4, 5], [23.4, 16, -0.2, 5], [16, 21, 1.6, 4], [10, 20, 2.6, 4]]) { g.save(); g.translate(x, y); g.rotate(a); sil(g, [0, -1, l, 0, 0, 1], P.lg(g, 0, 0, l, 0, ['#ffffff', '#80d0ff']), 0.7); g.restore(); }
+      P.glow(g, 16, 17, 6, '#a0e8ff', 0.35);
+    },
+    unholy_touch(g) {
+      P.glow(g, 16, 8, 12, '#80ff40', 0.35);
+      gauntlet(g, ['#6a6a6a', '#3e3e44', '#26262c', '#16161a', '#060608'], ['#5a6a2a', '#3a4818', '#26300e', '#161c08', '#080a02'], { claws: true });
+      for (const [x, y] of [[10.9, 3.6], [14.4, 1.4], [17.9, 2.2], [21.4, 5.4]]) P.circle(g, x, y, 0.9, '#a0ff50');
+      P.eye(g, 16, 18, 1.4, '#a0ff50');
+    },
+    leech_fingers(g) {
+      gauntlet(g, ['#c87a7a', '#9a3e44', '#6a2228', '#401014', '#1e0608'], MAT.leather);
+      g.lineCap = 'round'; for (const [w, c] of [[3.6, INK], [2.6, '#3a4a1a'], [1, '#7a9a3a']]) { g.strokeStyle = c; g.lineWidth = w; g.beginPath(); g.moveTo(11, 19.6); g.bezierCurveTo(13, 16, 17, 21.6, 21, 17.4); g.stroke(); } // a leech on the back of the hand
+      P.circle(g, 21, 17.4, 1, '#1a0a0a');
+      for (const [x, y] of [[12, 26], [20, 26.4]]) { P.path(g, [x - 0.7, y - 1, x + 0.7, y - 1, x, y + 1]); P.fill(g, BLOOD[1]); }
+    },
+    hunting_gloves(g) {
+      gauntlet(g, ['#c8a070', '#94703e', '#664a24', '#402c12', '#1e1206'], ['#5a7a3a', '#3e5a26', '#2a3e18', '#1a280e', '#0a1004']);
+      g.save(); g.translate(24, 6); g.rotate(0.5); sil(g, [0, -1, 1.8, 3, 1.4, 12, 0, 13, -1.4, 12, -1.8, 3], P.lg(g, -2, 0, 2, 0, ['#ffffff', '#c8b8a0', '#7a6a50']), 0.8); P.line(g, 0, 0, 0, 13, 0.4, '#5a4a30'); g.restore(); // a feather tucked in the cuff
+      stitch(g, [10, 17.4, 22.4, 17.4]);
+    },
+    pest_ring(g) {
+      ringOf(g, MAT.bronze);
+      inkPath(g, () => { g.beginPath(); g.moveTo(9.6, 11); g.quadraticCurveTo(12, 5, 18, 6); g.lineTo(23.6, 9.6); g.lineTo(18.4, 13.6); g.quadraticCurveTo(12, 15, 9.6, 11); }, P.vol(g, 15, 9, 7, '#e8dcc0'), 1); // a rat's skull
+      P.circle(g, 17.4, 9.2, 1.1, INK); P.circle(g, 17.4, 9.2, 0.5, '#50ff90');
+      for (const x of [21.4, 22.6]) P.line(g, x, 11.4, x - 0.6, 14.4, 0.6, '#fffae0');
+      g.strokeStyle = INK; g.lineWidth = 0.9; g.beginPath(); g.moveTo(9.6, 11); g.quadraticCurveTo(5, 14, 6.6, 18); g.stroke(); // its tail round the band
+    },
+    ring_ember(g) { ringOf(g, MAT.gold); P.glow(g, 16, 10.8, 7, '#ff7020', 0.55); setting(g, MAT.gold, '#ff6a20'); itFlame(g, 16, 4, 1.4); },
+    ring_rime(g) { ringOf(g, MAT.silver); P.glow(g, 16, 10.8, 7, '#80d8ff', 0.5); setting(g, MAT.silver, '#60c8ff'); for (const s of [-1, 1]) { g.save(); g.translate(16 + s * 6.6, 10); g.rotate(s * 0.5 - (s < 0 ? Math.PI : 0)); sil(g, [0, -0.9, 4, 0, 0, 0.9], '#e0f6ff', 0.6); g.restore(); } },
+    ring_storm(g) { ringOf(g, MAT.silver); P.glow(g, 16, 10.8, 7, '#fff080', 0.5); setting(g, MAT.silver, '#ffe040'); zig(g, [23, 3, 25, 6.4, 23.6, 7, 25.6, 10.4], '#fff080', 0.5); zig(g, [8.6, 3.6, 6.8, 6.6, 8.2, 7.2, 6.4, 10], '#fff080', 0.5); },
+    ring_earth(g) { ringOf(g, MAT.bronze); setting(g, MAT.bronze, '#7a9a40'); for (const s of [-1, 1]) P.ell(g, 16 + s * 6.6, 13.4, 2.4, 1.1, '#5a7a2a', s * 0.5); P.circle(g, 16, 27.4, 1.2, '#6a4a24'); },
+    echo_band(g) {
+      ringOf(g, DARKSTEEL);
+      inkCircle(g, 16, 10, 4.6, mfill(g, 11, 5, 21, 15, DARKSTEEL)); P.circle(g, 16, 10, 1.8, INK);
+      g.lineCap = 'round'; for (let i = 1; i <= 3; i++) { g.strokeStyle = G.rgba('#f0e8d0', 1 - i * 0.25); g.lineWidth = 0.8; for (const s of [-1, 1]) { g.beginPath(); g.arc(16, 10, 4.6 + i * 2.4, s < 0 ? Math.PI * 0.75 : -Math.PI * 0.25, s < 0 ? Math.PI * 1.25 : Math.PI * 0.25); g.stroke(); } }
+    },
+    blight_ring(g) {
+      ringOf(g, MAT.iron);
+      P.glow(g, 16, 10.8, 8, '#90ff40', 0.5); setting(g, MAT.iron, '#70d030');
+      for (const [x, l] of [[12.4, 3.4], [19.4, 2.2]]) { P.path(g, [x - 0.7, 14.6, x + 0.7, 14.6, x + 0.5, 14.6 + l, x, 15.4 + l, x - 0.5, 14.6 + l]); P.fill(g, '#80c030'); }
+      for (const [x, y] of [[6, 5], [25.6, 4.6]]) P.circle(g, x, y, 0.8, 'rgba(160,255,80,0.7)');
+    },
   });
   Object.assign(GEAR, GEAR2);
 
@@ -1963,7 +2213,7 @@
     else if (pre === 'tr') { badge(g, C.elevatedTraits[id] ? '#b07020' : '#4a3a5a', true); const gl = GL[TRAIT_GLYPH[id]]; if (gl) { g.save(); g.translate(16, 16); g.scale(0.72, 0.72); g.translate(-16, -16); gl(g); g.restore(); } }
     else if (pre === 'g' && GEAR[id]) GEAR[id](g);
     else if (pre === 's') { g.globalAlpha = 0.25; const t = { head: 'warden_helm', neck: 'wrath_amulet', chest: 'stalwart_cuirass', hands: 'stalker_grips', feet: 'striders', ring1: 'oak_band', ring2: 'oak_band' }[id]; if (GEAR[t]) GEAR[t](g); }
-    else if (pre === 'p') { const col = { remembrance: '#60a0ff', resonance: '#ff9a30', lethe: '#8a8a9a' }[id]; P.glow(g, 16, 20, 12, col, 0.5); GL.flask(g, col); }
+    else if (pre === 'p') { const col = { remembrance: '#60a0ff', resonance: '#ff9a30', lethe: '#8a8a9a', renewal: '#50e0a0', visions: '#e070ff' }[id]; P.glow(g, 16, 20, 12, col, 0.5); GL.flask(g, col); }
     else if (pre === 'herb') spriteIcon(g, 'herb_' + id, 46); // the sprig is small inside its glow: a larger box fills the slot
     else if (pre === 'a' && ART[id]) { reliquary(g, (ARTIFACT[id] || [0, '#6a5a7a'])[1]); g.save(); arch(g, 4.5, 27.5, 4.3, 27.9, 13.2); g.clip(); ART[id](g); g.restore(); }
     else if (pre === 'a' && ARTIFACT[id]) { badge(g, ARTIFACT[id][1], true); g.save(); g.translate(16, 16); g.scale(0.7, 0.7); g.translate(-16, -16); GL[ARTIFACT[id][0]](g); g.restore(); }

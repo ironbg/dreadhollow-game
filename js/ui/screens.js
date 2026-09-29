@@ -193,6 +193,7 @@
     },
     well() {
       const s = S(), box = h('div');
+      box.append(ui.keeperPanel('wellkeeper')); if (!M.npcFreed('wellkeeper')) return box;
       box.append(h('div.panel.item', h('div.ico', A.img('well')), h('div.grow', h('div.t', t('well.keeper')), h('div.d', t('well.keeperDesc')))));
       if (!s.wellkeeper.length) { box.append(h('div.panel.center.muted', { style: { marginTop: '8px' } }, t('well.none'))); return box; }
       s.wellkeeper.forEach((it, i) => {
@@ -277,6 +278,7 @@
     },
     archive() {
       const s = S(), root = h('div');
+      root.append(ui.keeperPanel('scriptor')); if (!M.npcFreed('scriptor')) return root;
       root.append(h('div.panel.item', h('div.ico', A.img('shard')), h('div.grow', h('div.t', t('archive.title')), h('div.d', t('archive.desc'))), h('div.shardcount', A.img('shard'), h('b', M.shardsFree()), h('span.small.muted', ' / ' + (s.shards || 0)))));
       if (s.archiveRefund) { root.append(h('div.panel.note.goldtxt', t('archive.refunded', { n: s.archiveRefund }))); s.archiveRefund = 0; DH.save.persist(); }
       // every hero keeps a separate Archive: pick whose shards you are assigning
@@ -301,6 +303,7 @@
     },
     brew() {
       const s = S(), root = h('div');
+      root.append(ui.keeperPanel('cupbearer')); if (!M.npcFreed('cupbearer')) return root;
       root.append(h('div.panel.item', h('div.ico', A.img('p_resonance')), h('div.grow', h('div.t', t('brew.title')), h('div.d', t('brew.desc', { n: E.POTION_USES_PER_RUN })))));
       root.append(h('div.row.herbs', E.herbs.map((k) => h('div.panel.herb', A.img('herb_' + k), h('b', s.herbs[k] || 0), h('span.small', t('herb.' + k))))));
       E.potionOrder.forEach((k) => {
