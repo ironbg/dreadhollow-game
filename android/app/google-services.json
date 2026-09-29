@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "553225221148",
+    "project_id": "dreadhollow-b49c7",
+    "storage_bucket": "dreadhollow-b49c7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:553225221148:android:214d5d500f19294dd95bd9",
+        "android_client_info": {
+          "package_name": "com.dreadhollow.game"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "553225221148-hssp75qf9vgfq1apbnemcditmkpqafji.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dreadhollow.game",
+            "certificate_hash": "e05e912f0910e40ee30fac7f22712600242c7a00"
+          }
+        },
+        {
+          "client_id": "553225221148-humjb7t4pr5b9lq5o2l3g147s63jb3fe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvOHwRt843b2niGPxfLDqRufKXcUsa3AY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "553225221148-humjb7t4pr5b9lq5o2l3g147s63jb3fe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
