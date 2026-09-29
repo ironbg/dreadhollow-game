@@ -74,7 +74,14 @@
   };
   R.computeAbility = function (a) {
     const def = C.abilities[a.id], b = def.base, m = this.abilityMods(a), P = this.P;
-    const tags = def.tags, isProj = tags.includes('projectile'), isSum = tags.includes('summon');
+    let tags = def.tags;
+    for (const u of this.traits.up[a.id] || []) { // an upgrade may change the damage type
+      const ut = C.UPGRADE_TAGS[u]; if (!ut) continue;
+      tags = tags.slice();
+      if (ut.swap) tags = tags.map((x) => (x === ut.swap[0] ? ut.swap[1] : x));
+      if (ut.add) ut.add.forEach((x) => { if (!tags.includes(x)) tags.push(x); });
+    }
+    const isProj = tags.includes('projectile'), isSum = tags.includes('summon');
     a.tags = tags; a.noCrit = !!def.noCrit; a.split = !!def.split;
     const fx = this.fx_ || {};
     // Pale Chalice: area bonuses sap effect chance; Elemental Crucible: far fewer effects, but they hit twice as hard
@@ -100,6 +107,8 @@
       purge: m.purge || 0, pulse: m.pulse || 0, falloff: def.falloff || 0,
     };
     for (const k of C.UNIQUE_MODS) if (m[k] && a.s[k] == null) a.s[k] = m[k];
+    if (a.s.froststrike) { a.s.frost += a.s.burn; a.s.burn = 0; } // turned to ice: its Burn becomes Frost
+    if (a.s.frozenfire) a.s.burn += a.s.frost; // Frozen Fire: every chance of Frost is a chance of Burn too
     if (def.msToAs) { a.s.cd /= 1 + 0.5 * Math.max(0, a.s.ms); a.s.ms = 0; } // Arquebus: Multistrike speeds up the reload instead of adding shots
     if (def.beat) {
       const want = def.beat / Math.max(0.25, 1 + P.as + (m.as || 0));
@@ -150,7 +159,7 @@
     for (const tg of a.tags) if (P.tag[tg]) pct += P.tag[tg];
     if (a.tags.includes('summon')) pct += P.summonPct;
     if (P.stillDmg && this.stillT > 0.4) pct += P.stillDmg;
-    const cm = this.critRoll(a), crit = cm > 1;
+    const cm = this.critRoll(a), crit = cm > 1; this.lastCrit = crit;
     const S = e.st;
     // Fragile / Affliction are applied before the damage of the same hit
     const cap = fx.edict ? 10 : Infinity; // Primal Edict: effect stacks are capped
@@ -277,6 +286,11 @@
     for (const e of list) { const d = Math.hypot(e.x - x, e.y - y) || 1; this.hit(e, a, m, (e.x - x) / d, (e.y - y) / d); }
     return list.length;
   };
+  /** Status stacks on a foe, all kinds together; and how many kinds it carries (Slow counts as one). */
+  R.stackCount = (e) => { const S = e.st; return (S.fragile || 0) + (S.affl || 0) + (S.decay || 0) + (S.burn || 0) + (S.frost || 0) + (S.spark || 0); };
+  R.statusKinds = (e) => { const S = e.st; return ['fragile', 'affl', 'decay', 'burn', 'frost', 'spark'].filter((k) => S[k] > 0).length + (e.slowS > 0 ? 1 : 0); };
+  /** The foe with the most life within `range` of the hero. */
+  R.strongest = function (range) { const p = this.player; let best = null; for (const e of this.enemies) { if (e.dead || e.def.prop || U.dist2(e.x, e.y, p.x, p.y) > range * range) continue; if (!best || e.hp > best.hp) best = e; } return best; };
   R.canHit = function (e, key, cd) {
     if (!e.hc) e.hc = {};
     const last = e.hc[key] == null ? -99 : e.hc[key];

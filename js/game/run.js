@@ -755,6 +755,8 @@
         e.reformed = true; e.hp = e.maxHp * 0.5; e.down = 2.6; e.st.burn = 0; this.burst(e.x, e.y, 10, ['#e6dcc0', '#8a6a4a'], 70); DH.audio.play('kill', e.painter); return;
       }
       e.dead = true;
+      if (e.plagued != null && this.time - e.plagued < 0.7) { const pa = this.abilities.find((x) => x.s && x.s.contagion); if (pa && this.zones.filter((z) => z.kind === 'pool').length < 14) this.zones.push({ kind: 'pool', a: pa, x: e.x, y: e.y, r: 16 * pa.s.area, life: 2, max: 2, tick: 0.2 }); } // Contagion
+      if (e.st.burn > 0) { const wf = this.abilities.find((x) => x.s && x.s.wildfire); if (wf) { for (const o of this.grid.query(e.x, e.y, 34, [])) if (!o.dead && o !== e && U.dist2(o.x, o.y, e.x, e.y) < 34 * 34) this.addBurn(o, 2, wf.s.dmg + this.P.addBase); } } // Wildfire
       const cols = e.def.particles || ['#e6dcc0', '#8a6a4a', '#7c1624'];
       if (e.def.hazard) { this.envBreak(e); return; } // braziers and ice spikes: no loot, a hazard
       if (e.def.prop) {

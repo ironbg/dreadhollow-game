@@ -21,7 +21,7 @@
   const PLANT_TAGS = { snare: ['physical', 'summon', 'area'], biter: ['physical', 'summon', 'melee'], pod: ['magic', 'summon', 'area'], spitter: ['magic', 'summon', 'projectile'] };
   // Alchemist's brews: the bomb (no puddle) and four elements, enabled by other sources of that element
   const BREW = { bomb: { tags: ['physical', 'area'], col: '#d8c8a0' }, fire: { tags: ['fire', 'area'], eff: 'burn', col: '#ff7a30' }, lightning: { tags: ['lightning', 'area'], eff: 'spark', col: '#fff080' },
-    ice: { tags: ['ice', 'area'], eff: 'frost', col: '#80d8ff' }, earth: { tags: ['physical', 'area'], eff: 'decay', col: '#9adf50' } };
+    ice: { tags: ['ice', 'area'], eff: 'frost', col: '#80d8ff' }, earth: { tags: ['physical', 'area'], eff: 'decay', col: '#9adf50' }, magic: { tags: ['magic', 'area'], eff: null, col: '#b080ff' } };
   C.BREW = BREW;
   const proj = (run, o) => { o.hit = o.hit || new Set(); o.life = o.life || 1; run.proj.push(o); return o; };
 
@@ -218,13 +218,17 @@
 
     /* ---------- tome abilities ---------- */
     hexlance: { fire(run, a) {
-      const p = run.player, s = a.s;
-      volley(run, a, 230, 0.12, false, (ang) => proj(run, { k: 'hex', a, x: p.x, y: p.y - 3, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 4, pierce: 999, life: 1.2, fork: s.fork }));
+      const p = run.player, s = a.s, shot = (ang) => proj(run, { k: 'hex', a, x: p.x, y: p.y - 3, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 4, pierce: 999, life: 1.2, fork: s.fork });
+      const base = volley(run, a, 230, 0.12, false, shot);
+      if (s.backshot) for (let i = 0; i < s.count; i++) shot(base + Math.PI + (i - (s.count - 1) / 2) * 0.12); // Crippling Cuts: behind you too
       DH.audio.play('hex');
     } },
     chakrams: { fire(run, a) {
       const p = run.player, s = a.s;
-      volley(run, a, 200, 0.3, false, (ang) => proj(run, { k: 'chakram', a, x: p.x, y: p.y, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 6 * Math.sqrt(s.area), pierce: 999, life: s.duration * 2 + 2, out: s.duration, cdHit: 0.3, orbit: s.orbit ? { a: ang, rad: 8, t: s.duration } : null }));
+      const blade = (ang, o) => proj(run, Object.assign({ k: 'chakram', a, x: p.x, y: p.y, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 6 * Math.sqrt(s.area), pierce: 999, life: s.duration * 2 + 2, out: s.duration, cdHit: 0.3, orbit: s.orbit ? { a: ang, rad: 8, t: s.duration } : null }, o));
+      const base = volley(run, a, 200, 0.3, false, (ang) => blade(ang));
+      if (s.crippling) for (const o of [-0.55, 0.55]) blade(base + o, { cripple: true }); // Crippling Blades
+      if (s.piercingblades) for (const o of [-0.9, 0.9]) blade(base + o, { a: run.subAb(a, 'pblade', ['magic', 'projectile'], 'fragile', 0.5), magicBlade: true }); // Piercing Blades
       DH.audio.play('blade');
     } },
     orbs: { update(run, a, dt) { orbit(run, a, dt, 'orb', 30, 6, 0.5); } },
@@ -241,20 +245,32 @@
       const n = stream ? 1 : s.count;
       for (let i = 0; i < n; i++) {
         const ang = base + (stream ? U.rand(-0.08, 0.08) : (i - (n - 1) / 2) * 0.24);
-        proj(run, { k: 'wave', a, x: p.x, y: p.y - 2, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 4, grow: 9 * s.area, pierce: 999, life: s.duration, max: s.duration, mult: stream ? 0.35 : 1 });
+        proj(run, { k: 'wave', a, x: p.x, y: p.y - 2, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 4, grow: 9 * s.area, pierce: 999, life: s.duration, max: s.duration, mult: stream ? 0.5 : 1 });
       }
       if (stream) a.cdNext = a.s.cd * 0.18;
       DH.audio.play('fire');
     } },
     stormsphere: { fire(run, a) {
       const p = run.player, s = a.s;
-      volley(run, a, 160, 0.35, false, (ang) => proj(run, { k: 'sphere', a, x: p.x, y: p.y - 3, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, r: 5, pierce: 999, life: s.duration, pulse: 0, cdHit: 99 }));
+      volley(run, a, 160, 0.35, false, (ang) => proj(run, { k: 'sphere', a, x: p.x, y: p.y - 3, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, r: 5, pierce: 999, life: s.duration * (s.discharge ? 0.6 : 1), pulse: 0, cdHit: 99, volt: 0 }));
       DH.audio.play('zap');
     } },
     halo: { update(run, a, dt) {
       const p = run.player, s = a.s; a.R = 42 * s.area; a.ang += dt; a.pulse = Math.max(0, (a.pulse || 0) - dt * 3);
       a.t -= dt;
-      if (a.t <= 0) { a.t = s.cd; a.pulse = 1; run.hitCircle(p.x, p.y, a.R, a); }
+      if (a.t <= 0) {
+        a.t = s.cd; a.pulse = 1;
+        if (!s.punitive && !s.sacredflame && !s.echolight) { run.hitCircle(p.x, p.y, a.R, a); return; }
+        run.grid.query(p.x, p.y, a.R + 20, tmp);
+        const list = tmp.filter((e) => !e.dead && U.dist2(e.x, e.y, p.x, p.y) < (a.R + e.r) * (a.R + e.r));
+        const m = list.length ? Math.max(1 / list.length, 0.12) : 1; // the light is shared among all it reaches
+        for (const e of list) {
+          const d = run.hit(e, a, m);
+          if (s.punitive) { e.st.fragile++; e.st.affl++; } // Punitive Light
+          if (s.echolight && d > 0 && Math.random() < 0.3) { const o = run.nearest(e.x, e.y, 30, new Set(list)); if (o) { run.rawDamage(o, d, '#ffe08a', a.id); run.fx.push({ k: 'chain', pts: [[e.x, e.y], [o.x, o.y]], life: 0.2, max: 0.2, seed: Math.random() * 999, color: '#ffe8a0' }); } } // Echoing Light
+        }
+        if (s.sacredflame && list.length) { const n = Math.round(2 * (1 + s.burn)), eb = (s.dmg + run.P.addBase) * 0.5; for (let i = 0; i < n; i++) run.addBurn(U.pick(list), 1, eb); } // Sacred Flame
+      }
     } },
     rifts: {
       fire(run, a) {
@@ -270,19 +286,33 @@
       for (let i = 0; i < 3 * s.count; i++) { // three meteors a cast, three more for every Amount past the first
         const tg = run.randomTarget(220); const x = tg ? tg.x + U.rand(-8, 8) : p.x + U.rand(-120, 120), y = tg ? tg.y + U.rand(-8, 8) : p.y + U.rand(-90, 90), R = 30 * s.area;
         run.fx.push({ k: 'meteor', x, y, R, life: 0.7, max: 0.7 }); run.castCircle(x, y, R, '#ff7a30');
-        run.after(0.7, () => { run.hitCircle(x, y, R, a); run.fx.push({ k: 'explosion', x, y, R, life: 0.4, max: 0.4 }); run.burst(x, y, 14, ['#ff6a1a', '#ffd35a', '#7c1624'], 100); run.shake = Math.max(run.shake, 2.5); DH.audio.play('boom'); });
+        run.after(0.7, () => {
+          run.hitCircle(x, y, R, a); run.fx.push({ k: 'explosion', x, y, R, life: 0.4, max: 0.4 }); run.burst(x, y, 14, ['#ff6a1a', '#ffd35a', '#7c1624'], 100); run.shake = Math.max(run.shake, 2.5); DH.audio.play('boom');
+          if (s.craters) run.puddle(a, 'fire', x, y, R * 0.8, 2.5, 0.1, false, 0); // Burning Craters
+          if (s.earthimpact) run.puddle(a, 'earth', x, y, R * 0.8, 2.5, 0.08); // Earthen Impact
+          if (s.scatter) for (let j = 0; j < 2; j++) { // Scattered Debris: two smaller rocks thrown off
+            const an = U.rand(0, TAU), sx = x + Math.cos(an) * R * 1.3, sy = y + Math.sin(an) * R * 1.3, sr = R * 0.6;
+            run.after(0.25, () => { run.hitCircle(sx, sy, sr, a, 0.5); run.fx.push({ k: 'explosion', x: sx, y: sy, R: sr, life: 0.3, max: 0.3 }); });
+          }
+        });
       }
     } },
     golem: { update(run, a) { run.keepAllies('golem', a, a.s.count); } },
-    phantom: { update(run, a) { run.keepAllies('phantom', a, a.s.count); } }, // lasting warriors, one per Amount
+    phantom: { update(run, a) { run.keepAllies('phantom', a, a.s.count); a.pos = a.s.spiritorbs ? [] : null; } }, // lasting warriors, one per Amount (their orbs are listed afresh each frame)
     avalanche: { fire(run, a) {
       // four waves of ice spikes run out along the diagonals; every Amount past the first adds four more between them
       const p = run.player, s = a.s, n = 4 * s.count, hit = new Set(), x0 = p.x, y0 = p.y;
       for (let i = 0; i < n; i++) {
         const ang = Math.PI / 4 + i * TAU / n;
-        for (let k = 0; k < 7; k++) {
-          const d = 16 + k * 15 * Math.sqrt(s.area), x = x0 + Math.cos(ang) * d, y = y0 + Math.sin(ang) * d, R = 13 * Math.sqrt(s.area);
-          run.after(k * 0.06, () => { run.fx.push({ k: 'spike', x, y, R, life: 0.5, max: 0.5 }); run.hitCircle(x, y, R, a, 1, (e) => !hit.has(e) && hit.add(e)); }); // each foe once a cast
+        const R = 13 * Math.sqrt(s.area), step = 15 * Math.sqrt(s.area);
+        const spike = (x, y, t, patch) => run.after(t, () => {
+          run.fx.push({ k: 'spike', x, y, R, life: 0.5, max: 0.5 }); run.hitCircle(x, y, R, a, 1, (e) => !hit.has(e) && hit.add(e)); // each foe once a cast
+          if (patch) run.puddle(a, 'ice', x, y, R, 2.5, 0.15, true); // Quick Freeze: a patch of ice that slows
+        });
+        for (let k = 0; k < 7; k++) spike(x0 + Math.cos(ang) * (16 + k * step), y0 + Math.sin(ang) * (16 + k * step), k * 0.06, s.icetrail && k % 2 === 1);
+        if (s.debris) for (const o of [-0.6, 0.6]) { // Debris: the wave breaks in two near its end
+          const bx = x0 + Math.cos(ang) * (16 + 4 * step), by = y0 + Math.sin(ang) * (16 + 4 * step);
+          for (let k = 1; k <= 3; k++) spike(bx + Math.cos(ang + o) * k * step, by + Math.sin(ang + o) * k * step, (4 + k) * 0.06, false);
         }
       }
       DH.audio.play('frost');
@@ -290,19 +320,27 @@
     hail: { fire(run, a) {
       // Hailstorm gathers hailstones while the hero keeps moving and drops them all, heavier, once they stop
       const p = run.player, s = a.s; a.store = a.store || 0;
+      if (p.moving && s.hailspikes) { const R = 16 * Math.sqrt(s.area); run.fx.push({ k: 'spike', x: p.x, y: p.y + 2, R, life: 0.45, max: 0.45 }); run.hitCircle(p.x, p.y, R, a, 0.6); } // Hailstorm Spikes
       if (p.moving && a.store < s.count * 5) { a.store += s.count; return; }
       const heavy = a.store > 0, n = Math.max(s.count, a.store), k = heavy ? 1.3 : 1; a.store = 0;
       for (let i = 0; i < n; i++) {
         const tg = run.randomTarget(170); const x = tg ? tg.x + U.rand(-6, 6) : p.x + U.rand(-100, 100), y = tg ? tg.y + U.rand(-6, 6) : p.y + U.rand(-80, 80), R = 12 * s.area * (heavy ? 1.2 : 1);
         run.after(i * 0.04, () => run.fx.push({ k: 'hail', x, y, R, life: 0.35, max: 0.35 }));
-        run.after(0.3 + i * 0.04, () => { run.hitCircle(x, y, R, a, k); run.burst(x, y, 5, ['#e8f8ff', '#9fd8ff'], 50); });
+        run.after(0.3 + i * 0.04, () => {
+          run.hitCircle(x, y, R, a, k); run.burst(x, y, 5, s.frozenfire ? ['#ffd35a', '#ff7a30'] : ['#e8f8ff', '#9fd8ff'], 50);
+          if (s.vortex && heavy) { // Hailstorm Vortex: foes round the impact are dragged into it and slowed
+            const VR = R * 3; run.grid.query(x, y, VR, tmp);
+            for (const e of tmp) if (!e.dead && !e.boss) { const dx = x - e.x, dy = y - e.y, d = Math.hypot(dx, dy) || 1; if (d < VR) { e.kx += dx / d * 140 / Math.sqrt(e.mass); e.ky += dy / d * 140 / Math.sqrt(e.mass); run.addSlow(e, 3); } }
+            run.fx.push({ k: 'ring', x, y, life: 0.4, max: 0.4, r0: VR, r1: 4, color: '#a8e8ff' });
+          }
+        });
       }
       DH.audio.play('glass');
     } },
     // a heavy ball on a chain swung in a slow figure-eight through the hero: the chain pays out to full reach and draws back in,
     // while the whole eight turns slowly so every side is swept in time; more balls swing crossed eights
     flail: { update(run, a, dt) {
-      const p = run.player, s = a.s, n = s.count, reach = 56 * (0.55 + 0.45 * s.area), wide = reach * 0.62;
+      const p = run.player, s = a.s, n = s.count + (s.butterfly ? 1 : 0), reach = 56 * (0.55 + 0.45 * s.area), wide = reach * 0.62; // Butterfly Swing: one more ball
       a.ph = (a.ph || 0) + s.speed * 0.55 * dt; // along the eight: about 5 s a figure at base speed
       a.rot = (a.rot == null ? Math.random() * TAU : a.rot) + s.speed * 0.13 * dt; // the eight itself turns
       a.pos = a.pos || []; a.pos.length = n;
@@ -312,21 +350,44 @@
         const prev = a.pos[i], trail = prev ? prev.trail : [];
         trail.push(bx, by); if (trail.length > 12) trail.splice(0, 2);
         a.pos[i] = { x: bx, y: by, a: Math.atan2(by - (prev ? prev.y : by), bx - (prev ? prev.x : bx)), kind: 'flail', trail, spin: (prev ? prev.spin : 0) + dt * 5 };
-        run.hitCircle(bx, by, 11 * Math.sqrt(s.area), a, 1, (e) => run.canHit(e, a.id, 0.5));
+        const hits = run.hitCircle(bx, by, 11 * Math.sqrt(s.area), a, 1, (e) => run.canHit(e, a.id, 0.5));
+        if (s.spikedchain) for (const f of [0.3, 0.55, 0.8]) { // Spiked Chain: the links wound and slow
+          const cx = p.x + (bx - p.x) * f, cy = p.y + (by - p.y) * f;
+          run.hitCircle(cx, cy, 6, a, 0.4, (e) => run.canHit(e, 'fch' + i, 0.5) && (run.addSlow(e, 2), true));
+        }
+        if (s.unleashed && hits && (a.uT = (a.uT || 0)) <= run.time && Math.random() < 0.6) { // Unleashed Stars: a loose star flung off, bouncing between foes
+          a.uT = run.time + 0.4; const tg = run.nearest(bx, by, 90);
+          if (tg) { const an = Math.atan2(tg.y - by, tg.x - bx); proj(run, { k: 'star', a, x: bx, y: by, vx: Math.cos(an) * 220, vy: Math.sin(an) * 220, ang: an, r: 5, pierce: 3, bounce: 3, life: 1.6, mult: 0.6 }); }
+        }
       }
     } },
     fists: { fire(run, a) {
       const p = run.player;
       if (volley(run, a, 80, 0.15, true, (ang) => proj(run, { k: 'fist', a, x: p.x + Math.cos(ang) * 6, y: p.y + Math.sin(ang) * 6, vx: Math.cos(ang) * 280, vy: Math.sin(ang) * 280, ang, r: 5, pierce: 0, life: 0.35 })) == null) return false;
+      const s = a.s;
+      if (s.groundpound) run.after(0.25, () => { const R = 32 * Math.sqrt(s.area); run.hitCircle(p.x, p.y, R, a, 0.3); run.fx.push({ k: 'slam', x: p.x, y: p.y + 3, R, life: 0.35, max: 0.35, color: '#c8a8ff' }); }); // Ground Pound
+      if (s.clutch) { const tg = run.strongest(120); if (tg) { const R = 14 * s.area; run.hitCircle(tg.x, tg.y, R, a, 0.7); run.grid.query(tg.x, tg.y, R, tmp); for (const e of tmp) if (!e.dead && !e.boss && U.dist2(e.x, e.y, tg.x, tg.y) < R * R) run.addSlow(e, 4); run.fx.push({ k: 'pop', x: tg.x, y: tg.y, R, life: 0.3, max: 0.3, color: '#b070ff' }); } } // Spectral Clutch
       DH.audio.play('punch');
     } },
     storm: { fire(run, a) {
-      const s = a.s, used = new Set(); let n = 0;
-      for (let i = 0; i < s.count; i++) {
+      const s = a.s, used = new Set(), targets = []; let n = 0;
+      if (s.concentrated) { // the strongest foe in reach, then those closest to it
+        const top = run.strongest(200);
+        if (top) { targets.push(top); const ex = new Set([top]); while (targets.length < s.count) { const nx = run.nearest(top.x, top.y, 90, ex); if (!nx) break; ex.add(nx); targets.push(nx); } }
+      } else for (let i = 0; i < s.count; i++) {
         let tg = null; for (let k = 0; k < 6 && !tg; k++) { const c = run.randomTarget(200); if (c && !used.has(c)) tg = c; }
-        if (!tg) break; used.add(tg); n++;
+        if (!tg) break; used.add(tg); targets.push(tg);
+      }
+      for (const tg of targets) {
+        n++;
         run.fx.push({ k: 'bolt', x: tg.x, y: tg.y, life: 0.28, max: 0.28, seed: Math.random() * 1000 });
-        run.hitCircle(tg.x, tg.y, 14 * s.area, a);
+        const c0 = run.crits || 0, R = 14 * s.area;
+        run.hitCircle(tg.x, tg.y, R, a, s.concentrated ? Math.min(3, 1 + 0.05 * run.stackCount(tg)) : 1);
+        if (s.electrify) { run.grid.query(tg.x, tg.y, R * 1.8, tmp); for (const e of tmp) if (!e.dead && e.stun > 0 && Math.random() < 0.4) run.addSpark(e, 2, s.dmg + run.P.addBase); }
+        if (s.explosive && (run.crits || 0) > c0) { // a critical strike bursts into fire
+          const sub = run.subAb(a, 'explosive', ['fire', 'area'], 'burn', 0.5), ER = 26 * s.area;
+          run.hitCircle(tg.x, tg.y, ER, sub, 0.3); run.fx.push({ k: 'explosion', x: tg.x, y: tg.y, R: ER, life: 0.35, max: 0.35 }); DH.audio.play('boom');
+        }
         let cur = tg; const ex = new Set([tg]); const pts = [[tg.x, tg.y]];
         for (let c = 0; c < s.chain; c++) { cur = run.nearest(cur.x, cur.y, 70, ex); if (!cur) break; ex.add(cur); pts.push([cur.x, cur.y]); run.hit(cur, a, 0.7); }
         if (pts.length > 1) run.fx.push({ k: 'chain', pts, life: 0.2, max: 0.2, seed: Math.random() * 999, color: '#fff6a0' });
@@ -339,7 +400,7 @@
       const p = run.player, s = a.s;
       for (let i = 0; i < s.count; i++) {
         const side = (i % 2 ? -1 : 1) * p.face;
-        proj(run, { k: 'axe', a, x: p.x, y: p.y, vx: side * U.rand(30, 90) + p.dirX * 20, vy: -U.rand(210, 250), g: 420, ang: 0, spin: side * 14, r: 7 * s.area, pierce: 999, life: 1.6 });
+        proj(run, { k: 'axe', a, x: p.x, y: p.y, vx: side * U.rand(30, 90) + p.dirX * 20, vy: -U.rand(210, 250), g: 420, ang: 0, spin: side * 14, r: 7 * s.area, pierce: 999, life: 1.6, max: 1.6 });
       }
       DH.audio.play('axe');
     } },
@@ -348,6 +409,8 @@
       const p = run.player, s = a.s, R = 64 * Math.min(1.6, Math.sqrt(s.area));
       run.castCircle(p.x, p.y, R * 0.55, '#a8e8ff');
       for (let i = 0; i < s.count; i++) run.after(i * 0.3, () => run.fx.push({ k: 'nova', x: p.x, y: p.y, life: 0.4, max: 0.4, R, hit: new Set(), a, update: novaUpdate }));
+      if (s.aftershock) run.after(0.5 + s.count * 0.3, () => run.fx.push({ k: 'nova', x: p.x, y: p.y, life: 0.4, max: 0.4, R: R * 0.8, hit: new Set(), a, mult: 0.5, update: novaUpdate })); // Aftershock
+      if (s.iceshards) for (let i = 0; i < 8; i++) { const an = i / 8 * TAU; proj(run, { k: 'shard', ice: true, a, x: p.x, y: p.y - 3, vx: Math.cos(an) * 190, vy: Math.sin(an) * 190, ang: an, r: 3.4, pierce: 2, life: 0.9, max: 0.9, drag: 1.5, mult: 0.7 }); } // Ice Shards
       DH.audio.play('frost');
     } },
     plague: { fire(run, a) {
@@ -370,12 +433,13 @@
       }
     } },
     wardrum: { fire(run, a) {
-      const p = run.player, s = a.s;
-      for (let i = 0; i < s.count; i++) run.after(i * 0.2, () => {
+      const p = run.player, s = a.s, n = s.count * (s.doublekick ? 2 : 1), col = s.firebass ? '#ff7a30' : '#ffb050'; // Kick Bass Amount: two beats at once
+      for (let i = 0; i < n; i++) run.after(Math.floor(i / (s.doublekick ? 2 : 1)) * 0.2 + (i % 2 && s.doublekick ? 0.07 : 0), () => {
         const R = 72 * s.area;
-        run.castCircle(p.x, p.y, R * 0.5, '#ffb050');
-        run.fx.push({ k: 'pulse', x: p.x, y: p.y, R, life: 0.45, max: 0.45, follow: true, color: '#ffb050' });
-        run.hitCircle(p.x, p.y, R, a); run.shake = Math.max(run.shake, 3);
+        run.castCircle(p.x, p.y, R * 0.5, col);
+        run.fx.push({ k: 'pulse', x: p.x, y: p.y, R, life: 0.45, max: 0.45, follow: true, color: col });
+        run.hitCircle(p.x, p.y, R, a, s.doublekick && i % 2 ? 0.6 : 1); run.shake = Math.max(run.shake, 3);
+        if (s.innercircle) { const IR = R * 0.45; run.grid.query(p.x, p.y, IR, tmp); for (const e of tmp) if (!e.dead && !e.boss && U.dist2(e.x, e.y, p.x, p.y) < IR * IR) e.stun = Math.max(e.stun || 0, 0.8); run.fx.push({ k: 'pulse', x: p.x, y: p.y, R: IR, life: 0.3, max: 0.3, follow: true, color: '#fff0c0' }); } // Inner Circle: stuns
       });
     } },
     deathwall: { fire(run, a) {
@@ -384,13 +448,18 @@
       const n = Math.max(1, s.count), sx = p.x - Math.cos(ang) * 70, sy = p.y - Math.sin(ang) * 70;
       for (let i = 0; i < n; i++) {
         const o = (i - (n - 1) / 2) * 16 * s.area;
-        proj(run, { k: 'wall', a, x: sx + nx * o, y: sy + ny * o, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 8 * Math.sqrt(s.area), pierce: 999, life: 1.6 });
+        proj(run, { k: 'wall', a, x: sx + nx * o, y: sy + ny * o, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 8 * Math.sqrt(s.area), pierce: 999, life: 1.6, cripple: s.slowing, trailT: 0 });
+        if (s.crashing) { // Crashing Waves: a second rank charges from the far side; where they meet, they crash
+          const fx0 = p.x + Math.cos(ang) * 70, fy0 = p.y + Math.sin(ang) * 70;
+          proj(run, { k: 'wall', a, x: fx0 + nx * o, y: fy0 + ny * o, vx: -Math.cos(ang) * s.speed, vy: -Math.sin(ang) * s.speed, ang: ang + Math.PI, r: 8 * Math.sqrt(s.area), pierce: 999, life: 1.6, cripple: s.slowing, trailT: 0, mult: 0.35 });
+        }
       }
+      if (s.crashing) run.after(70 / s.speed, () => { const R = 24 * Math.sqrt(s.area); run.hitCircle(p.x, p.y, R, a, 0.6); run.fx.push({ k: 'slam', x: p.x, y: p.y + 3, R, life: 0.4, max: 0.4, color: '#b8a8ff' }); run.shake = Math.max(run.shake, 3); DH.audio.play('boom'); });
       DH.audio.play('deathwall');
     } },
     moshpit: { fire(run, a) {
       const p = run.player, s = a.s;
-      for (let i = 0; i < s.count; i++) {
+      for (let i = 0; i < s.count * (s.doubling ? 2 : 1); i++) { // Moshpit Doubling
         const tg = run.randomTarget(150); const x = tg ? tg.x : p.x + U.rand(-60, 60), y = tg ? tg.y : p.y + U.rand(-50, 50);
         run.zones.push({ kind: 'mosh', a, x, y, r: 40 * s.area, life: s.duration * 60 / DH.audio.BATTLE_BPM * 1.05, max: s.duration * 60 / DH.audio.BATTLE_BPM, beat: -1 });
       }
@@ -402,31 +471,44 @@
       if (!tg) { a.wait += 0.2; return false; }
       const charge = Math.min(3, 1 + a.wait * 0.35), bonusCrit = Math.min(0.5, a.wait * 0.08);
       a.wait = 0;
-      const ex = new Set();
+      const ex = new Set(), ice = !!s.froststrike, eb = s.dmg + run.P.addBase;
       for (let i = 0; i < s.count; i++) {
         const e = i ? run.nearest(p.x, p.y, 70, ex) : tg; if (!e) break; ex.add(e);
         const ang = Math.atan2(e.y - p.y, e.x - p.x); p.face = e.x > p.x ? 1 : -1;
+        const lit = ice ? e.st.frost : e.st.burn; // Scattered Sparks: a foe already alight (frozen, as Frost Strike) blows apart
         s.crit += bonusCrit; run.hit(e, a, charge, Math.cos(ang), Math.sin(ang)); s.crit -= bonusCrit;
-        run.fx.push({ k: 'explosion', x: e.x, y: e.y, R: 16 * s.area * Math.sqrt(charge), life: 0.3, max: 0.3 });
-        run.burst(e.x, e.y, 10 + charge * 4, ['#ff6a1a', '#ffd35a', '#fff0a0'], 90);
+        if (ice) run.fx.push({ k: 'frostburst', x: e.x, y: e.y, R: 16 * s.area * Math.sqrt(charge), life: 0.35, max: 0.35 });
+        else run.fx.push({ k: 'explosion', x: e.x, y: e.y, R: 16 * s.area * Math.sqrt(charge), life: 0.3, max: 0.3 });
+        run.burst(e.x, e.y, 10 + charge * 4, ice ? ['#80d8ff', '#e8f8ff', '#ffffff'] : ['#ff6a1a', '#ffd35a', '#fff0a0'], 90);
+        if (s.sparks && lit > 0) {
+          const SR = 24 * s.area; run.hitCircle(e.x, e.y, SR, a, 0.4 + 0.05 * Math.min(20, lit), (o) => o !== e);
+          run.fx.push({ k: ice ? 'frostburst' : 'explosion', x: e.x, y: e.y, R: SR, life: 0.35, max: 0.35 });
+        }
       }
-      run.shake = Math.max(run.shake, 1 + charge); DH.audio.play('fire'); DH.audio.play('boom');
+      if (s.emberfall) { // a wave of flame (of frost) sweeps out: every foe it reaches is set alight, no direct damage
+        const R = 50 * Math.sqrt(s.area); run.grid.query(p.x, p.y, R, tmp);
+        for (const e of tmp) if (!e.dead && U.dist2(e.x, e.y, p.x, p.y) < R * R) { if (ice) run.addFrost(e, 1, eb * 0.3); else run.addBurn(e, 1, eb * 0.3); } // one light stack each
+        run.fx.push({ k: 'ring', x: p.x, y: p.y, life: 0.45, max: 0.45, r0: 8, r1: R, color: ice ? '#a8e8ff' : '#ff9a3a' });
+      }
+      run.shake = Math.max(run.shake, 1 + charge); DH.audio.play(ice ? 'frost' : 'fire'); DH.audio.play('boom');
     } },
     thorns: { fire(run, a) {
       const p = run.player, s = a.s;
       for (let i = 0; i < s.count; i++) {
         const tg = run.randomTarget(120); const x = tg ? tg.x : p.x + U.rand(-70, 70), y = tg ? tg.y : p.y + U.rand(-60, 60);
-        run.zones.push({ kind: 'thorns', a, x, y, r: 22 * s.area, life: s.duration, max: s.duration, tick: 0, seed: Math.random() * 99 });
+        run.zones.push({ kind: 'thorns', a, x, y, r: 22 * s.area, r0: 22 * s.area, life: s.duration, max: s.duration, tick: 0, seed: Math.random() * 99 });
       }
       DH.audio.play('thorns');
     } },
     illumination: { fire(run, a) {
-      const p = run.player, s = a.s;
-      for (let i = 0; i < s.count; i++) run.after(i * 0.35, () => {
+      const p = run.player, s = a.s, waves = s.count + (s.embrace ? 1 : 0) + (s.shielding ? 1 : 0); // Shining Embrace, Shielding Light: one more wave each
+      for (let i = 0; i < waves; i++) run.after(i * 0.35, () => {
         const R = 52 * s.area;
         run.castCircle(p.x, p.y, R * 0.6, '#fff0a0');
         run.fx.push({ k: 'pulse', x: p.x, y: p.y, R, life: 0.4, max: 0.4, follow: true, color: '#fff0a0' });
+        const d0 = run.dmgByAb[a.id] || 0;
         run.hitCircle(p.x, p.y, R, a);
+        if (s.embrace) run.heal(Math.min(((run.dmgByAb[a.id] || 0) - d0) * 0.05, run.P.maxHp * 0.02)); // its damage flows back as health
         if (s.purge) { const r2 = R * R; run.eproj = run.eproj.filter((b) => U.dist2(b.x, b.y, p.x, p.y) > r2); } // Luminous: burns away enemy projectiles
       });
       DH.audio.play('heal');
@@ -444,6 +526,10 @@
           for (const k in keep) s[k] = el[k] ? keep[k] * 1.6 : 0;
           run.hit(cur, a, 1 + c * 0.08);
           Object.assign(s, keep);
+          const hx = cur.x, hy = cur.y;
+          if (s.prismfire && c % 3 === 0) { const R = 18 * s.area; run.hitCircle(hx, hy, R, run.subAb(a, 'pfire', ['fire', 'area'], 'burn', 0.4), 0.5, (e) => e !== cur); run.fx.push({ k: 'explosion', x: hx, y: hy, R, life: 0.3, max: 0.3 }); } // a fire bounce explodes
+          if (s.prismice && c % 3 === 1) { const R = 40 * s.area; run.grid.query(hx, hy, R, tmp); for (const e of tmp) if (!e.dead && !e.boss && e !== cur) { const dx = hx - e.x, dy = hy - e.y, d = Math.hypot(dx, dy) || 1; if (d < R) { e.kx += dx / d * 120 / Math.sqrt(e.mass); e.ky += dy / d * 120 / Math.sqrt(e.mass); run.addSlow(e, 3); } } run.fx.push({ k: 'ring', x: hx, y: hy, life: 0.35, max: 0.35, r0: R, r1: 4, color: '#80d8ff' }); } // an ice bounce drags foes in
+          if (s.prismbolt && c % 3 === 2) { const ex2 = new Set([cur]); for (let q = 0; q < 2; q++) { const o = run.nearest(hx, hy, 60, ex2); if (!o) break; ex2.add(o); run.hit(o, run.subAb(a, 'pbolt', ['lightning', 'projectile'], 'spark', 0.4), 0.5); run.fx.push({ k: 'chain', pts: [[hx, hy], [o.x, o.y]], life: 0.2, max: 0.2, seed: Math.random() * 999, color: '#fff080' }); } } // a lightning bounce strikes two more
           cur = run.nearest(cur.x, cur.y, 90, ex);
         }
         for (let k = 1; k < pts.length; k++) run.fx.push({ k: 'chain', pts: [pts[k - 1], pts[k]], life: 0.25, max: 0.25, seed: Math.random() * 999, color: EL[(k - 1) % 3][0] });
@@ -453,19 +539,23 @@
     } },
     shards: { fire(run, a) {
       // two fans, one thrown up and one down, 75 degrees wide (wider with Area)
-      const p = run.player, s = a.s, n = s.count, half = 0.65 * Math.min(1.6, Math.sqrt(s.area));
+      const p = run.player, s = a.s, n = s.shivers ? Math.max(2, s.count - 2) : s.count, half = 0.65 * Math.min(1.6, Math.sqrt(s.area));
       for (const dir of [-Math.PI / 2, Math.PI / 2]) for (let i = 0; i < n; i++) {
         const ang = dir + (n > 1 ? (i / (n - 1) - 0.5) * 2 * half : 0) + U.rand(-0.06, 0.06), sp = s.speed * U.rand(0.8, 1.1);
-        proj(run, { k: 'shard', a, x: p.x, y: p.y - 3, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, ang, r: 3.2 * Math.sqrt(s.area), pierce: 999, life: s.duration, max: s.duration, drag: 2.6, decay: 0.25, cdHit: 0.45 });
+        // Arcane Unrest: never quite still, and stronger with time; Arcane Shivers: fewer, each bursting into three
+        proj(run, { k: 'shard', a, x: p.x, y: p.y - 3, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, ang, r: 3.2 * Math.sqrt(s.area), pierce: 999, life: s.duration, max: s.duration, drag: 2.6, minSp: s.unrest ? 24 : 0, decay: s.unrest ? -0.3 : 0.25, cdHit: 0.45, shiver: s.shivers ? 0.35 : null });
       }
       DH.audio.play('hex');
     } },
     confetti: { fire(run, a) {
-      const p = run.player, s = a.s; a.dir = (a.dir == null ? U.rand(0, TAU) : a.dir) + Math.PI / 4;
-      const CONF = ['#ff5a8a', '#ffd35a', '#6ad8ff', '#8aff6a', '#c890ff', '#ff9a3a'];
-      for (let i = 0; i < s.count; i++) {
-        const ang = a.dir + U.rand(-0.45, 0.45), sp = s.speed * U.rand(0.6, 1.15);
-        proj(run, { k: 'confetti', a, x: p.x, y: p.y - 4, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, ang: U.rand(0, TAU), spin: U.rand(-12, 12), col: U.pick(CONF), r: 3.5 * Math.sqrt(s.area), pierce: 999, life: s.duration, max: s.duration, drag: 3, cdHit: 0.3 });
+      const p = run.player, s = a.s; a.dir = (a.dir == null ? U.rand(0, TAU) : a.dir) + Math.PI / 4; a.turns = (a.turns || 0) + 1;
+      const CONF = s.iceconfetti ? ['#e8f8ff', '#9fdcff', '#6ab8ff', '#ffffff'] : ['#ff5a8a', '#ffd35a', '#6ad8ff', '#8aff6a', '#c890ff', '#ff9a3a'];
+      const full = s.fullcircle && a.turns % 8 === 0; // Full Circle: a whole turn done, every direction at once and harder
+      const dirs = full ? [0, 1, 2, 3, 4, 5, 6, 7].map((k) => a.dir + k * Math.PI / 4) : s.moredirs ? [a.dir, a.dir + TAU / 3, a.dir + 2 * TAU / 3] : [a.dir]; // More directions
+      const per = full ? Math.ceil(s.count / 2) : s.moredirs ? Math.ceil(s.count / 2) : s.count;
+      for (const d0 of dirs) for (let i = 0; i < per; i++) {
+        const ang = d0 + U.rand(-0.45, 0.45), sp = s.speed * U.rand(0.6, 1.15);
+        proj(run, { k: 'confetti', a, x: p.x, y: p.y - 4, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, ang: U.rand(0, TAU), spin: U.rand(-12, 12), col: U.pick(CONF), r: 3.5 * Math.sqrt(s.area), pierce: 999, life: s.duration, max: s.duration, drag: 3, cdHit: 0.3, mult: full ? 1.5 : 1 });
       }
       DH.audio.play('throw');
     } },
@@ -480,13 +570,15 @@
       DH.audio.play('dart');
     } },
     pyro: { fire(run, a) {
-      const p = run.player, s = a.s, R0 = 52 * Math.min(1.6, Math.sqrt(s.area)), R = 16 * Math.sqrt(s.area);
-      a.rot = (a.rot || 0) + Math.PI / s.count;
-      for (let i = 0; i < s.count; i++) run.after(i * 0.05, () => {
-        const ang = a.rot + i * TAU / s.count, x = p.x + Math.cos(ang) * R0, y = p.y + Math.sin(ang) * R0 * 0.85;
+      const p = run.player, s = a.s, R0 = 52 * Math.min(1.6, Math.sqrt(s.area)), R = 16 * Math.sqrt(s.area), n = s.count * (s.moreflames ? 2 : 1); // Additional Flames
+      a.rot = (a.rot || 0) + Math.PI / n;
+      const rings = [[R0, a.rot, n]]; if (s.smallcircle) rings.push([R0 * 0.5, -a.rot * 1.5, Math.max(3, Math.round(n / 2))]); // Small Circle: an inner ring the other way
+      const cols = s.hotspark ? ['#fff080', '#ffd35a', '#ffffff'] : ['#ffd35a', '#ff7a20', '#fff0a0'];
+      for (const [RR, rot, m] of rings) for (let i = 0; i < m; i++) run.after(i * 0.05, () => {
+        const ang = rot + i * TAU / m, x = p.x + Math.cos(ang) * RR, y = p.y + Math.sin(ang) * RR * 0.85;
         run.hitCircle(x, y, R, a);
         run.fx.push({ k: 'fountain', x, y, R, life: 0.55, max: 0.55 });
-        run.burst(x, y, 8, ['#ffd35a', '#ff7a20', '#fff0a0'], 110);
+        run.burst(x, y, 8, cols, 110);
       });
       DH.audio.play('fire');
     } },
@@ -506,18 +598,22 @@
         f.hit.add(e); run.addSlow(e, 6);
         const d = Math.hypot(e.x - f.x, e.y - f.y) || 1, k = Math.min(1, d / f.R);
         if (f.a.s.frostcore && k < 0.4 && !e.boss) e.stun = Math.max(e.stun || 0, 1.2); // Frozen Heart: the core freezes solid
-        run.hit(e, f.a, 1 - 0.7 * k, (e.x - f.x) / d, (e.y - f.y) / d); // full damage at the heart, 30% at the rim
+        run.hit(e, f.a, (1 - 0.7 * k) * (f.mult || 1), (e.x - f.x) / d, (e.y - f.y) / d); // full damage at the heart, 30% at the rim
       }
     }
   }
   function orbit(run, a, dt, kind, radius, hitR, cd) {
-    const p = run.player, s = a.s, def = C.abilities[a.id];
+    const p = run.player, s = a.s, def = C.abilities[a.id], n = s.count, lanes = s.innerorbit ? 2 : 1;
     a.ang += s.speed * dt * (def && def.moveSpin && p.moving ? 1 + run.P.speed / 110 : 1); a.R = radius * s.area;
-    a.pos = a.pos || []; a.pos.length = s.count;
-    for (let i = 0; i < s.count; i++) {
-      const ang = a.ang + i / s.count * TAU, bx = p.x + Math.cos(ang) * a.R, by = p.y + Math.sin(ang) * a.R;
-      a.pos[i] = { x: bx, y: by, a: ang, kind };
-      run.hitCircle(bx, by, hitR * Math.sqrt(s.area), a, 1, (e) => run.canHit(e, a.id, cd));
+    a.pos = a.pos || []; a.pos.length = n * lanes;
+    const zap = s.electrified && p.moving ? 1.25 : 1; // Electrified Orbs: harder while you move
+    for (let L = 0; L < lanes; L++) for (let i = 0; i < n; i++) {
+      const inner = L === 1, ang = (inner ? -a.ang * 1.3 + Math.PI / n : a.ang) + i / n * TAU; // Inner Orbit: a second ring the other way
+      const R = a.R * (inner ? 0.55 : s.eccentric ? 1 + 0.45 * Math.sin(a.ang * 0.8 + i * 2.1) : 1); // Orbital Shift: the ring breathes
+      const bx = p.x + Math.cos(ang) * R, by = p.y + Math.sin(ang) * R;
+      a.pos[L * n + i] = { x: bx, y: by, a: ang, kind };
+      run.hitCircle(bx, by, hitR * Math.sqrt(s.area), a, zap * (s.eccentric && !inner ? R / a.R : 1), (e) => run.canHit(e, a.id + (inner ? 'i' : ''), cd));
+      if (zap > 1 && Math.random() < dt * 5) run.parts.push({ x: bx + U.rand(-3, 3), y: by + U.rand(-3, 3), vx: U.rand(-20, 20), vy: U.rand(-20, 20), life: 0.2, max: 0.2, c: '#fff080', s: 1 });
     }
   }
   C.AB = AB;
@@ -667,11 +763,12 @@
       if (Math.abs(dx) > 1) al.face = dx > 0 ? 1 : -1;
       al.cd = (al.cd || 0) - dt;
       if (tg && d <= reach + 4 && al.cd <= 0) {
-        if (al.kind === 'golem') { al.cd = s.cd; const R = 22 * s.area; this.hitCircle(al.x, al.y, R, al.a); this.fx.push({ k: 'slam', x: al.x, y: al.y + 4, R, life: 0.35, max: 0.35, color: '#e8dcc0' }); this.shake = Math.max(this.shake, 1.5); DH.audio.play('boom'); }
+        if (al.kind === 'golem') { al.cd = s.cd; const R = 22 * s.area; this.hitCircle(al.x, al.y, R, al.a); this.fx.push({ k: 'slam', x: al.x, y: al.y + 4, R, life: 0.35, max: 0.35, color: s.magma ? '#ff8a30' : '#e8dcc0' }); this.shake = Math.max(this.shake, 1.5); DH.audio.play('boom'); }
         else if (al.kind === 'phantom') { al.cd = 0.55; const R = 18 * s.area; this.hitCircle(al.x, al.y, R, al.a); this.fx.push({ k: 'slash', x: al.x, y: al.y, ang: Math.atan2(dy, dx), R, arc: 2.4, life: 0.2, max: 0.2, color: '#b8a8ff' }); }
         else { al.cd = al.kind === 'imp' ? 0.9 : s.cd; this.hit(tg, al.a, 1, dx / (d || 1), dy / (d || 1)); al.bite = 0.15; }
       }
       al.bite = Math.max(0, (al.bite || 0) - dt);
+      if (al.kind === 'golem' && s.earthen && al.moving && (al.trail = (al.trail || 0) - dt) <= 0) { al.trail = 0.8; this.puddle(al.a, 'earth', al.x, al.y + 3, 14 * Math.sqrt(s.area), 3, 0.15); } // Earthen Trails
     }
   };
   /** Spirit Warrior: fights where it stands; when the hero moves away it dashes after them, cutting through everything on the way. */
@@ -681,7 +778,10 @@
     if (al.dash) {
       const dx = al.dash.x - al.x, dy = al.dash.y - al.y, d = Math.hypot(dx, dy), step = s.speed * 5 * dt;
       if (Math.abs(dx) > 1) al.face = dx > 0 ? 1 : -1;
-      if (d <= step) { al.x = al.dash.x; al.y = al.dash.y; al.dash = null; }
+      if (d <= step) {
+        al.x = al.dash.x; al.y = al.dash.y; al.dash = null;
+        if (s.dashimpact) { const R = 30 * s.area; this.hitCircle(al.x, al.y, R, al.a); this.grid.query(al.x, al.y, R, tmp); for (const e of tmp) if (!e.dead && !e.boss && U.dist2(e.x, e.y, al.x, al.y) < R * R) this.addSlow(e, 4); this.fx.push({ k: 'slam', x: al.x, y: al.y + 3, R, life: 0.35, max: 0.35, color: '#b8a8ff' }); } // Dash Impact
+      }
       else { al.x += dx / d * step; al.y += dy / d * step; }
       this.hitCircle(al.x, al.y, 14 * s.area, al.a, 1.5, (e) => this.canHit(e, 'phd' + al.id, 0.5));
       if (Math.random() < 0.6) this.parts.push({ x: al.x, y: al.y, vx: 0, vy: 0, life: 0.3, max: 0.3, c: '#b8a8ff', s: 1 });
@@ -689,6 +789,7 @@
       return;
     }
     al.moving = false; al.id = al.id || Math.random();
+    this.phantomExtras(al, dt);
     if (U.dist2(al.x, al.y, p.x, p.y) > 90 * 90) {
       const a = Math.random() * TAU; al.dash = { x: p.x + Math.cos(a) * 16, y: p.y + Math.sin(a) * 12 };
       this.fx.push({ k: 'slash', x: al.x, y: al.y, ang: Math.atan2(al.dash.y - al.y, al.dash.x - al.x), R: 20, arc: 1.2, life: 0.2, max: 0.2, color: '#d8c8ff' });
@@ -699,6 +800,19 @@
       al.cd = s.cd; const dx = tg.x - al.x, dy = tg.y - al.y, R = 18 * s.area;
       if (Math.abs(dx) > 1) al.face = dx > 0 ? 1 : -1;
       this.hitCircle(al.x, al.y, R, al.a); this.fx.push({ k: 'slash', x: al.x, y: al.y, ang: Math.atan2(dy, dx), R, arc: 2.4, life: 0.2, max: 0.2, color: '#b8a8ff' });
+    }
+  };
+  /** The Phantom Knight's upgrades that work wherever it stands: orbs about it, darts thrown from it. */
+  R.phantomExtras = function (al, dt) {
+    const s = al.a.s;
+    if (s.spiritorbs) { // Spirit Orbs
+      al.oa = (al.oa || 0) + dt * 3;
+      for (let i = 0; i < 2; i++) { const an = al.oa + i * Math.PI, ox = al.x + Math.cos(an) * 16, oy = al.y + Math.sin(an) * 12; if (al.a.pos) al.a.pos.push({ x: ox, y: oy, a: an, kind: 'orb' }); this.hitCircle(ox, oy, 6, al.a, 0.5, (e) => this.canHit(e, 'pho' + al.id + i, 0.5)); }
+    }
+    if (s.spiritneedles && (al.nd = (al.nd || 0) - dt) <= 0) { // Spirit Needles
+      const tg = this.randomTarget(150, al.x, al.y);
+      if (tg) { al.nd = 0.8; const ang = Math.atan2(tg.y - al.y, tg.x - al.x); proj(this, { k: 'dart', a: al.a, x: al.x, y: al.y - 4, vx: Math.cos(ang) * 320, vy: Math.sin(ang) * 320, ang, r: 3, pierce: 0, life: 0.7, mult: 0.5 }); }
+      else al.nd = 0.3;
     }
   };
   R.impAbility = function () {
@@ -740,13 +854,26 @@
         b.ang += dt * 16;
       } else {
         if (b.g) { b.vy += b.g * dt; b.ang += b.spin * dt; }
-        if (b.drag) { const k = Math.exp(-b.drag * dt); b.vx *= k; b.vy *= k; if (b.spin) b.ang += b.spin * dt * Math.min(1, Math.hypot(b.vx, b.vy) / 40 + 0.15); } // slows to a hover
+        if (b.drag) { const k = Math.exp(-b.drag * dt), v = Math.hypot(b.vx, b.vy); if (!b.minSp || v * k > b.minSp) { b.vx *= k; b.vy *= k; } if (b.spin) b.ang += b.spin * dt * Math.min(1, Math.hypot(b.vx, b.vy) / 40 + 0.15); } // slows to a hover
         b.x += b.vx * dt; b.y += b.vy * dt;
       }
-      if (b.decay) b.mult = Math.max(0.25, 1 - b.decay * (b.max - b.life)); // loses a share of its strength every second
+      if (b.decay) b.mult = Math.min(2, Math.max(0.25, 1 - b.decay * (b.max - b.life))); // loses (or, restless, gains) a share of its strength every second
+      if (b.shiver != null && (b.shiver -= dt) <= 0) { // Arcane Shivers: bursts into three smaller shards
+        b.shiver = null; b.life = 0; const sp = Math.max(60, Math.hypot(b.vx, b.vy)), an = Math.atan2(b.vy, b.vx);
+        for (const o of [-0.5, 0, 0.5]) proj(this, { k: 'shard', a: b.a, x: b.x, y: b.y, vx: Math.cos(an + o) * sp, vy: Math.sin(an + o) * sp, ang: an + o, r: b.r * 0.7, pierce: 999, life: b.max * 0.8, max: b.max * 0.8, drag: b.drag, decay: b.decay, cdHit: 0.45, mult: 0.4 });
+      }
+      if (b.k === 'wall' && b.a.s.devilhorns && (b.trailT -= dt) <= 0) { b.trailT = 0.3; this.puddle(b.a, 'magic', b.x, b.y + 3, 10, 1.2, 0.15, false, 0); } // Devil's Horns: a trail that wounds
+      if (b.k === 'axe' && b.a.s.returning && !b.ret && b.life < 0.75) { b.ret = true; b.hit = new Set(); b.g = 0; b.life = 1.2; } // Returning Axes: back to your hand
+      if (b.ret) { const d = Math.hypot(p.x - b.x, p.y - b.y) || 1; b.vx = (p.x - b.x) / d * 260; b.vy = (p.y - b.y) / d * 260; if (d < 10) b.life = 0; }
       if (b.grow) b.r = 4 + b.grow * (1 - b.life / b.max);
       if (b.k === 'sphere') {
         const s = b.a.s; b.pulse -= dt * (1 + s.ms);
+        if (s.attraction) { const tg = this.nearest(b.x, b.y, 80); if (tg) { const sp = Math.hypot(b.vx, b.vy) || 1, cur = Math.atan2(b.vy, b.vx); let da = Math.atan2(tg.y - b.y, tg.x - b.x) - cur; da = Math.atan2(Math.sin(da), Math.cos(da)); const na = cur + U.clamp(da, -2.5 * dt, 2.5 * dt); b.vx = Math.cos(na) * sp; b.vy = Math.sin(na) * sp; } } // Static Attraction
+        if (s.highvoltage && (b.volt -= dt) <= 0) { // High Voltage: chain lightning to foes it passes
+          b.volt = 0.5; let cur = { x: b.x, y: b.y }; const ex = new Set(), pts = [[b.x, b.y]];
+          for (let c = 0; c < 3; c++) { const e = this.nearest(cur.x, cur.y, 60, ex); if (!e) break; ex.add(e); pts.push([e.x, e.y]); this.hit(e, b.a, 0.6); cur = e; }
+          if (pts.length > 1) this.fx.push({ k: 'chain', pts, life: 0.2, max: 0.2, seed: Math.random() * 999, color: '#fff6a0' });
+        }
         if (b.pulse <= 0) { b.pulse = s.pulse ? 0.3 : 0.5; const R = 30 * s.area; this.fx.push({ k: 'pop', x: b.x, y: b.y, R, life: 0.2, max: 0.2, color: '#fff6a0' }); this.hitCircle(b.x, b.y, R, b.a); if (Math.random() < 0.5) DH.audio.play('zap'); }
       }
       let remove = b.life <= 0;
@@ -771,13 +898,15 @@
               remove = true; break;
             }
           }
-          this.hit(e, b.a, (b.mult || 1) * (b.a.s.falloff ? Math.pow(b.a.s.falloff, b.nh || 0) : 1), b.vx / sp, b.vy / sp);
+          const pm = this.projPre(b, e);
+          this.hit(e, b.a, (b.mult || 1) * (b.a.s.falloff ? Math.pow(b.a.s.falloff, b.nh || 0) : 1) * pm, b.vx / sp, b.vy / sp);
+          this.projPost(b, e);
           b.nh = (b.nh || 0) + 1;
           if (b.fork && !b.forked) { b.forked = true; for (const o of [-0.5, 0.5]) { const ang = Math.atan2(b.vy, b.vx) + o; proj(this, { k: 'hex', a: b.a, x: b.x, y: b.y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, ang, r: 4, pierce: 999, life: 0.6, forked: true, hit: new Set([e]) }); } }
           if (b.pierce-- <= 0 || (e.def.noPierce && b.pierce < 900)) { remove = true; break; } // some foes cannot be pierced
         }
       }
-      if (remove) { if (b.k === 'fireball' && b.life <= 0) this.explode(b); list.splice(i, 1); }
+      if (remove) { if (b.k === 'fireball' && b.life <= 0) this.explode(b); this.projEnd(b); list.splice(i, 1); }
     }
     // enemy projectiles
     for (let i = this.eproj.length - 1; i >= 0; i--) {
@@ -796,8 +925,55 @@
       if (b.life <= 0) this.eproj.splice(i, 1);
     }
   };
+  /** Upgrade hooks on a projectile's hit: a damage factor before it, effects after it, and when the projectile is spent. */
+  R.projPre = function (b, e) {
+    const s = b.a.s; let m = 1;
+    if (s.amputation) m *= 1 + 0.1 * this.statusKinds(e); // Amputation
+    if (s.fetters && b.k === 'dart') { b.cb = Math.min(0.6, (e.slowS || 0) * 0.03); s.crit += b.cb; } // Phantom Fetters: crits come easier on the slowed
+    return m;
+  };
+  R.projPost = function (b, e) {
+    const s = b.a.s;
+    if (b.cb) { s.crit -= b.cb; b.cb = 0; }
+    if ((s.fetters && b.k === 'dart') || (s.backshot && b.k === 'hex') || b.cripple) this.addSlow(e, 3);
+    if (b.k === 'note' && s.splitharmony && !b.child) { // Split Harmony: the note splits in two on its first hit
+      b.child = true; const sp = Math.hypot(b.vx, b.vy), an = Math.atan2(b.vy, b.vx);
+      for (const o of [-0.45, 0.45]) proj(this, { k: 'note', a: b.a, x: b.x, y: b.y, vx: Math.cos(an + o) * sp, vy: Math.sin(an + o) * sp, ang: an + o, r: 3, pierce: 0, life: 0.5, child: true, mult: 0.45, alt: 1, hit: new Set([e]) });
+    }
+    if (b.k === 'axe' && s.splitaxe && !b.child && !b.split) { // Splitting Axes: the first blow breaks it in two
+      b.split = true;
+      for (const side of [-1, 1]) proj(this, { k: 'axe', a: b.a, x: b.x, y: b.y, vx: side * 140, vy: -120, g: 420, ang: 0, spin: side * 16, r: b.r * 0.7, pierce: 999, life: 0.9, child: true, mult: 0.5, hit: new Set([e]) });
+    }
+    if (b.bounce > 0) { const nx = this.nearest(e.x, e.y, 80, b.hit); if (nx) { b.bounce--; const sp = Math.hypot(b.vx, b.vy) || 200, an = Math.atan2(nx.y - b.y, nx.x - b.x); b.vx = Math.cos(an) * sp; b.vy = Math.sin(an) * sp; b.ang = an; } }
+    if (s.split && b.k === 'dart' && this.lastCrit && !b.child && b.pierce > 0) { // Phantom Split
+      const sp = Math.hypot(b.vx, b.vy), ang = Math.atan2(b.vy, b.vx);
+      for (const o of [-0.35, 0.35]) proj(this, { k: 'dart', a: b.a, x: b.x, y: b.y, vx: Math.cos(ang + o) * sp, vy: Math.sin(ang + o) * sp, ang: ang + o, r: b.r, pierce: b.pierce - 1, life: Math.max(0.3, b.life), child: true, hit: new Set(b.hit) });
+    }
+  };
+  R.projEnd = function (b) {
+    const s = b.a && b.a.s; if (!s) return;
+    if (s.sonicboom && b.k === 'note') { const R = 16 * Math.sqrt(s.area); this.hitCircle(b.x, b.y, R, b.a, 0.35); this.fx.push({ k: 'pop', x: b.x, y: b.y, R, life: 0.25, max: 0.25, color: '#ffd98a' }); } // Sonic Boom
+    if (s.discharge && b.k === 'sphere') { // Final Discharge: a shockwave that Sparks all it reaches
+      const R = 60 * s.area; this.hitCircle(b.x, b.y, R, b.a, 1.5);
+      this.grid.query(b.x, b.y, R, tmp); for (const e of tmp) if (!e.dead && U.dist2(e.x, e.y, b.x, b.y) < R * R) this.addSpark(e, 2, s.dmg + this.P.addBase);
+      this.fx.push({ k: 'pulse', x: b.x, y: b.y, R, life: 0.4, max: 0.4, color: '#fff6a0' }); DH.audio.play('storm');
+    }
+    if (s.riftdart && b.k === 'dart') { // Phantom Rift: a spent dart bursts in magic, harder for every pierce it had left
+      const R = 14 * Math.sqrt(s.area), sub = this.subAb(b.a, 'riftdart', ['magic', 'area']);
+      this.hitCircle(b.x, b.y, R, sub, 0.5 * (1 + Math.min(4, Math.max(0, b.pierce))));
+      this.fx.push({ k: 'pop', x: b.x, y: b.y, R, life: 0.25, max: 0.25, color: '#c070ff' });
+    }
+  };
+  /** A puddle of an element that keeps working on those in it (the Alchemist's brews use the same). */
+  R.puddle = function (a, el, x, y, r, dur, mult, slow, eff) {
+    const E = BREW[el], sub = this.subAb(a, 'pud_' + el, E.tags, E.eff, (eff == null ? 0.3 : eff) * (1 + this.P.effectPct));
+    this.zones.push({ kind: 'brew', a: sub, el, col: E.col, x, y, r, life: dur, max: dur, tick: 0.2, seed: Math.random() * 99, mult, slow });
+  };
   R.explode = function (b) {
-    this.hitCircle(b.x, b.y, b.boom, b.a);
+    this.hitCircle(b.x, b.y, b.boom, b.a, b.mult || 1);
+    const s = b.a.s;
+    if (s.napalm) this.puddle(b.a, 'fire', b.x, b.y, b.boom * 0.8, 2.5, 0.12, false, 0.1); // Napalm: the ground burns
+    if (s.bouncing && !b.bounced) { const tg = this.nearest(b.x, b.y, 120, b.hit); if (tg) { const an = Math.atan2(tg.y - b.y, tg.x - b.x), sp = s.speed; proj(this, { k: 'fireball', a: b.a, x: b.x, y: b.y, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp, ang: an, r: 5, pierce: 0, life: 1, boom: b.boom, bounced: true, mult: 0.7, hit: new Set(b.hit) }); } } // Bouncing
     for (let i = 0; i < 10; i++) { const an = Math.random() * TAU, sp = U.rand(40, 120); this.gpart({ x: b.x, y: b.y, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp - 30, g: 80, life: U.rand(0.4, 0.8), max: 0.8, c: '#ff8a30', r: 1.1, core: '#fff0a0' }); }
     this.fx.push({ k: 'explosion', x: b.x, y: b.y, R: b.boom, life: 0.35, max: 0.35 });
     this.burst(b.x, b.y, 12, ['#ff6a1a', '#ffd35a', '#fff0a0', '#7c1624'], 90);
@@ -809,31 +985,40 @@
     for (let i = this.zones.length - 1; i >= 0; i--) {
       const z = this.zones[i]; z.life -= dt;
       if (z.kind === 'pool') {
+        const s = z.a.s;
+        if (s.miasma) { const tg = this.nearest(z.x, z.y, 120); if (tg) { const dx = tg.x - z.x, dy = tg.y - z.y, d = Math.hypot(dx, dy) || 1; if (d > 4) { z.x += dx / d * 25 * dt; z.y += dy / d * 25 * dt; } } } // Miasma: the cloud creeps after foes
         z.tick -= dt;
-        if (z.tick <= 0) { z.tick = 0.33; this.hitCircle(z.x, z.y, z.r, z.a); }
+        if (z.tick <= 0) { z.tick = 0.33; this.hitCircle(z.x, z.y, z.r, z.a, 1, s.contagion ? (e) => { e.plagued = this.time; } : null); } // Contagion marks who stands in it
         if (Math.random() < dt * 12) this.parts.push({ x: z.x + U.rand(-z.r, z.r) * 0.8, y: z.y + U.rand(-z.r, z.r) * 0.5, vx: 0, vy: -12, life: 0.6, max: 0.6, c: '#9adf50', s: 1 });
       } else if (z.kind === 'brew') { // the Alchemist's puddle: its element keeps working on whoever stands in it
         z.tick -= dt;
-        if (z.tick <= 0) { z.tick = 0.5; this.hitCircle(z.x, z.y, z.r, z.a, 0.35); }
+        if (z.tick <= 0) { z.tick = 0.5; this.hitCircle(z.x, z.y, z.r, z.a, z.mult || 0.35); if (z.slow) { this.grid.query(z.x, z.y, z.r, tmp); for (const e of tmp) if (!e.dead && !e.boss && U.dist2(z.x, z.y, e.x, e.y) < z.r * z.r) this.addSlow(e, 2); } }
         if (Math.random() < dt * 10) this.parts.push({ x: z.x + U.rand(-z.r, z.r) * 0.8, y: z.y + U.rand(-z.r, z.r) * 0.5, vx: 0, vy: z.el === 'ice' ? -4 : -14, life: 0.6, max: 0.6, c: z.col, s: 1 });
       } else if (z.kind === 'mosh') {
         const bi = Math.floor(this.beatPos());
         if (bi !== z.beat) {
           z.beat = bi; z.flash = 1;
           this.grid.query(z.x, z.y, z.r, tmp);
-          for (const e of tmp.slice()) if (!e.dead && U.dist2(z.x, z.y, e.x, e.y) < z.r * z.r) this.hit(e, z.a, 1);
+          for (const e of tmp.slice()) if (!e.dead && U.dist2(z.x, z.y, e.x, e.y) < z.r * z.r) { this.hit(e, z.a, 1); if (z.a.s.innermosh && !e.dead && U.dist2(z.x, z.y, e.x, e.y) < z.r * z.r * 0.25) this.hit(e, z.a, 0.6); } // Inner Moshpit: the heart of it strikes again
         }
         // the brawl drags everyone nearby into the circle
         this.grid.query(z.x, z.y, z.r * 1.6, tmp);
         for (const e of tmp) if (!e.dead && !e.boss) { const dx = z.x - e.x, dy = z.y - e.y, d = Math.hypot(dx, dy) || 1; if (d < z.r * 1.6 && d > 6) { const k = 90 / Math.sqrt(e.mass) * dt; e.x += dx / d * k; e.y += dy / d * k; } }
         z.flash = Math.max(0, (z.flash || 0) - dt * 4);
       } else if (z.kind === 'thorns') {
+        const s = z.a.s, age = 1 - z.life / z.max;
+        if (s.crown) z.r = z.r0 * (1 + 0.6 * age); // Crown of Thorns: the brambles spread as they grow
         z.tick -= dt;
-        if (z.tick <= 0) { z.tick = 0.4; this.hitCircle(z.x, z.y, z.r, z.a); }
+        if (z.tick <= 0) { z.tick = 0.4; this.hitCircle(z.x, z.y, z.r, z.a, s.strong ? 1 + age : 1); } // Strong Growth: harder with age
+        if (s.flyingthorns && z.life <= 0 && !z.flung) { z.flung = true; for (let i = 0; i < 8; i++) { const an = i / 8 * TAU; proj(this, { k: 'thorn', a: z.a, x: z.x, y: z.y, vx: Math.cos(an) * 220, vy: Math.sin(an) * 220, ang: an, r: 3, pierce: 1, life: 0.6, mult: 0.6 }); } } // Flying Thorns
         this.grid.query(z.x, z.y, z.r, tmp);
         for (const e of tmp) if (!e.dead && !e.boss && U.dist2(z.x, z.y, e.x, e.y) < z.r * z.r && (e.slowS || 0) < 8) this.addSlow(e, 8 - (e.slowS || 0)); // rooted in brambles
       } else if (z.kind === 'rift') {
-        if (U.dist2(z.x, z.y, p.x, p.y) < 14 * 14) this.detonateRift(z, 2); // touched: the stronger blast
+        if (z.a.s.wandering) { // Wandering Rifts: drift toward you, burst on the first foe they touch
+          const dx = p.x - z.x, dy = p.y - z.y, d = Math.hypot(dx, dy) || 1, sp = 18 + this.P.speed * 0.25; z.x += dx / d * sp * dt; z.y += dy / d * sp * dt;
+          this.grid.query(z.x, z.y, 12, tmp); if (tmp.some((e) => !e.dead && !e.def.prop && U.dist2(e.x, e.y, z.x, z.y) < (10 + e.r) * (10 + e.r))) this.detonateRift(z, 1);
+        }
+        if (z.gone) { /* burst above */ } else if (U.dist2(z.x, z.y, p.x, p.y) < 14 * 14) this.detonateRift(z, 2); // touched: the stronger blast
         else if (z.life <= 0) this.detonateRift(z, 1); // left alone, it bursts by itself when its time is up
       }
       if (z.life <= 0 || z.gone) this.zones.splice(i, 1);
@@ -843,6 +1028,7 @@
     if (z.gone) return; z.gone = true;
     const R = 38 * z.a.s.area * (mult > 1 ? 1.15 : 1);
     this.hitCircle(z.x, z.y, R, z.a, mult || 1);
+    if (z.a.s.riftsplinters) { const sub = this.subAb(z.a, 'riftshard', ['magic', 'projectile']); for (let i = 0; i < 6; i++) { const an = i / 6 * TAU + Math.random() * 0.5; proj(this, { k: 'shard', a: sub, x: z.x, y: z.y, vx: Math.cos(an) * 200, vy: Math.sin(an) * 200, ang: an, r: 3.2, pierce: 999, life: 1.4, max: 1.4, drag: 3, decay: 0.4, cdHit: 0.45, mult: 0.3 }); } } // Rift Splinters
     this.fx.push({ k: 'pop', x: z.x, y: z.y, R, life: 0.35, max: 0.35, color: '#c070ff' });
     this.burst(z.x, z.y, 14, ['#c070ff', '#ffffff', '#40106a'], 90);
     DH.audio.play('boom');

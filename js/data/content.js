@@ -232,43 +232,130 @@
     chainstorm:   { chain: 3 },
     luminous:     { purge: 1, area: 0.2 },
     frostcore:    { frostcore: 1, frost: 0.2 },
+    // unique upgrades: each changes how one ability works (the flag of the same name, read by its behaviour)
+    split:        { split: 1, dmgPct: 0.15 },     // Ghost Darts: a critical hit splits the dart in two
+    fetters:      { fetters: 1 },                 // Ghost Darts: slow; +3% crit per slow stack on the foe
+    riftdart:     { riftdart: 1 },                // Ghost Darts: a spent dart bursts, harder for pierce left
+    backshot:     { backshot: 1 },                // Piercing Hex: fires behind too; every lance slows
+    amputation:   { amputation: 1 },              // Piercing Hex: +10% damage per kind of affliction on the foe
+    innerorbit:   { innerorbit: 1 },              // Celestial Orbs: an inner ring turning the other way
+    electrified:  { electrified: 1, spark: 0.3 }, // Celestial Orbs: +25% damage while you move
+    eccentric:    { eccentric: 1 },               // Celestial Orbs: the ring breathes; farther out hits harder
+    electrify:    { electrify: 1 },               // Storm Call: stunned foes near a strike take Spark
+    explosive:    { explosive: 1 },               // Storm Call: a critical strike explodes in fire
+    concentrated: { concentrated: 1 },            // Storm Call: strikes the strongest foe and those round it
+    emberfall:    { emberfall: 1 },               // Searing Smite: a wave sets every foe nearby alight
+    sparks:       { sparks: 1 },                  // Searing Smite: striking a burning foe blows it apart
+    froststrike:  { froststrike: 1 },             // Searing Smite: becomes ice (Frost instead of Burn)
+    icetrail:     { icetrail: 1 },                // Glacial Surge: leaves patches of ice that slow
+    debris:       { debris: 1 },                  // Glacial Surge: each wave branches in two
+    staticice:    { staticice: 1, spark: 0.3 },   // Glacial Surge: its ice turns to lightning too
+    hailspikes:   { hailspikes: 1 },              // Ice Barrage: spikes burst under you as you walk
+    vortex:       { vortex: 1 },                  // Ice Barrage: where the hail lands, foes are dragged in
+    frozenfire:   { frozenfire: 1 },              // Ice Barrage: every Frost also sets a Burn; the hail is fire too
+    crippling:    { crippling: 1 },               // Whirling Chakrams: two more blades that slow
+    piercingblades: { piercingblades: 1 },        // Whirling Chakrams: two more blades of magic that leave foes Fragile
+    heatblast:    { heatblast: 1, dmgPct: 1, knock: 80 }, // Wyrmfire: twice the direct damage, knocks back, counts as physical
+    wildfire:     { wildfire: 1 },                // Wyrmfire: a foe dying in flames passes the fire on
+    punitive:     { punitive: 1 },                // Radiant Halo: every pulse leaves foes Fragile and Afflicted
+    sacredflame:  { sacredflame: 1 },             // Radiant Halo: every pulse shares out stacks of Burn
+    echolight:    { echolight: 1 },               // Radiant Halo: a foe struck may relay the blow to its neighbour
+    magma:        { magma: 1, as: 0.15, area: 0.15, burn: 0.25 }, // Bone Golem: fists of magma
+    earthen:      { earthen: 1, dmgPct: 0.25, speed: 0.2, decay: 0.3 }, // Bone Golem: leaves a trail of rot
+    doubletrouble:{ count: 1 },                   // Bone Golem: a second golem
+    craters:      { craters: 1 },                 // Skyfall: the ground burns where a meteor lands
+    scatter:      { scatter: 1 },                 // Skyfall: each meteor throws off two smaller ones
+    earthimpact:  { earthimpact: 1, decay: 0.3 }, // Skyfall: rot spreads where a meteor lands
+    attraction:   { attraction: 1 },              // Storm Sphere: turns toward foes nearby
+    highvoltage:  { highvoltage: 1 },             // Storm Sphere: throws chain lightning as it passes
+    discharge:    { discharge: 1 },               // Storm Sphere: shorter flight, a great shockwave at its end
+    riftsplinters:{ riftsplinters: 1 },           // Void Rifts: a burst throws off arcane shards
+    wandering:    { wandering: 1 },               // Void Rifts: drift toward you, burst on foes they touch
+    elementalrift:{ elementalrift: 1, burn: 0.3 },// Void Rifts: rifts of fire
+    dashimpact:   { dashimpact: 1 },              // Phantom Knight: a shockwave where the dash ends
+    spiritorbs:   { spiritorbs: 1 },              // Phantom Knight: orbs circle the knight
+    spiritneedles:{ spiritneedles: 1 },           // Phantom Knight: the knight throws ghost darts
+    spikedchain:  { spikedchain: 1 },             // Penitent Flail: the chain wounds and slows too
+    unleashed:    { unleashed: 1 },               // Penitent Flail: blows fling loose stars that bounce
+    butterfly:    { butterfly: 1 },               // Penitent Flail: a second ball in a crossed figure
+    groundpound:  { groundpound: 1 },             // Wraith Fists: a shockwave after every volley
+    clutch:       { clutch: 1 },                  // Wraith Fists: a hand clutches the strongest foe near
+    embrace:      { embrace: 1 },                 // Illumination: one more wave; its damage heals you
+    shielding:    { shielding: 1, knock: 80 },    // Illumination: one more wave, a stronger push
+    prismfire:    { prismfire: 1 },               // Prism Cascade: a fire bounce explodes
+    prismice:     { prismice: 1 },                // Prism Cascade: an ice bounce drags foes in
+    prismbolt:    { prismbolt: 1 },               // Prism Cascade: a lightning bounce strikes two more
+    crown:        { crown: 1 },                   // Thornroot: the brambles spread as they grow
+    strong:       { strong: 1, duration: 0.5 },   // Thornroot: grows stronger the longer it lives
+    flyingthorns: { flyingthorns: 1 },            // Thornroot: withering, it throws its thorns
+    unrest:       { unrest: 1, dmgPct: 0.2 },     // Arcane Shards: never still, stronger with time
+    shivers:      { shivers: 1 },                 // Arcane Shards: fewer, each bursting into three
+    elements:     { elements: 1, burn: 0.15, frost: 0.15, spark: 0.15 }, // Arcane Shards: of every element
+    returning:    { returning: 1 },               // Hurled Axes: they fly back to you
+    splitaxe:     { splitaxe: 1 },                // Hurled Axes: an axe splits on its first blow
+    aftershock:   { aftershock: 1 },              // Frost Nova: a second, weaker wave follows
+    iceshards:    { iceshards: 1 },               // Frost Nova: throws a ring of ice shards
+    contagion:    { contagion: 1 },               // Plague Flask: a foe dying in the cloud leaves a new one
+    miasma:       { miasma: 1 },                  // Plague Flask: the clouds creep after foes
+    bouncing:     { bouncing: 1 },                // Fireball: leaps to a second foe after it bursts
+    napalm:       { napalm: 1 },                  // Fireball: the ground burns where it bursts
+    doublekick:   { doublekick: 1 },              // War Drum: two beats of the drum at once
+    innercircle:  { innercircle: 1 },             // War Drum: an inner ring that stuns every foe in it
+    firebass:     { firebass: 1, burn: 0.3 },     // War Drum: the drum of fire
+    crashing:     { crashing: 1 },                // Wall of the Dead: two ranks charge and crash together
+    slowing:      { slowing: 1 },                 // Wall of the Dead: the warriors slow what they strike
+    devilhorns:   { devilhorns: 1 },              // Wall of the Dead: they leave a trail that wounds
+    doubling:     { doubling: 1 },                // Brawl Circle: twice as many circles
+    innermosh:    { innermosh: 1 },               // Brawl Circle: an inner ring strikes again
+    moredirs:     { moredirs: 1 },                // Confetti Cannon: three directions a beat
+    fullcircle:   { fullcircle: 1 },              // Confetti Cannon: every full turn, all at once and harder
+    iceconfetti:  { iceconfetti: 1, frost: 0.3 }, // Confetti Cannon: confetti of ice
+    sonicboom:    { sonicboom: 1 },               // Killer Riff: a spent note bursts
+    splitharmony: { splitharmony: 1 },            // Killer Riff: a note splits on its first hit
+    fireriff:     { fireriff: 1, burn: 0.3 },     // Killer Riff: notes of fire
+    smallcircle:  { smallcircle: 1 },             // Pyrotechnics: an inner ring turning the other way
+    moreflames:   { moreflames: 1 },              // Pyrotechnics: twice the fountains
+    hotspark:     { hotspark: 1, spark: 0.3 },    // Pyrotechnics: the fire crackles with lightning
   };
+  /** Upgrades that change an ability's damage type: add tags, or swap one for another. */
+  C.UPGRADE_TAGS = { froststrike: { swap: ['fire', 'ice'] }, staticice: { add: ['lightning'] }, frozenfire: { add: ['fire'] }, heatblast: { add: ['physical'] }, magma: { add: ['fire'] }, elementalrift: { add: ['fire'] }, elements: { add: ['fire', 'ice', 'lightning'] }, firebass: { add: ['fire'] }, iceconfetti: { add: ['ice'] }, fireriff: { add: ['fire'] }, hotspark: { add: ['lightning'] } };
   /** Upgrade mods that change how an ability works rather than a number: each is copied onto the ability as a flag
    *  (its value a strength where it has one) and described by its own line (mod.<key>). */
-  C.UNIQUE_MODS = ['orbit', 'stream', 'chainRift', 'fork', 'purge', 'pulse', 'frostcore'];
+  C.UNIQUE_MODS = ['orbit', 'stream', 'chainRift', 'fork', 'purge', 'pulse'];
+  Object.keys(C.UPGRADES).forEach((id) => { if (C.UPGRADES[id][id] && !C.UNIQUE_MODS.includes(id)) C.UNIQUE_MODS.push(id); });
   const UP = (t1, t2) => [t1, t2];
   Object.entries({
-    darts: UP(['lethal', 'echoing'], ['barrage', 'impaling']),
-    orbs: UP(['constellation', 'colossus'], ['overpower', 'hexed']),
-    halo: UP(['searing', 'hexed'], ['colossus', 'overpower']),
-    chakrams: UP(['cyclone', 'lethal'], ['barrage', 'colossus']),
-    hexlance: UP(['forked', 'hexed'], ['barrage', 'frenzy']),
-    hail: UP(['shatter', 'colossus'], ['barrage', 'overpower']),
-    fists: UP(['concussive', 'overpower'], ['barrage', 'hexed']),
-    storm: UP(['chainstorm', 'concussive'], ['conductive', 'overpower']),
-    axes: UP(['overpower', 'colossus'], ['barrage', 'lethal']),
-    nova: UP(['frostcore', 'shatter'], ['echoing', 'overpower']),
-    plague: UP(['blight', 'enduring'], ['colossus', 'hexed']),
-    fireball: UP(['searing', 'colossus'], ['barrage', 'conductive']),
-    wyrmfire: UP(['streamfire', 'searing'], ['colossus', 'overpower']),
-    stormsphere: UP(['overcharge', 'conductive'], ['barrage', 'colossus']),
-    rifts: UP(['cascade', 'colossus'], ['barrage', 'hexed']),
-    skyfall: UP(['cataclysm', 'colossus'], ['searing', 'overpower']),
-    golem: UP(['colossus', 'frenzy'], ['barrage', 'hexed']),
-    phantom: UP(['legion', 'colossus'], ['lethal', 'frenzy']),
-    avalanche: UP(['shatter', 'barrage'], ['colossus', 'overpower']),
-    flail: UP(['concussive', 'colossus'], ['barrage', 'overpower']),
-    smite: UP(['searing', 'lethal'], ['colossus', 'echoing']),
-    thorns: UP(['blight', 'enduring'], ['colossus', 'concussive']),
-    illumination: UP(['luminous', 'colossus'], ['hexed', 'overpower']),
-    prism: UP(['chainstorm', 'barrage'], ['overpower', 'lethal']),
-    wardrum: UP(['concussive', 'colossus'], ['echoing', 'overpower']),
-    deathwall: UP(['legion', 'hexed'], ['overpower', 'lethal']),
-    moshpit: UP(['enduring', 'concussive'], ['barrage', 'colossus']),
-    shards: UP(['lethal', 'enduring'], ['barrage', 'overpower']),
-    confetti: UP(['barrage', 'hexed'], ['enduring', 'overpower']),
-    riff: UP(['barrage', 'lethal'], ['impaling', 'overpower']),
-    pyro: UP(['searing', 'colossus'], ['conductive', 'overpower']),
+    darts: UP(['split', 'fetters'], ['riftdart', 'lethal']),
+    orbs: UP(['innerorbit', 'electrified'], ['eccentric', 'overpower']),
+    halo: UP(['punitive', 'sacredflame'], ['echolight', 'overpower']),
+    chakrams: UP(['crippling', 'piercingblades'], ['cyclone', 'lethal']),
+    hexlance: UP(['backshot', 'forked'], ['amputation', 'frenzy']),
+    hail: UP(['hailspikes', 'vortex'], ['frozenfire', 'barrage']),
+    fists: UP(['groundpound', 'clutch'], ['concussive', 'overpower']),
+    storm: UP(['electrify', 'explosive'], ['concentrated', 'chainstorm']),
+    axes: UP(['returning', 'splitaxe'], ['lethal', 'barrage']),
+    nova: UP(['frostcore', 'aftershock'], ['iceshards', 'overpower']),
+    plague: UP(['contagion', 'miasma'], ['enduring', 'blight']),
+    fireball: UP(['bouncing', 'napalm'], ['searing', 'barrage']),
+    wyrmfire: UP(['heatblast', 'streamfire'], ['wildfire', 'colossus']),
+    stormsphere: UP(['attraction', 'highvoltage'], ['discharge', 'overcharge']),
+    rifts: UP(['riftsplinters', 'wandering'], ['elementalrift', 'cascade']),
+    skyfall: UP(['craters', 'scatter'], ['earthimpact', 'overpower']),
+    golem: UP(['magma', 'earthen'], ['doubletrouble', 'overpower']),
+    phantom: UP(['dashimpact', 'spiritorbs'], ['spiritneedles', 'legion']),
+    avalanche: UP(['icetrail', 'debris'], ['staticice', 'overpower']),
+    flail: UP(['spikedchain', 'unleashed'], ['butterfly', 'overpower']),
+    smite: UP(['emberfall', 'sparks'], ['froststrike', 'lethal']),
+    thorns: UP(['crown', 'strong'], ['flyingthorns', 'blight']),
+    illumination: UP(['embrace', 'shielding'], ['luminous', 'overpower']),
+    prism: UP(['prismfire', 'prismice'], ['prismbolt', 'chainstorm']),
+    wardrum: UP(['doublekick', 'innercircle'], ['firebass', 'overpower']),
+    deathwall: UP(['crashing', 'slowing'], ['devilhorns', 'legion']),
+    moshpit: UP(['doubling', 'innermosh'], ['hexed', 'overpower']),
+    shards: UP(['unrest', 'shivers'], ['elements', 'overpower']),
+    confetti: UP(['moredirs', 'fullcircle'], ['iceconfetti', 'overpower']),
+    riff: UP(['sonicboom', 'splitharmony'], ['fireriff', 'overpower']),
+    pyro: UP(['smallcircle', 'moreflames'], ['hotspark', 'overpower']),
   }).forEach(([id, ups]) => { C.abilities[id].ups = ups; });
   C.UPGRADE_LEVELS = [3, 6, 9];
   C.exclusiveAbilities = Object.keys(C.abilities).filter((k) => C.abilities[k].exclusive);

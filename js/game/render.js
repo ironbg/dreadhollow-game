@@ -503,16 +503,22 @@
         g.drawImage(A.glow('rgba(170,110,255,0.7)'), x - 6, y - 6, 12, 12);
         this.sprite(g, 'seed_p', null, 0, x, y, false, 1, false, 1, now * 8);
         lights.push({ x: b.x, y: b.y, r: 14, kind: 'magic' }); break;
-      case 'shard': { // a violet splinter of arcane glass, dimming as its strength drains
-        const al = Math.min(1, b.life / 0.35) * (0.45 + 0.55 * (b.mult || 1)), ang = Math.hypot(b.vx, b.vy) > 8 ? Math.atan2(b.vy, b.vx) : b.ang, L = 5 * b.r / 3.2, W = 1.5 * b.r / 3.2;
+      case 'shard': { // a splinter of arcane glass (of ice, from the Frost Nova), dimming as its strength drains
+        const al = Math.min(1, b.life / 0.35) * (0.45 + 0.55 * Math.min(1, b.mult || 1)), ang = Math.hypot(b.vx, b.vy) > 8 ? Math.atan2(b.vy, b.vx) : b.ang, L = 5 * b.r / 3.2, W = 1.5 * b.r / 3.2;
+        const PAL = b.ice ? ['rgba(140,220,255,0.6)', '#0a2a44', '#9fdcff', '#f0fbff'] : ['rgba(190,110,255,0.6)', '#2a0a44', '#c890ff', '#f4e4ff'];
         b.ang = ang; g.save(); g.globalAlpha = al;
-        g.drawImage(A.glow('rgba(190,110,255,0.6)'), x - 7, y - 7, 14, 14);
+        g.drawImage(A.glow(PAL[0]), x - 7, y - 7, 14, 14);
         g.translate(x, y); g.rotate(ang);
-        g.fillStyle = '#2a0a44'; g.beginPath(); g.moveTo(L + 0.8, 0); g.lineTo(0, W + 0.8); g.lineTo(-L * 0.6 - 0.8, 0); g.lineTo(0, -W - 0.8); g.closePath(); g.fill();
-        g.fillStyle = '#c890ff'; g.beginPath(); g.moveTo(L, 0); g.lineTo(0, W); g.lineTo(-L * 0.6, 0); g.lineTo(0, -W); g.closePath(); g.fill();
-        g.fillStyle = '#f4e4ff'; g.beginPath(); g.moveTo(L, 0); g.lineTo(0, -W); g.lineTo(-L * 0.3, 0); g.closePath(); g.fill();
+        g.fillStyle = PAL[1]; g.beginPath(); g.moveTo(L + 0.8, 0); g.lineTo(0, W + 0.8); g.lineTo(-L * 0.6 - 0.8, 0); g.lineTo(0, -W - 0.8); g.closePath(); g.fill();
+        g.fillStyle = PAL[2]; g.beginPath(); g.moveTo(L, 0); g.lineTo(0, W); g.lineTo(-L * 0.6, 0); g.lineTo(0, -W); g.closePath(); g.fill();
+        g.fillStyle = PAL[3]; g.beginPath(); g.moveTo(L, 0); g.lineTo(0, -W); g.lineTo(-L * 0.3, 0); g.closePath(); g.fill();
         g.restore();
-        lights.push({ x: b.x, y: b.y, r: 12, kind: 'magic' }); break;
+        lights.push({ x: b.x, y: b.y, r: 12, kind: b.ice ? 'frost' : 'magic' }); break;
+      }
+      case 'thorn': { // a flung thorn: a dark barb with a green tip
+        const ang = Math.atan2(b.vy, b.vx), tx = Math.cos(ang), ty = Math.sin(ang);
+        g.strokeStyle = '#2a1a0a'; g.lineWidth = 2; g.lineCap = 'round'; g.beginPath(); g.moveTo(x - tx * 4, y - ty * 4); g.lineTo(x + tx * 3, y + ty * 3); g.stroke();
+        g.strokeStyle = '#9adf50'; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y); g.lineTo(x + tx * 3.5, y + ty * 3.5); g.stroke(); g.lineWidth = 1; break;
       }
       case 'confetti': { // a fluttering scrap of coloured paper
         const al = Math.min(1, b.life / 0.3), w = b.r * 0.9, hgt = b.r * 0.55 * Math.abs(Math.cos(b.ang * 1.7)) + 0.4;
@@ -537,7 +543,7 @@
         this.sprite(g, 'hex_p', null, 0, x, y, false, 1, false, 1, b.ang || Math.atan2(b.vy, b.vx) || 0.0001);
         lights.push({ x: b.x, y: b.y, r: 16, kind: 'magic' }); break;
       default: {
-        const name = { arrow: 'arrow_p', dart: 'dagger_p', axe: 'axe_p', flask: 'flask_p', chakram: 'chakram_p', fist: 'fist_p' }[b.k];
+        const name = { arrow: 'arrow_p', dart: 'dagger_p', axe: 'axe_p', flask: 'flask_p', chakram: 'chakram_p', fist: 'fist_p', star: 'flail_p' }[b.k];
         if (!name) break;
         this.sprite(g, name, null, 0, x, y, false, b.k === 'axe' || b.k === 'chakram' ? Math.max(1, b.r / 6) : 1, false, 1, b.ang || 0.0001);
         const ec = b.a && b.a.tags && b.a.tags.some((t) => t === 'fire' || t === 'ice' || t === 'lightning' || t === 'magic') ? this.elemColor(b.a.tags) : b.k === 'flask' ? '#8ae060' : null;
