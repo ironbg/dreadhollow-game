@@ -365,6 +365,16 @@
   });
   GL.moon = (g) => { P.circle(g, 16, 16, 11, P.vol(g, 16, 16, 11, '#e02838')); P.circle(g, 20, 13, 9, 'rgba(0,0,0,0.55)'); };
 
+  /** The box of a sprite's visible pixels (for cropping portraits). */
+  function opaqueBox(img) {
+    const w = img.width, h = img.height; let x0 = w, y0 = h, x1 = 0, y1 = 0;
+    try {
+      const c = document.createElement('canvas'); c.width = w; c.height = h; const cg = c.getContext('2d', { willReadFrequently: true }); cg.drawImage(img, 0, 0);
+      const d = cg.getImageData(0, 0, w, h).data;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 40) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    } catch (e) { return { x0: 0, y0: 0, x1: w, y1: h }; }
+    return x1 > x0 ? { x0, y0, x1: x1 + 1, y1: y1 + 1 } : { x0: 0, y0: 0, x1: w, y1: h };
+  }
   function heroPortrait(g, id, frame) {
     // crop the head and shoulders out of the in-game sprite, one sprite pixel per icon pixel
     const s = G.sprite(id), k = G.CPX, img = s.frames[0];
@@ -2197,6 +2207,16 @@
     else if (name === 'c_silver') GL.chest(g, '#4a5a7a');
     else if (name === 'c_gold') GL.chest(g, '#8a2034');
     else if (name === 'c_red') GL.chest(g, '#8a1a24');
+    else if (pre === 'av' && DH.gfx.painters[id]) { // an avatar: the head and shoulders of an in-game model in a round frame (the keepers are cut like the heroes)
+      P.circle(g, 16, 16, 15.5, P.rg(g, 16, 20, 16, ['#4a3a44', '#1a1016'])); g.save(); g.beginPath(); g.arc(16, 16, 15, 0, Math.PI * 2); g.clip(); g.setTransform(1, 0, 0, 1, 0, 0);
+      if (id.startsWith('npc_')) { g.scale(U2, U2); heroPortrait(g, id); }
+      else { // the model's visible box; a long beast (wider than tall) is cut at its head end, which faces right
+        const img = G.sprite(id).frames[0], b = opaqueBox(img), bw = b.x1 - b.x0, bh = b.y1 - b.y0;
+        const side = bw > bh * 1.15 ? bh * 1.05 : Math.min(bw * 1.05, bh), sx = bw > bh * 1.15 ? b.x1 - side : b.x0 + (bw - side) / 2, sy = b.y0 - side * 0.04;
+        g.imageSmoothingEnabled = false; g.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
+      }
+      g.restore();
+    }
     else if (pre === 'h' && DH.gfx.painters[id]) { P.circle(g, 16, 16, 15.5, P.rg(g, 16, 20, 16, ['#4a3a44', '#1a1016'])); g.save(); g.beginPath(); g.arc(16, 16, 15, 0, Math.PI * 2); g.clip(); g.setTransform(1, 0, 0, 1, 0, 0); g.scale(U2, U2); heroPortrait(g, id); g.restore(); }
     else if (pre === 'm' && DH.gfx.painters[id]) { P.circle(g, 16, 16, 15, P.lg(g, 0, 1, 0, 31, ['#fff0a0', '#c89030', '#6a4a14'])); P.circle(g, 16, 16, 12.5, P.rg(g, 16, 18, 13, ['#4a3a44', '#1a1016'])); g.save(); g.beginPath(); g.arc(16, 16, 12.3, 0, Math.PI * 2); g.clip(); g.setTransform(1, 0, 0, 1, 0, 0); g.scale(U2, U2); heroPortrait(g, id, true); g.restore(); }
     else if (pre === 'ab') {

@@ -7,6 +7,8 @@
   const KEY = 'dreadhollow.save.v1';
   const META_KEY = 'dreadhollow.sync.v1';
   const SAVE_VERSION = 8;
+  /** A player's id: 12 letters and digits, unambiguous (no 0/O, 1/I/L). */
+  const newPid = () => { const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let s = ''; for (let i = 0; i < 12; i++) s += A[Math.floor(Math.random() * A.length)]; return s; };
   const store = () => DH.platform.storage;
   const newMeta = () => ({ rev: 0, dirty: false, uid: null, syncedAt: 0, device: Math.random().toString(36).slice(2, 10) });
 
@@ -20,7 +22,7 @@
       accountLevel: 1, accountXp: 0,
       heroes: { knight: true }, selectedHero: 'knight',
       selectedStage: 'crypt', trackedDeed: null, newbie: null, cleared: {}, bestTime: {},
-      shrine: {}, tributes: [], runTributes: [], npcs: {},
+      shrine: {}, tributes: [], runTributes: [], npcs: {}, avatar: null, pid: newPid(),
       gear: [], equipped: { head: null, neck: null, chest: null, hands: null, feet: null, ring1: null, ring2: null, mark: null }, nextGearId: 1,
       loadouts: {}, archiveBy: {}, // per hero: equipped gear + Mark, and Archive shards
       discovered: {}, potions: {}, herbs: {}, wellkeeper: [], deeds: {}, artifacts: {}, agony: {},
@@ -118,6 +120,7 @@
       if (d.v < 8 && d.stats && d.stats.runs > 0) { // v8: the keepers of the camp must be rescued; whoever already played has them at work
         d.npcs = d.npcs || {}; for (const k of ['wellkeeper', 'cupbearer', 'scriptor']) if (!d.npcs[k]) d.npcs[k] = Date.now();
       }
+      if (!d.pid) d.pid = newPid(); // the player's id, shown (and copied) in the profile
       if (!Number.isFinite(d.energy)) { d.energy = 30; d.energyTs = DH.util.now(); } // repair saves hit by the old run-cost bug
       if (DH.content && !DH.content.heroes[d.selectedHero]) d.selectedHero = 'knight';
       if (DH.content && !DH.content.stages[d.selectedStage]) d.selectedStage = 'crypt';

@@ -339,6 +339,12 @@
   /** The Altar opens after the Chapter V Lord falls (saves that already own Artifacts keep it open). */
   /** Is this keeper of the camp free (rescued in their hall; profiles from before v8 have them all, see save.js)? */
   meta.npcFreed = (id) => { const s = S(); return !!(s.npcs && s.npcs[id]); };
+  /* ---------------- Avatars (the profile picture) ---------------- */
+  meta.avatarUnlocked = (id) => { const a = C.avatarById[id]; if (!a) return false; return a.hero ? meta.heroOwned(a.hero) : a.npc ? meta.npcFreed(a.npc) : meta.deedDone(a.deed); };
+  /** The chosen avatar, or the portrait of the selected hero when none is chosen (or the choice is no longer valid). */
+  meta.avatar = () => { const s = S(); return s.avatar && meta.avatarUnlocked(s.avatar) ? s.avatar : 'hero_' + s.selectedHero; };
+  meta.avatarIcon = (id) => (C.avatarById[id || meta.avatar()] || { icon: 'h_' + S().selectedHero }).icon;
+  meta.setAvatar = (id) => { if (id !== null && !meta.avatarUnlocked(id)) return false; S().avatar = id; changed(); return true; };
   meta.altarUnlocked = () => meta.deedDone('d_stage_discord_win') || Object.keys(S().artifactsOwned).length > 0;
   meta.activeArtifacts = () => meta.altarUnlocked() ? E.artifactOrder.filter((k) => S().artifacts[k] && meta.artifactUnlocked(k)) : [];
   /** Torment Rank: one per active Artifact. */

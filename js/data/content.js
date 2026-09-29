@@ -707,5 +707,16 @@
   /* Agony (dynamic difficulty after a stage is cleared) */
   C.AGONY_MAX = 5;
 
+  /* Avatars for the profile: every hero (unlocked with the hero), every hall's Lord (slain), the keepers of the camp
+   * (rescued) and a few earned by deeds. icon: an icon name (h_ hero portrait, av_ a model's head and shoulders). */
+  C.AVATARS = [].concat(
+    C.heroOrder.map((h) => ({ id: 'hero_' + h, icon: 'h_' + h, hero: h })),
+    C.stageOrder.map((sid) => { const b = C.stages[sid].bosses.find((x) => x.final); return { id: 'lord_' + sid, icon: 'av_' + C.enemies[b.id].painter, deed: 'd_boss_' + b.id, name: 'enemy.' + b.id }; }),
+    ['wellkeeper', 'cupbearer', 'scriptor'].map((n) => ({ id: 'npc_' + n, icon: 'av_npc_' + n, npc: n, name: 'npc.' + n })),
+    [['ooze', 'gildedooze', 'd_oozes_10'], ['champion', 'twistedknight', 'd_champions_100'], ['slayer', 'bonetyrant', 'd_kills_run_4000'],
+      ['veteran', 'basilisk', 'd_level_70'], ['tormented', 'magistrate', 'd_dread_8'], ['precise', 'sunkknight', 'd_crits']]
+      .map(([k, foe, deed]) => ({ id: 'deed_' + k, icon: 'av_' + C.enemies[foe].painter, deed, name: 'enemy.' + foe })));
+  C.avatarById = {}; C.AVATARS.forEach((a) => { C.avatarById[a.id] = a; });
+
   DH.content = C;
 })(window.DH);

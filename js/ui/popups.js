@@ -6,18 +6,68 @@
   const click = () => DH.audio.play('click');
 
   /* ---------------- Profile / stats ---------------- */
-  ui.openProfile = () => {
-    const s = S(), st = s.stats;
-    const rows = [
-      ['profile.runs', U.fmt(st.runs)], ['profile.wins', U.fmt(st.wins)], ['profile.kills', U.fmt(st.kills)],
-      ['profile.bosses', U.fmt(st.bossKills)], ['profile.elites', U.fmt(st.eliteKills)], ['profile.bestTime', U.fmtTime(st.bestSurvival)],
-      ['profile.maxLevel', st.maxLevel], ['profile.gold', U.fmt(st.goldEarned)], ['profile.playTime', U.fmtDuration(st.playTime * 1000)],
-      ['profile.chests', U.fmt(st.chestsOpened)],
-    ];
-    const m = ui.modal({ title: t('profile.title'), body: h('div',
-      h('div.pname', h('b', s.playerName || '—'), h('button.btn.tiny.ghost', { onclick: () => { click(); m.close(); ui.openName(false, () => ui.openProfile()); } }, t('name.change'))),
-      h('div.center', h('span.power', t('top.level', { n: s.accountLevel }))),
-      h('div.statgrid', rows.map(([k, v]) => h('div', h('span', t(k)), h('b', v))))) });
+  /** The profile: the avatar, the name and the player's id above three tabs (the records, the avatars, the account). */
+  ui.openProfile = (tab) => {
+    tab = tab || 'avatar';
+    let pick = M.avatar();
+    const m = ui.modal({ title: t('profile.title'), cls: 'profile', body: () => h('div'), onClose: () => DH.events.off('cloud', onCloud) });
+    const onCloud = () => { if (!m.closed && tab === 'account') draw(); };
+    DH.events.on('cloud', onCloud);
+    const stats = () => {
+      const st = S().stats;
+      const rows = [
+        ['profile.runs', U.fmt(st.runs)], ['profile.wins', U.fmt(st.wins)], ['profile.kills', U.fmt(st.kills)],
+        ['profile.bosses', U.fmt(st.bossKills)], ['profile.elites', U.fmt(st.eliteKills)], ['profile.bestTime', U.fmtTime(st.bestSurvival)],
+        ['profile.maxLevel', st.maxLevel], ['profile.gold', U.fmt(st.goldEarned)], ['profile.playTime', U.fmtDuration(st.playTime * 1000)],
+        ['profile.chests', U.fmt(st.chestsOpened)],
+      ];
+      return h('div.statgrid', rows.map(([k, v]) => h('div', h('span', t(k)), h('b', v))));
+    };
+    const avName = (a) => (a.hero ? t('hero.' + a.hero + '.name') : t(a.name));
+    const avNeed = (a) => (a.hero ? t('avatar.needHero', { name: t('hero.' + a.hero + '.name') }) : a.npc ? t('resc.lost.' + a.npc) : ui.deedText(DH.deeds.byId[a.deed]));
+    const avatars = () => {
+      const grid = h('div.avgrid'), sel = C.avatarById[pick];
+      const groups = [['avatar.heroes', (a) => a.hero], ['avatar.lords', (a) => a.id.startsWith('lord_')], ['avatar.keepers', (a) => a.npc], ['avatar.deeds', (a) => a.id.startsWith('deed_')]];
+      for (const [title, test] of groups) {
+        grid.append(h('div.avsec', t(title)));
+        C.AVATARS.filter(test).forEach((a) => {
+          const open = M.avatarUnlocked(a.id);
+          grid.append(h('button.av' + (open ? '' : '.locked') + (a.id === pick ? '.on' : ''), { title: avName(a), onclick: () => {
+            click();
+            if (!open) { ui.toast(avName(a) + ': ' + avNeed(a), 'bad'); return; }
+            pick = a.id; draw();
+          } }, A.img(a.icon), open ? null : h('span.avlock', A.img('u_lock'))));
+        });
+      }
+      const changed = pick !== M.avatar();
+      return h('div',
+        h('div.avpick', h('b', sel ? avName(sel) : ''), h('span.small.muted', ' · ' + t('avatar.count', { n: C.AVATARS.filter((a) => M.avatarUnlocked(a.id)).length, m: C.AVATARS.length }))),
+        grid,
+        h('button.btn.green.block.avapply' + (changed ? '' : '.off'), { onclick: async () => {
+          if (!changed) return;
+          if (await ui.act('setAvatar', { id: pick })) { DH.audio.play('buy'); ui.refresh(); draw(); }
+        } }, t('avatar.apply')));
+    };
+    const account = () => h('div',
+      ui.accountBody(() => m.close()),
+      h('div.col', { style: { marginTop: '12px' } },
+        h('button.btn.small.ghost.block', { onclick: () => DH.iap.restore() }, t('shop.restore')),
+        h('button.btn.small.ghost.block', { onclick: () => ui.openSaveTransfer() }, t('settings.transfer'))));
+    const draw = () => {
+      const s = S(), u = DH.cloud.user, id = s.pid || '—';
+      const copy = () => { const done = () => ui.toast(t('settings.copied'), 'good'); try { navigator.clipboard.writeText(id).then(done, () => {}); } catch (e) { /* no clipboard */ } };
+      m.set(h('div',
+        h('div.prof-head',
+          h('div.prof-av', A.img(M.avatarIcon(M.avatar())), h('div.lvl', s.accountLevel)),
+          h('div.prof-info',
+            h('div.prof-name', h('b', s.playerName || '—'), h('button.btn.tiny.ghost', { onclick: () => { click(); m.close(); ui.openName(false, () => ui.openProfile(tab)); } }, t('name.change'))),
+            h('div.small.muted', t('profile.id')),
+            h('div.prof-id', h('span', id), h('button.btn.tiny.ghost', { onclick: () => { click(); copy(); } }, t('settings.copy'))),
+            h('div.small.' + (u ? 'good' : 'muted'), u ? t('profile.linked', { who: u.email || u.name || '—' }) : t('profile.guest')))),
+        h('div.tabs.prof-tabs', ['stats', 'avatar', 'account'].map((k) => h('button' + (tab === k ? '.on' : ''), { onclick: () => { click(); tab = k; draw(); } }, t('profile.tab.' + k)))),
+        h('div.prof-body', tab === 'stats' ? stats() : tab === 'avatar' ? avatars() : account())));
+    };
+    draw();
   };
 
   /* ---------------- Player name ---------------- */
@@ -130,9 +180,7 @@
       h('div.setsec', t('settings.secGame')),
       h('div.setrow', h('label', t('settings.language')), langSel),
       h('div.col', { style: { marginTop: '14px' } },
-        h('button.btn.small.gold.block', { onclick: () => ui.openAccount() }, t(DH.cloud.user ? 'cloud.account' : 'cloud.signInSave')),
-        h('button.btn.small.ghost.block', { onclick: () => DH.iap.restore() }, t('shop.restore')),
-        h('button.btn.small.ghost.block', { onclick: () => ui.openSaveTransfer() }, t('settings.transfer')),
+        h('button.btn.small.gold.block', { onclick: () => { m.close(); ui.openProfile('account'); } }, t('profile.accountBtn')), // sign-in, linking, purchases and transfer live in the profile's Account tab
         h('div.btns', h('button.btn.small.ghost', { onclick: () => ui.openLegal('terms') }, t('title.terms')), h('button.btn.small.ghost', { onclick: () => ui.openLegal('privacy') }, t('title.privacy'))),
         DH.ads.privacyRequired() ? h('button.btn.small.ghost.block', { onclick: () => DH.ads.privacyOptions() }, t('settings.adPrivacy')) : null,
         h('button.btn.small.red.block', { onclick: async () => {
@@ -179,12 +227,13 @@
       h('div.center.small.muted', { style: { marginTop: '8px', userSelect: 'text', webkitUserSelect: 'text' } }, C.playUrl.replace(/^https:\/\/|\/$/g, ''))) });
     return true;
   };
-  ui.openAccount = () => {
+  /** The account's content (sign in, link, sync, sign out, delete): in its own window and in the profile's Account tab.
+   *  close: closes whatever holds it (the email forms open a window of their own). */
+  ui.accountBody = (close) => {
     const C = DH.cloud;
-    if (ui.signInElsewhere()) return;
     const googleIn = async (btn) => {
       const r = await act([btn], () => C.signInGoogle());
-      if (r && r.needPassword) { m.close(); ui.openEmailAuth('link', r); }
+      if (r && r.needPassword) { close(); ui.openEmailAuth('link', r); }
     };
     const status = () => {
       const st = C.state;
@@ -197,9 +246,9 @@
     const signedOut = () => h('div',
       h('div.small.center', { style: { lineHeight: '1.45', marginBottom: '12px' } }, t('cloud.why')),
       h('div.col',
-        h('button.btn.gold.block', { onclick: (e) => googleIn(e.currentTarget) }, t('cloud.google')),
-        h('button.btn.ghost.block', { onclick: () => { m.close(); ui.openEmailAuth('signin'); } }, t('cloud.emailSignIn')),
-        h('button.btn.ghost.block', { onclick: () => { m.close(); ui.openEmailAuth('signup'); } }, t('cloud.emailSignUp'))));
+        h('button.btn.gold.block', { onclick: (e) => { if (!ui.signInElsewhere()) googleIn(e.currentTarget); } }, t('cloud.google')),
+        h('button.btn.ghost.block', { onclick: () => { if (ui.signInElsewhere()) return; close(); ui.openEmailAuth('signin'); } }, t('cloud.emailSignIn')),
+        h('button.btn.ghost.block', { onclick: () => { if (ui.signInElsewhere()) return; close(); ui.openEmailAuth('signup'); } }, t('cloud.emailSignUp'))));
     const signedIn = () => {
       const u = C.user, google = C.linked('google'), pw = C.linked('password');
       return h('div',
@@ -223,8 +272,12 @@
             act([e.currentTarget], () => C.deleteAccount());
           } }, t('cloud.delete'))));
     };
-    const body = () => h('div', C.user ? signedIn() : signedOut(),
+    return h('div', C.user ? signedIn() : signedOut(),
       C.provider.name === 'mock' ? h('div.note', t('cloud.mockNote')) : null);
+  };
+  ui.openAccount = () => {
+    if (ui.signInElsewhere()) return;
+    const body = () => ui.accountBody(() => m.close());
     const m = ui.modal({ title: t('cloud.title'), body, onClose: () => DH.events.off('cloud', redraw) });
     const redraw = () => { if (!m.closed) m.set(body()); };
     DH.events.on('cloud', redraw);

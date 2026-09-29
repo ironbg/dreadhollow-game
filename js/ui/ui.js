@@ -215,7 +215,7 @@
     const en = DH.meta.energy();
     el.innerHTML = '';
     el.append(
-      h('div.avatar', { onclick: () => ui.openProfile() }, A.img('h_' + s.selectedHero), h('div.lvl', s.accountLevel)),
+      h('div.avatar', { onclick: () => ui.openProfile() }, A.img(DH.meta.avatarIcon()), h('div.lvl', s.accountLevel)),
       h('div.acct', { onclick: () => ui.openProfile() },
         h('div.name', s.playerName || t('top.level', { n: s.accountLevel })),
         h('div.xpbar', h('i', { style: { width: 'calc((100% - 6px) * ' + Math.min(1, s.accountXp / need).toFixed(3) + ')' } }), h('span', U.fmt(Math.floor(s.accountXp)) + ' / ' + U.fmt(need)))),
