@@ -19,11 +19,12 @@
     }
     if (c.kind === 'elev') return { icon: 'tr_' + c.id, name: t('trait.' + c.id), desc: ui.fmtStats(C.elevatedTraits[c.id].per), tag: t('lv.elevated'), tcls: 'elev' };
     if (c.kind === 'cls') {
-      const ct = C.heroes[c.hero].ct[c.cat][c.v], sis = C.heroes[c.hero].ct[c.cat][1 - c.v];
-      const parts = []; if (Object.keys(ct.w).length) parts.push(ui.fmtMods(ct.w)); if (Object.keys(ct.s).length) parts.push(ui.fmtStats(ct.s));
-      return { icon: c.hero === run.heroId ? 'h_' + c.hero : 'm_' + c.hero, name: t('ct.' + ct.k), desc: parts.join(' · '),
-        tag: t('lv.class.' + c.cat) + (c.hero !== run.heroId ? ' · ' + t('lv.mark', { hero: t('hero.' + c.hero + '.name') }) : ''), tcls: 'cls',
-        note: c.rank === 1 && !c.sister ? t('lv.sister', { name: t('ct.' + sis.k) }) : null };
+      const d = C.ctDef(c.hero, c.cat, c.v), parts = [];
+      if (Object.keys(d.w).length) parts.push(t('lv.mainWeapon') + ': ' + ui.fmtMods(d.w));
+      if (Object.keys(d.s).length) parts.push(ui.fmtStats(d.s));
+      return { icon: c.hero === run.heroId ? 'h_' + c.hero : 'm_' + c.hero, name: t('lv.class.' + c.cat) + ' ' + ['', 'I', 'II', 'III', 'IV', 'V'][c.rank] + ' (' + t('ct.' + d.k) + ')', desc: parts.join(' · '),
+        tag: t(c.x ? 'lv.rankV' : 'lv.heroTrait') + (c.hero !== run.heroId ? ' · ' + t('lv.mark', { hero: t('hero.' + c.hero + '.name') }) : ''), tcls: c.x ? 'cls.clsv' : 'cls',
+        note: c.x ? t('lv.rankVNote') : null };
     }
     if (c.kind === 'ab') {
       const T = C.abilities[c.ab].traits[c.idx];
@@ -144,7 +145,7 @@
 
   function buildRow(run) {
     const row = h('div.buildrow');
-    for (let i = 0; i <= C.MAX_ABILITIES; i++) {
+    for (let i = 0; i <= Math.max(C.MAX_ABILITIES, run.maxAbilities()); i++) {
       const a = run.abilities[i];
       if (!a) { row.append(h('div.b.empty')); continue; }
       const n = Object.values(run.traits.ab[a.id] || {}).reduce((x, y) => x + y, 0);
@@ -156,7 +157,7 @@
     const row = h('div.buildrow.traits');
     for (const id in run.traits.base) row.append(h('div.b', A.img('tr_' + id), h('i', run.traits.base[id])));
     for (const id in run.traits.elev) row.append(h('div.b.elev', A.img('tr_' + id), h('i', run.traits.elev[id])));
-    for (const k in run.traits.cls) { const c = run.traits.cls[k]; row.append(h('div.b.cls', A.img(c.hero === run.heroId ? 'h_' + c.hero : 'm_' + c.hero), h('i', c.rank))); }
+    for (const k in run.traits.cls) { const c = run.traits.cls[k]; row.append(h('div.b.cls', A.img(c.hero === run.heroId ? 'h_' + c.hero : 'm_' + c.hero), h('i', typeof c.v === 'string' ? 'V' : c.rank))); }
     return row.childNodes.length ? row : null;
   }
 

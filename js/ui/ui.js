@@ -9,7 +9,7 @@
   /* ---------------- formatting ---------------- */
   const PCT = {}; ['dmgPct', 'maxHpPct', 'speedPct', 'as', 'area', 'duration', 'ms', 'pickup', 'critPct', 'addCrit', 'critBonus', 'summonPct',
     'burn', 'spark', 'frost', 'decay', 'fragile', 'affliction', 'growth', 'greed', 'physPct', 'magicPct', 'firePct', 'lightningPct', 'icePct',
-    'killAs', 'killAsMax', 'eliteHeal', 'killHealChance', 'killHeal', 'stillDmg', 'fireSpark', 'effectPct', 'wBurn', 'wSpark', 'wFrost', 'grenadePct', 'chestDrop', 'tomeDrop'].forEach((k) => { PCT[k] = 1; });
+    'killAs', 'killAsMax', 'eliteHeal', 'killHealChance', 'killHeal', 'stillDmg', 'fireSpark', 'effectPct', 'wBurn', 'wSpark', 'wFrost', 'grenadePct', 'chestDrop', 'tomeDrop', 'meleePct', 'projectilePct', 'areaPct', 'abPct'].forEach((k) => { PCT[k] = 1; });
   const fmtStat1 = (k, v) => {
     if (k === 'defense' || k === 'hitDefense') return t('statfmt.flat', { v: Math.round(v * 1000) / 10, name: t('stat.defense') }); // Defense is shown in points
     if (PCT[k]) return t('statfmt.pct', { v: Math.round(v * 1000) / 10, name: t('stat.' + k) });
