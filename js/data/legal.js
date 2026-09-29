@@ -4,11 +4,11 @@
 (function (DH) {
   'use strict';
   DH.legal = {
-    owner: { bg: 'НОЛИНА МЕД ЕООД', en: 'NOLINA MED EOOD' }, // the company, as registered in the Commercial Register
-    eik: '204109102',
-    address: { bg: 'гр. Хисаря, обл. Пловдив, „Деветте деца на Еани“ № 2, България', en: '2 Devette Detsa na Eani, Hisarya, Plovdiv Province, Bulgaria' },
+    owner: { bg: 'Dreadhollow Games', en: 'Dreadhollow Games' }, // the developer name players see (the studio name, as on Google Play)
+    eik: '', // left empty on purpose: the documents name the studio and a contact email only
+    address: { bg: '', en: '' },
     email: 'nikolov@nolina-med.eu', // a support address players can write to about their account, purchases and personal data
     country: 'BG', // governing law and the data protection authority players can complain to
-    updated: '2026-09-28',
+    updated: '2026-09-29',
   };
 })(window.DH = window.DH || {});
