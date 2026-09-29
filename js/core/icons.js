@@ -851,6 +851,40 @@
       g.strokeStyle = G.rgba(INK, 0.7); g.lineWidth = 0.5; g.beginPath(); g.moveTo(14, 14.6); g.lineTo(14.2, 17); g.moveTo(16.4, 14.4); g.lineTo(16.6, 17); g.moveTo(10.6, 18); g.quadraticCurveTo(14, 17.2, 16.4, 19.4); g.stroke();
       P.rect(g, 10.2, 23.4, 10.6, 2.6, '#3a2a22'); for (const x of [12, 15, 18]) P.circle(g, x, 24.7, 0.5, '#c8ccd6');
     },
+    confetti(g) { // a flared brass horn blowing a spray of coloured scraps
+      P.glow(g, 20, 12, 11, '#ff90c0', 0.4);
+      const cols = ['#ff5a8a', '#ffd35a', '#6ad8ff', '#8aff6a', '#c890ff', '#ff9a3a'];
+      for (let i = 0; i < 11; i++) { const a = -0.9 + i * 0.13, d = 8 + (i * 37 % 7), x = 15 + Math.cos(a) * d, y = 15 + Math.sin(a) * d; g.save(); g.translate(x, y); g.rotate(i * 1.3); P.rect(g, -1.5, -0.9, 3, 1.8, INK); P.rect(g, -1.1, -0.55, 2.2, 1.1, cols[i % cols.length]); g.restore(); }
+      sil(g, [4, 25, 13, 16, 17, 10, 21.6, 14.4, 16.4, 19, 7, 28], P.lg(g, 4, 10, 21, 28, ['#fff0b0', '#e0a830', '#7a5410']), 1.3);
+      inkPath(g, () => { g.beginPath(); g.ellipse(19.3, 12.2, 3.6, 2.2, -0.75, 0, Math.PI * 2); }, '#2a1a0a', 1.1);
+      P.line(g, 6, 25.4, 14, 17.4, 0.6, 'rgba(255,255,255,0.6)');
+    },
+    riff(g) { // three notes leaping off a string
+      P.glow(g, 16, 16, 13, '#ffd070', 0.45);
+      g.strokeStyle = 'rgba(255,220,150,0.5)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(2, 25); g.quadraticCurveTo(16, 20, 30, 25); g.stroke();
+      const note = (x, y, s) => {
+        g.save(); g.translate(x, y); g.scale(s, s);
+        inkLine(g, 2.6, 1, 2.6, -9, 1.1, '#ffe0a0');
+        g.strokeStyle = INK; g.lineWidth = 2.4; g.beginPath(); g.moveTo(2.6, -9); g.quadraticCurveTo(7, -7, 6, -3.6); g.stroke(); g.strokeStyle = '#ffe0a0'; g.lineWidth = 1.1; g.stroke();
+        inkPath(g, () => { g.beginPath(); g.ellipse(0, 1.4, 3.2, 2.3, -0.4, 0, Math.PI * 2); }, P.rg(g, -1, 0.6, 3.4, ['#fff4c8', '#e0a830', '#7a5410']), 1.1);
+        g.restore();
+      };
+      note(7, 22, 0.85); note(15, 16, 1); note(24, 11, 0.95);
+    },
+    pyro(g) { // a fountain of fire bursting from a brass mortar, sparks falling back
+      P.glow(g, 16, 13, 13, '#ff8a30', 0.6);
+      inkPath(g, () => { g.beginPath(); g.moveTo(16, 2.4); g.quadraticCurveTo(22, 11, 19.6, 21); g.lineTo(12.4, 21); g.quadraticCurveTo(10, 11, 16, 2.4); }, P.lg(g, 0, 2, 0, 21, ['#fff6c0', '#ffb040', '#e04010']), 1.1);
+      P.path(g, [16, 7, 18.4, 14, 16.8, 20, 15, 20, 13.8, 14]); P.fill(g, '#fff4c8');
+      for (const [x, y] of [[7, 8], [25, 7], [5, 15], [27, 15], [9, 3.6], [23, 3]]) { P.circle(g, x, y, 1.1, INK); P.circle(g, x, y, 0.7, '#ffe070'); }
+      sil(g, [9.6, 20, 22.4, 20, 21, 28.4, 11, 28.4], P.lg(g, 9, 0, 23, 0, ['#fff0b0', '#c89030', '#5a3a0c']), 1.2);
+      P.rect(g, 10.4, 22.6, 11.2, 1.1, 'rgba(60,30,10,0.6)');
+    },
+    shards(g) { // violet splinters flung out in two fans, hanging in the air
+      P.glow(g, 16, 16, 13, '#b070ff', 0.5);
+      const sh = (x, y, a, L) => { g.save(); g.translate(x, y); g.rotate(a); sil(g, [L, 0, 0, 1.9, -L * 0.6, 0, 0, -1.9], P.lg(g, -L, 0, L, 0, ['#6a2ab0', '#c890ff', '#f4e4ff']), 1); g.restore(); };
+      for (const dir of [-1, 1]) for (let i = 0; i < 4; i++) { const a = dir * Math.PI / 2 + (i - 1.5) * 0.42; sh(16 + Math.cos(a) * (8 + (i % 2) * 3), 16 + Math.sin(a) * (7 + (i % 2) * 3), a, 5.2); }
+      inkCircle(g, 16, 16, 2.6, P.rg(g, 15.4, 15.4, 3, ['#ffffff', '#c890ff', '#4a1a80']));
+    },
   });
 
   /* ---------- trait icons: a round iron medallion (gold for the elevated ones) around a well in the trait's colour ---------- */

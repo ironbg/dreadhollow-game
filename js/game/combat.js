@@ -99,6 +99,7 @@
       stun: ((b.stun || 0) + (m.stun || 0)) * eff,
       purge: m.purge || 0, pulse: m.pulse || 0, falloff: def.falloff || 0,
     };
+    for (const k of C.UNIQUE_MODS) if (m[k] && a.s[k] == null) a.s[k] = m[k];
     if (def.msToAs) { a.s.cd /= 1 + 0.5 * Math.max(0, a.s.ms); a.s.ms = 0; } // Arquebus: Multistrike speeds up the reload instead of adding shots
     if (def.beat) {
       const want = def.beat / Math.max(0.25, 1 + P.as + (m.as || 0));

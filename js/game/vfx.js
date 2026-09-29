@@ -287,6 +287,7 @@
   /** Trails behind spell projectiles (called while rendering them). */
   R.projTrail = function (b) {
     if (!b.a || this.settings.minFx || Math.random() < (this.settings.lowFx ? 0.8 : 0.45)) return;
+    if (b.drag && b.vx * b.vx + b.vy * b.vy < 900) return; // hanging in the air: no trail
     const c = b.k === 'flame' || b.k === 'fireball' || b.k === 'wave' ? '#ff8a30' : elemColor(b.a.tags);
     if (b.k === 'arrow' || b.k === 'dart' || b.k === 'axe' || b.k === 'chakram' || b.k === 'flask') { if (Math.random() < 0.5) return; }
     this.gpart({ x: b.x + U.rand(-1.5, 1.5), y: b.y + U.rand(-1.5, 1.5), vx: -b.vx * 0.05, vy: -b.vy * 0.05 - 4, life: 0.35, max: 0.35, c, r: 0.8, core: c });

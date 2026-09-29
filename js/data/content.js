@@ -143,15 +143,15 @@
                   traits: [T('static', { spark: 0.25 }), T('linger', { duration: 0.4 }), T('multi', { count: 1 }), T('expanse', { area: 0.25 }), T('haste', { as: 0.2 }), T('amp', { dmgPct: 0.25 })] },
     halo:       { icon: 'sun',      tags: ['magic', 'area'], base: { dmg: 24, cd: 0.5, area: 1, knock: 10, crit: 0.05 }, split: true,
                   traits: [T('expanse', { area: 0.2 }), T('amp', { dmgPct: 0.3 }), T('brittle', { fragile: 0.15 }), T('torment', { affliction: 0.15 }), T('kindle', { burn: 0.2 }), T('haste', { as: 0.15 })] },
-    rifts:      { icon: 'rift',     tags: ['magic', 'area'], base: { dmg: 40, cd: 1.2, count: 1, area: 1, duration: 8, knock: 60, crit: 0.05 },
+    rifts:      { icon: 'rift',     tags: ['magic', 'area'], base: { dmg: 40, cd: 1.6, count: 1, area: 1, duration: 4, knock: 60, crit: 0.05 },
                   traits: [T('multi', { count: 1 }), T('expanse', { area: 0.25 }), T('amp', { dmgPct: 0.3 }), T('linger', { duration: 0.4 }), T('torment', { affliction: 0.2 }), T('haste', { as: 0.2 })] },
-    skyfall:    { icon: 'meteor',   tags: ['fire', 'area'], base: { dmg: 40, cd: 2.6, count: 1, area: 1, knock: 70, crit: 0.05, burn: 0.3 },
+    skyfall:    { icon: 'meteor',   tags: ['fire', 'area'], base: { dmg: 26, cd: 3, count: 1, area: 1, knock: 70, crit: 0.05, burn: 0.3 },
                   traits: [T('multi', { count: 1 }), T('expanse', { area: 0.3 }), T('kindle', { burn: 0.25 }), T('amp', { dmgPct: 0.3 }), T('keen', { crit: 0.1 }), T('haste', { as: 0.2 })] },
     golem:      { icon: 'golem',    tags: ['physical', 'summon', 'area'], base: { dmg: 30, cd: 1.6, count: 1, area: 1, speed: 45, knock: 90, crit: 0.05 },
                   traits: [T('multi', { count: 1 }), T('amp', { dmgPct: 0.3 }), T('expanse', { area: 0.25 }), T('haste', { as: 0.2 }), T('velocity', { speed: 0.3 }), T('brittle', { fragile: 0.2 })] },
-    phantom:    { icon: 'helm',     tags: ['magic', 'summon', 'melee'], base: { dmg: 22, cd: 2.4, count: 1, area: 1, duration: 6, speed: 80, crit: 0.08 },
-                  traits: [T('multi', { count: 1 }), T('linger', { duration: 0.4 }), T('amp', { dmgPct: 0.3 }), T('expanse', { area: 0.25 }), T('keen', { crit: 0.1 }), T('haste', { as: 0.2 })] },
-    avalanche:  { icon: 'ice',      tags: ['ice', 'area'], base: { dmg: 22, cd: 2.2, count: 1, area: 1, crit: 0.05, frost: 0.6 },
+    phantom:    { icon: 'helm',     tags: ['magic', 'summon', 'melee'], base: { dmg: 22, cd: 0.6, count: 1, area: 1, speed: 80, crit: 0.08 },
+                  traits: [T('multi', { count: 1 }), T('velocity', { speed: 0.3 }), T('amp', { dmgPct: 0.3 }), T('expanse', { area: 0.25 }), T('keen', { crit: 0.1 }), T('haste', { as: 0.2 })] },
+    avalanche:  { icon: 'ice',      tags: ['ice', 'area'], base: { dmg: 16, cd: 2.2, count: 1, area: 1, crit: 0.05, frost: 0.6 },
                   traits: [T('rime', { frost: 0.25 }), T('multi', { count: 1 }), T('expanse', { area: 0.3 }), T('amp', { dmgPct: 0.3 }), T('haste', { as: 0.2 }), T('brittle', { fragile: 0.2 })] },
     hail:       { icon: 'hail',     tags: ['ice', 'projectile', 'area'], base: { dmg: 12, cd: 0.6, count: 1, area: 1, crit: 0.05, frost: 0.3 },
                   traits: [T('multi', { count: 1 }), T('rime', { frost: 0.25 }), T('expanse', { area: 0.25 }), T('haste', { as: 0.2 }), T('amp', { dmgPct: 0.3 }), T('echo', { ms: 0.3 })] },
@@ -181,6 +181,10 @@
     // Prism Cascade: a bolt that bounces between enemies, cycling fire -> ice -> lightning
     prism:      { icon: 'prism', badge: 'magic', tags: ['magic', 'projectile', 'fire', 'ice', 'lightning'], base: { dmg: 14, cd: 1.5, count: 1, chain: 4, crit: 0.08, burn: 0.3, frost: 0.3, spark: 0.3 },
                   traits: [T('chain', { chain: 2 }), T('multi', { count: 1 }), T('amp', { dmgPct: 0.25 }), T('haste', { as: 0.2 }), T('keen', { crit: 0.1 }), T('elements', { burn: 0.15, frost: 0.15, spark: 0.15 })] },
+    // Arcane Shards: two fans of short splinters thrown up and down; they slow to a stop and hang in the air,
+    // wounding what touches them, a quarter weaker every second
+    shards:     { icon: 'shards',   tags: ['magic', 'projectile'], base: { dmg: 13, cd: 1.9, count: 5, speed: 230, duration: 2.6, area: 1, crit: 0.1 },
+                  traits: [T('multi', { count: 1 }), T('amp', { dmgPct: 0.25 }), T('keen', { crit: 0.1 }), T('linger', { duration: 0.3 }), T('expanse', { area: 0.25 }), T('haste', { as: 0.2 })] },
     // ---- Skald-exclusive songs ----
     wardrum:    { exclusive: 'skald', icon: 'drum', tags: ['physical', 'area'], base: { dmg: 44, cd: 3.2, area: 1, knock: 140, crit: 0.05, stun: 0.25 }, beat: 4,
                   traits: [T('amp', { dmgPct: 0.3 }), T('expanse', { area: 0.25 }), T('haste', { as: 0.25 }), T('brittle', { fragile: 0.2 }), T('keen', { crit: 0.1 }), T('twin', { count: 1 })] },
@@ -188,6 +192,15 @@
                   traits: [T('multi', { count: 2 }), T('amp', { dmgPct: 0.3 }), T('haste', { as: 0.25 }), T('torment', { affliction: 0.2 }), T('velocity', { speed: 0.3 }), T('expanse', { area: 0.25 })] },
     moshpit:    { exclusive: 'skald', icon: 'rings', tags: ['physical', 'area'], base: { dmg: 15, cd: 3.2, count: 1, area: 1, duration: 4, knock: 0, crit: 0.05 }, beat: 4,
                   traits: [T('multi', { count: 1 }), T('amp', { dmgPct: 0.3 }), T('expanse', { area: 0.25 }), T('linger', { duration: 0.4 }), T('brittle', { fragile: 0.2 }), T('haste', { as: 0.2 })] },
+    // confetti blown out on every other beat, the barrel turning an eighth of a circle each time; the scraps hang and sting
+    confetti:   { exclusive: 'skald', icon: 'confetti', tags: ['magic', 'projectile'], base: { dmg: 7, cd: 1.2, count: 6, speed: 150, duration: 1.6, area: 1, crit: 0.05 }, beat: 2,
+                  traits: [T('multi', { count: 1 }), T('amp', { dmgPct: 0.3 }), T('haste', { as: 0.25 }), T('linger', { duration: 0.4 }), T('expanse', { area: 0.25 }), T('torment', { affliction: 0.2 })] },
+    // a quick run of notes on every beat, each at a random foe nearby
+    riff:       { exclusive: 'skald', icon: 'riff', tags: ['physical', 'projectile'], base: { dmg: 16, cd: 0.6, count: 3, speed: 300, crit: 0.08 }, beat: 1,
+                  traits: [T('multi', { count: 1 }), T('amp', { dmgPct: 0.25 }), T('keen', { crit: 0.1 }), T('haste', { as: 0.25 }), T('impale', { pierce: 1 }), T('brittle', { fragile: 0.2 })] },
+    // fountains of fire burst in a ring round the Skald every fourth beat, the ring turning each time
+    pyro:       { exclusive: 'skald', icon: 'pyro', tags: ['fire', 'area'], base: { dmg: 22, cd: 2.4, count: 6, area: 1, knock: 30, crit: 0.05, burn: 0.4 }, beat: 4,
+                  traits: [T('multi', { count: 1 }), T('amp', { dmgPct: 0.3 }), T('kindle', { burn: 0.25 }), T('expanse', { area: 0.25 }), T('haste', { as: 0.25 }), T('static', { spark: 0.2 })] },
   };
 
   /* Ability Upgrades: at ability level III and VI (total trait ranks) the next level-up offers one of two
@@ -218,7 +231,11 @@
     overcharge:   { as: 0.35, pulse: 1 },
     chainstorm:   { chain: 3 },
     luminous:     { purge: 1, area: 0.2 },
+    frostcore:    { frostcore: 1, frost: 0.2 },
   };
+  /** Upgrade mods that change how an ability works rather than a number: each is copied onto the ability as a flag
+   *  (its value a strength where it has one) and described by its own line (mod.<key>). */
+  C.UNIQUE_MODS = ['orbit', 'stream', 'chainRift', 'fork', 'purge', 'pulse', 'frostcore'];
   const UP = (t1, t2) => [t1, t2];
   Object.entries({
     darts: UP(['lethal', 'echoing'], ['barrage', 'impaling']),
@@ -230,7 +247,7 @@
     fists: UP(['concussive', 'overpower'], ['barrage', 'hexed']),
     storm: UP(['chainstorm', 'concussive'], ['conductive', 'overpower']),
     axes: UP(['overpower', 'colossus'], ['barrage', 'lethal']),
-    nova: UP(['shatter', 'colossus'], ['echoing', 'overpower']),
+    nova: UP(['frostcore', 'shatter'], ['echoing', 'overpower']),
     plague: UP(['blight', 'enduring'], ['colossus', 'hexed']),
     fireball: UP(['searing', 'colossus'], ['barrage', 'conductive']),
     wyrmfire: UP(['streamfire', 'searing'], ['colossus', 'overpower']),
@@ -238,7 +255,7 @@
     rifts: UP(['cascade', 'colossus'], ['barrage', 'hexed']),
     skyfall: UP(['cataclysm', 'colossus'], ['searing', 'overpower']),
     golem: UP(['colossus', 'frenzy'], ['barrage', 'hexed']),
-    phantom: UP(['legion', 'enduring'], ['lethal', 'frenzy']),
+    phantom: UP(['legion', 'colossus'], ['lethal', 'frenzy']),
     avalanche: UP(['shatter', 'barrage'], ['colossus', 'overpower']),
     flail: UP(['concussive', 'colossus'], ['barrage', 'overpower']),
     smite: UP(['searing', 'lethal'], ['colossus', 'echoing']),
@@ -248,10 +265,14 @@
     wardrum: UP(['concussive', 'colossus'], ['echoing', 'overpower']),
     deathwall: UP(['legion', 'hexed'], ['overpower', 'lethal']),
     moshpit: UP(['enduring', 'concussive'], ['barrage', 'colossus']),
+    shards: UP(['lethal', 'enduring'], ['barrage', 'overpower']),
+    confetti: UP(['barrage', 'hexed'], ['enduring', 'overpower']),
+    riff: UP(['barrage', 'lethal'], ['impaling', 'overpower']),
+    pyro: UP(['searing', 'colossus'], ['conductive', 'overpower']),
   }).forEach(([id, ups]) => { C.abilities[id].ups = ups; });
   C.UPGRADE_LEVELS = [3, 6, 9];
   C.exclusiveAbilities = Object.keys(C.abilities).filter((k) => C.abilities[k].exclusive);
-  C.tomeAbilities = ['darts', 'orbs', 'halo', 'chakrams', 'hexlance', 'hail', 'fists', 'storm', 'axes', 'nova', 'plague', 'fireball', 'wyrmfire', 'stormsphere', 'rifts', 'skyfall', 'golem', 'phantom', 'avalanche', 'flail', 'smite', 'thorns', 'illumination', 'prism'];
+  C.tomeAbilities = ['darts', 'orbs', 'halo', 'chakrams', 'hexlance', 'hail', 'fists', 'storm', 'axes', 'nova', 'plague', 'fireball', 'wyrmfire', 'stormsphere', 'rifts', 'skyfall', 'golem', 'phantom', 'avalanche', 'flail', 'smite', 'thorns', 'illumination', 'prism', 'shards'];
   // unlocks follow quests: survive a hall, or deal a kind of damage in a single run
   C.lockedAbilities = {
     avalanche: 'd_stage_abyss_s8', smite: 'd_stage_abyss_s8', hail: 'd_dmg_ice', chakrams: 'd_dmg_weapon', hexlance: 'd_crits',

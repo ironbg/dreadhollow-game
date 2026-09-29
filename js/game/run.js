@@ -155,6 +155,21 @@
 
     /* ---------------- spawning ---------------- */
     remap(type) { return this.stage.remap[type] || type; }
+    /** Every model this hall will show, [painter, variant]: painted ahead in spare frames so no foe stalls the fight the
+     *  first time it walks in. */
+    spriteList() {
+      const ids = new Set(), st = this.stage;
+      C.timeline.forEach((w) => Object.keys(w.mix).forEach((k) => ids.add(this.remap(k))));
+      (C.HALL_FOES[this.stageId] || []).forEach((f) => ids.add(f[0]));
+      (st.bosses || []).forEach((b) => ids.add(b.id));
+      const out = [];
+      ids.forEach((id) => {
+        const def = C.enemies[id]; if (!def || !def.painter || !DH.gfx.has(def.painter)) return;
+        const fv = !def.variant && (C.HALL_FOES[this.stageId] || []).find((f) => f[0] === id && f[3]), pv = DH.gfx.painters[def.painter].variants;
+        out.push([def.painter, def.variant || (fv && fv[3]) || (st.variant && st.foeVariant !== false && pv && pv[st.variant] ? st.variant : null)]);
+      });
+      return out;
+    }
     spawnRate() {
       const tl = C.timeline, late = this.lordKills && !this.lordUp; // the Blightmire keeps pressing until its Lord rises
       const tt = late ? Math.min(599, this.time / (this.runLength / C.RUN_LENGTH)) : this.time / (this.runLength / C.RUN_LENGTH);
@@ -686,7 +701,7 @@
       const p = this.player;
       p.hp = this.P.maxHp * (auto ? 0.5 : 1); p.inv = 2.5; this.curse = 0; // a revive lifts the Curse
       if (this.agonyOn) this.agony = Math.max(0, this.agony - C.AGONY.revive); // a revive drains a fifth of the Agony gauge
-      this.nova(p.x, p.y, 999, 180, 'revive');
+      this.nova(p.x, p.y, 60 * this.stage.hpMult, 95, 'revive'); // room to breathe: pushes the horde back, kills only the weakest close by
       this.state = 'playing';
       DH.audio.play('heal');
       if (auto) this.text(p.x, p.y - 20, t('hud.revived'), '#ffd35a', true);
@@ -893,7 +908,7 @@
         case 'shard': DH.audio.play('reward'); this.shards++; this.text(this.player.x, this.player.y - 16, t('hud.shard'), '#ff70c0', true); break;
         case 'magnet': DH.audio.play('reward'); this.pickups.forEach((o) => { if (o.type === 'xp' || o.type === 'coin' || o.type === 'herb') o.mag = true; }); break;
         case 'bomb': this.nova(this.player.x, this.player.y, 200 * this.stage.hpMult, Math.hypot(DH.view.w, DH.view.h) / 2, 'bomb'); break;
-        case 'tome': this.tomes++; DH.audio.play('chest'); this.queue.push({ state: 'tome', ev: 'run:tome', data: Object.assign(this.tomeChoices(k.sub === 'mastery' ? 99 : 3), { mastery: k.sub === 'mastery' }) }); // a Tome of Mastery offers everything this.pump(); break;
+        case 'tome': this.tomes++; DH.audio.play('chest'); this.queue.push({ state: 'tome', ev: 'run:tome', data: Object.assign(this.tomeChoices(k.sub === 'mastery' ? 99 : 3), { mastery: k.sub === 'mastery' }) }); this.pump(); break; // a Tome of Mastery offers everything
         case 'chest_red': case 'chest_gold': case 'chest_new': DH.audio.play('chest'); if (this.art) this.art.treasure = this.art.treasure.filter((x) => x !== k); this.queue.push({ state: 'loot', ev: 'run:loot', data: this.openLoot(k.type) }); this.pump(); break;
         default: break;
       }

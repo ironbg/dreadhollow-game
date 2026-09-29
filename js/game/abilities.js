@@ -267,25 +267,22 @@
     },
     skyfall: { fire(run, a) {
       const p = run.player, s = a.s;
-      for (let i = 0; i < s.count; i++) {
+      for (let i = 0; i < 3 * s.count; i++) { // three meteors a cast, three more for every Amount past the first
         const tg = run.randomTarget(220); const x = tg ? tg.x + U.rand(-8, 8) : p.x + U.rand(-120, 120), y = tg ? tg.y + U.rand(-8, 8) : p.y + U.rand(-90, 90), R = 30 * s.area;
         run.fx.push({ k: 'meteor', x, y, R, life: 0.7, max: 0.7 }); run.castCircle(x, y, R, '#ff7a30');
         run.after(0.7, () => { run.hitCircle(x, y, R, a); run.fx.push({ k: 'explosion', x, y, R, life: 0.4, max: 0.4 }); run.burst(x, y, 14, ['#ff6a1a', '#ffd35a', '#7c1624'], 100); run.shake = Math.max(run.shake, 2.5); DH.audio.play('boom'); });
       }
     } },
     golem: { update(run, a) { run.keepAllies('golem', a, a.s.count); } },
-    phantom: { fire(run, a) {
-      const p = run.player, s = a.s;
-      for (let i = 0; i < s.count; i++) run.allies.push({ kind: 'phantom', a, x: p.x + U.rand(-12, 12), y: p.y + U.rand(-12, 12), life: s.duration, t: 0, face: 1 });
-      DH.audio.play('phantom');
-    } },
+    phantom: { update(run, a) { run.keepAllies('phantom', a, a.s.count); } }, // lasting warriors, one per Amount
     avalanche: { fire(run, a) {
-      const p = run.player, s = a.s, base = aimAt(run, 200);
-      for (let i = 0; i < s.count; i++) {
-        const ang = base + (i - (s.count - 1) / 2) * 0.4;
+      // four waves of ice spikes run out along the diagonals; every Amount past the first adds four more between them
+      const p = run.player, s = a.s, n = 4 * s.count, hit = new Set(), x0 = p.x, y0 = p.y;
+      for (let i = 0; i < n; i++) {
+        const ang = Math.PI / 4 + i * TAU / n;
         for (let k = 0; k < 7; k++) {
-          const d = 16 + k * 15 * Math.sqrt(s.area), x = p.x + Math.cos(ang) * d, y = p.y + Math.sin(ang) * d, R = 13 * s.area;
-          run.after(k * 0.06, () => { run.fx.push({ k: 'spike', x, y, R, life: 0.5, max: 0.5 }); run.hitCircle(x, y, R, a); });
+          const d = 16 + k * 15 * Math.sqrt(s.area), x = x0 + Math.cos(ang) * d, y = y0 + Math.sin(ang) * d, R = 13 * Math.sqrt(s.area);
+          run.after(k * 0.06, () => { run.fx.push({ k: 'spike', x, y, R, life: 0.5, max: 0.5 }); run.hitCircle(x, y, R, a, 1, (e) => !hit.has(e) && hit.add(e)); }); // each foe once a cast
         }
       }
       DH.audio.play('frost');
@@ -347,9 +344,10 @@
       DH.audio.play('axe');
     } },
     nova: { fire(run, a) {
-      const p = run.player, s = a.s;
-      run.castCircle(p.x, p.y, 40 * s.area, '#a8e8ff');
-      for (let i = 0; i < s.count; i++) run.after(i * 0.3, () => run.fx.push({ k: 'nova', x: p.x, y: p.y, life: 0.4, max: 0.4, R: 72 * s.area, hit: new Set(), a, update: novaUpdate }));
+      // the reach grows with the square root of Area and stops at 1.6x: bonuses widen it, never to the whole screen
+      const p = run.player, s = a.s, R = 64 * Math.min(1.6, Math.sqrt(s.area));
+      run.castCircle(p.x, p.y, R * 0.55, '#a8e8ff');
+      for (let i = 0; i < s.count; i++) run.after(i * 0.3, () => run.fx.push({ k: 'nova', x: p.x, y: p.y, life: 0.4, max: 0.4, R, hit: new Set(), a, update: novaUpdate }));
       DH.audio.play('frost');
     } },
     plague: { fire(run, a) {
@@ -453,6 +451,45 @@
       if (!fired) return false;
       DH.audio.play('prism');
     } },
+    shards: { fire(run, a) {
+      // two fans, one thrown up and one down, 75 degrees wide (wider with Area)
+      const p = run.player, s = a.s, n = s.count, half = 0.65 * Math.min(1.6, Math.sqrt(s.area));
+      for (const dir of [-Math.PI / 2, Math.PI / 2]) for (let i = 0; i < n; i++) {
+        const ang = dir + (n > 1 ? (i / (n - 1) - 0.5) * 2 * half : 0) + U.rand(-0.06, 0.06), sp = s.speed * U.rand(0.8, 1.1);
+        proj(run, { k: 'shard', a, x: p.x, y: p.y - 3, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, ang, r: 3.2 * Math.sqrt(s.area), pierce: 999, life: s.duration, max: s.duration, drag: 2.6, decay: 0.25, cdHit: 0.45 });
+      }
+      DH.audio.play('hex');
+    } },
+    confetti: { fire(run, a) {
+      const p = run.player, s = a.s; a.dir = (a.dir == null ? U.rand(0, TAU) : a.dir) + Math.PI / 4;
+      const CONF = ['#ff5a8a', '#ffd35a', '#6ad8ff', '#8aff6a', '#c890ff', '#ff9a3a'];
+      for (let i = 0; i < s.count; i++) {
+        const ang = a.dir + U.rand(-0.45, 0.45), sp = s.speed * U.rand(0.6, 1.15);
+        proj(run, { k: 'confetti', a, x: p.x, y: p.y - 4, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, ang: U.rand(0, TAU), spin: U.rand(-12, 12), col: U.pick(CONF), r: 3.5 * Math.sqrt(s.area), pierce: 999, life: s.duration, max: s.duration, drag: 3, cdHit: 0.3 });
+      }
+      DH.audio.play('throw');
+    } },
+    riff: { fire(run, a) {
+      const p = run.player, s = a.s;
+      if (!run.randomTarget(200)) return false;
+      for (let i = 0; i < s.count; i++) run.after(i * 0.07, () => {
+        const tg = run.randomTarget(200); if (!tg) return;
+        const ang = Math.atan2(tg.y - p.y, tg.x - p.x);
+        proj(run, { k: 'note', a, x: p.x, y: p.y - 4, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 3.5, pierce: s.pierce, life: 0.9, alt: i % 2 });
+      });
+      DH.audio.play('dart');
+    } },
+    pyro: { fire(run, a) {
+      const p = run.player, s = a.s, R0 = 52 * Math.min(1.6, Math.sqrt(s.area)), R = 16 * Math.sqrt(s.area);
+      a.rot = (a.rot || 0) + Math.PI / s.count;
+      for (let i = 0; i < s.count; i++) run.after(i * 0.05, () => {
+        const ang = a.rot + i * TAU / s.count, x = p.x + Math.cos(ang) * R0, y = p.y + Math.sin(ang) * R0 * 0.85;
+        run.hitCircle(x, y, R, a);
+        run.fx.push({ k: 'fountain', x, y, R, life: 0.55, max: 0.55 });
+        run.burst(x, y, 8, ['#ffd35a', '#ff7a20', '#fff0a0'], 110);
+      });
+      DH.audio.play('fire');
+    } },
     fireball: { fire(run, a) {
       const p = run.player, s = a.s;
       if (volley(run, a, 260, 0.15, true, (ang) => proj(run, { k: 'fireball', a, x: p.x, y: p.y, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 5, pierce: 0, life: 1.8, boom: 26 * s.area })) == null) return false;
@@ -465,7 +502,12 @@
     run.grid.query(f.x, f.y, R + 10, tmp);
     for (const e of tmp.slice()) {
       if (e.dead || f.hit.has(e)) continue;
-      if (U.dist2(f.x, f.y, e.x, e.y) < (R + e.r) * (R + e.r)) { f.hit.add(e); run.addSlow(e, 6); const d = Math.hypot(e.x - f.x, e.y - f.y) || 1; run.hit(e, f.a, 1, (e.x - f.x) / d, (e.y - f.y) / d); }
+      if (U.dist2(f.x, f.y, e.x, e.y) < (R + e.r) * (R + e.r)) {
+        f.hit.add(e); run.addSlow(e, 6);
+        const d = Math.hypot(e.x - f.x, e.y - f.y) || 1, k = Math.min(1, d / f.R);
+        if (f.a.s.frostcore && k < 0.4 && !e.boss) e.stun = Math.max(e.stun || 0, 1.2); // Frozen Heart: the core freezes solid
+        run.hit(e, f.a, 1 - 0.7 * k, (e.x - f.x) / d, (e.y - f.y) / d); // full damage at the heart, 30% at the rim
+      }
     }
   }
   function orbit(run, a, dt, kind, radius, hitR, cd) {
@@ -654,7 +696,7 @@
     }
     const tg = this.nearest(al.x, al.y, 28 * s.area);
     if (tg && al.cd <= 0) {
-      al.cd = 0.55; const dx = tg.x - al.x, dy = tg.y - al.y, R = 18 * s.area;
+      al.cd = s.cd; const dx = tg.x - al.x, dy = tg.y - al.y, R = 18 * s.area;
       if (Math.abs(dx) > 1) al.face = dx > 0 ? 1 : -1;
       this.hitCircle(al.x, al.y, R, al.a); this.fx.push({ k: 'slash', x: al.x, y: al.y, ang: Math.atan2(dy, dx), R, arc: 2.4, life: 0.2, max: 0.2, color: '#b8a8ff' });
     }
@@ -698,8 +740,10 @@
         b.ang += dt * 16;
       } else {
         if (b.g) { b.vy += b.g * dt; b.ang += b.spin * dt; }
+        if (b.drag) { const k = Math.exp(-b.drag * dt); b.vx *= k; b.vy *= k; if (b.spin) b.ang += b.spin * dt * Math.min(1, Math.hypot(b.vx, b.vy) / 40 + 0.15); } // slows to a hover
         b.x += b.vx * dt; b.y += b.vy * dt;
       }
+      if (b.decay) b.mult = Math.max(0.25, 1 - b.decay * (b.max - b.life)); // loses a share of its strength every second
       if (b.grow) b.r = 4 + b.grow * (1 - b.life / b.max);
       if (b.k === 'sphere') {
         const s = b.a.s; b.pulse -= dt * (1 + s.ms);
@@ -789,18 +833,19 @@
         this.grid.query(z.x, z.y, z.r, tmp);
         for (const e of tmp) if (!e.dead && !e.boss && U.dist2(z.x, z.y, e.x, e.y) < z.r * z.r && (e.slowS || 0) < 8) this.addSlow(e, 8 - (e.slowS || 0)); // rooted in brambles
       } else if (z.kind === 'rift') {
-        if (U.dist2(z.x, z.y, p.x, p.y) < 14 * 14) this.detonateRift(z);
+        if (U.dist2(z.x, z.y, p.x, p.y) < 14 * 14) this.detonateRift(z, 2); // touched: the stronger blast
+        else if (z.life <= 0) this.detonateRift(z, 1); // left alone, it bursts by itself when its time is up
       }
       if (z.life <= 0 || z.gone) this.zones.splice(i, 1);
     }
   };
-  R.detonateRift = function (z) {
+  R.detonateRift = function (z, mult) {
     if (z.gone) return; z.gone = true;
-    const R = 38 * z.a.s.area;
-    this.hitCircle(z.x, z.y, R, z.a);
+    const R = 38 * z.a.s.area * (mult > 1 ? 1.15 : 1);
+    this.hitCircle(z.x, z.y, R, z.a, mult || 1);
     this.fx.push({ k: 'pop', x: z.x, y: z.y, R, life: 0.35, max: 0.35, color: '#c070ff' });
     this.burst(z.x, z.y, 14, ['#c070ff', '#ffffff', '#40106a'], 90);
     DH.audio.play('boom');
-    if (z.a.s.chainRift) for (const o of this.zones) if (o.kind === 'rift' && !o.gone && o !== z && U.dist2(o.x, o.y, z.x, z.y) < 90 * 90) this.after(0.15, () => this.detonateRift(o));
+    if (z.a.s.chainRift) for (const o of this.zones) if (o.kind === 'rift' && !o.gone && o !== z && U.dist2(o.x, o.y, z.x, z.y) < 90 * 90) this.after(0.15, () => this.detonateRift(o, 1));
   };
 })(window.DH);

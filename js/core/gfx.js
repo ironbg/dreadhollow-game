@@ -138,16 +138,17 @@
   const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => v / 16 - 0.47);
   /** Grade (desaturate + contrast) and quantize an ImageData in place with 4x4 Bayer dithering + grain. */
   function quantize(id, o) {
-    const d = id.data, W = id.width, H = id.height, L = lut();
+    const d = id.data, W = id.width, H = id.height, L = lut(), oy = o.oy | 0; // oy: the band's first row, when only a band of an image is graded
     const amp = o.dither == null ? 16 : o.dither, grit = o.grit || 0, sat = o.sat == null ? 0.85 : o.sat, con = o.contrast || 1.08, lift = o.lift || 0;
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = (y * W + x) * 4; if (d[i + 3] === 0) continue;
+      const yy = y + oy;
       let r = d[i], g = d[i + 1], b = d[i + 2];
       const l = r * 0.3 + g * 0.59 + b * 0.11;
       r = l + (r - l) * sat; g = l + (g - l) * sat; b = l + (b - l) * sat;
       r = (r - 118) * con + 118 + lift; g = (g - 118) * con + 118 + lift; b = (b - 118) * con + 118 + lift;
-      let n = BAYER[(y & 3) * 4 + (x & 3)] * amp;
-      if (grit) { let h = (x * 374761393 + y * 668265263 + (o.seed | 0)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); n += (((h ^ (h >>> 16)) & 255) / 255 - 0.5) * grit; }
+      let n = BAYER[(yy & 3) * 4 + (x & 3)] * amp;
+      if (grit) { let h = (x * 374761393 + yy * 668265263 + (o.seed | 0)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); n += (((h ^ (h >>> 16)) & 255) / 255 - 0.5) * grit; }
       r += n; g += n; b += n;
       r = r < 0 ? 0 : r > 255 ? 255 : r; g = g < 0 ? 0 : g > 255 ? 255 : g; b = b < 0 ? 0 : b > 255 ? 255 : b;
       const c = L[((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3)];
@@ -262,10 +263,17 @@
       [[0, 0, 0.5, 1], [0.5, 0, 0.5, 0.5], [0.5, 0.5, 0.5, 0.5]], [[0, 0, 1, 0.5], [0, 0.5, 0.5, 0.5], [0.5, 0.5, 0.5, 0.5]], [[0, 0, 1, 1]]],
     long: [[[0, 0, 1, 1]], [[0, 0, 0.5, 1], [0.5, 0, 0.5, 1]], [[0, 0, 1 / 3, 1], [1 / 3, 0, 2 / 3, 1]], [[0, 0, 2 / 3, 1], [2 / 3, 0, 1 / 3, 1]]],
   };
+  /* A chunk's paving is laid a strip of rows at a time (Floor.steps): each strip is clipped to its rows and draws only the
+   * stones that reach into them. Every stone draws from its own seed, so a stone split between two strips comes out whole. */
+  /** Does the band y0..y1 (chunk units) reach into the strip being laid? Always, when the chunk is laid in one go. */
+  const inStrip = (F, y0, y1) => !F.strip || (y1 >= F.strip[0] - 4 && y0 <= F.strip[1] + 4);
+  /** Is y inside the strip itself: for what must happen once per chunk (a light), not once per strip it touches. */
+  const ownStrip = (F, y) => !F.strip || (y >= F.strip[0] && y < F.strip[1]);
   /** Stones laid in blocks of bw x bh on a running bond; each block split by one of the patterns. */
   function blocks(g, F, cx, cy, bw, bh, pats, gap, each) {
     const ox = cx * CHUNK, oy = cy * CHUNK;
     for (let by = Math.floor(oy / bh) - 1; by <= Math.floor((oy + CHUNK) / bh) + 1; by++) {
+      if (!inStrip(F, by * bh - oy, by * bh - oy + bh)) continue;
       const off = (by & 1) ? bw / 2 : 0;
       for (let bx = Math.floor((ox - off) / bw) - 1; bx <= Math.floor((ox + CHUNK - off) / bw) + 1; bx++) {
         const pat = pats[Math.floor(U.hash2(bx, by, F.seed + 9) * pats.length)], X = bx * bw + off - ox, Y = by * bh - oy;
@@ -291,13 +299,14 @@
       for (let q = Math.floor((ox - 2 * R) / (1.5 * R)); q <= Math.ceil((ox + CHUNK + 2 * R) / (1.5 * R)); q++)
         for (let s = Math.floor((oy - 2 * R) / (S3 * R) - q / 2); s <= Math.ceil((oy + CHUNK + 2 * R) / (S3 * R) - q / 2); s++) cells.push([q, s, 1.5 * R * q - ox, S3 * R * (s + q / 2) - oy]);
       const corner = (X, Y, k, rr) => [X + rr * Math.cos(k * Math.PI / 3), Y + rr * Math.sin(k * Math.PI / 3)];
-      g.lineCap = 'round'; let lit = 0;
-      for (const [q, s, X, Y] of cells) for (let k = 0; k < 3; k++) if (U.hash2(q * 3 + k, s, F.seed + 21) < 0.06) {
+      g.lineCap = 'round';
+      for (const [q, s, X, Y] of cells) for (let k = 0; k < 3; k++) if (inStrip(F, Y - R, Y + R) && U.hash2(q * 3 + k, s, F.seed + 21) < 0.06) {
         const [ax, ay] = corner(X, Y, k, R), [bx, by] = corner(X, Y, k + 1, R);
         P.line(g, ax, ay, bx, by, 2.6, 'rgba(255,80,20,0.35)'); P.line(g, ax, ay, bx, by, 0.8, '#ff9a3a');
-        if (lit < 2 && U.hash2(q, s * 3 + k, F.seed + 22) < 0.15) { lit++; lights.push({ x: ox + (ax + bx) / 2, y: oy + (ay + by) / 2, r: 22, kind: 'lava' }); }
+        if (F.lit < 2 && ownStrip(F, (ay + by) / 2) && U.hash2(q, s * 3 + k, F.seed + 22) < 0.15) { F.lit++; lights.push({ x: ox + (ax + bx) / 2, y: oy + (ay + by) / 2, r: 22, kind: 'lava' }); }
       }
       for (const [q, s, X, Y] of cells) {
+        if (!inStrip(F, Y - R, Y + R)) continue;
         const r = srng(q, s, F.seed), k = U.hash2(q, s, F.seed + 1), poly = [];
         for (let i = 0; i < 6; i++) { const [px, py] = corner(X, Y, i, R - 0.8 - r() * 0.5); poly.push(px, py); }
         stone(g, poly, shade(mix(tone(A, B, k), '#3a3634', 0.45), -0.12), r, { crack: 0.2 });
@@ -331,16 +340,16 @@
     },
     // the halls of discord: an argyle of dark tiles bound in thin inlay of the hall's colour, a rune set in a few
     discord(g, F, cx, cy, T, A, B, lights) {
-      const d = 14, ox = cx * CHUNK, oy = cy * CHUNK, ac = T.accent || '#e080ff'; let lit = 0;
+      const d = 14, ox = cx * CHUNK, oy = cy * CHUNK, ac = T.accent || '#e080ff';
       for (let j = Math.floor(oy / d) - 1; j <= Math.ceil((oy + CHUNK) / d) + 1; j++)
-        for (let i = Math.floor(ox / (2 * d)) - 1; i <= Math.ceil((ox + CHUNK) / (2 * d)) + 1; i++) {
+        if (inStrip(F, j * d - oy - d, j * d - oy + d)) for (let i = Math.floor(ox / (2 * d)) - 1; i <= Math.ceil((ox + CHUNK) / (2 * d)) + 1; i++) {
           const X = i * 2 * d + ((j & 1) ? d : 0) - ox, Y = j * d - oy, r = srng(i, j, F.seed), k = U.hash2(i, j, F.seed + 1), gp = 0.7;
           const poly = [X, Y - d + gp, X + d - gp, Y, X, Y + d - gp, X - d + gp, Y];
           stone(g, poly, shade((j & 1) ? A : B, (k * 7 % 1) * 0.12 - 0.06 + ((j & 1) ? 0.02 : -0.06)), r, { crack: 0.1 });
           g.strokeStyle = rgba(ac, 0.22); g.lineWidth = 0.5; P.path(g, [X, Y - d, X + d, Y, X, Y + d, X - d, Y]); g.stroke();
           if (k > 0.985) {
             g.strokeStyle = rgba(ac, 0.75); g.lineWidth = 0.6; g.beginPath(); g.arc(X, Y, 4, 0, Math.PI * 2); g.moveTo(X, Y - 5.4); g.lineTo(X, Y + 5.4); g.moveTo(X - 3, Y - 1.6); g.lineTo(X + 3, Y + 1.6); g.stroke();
-            if (X > 0 && X < CHUNK && Y > 0 && Y < CHUNK && lit++ < 2) lights.push({ x: ox + X, y: oy + Y, r: 14, kind: 'crystal', color: ac });
+            if (X > 0 && X < CHUNK && Y > 0 && Y < CHUNK && ownStrip(F, Y) && F.lit++ < 2) lights.push({ x: ox + X, y: oy + Y, r: 14, kind: 'crystal', color: ac });
           }
         }
     },
@@ -372,7 +381,7 @@
     // the reliquary: polished marble in a chequer, veined, bound every few tiles by bands of gold
     reliquary(g, F, cx, cy, T, A, B) {
       const s = 24, ox = cx * CHUNK, oy = cy * CHUNK, L = shade(A, 0.05), D = shade(B, -0.08);
-      for (let j = Math.floor(oy / s) - 1; j <= Math.ceil((oy + CHUNK) / s); j++) for (let i = Math.floor(ox / s) - 1; i <= Math.ceil((ox + CHUNK) / s); i++) {
+      for (let j = Math.floor(oy / s) - 1; j <= Math.ceil((oy + CHUNK) / s); j++) if (inStrip(F, j * s - oy, j * s - oy + s)) for (let i = Math.floor(ox / s) - 1; i <= Math.ceil((ox + CHUNK) / s); i++) {
         const x = i * s - ox + 0.5, y = j * s - oy + 0.5, r = srng(i, j, F.seed), k = U.hash2(i, j, F.seed + 1), light = (i + j) & 1;
         stone(g, [x, y, x + s - 1, y, x + s - 1, y + s - 1, x, y + s - 1], shade(light ? L : D, k * 0.08 - 0.04), r, { crack: 0.08, lift: 0.06, inner: (x0, y0, w0, h0) => {
           for (let v = 0; v < 2; v++) { let px = x0 + r() * w0, py = y0; g.strokeStyle = light ? 'rgba(90,70,50,0.22)' : 'rgba(255,240,210,0.12)'; g.lineWidth = 0.4; g.beginPath(); g.moveTo(px, py); for (let t = 1; t <= 4; t++) { px += (r() - 0.5) * 9; g.lineTo(px, y0 + h0 * t / 4); } g.stroke(); }
@@ -391,20 +400,50 @@
   Floor.prototype.chunk = function (cx, cy) {
     const key = cx + ',' + cy; let ch = this.chunks.get(key);
     if (ch) { ch.used = performance.now(); return ch; }
-    ch = this.build(cx, cy); this.chunks.set(key, ch);
-    if (this.chunks.size > 20) { let ok = null, ot = Infinity; this.chunks.forEach((v, k) => { if (v.used < ot) { ot = v.used; ok = k; } }); this.chunks.delete(ok); }
+    if (this.job && this.job.key === key) { const job = this.job; this.job = null; let r; do r = job.it.next(); while (!r.done); ch = r.value; } // it was being prepared: finish it now
+    else ch = this.build(cx, cy);
+    return this.keep(key, ch);
+  };
+  Floor.prototype.keep = function (key, ch) {
+    ch.used = performance.now(); this.chunks.set(key, ch);
+    if (this.chunks.size > 28) { let ok = null, ot = Infinity; this.chunks.forEach((v, k) => { if (v.used < ot) { ot = v.used; ok = k; } }); this.chunks.delete(ok); }
     return ch;
   };
-  Floor.prototype.build = function (cx, cy) {
+  /** Paints the chunks the camera is about to reach a few milliseconds at a time, so a new stretch of floor never has to be
+   *  painted whole in the frame that shows it (a chunk takes 25-50 ms, several times that on a phone). `want`: chunk
+   *  coordinates [cx, cy], most wanted first. */
+  Floor.prototype.prefetch = function (want, budget) {
+    const t0 = performance.now();
+    while (performance.now() - t0 < budget) {
+      if (!this.job) {
+        const next = want.find(([x, y]) => !this.chunks.has(x + ',' + y)); if (!next) return;
+        this.job = { key: next[0] + ',' + next[1], it: this.steps(next[0], next[1]) };
+      }
+      const r = this.job.it.next();
+      if (r.done) { this.keep(this.job.key, r.value); this.job = null; }
+    }
+  };
+  Floor.prototype.build = function (cx, cy) { const it = this.steps(cx, cy); let r; do r = it.next(); while (!r.done); return r.value; };
+  /** The chunk painted in small steps (a generator): the paving, the dressing, then the grading band by band. */
+  Floor.prototype.steps = function* (cx, cy) {
     const T = this.theme, R = this.res, S = CHUNK * R;
-    const c = canvas(S, S), g = c.getContext('2d');
+    const c = canvas(S, S), g = c.getContext('2d', { willReadFrequently: true }); // read back band by band: kept in memory, not on the graphics card
     const rng = U.seeded(U.strSeed(cx + '/' + cy + '/' + this.seed));
     const A = hex.apply(null, T.floorA), B = hex.apply(null, T.floorB), M = hex.apply(null, T.mortar);
     g.fillStyle = M; g.fillRect(0, 0, S, S);
     g.save(); g.scale(R, R);
     // the paving of this hall
     const lights = [];
-    (PAVE[T.floor] || PAVE.crypt)(g, this, cx, cy, T, A, B, lights);
+    this.lit = 0; // lights a paving may set (lava seams, runes): at most two a chunk, counted across its strips
+    for (let k = 0; k < 4; k++) {
+      const s0 = k ? k * CHUNK / 4 : -8, s1 = k < 3 ? (k + 1) * CHUNK / 4 : CHUNK + 8;
+      g.save(); g.beginPath(); g.rect(-8, s0, CHUNK + 16, s1 - s0); g.clip();
+      this.strip = [s0, s1];
+      try { (PAVE[T.floor] || PAVE.crypt)(g, this, cx, cy, T, A, B, lights); } finally { this.strip = null; }
+      g.restore();
+      g.getImageData(0, 0, 1, 1); // have the strip painted now, not all at once when the chunk is graded
+      yield;
+    }
     // large stains and puddles
     for (let i = 0; i < 3; i++) {
       const x = rng() * CHUNK, y = rng() * CHUNK, r = 25 + rng() * 55;
@@ -416,6 +455,8 @@
       P.ell(g, x, y, rx, ry, P.lg(g, x, y - ry, x, y + ry, [shade(pc, 0.2), pc, shade(pc, -0.3)]));
       g.strokeStyle = rgba(shade(pc, 0.5), 0.35); g.lineWidth = 0.6; g.beginPath(); g.ellipse(x - rx * 0.2, y - ry * 0.3, rx * 0.5, ry * 0.3, 0, Math.PI, Math.PI * 1.8); g.stroke();
     }
+    g.getImageData(0, 0, 1, 1);
+    yield;
     // decals
     const nDec = 7 + (rng() * 8 | 0);
     for (let i = 0; i < nDec; i++) {
@@ -429,6 +470,8 @@
       else if (r < 0.9 && T.crystals) { drawDecal(g, 'crystal', x, y, rng, hex.apply(null, T.crystals)); lights.push({ x: cx * CHUNK + x, y: cy * CHUNK + y - 3, r: 22, kind: 'crystal', color: hex.apply(null, T.crystals) }); }
       else { drawDecal(g, 'candle', x, y, rng); lights.push({ x: cx * CHUNK + x, y: cy * CHUNK + y - 5, r: 26, kind: 'candle' }); }
     }
+    g.getImageData(0, 0, 1, 1);
+    yield;
     // set dressing: rubble, cobwebs, grates, tomb slabs, rune circles, broken columns
     const nSet = 2 + (rng() * 3 | 0);
     for (let i = 0; i < nSet; i++) {
@@ -454,7 +497,11 @@
       lights.push({ x: cx * CHUNK + bx, y: cy * CHUNK + by - 4, r: 72, kind: 'brazier' });
     }
     g.restore();
-    { const id = g.getImageData(0, 0, S, S); quantize(id, { dither: 18, grit: 16, sat: 0.8, contrast: 1.12, seed: cx * 7919 + cy * 104729 }); g.putImageData(id, 0, 0); }
+    yield;
+    for (let y0 = 0; y0 < S; y0 += 64) { // the grading, a band of rows at a time
+      const id = g.getImageData(0, y0, S, 64); quantize(id, { dither: 18, grit: 16, sat: 0.8, contrast: 1.12, seed: cx * 7919 + cy * 104729, oy: y0 }); g.putImageData(id, 0, y0);
+      yield;
+    }
     return { canvas: c, lights, used: performance.now(), res: R };
   };
 
@@ -565,7 +612,7 @@
    *  all its canvases at once; without this every sprite would stay blank for the rest of the session. */
   gfx.flush = function () {
     this.cache = {};
-    for (const f of floors) f.chunks.clear();
+    for (const f of floors) { f.chunks.clear(); f.job = null; }
     if (DH.art && DH.art.flushGlows) DH.art.flushGlows();
     DH.events.emit('gfx:flush');
   };

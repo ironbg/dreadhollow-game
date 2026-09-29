@@ -25,6 +25,17 @@
       g.drawImage(ch.canvas, kx * CH - cx, ky * CH - cy, CH, CH);
       for (const l of ch.lights) if (!this.bridge || Math.abs(l.y) < this.bridge + 10) lights.push(l);
     }
+    { // the ring of chunks just off screen is painted ahead, a little each frame, nearest to where the hero is heading first
+      const kx0 = Math.floor(cx / CH) - 1, kx1 = Math.floor((cx + W) / CH) + 1, ky0 = Math.floor(cy / CH) - 1, ky1 = Math.floor((cy + H) / CH) + 1;
+      const ax = p.x + (p.moving ? (p.dirX || 0) * 160 : 0), ay = p.y + (p.moving ? (p.dirY || 0) * 160 : 0), want = [];
+      for (let ky = ky0; ky <= ky1; ky++) for (let kx = kx0; kx <= kx1; kx++) want.push([kx, ky, (kx * CH + CH / 2 - ax) ** 2 + (ky * CH + CH / 2 - ay) ** 2]);
+      want.sort((a, b) => a[2] - b[2]);
+      this.floor.prefetch(want.slice(0, 24), 3); // the floor keeps 28 chunks: never ask for more than it holds
+      if (!this.floor.job) { // the hall's foes are painted ahead too, one model a frame while the floor is idle
+        if (!this.warmQ) this.warmQ = this.spriteList();
+        const w = this.warmQ.pop(); if (w) G.sprite(w[0], w[1]);
+      }
+    }
     this.drawHall(g, cx, cy, W, H, now);
     this.drawLandmarksFlat(g, cx, cy, W, H, lights);
     this.vfxShafts(cx, cy, W, H, lights);
@@ -492,6 +503,35 @@
         g.drawImage(A.glow('rgba(170,110,255,0.7)'), x - 6, y - 6, 12, 12);
         this.sprite(g, 'seed_p', null, 0, x, y, false, 1, false, 1, now * 8);
         lights.push({ x: b.x, y: b.y, r: 14, kind: 'magic' }); break;
+      case 'shard': { // a violet splinter of arcane glass, dimming as its strength drains
+        const al = Math.min(1, b.life / 0.35) * (0.45 + 0.55 * (b.mult || 1)), ang = Math.hypot(b.vx, b.vy) > 8 ? Math.atan2(b.vy, b.vx) : b.ang, L = 5 * b.r / 3.2, W = 1.5 * b.r / 3.2;
+        b.ang = ang; g.save(); g.globalAlpha = al;
+        g.drawImage(A.glow('rgba(190,110,255,0.6)'), x - 7, y - 7, 14, 14);
+        g.translate(x, y); g.rotate(ang);
+        g.fillStyle = '#2a0a44'; g.beginPath(); g.moveTo(L + 0.8, 0); g.lineTo(0, W + 0.8); g.lineTo(-L * 0.6 - 0.8, 0); g.lineTo(0, -W - 0.8); g.closePath(); g.fill();
+        g.fillStyle = '#c890ff'; g.beginPath(); g.moveTo(L, 0); g.lineTo(0, W); g.lineTo(-L * 0.6, 0); g.lineTo(0, -W); g.closePath(); g.fill();
+        g.fillStyle = '#f4e4ff'; g.beginPath(); g.moveTo(L, 0); g.lineTo(0, -W); g.lineTo(-L * 0.3, 0); g.closePath(); g.fill();
+        g.restore();
+        lights.push({ x: b.x, y: b.y, r: 12, kind: 'magic' }); break;
+      }
+      case 'confetti': { // a fluttering scrap of coloured paper
+        const al = Math.min(1, b.life / 0.3), w = b.r * 0.9, hgt = b.r * 0.55 * Math.abs(Math.cos(b.ang * 1.7)) + 0.4;
+        g.save(); g.globalAlpha = al; g.translate(x, y); g.rotate(b.ang);
+        g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(-w / 2 - 0.5, -hgt / 2 - 0.5, w + 1, hgt + 1);
+        g.fillStyle = b.col; g.fillRect(-w / 2, -hgt / 2, w, hgt);
+        g.restore(); break;
+      }
+      case 'note': { // a note of the riff: a black head and stem ringed in gold
+        const bob = Math.sin((b.life + (b.alt ? 0.3 : 0)) * 18) * 1.2;
+        g.drawImage(A.glow('rgba(255,210,120,0.55)'), x - 7, y - 7, 14, 14);
+        g.save(); g.translate(x, y + bob);
+        g.strokeStyle = '#ffd98a'; g.lineWidth = 2.2; g.lineCap = 'round'; g.beginPath(); g.moveTo(1.8, 0.6); g.lineTo(1.8, -6); g.quadraticCurveTo(4.8, -4.4, 4.2, -2.2); g.stroke();
+        g.fillStyle = '#ffd98a'; g.beginPath(); g.ellipse(0, 1, 2.8, 2, -0.4, 0, TAU); g.fill();
+        g.strokeStyle = '#2a1a10'; g.lineWidth = 0.9; g.beginPath(); g.moveTo(1.8, 0.6); g.lineTo(1.8, -6); g.quadraticCurveTo(4.8, -4.4, 4.2, -2.2); g.stroke();
+        g.fillStyle = '#2a1a10'; g.beginPath(); g.ellipse(0, 1, 2, 1.3, -0.4, 0, TAU); g.fill();
+        g.restore();
+        lights.push({ x: b.x, y: b.y, r: 12, kind: 'tint', color: '#ffd98a', a: 0.35 }); break;
+      }
       case 'hex':
         g.drawImage(A.glow('rgba(190,80,255,0.8)'), x - 7, y - 7, 14, 14);
         this.sprite(g, 'hex_p', null, 0, x, y, false, 1, false, 1, b.ang || Math.atan2(b.vy, b.vx) || 0.0001);
@@ -621,6 +661,17 @@
         g.fillStyle = f.color; for (let i = 0; i < 10; i++) { const an = rot + i / 10 * TAU; g.fillRect(this.rd(x + Math.cos(an) * Rr * 0.86), this.rd(y + Math.sin(an) * Rr * 0.43), 1, 1); }
         g.restore();
         lights.push({ x: f.x, y: f.y, r: f.R * 1.2 * a, kind: 'magic' });
+        break;
+      }
+      case 'fountain': { // a fountain of fire bursting from the stage: a glowing mouth, a column of flame, sparks falling back
+        const a = 1 - k, H = f.R * 2.4 * Math.sin(Math.min(1, k * 2.2) * Math.PI * 0.5);
+        g.save(); g.globalCompositeOperation = 'lighter';
+        g.globalAlpha = a; g.drawImage(A.glow('rgba(255,140,40,0.9)'), x - f.R * 1.2, y - f.R * 0.7, f.R * 2.4, f.R * 1.4);
+        const gr = g.createLinearGradient(0, y - H, 0, y); gr.addColorStop(0, 'rgba(255,90,20,0)'); gr.addColorStop(0.4, 'rgba(255,150,40,0.85)'); gr.addColorStop(1, 'rgba(255,245,190,0.95)');
+        g.fillStyle = gr; g.beginPath(); g.moveTo(x - f.R * 0.35, y); g.quadraticCurveTo(x - f.R * 0.2, y - H * 0.6, x, y - H); g.quadraticCurveTo(x + f.R * 0.2, y - H * 0.6, x + f.R * 0.35, y); g.closePath(); g.fill();
+        g.restore();
+        g.globalAlpha = a; g.strokeStyle = '#ffb040'; g.lineWidth = 1.2; g.beginPath(); g.ellipse(x, y, f.R * (0.5 + k * 0.6), f.R * (0.3 + k * 0.35), 0, 0, TAU); g.stroke(); g.globalAlpha = 1; g.lineWidth = 1;
+        lights.push({ x: f.x, y: f.y, r: f.R * 3 * a + 8, kind: 'fire' });
         break;
       }
       case 'pulse': case 'pop': case 'slam': {

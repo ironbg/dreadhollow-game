@@ -7,7 +7,7 @@
   /* ---------------- descriptions ---------------- */
   ui.fmtMods = (m, k) => Object.keys(m).map((key) => {
     const v = m[key] * (k == null ? 1 : k);
-    if (['orbit', 'stream', 'chainRift', 'fork', 'purge', 'pulse'].includes(key)) return t('mod.' + key);
+    if (C.UNIQUE_MODS.includes(key)) return t('mod.' + key);
     const pct = ['dmgPct', 'as', 'area', 'duration', 'speed', 'ms', 'burn', 'spark', 'frost', 'decay', 'fragile', 'affliction', 'crit', 'blockDmg', 'stun'].includes(key);
     return t('mod.' + key, { v: pct ? Math.round(v * 100) : Math.round(v * 10) / 10 }).replace('+-', '−'); // trade-offs read '−25% …'
   }).join(' · ');
