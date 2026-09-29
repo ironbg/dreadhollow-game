@@ -40,7 +40,7 @@
         });
       }
       const changed = pick !== M.avatar();
-      return h('div',
+      return h('div.avtab',
         h('div.avpick', h('b', sel ? avName(sel) : ''), h('span.small.muted', ' · ' + t('avatar.count', { n: C.AVATARS.filter((a) => M.avatarUnlocked(a.id)).length, m: C.AVATARS.length }))),
         grid,
         h('button.btn.green.block.avapply' + (changed ? '' : '.off'), { onclick: async () => {

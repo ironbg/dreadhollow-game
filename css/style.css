@@ -232,8 +232,9 @@ h3.sect .timer { font: 8px var(--num); color: var(--muted); letter-spacing: 0; }
 .prof-name b { font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .prof-id { display: flex; align-items: center; gap: 8px; justify-content: space-between; font: 11px var(--num); letter-spacing: 1px; user-select: text; -webkit-user-select: text; }
 .prof-tabs { margin-top: 10px; }
-.prof-body { min-height: 180px; }
-.avgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-height: 46vh; overflow-y: auto; padding: 4px 2px 8px; }
+.prof-body { height: min(50vh, 440px); overflow-y: auto; display: flex; flex-direction: column; } /* one height for every tab: the window never jumps */
+.prof-body > .avtab { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.avgrid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); align-content: start; gap: 10px; overflow-y: auto; padding: 4px 2px 8px; }
 .avsec { grid-column: 1 / -1; font-weight: 800; font-size: 12px; color: var(--gold); text-transform: uppercase; letter-spacing: .5px; margin-top: 4px; }
 .av { position: relative; aspect-ratio: 1; border-radius: 50%; padding: 0; border: 3px solid #2a2030; background: #140e18; cursor: pointer; box-shadow: 0 0 0 2px #050308; }
 .av img { width: 100%; height: 100%; border-radius: 50%; display: block; }
@@ -242,7 +243,7 @@ h3.sect .timer { font: 8px var(--num); color: var(--muted); letter-spacing: 0; }
 .av .avlock { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
 .av .avlock img { width: 42%; height: 42%; filter: none; border-radius: 0; }
 .avpick { margin: 2px 0 8px; }
-.avapply { margin-top: 10px; }
+.avapply { margin-top: 10px; flex: none; }
 /* the keepers of the camp: a word from them, or where they are lost */
 .keeper .ico img { width: 44px; height: 44px; }
 .keeper .ico { overflow: hidden; }
