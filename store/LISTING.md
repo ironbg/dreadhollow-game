@@ -21,7 +21,7 @@ Your hero fights on their own: you move, dodge and choose. Every level brings a 
 
 • 16 HEROES – Swordbearer, Ranger, Pyromancer, Stormwitch, Valkyrie, Skald and more, each with a signature weapon, strengths and class traits.
 • 40+ ABILITIES – flames, frost, lightning, summons and holy light, with game-changing upgrades at levels III and VI.
-• 7 HALLS, 14 BOSSES – from the Forsaken Crypt to the Sealed Reliquary, each with its own foes, hazards, rules and a hidden secret.
+• 7 HALLS, 28 BOSSES – from the Forsaken Crypt to the Sealed Reliquary, each with its own foes, hazards, rules and a hidden secret.
 • DEEP BUILDS – burn, spark, frost, decay and affliction; crits above 100%, multistrike, block and more.
 • RELICS AND MARKS – find, level, merge and send your best items up the Well.
 • AGONY AND TORMENT – when a hall falls, raise the stakes for artifacts, rarer loot and Lament Shards.
@@ -50,7 +50,7 @@ An internet connection is needed for battles and rewards.
 
 • 16 ГЕРОЯ – Мечоносец, Следотърсач, Пиромант, Вещица на бурята, Валкирия, Скалд и още, всеки със свое оръжие, силни страни и класови черти.
 • 40+ УМЕНИЯ – огън, лед, мълнии, призовани съюзници и свята светлина, с подобрения, които променят играта, на ниво III и VI.
-• 7 ЗАЛИ, 14 БОСА – от Забравената крипта до Запечатания реликварий, всяка със свои врагове, капани, правила и скрита тайна.
+• 7 ЗАЛИ, 28 БОСА – от Забравената крипта до Запечатания реликварий, всяка със свои врагове, капани, правила и скрита тайна.
 • ДЪЛБОКИ БИЛДОВЕ – горене, искри, лед, разложение и проклятие; критични удари над 100%, многократни удари, блок и още.
 • РЕЛИКВИ И ЗНАЦИ – намирай, усилвай, сливай и изпращай най-добрите си предмети нагоре по Кладенеца.
 • АГОНИЯ И МЪЧЕНИЕ – щом една зала падне, вдигни залога за артефакти, по-редки предмети и Скръбни отломки.

@@ -419,6 +419,7 @@
             h('div.small.muted', t('pass.tierOf', { n: tier, max: E.PASS_TIERS }) + ' · ' + t('pass.seasonEnds', { t: ui.fmtDays(M.seasonEndsIn()) }))),
           p.premium ? h('span.small.good', { style: { fontWeight: 800 } }, t('pass.premiumOn'))
             : h('button.btn.small.gold.shine', { onclick: () => DH.iap.buy('pass') }, t('pass.unlock', { price: DH.iap.price('pass') }))),
+        p.premium ? null : h('div.small.muted', { style: { marginTop: '4px' } }, t('pass.premiumNote')), // bought for this season only: said before buying
         h('div.bar.blue', { style: { marginTop: '8px' } }, h('i', { style: { width: (tier >= E.PASS_TIERS ? 100 : inTier / E.PASS_XP_PER_TIER * 100) + '%' } })),
         h('div.row', { style: { marginTop: '6px' } },
           h('div.small.muted.grow', tier >= E.PASS_TIERS ? t('pass.maxed') : t('pass.xpToNext', { v: E.PASS_XP_PER_TIER - inTier })),
