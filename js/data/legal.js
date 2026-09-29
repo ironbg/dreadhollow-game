@@ -7,7 +7,7 @@
     owner: { bg: 'Dreadhollow Games', en: 'Dreadhollow Games' }, // the developer name players see (the studio name, as on Google Play)
     eik: '', // left empty on purpose: the documents name the studio and a contact email only
     address: { bg: '', en: '' },
-    email: 'nikolov@nolina-med.eu', // a support address players can write to about their account, purchases and personal data
+    email: 'dreadhollow.support@gmail.com', // a support address players can write to about their account, purchases and personal data
     country: 'BG', // governing law and the data protection authority players can complain to
     updated: '2026-09-29',
   };

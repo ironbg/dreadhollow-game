@@ -71,7 +71,7 @@ An internet connection is needed for battles and rewards.
 |---|---|
 | App category | Games → Action |
 | Tags | Action, Roguelike, Survival, Fantasy, Dark (pick up to 5 from Google's list) |
-| Email | nikolov@nolina-med.eu |
+| Email | dreadhollow.support@gmail.com |
 | Website | https://dreadhollow-b49c7.web.app/ |
 | Privacy policy | https://dreadhollow-b49c7.web.app/legal.html?doc=privacy&lang=en |
 | Delete account (Data safety) | https://dreadhollow-b49c7.web.app/legal.html?doc=privacy&lang=en#delete |
