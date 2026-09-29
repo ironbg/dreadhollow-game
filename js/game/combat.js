@@ -11,7 +11,7 @@
   const U = DH.util, C = DH.content;
   const R = DH.Run.prototype;
   const tmp = [];
-  const TAGS = ['physical', 'magic', 'fire', 'lightning', 'ice', 'melee', 'projectile', 'area']; // damage bonuses by tag (stat <tag>Pct, physical: physPct)
+  const TAGS = ['physical', 'magic', 'fire', 'lightning', 'ice'];
   const EDGE = { dmgPct: 0.04, as: 0.03, area: 0.04, maxHpPct: 0.05, critPct: 0.04, speedPct: 0.03 }; // Master's Edge picks
 
   R.recompute = function (fill) {
@@ -20,7 +20,7 @@
     const aff = this.hero.affinity || {};
     for (const id in this.traits.base) add(C.baseTraits[id].per, this.traits.base[id] * C.AFFINITY[aff[id] == null ? 1 : aff[id]]);
     for (const id in this.traits.elev) add(C.elevatedTraits[id].per, this.traits.elev[id]);
-    for (const key in this.traits.cls) { const c = this.traits.cls[key]; add(C.ctDef(c.hero, c.cat, c.v).s, c.rank); }
+    for (const key in this.traits.cls) { const c = this.traits.cls[key]; add(C.heroes[c.hero].ct[c.cat][c.v].s, c.rank); }
     if (this.hero.potionBrew && this.brews) { st.dmgPct = (st.dmgPct || 0) + 0.05 * this.brews; st.baseHp += 1.7 * this.brews; } // Alchemist: every potion drunk strengthens his brews
     const lv = this.level - 1;
     let taken = 1;
@@ -57,7 +57,7 @@
       revives: st.revives || 0, rerolls: st.rerolls || 0, chestDrop: st.chestDrop || 0, tomeDrop: st.tomeDrop || 0,
       killAs: st.killAs || 0, eliteHeal: st.eliteHeal || 0, killHealChance: st.killHealChance || 0, killHeal: st.killHeal || 0,
       hitRegen: st.hitRegen || 0, thornBurn: st.thornBurn || 0, hitDefense: st.hitDefense || 0, stillDmg: st.stillDmg || 0, fireSpark: st.fireSpark || 0, imps: Math.floor(st.imps || 0),
-      grenadePct: st.grenadePct || 0, abPct: st.abPct || 0, slots: Math.floor(st.slots || 0), effectPct: st.effectPct || 0, wBurn: st.wBurn || 0, wSpark: st.wSpark || 0, wFrost: st.wFrost || 0, wDecay: st.wDecay || 0, it,
+      grenadePct: st.grenadePct || 0, effectPct: st.effectPct || 0, wBurn: st.wBurn || 0, wSpark: st.wSpark || 0, wFrost: st.wFrost || 0, wDecay: st.wDecay || 0, it,
       sig: { fire: st.sig_fire || 0, ice: st.sig_ice || 0, lightning: st.sig_lightning || 0, magic: st.sig_magic || 0, physical: st.sig_physical || 0, summon: st.sig_summon || 0 },
     };
     const p = this.player;
@@ -72,7 +72,7 @@
     const tr = this.traits.ab[a.id] || {};
     for (const i in tr) put(def.traits[i].m, tr[i]);
     for (const u of this.traits.up[a.id] || []) put(C.UPGRADES[u], 1);
-    if (a.weapon) for (const key in this.traits.cls) { const c = this.traits.cls[key]; put(C.ctDef(c.hero, c.cat, c.v).w, c.rank); }
+    if (a.weapon) for (const key in this.traits.cls) { const c = this.traits.cls[key]; put(C.heroes[c.hero].ct[c.cat][c.v].w, c.rank); }
     return m;
   };
   R.computeAbility = function (a) {
@@ -163,7 +163,6 @@
     if (a.tags.includes('summon')) pct += P.summonPct;
     if (P.stillDmg && this.stillT > 0.4) pct += P.stillDmg;
     pct += this.itemPct(a);
-    if (P.abPct && !a.weapon && a.id !== 'item') pct += P.abPct; // damage of the abilities besides the main weapon (the Oracle's traits)
     const cm = this.critRoll(a), crit = cm > 1; this.lastCrit = crit;
     const S = e.st;
     // Fragile / Affliction are applied before the damage of the same hit
@@ -312,21 +311,16 @@
     const m = DH.meta.eq(this.heroId).mark;
     return m && m !== this.heroId && C.heroes[m] ? [this.heroId, m] : [this.heroId];
   };
-  /** Ranks I-IV taken in a hero's category (any variants), and whether the hero's one Rank V trait is taken. */
-  R.classRank = function (h, cat) { let n = 0; for (const k in this.traits.cls) { const c = this.traits.cls[k]; if (c.hero === h && c.cat === cat && typeof c.v === 'number') n += c.rank; } return n; };
-  R.classVTaken = function (h) { for (const k in this.traits.cls) { const c = this.traits.cls[k]; if (c.hero === h && typeof c.v === 'string') return true; } return false; };
-  /** Class traits on offer: each category climbs Ranks I-IV one pick at a time (any variant at each rank, a rank needs
-   *  its hero level); after IV its Rank V options, of which a hero takes only one per run. A Mark's hero shares all
-   *  ranks, but for Rank V only Stance and Dedication. */
   R.classPool = function (level) {
     const out = [], allowed = C.CLASS_LEVELS.filter((l) => l <= level).length;
-    for (const h of this.classHeroes()) {
-      const ct = C.heroes[h].ct, mark = h !== this.heroId, vTaken = this.classVTaken(h);
-      for (const cat of ['wp', 'st', 'dd']) {
-        const n = this.classRank(h, cat);
-        if (n < 4 && n < allowed) ct[cat].v.forEach((d, v) => { const c = { kind: 'cls', hero: h, cat, v, rank: n + 1 }; if (!this.banished.has(ckey(c))) out.push(c); });
-        else if (n >= 4 && allowed >= 5 && !vTaken && !(mark && cat === 'wp') && !this.banished.has('cls:' + h + '.V')) ct[cat].x.forEach((d, i) => out.push({ kind: 'cls', hero: h, cat, v: 'x' + i, rank: 5, x: true }));
-      }
+    for (const h of this.classHeroes()) for (const cat of ['wp', 'st', 'dd']) for (const v of [0, 1]) {
+      const cur = (this.traits.cls[h + '.' + cat + '.' + v] || {}).rank || 0;
+      const sis = (this.traits.cls[h + '.' + cat + '.' + (1 - v)] || {}).rank || 0;
+      const c = { kind: 'cls', hero: h, cat, v, rank: cur + 1, sister: sis > 0 };
+      if (this.banished.has(ckey(c))) continue;
+      if (sis > 0 && cur === 0) continue; // the sister variant was taken
+      if (cur >= allowed || cur >= 5) continue;
+      out.push(c);
     }
     return out;
   };
@@ -352,7 +346,6 @@
         });
       }
     }
-    if (!abilityOnly && level >= C.CLASS_LEVELS[0]) this.classPool(level).forEach((c) => { c.w = 0.6; out.push(c); }); // class traits also turn up among the others
     return out.filter((c) => !this.banished.has(ckey(c)));
   };
   /** Ability Signets (rings): extra upgrade picks for abilities sharing the signet's element. */
@@ -400,7 +393,7 @@
     times = times || 1;
     if (c.kind === 'base') this.traits.base[c.id] = (this.traits.base[c.id] || 0) + times;
     else if (c.kind === 'elev') this.traits.elev[c.id] = (this.traits.elev[c.id] || 0) + times;
-    else if (c.kind === 'cls') { const k = c.hero + '.' + c.cat + '.' + c.v; const o = this.traits.cls[k] || { hero: c.hero, cat: c.cat, v: c.v, rank: 0 }; o.rank = c.x ? 1 : o.rank + times; this.traits.cls[k] = o; } // Rank V: once
+    else if (c.kind === 'cls') { const k = c.hero + '.' + c.cat + '.' + c.v; const o = this.traits.cls[k] || { hero: c.hero, cat: c.cat, v: c.v, rank: 0 }; o.rank += times; this.traits.cls[k] = o; }
     else if (c.kind === 'ab') { const tr = this.traits.ab[c.ab] || (this.traits.ab[c.ab] = {}); tr[c.idx] = (tr[c.idx] || 0) + times; }
     else if (c.kind === 'up') (this.traits.up[c.ab] || (this.traits.up[c.ab] = [])).push(c.id);
     else if (c.kind === 'edge') (this.edge || (this.edge = {}))[c.stat] = (this.edge[c.stat] || 0) + c.v * times;
@@ -430,7 +423,6 @@
     if (kind === 'remembrance') { this.remembered = Object.assign({}, c); delete this.remembered.remembered; }
     else if (kind === 'lethe') {
       this.banished.add(ckey(c));
-      if (c.kind === 'cls' && c.x) this.banished.add('cls:' + c.hero + '.V'); // banishing a Rank V banishes all of that hero's
       const idx = this.choices.indexOf(c);
       const pool = (C.CLASS_LEVELS.includes(this.levelFor) ? this.classPool(this.levelFor) : this.normalPool(this.levelFor)).filter((x) => !this.choices.some((y) => ckey(y) === ckey(x)));
       if (idx >= 0) { if (pool.length) this.choices[idx] = U.pick(pool); else this.choices.splice(idx, 1); }

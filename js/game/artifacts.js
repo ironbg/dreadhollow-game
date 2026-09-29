@@ -98,5 +98,5 @@
   };
   /** The hero's attack animation: a wind-up and a strike, quicker for fast weapons. */
   R.attackAnim = function (a) { const p = this.player, cd = a && a.s ? a.s.cd : 0.5; p.atkMax = Math.max(0.12, Math.min(0.28, (cd || 0.5) * 0.85)); p.atkT = p.atkMax; };
-  R.maxAbilities = function () { return Math.max(1, C.MAX_ABILITIES - Math.round(this.fx_.lessSlots || 0) + ((this.P && this.P.slots) || 0)); }; // + Rank V traits that grant another ability
+  R.maxAbilities = function () { return Math.max(1, C.MAX_ABILITIES - Math.round(this.fx_.lessSlots || 0)); };
 })(window.DH);

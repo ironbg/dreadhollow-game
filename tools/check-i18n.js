@@ -15,7 +15,7 @@ walk(path.join(root, 'js'));
 // dynamic key families
 Object.keys(C.heroes).forEach((k) => { used.add(`hero.${k}.name`); used.add(`hero.${k}.desc`); });
 Object.keys(C.abilities).forEach((k) => { used.add(`ab.${k}.name`); used.add(`ab.${k}.desc`); C.abilities[k].traits.forEach((t) => used.add(`at.${t.k}`)); C.abilities[k].tags.forEach((t) => used.add(`tag.${t}`)); Object.keys(C.abilities[k].traits.reduce((a, t) => Object.assign(a, t.m), {})).forEach((m) => used.add(`mod.${m}`)); });
-Object.values(C.heroes).forEach((h) => ['wp', 'st', 'dd'].forEach((c) => h.ct[c].v.concat(h.ct[c].x).forEach((x) => { used.add(`ct.${x.k}`); Object.keys(x.w).forEach((m) => used.add(`mod.${m}`)); Object.keys(x.s).forEach((m) => used.add(`stat.${m}`)); })));
+Object.values(C.heroes).forEach((h) => ['wp', 'st', 'dd'].forEach((c) => h.ct[c].forEach((x) => { used.add(`ct.${x.k}`); Object.keys(x.w).forEach((m) => used.add(`mod.${m}`)); Object.keys(x.s).forEach((m) => used.add(`stat.${m}`)); })));
 Object.values(C.heroes).forEach((h) => { Object.keys(h.bonus || {}).concat(Object.keys(h.mark || {})).forEach((m) => used.add(`stat.${m}`)); });
 Object.keys(C.baseTraits).concat(Object.keys(C.elevatedTraits)).forEach((k) => used.add(`trait.${k}`));
 Object.values(C.baseTraits).concat(Object.values(C.elevatedTraits)).forEach((t) => Object.keys(t.per).forEach((m) => used.add(`stat.${m}`)));
