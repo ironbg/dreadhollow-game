@@ -120,6 +120,9 @@
       if (d.v < 8 && d.stats && d.stats.runs > 0) { // v8: the keepers of the camp must be rescued; whoever already played has them at work
         d.npcs = d.npcs || {}; for (const k of ['wellkeeper', 'cupbearer', 'scriptor']) if (!d.npcs[k]) d.npcs[k] = Date.now();
       }
+      if (!d.shrineBy) { // the Shrine became per hero: every hero already owned keeps the Blessings bought so far (s.shrine stays, for older copies of the game)
+        d.shrineBy = {}; for (const h in d.heroes || {}) if (d.heroes[h]) d.shrineBy[h] = Object.assign({}, d.shrine || {});
+      }
       if (!d.pid) d.pid = newPid(); // the player's id, shown (and copied) in the profile
       if (!Number.isFinite(d.energy)) { d.energy = 30; d.energyTs = DH.util.now(); } // repair saves hit by the old run-cost bug
       if (DH.content && !DH.content.heroes[d.selectedHero]) d.selectedHero = 'knight';

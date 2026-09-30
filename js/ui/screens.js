@@ -243,6 +243,9 @@
     bless() {
       const s = S(), root = h('div');
       root.append(h('div.center.small.muted', { style: { marginBottom: '8px' } }, t('shrine.desc')));
+      // every hero keeps separate Blessings: pick whose you are raising
+      root.append(h('div.heropick', C.heroOrder.filter((id) => M.heroOwned(id)).map((id) => h('button.hp' + (id === s.selectedHero ? '.on' : ''), { onclick: () => { click(); s.selectedHero = id; DH.save.persist(); ui.refresh(); } }, A.img('h_' + id)))));
+      root.append(h('div.row.archhead', h('div.grow', h('b', t('hero.' + s.selectedHero + '.name')), h('span.small.muted', ' · ' + t('shrine.levels', { n: M.shrineTotal(s.selectedHero) })))));
       const grid = h('div.shrine-grid');
       E.shrineOrder.forEach((id) => {
         const def = E.shrine[id], lvl = M.shrineLevel(id), max = lvl >= def.max, cost = max ? 0 : E.shrineCost(id, lvl), open = M.shrineUnlocked(id);

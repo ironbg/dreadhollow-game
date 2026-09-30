@@ -24,7 +24,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'armory.bundle': 'Пакет', 'armory.hpSpeed': 'Живот {hp} · Скорост {spd}', 'armory.equipped': 'Екипирани', 'armory.inventory': 'Инвентар ({n})',
   'armory.autoMerge': 'Автосливане', 'armory.getGear': 'Още реликви', 'armory.noGear': 'Още нямаш реликви. Отваряй сандъци или побеждавай босове!', 'armory.merged': 'Реликвите са слети!',
 
-  'shrine.desc': 'Постоянни благословии за всички герои.', 'shrine.perLevel': '{v} на ниво', 'shrine.total': 'Сега: {v}',
+  'shrine.desc': 'Постоянни благословии. Всеки герой има свои: избери за кого ги вдигаш.', 'shrine.levels': 'вдигнати нива: {n}', 'shrine.perLevel': '{v} на ниво', 'shrine.total': 'Сега: {v}',
   'shrine.might': 'Мощ', 'shrine.vitality': 'Жизненост', 'shrine.armor': 'Броня', 'shrine.recovery': 'Възстановяване', 'shrine.swiftness': 'Бързина',
   'shrine.haste': 'Устрем', 'shrine.reach': 'Обхват', 'shrine.magnet': 'Привличане', 'shrine.greed': 'Алчност', 'shrine.wisdom': 'Мъдрост',
   'shrine.luck': 'Късмет', 'shrine.revival': 'Съживяване', 'shrine.reroll': 'Съдба', 'shrine.echo': 'Ехо', 'shrine.ferocity': 'Жестокост', 'shrine.sorcery': 'Магьосничество', 'shrine.elements': 'Стихии', 'shrine.brawn': 'Мощ на тялото', 'shrine.arcana': 'Тайнство', 'shrine.plunder': 'Плячка', 'shrine.scholar': 'Учен',
@@ -52,7 +52,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'ach.blacksmith.name': 'Ковач', 'ach.blacksmith.desc': 'Слей реликви: {n}',
   'ach.opener.name': 'Иманяр', 'ach.opener.desc': 'Отвори {n} сандъка',
   'ach.faithful.name': 'Верен', 'ach.faithful.desc': 'Влизай в играта {n} дни',
-  'ach.devotee.name': 'Поклонник', 'ach.devotee.desc': 'Купи {n} благословии в светилището',
+  'ach.devotee.name': 'Поклонник', 'ach.devotee.desc': 'Купи {n} благословии в светилището за един герой',
   'ach.patron.name': 'Покровител', 'ach.patron.desc': 'Изгледай {n} видеа',
   'ach.conqueror.name': 'Завоевател', 'ach.conqueror.desc': 'Премини зали: {n}',
 
@@ -141,7 +141,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'nb.t.chests': 'Отвори {n} сандъка',
   'nb.t.chests1': 'Отвори сандък',
   'nb.t.bosses': 'Победи общо {n} боса',
-  'nb.t.shrine': 'Вдигни благословиите общо с {n} нива',
+  'nb.t.shrine': 'Вдигни благословиите на един герой с {n} нива',
   'nb.t.shrine1': 'Вдигни благословия до ниво 1',
   'nb.t.merge': 'Слей реликви {n} пъти',
   'nb.t.merge1': 'Слей реликви веднъж',

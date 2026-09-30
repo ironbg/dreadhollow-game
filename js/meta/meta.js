@@ -135,7 +135,7 @@
     const st = { baseHp: hero.hp, baseSpeed: hero.speed, regen: hero.regen || 0, defense: hero.defense || 0, block: hero.block || 0,
       critBonus: 0.5, rerolls: 1, revives: 0 };
     meta.addStats(st, hero.bonus || {});
-    for (const id in s.shrine) if (E.shrine[id]) meta.addStats(st, E.shrine[id].per, s.shrine[id]);
+    const shr = meta.shrineOf(heroId); for (const id in shr) if (E.shrine[id]) meta.addStats(st, E.shrine[id].per, shr[id]); // this hero's own Blessings
     const sup = (meta.artifactFx().suppress || 1); // Torment Suppressor weakens the Archive
     const arc = (s.archiveBy && s.archiveBy[heroId]) || {}, eqp = meta.eq(heroId); // this hero's own Archive and loadout
     for (const id in arc) if (E.archive[id]) { const n = arc[id], whole = 'count' in E.archive[id].per || 'rerolls' in E.archive[id].per; meta.addStats(st, E.archive[id].per, whole ? Math.floor(n * sup) : n * sup); }
@@ -189,19 +189,25 @@
   };
 
   /* ---------------- Shrine ---------------- */
-  meta.shrineLevel = (id) => S().shrine[id] || 0;
+  /** Blessings are per hero (default: the selected one), as the Archive is. */
+  meta.shrineOf = (hero) => { const s = S(); s.shrineBy = s.shrineBy || {}; hero = hero || s.selectedHero; return s.shrineBy[hero] || (s.shrineBy[hero] = {}); };
+  meta.shrineLevel = (id, hero) => meta.shrineOf(hero)[id] || 0;
   /** A Blessing with an 'unlock' deed stays sealed until that deed is done (levels already bought keep working). */
   meta.shrineUnlocked = (id) => !E.shrine[id].unlock || meta.deedDone(E.shrine[id].unlock);
   meta.buyShrine = (id) => {
     const lvl = meta.shrineLevel(id), def = E.shrine[id];
     if (lvl >= def.max || !meta.shrineUnlocked(id)) return false;
     if (!meta.spend({ gold: E.shrineCost(id, lvl) })) return false;
-    S().shrine[id] = lvl + 1;
+    meta.shrineOf()[id] = lvl + 1;
     meta.track('upgrade', 1);
     changed();
     return true;
   };
-  meta.shrineTotal = () => Object.values(S().shrine).reduce((a, b) => a + b, 0);
+  /** Blessing levels of one hero; with none named, of the hero with the most (deeds and the newcomer's tasks count that). */
+  meta.shrineTotal = (hero) => {
+    const sum = (h) => Object.values(meta.shrineOf(h)).reduce((a, b) => a + b, 0);
+    return hero ? sum(hero) : Object.keys(S().shrineBy || {}).reduce((m, h) => Math.max(m, sum(h)), 0);
+  };
 
   /* ---------------- Heroes ---------------- */
   meta.heroOwned = (id) => { const h = C.heroes[id]; return !!S().heroes[id] || !!h.unlock.free || (h.unlock.deed && meta.deedDone(h.unlock.deed)); };

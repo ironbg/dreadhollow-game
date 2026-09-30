@@ -74,5 +74,13 @@ const live = require('../game/live.json');
   const E2 = DH.economy, ok = (rw) => { for (const k in rw.mats || {}) assert.ok(E2.materials.includes(k), k); for (const k in rw.herbs || {}) assert.ok(E2.herbs.includes(k), k); for (const k in rw.potions || {}) assert.ok(E2.potions[k], k); };
   E2.passRewards.free.concat(E2.passRewards.prem, E2.loginRewards, E2.missionPool.map((m) => m.reward), E2.dealPool.map((x) => x.grant), E2.stockPacks.map((x) => x.grant), E2.NEWBIE.milestones.map((x) => x.r), [].concat(...E2.NEWBIE.tasks).map((x) => x.r)).forEach(ok);
   live.events.forEach((ev) => ev.shop.forEach((it) => ok(it.reward)));
+  // the Shrine is per hero: an old profile's Blessings go to every hero it owns; a purchase raises only the selected hero
+  const oldP = Object.assign({}, p0, { gold: 1e6, heroes: { knight: true, ranger: true }, shrine: { might: 2 }, selectedHero: 'ranger' }); delete oldP.shrineBy;
+  let sh = await withProfile(oldP, live, (DHp) => DHp.actions.list.buyShrine.run({ id: 'swiftness' }));
+  assert.strictEqual(sh.result, true);
+  assert.deepStrictEqual(sh.profile.shrineBy.knight, { might: 2 }, 'knight keeps the old Blessings, gets nothing new');
+  assert.deepStrictEqual(sh.profile.shrineBy.ranger, { might: 2, swiftness: 1 }, 'the selected hero gets the purchase');
+  sh = await withProfile(sh.profile, live, (DHp) => ({ k: DHp.meta.baseStats('knight').speedPct || 0, a: DHp.meta.baseStats('ranger').speedPct || 0, tot: DHp.meta.shrineTotal() }));
+  assert.ok(sh.result.a > sh.result.k, 'only the ranger runs faster'); assert.strictEqual(sh.result.tot, 3, 'the deeds count the hero with the most');
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });

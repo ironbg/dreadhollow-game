@@ -24,7 +24,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'armory.bundle': 'Bundle', 'armory.hpSpeed': 'HP {hp} · Speed {spd}', 'armory.equipped': 'Equipped', 'armory.inventory': 'Inventory ({n})',
   'armory.autoMerge': 'Auto-merge', 'armory.getGear': 'Get relics', 'armory.noGear': 'No relics yet. Open chests or defeat bosses!', 'armory.merged': 'Relics merged!',
 
-  'shrine.desc': 'Permanent Blessings for every hero.', 'shrine.perLevel': '{v} per level', 'shrine.total': 'Total: {v}',
+  'shrine.desc': 'Permanent Blessings. Every hero has their own: pick whose you are raising.', 'shrine.levels': 'levels raised: {n}', 'shrine.perLevel': '{v} per level', 'shrine.total': 'Total: {v}',
   'shrine.might': 'Might', 'shrine.vitality': 'Vitality', 'shrine.armor': 'Armor', 'shrine.recovery': 'Recovery', 'shrine.swiftness': 'Swiftness',
   'shrine.haste': 'Haste', 'shrine.reach': 'Reach', 'shrine.magnet': 'Attraction', 'shrine.greed': 'Greed', 'shrine.wisdom': 'Wisdom',
   'shrine.luck': 'Luck', 'shrine.revival': 'Revival', 'shrine.reroll': 'Fate', 'shrine.echo': 'Echo', 'shrine.ferocity': 'Ferocity', 'shrine.sorcery': 'Sorcery', 'shrine.elements': 'Elements', 'shrine.brawn': 'Brawn', 'shrine.arcana': 'Arcana', 'shrine.plunder': 'Plunder', 'shrine.scholar': 'Scholar',
@@ -52,7 +52,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'ach.blacksmith.name': 'Blacksmith', 'ach.blacksmith.desc': 'Relics merged: {n}',
   'ach.opener.name': 'Treasure Seeker', 'ach.opener.desc': 'Open {n} chests',
   'ach.faithful.name': 'Faithful', 'ach.faithful.desc': 'Log in on {n} days',
-  'ach.devotee.name': 'Devotee', 'ach.devotee.desc': 'Upgrade Blessings {n} times',
+  'ach.devotee.name': 'Devotee', 'ach.devotee.desc': 'Upgrade one hero\'s Blessings {n} times',
   'ach.patron.name': 'Patron', 'ach.patron.desc': 'Watch {n} videos',
   'ach.conqueror.name': 'Conqueror', 'ach.conqueror.desc': 'Halls cleared: {n}',
 
@@ -141,7 +141,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'nb.t.chests': 'Open {n} chests',
   'nb.t.chests1': 'Open a chest',
   'nb.t.bosses': 'Defeat {n} bosses in total',
-  'nb.t.shrine': 'Raise blessings {n} levels in total',
+  'nb.t.shrine': 'Raise one hero\'s blessings by {n} levels',
   'nb.t.shrine1': 'Raise a blessing to level 1',
   'nb.t.merge': 'Merge relics {n} times',
   'nb.t.merge1': 'Merge relics once',
