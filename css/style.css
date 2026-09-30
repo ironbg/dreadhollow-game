@@ -527,6 +527,22 @@ img.ic { image-rendering: auto; }
 .sb-card:not(.on) .sb-art img { filter: grayscale(.4) brightness(.8); }
 .sb-t { padding: 8px 4px; text-align: center; font-weight: 800; font-size: 14px; background: rgba(0,0,0,.55); color: #f0e8d8; }
 @keyframes sbFloat { 0%, 100% { transform: translateY(-3px); } 50% { transform: translateY(3px); } }
+.acttrack { display: flex; align-items: center; gap: 10px; padding: 10px 14px 22px; margin-bottom: 6px; }
+.act-pts { display: flex; flex-direction: column; align-items: center; flex: none; min-width: 58px; }
+.act-pts b { display: inline-flex; align-items: center; gap: 3px; font: 22px var(--num); color: var(--gold-hi); }
+.act-pts b img { width: 20px; height: 20px; }
+.act-line { position: relative; flex: 1; height: 44px; margin: 0 22px 0 8px; }
+.act-bar { position: absolute; left: 0; right: 0; top: 19px; height: 6px; background: #1a1418; border: 1px solid #3a2e30; }
+.act-bar i { display: block; height: 100%; background: linear-gradient(90deg, #7a1420, #d8323e); }
+.act-chest { position: absolute; top: 0; transform: translateX(-50%); width: 40px; height: 40px; padding: 0; border: 0; background: none; cursor: pointer; }
+.act-chest img { width: 40px; height: 40px; filter: grayscale(.7) brightness(.7); }
+.act-chest.ready img { filter: drop-shadow(0 0 6px rgba(255,200,80,.9)); animation: sbFloat 1.4s ease-in-out infinite; }
+.act-chest.got img { filter: grayscale(.3) brightness(.9); }
+.act-tick { position: absolute; right: -6px; top: -6px; }
+.act-tick img { width: 18px !important; height: 18px !important; filter: none !important; animation: none !important; }
+.act-at { position: absolute; left: 50%; top: 42px; transform: translateX(-50%); font: 11px var(--num); color: var(--gold); white-space: nowrap; }
+.panel.item .ico .mpts { position: absolute; right: -4px; bottom: -4px; display: inline-flex; align-items: center; gap: 1px; font: 11px var(--num); color: var(--gold-hi); background: rgba(0,0,0,.75); padding: 0 3px; }
+.panel.item .ico .mpts img { width: 12px; height: 12px; }
 .mini-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 8px; padding: 6px 0; }
 .mini-chips span { display: inline-flex; align-items: center; gap: 2px; font: 13px var(--num); }
 .mini-chips img { width: 26px; height: 26px; }

@@ -34,7 +34,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
 
   'mission.kills': 'Победи {n} врагове', 'mission.kills2': 'Победи {n} врагове', 'mission.runs': 'Изиграй {n} битки', 'mission.survive': 'Оцелей {n} в една битка',
   'mission.level': 'Достигни ниво {n} в една битка', 'mission.boss': 'Победи {n} бос', 'mission.gold': 'Спечели {n} злато от битки', 'mission.chest': 'Отвори {n} сандък в магазина',
-  'mission.ads': 'Изгледай {n} видеа', 'mission.upgrade': 'Направи {n} подобрения (светилище или реликви)', 'mission.elites': 'Победи {n} елитни врагове',
+  'mission.ads': 'Изгледай {n} видеа', 'mission.upgrade': 'Вдигни благословия {n} път', 'mission.elites': 'Победи {n} елитни врагове',
 
   'pass.season': 'Пропуск на мъчението · Сезон {n}', 'pass.tierOf': 'Степен {n} / {max}', 'pass.premiumOn': 'Премиум активен', 'pass.unlock': 'Премиум {price}',
   'pass.maxed': 'Пропускът е завършен!', 'pass.xpToNext': '{v} опит до следващата степен', 'pass.buyTier': '+1 степен', 'pass.rewards': 'Награди от пропуска', 'pass.claimAll': 'Вземи всички',
@@ -449,6 +449,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'gearsp.signet_arcana': '+{sig_magic} допълнителни подобрения за избор и +1 макс. ранг за магическите умения',
   'gearsp.signet_steel': '+{sig_physical} допълнителни подобрения за избор и +1 макс. ранг за физическите умения',
   'gearsp.signet_legion': '+{sig_summon} допълнителни подобрения за избор и +1 макс. ранг за уменията за призоваване',
+  'quests.points': 'Активност', 'quests.chest': 'Сандък за активност · {n}', 'quests.needPts': 'Още {n} точки', 'mission.forge': 'Подобри екипировка {n} път', 'mission.mats': 'Събери {n} материала за ковачницата в битки', 'mission.herbs': 'Събери {n} билки в битки', 'mission.agony': 'Изиграй битка с включена Агония или Мъчение',
   'startBonus.title': 'Наградата на приключенеца', 'startBonus.chest': 'Дървен сандък', 'startBonus.ability': 'Том с умение', 'startBonus.sub': 'Избери едно, което да вземеш в тази битка.', 'startBonus.claim': 'Вземи',
   'shop.forge': 'Ковачницата', 'shop.forgeDaily': 'нова стока всеки ден', 'armory.toForge': 'Ковачница', 'pack.p_iron': 'Железни пръти', 'pack.p_silver': 'Сребърни пръти', 'pack.p_gold': 'Златни кюлчета', 'pack.p_starsteel': 'Звездна стомана', 'pack.p_herbs': 'Кесия на билкаря', 'pack.p_forge': 'Сандък на ковача', 'vigil.matRate': '(до {n} за 12 часа)', 'ach.forger.name': 'Майстор на наковалнята', 'ach.forger.desc': 'Вдигнати нива на реликви: {n}',
   'mat.iron': 'Желязо', 'mat.silver': 'Сребро', 'mat.gold': 'Златно кюлче', 'mat.starsteel': 'Звездна стомана', 'gear.levelBonus': 'Бонус от нивата', 'gear.unlocksAt': '(Отключва се на ниво {n})', 'gear.needMat': 'Нямаш достатъчно {m}: пускат го елитите, шампионите и босовете', 'gear.levelAll': 'Вдигни всичко', 'gear.leveledBy': '+{n} нива', 'gear.salvageMats': 'Връщат ти се и: {m}.', 'armory.matsHint': 'Материалите падат от елити, шампиони и босове: желязо в първите зали, после сребро, злато и звездна стомана.',

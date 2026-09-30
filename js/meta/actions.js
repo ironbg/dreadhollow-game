@@ -29,6 +29,7 @@
     // quests, pass, deeds
     claimMission: { run: (a) => M().claimMission(int(a.i)) },
     claimMissionBonus: { run: () => M().claimMissionBonus() },
+    claimActivity: { run: (a) => M().claimActivity(int(a.i)) },
     claimAch: { run: (a) => M().claimAch(str(a.id)) },
     claimPass: { run: (a) => M().claimPass(int(a.tier), a.track === 'prem' ? 'prem' : 'free') },
     claimAllPass: { run: () => M().claimAllPass() },

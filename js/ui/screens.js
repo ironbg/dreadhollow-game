@@ -396,9 +396,20 @@
       const timer = h('span.timer');
       const upd = () => { timer.textContent = t('quests.resetsIn', { t: U.fmtDuration(U.msToMidnight()) }); };
       upd(); ui.tick = upd;
+      // the activity track: the day's points and a chest at each score
+      const pts = M.activityPts(), top = E.ACTIVITY_CHESTS[E.ACTIVITY_CHESTS.length - 1].at;
+      box.append(h('div.panel.acttrack',
+        h('div.act-pts', h('span.small.muted', t('quests.points')), h('b', A.img('u_seal'), pts)),
+        h('div.act-line',
+          h('div.act-bar', h('i', { style: { width: Math.min(100, pts / top * 100) + '%' } })),
+          E.ACTIVITY_CHESTS.map((c, i) => {
+            const got = M.activityOpened(i), ready = M.activityReady(i);
+            return h('button.act-chest' + (got ? '.got' : ready ? '.ready' : ''), { style: { left: (c.at / top * 100) + '%' }, onclick: () => { click(); openActivity(i); } },
+              A.img(c.icon), got ? h('i.act-tick', A.img('u_check', 'ci')) : null, h('span.act-at', c.at));
+          }))));
       box.append(h('h3.sect', t('quests.dailyTitle'), timer));
       d.missions.forEach((m, i) => {
-        const def = M.missionDef(m.id);
+        const def = M.missionDef(m.id); if (!def) return;
         const n = m.id === 'survive' ? U.fmtTime(def.target) : def.target;
         const pv = m.id === 'survive' ? U.fmtTime(m.p) + ' / ' + U.fmtTime(def.target) : U.fmt(m.p) + ' / ' + U.fmt(def.target);
         let btn;
@@ -406,17 +417,11 @@
         else if (m.done) btn = h('button.btn.small.green.shine', { onclick: async () => { const r = await ui.act('claimMission', { i }); if (r) ui.rewardPopup(t('quests.complete'), r); ui.refresh(); } }, t('common.claim'));
         else btn = h('button.btn.small.ghost', { onclick: () => { click(); missionGo(m.id); } }, t('common.go'));
         box.append(h('div.panel.item' + (m.done && !m.claimed ? '.done' : '') + (m.claimed ? '.claimed' : ''),
-          h('div.ico', A.img(missionIcon(m.id))),
+          h('div.ico', A.img(missionIcon(m.id)), h('span.mpts', A.img('u_seal'), def.pts)),
           h('div.grow', h('div.t', t('mission.' + m.id, { n })), ui.rewardChips(def.reward),
             h('div.prog', h('div.bar.green', h('i', { style: { width: (m.p / def.target * 100) + '%' } })), h('div.v', pv))),
           btn));
       });
-      const allDone = d.missions.every((m) => m.claimed);
-      box.append(h('div.panel.gold.item', { style: { marginTop: '12px' } },
-        h('div.ico', A.img('c_silver')),
-        h('div.grow', h('div.t', t('quests.bonus')), h('div.d', t('quests.bonusDesc')), ui.rewardChips(E.missionBonus)),
-        d.bonusClaimed ? h('button.btn.small.ghost.off', A.img('u_check', 'ci'))
-          : h('button.btn.small.gold' + (allDone ? '.shine' : '.off'), { onclick: async () => { const r = await ui.act('claimMissionBonus'); if (r) ui.rewardPopup(t('quests.bonus'), r); ui.refresh(); } }, t('common.claim'))));
       return box;
     },
     pass() {
@@ -474,13 +479,24 @@
     },
     scrollTo() { },
   };
+  /** An activity chest: what it holds, and claim it once the day's points reach it. */
+  function openActivity(i) {
+    const c = E.ACTIVITY_CHESTS[i], ready = M.activityReady(i), got = M.activityOpened(i);
+    const m = ui.modal({ title: t('quests.chest', { n: c.at }), rays: ready, body: () => h('div',
+      h('div.center', A.img(c.icon, 'bigicon')),
+      h('div.reward-list', { style: { marginTop: '8px' } }, M.rewardPreview(c.reward).map((e) => h('div.reward', h('div.slot' + (e.rarity != null ? '.rar' + e.rarity : ''), A.img(e.icon)), h('div.n' + (ui.isWord(e.text) ? '.word' : ''), e.text)))),
+      h('div.btns', got ? h('button.btn.ghost.off', A.img('u_check', 'ci'), t('nb.claimed'))
+        : ready ? h('button.btn.red.shine', { onclick: async () => { const r = await ui.act('claimActivity', { i }); m.close(); if (r) ui.rewardPopup(t('quests.chest', { n: c.at }), r); ui.refresh(); } }, t('common.claim'))
+        : h('button.btn.ghost.off', t('quests.needPts', { n: c.at - M.activityPts() })))) });
+  }
   function missionIcon(id) {
-    return { kills: 'n_skull', kills2: 'n_skull', runs: 'n_battle', survive: 't_haste', level: 't_wisdom', boss: 'n_trophy', gold: 'i_gold', chest: 'c_wood', ads: 'n_ad', upgrade: 'n_shrine', elites: 't_might', tomes: 'tome', champions: 'c_red' }[id] || 'n_scroll';
+    return { forge: 'mat_iron', mats: 'mat_silver', herbs: 'herb_moss', agony: 'a_mirror', kills: 'n_skull', kills2: 'n_skull', runs: 'n_battle', survive: 't_haste', level: 't_wisdom', boss: 'n_trophy', gold: 'i_gold', chest: 'c_wood', ads: 'n_ad', upgrade: 'n_shrine', elites: 't_might', tomes: 'tome', champions: 'c_red' }[id] || 'n_scroll';
   }
   function missionGo(id) {
     if (id === 'chest') ui.go('shop', 'chests');
     else if (id === 'ads') ui.go('shop', 'free');
     else if (id === 'upgrade') ui.go('shrine');
+    else if (id === 'forge') ui.go('armory', 'gear');
     else ui.go('home');
   }
 

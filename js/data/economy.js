@@ -252,23 +252,38 @@
     gold:   { icon: 'c_gold',   price: { gems: 400 },  odds: [0, 0, 60, 32.5, 7, 0.5], pity: 10, x10: 3600 },
   };
 
-  /* ---------- Daily missions ---------- */
+  /* ---------- Daily missions ----------
+   * Each pays activity points (pts) and a small reward; the points fill a track of chests (E.ACTIVITY_CHESTS).
+   * need: the mission is only offered once it can be done. */
   E.missionPool = [
-    { id: 'kills',    target: 400,  reward: { gold: 600, passXp: 60 } },
-    { id: 'kills2',   stat: 'kills', target: 1500, reward: { gems: 15, passXp: 90 } },
-    { id: 'runs',     target: 2,    reward: { gold: 500, passXp: 60 } },
-    { id: 'survive',  target: 300,  reward: { gems: 10, passXp: 80 } },
-    { id: 'level',    target: 20,   reward: { gold: 800, passXp: 70 } },
-    { id: 'boss',     target: 1,    reward: { gems: 20, passXp: 100 } },
-    { id: 'gold',     target: 400,  reward: { energy: 10, passXp: 60 } },
-    { id: 'chest',    target: 1,    reward: { gold: 700, passXp: 60 } },
-    { id: 'ads',      target: 2,    reward: { gems: 15, passXp: 80 } },
-    { id: 'upgrade',  target: 2,    reward: { mats: { iron: 8 }, gold: 300, passXp: 60 } },
-    { id: 'elites',   target: 3,    reward: { mats: { iron: 6 }, gems: 5, passXp: 70 } },
+    { id: 'kills',     target: 400,  pts: 5,  reward: { gold: 300, passXp: 60 } },
+    { id: 'kills2',    stat: 'kills', target: 1500, pts: 10, reward: { gold: 500, passXp: 90 } },
+    { id: 'runs',      target: 2,    pts: 5,  reward: { gold: 300, passXp: 60 } },
+    { id: 'survive',   target: 300,  pts: 10, reward: { gold: 400, passXp: 80 } },
+    { id: 'level',     target: 20,   pts: 5,  reward: { gold: 300, passXp: 70 } },
+    { id: 'boss',      target: 1,    pts: 10, reward: { gold: 400, passXp: 100 } },
+    { id: 'gold',      target: 400,  pts: 5,  reward: { gold: 300, passXp: 60 } },
+    { id: 'chest',     target: 1,    pts: 5,  reward: { gold: 300, passXp: 60 } },
+    { id: 'ads',       target: 2,    pts: 5,  reward: { gems: 10, passXp: 80 } },
+    { id: 'upgrade',   target: 1,    pts: 5,  reward: { gold: 300, passXp: 60 } },
+    { id: 'forge',     target: 1,    pts: 5,  reward: { mats: { iron: 5 }, passXp: 60 } },
+    { id: 'elites',    target: 3,    pts: 5,  reward: { mats: { iron: 6 }, passXp: 70 } },
+    { id: 'tomes',     target: 3,    pts: 5,  reward: { gold: 300, passXp: 60 } },
+    { id: 'champions', target: 1,    pts: 10, reward: { gold: 400, passXp: 80 } },
+    { id: 'mats',      target: 20,   pts: 5,  reward: { gold: 300, passXp: 60 } },
+    { id: 'herbs',     target: 3,    pts: 5,  reward: { gold: 200, passXp: 60 } },
+    { id: 'agony',     target: 1,    pts: 10, reward: { gold: 500, passXp: 100 }, need: 'agony' },
   ];
-  E.MISSIONS_PER_DAY = 5;
-  E.missionBonus = { chest: 'silver', gems: 30, mats: { silver: 5 }, passXp: 150 };
-  E.missionPool.push({ id: 'tomes', target: 3, reward: { gold: 600, passXp: 60 } }, { id: 'champions', target: 1, reward: { gems: 10, mats: { silver: 3 }, passXp: 80 } });
+  E.MISSIONS_PER_DAY = 8;
+  E.MISSION_PTS_MIN = 55; // a day's missions always add up to at least this (the last chest asks for 50): one more is offered if not
+  /** The activity track: a chest at each score, opened with the points of the missions claimed today. */
+  E.ACTIVITY_CHESTS = [
+    { at: 10, icon: 'c_wood',   reward: { gold: 1000, mats: { iron: 10 } } },
+    { at: 20, icon: 'c_wood',   reward: { gems: 20, mats: { iron: 15 } } },
+    { at: 30, icon: 'c_silver', reward: { gold: 2000, mats: { silver: 8 }, herbs: { moss: 2, ember: 2 } } },
+    { at: 40, icon: 'c_silver', reward: { gems: 30, energy: 10, mats: { silver: 10 } } },
+    { at: 50, icon: 'c_gold',   reward: { chest: 'silver', mats: { gold: 6 }, passXp: 150 } },
+  ];
 
   /* ---------- Achievements (tiered) ---------- */
   E.achievements = [

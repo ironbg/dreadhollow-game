@@ -34,7 +34,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
 
   'mission.kills': 'Defeat {n} foes', 'mission.kills2': 'Defeat {n} foes', 'mission.runs': 'Play {n} runs', 'mission.survive': 'Survive {n} in one run',
   'mission.level': 'Reach level {n} in one run', 'mission.boss': 'Defeat {n} boss', 'mission.gold': 'Earn {n} gold from runs', 'mission.chest': 'Open {n} chest in the Shop',
-  'mission.ads': 'Watch {n} videos', 'mission.upgrade': 'Upgrade Blessings or relics {n} times', 'mission.elites': 'Defeat {n} elites',
+  'mission.ads': 'Watch {n} videos', 'mission.upgrade': 'Raise a Blessing {n} time', 'mission.elites': 'Defeat {n} elites',
 
   'pass.season': 'Torment Pass · Season {n}', 'pass.tierOf': 'Tier {n} / {max}', 'pass.premiumOn': 'Premium active', 'pass.unlock': 'Premium {price}',
   'pass.maxed': 'Pass complete!', 'pass.xpToNext': '{v} XP to next tier', 'pass.buyTier': '+1 tier', 'pass.rewards': 'Pass rewards', 'pass.claimAll': 'Claim all',
@@ -449,6 +449,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'gearsp.signet_arcana': '+{sig_magic} trait picks and +1 max trait rank for Magic abilities',
   'gearsp.signet_steel': '+{sig_physical} trait picks and +1 max trait rank for Physical abilities',
   'gearsp.signet_legion': '+{sig_summon} trait picks and +1 max trait rank for Summon abilities',
+  'quests.points': 'Activity', 'quests.chest': 'Activity chest · {n}', 'quests.needPts': '{n} more points', 'mission.forge': 'Level up equipment {n} time', 'mission.mats': 'Gather {n} forging materials in fights', 'mission.herbs': 'Gather {n} herbs in fights', 'mission.agony': 'Play a fight with Agony or Torment on',
   'startBonus.title': 'Adventurer\'s Reward', 'startBonus.chest': 'A wooden chest', 'startBonus.ability': 'A tome of abilities', 'startBonus.sub': 'Pick one to take into this fight.', 'startBonus.claim': 'Claim',
   'shop.forge': 'The Forge', 'shop.forgeDaily': 'new stock every day', 'armory.toForge': 'Forge', 'pack.p_iron': 'Iron bars', 'pack.p_silver': 'Silver bars', 'pack.p_gold': 'Gold ingots', 'pack.p_starsteel': 'Starsteel', 'pack.p_herbs': 'Herbalist\'s pouch', 'pack.p_forge': 'Smith\'s chest', 'vigil.matRate': '(up to {n} over 12 hours)', 'ach.forger.name': 'Master of the Anvil', 'ach.forger.desc': 'Relic levels forged: {n}',
   'mat.iron': 'Iron', 'mat.silver': 'Silver', 'mat.gold': 'Gold ingot', 'mat.starsteel': 'Starsteel', 'gear.levelBonus': 'Level bonus', 'gear.unlocksAt': '(unlocks at level {n})', 'gear.needMat': 'Not enough {m}: elites, champions and bosses drop it', 'gear.levelAll': 'Upgrade all', 'gear.leveledBy': '+{n} levels', 'gear.salvageMats': 'You also get back: {m}.', 'armory.matsHint': 'Materials fall from elites, champions and bosses: iron in the first halls, then silver, gold and starsteel.',

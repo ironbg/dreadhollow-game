@@ -264,7 +264,7 @@
     const p = meta.gearLevelPrice(g);
     if (!meta.spend({ gold: p.gold })) return false;
     meta.mats()[p.mat] -= p.n;
-    g.level++; S().stats.forged = (S().stats.forged || 0) + 1; meta.track('upgrade', 1); changed(); return true;
+    g.level++; S().stats.forged = (S().stats.forged || 0) + 1; meta.track('forge', 1); changed(); return true;
   };
   /** Level an item as far as gold and materials reach (up to its cap): how many levels it gained. */
   meta.levelGearAll = (id) => {
@@ -548,13 +548,15 @@
     const s = S(), today = U.dayKey();
     if (s.daily && s.daily.day === today) return s.daily;
     const rng = U.seeded(U.strSeed(today + (s.created % 997)));
-    const pool = U.shuffle(E.missionPool.slice(), rng).slice(0, E.MISSIONS_PER_DAY);
+    // the day's missions: those that can be done, enough of them that the last chest can be reached
+    const avail = U.shuffle(E.missionPool.filter((m) => meta.missionAvailable(m)), rng), pool = avail.slice(0, E.MISSIONS_PER_DAY);
+    for (let i = pool.length; i < avail.length && pool.reduce((n, m) => n + m.pts, 0) < E.MISSION_PTS_MIN; i++) pool.push(avail[i]);
     const all = E.dealPool.map((d, i) => i), adIdx = all.filter((i) => E.dealPool[i].cost.ad);
     const dealIdx = U.shuffle(all.filter((i) => !E.dealPool[i].cost.ad), rng).slice(0, 3);
     s.daily = {
       day: today,
       missions: pool.map((m) => ({ id: m.id, p: 0, done: false, claimed: false })),
-      bonusClaimed: false,
+      bonusClaimed: false, chests: {}, // the activity chests opened today
       ads: { energy: 0, vigil: 0, gems: 0 },
       quickVigilFree: true,
       deals: [adIdx[Math.floor(rng() * adIdx.length)]].concat(dealIdx).map((i) => ({ i, bought: false })),
@@ -583,12 +585,21 @@
     m.claimed = true;
     return meta.grant(meta.missionDef(m.id).reward);
   };
-  meta.missionBonusReady = () => { const d = meta.ensureDaily(); return !d.bonusClaimed && d.missions.every((m) => m.claimed); };
-  meta.claimMissionBonus = () => {
-    if (!meta.missionBonusReady()) return null;
-    meta.ensureDaily().bonusClaimed = true;
-    return meta.grant(E.missionBonus);
+  /** A mission is offered only once it can be done (need: 'agony' asks for a hall won, where Agony can be switched on). */
+  meta.missionAvailable = (def) => !def.need || (def.need === 'agony' && meta.vigilOpen());
+  /** Today's activity points: those of the missions claimed. */
+  meta.activityPts = () => meta.ensureDaily().missions.reduce((n, m) => n + (m.claimed ? (meta.missionDef(m.id).pts || 0) : 0), 0);
+  meta.activityOpened = (i) => { const d = meta.ensureDaily(); return !!(d.chests && d.chests[i]); };
+  meta.activityReady = (i) => { const c = E.ACTIVITY_CHESTS[i]; return !!c && !meta.activityOpened(i) && meta.activityPts() >= c.at; };
+  meta.claimActivity = (i) => {
+    if (!meta.activityReady(i)) return null;
+    const d = meta.ensureDaily(); d.chests = d.chests || {}; d.chests[i] = true;
+    return meta.grant(E.ACTIVITY_CHESTS[i].reward);
   };
+  meta.activityReadyCount = () => E.ACTIVITY_CHESTS.filter((c, i) => meta.activityReady(i)).length;
+  // the old all-missions bonus became the activity chests: kept for older copies of the game, it gives nothing
+  meta.missionBonusReady = () => false;
+  meta.claimMissionBonus = () => null;
 
   /* ---------------- Achievements ---------------- */
   meta.achValue = (a) => {
@@ -819,6 +830,8 @@
     meta.track('kills', r.kills); meta.track('runs', 1); meta.track('survive', Math.floor(r.time), true);
     meta.track('level', r.level, true); meta.track('boss', r.bossKills); meta.track('gold', gold); meta.track('elites', r.eliteKills);
     meta.track('tomes', r.tomes || 0); meta.track('champions', r.championKills || 0);
+    const sumOf = (o) => Object.values(o || {}).reduce((n, v) => n + (Math.floor(v) || 0), 0);
+    meta.track('mats', sumOf(r.mats)); meta.track('herbs', sumOf(r.herbs)); meta.track('agony', r.agonyOn || r.dread ? 1 : 0);
     res.deeds = meta.checkDeeds(r);
     // event tokens: every running collect event takes its share of the run
     res.events = meta.liveEvents().filter(meta.eventCollecting).map((ev) => {
@@ -1003,7 +1016,7 @@
   /* ---------------- Badges (red dots) ---------------- */
   meta.badges = () => {
     const d = meta.ensureDaily();
-    const missions = d.missions.filter((m) => m.done && !m.claimed).length + (meta.missionBonusReady() ? 1 : 0);
+    const missions = d.missions.filter((m) => m.done && !m.claimed).length + meta.activityReadyCount();
     const ach = E.achievements.filter(meta.achClaimable).length;
     let pass = 0; for (let i = 1; i <= meta.passTier(); i++) { if (meta.passClaimable(i, 'free')) pass++; if (meta.passClaimable(i, 'prem')) pass++; }
     const shop = (meta.freeChestReadyIn() <= 0 ? 1 : 0) + (meta.soulCardClaimable() ? 1 : 0) + (d.ads.gems < E.FREE_GEM_ADS ? 0 : 0);

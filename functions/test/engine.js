@@ -82,5 +82,26 @@ const live = require('../game/live.json');
   assert.deepStrictEqual(sh.profile.shrineBy.ranger, { might: 2, swiftness: 1 }, 'the selected hero gets the purchase');
   sh = await withProfile(sh.profile, live, (DHp) => ({ k: DHp.meta.baseStats('knight').speedPct || 0, a: DHp.meta.baseStats('ranger').speedPct || 0, tot: DHp.meta.shrineTotal() }));
   assert.ok(sh.result.a > sh.result.k, 'only the ranger runs faster'); assert.strictEqual(sh.result.tot, 3, 'the deeds count the hero with the most');
+  // daily missions pay activity points; the points open the chests of the track
+  let dm = await withProfile(Object.assign({}, p0, { cleared: { crypt: 1 } }), live, (DHp) => {
+    const M = DHp.meta, d = M.ensureDaily(), E3 = DHp.economy;
+    const sum = d.missions.reduce((n, m) => n + M.missionDef(m.id).pts, 0);
+    const out = { sum, n: d.missions.length, early: M.claimActivity(0) };
+    d.missions.forEach((m) => { m.done = true; m.p = M.missionDef(m.id).target; });
+    d.missions.forEach((m, i) => M.claimMission(i));
+    out.pts = M.activityPts(); out.gems0 = DHp.save.data.gems;
+    out.claimed = E3.ACTIVITY_CHESTS.map((c, i) => !!M.claimActivity(i));
+    out.again = M.claimActivity(0); out.gems = DHp.save.data.gems;
+    return out;
+  });
+  assert.ok(dm.result.sum >= 55 && dm.result.n >= 8, 'a day always reaches the last chest');
+  assert.strictEqual(dm.result.early, null, 'no chest before its points');
+  assert.strictEqual(dm.result.pts, dm.result.sum); assert.deepStrictEqual(dm.result.claimed, [true, true, true, true, true]);
+  assert.strictEqual(dm.result.again, null, 'a chest opens once'); assert.strictEqual(dm.result.gems, dm.result.gems0 + 50);
+  // a fresh player (no hall won) is never offered the Agony mission; a fight counts materials and herbs
+  dm = await withProfile(p0, live, (DHp) => { const d = DHp.meta.ensureDaily(); d.missions = [{ id: 'mats', p: 0 }, { id: 'herbs', p: 0 }]; DHp.meta.settleRun(Object.assign({}, sum, { mats: { iron: 12, silver: 9 }, herbs: { moss: 3 } })); return d.missions.map((m) => m.done); });
+  assert.deepStrictEqual(dm.result, [true, true]);
+  dm = await withProfile(p0, live, (DHp) => DHp.meta.ensureDaily().missions.some((m) => m.id === 'agony'));
+  assert.strictEqual(dm.result, false);
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });
