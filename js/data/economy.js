@@ -169,7 +169,7 @@
     chest: [['maxHpPct', 0.03], ['critBonus', 0.05], ['regen', 0.1], ['block', 0.6]],
     feet:  [['area', 0.03], ['chestDrop', 0.01], ['pickup', 0.1], ['regen', 0.1]],
     hands: [['addBase', 1], ['block', 0.6], ['as', 0.02], ['critBonus', 0.05]],
-    head:  [['growth', 0.04], ['effectPct', 0.03], ['tomeDrop', 0.04], ['area', 0.03]],
+    head:  [['greed', 0.04], ['effectPct', 0.03], ['growth', 0.04], ['tomeDrop', 0.04]],
     neck:  [['dmgPct', 0.025], ['maxHpPct', 0.03], ['greed', 0.04], ['as', 0.02]],
     ring:  [['growth', 0.03], ['as', 0.02], ['critPct', 0.02], ['greed', 0.04]],
   };
