@@ -61,6 +61,12 @@
   meta.addEnergy = (n) => { meta.energy(); S().energy += n; changed(); };
 
   /* ---------------- Rewards ---------------- */
+  /** Counted stock a reward can hold: [reward key, valid ids, the profile's store, icon prefix, name key]. */
+  const STOCK = [
+    ['mats', () => E.materials, () => meta.mats(), 'mat_', (k) => 'mat.' + k],
+    ['herbs', () => E.herbs, () => S().herbs, 'herb_', (k) => 'herb.' + k],
+    ['potions', () => E.potionOrder, () => S().potions, 'p_', (k) => 'potion.' + k + '.name'],
+  ];
   /** Grants a reward object and returns display entries [{icon, text, rarity?}]. */
   meta.grant = (rw, opts) => {
     const s = S(), out = [];
@@ -68,6 +74,10 @@
     if (rw.gold) { const g = Math.floor(rw.gold); s.gold += g; out.push({ icon: 'i_gold', text: '+' + U.fmt(g), kind: 'gold' }); }
     if (rw.gems) { s.gems += rw.gems; out.push({ icon: 'i_gem', text: '+' + U.fmt(rw.gems), kind: 'gems' }); }
     if (rw.energy) { meta.energy(); s.energy += rw.energy; out.push({ icon: 'i_energy', text: '+' + rw.energy, kind: 'energy' }); }
+    for (const [key, list, store, pre, tk] of STOCK) for (const k in rw[key] || {}) { // forging materials, herbs, potions: { id: count }
+      const n = Math.floor(rw[key][k]); if (!(n > 0) || !list().includes(k)) continue;
+      const st = store(); st[k] = (st[k] || 0) + n; out.push({ icon: pre + k, text: '+' + n + ' ' + t(tk(k)), kind: key });
+    }
     if (rw.passXp) { meta.addPassXp(rw.passXp); out.push({ icon: 'n_pass', text: '+' + rw.passXp + ' ' + t('pass.xp'), kind: 'pass' }); }
     if (rw.accountXp) meta.addAccountXp(rw.accountXp);
     if (rw.hero) {
@@ -90,6 +100,7 @@
     if (rw.gold) out.push({ icon: 'i_gold', text: U.fmt(rw.gold) });
     if (rw.gems) out.push({ icon: 'i_gem', text: U.fmt(rw.gems) });
     if (rw.energy) out.push({ icon: 'i_energy', text: rw.energy });
+    for (const [key, list, , pre, tk] of STOCK) for (const k in rw[key] || {}) if (list().includes(k)) out.push({ icon: pre + k, text: U.fmt(rw[key][k]), name: t(tk(k)) });
     if (rw.passXp) out.push({ icon: 'n_pass', text: rw.passXp });
     if (rw.chest) out.push({ icon: E.chests[rw.chest].icon, text: t('chest.' + rw.chest) });
     if (rw.gear) out.push({ icon: 'g_wrath_amulet', text: t('rarity.' + E.rarities[rw.gear.rarity]), rarity: rw.gear.rarity });
@@ -106,6 +117,7 @@
       s.accountLevel++;
       const rw = E.accountLevelReward(s.accountLevel);
       s.gems += rw.gems; s.gold += rw.gold;
+      for (const k in rw.mats || {}) meta.mats()[k] = meta.matCount(k) + rw.mats[k];
       meta.pendingLevelUps = (meta.pendingLevelUps || []).concat([{ level: s.accountLevel, reward: rw }]);
       leveled = true;
     }
@@ -246,7 +258,7 @@
     const p = meta.gearLevelPrice(g);
     if (!meta.spend({ gold: p.gold })) return false;
     meta.mats()[p.mat] -= p.n;
-    g.level++; meta.track('upgrade', 1); changed(); return true;
+    g.level++; S().stats.forged = (S().stats.forged || 0) + 1; meta.track('upgrade', 1); changed(); return true;
   };
   /** Level an item as far as gold and materials reach (up to its cap): how many levels it gained. */
   meta.levelGearAll = (id) => {
@@ -531,14 +543,16 @@
     if (s.daily && s.daily.day === today) return s.daily;
     const rng = U.seeded(U.strSeed(today + (s.created % 997)));
     const pool = U.shuffle(E.missionPool.slice(), rng).slice(0, E.MISSIONS_PER_DAY);
-    const dealIdx = U.shuffle(E.dealPool.map((d, i) => i).filter((i) => i > 2), rng).slice(0, 3);
+    const all = E.dealPool.map((d, i) => i), adIdx = all.filter((i) => E.dealPool[i].cost.ad);
+    const dealIdx = U.shuffle(all.filter((i) => !E.dealPool[i].cost.ad), rng).slice(0, 3);
     s.daily = {
       day: today,
       missions: pool.map((m) => ({ id: m.id, p: 0, done: false, claimed: false })),
       bonusClaimed: false,
       ads: { energy: 0, vigil: 0, gems: 0 },
       quickVigilFree: true,
-      deals: [U.randi(0, 2)].concat(dealIdx).map((i) => ({ i, bought: false })),
+      deals: [adIdx[Math.floor(rng() * adIdx.length)]].concat(dealIdx).map((i) => ({ i, bought: false })),
+      packs: {}, // the Forge: bought today, by pack
     };
     persist();
     return s.daily;
@@ -659,12 +673,15 @@
     const s = S(), r = E.vigilRates(Object.keys(s.cleared).length);
     if (!meta.vigilOpen()) return { ms: 0, gold: 0, xp: 0, full: false, rate: r, locked: true };
     const ms = Math.max(0, Math.min(E.VIGIL_CAP_MS, U.now() - s.vigil.ts)), mins = ms / 60000;
-    return { ms, gold: Math.floor(r.goldPerMin * mins), xp: Math.floor(r.xpPerMin * mins), full: ms >= E.VIGIL_CAP_MS, rate: r };
+    return { ms, gold: Math.floor(r.goldPerMin * mins), xp: Math.floor(r.xpPerMin * mins), mat: meta.vigilMat(), mats: Math.floor(E.VIGIL_MATS_PER_HOUR * ms / 3600e3), full: ms >= E.VIGIL_CAP_MS, rate: r };
   };
+  /** The metal the Vigil gathers: that of the deepest hall won. */
+  meta.vigilMat = () => E.materials[Object.keys(S().cleared).reduce((m, id) => Math.max(m, E.MAT_HALL[id] || 0), 0)];
   meta.claimVigil = (double) => {
     const v = meta.vigil(); if (v.gold <= 0) return null;
     S().vigil.ts = U.now();
-    return meta.grant({ gold: v.gold * (double ? 2 : 1), accountXp: v.xp });
+    const k = double ? 2 : 1;
+    return meta.grant({ gold: v.gold * k, accountXp: v.xp, mats: v.mats ? { [v.mat]: v.mats * k } : null });
   };
   meta.quickVigil = async (mode) => {
     if (!meta.vigilOpen()) return null;
@@ -673,7 +690,7 @@
     else if (mode === 'ad') { if (d.ads.vigil >= E.QUICK_VIGIL_ADS) return null; if (!(await DH.ads.rewarded('quick_vigil'))) return null; d.ads.vigil++; }
     else if (mode === 'gems') { if (!meta.spend({ gems: E.QUICK_VIGIL_GEMS })) return null; }
     const r = E.vigilRates(Object.keys(S().cleared).length), mins = E.QUICK_VIGIL_MS / 60000;
-    return meta.grant({ gold: Math.floor(r.goldPerMin * mins), accountXp: Math.floor(r.xpPerMin * mins) });
+    return meta.grant({ gold: Math.floor(r.goldPerMin * mins), accountXp: Math.floor(r.xpPerMin * mins), mats: { [meta.vigilMat()]: Math.floor(E.VIGIL_MATS_PER_HOUR * E.QUICK_VIGIL_MS / 3600e3) } });
   };
 
   /* ---------------- Products (IAP fulfilment) ---------------- */
@@ -715,6 +732,15 @@
     else if (!meta.spend(def.cost)) return null;
     deal.bought = true;
     return meta.grant(def.grant);
+  };
+
+  /* ---------------- The Forge: stock packs, a few of each a day ---------------- */
+  meta.packLeft = (i) => { const p = E.stockPacks[i]; if (!p) return 0; const d = meta.ensureDaily(); d.packs = d.packs || {}; return Math.max(0, p.daily - (d.packs[p.id] || 0)); };
+  meta.buyPack = (i) => {
+    const p = E.stockPacks[i]; if (!p || meta.packLeft(i) <= 0) return null;
+    if (!meta.spend(p.cost)) return null;
+    const d = meta.ensureDaily(); d.packs[p.id] = (d.packs[p.id] || 0) + 1;
+    return meta.grant(p.grant);
   };
 
   /* ---------------- Free gems / energy via ads ---------------- */

@@ -509,6 +509,16 @@ img.ic { image-rendering: auto; }
 .gcost-i { display: inline-flex; align-items: center; gap: 4px; }
 .gcost-i img { width: 22px; height: 22px; }
 .gcost-i.bad { color: var(--blood-hi); }
+.pack-forge { gap: 4px; }
+.pack-forge.soldout { opacity: 0.55; }
+.pack-forge .pf-in { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 6px; font: 11px var(--num); min-height: 16px; }
+.pack-forge .pf-in span { display: inline-flex; align-items: center; gap: 2px; font: 12px var(--num); color: var(--text, #e8e0d0); }
+.pack-forge .pf-in img { width: 16px; height: 16px; }
+.mini-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 8px; padding: 6px 0; }
+.mini-chips span { display: inline-flex; align-items: center; gap: 2px; font: 13px var(--num); }
+.mini-chips img { width: 26px; height: 26px; }
+.vigil-mat { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 2px 0 4px; }
+.vigil-mat img { width: 26px; height: 26px; }
 .item.deed .t { font-size: 14px; }
 .item.deed .d { font-size: 11.5px; }
 

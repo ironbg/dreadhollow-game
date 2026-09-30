@@ -420,6 +420,7 @@
       h('div.center', A.img('c_wood', 'bigicon')),
       h('div.center.small.muted', t('vigil.desc', { g: v.rate.goldPerMin * 60, max: 12 })),
       h('div.goldtotal', A.img('i_gold'), U.fmt(v.gold)),
+      M.vigilOpen() ? h('div.center.vigil-mat', A.img('mat_' + v.mat), h('b', '+' + v.mats + ' ' + t('mat.' + v.mat)), h('span.small.muted', ' ' + t('vigil.matRate', { n: E.VIGIL_MATS_PER_HOUR * 12 }))) : null,
       h('div.center.small.muted', t('home.vigilTime', { t: U.fmtDuration(v.ms), max: 12 })),
       h('div.btns',
         h('button.btn.gold' + (v.gold > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('claimVigil', { double: false }); m.close(); if (r) ui.rewardPopup(t('vigil.title'), r); } }, t('common.claim')),
@@ -610,7 +611,8 @@
         h('div.evshop', ev.shop.filter((it) => it && it.id && it.reward).map((it) => {
           const left = M.eventItemLeft(ev, it), can = left > 0 && st.tokens >= it.cost;
           return h('div.evitem' + (left <= 0 ? '.sold' : ''),
-            h('div.reward-list', M.rewardPreview(it.reward).map((r) => h('div.reward', h('div.slot' + (r.rarity != null ? '.rar' + r.rarity : ''), A.img(r.icon)), h('div.n' + (ui.isWord(r.text) ? '.word' : ''), r.text)))),
+            M.rewardPreview(it.reward).length > 2 ? h('div.mini-chips', M.rewardPreview(it.reward).map((r) => h('span', A.img(r.icon), '×' + r.text))) // a pouch of many: one compact row
+              : h('div.reward-list', M.rewardPreview(it.reward).map((r) => h('div.reward', h('div.slot' + (r.rarity != null ? '.rar' + r.rarity : ''), A.img(r.icon)), h('div.n' + (ui.isWord(r.text) ? '.word' : ''), r.text)))),
             it.limit ? h('div.small.muted', t('ev.left', { n: left, m: it.limit })) : null,
             left <= 0 ? h('div.small.good.evsold', t('ev.soldOut'))
               : h('button.btn.small' + (can ? '.gold' : '.off'), { onclick: async () => {
@@ -693,13 +695,17 @@
   /* ---------------- Account level up ---------------- */
   ui.flushLevelUps = () => {
     const q = M.pendingLevelUps || []; M.pendingLevelUps = [];
-    const pay = (gems, gold) => [{ icon: 'i_gem', text: '+' + gems }, { icon: 'i_gold', text: '+' + U.fmt(gold) }];
+    const pay = (rws) => {
+      const mats = {}; rws.forEach((rw) => { for (const k in rw.mats || {}) mats[k] = (mats[k] || 0) + rw.mats[k]; });
+      return [{ icon: 'i_gem', text: '+' + rws.reduce((n, rw) => n + rw.gems, 0) }, { icon: 'i_gold', text: '+' + U.fmt(rws.reduce((n, rw) => n + rw.gold, 0)) }]
+        .concat(E.materials.filter((k) => mats[k]).map((k) => ({ icon: 'mat_' + k, text: '+' + mats[k] + ' ' + t('mat.' + k) })));
+    };
     if (q.length > 3) { // a long climb: one window for all of it
-      ui.rewardPopup(t('account.levelsUp', { a: q[0].level - 1, b: q[q.length - 1].level }), pay(q.reduce((n, l) => n + l.reward.gems, 0), q.reduce((n, l) => n + l.reward.gold, 0)));
+      ui.rewardPopup(t('account.levelsUp', { a: q[0].level - 1, b: q[q.length - 1].level }), pay(q.map((l) => l.reward)));
       return;
     }
     // one level at a time, lowest first: the next window opens when this one is collected
-    const next = () => { const l = q.shift(); if (l) ui.rewardPopup(t('account.levelUp', { n: l.level }), pay(l.reward.gems, l.reward.gold), null, () => setTimeout(next, 180)); };
+    const next = () => { const l = q.shift(); if (l) ui.rewardPopup(t('account.levelUp', { n: l.level }), pay([l.reward]), null, () => setTimeout(next, 180)); };
     next();
   };
 })(window.DH);

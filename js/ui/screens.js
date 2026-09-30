@@ -170,7 +170,7 @@
       const mk = eqp.mark;
       eq.append(h('div', h('div.slot.mark' + (mk ? '.rar4' : '.empty'), { onclick: () => ui.openMarks() }, A.img(mk ? 'm_' + mk : 'm_knight')), h('div.center.small.muted', t('slot.mark'))));
       box.append(eq);
-      box.append(ui.matsRow(), h('div.small.muted.center', { style: { marginBottom: '6px' } }, t('armory.matsHint')));
+      box.append(ui.matsRow(), h('div.row', { style: { marginBottom: '6px', gap: '6px' } }, h('div.small.muted.grow', t('armory.matsHint')), h('button.btn.tiny.gold', { onclick: () => { click(); ui.go('shop', 'forge'); } }, t('armory.toForge'))));
       box.append(h('h3.sect', t('armory.inventory', { n: s.gear.length })));
       const canMerge = s.gear.some((g) => M.mergeCandidates(g.id).length >= 2);
       box.append(h('div.row', { style: { marginBottom: '8px' } },
@@ -514,6 +514,21 @@
       });
       root.append(deals);
       if (d.deals.some((deal) => E.dealPool[deal.i].grant.gear || E.dealPool[deal.i].grant.chest)) root.append(ui.ratesLink());
+
+      // ---- the Forge: forging metal, herbs, a few packs of each a day
+      root.append(h('h3.sect', { id: 'shop-forge' }, t('shop.forge'), h('span.timer', t('shop.forgeDaily'))));
+      const forge = h('div.grid3');
+      E.stockPacks.forEach((p, i) => {
+        const pv = M.rewardPreview(p.grant), left = M.packLeft(i), ico = { p_forge: 'mat_starsteel', p_herbs: 'herb_nightshade' }[p.id] || pv[0].icon;
+        forge.append(h('div.panel.chest.pack-forge' + (left ? '' : '.soldout'),
+          h('div.slot', { style: { width: '52px' } }, A.img(ico)),
+          h('div.small', { style: { fontWeight: 800 } }, t('pack.' + p.id)),
+          h('div.pf-in', pv.map((e) => h('span', A.img(e.icon), '×' + e.text))),
+          left ? h('button.btn.small.' + (p.cost.gems ? 'gem' : 'gold'), { onclick: async () => { const r = await ui.act('buyPack', { i }); if (r) { DH.audio.play('buy'); ui.rewardPopup(t('shop.forge'), r); } else if (r !== undefined) ui.toast(t('common.notEnough'), 'bad'); ui.refresh(); } },
+            A.img(p.cost.gems ? 'i_gem' : 'i_gold'), U.fmt(p.cost.gems || p.cost.gold)) : h('button.btn.small.ghost.off', t('shop.soldOut')),
+          h('div.small.muted', t('shop.leftToday', { n: left }))));
+      });
+      root.append(forge);
 
       // ---- chests
       root.append(h('h3.sect', { id: 'shop-chests' }, t('shop.chests')));

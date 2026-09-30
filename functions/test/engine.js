@@ -38,7 +38,8 @@ const live = require('../game/live.json');
   assert.strictEqual(checkRun(Object.assign({}, sum, { mats: { iron: 9999 } }), run, Date.now(), DH), 'mats');
   assert.strictEqual(checkRun(Object.assign({}, sum, { mats: { iron: -2 } }), run, Date.now(), DH), 'mats');
   r = await withProfile(p0, live, (DHp) => DHp.meta.settleRun(sum));
-  assert.strictEqual(r.profile.mats.iron, 10 + 12, 'materials come home'); assert.strictEqual(r.profile.mats.silver, 1);
+  let lvIron = 0; for (let l = 2; l <= r.profile.accountLevel; l++) lvIron += DH.economy.accountLevelReward(l).mats.iron || 0;
+  assert.strictEqual(r.profile.mats.iron, 10 + 12 + lvIron, 'materials come home (and each account level adds its metal)'); assert.strictEqual(r.profile.mats.silver, 1);
   // forging: a level costs gold and a material; without the material nothing happens
   const pg = Object.assign({}, p0, { gold: 1e6, gear: [{ id: 1, type: 'striders', rarity: 0, level: 1 }], nextGearId: 2, mats: { iron: 0, silver: 0, gold: 0, starsteel: 0 } });
   let f = await withProfile(pg, live, (DHp) => DHp.actions.list.levelGear.run({ id: 1 }));
@@ -53,5 +54,25 @@ const live = require('../game/live.json');
   const d1 = await withProfile(r.profile, live, (DHp) => DHp.actions.list.doubleRunGold.run({ gold: 1e9 }));
   const d2 = await withProfile(d1.profile, live, (DHp) => DHp.actions.list.doubleRunGold.run({}));
   assert.strictEqual(d1.profile.gold, r.profile.gold + r.result.gold); assert.strictEqual(d2.result, 0);
+  // rewards hold materials, herbs and potions; the Forge sells a few packs a day
+  let g2 = await withProfile(p0, live, (DHp) => DHp.meta.grant({ mats: { iron: 7, mithril: 5 }, herbs: { moss: 2 }, potions: { lethe: 1 } }));
+  assert.strictEqual(g2.profile.mats.iron, 17); assert.ok(!('mithril' in g2.profile.mats)); assert.strictEqual(g2.profile.herbs.moss, 2); assert.strictEqual(g2.profile.potions.lethe, 1);
+  const iIron = DH.economy.stockPacks.findIndex((x) => x.id === 'p_iron');
+  let pk = { profile: Object.assign({}, p0, { gold: 1e6 }) };
+  for (let k = 0; k < 6; k++) pk = await withProfile(pk.profile, live, (DHp) => DHp.actions.list.buyPack.run({ i: iIron }));
+  assert.strictEqual(pk.result, null, 'the sixth iron pack of a day is refused');
+  assert.strictEqual(pk.profile.mats.iron, 10 + 5 * 20); assert.strictEqual(pk.profile.gold, 1e6 - 5 * 2500);
+  pk = await withProfile(Object.assign({}, p0, { gems: 10 }), live, (DHp) => DHp.actions.list.buyPack.run({ i: DH.economy.stockPacks.findIndex((x) => x.id === 'p_starsteel') }));
+  assert.ok(!pk.result); assert.strictEqual(pk.profile.gems, 10);
+  // the Vigil gathers the metal of the deepest hall won
+  const vg = await withProfile(Object.assign({}, p0, { cleared: { crypt: 1, aqueduct: 1 }, vigil: { ts: Date.now() - 4 * 3600e3 } }), live, (DHp) => DHp.meta.claimVigil(false));
+  assert.strictEqual(vg.profile.mats.silver, 6, 'four hours: six silver');
+  // an account level pays metal too
+  const al = await withProfile(Object.assign({}, p0, { accountXp: 99 }), live, (DHp) => DHp.meta.addAccountXp(1));
+  assert.strictEqual(al.profile.accountLevel, 2); assert.strictEqual(al.profile.mats.iron, 15);
+  // every pass, calendar, mission, deal and newcomer reward only names things that exist
+  const E2 = DH.economy, ok = (rw) => { for (const k in rw.mats || {}) assert.ok(E2.materials.includes(k), k); for (const k in rw.herbs || {}) assert.ok(E2.herbs.includes(k), k); for (const k in rw.potions || {}) assert.ok(E2.potions[k], k); };
+  E2.passRewards.free.concat(E2.passRewards.prem, E2.loginRewards, E2.missionPool.map((m) => m.reward), E2.dealPool.map((x) => x.grant), E2.stockPacks.map((x) => x.grant), E2.NEWBIE.milestones.map((x) => x.r), [].concat(...E2.NEWBIE.tasks).map((x) => x.r)).forEach(ok);
+  live.events.forEach((ev) => ev.shop.forEach((it) => ok(it.reward)));
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });

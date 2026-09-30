@@ -272,12 +272,12 @@
     { id: 'gold',     target: 400,  reward: { energy: 10, passXp: 60 } },
     { id: 'chest',    target: 1,    reward: { gold: 700, passXp: 60 } },
     { id: 'ads',      target: 2,    reward: { gems: 15, passXp: 80 } },
-    { id: 'upgrade',  target: 2,    reward: { gold: 600, passXp: 60 } },
-    { id: 'elites',   target: 3,    reward: { gems: 10, passXp: 70 } },
+    { id: 'upgrade',  target: 2,    reward: { mats: { iron: 8 }, gold: 300, passXp: 60 } },
+    { id: 'elites',   target: 3,    reward: { mats: { iron: 6 }, gems: 5, passXp: 70 } },
   ];
   E.MISSIONS_PER_DAY = 5;
-  E.missionBonus = { chest: 'silver', gems: 30, passXp: 150 };
-  E.missionPool.push({ id: 'tomes', target: 3, reward: { gold: 600, passXp: 60 } }, { id: 'champions', target: 1, reward: { gems: 15, passXp: 80 } });
+  E.missionBonus = { chest: 'silver', gems: 30, mats: { silver: 5 }, passXp: 150 };
+  E.missionPool.push({ id: 'tomes', target: 3, reward: { gold: 600, passXp: 60 } }, { id: 'champions', target: 1, reward: { gems: 10, mats: { silver: 3 }, passXp: 80 } });
 
   /* ---------- Achievements (tiered) ---------- */
   E.achievements = [
@@ -295,6 +295,7 @@
     { id: 'devotee',   stat: 'shrineLevels', tiers: [5, 20, 45, 75],                     gems: [20, 50, 100, 200] },
     { id: 'patron',    stat: 'adsWatched',   tiers: [5, 25, 100, 300],                   gems: [15, 40, 80, 150] },
     { id: 'conqueror', stat: 'stagesCleared',tiers: [1, 2, 3],                           gems: [50, 150, 300] },
+    { id: 'forger',    stat: 'forged',       tiers: [5, 30, 120, 400],                   gems: [15, 40, 90, 200] },
   ];
 
   /* ---------- Season pass ---------- */
@@ -308,6 +309,7 @@
       if (i % 10 === 0) free.push({ chest: 'gold' });
       else if (i % 5 === 0) free.push({ chest: 'silver' });
       else if (i % 3 === 0) free.push({ gems: 20 + i * 2 });
+      else if (i % 4 === 0) free.push({ mats: { [i < 10 ? 'iron' : i < 20 ? 'silver' : 'gold']: i < 10 ? 15 : 10 } }); // forging metal, finer as the season goes on
       else if (i % 2 === 0) free.push({ energy: 10 });
       else free.push({ gold: 400 + i * 80 });
       // premium track
@@ -317,6 +319,7 @@
       else if (i % 5 === 0) prem.push({ chest: 'gold' });
       else if (i % 3 === 0) prem.push({ gems: 60 + i * 4 });
       else if (i % 2 === 0) prem.push({ chest: 'silver' });
+      else if (i % 4 === 3) prem.push({ mats: { [i < 10 ? 'silver' : i < 20 ? 'gold' : 'starsteel']: i < 20 ? 15 : 10 } });
       else prem.push({ gold: 1500 + i * 200 });
     }
     return { free, prem };
@@ -324,12 +327,13 @@
 
   /* ---------- 7-day login calendar ---------- */
   E.loginRewards = [
-    { gold: 1000 }, { gems: 25 }, { energy: 20 }, { gold: 3000 }, { chest: 'silver' }, { gems: 60 }, { chest: 'gold' },
+    { gold: 1000 }, { gems: 25 }, { energy: 20 }, { mats: { iron: 25 } }, { chest: 'silver' }, { gems: 60 }, { chest: 'gold' },
   ];
 
   /* ---------- Vigil (idle) rewards ---------- */
   E.VIGIL_CAP_MS = 12 * 3600e3;
   E.vigilRates = (stagesCleared) => ({ goldPerMin: 2 + stagesCleared * 3, xpPerMin: 1 + stagesCleared }); // one hall: 5 a minute, 3600 over the full 12 hours (about one won run)
+  E.VIGIL_MATS_PER_HOUR = 1.5; // forging metal while away: the metal of the deepest hall won
   E.QUICK_VIGIL_MS = 2 * 3600e3;
   E.QUICK_VIGIL_ADS = 3;
   E.QUICK_VIGIL_GEMS = 40;
@@ -352,7 +356,7 @@
 
   /* ---------- Account level ---------- */
   E.accountXpNext = (lvl) => 100 + (lvl - 1) * 60;
-  E.accountLevelReward = (lvl) => ({ gems: 20 + lvl * 2, gold: 300 * lvl });
+  E.accountLevelReward = (lvl) => ({ gems: 20 + lvl * 2, gold: 300 * lvl, mats: { [E.materials[Math.min(3, Math.floor(lvl / 10))]]: lvl % 5 === 0 ? 15 : 5 } }); // metal: finer every ten levels, more every fifth
 
   /* ---------- Store catalogue (real money) ----------
    * Prices are placeholders in USD. On a real store the platform returns
@@ -364,12 +368,12 @@
     gems_4: { type: 'gems', gems: 2200,  price: 19.99, icon: 'gems_l', bonus: 30 },
     gems_5: { type: 'gems', gems: 6000,  price: 49.99, icon: 'gems_l', bonus: 50 },
     gems_6: { type: 'gems', gems: 13500, price: 99.99, icon: 'gems_xl', bonus: 70, tag: 'best' },
-    starter:  { type: 'bundle', price: 1.99, once: true, grant: { gems: 300, gold: 10000, gear: { rarity: 3 }, energy: 30 }, value: 800 },
+    starter:  { type: 'bundle', price: 1.99, once: true, grant: { gems: 300, gold: 10000, gear: { rarity: 3 }, energy: 30, mats: { iron: 60, silver: 20 } }, value: 800 },
     noads:    { type: 'noads', price: 4.99, once: true },
-    soulcard: { type: 'sub', price: 4.99, grant: { gems: 300 }, daily: { gems: 100, energy: 10 }, days: 30 },
+    soulcard: { type: 'sub', price: 4.99, grant: { gems: 300 }, daily: { gems: 100, energy: 10, mats: { iron: 5 } }, days: 30 },
     pass:     { type: 'pass', price: 9.99 },
     reaper:   { type: 'bundle', price: 4.99, once: true, grant: { hero: 'reaper', gems: 500, chest: 'gold' }, value: 400 },
-    legend:   { type: 'bundle', price: 19.99, once: true, grant: { gems: 2500, gear: { rarity: 4 }, chest: 'gold', gold: 50000 }, value: 500 },
+    legend:   { type: 'bundle', price: 19.99, once: true, grant: { gems: 2500, gear: { rarity: 4 }, chest: 'gold', gold: 50000, mats: { gold: 40, starsteel: 20 } }, value: 500 },
   };
   E.gemPackOrder = ['gems_1', 'gems_2', 'gems_3', 'gems_4', 'gems_5', 'gems_6'];
 
@@ -378,6 +382,16 @@
     { id: 'gold_s', gems: 60,  gold: 4000 },
     { id: 'gold_m', gems: 250, gold: 18000 },
     { id: 'gold_l', gems: 600, gold: 48000 },
+  ];
+
+  /* The Forge: forging metal, herbs and potions for gold or gems, each a few times a day */
+  E.stockPacks = [
+    { id: 'p_iron',      cost: { gold: 2500 }, grant: { mats: { iron: 20 } },      daily: 5 },
+    { id: 'p_silver',    cost: { gold: 6000 }, grant: { mats: { silver: 12 } },    daily: 3 },
+    { id: 'p_gold',      cost: { gems: 90 },   grant: { mats: { gold: 12 } },      daily: 3 },
+    { id: 'p_starsteel', cost: { gems: 200 },  grant: { mats: { starsteel: 10 } }, daily: 2 },
+    { id: 'p_herbs',     cost: { gold: 3000 }, grant: { herbs: { moss: 3, ember: 3, lily: 3, frostcap: 3, nightshade: 3 } }, daily: 2 },
+    { id: 'p_forge',     cost: { gems: 300 },  grant: { mats: { iron: 30, silver: 20, gold: 10, starsteel: 5 } }, daily: 1 },
   ];
 
   /* Daily deals: rotated every day. kind: ad (free with ad), gold, gems */
@@ -391,6 +405,11 @@
     { id: 'd_gear_unc',  cost: { gold: 4000 },grant: { gear: { rarity: 1 } } },
     { id: 'd_energy',    cost: { gems: 30 },  grant: { energy: 30 } },
     { id: 'd_gold_big',  cost: { gems: 120 }, grant: { gold: 12000 } },
+    { id: 'd_iron_ad',   cost: { ad: 1 },     grant: { mats: { iron: 12 } } },
+    { id: 'd_silver_mat',cost: { gold: 4500 },grant: { mats: { silver: 12 } } },
+    { id: 'd_gold_mat',  cost: { gems: 70 },  grant: { mats: { gold: 12 } } },
+    { id: 'd_star_mat',  cost: { gems: 150 }, grant: { mats: { starsteel: 10 } } },
+    { id: 'd_potion',    cost: { gold: 5000 },grant: { potions: { remembrance: 1 } } },
   ];
 
   /* Ads */
@@ -408,18 +427,18 @@
         { k: 'survive', st: 'crypt', n: 300, s: 10, r: { gems: 20 } }, { k: 'shrine', n: 1, s: 5, r: { gold: 300 } }, { k: 'equip', n: 1, s: 5, r: { gold: 300 } },
         { k: 'ads', n: 1, s: 5, r: { gems: 10 } }],
       [{ k: 'login', n: 2, s: 5, r: { gold: 400 } }, { k: 'clear', st: 'crypt', n: 1, s: 10, r: { gems: 30 } }, { k: 'level', n: 20, s: 10, r: { gold: 600 } },
-        { k: 'gearLv', n: 3, s: 10, r: { gold: 500 } }, { k: 'chests', n: 1, s: 5, r: { gold: 400 } }, { k: 'bosses', n: 3, s: 5, r: { energy: 10 } },
+        { k: 'gearLv', n: 3, s: 10, r: { mats: { iron: 15 } } }, { k: 'chests', n: 1, s: 5, r: { gold: 400 } }, { k: 'bosses', n: 3, s: 5, r: { energy: 10 } },
         { k: 'shrine', n: 3, s: 5, r: { gold: 400 } }],
       [{ k: 'login', n: 3, s: 5, r: { gold: 500 } }, { k: 'survive', st: 'abyss', n: 300, s: 10, r: { gems: 30 } }, { k: 'merge', n: 1, s: 10, r: { gold: 600 } },
-        { k: 'heroes', n: 2, s: 10, r: { gems: 40 } }, { k: 'level', n: 30, s: 10, r: { gold: 700 } }, { k: 'elites', n: 30, s: 5, r: { gold: 500 } },
+        { k: 'heroes', n: 2, s: 10, r: { gems: 40 } }, { k: 'level', n: 30, s: 10, r: { gold: 700 } }, { k: 'elites', n: 30, s: 5, r: { mats: { iron: 12 } } },
         { k: 'ads', n: 3, s: 5, r: { gems: 15 } }],
-      [{ k: 'login', n: 4, s: 5, r: { gold: 600 } }, { k: 'clear', st: 'abyss', n: 1, s: 10, r: { gems: 40 } }, { k: 'gearLv', n: 10, s: 10, r: { gold: 800 } },
+      [{ k: 'login', n: 4, s: 5, r: { gold: 600 } }, { k: 'clear', st: 'abyss', n: 1, s: 10, r: { gems: 40 } }, { k: 'gearLv', n: 10, s: 10, r: { mats: { iron: 25 } } },
         { k: 'shrine', n: 8, s: 5, r: { gold: 600 } }, { k: 'tomes', n: 25, s: 5, r: { gold: 600 } }, { k: 'kills', n: 5000, s: 10, r: { energy: 15 } },
         { k: 'deeds', n: 10, s: 10, r: { gems: 30 } }],
       [{ k: 'login', n: 5, s: 5, r: { gold: 700 } }, { k: 'survive', st: 'aqueduct', n: 300, s: 10, r: { gems: 40 } }, { k: 'acct', n: 5, s: 10, r: { gold: 1000 } },
-        { k: 'agony', n: 1, s: 10, r: { gems: 40 } }, { k: 'brew', n: 1, s: 5, r: { gold: 700 } }, { k: 'champions', n: 10, s: 5, r: { gold: 700 } },
+        { k: 'agony', n: 1, s: 10, r: { gems: 40 } }, { k: 'brew', n: 1, s: 5, r: { herbs: { moss: 3, lily: 3 } } }, { k: 'champions', n: 10, s: 5, r: { gold: 700 } },
         { k: 'ads', n: 5, s: 5, r: { gems: 20 } }],
-      [{ k: 'login', n: 6, s: 5, r: { gold: 800 } }, { k: 'clear', st: 'aqueduct', n: 1, s: 15, r: { gems: 50 } }, { k: 'gearLv', n: 15, s: 10, r: { gold: 1000 } },
+      [{ k: 'login', n: 6, s: 5, r: { gold: 800 } }, { k: 'clear', st: 'aqueduct', n: 1, s: 15, r: { gems: 50 } }, { k: 'gearLv', n: 15, s: 10, r: { mats: { silver: 15 } } },
         { k: 'merge', n: 3, s: 10, r: { gold: 1000 } }, { k: 'shrine', n: 15, s: 5, r: { gold: 800 } }, { k: 'level', n: 40, s: 10, r: { energy: 20 } },
         { k: 'wins', n: 5, s: 5, r: { gems: 30 } }],
       [{ k: 'login', n: 7, s: 5, r: { gold: 1000 } }, { k: 'heroes', n: 3, s: 10, r: { gems: 60 } }, { k: 'runs', n: 30, s: 10, r: { gold: 1500 } },
@@ -428,7 +447,7 @@
     ],
     // 385 Seals in all: the last reward asks for most of them, not every single task
     milestones: [
-      { at: 40, r: { gold: 3000 } }, { at: 90, r: { energy: 30 } }, { at: 150, r: { chest: 'silver' } }, { at: 210, r: { gems: 200 } },
+      { at: 40, r: { gold: 3000 } }, { at: 90, r: { mats: { iron: 40 } } }, { at: 150, r: { chest: 'silver' } }, { at: 210, r: { gems: 200 } },
       { at: 270, r: { gear: { rarity: 3 } } }, { at: 320, r: { chest: 'gold' } }, { at: 360, r: { gear: { rarity: 4 } } },
     ],
   };
