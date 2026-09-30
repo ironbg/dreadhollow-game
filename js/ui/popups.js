@@ -512,8 +512,8 @@
         h('div.col', { style: { marginTop: '12px' } },
           equipBtns,
           g.level < maxL ? h('div.gcost',
-            h('span.gcost-i' + (hasMat ? '' : '.bad'), A.img('mat_' + price.mat), M.matCount(price.mat) + ' / ' + price.n),
-            h('span.gcost-i' + (hasGold ? '' : '.bad'), A.img('i_gold'), U.fmt(price.gold))) : null,
+            h('div.gcost-i' + (hasMat ? '.ok' : '.bad'), { title: t('mat.' + price.mat) }, h('div.gcost-box', A.img('mat_' + price.mat)), h('b', U.fmt(M.matCount(price.mat)) + '/' + price.n)),
+            h('div.gcost-i' + (hasGold ? '.ok' : '.bad'), { title: t('common.gold') }, h('div.gcost-box', A.img('i_gold')), h('b', U.fmt(S().gold) + '/' + U.fmt(price.gold)))) : null, // each price: its icon framed, what you have over what it takes
           g.level < maxL ? h('div.row', { style: { gap: '6px' } },
             h('button.btn.gold.grow' + (canLv ? '' : '.off'), { onclick: async () => { const ok = await ui.act('levelGear', { id: g.id }); if (ok) { DH.audio.play('buy'); draw(); } else if (ok === false) ui.toast(t(hasMat ? 'common.notEnough' : 'gear.needMat', { m: t('mat.' + price.mat) }), 'bad'); } },
               t('gear.levelUp')),

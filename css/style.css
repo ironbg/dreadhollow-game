@@ -505,10 +505,13 @@ img.ic { image-rendering: auto; }
 .gms-h { font-weight: bold; color: var(--gold, #ffd35a); margin-bottom: 4px; font-size: 13px; }
 .gms-row { color: #8a8478; }
 .gms-row.on { color: var(--good); }
-.gcost { display: flex; justify-content: center; gap: 18px; font: 13px var(--num); }
-.gcost-i { display: inline-flex; align-items: center; gap: 4px; }
-.gcost-i img { width: 22px; height: 22px; }
-.gcost-i.bad { color: var(--blood-hi); }
+.gcost { display: flex; justify-content: center; gap: 22px; margin: 4px 0 2px; }
+.gcost-i { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.gcost-box { width: 56px; height: 44px; display: flex; align-items: center; justify-content: center; background: linear-gradient(#1c181e, #0e0c10); border: 2px solid #8a6a2c; box-shadow: inset 0 0 0 1px #000; }
+.gcost-box img { width: 32px; height: 32px; }
+.gcost-i b { font: 13px var(--num); }
+.gcost-i.ok b { color: var(--good); }
+.gcost-i.bad b { color: var(--blood-hi); }
 .pack-forge { gap: 4px; }
 .pack-forge.soldout { opacity: 0.55; }
 .pack-forge .pf-in { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 6px; font: 11px var(--num); min-height: 16px; }
