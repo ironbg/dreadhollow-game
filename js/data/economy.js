@@ -162,28 +162,19 @@
   E.MAT_HALL = { crypt: 0, abyss: 0, aqueduct: 1, catacombs: 1, discord: 2, blightmire: 2, reliquary: 3 };
   /** The material that lifts an item of this rarity from `level` to the next: { mat, n }. */
   E.gearMatCost = (rarity, level) => ({ mat: E.materials[Math.min(3, Math.floor(level / 10))], n: (1 + Math.floor((level % 10) / 3)) * (1 + Math.floor(rarity / 2)) });
-  /** Level milestones: at these levels an item gains one more stat, drawn for its type from its slot's pool (so two
-   *  items of one slot differ). Its size grows with the rarity as the item's own stats do. */
+  /** Level milestones: at these levels an item gains one more stat. It follows the slot, so every armour, every pair of
+   *  boots, every pair of gloves grows the same way; its size grows with the rarity as the item's own stats do. */
   E.GEAR_MILESTONES = [10, 20, 30, 40];
-  E.MILESTONE_POOL = {
-    head:  { area: 0.03, effectPct: 0.03, growth: 0.04, critPct: 0.02, pickup: 0.1, tomeDrop: 0.04 },
-    neck:  { dmgPct: 0.025, growth: 0.04, greed: 0.04, as: 0.02, maxHpPct: 0.03, effectPct: 0.03 },
-    chest: { maxHpPct: 0.03, defense: 0.012, regen: 0.1, block: 0.6, chestDrop: 0.01, dmgPct: 0.02 },
-    hands: { as: 0.02, critPct: 0.02, ms: 0.03, critBonus: 0.05, dmgPct: 0.02, area: 0.03 },
-    feet:  { speedPct: 0.02, pickup: 0.1, area: 0.03, chestDrop: 0.01, regen: 0.1, defense: 0.01 },
-    ring:  { critPct: 0.02, greed: 0.04, as: 0.02, dmgPct: 0.02, growth: 0.03, critBonus: 0.05 },
+  E.SLOT_MILESTONES = {
+    chest: [['maxHpPct', 0.03], ['critBonus', 0.05], ['regen', 0.1], ['block', 0.6]],
+    feet:  [['area', 0.03], ['chestDrop', 0.01], ['pickup', 0.1], ['regen', 0.1]],
+    hands: [['addBase', 1], ['block', 0.6], ['as', 0.02], ['critBonus', 0.05]],
+    head:  [['growth', 0.04], ['effectPct', 0.03], ['tomeDrop', 0.04], ['area', 0.03]],
+    neck:  [['dmgPct', 0.025], ['maxHpPct', 0.03], ['greed', 0.04], ['as', 0.02]],
+    ring:  [['critPct', 0.02], ['greed', 0.04], ['critBonus', 0.05], ['growth', 0.03]],
   };
-  const typeHash = (s) => { let x = 7; for (let i = 0; i < s.length; i++) x = (x * 31 + s.charCodeAt(i)) >>> 0; return x; };
-  const msCache = {};
-  /** The stats an item type gains at its milestones, in order: [{ lv, k, v }] (v before the rarity). Its own stats come
-   *  last in the draw, so a milestone mostly brings something new. */
-  E.gearMilestoneDefs = (type) => {
-    if (msCache[type]) return msCache[type];
-    const g = E.gear[type], pool = E.MILESTONE_POOL[g.slot], keys = Object.keys(pool);
-    let x = typeHash(type);
-    const order = keys.map((k) => { x = (x * 1103515245 + 12345) >>> 0; return { k, r: (k in g.stats ? 1 : 0) + (x % 1000) / 1000 }; }).sort((a, b) => a.r - b.r);
-    return (msCache[type] = E.GEAR_MILESTONES.map((lv, i) => ({ lv, k: order[i % order.length].k, v: pool[order[i % order.length].k] })));
-  };
+  /** The stats an item type gains at its milestones, in order: [{ lv, k, v }] (v before the rarity). */
+  E.gearMilestoneDefs = (type) => E.SLOT_MILESTONES[E.gear[type].slot].map(([k, v], i) => ({ lv: E.GEAR_MILESTONES[i], k, v }));
   /** What an item's milestones give at this rarity and level (only those reached). */
   E.gearMilestones = (type, rarity, level) => {
     const out = {};
