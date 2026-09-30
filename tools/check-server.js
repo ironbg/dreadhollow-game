@@ -10,7 +10,7 @@ const ok = (m) => console.log('  ok   ' + m), bad = (m) => { console.log('  FAIL
 const call = async (name, data, token) => {
   const r = await fetch(FN + name, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ data }) });
   const j = await r.json().catch(() => ({}));
-  if (j.error) throw new Error(name + ': ' + r.status + ' ' + ((j.error.details && j.error.details.code) || j.error.status || j.error.message));
+  if (j.error) throw new Error(name + ': ' + r.status + ' ' + ((j.error.details && j.error.details.code) || j.error.status || '') + (j.error.message ? ' — ' + j.error.message : ''));
   return j.result;
 };
 

@@ -35,6 +35,15 @@ async function liveConfig() {
   return live;
 }
 
+/** A callable whose unexpected errors are logged and answered with their cause (a Firestore or Google error code and
+ *  message), so a failure can be read from the game or tools/check-server.js without opening the Cloud logs. */
+const callable = (fn) => onCall(async (req) => {
+  try { return await fn(req); } catch (e) {
+    if (e instanceof HttpsError) throw e;
+    console.error('unexpected', e);
+    throw new HttpsError('internal', 'server: ' + String((e && e.code) || '') + ' ' + String((e && e.message) || e).slice(0, 300), { code: 'server' }); // 'server': the game keeps the call and tries again later
+  }
+});
 const fail = (code, msg, status) => new HttpsError(status || 'failed-precondition', msg || code, { code });
 /** Guests (anonymous accounts) play but stay off the leaderboards. */
 const isGuest = (req) => !!(req.auth && req.auth.token && req.auth.token.firebase && req.auth.token.firebase.sign_in_provider === 'anonymous');
@@ -84,7 +93,7 @@ function rate(doc) {
 }
 
 /* ---------- sync ---------- */
-exports.sync = onCall(async (req) => {
+exports.sync = callable(async (req) => {
   const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
   checkVersion(d, cfg);
   const out = await onProfile(uid, async (profile, doc) => {
@@ -101,7 +110,7 @@ exports.sync = onCall(async (req) => {
 });
 
 /* ---------- act ---------- */
-exports.act = onCall(async (req) => {
+exports.act = callable(async (req) => {
   const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
   checkVersion(d, cfg);
   const name = String(d.name || '');
@@ -138,7 +147,7 @@ exports.act = onCall(async (req) => {
 });
 
 /* ---------- a fight ---------- */
-exports.runStart = onCall(async (req) => {
+exports.runStart = callable(async (req) => {
   const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
   checkVersion(d, cfg);
   const out = await onProfile(uid, async (profile, doc) => {
@@ -159,7 +168,7 @@ exports.runStart = onCall(async (req) => {
   return { save: out.profile, rev: out.rev, ticket: out.ticket ? out.ticket.id : null };
 });
 
-exports.runEnd = onCall(async (req) => {
+exports.runEnd = callable(async (req) => {
   const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
   checkVersion(d, cfg);
   const out = await onProfile(uid, async (profile, doc) => {
@@ -180,7 +189,7 @@ exports.runEnd = onCall(async (req) => {
 });
 
 /* ---------- a Google Play purchase ---------- */
-exports.purchase = onCall(async (req) => {
+exports.purchase = callable(async (req) => {
   const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
   checkVersion(d, cfg);
   const productId = String(d.productId || ''), token = String(d.token || '');
@@ -231,7 +240,7 @@ async function sendBoards(uid, profile, cfg) {
 }
 
 /* ---------- the player starts over (Settings → Reset progress): a fresh profile; bought things stay ---------- */
-exports.reset = onCall(async (req) => {
+exports.reset = callable(async (req) => {
   const uid = uidOf(req), cfg = await liveConfig();
   const out = await onProfile(uid, async (profile, doc) => {
     const fresh = freshProfile(cfg), keep = (profile && profile.purchases) || null;
@@ -242,7 +251,7 @@ exports.reset = onCall(async (req) => {
 });
 
 /* ---------- the player deletes their account: everything the server holds for it goes too ---------- */
-exports.wipe = onCall(async (req) => {
+exports.wipe = callable(async (req) => {
   const uid = uidOf(req);
   const doc = await db.collection('players').doc(uid).get();
   const keys = doc.exists ? Object.keys((JSON.parse(doc.data().save).boards || {}).best || {}) : [];
