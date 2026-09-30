@@ -871,7 +871,7 @@
      *  laid at the hero's feet so it opens as any found one does. */
     takeStartBonus(kind) {
       if (this.startBonus) return; this.startBonus = kind;
-      const p = this.player; this.drop(kind === 'chest' ? 'chest_red' : 'tome', p.x, p.y);
+      const p = this.player; this.drop(kind === 'chest' ? 'chest_wood' : 'tome', p.x, p.y); // the chest is the plainest one: common pieces
     }
     /** Forging materials: n pieces, each the hall's metal (or one finer or coarser). */
     matDrop(x, y, n) { for (let i = 0; i < n; i++) this.drop('mat', x + U.rand(-8, 8), y + U.rand(-5, 5), 1, E.rollMat(this.stageId, this.dread)); }
@@ -930,14 +930,14 @@
         case 'magnet': DH.audio.play('reward'); this.pickups.forEach((o) => { if (o.type === 'xp' || o.type === 'coin' || o.type === 'herb' || o.type === 'mat') o.mag = true; }); break;
         case 'bomb': this.nova(this.player.x, this.player.y, 200 * this.stage.hpMult, Math.hypot(DH.view.w, DH.view.h) / 2, 'bomb'); break;
         case 'tome': this.tomes++; DH.audio.play('chest'); this.queue.push({ state: 'tome', ev: 'run:tome', data: Object.assign(this.tomeChoices(k.sub === 'mastery' ? 99 : 3), { mastery: k.sub === 'mastery' }) }); this.pump(); break; // a Tome of Mastery offers everything
-        case 'chest_red': case 'chest_gold': case 'chest_new': DH.audio.play('chest'); if (this.art) this.art.treasure = this.art.treasure.filter((x) => x !== k); this.queue.push({ state: 'loot', ev: 'run:loot', data: this.openLoot(k.type) }); this.pump(); break;
+        case 'chest_wood': case 'chest_red': case 'chest_gold': case 'chest_new': DH.audio.play('chest'); if (this.art) this.art.treasure = this.art.treasure.filter((x) => x !== k); this.queue.push({ state: 'loot', ev: 'run:loot', data: this.openLoot(k.type) }); this.pump(); break;
         default: break;
       }
     }
     /** Victory: every unclaimed tome / chest still on the floor is worth half a level. */
     lateLoot() {
       let n = 0;
-      for (const k of this.pickups) if (k.type === 'tome' || k.type === 'chest_red' || k.type === 'chest_gold' || k.type === 'chest_new') n++;
+      for (const k of this.pickups) if (k.type === 'tome' || k.type === 'chest_wood' || k.type === 'chest_red' || k.type === 'chest_gold' || k.type === 'chest_new') n++;
       this.lateLevels = 0;
       for (let i = 0; i < n; i++) { this.xp += this.xpNext * 0.5; while (this.xp >= this.xpNext) { this.xp -= this.xpNext; this.level++; this.lateLevels++; this.xpNext = C.xpToNext(this.level, this.stageId); } }
     }
@@ -992,7 +992,7 @@
     /** A chest: a Lord's or boss's holds 3 pieces to pick from, a champion's 2 (Uncommon at least, Rare from Torment Level 10),
      *  the Strange Pendulum's 1 piece you have never found. */
     openLoot(kind) {
-      const boss = kind === 'chest_gold', fresh = kind === 'chest_new', tl = this.tormentLevel(), T = C.LOOT_TIERS;
+      const boss = kind === 'chest_gold', fresh = kind === 'chest_new', wood = kind === 'chest_wood', tl = this.tormentLevel(), T = C.LOOT_TIERS;
       const minR = kind === 'chest_red' ? (tl >= 10 ? 2 : 1) : 0, n = (boss ? 3 : fresh ? 1 : 2) + (fresh ? 0 : this.trib.loot || 0); // the tribute of the Relic: one more to choose from
       const score = tl + Math.floor(this.stage.index / 2) + (boss && tl > 0 ? 5 : 0), top = boss ? 5 : 4; // Torment Level (TR + AR) drives rarity: without Agony / Torment chests hold mostly Common pieces
       const s = DH.save.data, unseen = E.gearOrder.filter((t) => !s.discovered[t]);
@@ -1001,6 +1001,7 @@
         let r = Math.max(minR, DH.meta.rollItemRarity(score, boss));
         // Torment tiers: at 11 (champion chests) / 16 (Lord chests) the top rarity can appear, at 25 every chest holds it
         if (tl >= T.all || (tl >= (boss ? T.lord : T.champion) && Math.random() < 0.25 + 0.05 * (tl - (boss ? T.lord : T.champion)))) r = top;
+        if (wood) r = 0; // the plainest chest: Common only
         let type = fresh && unseen.length ? U.pick(unseen) : DH.meta.rollItemType(this.runGear);
         for (let k = 0; k < 6 && types.has(type); k++) type = DH.meta.rollItemType(this.runGear);
         types.add(type); items.push({ type, rarity: r, level: 1 });
@@ -1009,7 +1010,7 @@
       this.gold += g;
       // Ivory Dice: the chest chooses for you
       const auto = this.fx_ && this.fx_.ivoryDice ? U.pick(items) : null;
-      const d = { items: auto ? [auto] : items, gold: g, boss, fresh, auto: !!auto, kind };
+      const d = { items: auto ? [auto] : items, gold: g, boss, fresh, wood, auto: !!auto, kind };
       if (auto) d.result = this.takeLoot(auto);
       this.lastLoot = d;
       return d;

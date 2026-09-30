@@ -230,7 +230,7 @@
       h('div.sb-art', h('i.sb-ray'), A.img(icon)), h('div.sb-t', t('startBonus.' + kind)));
     let m = null;
     const draw = () => m && m.set(h('div',
-      h('div.sb-row', card('chest', 'c_red'), card('ability', 'tome')),
+      h('div.sb-row', card('chest', 'c_wood'), card('ability', 'tome')),
       h('div.center.small.muted', { style: { margin: '8px 0' } }, t('startBonus.sub')),
       h('button.btn.red.block.shine', { onclick: async () => {
         if (busy) return; busy = true; click();
@@ -254,7 +254,7 @@
     };
     // the X refuses the pieces: half a level of experience instead (not when Ivory Dice already chose)
     const refuse = d.auto ? null : () => { click(); run.takeLootXp(); DH.audio.play('levelup'); ui.toast(t('loot.xpTaken', { v: Math.round(C.LOOT_XP * 100) }), 'good'); done(lm); };
-    const lm = ui.modal({ title: d.fresh ? t('loot.pendulum') : d.boss ? t('loot.boss') : t('loot.champion'), rays: true, closable: false, onX: refuse, cls: 'levelup', body: (m) => h('div',
+    const lm = ui.modal({ title: d.fresh ? t('loot.pendulum') : d.boss ? t('loot.boss') : d.wood ? t('chest.wood') : t('loot.champion'), rays: true, closable: false, onX: refuse, cls: 'levelup', body: (m) => h('div',
       h('div.center.small.muted', d.auto ? t('loot.ivory') : d.items.length > 1 ? t('loot.pick', { n: d.items.length }) : d.fresh ? t('loot.newItem') : ''),
       h('div', { style: { marginTop: '8px' } }, d.items.map((it, i) => {
         const L = gearLine(it);

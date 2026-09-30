@@ -83,6 +83,7 @@
     if (glow) { P.glow(g, 7, 5.2, 3, glow, 0.35); P.line(g, 1.4, 5.3, 12.6, 5.3, 0.25, G.rgba(glow, 0.8)); } // light leaking from under the lid
     if (runes) for (const [x, y] of [[4, 8.2], [10, 8.2], [7, 9.8]]) { P.circle(g, x, y, 0.5, G.rgba(glow, 0.9)); P.glow(g, x, y, 1.4, glow, 0.5); }
   }
+  def('chest_wood', { w: 14, h: 12, draw(g) { chest(g, '#6a4424', '#8a8478', null); } }); // the plainest chest: common pieces only
   def('chest_red', { w: 14, h: 12, draw(g) { chest(g, '#6a1420', '#c8ccd8', '#ff3040'); } });
   def('chest_gold', { w: 14, h: 12, draw(g) { P.glow(g, 7, 6, 8, '#ffd35a', 0.3); chest(g, '#4a2a14', '#ffd35a', '#ffe070'); } });
   def('chest', { w: 14, h: 12, draw(g) { chest(g, '#6a4222', '#7a808a', null); } });

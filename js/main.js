@@ -29,7 +29,7 @@
       DH.audio.music('battle'); DH.audio.ambience(s.selectedStage);
       setTimeout(() => ui.hud.banner(t('stage.' + s.selectedStage + '.name'), t('hud.survive', { t: DH.util.fmtTime(C.RUN_LENGTH) }), true), 300);
       const run = this.run; // the adventurer's reward: offered as the fight begins (not in the first, taught fight)
-      if (s.tutorialDone && s.stats.runs > 0) setTimeout(() => { if (this.run === run && run.state === 'playing' && run.time < 5) { run.queue.unshift({ state: 'startbonus', ev: 'run:startbonus' }); run.pump(); } }, 900);
+      if (s.tutorialDone && s.stats.runs > 0) setTimeout(() => { if (this.run === run && run.state === 'playing' && run.time < 5) { run.queue.unshift({ state: 'startbonus', ev: 'run:startbonus' }); run.pump(); } }, 2000);
     },
     pause() {
       const r = this.run; if (!r || r.state !== 'playing') return;
