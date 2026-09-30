@@ -905,11 +905,18 @@
     P.circle(g, 16, 16, 12.2, '#07050a'); P.circle(g, 16, 16, 11.6, P.rg(g, 16, 18.4, 13, [[0, sh(col, -0.15)], [0.6, sh(col, -0.6)], [1, '#07050a']]));
     g.strokeStyle = G.rgba(col, 0.5); g.lineWidth = 0.6; g.beginPath(); g.arc(16, 16, 11.4, 0, Math.PI * 2); g.stroke();
   }
+  const inMedal = (g, k, draw) => { g.save(); g.translate(16, 16); g.scale(k, k); g.translate(-16, -16); draw(); g.restore(); };
   const TRA = {
     // Blessings of the Shrine that have no trait of their own
     arcana: ['#7a3ab0', (g) => { GL.orb(g, '#c890ff'); for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; P.circle(g, 16 + Math.cos(a) * 9.5, 16 + Math.sin(a) * 9.5, 0.8, '#f0dcff'); } }],
     plunder: ['#8a2034', (g) => { g.save(); g.translate(16, 17); g.scale(0.72, 0.72); g.translate(-16, -16); GL.chest(g, '#8a2034'); g.restore(); }],
     scholar: ['#6a5020', (g) => { g.save(); g.translate(16, 16); g.scale(0.78, 0.78); g.translate(-16, -16); GL.scroll(g); g.restore(); }],
+    // the rest of the Shrine and the Archive: a glyph set into the same medal
+    greed:   ['#8a6a14', (g) => inMedal(g, 0.7, () => GL.coin(g))],
+    wisdom:  ['#2a4a8a', (g) => inMedal(g, 0.74, () => GL.book(g))],
+    revival: ['#8a7420', (g) => inMedal(g, 0.74, () => GL.ankh(g))],
+    fortune: ['#6a2a3a', (g) => inMedal(g, 0.72, () => GL.dice(g))],
+    legion:  ['#2a4a8a', (g) => inMedal(g, 0.8, () => GL.orbs(g))],
     strength: ['#c03020', (g) => {
       P.glow(g, 16, 14, 11, '#ff5030', 0.5);
       for (const [x, y] of [[8, 9], [24, 10], [9.4, 21]]) P.line(g, x, y, x + (16 - x) * 0.3, y + (16 - y) * 0.3, 0.8, 'rgba(255,150,110,0.7)');
@@ -2229,6 +2236,7 @@
       g.restore();
       if (def && def.hero) { P.circle(g, 26, 26, 4.2, INK); P.circle(g, 26, 26, 3.6, P.vol(g, 26, 26, 3.6, '#e8b840')); GL.starSmallAt(g, 26, 26); }
     }
+    else if (pre === 'bl' && TRA[id]) { medal(g, TRA[id][0], false); g.save(); g.beginPath(); g.arc(16, 16, 11.6, 0, Math.PI * 2); g.clip(); TRA[id][1](g); g.restore(); } // a Blessing or Archive medal: one plain frame for all
     else if (pre === 'tr' && TRA[id]) { medal(g, TRA[id][0], !!C.elevatedTraits[id]); g.save(); g.beginPath(); g.arc(16, 16, 11.6, 0, Math.PI * 2); g.clip(); TRA[id][1](g); g.restore(); }
     else if (pre === 'tr') { badge(g, C.elevatedTraits[id] ? '#b07020' : '#4a3a5a', true); const gl = GL[TRAIT_GLYPH[id]]; if (gl) { g.save(); g.translate(16, 16); g.scale(0.72, 0.72); g.translate(-16, -16); gl(g); g.restore(); } }
     else if (pre === 'g' && GEAR[id]) GEAR[id](g);

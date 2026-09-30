@@ -224,6 +224,10 @@
   }
 
   /* ================= SHRINE ================= */
+  /** The medal of a Blessing or an Archive upgrade: every one in the same plain frame, its glyph inside. */
+  const BLESS_GLYPH = { fistup: 'strength', heart: 'vitality', hide: 'thickhide', shield: 'parry', cross: 'metabolism', boot: 'swiftfeet', hourglass: 'quickhands', rings: 'reach',
+    magnet: 'magnetism', target: 'precision', i_gold: 'greed', t_wisdom: 'wisdom', i_revive: 'revival', i_reroll: 'fortune', orbs: 'legion' };
+  ui.blessIcon = (icon) => 'bl_' + (BLESS_GLYPH[icon] || (icon.startsWith('tr_') ? icon.slice(3) : 'strength'));
   ui.screens.shrine = {
     render() {
       const tab = ui.sub.shrine || 'bless', root = h('div');
@@ -244,7 +248,7 @@
         const def = E.shrine[id], lvl = M.shrineLevel(id), max = lvl >= def.max, cost = max ? 0 : E.shrineCost(id, lvl), open = M.shrineUnlocked(id);
         const pips = h('div.pips'); for (let i = 0; i < def.max; i++) pips.append(h('i' + (i < lvl ? '.on' : '')));
         grid.append(h('div.panel.shrine' + (open ? '' : '.sealed'),
-          A.img(def.icon.includes('_') ? def.icon : 'tr_' + ({ fistup: 'strength', heart: 'vitality', hide: 'thickhide', shield: 'parry', cross: 'metabolism', boot: 'swiftfeet', hourglass: 'quickhands', rings: 'reach', magnet: 'magnetism', target: 'precision' }[def.icon] || 'strength')),
+          A.img(ui.blessIcon(def.icon)),
           h('div.t', t('shrine.' + id)), pips,
           h('div.d', t('shrine.perLevel', { v: ui.fmtStats(def.per) }), h('br'), lvl ? h('span.good', t('shrine.total', { v: ui.fmtStats(def.per, lvl) })) : null),
           !open ? h('div.sealnote', A.img('u_lock'), ui.deedText(DH.deeds.byId[def.unlock]))
@@ -291,7 +295,7 @@
       E.archiveOrder.forEach((id) => {
         const def = E.archive[id], lvl = M.archiveLevel(id), max = lvl >= def.max, cost = max ? 0 : E.archiveCost(id, lvl);
         const pips = h('div.pips'); for (let i = 0; i < def.max; i++) pips.append(h('i' + (i < lvl ? '.on' : '')));
-        const ic = def.icon.includes('_') ? def.icon : def.icon === 'orbs' ? 'tr_multistrike' : 'tr_' + ({ fistup: 'strength', heart: 'vitality', hide: 'thickhide', shield: 'parry', hourglass: 'quickhands', rings: 'reach', target: 'precision' }[def.icon] || 'strength');
+        const ic = ui.blessIcon(def.icon);
         grid.append(h('div.panel.shrine.arch',
           A.img(ic), h('div.t', t('archive.' + id)), pips,
           h('div.d', t('shrine.perLevel', { v: ui.fmtStats(def.per) }), h('br'), lvl ? h('span.good', t('shrine.total', { v: ui.fmtStats(def.per, lvl) })) : null),
