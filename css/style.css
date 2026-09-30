@@ -514,6 +514,16 @@ img.ic { image-rendering: auto; }
 .pack-forge .pf-in { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 6px; font: 11px var(--num); min-height: 16px; }
 .pack-forge .pf-in span { display: inline-flex; align-items: center; gap: 2px; font: 12px var(--num); color: var(--text, #e8e0d0); }
 .pack-forge .pf-in img { width: 16px; height: 16px; }
+.sb-row { display: flex; gap: 12px; justify-content: center; margin-top: 6px; }
+.sb-card { flex: 1; max-width: 150px; background: linear-gradient(#26222a, #121014); border: 2px solid #3a3440; cursor: pointer; display: flex; flex-direction: column; transition: transform .12s; }
+.sb-card.on { border-color: var(--gold); box-shadow: 0 0 14px rgba(240,200,96,.45); transform: translateY(-2px); }
+.sb-art { position: relative; height: 128px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 78%, rgba(255,200,80,.5) 0, rgba(255,190,60,.12) 30%, transparent 55%), radial-gradient(circle at 50% 50%, #2e2a30 0, #16141a 70%); }
+.sb-ray { position: absolute; left: 50%; top: 0; width: 8px; height: 62%; margin-left: -4px; background: linear-gradient(rgba(255,210,90,0), rgba(255,210,90,.75)); filter: blur(2px); }
+.sb-art img { position: relative; width: 72px; height: 72px; animation: sbFloat 2.4s ease-in-out infinite; filter: drop-shadow(0 0 6px rgba(255,200,80,.55)); }
+.sb-card:not(.on) .sb-art img { filter: grayscale(.4) brightness(.8); }
+.sb-t { padding: 8px 4px; text-align: center; font-weight: 800; font-size: 14px; background: rgba(0,0,0,.55); color: #f0e8d8; }
+@keyframes sbFloat { 0%, 100% { transform: translateY(-3px); } 50% { transform: translateY(3px); } }
 .mini-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 8px; padding: 6px 0; }
 .mini-chips span { display: inline-flex; align-items: center; gap: 2px; font: 13px var(--num); }
 .mini-chips img { width: 26px; height: 26px; }

@@ -867,6 +867,12 @@
       });
       if (c) { this.drop('xp', cx / c, cy / c, sum, null, true); this.pickups[this.pickups.length - 1].xm = 1; } // the cluster holds worth already multiplied
     }
+    /** The adventurer's reward, taken as the fight begins (for a rewarded ad): an item chest or an ability scroll,
+     *  laid at the hero's feet so it opens as any found one does. */
+    takeStartBonus(kind) {
+      if (this.startBonus) return; this.startBonus = kind;
+      const p = this.player; this.drop(kind === 'chest' ? 'chest_red' : 'tome', p.x, p.y);
+    }
     /** Forging materials: n pieces, each the hall's metal (or one finer or coarser). */
     matDrop(x, y, n) { for (let i = 0; i < n; i++) this.drop('mat', x + U.rand(-8, 8), y + U.rand(-5, 5), 1, E.rollMat(this.stageId, this.dread)); }
     drop(type, x, y, val, sub, cluster) {
