@@ -171,7 +171,7 @@
     hands: [['addBase', 1], ['block', 0.6], ['as', 0.02], ['critBonus', 0.05]],
     head:  [['growth', 0.04], ['effectPct', 0.03], ['tomeDrop', 0.04], ['area', 0.03]],
     neck:  [['dmgPct', 0.025], ['maxHpPct', 0.03], ['greed', 0.04], ['as', 0.02]],
-    ring:  [['critPct', 0.02], ['greed', 0.04], ['critBonus', 0.05], ['growth', 0.03]],
+    ring:  [['growth', 0.03], ['as', 0.02], ['critPct', 0.02], ['greed', 0.04]],
   };
   /** The stats an item type gains at its milestones, in order: [{ lv, k, v }] (v before the rarity). */
   E.gearMilestoneDefs = (type) => E.SLOT_MILESTONES[E.gear[type].slot].map(([k, v], i) => ({ lv: E.GEAR_MILESTONES[i], k, v }));
