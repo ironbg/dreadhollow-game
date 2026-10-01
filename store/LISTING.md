@@ -122,3 +122,20 @@ game's own; Google converts them to other currencies (you may round them per cou
 
 "Repeatable" products are consumed by the game after delivery, so they can be bought again; "once" products stay owned
 (and come back with *Restore purchases*). In the Play Console all of them are ordinary one-time products.
+
+### Product descriptions (Play Console: each product → Manage translations)
+
+| Product ID | Description (EN) | Описание (BG) |
+|---|---|---|
+| gems_1 | 80 gems | 80 диаманта |
+| gems_2 | 450 gems (+10% bonus) | 450 диаманта (+10% бонус) |
+| gems_3 | 1,000 gems (+20% bonus) | 1000 диаманта (+20% бонус) |
+| gems_4 | 2,200 gems (+30% bonus) | 2200 диаманта (+30% бонус) |
+| gems_5 | 6,000 gems (+50% bonus) | 6000 диаманта (+50% бонус) |
+| gems_6 | 13,500 gems (+70% bonus) | 13 500 диаманта (+70% бонус) |
+| starter | 300 gems, 10,000 gold, an epic item, 30 torches and forging metals. Once per account. | 300 диаманта, 10 000 злато, епичен предмет, 30 факли и метали за ковачницата. Веднъж на акаунт. |
+| noads | Removes ads between fights; rewarded videos give their reward without an ad. | Премахва рекламите между битките; наградите за видео се дават без реклама. |
+| soulcard | 300 gems now, then 100 gems, 10 torches and 5 iron every day for 30 days. | 300 диаманта веднага, после 100 диаманта, 10 факли и 5 желязо всеки ден за 30 дни. |
+| pass | Unlocks the premium rewards of the current season pass. | Отключва премиум наградите на текущия сезонен пропуск. |
+| reaper | Unlocks the Reaper hero, plus 500 gems and a Gold Chest. Once per account. | Отключва героя Жътвар, плюс 500 диаманта и Златен сандък. Веднъж на акаунт. |
+| legend | 2,500 gems, a legendary item, a Gold Chest, 50,000 gold and rare metals. Once per account. | 2500 диаманта, легендарен предмет, Златен сандък, 50 000 злато и редки метали. Веднъж на акаунт. |
