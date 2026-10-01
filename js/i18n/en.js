@@ -216,7 +216,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'ad.notConfirmed': 'The ad could not be confirmed, so it gives no reward. Try again in a moment.',
   'iap.pending': 'Your payment is being processed. The purchase arrives as soon as it clears.', 'iap.failed': 'The store could not complete the purchase. Nothing was charged.',
   'cloud.err.no-google': 'There is no Google account on this phone. Add one in the phone\'s Settings → Accounts, or sign in with email.',
-  'cloud.err.google-failed': 'Google sign-in did not work. Try again in a moment, or sign in with email.',
+  'cloud.err.detail': 'Google\'s answer (for support): {d}', 'cloud.err.google-failed': 'Google sign-in did not work. Try again in a moment, or sign in with email.',
   'shop.ratesTypeTitle': 'Which relic', 'shop.ratesType': 'The rarity is drawn first, then the relic ({n} kinds). A kind you have found but are not wearing is 6 times as likely as one you are wearing; a kind you have not found yet is 1.5 times as likely.',
   'shop.ratesOffersTitle': 'Offers and packs', 'shop.ratesOffers': 'A pack or daily deal that gives "a relic" of a stated rarity always gives that rarity; which relic it is, is drawn as above. A chest inside a pack opens with that chest\'s rates above.',
   'pass.premiumNote': 'Premium unlocks this season\'s premium rewards. A new season starts each month.',

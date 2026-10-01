@@ -209,7 +209,15 @@
 
   /* ---------------- Account + cloud save ---------------- */
   const cloudErrText = (code) => t(DH.i18n.has('cloud.err.' + code) ? 'cloud.err.' + code : 'cloud.err.network');
-  const cloudErr = (e) => ui.toast(cloudErrText(e && e.code), 'bad');
+  const cloudErr = (e) => {
+    if (!(e && e.detail)) return ui.toast(cloudErrText(e && e.code), 'bad');
+    // a failure only the phone can explain: keep it on screen with Google's own words, so the player can send them to us
+    DH.audio.play('error');
+    const m = ui.modal({ title: t('cloud.google'), closable: true,
+      body: h('div', h('div.center', { style: { lineHeight: '1.4' } }, cloudErrText(e.code)),
+        h('div.note', t('cloud.err.detail', { d: e.detail })),
+        h('div.btns', h('button.btn.gold', { onclick: () => m.close() }, t('common.ok')))) });
+  };
   ui.cloudErr = cloudErr;
   /** Run an account action with the buttons locked; errors become a toast. */
   const act = async (btns, fn) => {

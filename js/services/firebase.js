@@ -59,13 +59,22 @@
   const Native = () => DH.platform.plugin('FirebaseAuthentication');
   /** A Google credential: the native account picker in the app, a popup in the browser. */
   const googleCredential = async () => {
+    const why = (e) => String(((e && e.code) || '') + ' ' + ((e && e.message) || '')).trim();
     let r;
     try { r = await Native().signInWithGoogle({ skipNativeAuth: true }); } catch (e) {
-      const why = String((e && (e.code || '')) + ' ' + ((e && e.message) || ''));
-      if (/cancel/i.test(why)) throw fail('cancelled');
-      if (/no credential|no account|NoCredential/i.test(why)) throw fail('no-google'); // no Google account on this phone
-      console.warn('google sign-in', why);
-      throw fail('google-failed');
+      const w1 = why(e);
+      if (/cancel/i.test(w1)) throw fail('cancelled');
+      console.warn('google sign-in', w1);
+      // Google's newer account picker refuses on some phones, and its "no credentials" also stands for a setup it
+      // does not accept: try the older sign-in screen, whose numbered errors say what is wrong (10: an app
+      // fingerprint Google does not know). The player sees both answers, for support.
+      try { r = await Native().signInWithGoogle({ skipNativeAuth: true, useCredentialManager: false }); } catch (e2) {
+        const w2 = why(e2);
+        if (/cancel|^12501\b/i.test(w2)) throw fail('cancelled');
+        console.warn('google sign-in (classic)', w2);
+        const none = (w) => /no credential|no account/i.test(w); // both screens found no Google account on the phone
+        throw fail(none(w1) && none(w2) ? 'no-google' : 'google-failed', { detail: (w1 + ' / ' + w2).slice(0, 240) });
+      }
     }
     const idToken = r && r.credential && r.credential.idToken;
     if (!idToken) throw fail('cancelled');
