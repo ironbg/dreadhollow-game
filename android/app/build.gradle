@@ -5,11 +5,11 @@ apply plugin: 'com.android.application'
  * Signing: debug builds use debug.keystore in this folder (committed on purpose, so its SHA-1 stays the same and
  * Google sign-in works on test phones). Release builds use the upload key from the environment
  * (DH_KEYSTORE, DH_KEYSTORE_PASSWORD, DH_KEY_ALIAS, DH_KEY_PASSWORD), as the CI sets them from its secrets.
- * AdMob: DH_ADMOB_APP_ID, or Google's test app id when it is not set. */
+ * AdMob: the game's app id (not a secret), or DH_ADMOB_APP_ID when it is set. */
 def pkg = new groovy.json.JsonSlurper().parse(file('../../package.json'))
 def (vMaj, vMin, vPatch) = pkg.version.tokenize('.').collect { it as int }
 def env = { String k -> System.getenv(k) ?: (project.findProperty(k) ?: '') }
-def ADMOB_TEST_APP = 'ca-app-pub-3940256099942544~3347511713'
+def ADMOB_APP = 'ca-app-pub-7969730484316437~5500854592'
 
 android {
     namespace = "com.dreadhollow.game"
@@ -20,7 +20,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode vMaj * 1000000 + vMin * 1000 + vPatch
         versionName pkg.version
-        manifestPlaceholders = [admobAppId: env('DH_ADMOB_APP_ID') ?: ADMOB_TEST_APP]
+        manifestPlaceholders = [admobAppId: env('DH_ADMOB_APP_ID') ?: ADMOB_APP]
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

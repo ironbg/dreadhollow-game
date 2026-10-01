@@ -9,7 +9,7 @@
 #   ANDROID_KEYSTORE_PASSWORD its password                               │ release only
 #   ANDROID_KEY_ALIAS         the key's alias (e.g. upload)              │
 #   ANDROID_KEY_PASSWORD      the key's password (often the same)        │
-#   ADMOB_APP_ID              the AdMob app id (ca-app-pub-…~…)          ┘ without it: Google's test app id
+#   ADMOB_APP_ID              the AdMob app id (ca-app-pub-…~…)          ┘ without it: the game's own (android/app/build.gradle)
 name: Android app
 on:
   workflow_dispatch:
