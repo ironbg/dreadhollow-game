@@ -102,7 +102,7 @@ Dreadhollow е екшън RPG рогълайт в тъмно фентъзи, в 
 
 ## In-app products (Monetize with Play → Products → One-time products)
 
-Create each one with exactly this **Product ID** (the game looks them up by it), status **Active**. Prices are the
+Each product's icon (512 × 512 PNG) is in `products/`, named after its Product ID. Create each one with exactly this **Product ID** (the game looks them up by it), status **Active**. Prices are the
 game's own; Google converts them to other currencies (you may round them per country).
 
 | Product ID | Name (EN) | Name (BG) | Price (USD) | Kind in the game |
