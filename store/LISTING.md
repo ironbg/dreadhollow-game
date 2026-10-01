@@ -7,63 +7,87 @@ screenshots in `en/` and `bg/` (1080 × 1920).
 
 ## English (en-US)
 
-**App name** (max 30): `Dreadhollow: Horde Survival`
+**App name** (max 30): `Dreadhollow`
 
 **Short description** (max 80):
-`Survive dark halls against endless hordes. Build your hero and break the Lords.`
+`Dark fantasy roguelite action RPG: survive endless hordes and slay the bosses`
 
 **Full description** (max 4000):
 
 ```
-Descend into Dreadhollow, where the dead do not rest and the halls grow darker with every step.
+Dreadhollow is a dark fantasy roguelite action RPG about surviving endless hordes of monsters. Choose a hero, descend into cursed dungeon halls and grow strong enough to slay their bosses.
 
-Your hero fights on their own: you move, dodge and choose. Every level brings a new choice of traits and abilities, and every choice changes the fight. Survive ten minutes against an ever-growing horde, face the mid-boss, then break the Lord of the hall.
+Your hero attacks on their own: you move, dodge and choose. Every level up offers new skills and traits, so every run builds a different hero. Hold out against a horde that grows by the minute, defeat the mid-boss, then break the Lord of the hall. Short runs, deep builds and progress that stays with you.
 
-• 16 HEROES – Swordbearer, Ranger, Pyromancer, Stormwitch, Valkyrie, Skald and more, each with a signature weapon, strengths and class traits.
-• 40+ ABILITIES – flames, frost, lightning, summons and holy light, with game-changing upgrades at levels III and VI.
-• 7 HALLS, 28 BOSSES – from the Forsaken Crypt to the Sealed Reliquary, each with its own foes, hazards, rules and a hidden secret.
-• DEEP BUILDS – burn, spark, frost, decay and affliction; crits above 100%, multistrike, block and more.
-• RELICS AND THE FORGE – find, merge and level relics with iron, silver, gold and starsteel; every tenth level adds a new bonus.
-• BLESSINGS FOR EACH HERO – raise every hero's own Blessings at the Shrine and their own Archive with Lament Shards.
-• AGONY AND TORMENT – when a hall falls, raise the stakes for artifacts, rarer loot and Lament Shards.
-• 400+ DEEDS – permanent quests that unlock heroes, abilities and blessings.
-• DAILY TASKS AND ACTIVITY CHESTS, MONTHLY EVENTS AND A SEASON PASS – new rewards every day and every month.
+HEROES AND SKILLS
+• 16 heroes – Swordbearer, Ranger, Pyromancer, Stormwitch, Valkyrie, Skald, Reaper and more, each with a signature weapon and class traits.
+• 40+ skills – fire, frost, lightning, summons and holy light, with upgrades at levels III and VI that change how they work.
+• Deep builds – burn, spark, frost, decay and affliction; critical hits above 100%, multistrike, block and more.
+
+DUNGEONS AND BOSSES
+• 7 dungeon halls and 28 bosses – from the Forsaken Crypt to the Sealed Reliquary, each with its own monsters, traps, rules and a hidden secret.
+• Agony and Torment – once a hall falls, raise the difficulty for artifacts, rarer loot and Lament Shards.
+
+LOOT, GEAR AND UPGRADES
+• The Forge – find, merge and upgrade your gear with iron, silver, gold and starsteel; every tenth level adds a new bonus.
+• Blessings and the Archive – permanent upgrades for each hero.
+• 400+ deeds – quests that unlock new heroes, skills and blessings.
+• Daily missions with activity chests, monthly events, a season pass and leaderboards.
+
+PLAY YOUR WAY
+• Simple touch controls, made for quick sessions on your phone.
+• Play as a guest, or sign in with Google or email to keep your progress on every device.
 • Full English and Bulgarian.
 
-Short runs, lasting progress, and a dark hand-drawn world. Play as a guest, or sign in with Google or email to keep your progress on every device.
+If you enjoy roguelike games, bullet heaven survival and dark dungeon crawlers, the horde is waiting for you in Dreadhollow.
 
 An internet connection is needed for battles and rewards.
 ```
 
 ## Bulgarian (bg)
 
-**App name** (max 30): `Dreadhollow: Оцеляване`
+**App name** (max 30): `Dreadhollow`
 
 **Short description** (max 80):
-`Оцелей срещу безкрайни орди в мрачни зали. Изгради героя си, срази Владетелите.`
+`Рогълайт екшън RPG в тъмно фентъзи: оцелей срещу орди чудовища и срази босовете`
 
 **Full description** (max 4000):
 
 ```
-Слез в Dreadhollow, където мъртвите не почиват, а залите стават все по-тъмни с всяка стъпка.
+Dreadhollow е екшън RPG рогълайт в тъмно фентъзи, в който оцеляваш срещу безкрайни орди чудовища. Избери герой, слез в прокълнатите зали на подземието и стани достатъчно силен, за да сразиш босовете им.
 
-Героят ти се бие сам: ти се движиш, избягваш и избираш. Всяко ниво носи нов избор на черти и умения, а всеки избор променя битката. Оцелей десет минути срещу все по-голяма орда, изправи се срещу междинния бос, а после срази Владетеля на залата.
+Героят ти атакува сам: ти се движиш, избягваш и избираш. Всяко ново ниво носи избор на умения и черти, така че всяка битка изгражда различен герой. Удържи срещу орда, която расте с всяка минута, победи междинния бос и срази Владетеля на залата. Кратки битки, дълбоки билдове и напредък, който остава.
 
-• 16 ГЕРОЯ – Мечоносец, Следотърсач, Пиромант, Вещица на бурята, Валкирия, Скалд и още, всеки със свое оръжие, силни страни и класови черти.
-• 40+ УМЕНИЯ – огън, лед, мълнии, призовани съюзници и свята светлина, с подобрения, които променят играта, на ниво III и VI.
-• 7 ЗАЛИ, 28 БОСА – от Забравената крипта до Запечатания реликварий, всяка със свои врагове, капани, правила и скрита тайна.
-• ДЪЛБОКИ БИЛДОВЕ – горене, искри, лед, разложение и проклятие; критични удари над 100%, многократни удари, блок и още.
-• РЕЛИКВИ И КОВАЧНИЦА – намирай, сливай и вдигай реликвите си с желязо, сребро, злато и звездна стомана; всяко десето ниво добавя нов бонус.
-• БЛАГОСЛОВИИ ЗА ВСЕКИ ГЕРОЙ – всеки герой има свои Благословии в Светилището и свой Архив със Скръбни отломки.
-• АГОНИЯ И МЪЧЕНИЕ – щом една зала падне, вдигни залога за артефакти, по-редки предмети и Скръбни отломки.
-• 400+ ПОДВИГА – постоянни задачи, които отключват герои, умения и благословии.
-• ДНЕВНИ ЗАДАЧИ И СЪНДЪЦИ ЗА АКТИВНОСТ, МЕСЕЧНИ ЕВЕНТИ И СЕЗОНЕН ПРОПУСК – нови награди всеки ден и всеки месец.
+ГЕРОИ И УМЕНИЯ
+• 16 героя – Мечоносец, Следотърсач, Пиромант, Вещица на бурята, Валкирия, Скалд, Жътвар и още, всеки със свое оръжие и класови черти.
+• 40+ умения – огън, лед, мълнии, призовани съюзници и свята светлина, с подобрения на ниво III и VI, които променят как действат.
+• Дълбоки билдове – горене, искри, лед, разложение и проклятие; критични удари над 100%, многократни удари, блок и още.
+
+ПОДЗЕМИЯ И БОСОВЕ
+• 7 зали и 28 боса – от Забравената крипта до Запечатания реликварий, всяка със свои чудовища, капани, правила и скрита тайна.
+• Агония и Мъчение – щом една зала падне, вдигни трудността за артефакти, по-редки предмети и Скръбни отломки.
+
+ПРЕДМЕТИ, ЕКИПИРОВКА И ПОДОБРЕНИЯ
+• Ковачницата – намирай, сливай и подобрявай екипировката си с желязо, сребро, злато и звездна стомана; всяко десето ниво добавя нов бонус.
+• Благословии и Архив – постоянни подобрения за всеки герой.
+• 400+ подвига – задачи, които отключват нови герои, умения и благословии.
+• Дневни мисии със сандъци за активност, месечни евенти, сезонен пропуск и класации.
+
+ИГРАЙ ПО СВОЯ НАЧИН
+• Лесно управление с докосване, направено за кратки игри на телефона.
+• Играй като гост или влез с Google или имейл, за да пазиш прогреса си на всяко устройство.
 • Изцяло на български и английски.
 
-Кратки битки, траен напредък и мрачен рисуван свят. Играй като гост или влез с Google или имейл, за да пазиш прогреса си на всяко устройство.
+Ако обичаш roguelike игри, оцеляване срещу орди и мрачни подземия, ордата те чака в Dreadhollow.
 
 За битките и наградите е нужна връзка с интернет.
 ```
+
+## Search (ASO) notes
+
+- Google Play reads the name, the short description and the full description for search; there is no separate keyword field.
+- The words the texts carry on purpose: roguelite / roguelike, horde survival, action RPG, dark fantasy, dungeon, monsters, bosses, heroes, skills, gear, upgrades (BG: рогълайт, екшън RPG, оцеляване, орди, чудовища, подземие, босове, герои, умения, екипировка).
+- Each one appears two or three times in natural sentences. Google penalises lists of keywords, repeated words, "best", "#1", "free" and other rankings or price claims, so leave those out when editing.
 
 ## Other fields
 
