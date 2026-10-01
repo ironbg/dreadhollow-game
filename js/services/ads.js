@@ -35,19 +35,20 @@
     },
   };
 
-  /* AdMob in the Android app (@capacitor-community/admob). Test ads on test phones (the debug build) and whenever
-   * live.json has no ad units yet; the real units come from live.json "ads" (so they change without an update).
+  /* AdMob in the Android app (@capacitor-community/admob). Test ads on test phones (the debug build); the Play build
+   * shows the game's own ad units, or the ones in live.json "ads" when it names them (so they change without an update).
    * Before any ad the player is asked for consent where the law needs it (Google's consent form, set up in AdMob:
    * Privacy & messaging). Each rewarded ad carries the player's account id, so AdMob can tell the game's server
    * that the ad was really watched (server-side verification; the server pays only then, see functions/ads.js). */
   const TEST = { rewarded: 'ca-app-pub-3940256099942544/5224354917', interstitial: 'ca-app-pub-3940256099942544/1033173712' };
+  const UNITS = { rewarded: 'ca-app-pub-7969730484316437/3856600431', interstitial: 'ca-app-pub-7969730484316437/8362735935' };
   const AdMobProvider = {
     name: 'admob',
     plugin: () => DH.platform.plugin('AdMob'),
     testing: () => DH.BUILD !== 'release',
     unit(kind) {
       const cfg = (DH.live && DH.live.config && DH.live.config.ads) || {};
-      return (!this.testing() && cfg[kind]) || TEST[kind];
+      return this.testing() ? TEST[kind] : (cfg[kind] || UNITS[kind]);
     },
     /** Consent first (GDPR/UK: Google's form), then the SDK; once per launch, retried if it failed. */
     init() {
