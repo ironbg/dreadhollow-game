@@ -23,10 +23,11 @@ Your hero fights on their own: you move, dodge and choose. Every level brings a 
 • 40+ ABILITIES – flames, frost, lightning, summons and holy light, with game-changing upgrades at levels III and VI.
 • 7 HALLS, 28 BOSSES – from the Forsaken Crypt to the Sealed Reliquary, each with its own foes, hazards, rules and a hidden secret.
 • DEEP BUILDS – burn, spark, frost, decay and affliction; crits above 100%, multistrike, block and more.
-• RELICS AND MARKS – find, level, merge and send your best items up the Well.
+• RELICS AND THE FORGE – find, merge and level relics with iron, silver, gold and starsteel; every tenth level adds a new bonus.
+• BLESSINGS FOR EACH HERO – raise every hero's own Blessings at the Shrine and their own Archive with Lament Shards.
 • AGONY AND TORMENT – when a hall falls, raise the stakes for artifacts, rarer loot and Lament Shards.
 • 400+ DEEDS – permanent quests that unlock heroes, abilities and blessings.
-• MONTHLY EVENTS AND SEASON PASS – new rewards every month.
+• DAILY TASKS AND ACTIVITY CHESTS, MONTHLY EVENTS AND A SEASON PASS – new rewards every day and every month.
 • Full English and Bulgarian.
 
 Short runs, lasting progress, and a dark hand-drawn world. Play as a guest, or sign in with Google or email to keep your progress on every device.
@@ -52,10 +53,11 @@ An internet connection is needed for battles and rewards.
 • 40+ УМЕНИЯ – огън, лед, мълнии, призовани съюзници и свята светлина, с подобрения, които променят играта, на ниво III и VI.
 • 7 ЗАЛИ, 28 БОСА – от Забравената крипта до Запечатания реликварий, всяка със свои врагове, капани, правила и скрита тайна.
 • ДЪЛБОКИ БИЛДОВЕ – горене, искри, лед, разложение и проклятие; критични удари над 100%, многократни удари, блок и още.
-• РЕЛИКВИ И ЗНАЦИ – намирай, усилвай, сливай и изпращай най-добрите си предмети нагоре по Кладенеца.
+• РЕЛИКВИ И КОВАЧНИЦА – намирай, сливай и вдигай реликвите си с желязо, сребро, злато и звездна стомана; всяко десето ниво добавя нов бонус.
+• БЛАГОСЛОВИИ ЗА ВСЕКИ ГЕРОЙ – всеки герой има свои Благословии в Светилището и свой Архив със Скръбни отломки.
 • АГОНИЯ И МЪЧЕНИЕ – щом една зала падне, вдигни залога за артефакти, по-редки предмети и Скръбни отломки.
 • 400+ ПОДВИГА – постоянни задачи, които отключват герои, умения и благословии.
-• МЕСЕЧНИ ЕВЕНТИ И СЕЗОНЕН ПРОПУСК – нови награди всеки месец.
+• ДНЕВНИ ЗАДАЧИ И СЪНДЪЦИ ЗА АКТИВНОСТ, МЕСЕЧНИ ЕВЕНТИ И СЕЗОНЕН ПРОПУСК – нови награди всеки ден и всеки месец.
 • Изцяло на български и английски.
 
 Кратки битки, траен напредък и мрачен рисуван свят. Играй като гост или влез с Google или имейл, за да пазиш прогреса си на всяко устройство.
@@ -68,7 +70,7 @@ An internet connection is needed for battles and rewards.
 | Field | Value |
 |---|---|
 | App category | Games → Action |
-| Tags | Action, Roguelike, Survival, Fantasy, Dark (pick up to 5 from Google's list) |
+| Tags | Action RPG, Survival, Action, Dungeon RPG, Action-adventure (Google's list has no Roguelike; not Hack and slash, which it files under Platformers) |
 | Email | dreadhollow.support@gmail.com |
 | Website | https://dreadhollow-b49c7.web.app/ |
 | Privacy policy | https://dreadhollow-b49c7.web.app/legal.html?doc=privacy&lang=en |
