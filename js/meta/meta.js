@@ -210,7 +210,9 @@
   };
 
   /* ---------------- Heroes ---------------- */
-  meta.heroOwned = (id) => { const h = C.heroes[id]; return !!S().heroes[id] || !!h.unlock.free || (h.unlock.deed && meta.deedDone(h.unlock.deed)); };
+  /** A quest finished before the unlock rules changed (it keeps what it unlocked then). */
+  const doneBefore = (id) => { const at = id && S().deeds[id]; return !!at && at < C.UNLOCK_RULES_CHANGED; };
+  meta.heroOwned = (id) => { const h = C.heroes[id]; return !!S().heroes[id] || !!h.unlock.free || (h.unlock.deed && meta.deedDone(h.unlock.deed)) || doneBefore(h.unlock.was); };
   meta.unlockHero = (id) => {
     const h = C.heroes[id], s = S();
     if (meta.heroOwned(id)) { s.heroes[id] = true; return true; }
@@ -428,7 +430,7 @@
   };
 
   /* ---------------- Abilities ---------------- */
-  meta.abilityUnlocked = (id) => { const d = C.lockedAbilities[id]; return !d || meta.deedDone(d); };
+  meta.abilityUnlocked = (id) => { const d = C.lockedAbilities[id]; return !d || meta.deedDone(d) || doneBefore(C.lockedAbilitiesWas[id]); };
   meta.abilityTraitUnlocked = (ab, idx) => idx < 2 || meta.deedDone('d_ab_' + ab + '_' + (idx - 1));
 
   /* ---------------- Deeds ---------------- */
@@ -448,7 +450,7 @@
     const yes = (b) => ({ v: b ? 1 : 0, n: 1 });
     let o;
     switch (c.type) {
-      case 'survive': case 'adept': case 'heathen': case 'direct': o = { v: R.time, n: c.t * k, time: true }; break;
+      case 'survive': case 'adept': case 'heathen': case 'direct': if (c.agony) here = here && R.agonyOn; o = { v: R.time, n: c.t * k, time: true }; break;
       case 'win': case 'heroWin': o = yes(R.state === 'victory'); break;
       case 'agony': case 'mark': here = here && R.agonyOn; o = { v: Math.floor(R.maxAgony + 1e-6), n: c.a }; break;
       case 'killsRun': o = { v: R.kills, n: c.n }; break;
@@ -461,6 +463,7 @@
       case 'dmgRun': o = { v: R.dmgTags()[c.tag] || 0, n: c.n }; break;
       case 'abRun': here = R.abilities.some((a) => a.id === c.ab); o = { v: R.dmgByAb[c.ab] || 0, n: c.n }; break;
       case 'crits': o = { v: R.crits || 0, n: c.n }; break;
+      case 'plantsAtOnce': o = { v: R.maxPlants || 0, n: c.n }; break;
       case 'dmgStage': o = { v: dmgAll(), n: c.n }; break;
       case 'abilitiesBy': o = { v: R.abilities.length, n: c.n }; break;
       case 'shardsRun': o = { v: R.shards || 0, n: c.n }; break;
@@ -478,7 +481,7 @@
       if (s.deeds[d.id]) continue;
       const c = d.cond; let ok = false;
       switch (c.type) {
-        case 'survive': ok = r && r.stage === c.stage && r.time >= c.t * (r.runLength / C.RUN_LENGTH); break;
+        case 'survive': ok = r && r.stage === c.stage && r.time >= c.t * (r.runLength / C.RUN_LENGTH) && (!c.agony || !!r.agonyOn); break;
         case 'win': ok = r && r.victory && r.stage === c.stage; break;
         case 'agony': ok = r && r.victory && r.stage === c.stage && r.agony >= c.a; break;
         case 'killsRun': ok = r && r.kills >= c.n && (!c.stage || r.stage === c.stage); break;
@@ -494,6 +497,7 @@
         case 'dmgRun': ok = r && (r.dmgTags[c.tag] || 0) >= c.n; break;
         case 'abRun': ok = r && (r.dmgByAb[c.ab] || 0) >= c.n; break;
         case 'crits': ok = r && (r.crits || 0) >= c.n; break;
+        case 'plantsAtOnce': ok = r && (r.maxPlants || 0) >= c.n; break;
         case 'dmgStage': ok = r && r.stage === c.stage && Object.values(r.dmgByAb).reduce((a, b) => a + b, 0) >= c.n; break;
         case 'adept': { // survive with the main attack only: other abilities deal no damage
           if (!r || r.stage !== c.stage || r.time < c.t * (r.runLength / C.RUN_LENGTH)) break;
@@ -507,6 +511,7 @@
         case 'shardsRun': ok = r && r.stage === c.stage && (r.shards || 0) >= c.n; break;
         default: break;
       }
+      if (ok && c.hero && (!r || r.hero !== c.hero)) ok = false; // done in that hero's run only
       if (ok) { s.deeds[d.id] = U.now(); if (d.gold) s.gold += d.gold; done.push(d); }
     }
     if (done.length) changed();

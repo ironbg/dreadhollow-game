@@ -52,9 +52,13 @@
   [10, 100].forEach((n) => add('d_champions_' + n, 'general', { type: 'stat', stat: 'championKills', n }, { args: { n } }));
   [1, 10].forEach((n) => add('d_oozes_' + n, 'general', { type: 'stat', stat: 'oozes', n }, { args: { n } }));
   // damage of one kind in a single run (these unlock abilities, see C.lockedAbilities)
-  Object.entries(C.DMG_DEEDS).forEach(([tag, n]) => add('d_dmg_' + tag, 'general', { type: 'dmgRun', tag, n }, { args: { tag, n } }));
+  // each in the run of the hero who masters it (C.DMG_DEED_HERO)
+  Object.entries(C.DMG_DEEDS).forEach(([tag, n]) => { const hero = C.DMG_DEED_HERO[tag]; add('d_dmg_' + tag, 'general', { type: 'dmgRun', tag, n, hero }, { args: { tag, n, hero } }); });
   add('d_dmg_shieldbash', 'general', { type: 'abRun', ab: 'shieldbash', n: 30000 }, { args: { ab: 'shieldbash', n: 30000 } });
-  add('d_crits', 'general', { type: 'crits', n: 1500 }, { args: { n: 1500 } });
+  add('d_crits', 'general', { type: 'crits', n: 1500, hero: 'ranger' }, { args: { n: 1500, hero: 'ranger' } });
+  // the Oracle: hold out in the Halls of Discord, in Agony, until their Lord comes; the Crone's garden in full bloom
+  add('d_oracle', 'stage', { type: 'survive', stage: 'discord', t: 600, agony: true }, { args: { stage: 'discord' } });
+  add('d_plants', 'general', { type: 'plantsAtOnce', n: 10, hero: 'crone' }, { args: { n: 10, hero: 'crone' } });
   [4, 8].forEach((n) => add('d_dread_' + n, 'general', { type: 'dread', n }, { args: { n } }));
 
   DH.deeds = { list: D, byId: Object.fromEntries(D.map((d) => [d.id, d])), XP_PER_DEED: 0.003 }; // +0.3% XP per completed quest

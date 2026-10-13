@@ -340,7 +340,9 @@
     if (a.tag) a.tag = t('dmgtag.' + a.tag);
     if (a.n) a.n = U.fmt(a.n);
     const c = d.cond;
-    return t('deed.' + (c.type === 'stat' ? 'stat.' + c.stat : c.type === 'killsRun' && c.stage ? 'killsStage' : c.type), a);
+    const txt = t('deed.' + (c.type === 'stat' ? 'stat.' + c.stat : c.type === 'killsRun' && c.stage ? 'killsStage' : c.type === 'survive' && c.agony ? 'surviveAgony' : c.type), a);
+    // a quest bound to one hero names them (the hero quests already do)
+    return c.hero && !['heroLevel', 'heroWin', 'mark'].includes(c.type) ? t('deed.withHero', { text: txt, hero: a.hero }) : txt;
   };
   ui.deedReward = (d) => {
     const out = [t('deeds.xp')];

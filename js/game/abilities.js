@@ -196,7 +196,7 @@
     bogplants: { update(run, a, dt) {
       const p = run.player, s = a.s, mine = [];
       for (const al of run.allies) if (al.kind === 'plant' && al.a === a) mine.push(al);
-      a.nPlants = mine.length;
+      a.nPlants = mine.length; run.maxPlants = Math.max(run.maxPlants || 0, mine.length); // the Crone's quest
       if (run.hero.blessing) run.plantSlow = Math.max(0.72, 1 - 0.035 * mine.length); // Crone's Curse
       a.moved = (a.moved || 0) + (p.moving ? run.P.speed * dt : 0);
       a.t -= dt;

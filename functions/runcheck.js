@@ -43,6 +43,7 @@ function checkRun(sum, run, now, DH) {
   if (sum.rescued != null && (C.RESCUE || {})[run.stage] !== sum.rescued) return 'rescue';
   if (!(int(sum.lateLevels || 0) >= 0) || (sum.lateLevels || 0) > 300) return 'late-levels';
   if (!(int(sum.shards || 0) >= 0) || (sum.shards || 0) > 60) return 'shards';
+  if (!(int(sum.maxPlants || 0) >= 0) || (sum.maxPlants || 0) > 60) return 'plants';
   const herbs = sum.herbs || {};
   for (const k in herbs) if (!(E.herbs || []).concat('dust').includes(k) || !(int(herbs[k]) >= 0) || herbs[k] > 40) return 'herbs';
   const mats = sum.mats || {};

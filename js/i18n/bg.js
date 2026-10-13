@@ -381,7 +381,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'deeds.title': 'Подвизи {n}/{max}', 'deeds.bonus': '+{v}% опит от завършени подвизи', 'deeds.xp': '+0,3% опит', 'deeds.unlockHero': 'Отключва {name}',
   'deeds.unlockAbility': 'Отключва {name}', 'deeds.unlockPotion': 'Отключва {name}', 'deeds.unlockArtifact': 'Отключва {name}', 'deeds.unlockMark': 'Отключва Белег на {name}',
   'deeds.unlockTrait': 'Отключва черта: {name}', 'deeds.cat.stage': 'Зали', 'deeds.cat.hero': 'Герои', 'deeds.cat.ability': 'Умения', 'deeds.cat.general': 'Общи',
-  'deed.survive': 'Оцелей {t} мин в „{stage}“', 'deed.win': 'Премини „{stage}“', 'deed.agony': 'Премини „{stage}“ и достигни Агония {a}',
+  'deed.withHero': '{text} като {hero}', 'deed.surviveAgony': 'Оцелей в „{stage}“ на Агония, докато дойде Владетелят', 'deed.plantsAtOnce': 'Имай {n} растения едновременно', 'dmgtag.elemental': 'с огън, лед и мълнии', 'deed.survive': 'Оцелей {t} мин в „{stage}“', 'deed.win': 'Премини „{stage}“', 'deed.agony': 'Премини „{stage}“ и достигни Агония {a}',
   'deed.killsStage': 'Победи {n} врагове в една битка в „{stage}“', 'deed.killsRun': 'Победи {n} врагове в една битка', 'deed.boss': 'Победи: {boss}',
   'deed.heroLevel': 'Достигни ниво {n}, докато играеш като {hero}', 'deed.heroWin': 'Спечели битка, докато играеш като {hero}', 'deed.mark': 'Премини „{stage}“ на Агония {a}, докато играеш като {hero}',
   'deed.abDmg': 'Нанеси {n} щети с {ab}', 'deed.level': 'Достигни ниво {n} в една битка', 'deed.stat.tomes': 'Събери {n} Тайнствени тома',

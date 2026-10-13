@@ -381,7 +381,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'deeds.title': 'Deeds {n}/{max}', 'deeds.bonus': '+{v}% XP from completed deeds', 'deeds.xp': '+0.3% XP', 'deeds.unlockHero': 'Unlocks {name}',
   'deeds.unlockAbility': 'Unlocks {name}', 'deeds.unlockPotion': 'Unlocks {name}', 'deeds.unlockArtifact': 'Unlocks {name}', 'deeds.unlockMark': 'Unlocks the Mark of the {name}',
   'deeds.unlockTrait': 'Unlocks trait: {name}', 'deeds.cat.stage': 'Halls', 'deeds.cat.hero': 'Heroes', 'deeds.cat.ability': 'Abilities', 'deeds.cat.general': 'General',
-  'deed.survive': 'Survive {t} min in {stage}', 'deed.win': 'Clear {stage}', 'deed.agony': 'Clear {stage} after reaching Agony {a}',
+  'deed.withHero': '{text} as {hero}', 'deed.surviveAgony': 'Survive {stage} in Agony until its Lord appears', 'deed.plantsAtOnce': 'Have {n} plants at once', 'dmgtag.elemental': 'elemental (fire, ice, lightning)', 'deed.survive': 'Survive {t} min in {stage}', 'deed.win': 'Clear {stage}', 'deed.agony': 'Clear {stage} after reaching Agony {a}',
   'deed.killsStage': 'Defeat {n} foes in one run in {stage}', 'deed.killsRun': 'Defeat {n} foes in one run', 'deed.boss': 'Defeat {boss}',
   'deed.heroLevel': 'Reach level {n} with the {hero}', 'deed.heroWin': 'Win a run with the {hero}', 'deed.mark': 'Clear {stage} at Agony {a} with the {hero}',
   'deed.abDmg': 'Deal {n} damage with {ab}', 'deed.level': 'Reach level {n} in one run', 'deed.stat.tomes': 'Collect {n} Arcane Tomes',

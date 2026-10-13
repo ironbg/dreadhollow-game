@@ -1136,6 +1136,7 @@
         tags.forEach((tg) => add(tg, v));
         if (def) add(id === this.hero.weapon ? 'weapon' : 'abilities', v);
       }
+      out.elemental = (out.fire || 0) + (out.ice || 0) + (out.lightning || 0); // the Alchemist's quest
       return out;
     }
     summary() {
@@ -1144,7 +1145,7 @@
         victory: this.state === 'victory', agony: this.agonyOn ? Math.floor(this.maxAgony + 1e-6) : 0, agonyOn: this.agonyOn,
         dmgByAb: Object.assign({}, this.dmgByAb), wellSent: this.wellSent, wellExtra: this.wellExtra.slice(), herbs: Object.assign({}, this.herbs), mats: Object.assign({}, this.mats), dread: this.dread, tributes: this.tributes.slice(), rescued: this.rescued || null,
         potionsUsed: Object.assign({}, this.potionsUsed), lateLevels: this.lateLevels || 0, runLength: this.runLength, artifactsFound: this.artifactsFound.slice(),
-        shards: this.shards, hexed: this.hexed || !!this.dissoSolved || !!this.secretDone, secretT: this.secretT, elemApplied: !!this.elemApplied, abTimes: (this.abTimes || []).slice(), oozes: this.oozes, crits: this.crits || 0, dmgTags: this.dmgTags() };
+        shards: this.shards, hexed: this.hexed || !!this.dissoSolved || !!this.secretDone, secretT: this.secretT, elemApplied: !!this.elemApplied, abTimes: (this.abTimes || []).slice(), oozes: this.oozes, crits: this.crits || 0, maxPlants: this.maxPlants || 0, dmgTags: this.dmgTags() };
     }
   }
   Run.Grid = Grid;
