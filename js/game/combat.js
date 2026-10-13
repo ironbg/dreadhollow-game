@@ -51,7 +51,7 @@
       dmgPct: st.dmgPct || 0, addBase: st.addBase || 0,
       critPct: st.critPct || 0, addCrit: st.addCrit || 0, critBonus: st.critBonus || 0.5,
       as: st.as || 0, area: st.area || 0, duration: st.duration || 0, count: Math.floor(st.count || 0), pierce: Math.floor(st.pierce || 0),
-      ms: st.ms || 0, pickupR: 30 * (1 + (st.pickup || 0)), summonPct: st.summonPct || 0, summons: Math.floor(st.summons || 0),
+      ms: st.ms || 0, msProj: st.msProj || 0, pickupR: 30 * (1 + (st.pickup || 0)), summonPct: st.summonPct || 0, summons: Math.floor(st.summons || 0),
       burn: st.burn || 0, spark: st.spark || 0, frost: st.frost || 0, decay: st.decay || 0, fragile: st.fragile || 0, affliction: st.affliction || 0,
       tag, growth: 1 + (st.growth || 0), greed: (1 + (st.greed || 0)) * (1 + this.dread * DH.economy.DREAD.gold) * (1 + ((this.trib && this.trib.gold) || 0)),
       revives: st.revives || 0, rerolls: st.rerolls || 0, chestDrop: st.chestDrop || 0, tomeDrop: st.tomeDrop || 0,
@@ -99,7 +99,7 @@
       duration: (b.duration || 0) * (1 + P.duration + (m.duration || 0)),
       knock: (b.knock || 0) + (m.knock || 0),
       crit: (b.crit || 0) + (m.crit || 0) + (a.weapon && this.heroId === 'stormwitch' ? 0.01 * (this.level - 1) : 0),
-      ms: def.noMs ? 0 : P.ms + (m.ms || 0),
+      ms: def.noMs ? 0 : P.ms + (m.ms || 0) + (isProj ? P.msProj : 0), // Volley: Multistrike for projectile abilities
       chain: (b.chain || 0) + (m.chain || 0), fork: m.fork || 0, orbit: m.orbit || 0, stream: m.stream || 0, chainRift: m.chainRift || 0,
       blockDmg: (b.blockDmg || 0) + (m.blockDmg || 0), hpCost: b.hpCost || 0,
       // effect chances; Marks of Incineration / Sorcery / the Beast add to the main weapon only
@@ -340,7 +340,7 @@
         if (used >= allowed + sig) continue;
         C.abilities[a.id].traits.forEach((T, idx) => {
           const r = tr[idx] || 0;
-          if (r >= C.ABILITY_TRAIT_MAX + (sig ? 1 : 0)) return;
+          if (r >= (T.max || C.ABILITY_TRAIT_MAX) + (sig ? 1 : 0)) return;
           if (!this.hero.anyAbilityTrait && !DH.meta.abilityTraitUnlocked(a.id, idx)) return;
           out.push({ kind: 'ab', ab: a.id, idx, rank: r + 1, w: 1.2 });
         });

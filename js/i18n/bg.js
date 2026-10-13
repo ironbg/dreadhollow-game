@@ -323,7 +323,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'trait.volley': 'Залп', 'trait.summoner': 'Призовател', 'trait.afflictor': 'Мъчител', 'trait.elementalist': 'Елементалист',
 
   'stat.dmgPct': 'Щети', 'stat.maxHpPct': 'Макс. живот', 'stat.regen': 'Живот/сек', 'stat.defense': 'Защита', 'stat.block': 'Сила на блока', 'stat.speedPct': 'Скорост на движение',
-  'stat.as': 'Скорост на атака', 'stat.area': 'Обхват', 'stat.duration': 'Продължителност', 'stat.count': 'Снаряди', 'stat.pierce': 'Пробиване', 'stat.ms': 'Многоудар',
+  'stat.as': 'Скорост на атака', 'stat.area': 'Обхват', 'stat.duration': 'Продължителност', 'stat.count': 'Снаряди', 'stat.pierce': 'Пробиване', 'stat.msProj': 'Многоудар (снаряди)', 'stat.ms': 'Многоудар',
   'stat.pickup': 'Обхват за събиране', 'stat.critPct': 'Шанс за крит', 'stat.addCrit': 'Базов крит', 'stat.critBonus': 'Критични щети', 'stat.addBase': 'Базови щети',
   'stat.summonPct': 'Щети от призовани', 'stat.summons': 'Призовани', 'stat.burn': 'Шанс за Изгаряне', 'stat.spark': 'Шанс за Искра', 'stat.frost': 'Шанс за Замръзване',
   'stat.decay': 'Шанс за Разлагане', 'stat.fragile': 'Шанс за Крехкост', 'stat.affliction': 'Шанс за Страдание', 'stat.growth': 'Опит', 'stat.greed': 'Злато',

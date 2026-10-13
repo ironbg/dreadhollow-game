@@ -1104,6 +1104,14 @@
       for (const e of this.enemies) { if (e.dead || e.def.prop || e.under || (exclude && exclude.has(e))) continue; const d = U.dist2(x, y, e.x, e.y); if (d < bd) { bd = d; best = e; } }
       return best;
     }
+    /** A random foe in reach that is not in `taken` (a boss first, if `boss`); any foe in reach once all are taken. */
+    spreadTarget(maxD, taken, boss) {
+      const p = this.player, r2 = maxD * maxD;
+      if (boss) for (const b of this.bosses) if (!b.dead && !taken.has(b) && U.dist2(p.x, p.y, b.x, b.y) < r2) return b;
+      const c = [];
+      for (const e of this.enemies) if (!e.dead && !e.def.prop && !taken.has(e) && U.dist2(p.x, p.y, e.x, e.y) < r2) c.push(e);
+      return c.length ? U.pick(c) : this.randomTarget(maxD);
+    }
     randomTarget(maxD, x, y) {
       const p = this.player; x = x == null ? p.x : x; y = y == null ? p.y : y;
       for (const b of this.bosses) if (!b.dead && Math.random() < 0.45 && U.dist2(x, y, b.x, b.y) < maxD * maxD) return b;

@@ -283,8 +283,13 @@
     },
     skyfall: { fire(run, a) {
       const p = run.player, s = a.s;
-      for (let i = 0; i < 3 * s.count; i++) { // three meteors a cast, three more for every Amount past the first
-        const tg = run.randomTarget(220); const x = tg ? tg.x + U.rand(-8, 8) : p.x + U.rand(-120, 120), y = tg ? tg.y + U.rand(-8, 8) : p.y + U.rand(-90, 90), R = 30 * s.area;
+      // three meteors a cast and one more for every Amount past the first; each seeks a foe no other meteor of this
+      // cast (or of its Multistrike repeats, a moment later) has taken, and only the first leans toward a boss
+      const now = run.time; if (!a.mTaken || now - a.mAt > 0.6) { a.mTaken = new Set(); a.mAt = now; }
+      for (let i = 0; i < 2 + s.count; i++) {
+        const tg = run.spreadTarget(220, a.mTaken, i === 0 && a.mTaken.size === 0);
+        if (tg) a.mTaken.add(tg);
+        const x = tg ? tg.x + U.rand(-8, 8) : p.x + U.rand(-120, 120), y = tg ? tg.y + U.rand(-8, 8) : p.y + U.rand(-90, 90), R = 30 * s.area;
         run.fx.push({ k: 'meteor', x, y, R, life: 0.7, max: 0.7 }); run.castCircle(x, y, R, '#ff7a30');
         run.after(0.7, () => {
           run.hitCircle(x, y, R, a); run.fx.push({ k: 'explosion', x, y, R, life: 0.4, max: 0.4 }); run.burst(x, y, 14, ['#ff6a1a', '#ffd35a', '#7c1624'], 100); run.shake = Math.max(run.shake, 2.5); DH.audio.play('boom');
@@ -300,8 +305,8 @@
     golem: { update(run, a) { run.keepAllies('golem', a, a.s.count); } },
     phantom: { update(run, a) { run.keepAllies('phantom', a, a.s.count); a.pos = a.s.spiritorbs ? [] : null; } }, // lasting warriors, one per Amount (their orbs are listed afresh each frame)
     avalanche: { fire(run, a) {
-      // four waves of ice spikes run out along the diagonals; every Amount past the first adds four more between them
-      const p = run.player, s = a.s, n = 4 * s.count, hit = new Set(), x0 = p.x, y0 = p.y;
+      // four waves of ice spikes run out along the diagonals; every Amount past the first adds one more, evenly spread
+      const p = run.player, s = a.s, n = 3 + s.count, hit = new Set(), x0 = p.x, y0 = p.y;
       for (let i = 0; i < n; i++) {
         const ang = Math.PI / 4 + i * TAU / n;
         const R = 13 * Math.sqrt(s.area), step = 15 * Math.sqrt(s.area);

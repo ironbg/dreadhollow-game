@@ -323,7 +323,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'trait.volley': 'Volley', 'trait.summoner': 'Summoner', 'trait.afflictor': 'Afflictor', 'trait.elementalist': 'Elementalist',
 
   'stat.dmgPct': 'Damage', 'stat.maxHpPct': 'Max HP', 'stat.regen': 'HP Regen/s', 'stat.defense': 'Defense', 'stat.block': 'Block Strength', 'stat.speedPct': 'Move Speed',
-  'stat.as': 'Attack Speed', 'stat.area': 'Area', 'stat.duration': 'Duration', 'stat.count': 'Projectiles', 'stat.pierce': 'Pierce', 'stat.ms': 'Multistrike',
+  'stat.as': 'Attack Speed', 'stat.area': 'Area', 'stat.duration': 'Duration', 'stat.count': 'Projectiles', 'stat.pierce': 'Pierce', 'stat.msProj': 'Multistrike (projectiles)', 'stat.ms': 'Multistrike',
   'stat.pickup': 'Pickup Range', 'stat.critPct': 'Crit Chance', 'stat.addCrit': 'Base Crit Chance', 'stat.critBonus': 'Crit Damage', 'stat.addBase': 'Base Damage',
   'stat.summonPct': 'Summon Damage', 'stat.summons': 'Summons', 'stat.burn': 'Burn Chance', 'stat.spark': 'Spark Chance', 'stat.frost': 'Frost Chance',
   'stat.decay': 'Decay Chance', 'stat.fragile': 'Fragile Chance', 'stat.affliction': 'Affliction Chance', 'stat.growth': 'XP Gain', 'stat.greed': 'Gold Gain',

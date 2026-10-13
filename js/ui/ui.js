@@ -7,7 +7,7 @@
   const ui = { screen: 'home', sub: {}, screens: {} };
 
   /* ---------------- formatting ---------------- */
-  const PCT = {}; ['dmgPct', 'maxHpPct', 'speedPct', 'as', 'area', 'duration', 'ms', 'pickup', 'critPct', 'addCrit', 'critBonus', 'summonPct',
+  const PCT = {}; ['dmgPct', 'maxHpPct', 'speedPct', 'as', 'area', 'duration', 'ms', 'msProj', 'pickup', 'critPct', 'addCrit', 'critBonus', 'summonPct',
     'burn', 'spark', 'frost', 'decay', 'fragile', 'affliction', 'growth', 'greed', 'physPct', 'magicPct', 'firePct', 'lightningPct', 'icePct',
     'killAs', 'killAsMax', 'eliteHeal', 'killHealChance', 'killHeal', 'stillDmg', 'fireSpark', 'effectPct', 'wBurn', 'wSpark', 'wFrost', 'grenadePct', 'chestDrop', 'tomeDrop'].forEach((k) => { PCT[k] = 1; });
   const fmtStat1 = (k, v) => {
