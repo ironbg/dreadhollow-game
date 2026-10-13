@@ -6,7 +6,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
 
   'ad.label': 'РЕКЛАМА', 'ad.rewardIn': 'Награда след {s}', 'ad.closeIn': 'Затваряне след {s}', 'ad.rewardReady': 'Наградата е твоя!',
   'ad.demoTitle': 'Пропуск на мъчението — Сезон 1', 'ad.demoSub': 'Отключи Жътваря и легендарни реликви още днес!',
-  'ad.mockNote': 'Тестова реклама. Тук се включва истинска рекламна мрежа (AdMob, Unity Ads…).', 'ad.unavailable': 'В момента няма налична реклама',
+  'ad.mockNote': 'Тестова реклама. Тук се включва истинска рекламна мрежа (AdMob, Unity Ads…).', 'ad.loading': 'Зареждане на рекламата…', 'ad.unavailable': 'В момента няма налична реклама',
 
   'iap.confirmTitle': 'Потвърди покупката', 'iap.confirmBody': 'Да купиш ли {item} за {price}?',
   'iap.mockNote': 'ТЕСТОВ РЕЖИМ: не се таксуват истински пари. Свържи плащанията през Google Play / App Store, за да заработят наистина.',

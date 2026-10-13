@@ -408,7 +408,9 @@
               A.img(c.icon), got ? h('i.act-tick', A.img('u_check', 'ci')) : null, h('span.act-at', c.at));
           }))));
       box.append(h('h3.sect', t('quests.dailyTitle'), timer));
-      d.missions.forEach((m, i) => {
+      // ready to claim on top, then the ones under way, the claimed ones last (each keeps its index for the claim)
+      const rank = (m) => (m.claimed ? 2 : m.done ? 0 : 1);
+      d.missions.map((m, i) => [m, i]).sort((x, y) => rank(x[0]) - rank(y[0]) || x[1] - y[1]).forEach(([m, i]) => {
         const def = M.missionDef(m.id); if (!def) return;
         const n = m.id === 'survive' ? U.fmtTime(def.target) : def.target;
         const pv = m.id === 'survive' ? U.fmtTime(m.p) + ' / ' + U.fmtTime(def.target) : U.fmt(m.p) + ' / ' + U.fmt(def.target);
@@ -461,7 +463,9 @@
     },
     ach() {
       const box = h('div');
-      E.achievements.forEach((a) => {
+      // trophies ready to claim on top, the finished ones (every star taken) last
+      const rank = (a) => (M.achClaimable(a) ? 0 : M.achClaimed(a.id) >= a.tiers.length ? 2 : 1);
+      E.achievements.map((a, i) => [a, i]).sort((x, y) => rank(x[0]) - rank(y[0]) || x[1] - y[1]).forEach(([a]) => {
         const c = M.achClaimed(a.id), val = M.achValue(a), done = c >= a.tiers.length;
         const target = a.tiers[Math.min(c, a.tiers.length - 1)];
         const can = M.achClaimable(a);
@@ -482,11 +486,14 @@
   /** An activity chest: what it holds, and claim it once the day's points reach it. */
   function openActivity(i) {
     const c = E.ACTIVITY_CHESTS[i], ready = M.activityReady(i), got = M.activityOpened(i);
-    const m = ui.modal({ title: t('quests.chest', { n: c.at }), rays: ready, body: () => h('div',
+    // a chest that is ready opens however the window is left: the button, the X or a tap outside it
+    let taken = !ready || got;
+    const claim = async () => { if (taken) return; taken = true; const r = await ui.act('claimActivity', { i }); m.close(); if (r) ui.rewardPopup(t('quests.chest', { n: c.at }), r); ui.refresh(); };
+    const m = ui.modal({ title: t('quests.chest', { n: c.at }), rays: ready, onClose: () => { claim(); }, body: () => h('div',
       h('div.center', A.img(c.icon, 'bigicon')),
       h('div.reward-list', { style: { marginTop: '8px' } }, M.rewardPreview(c.reward).map((e) => h('div.reward', h('div.slot' + (e.rarity != null ? '.rar' + e.rarity : ''), A.img(e.icon)), h('div.n' + (ui.isWord(e.text) ? '.word' : ''), e.text)))),
       h('div.btns', got ? h('button.btn.ghost.off', A.img('u_check', 'ci'), t('nb.claimed'))
-        : ready ? h('button.btn.red.shine', { onclick: async () => { const r = await ui.act('claimActivity', { i }); m.close(); if (r) ui.rewardPopup(t('quests.chest', { n: c.at }), r); ui.refresh(); } }, t('common.claim'))
+        : ready ? h('button.btn.red.shine', { onclick: claim }, t('common.claim'))
         : h('button.btn.ghost.off', t('quests.needPts', { n: c.at - M.activityPts() })))) });
   }
   function missionIcon(id) {

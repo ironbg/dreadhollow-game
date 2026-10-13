@@ -30,6 +30,27 @@ value — that is the notan panel of `paintcheck`, and if the notan does not rea
 rendering will save the model. Then place the terminator as a shape (it bends with every plane
 on an organic form), then the core shadow, then occlusion, then halftones, then the accent.
 
+## Shift the hue, not only the value
+
+A shadow that is only the same colour made darker (`G.shade(col, -k)`) reads as dirt, or as a
+brightness slider: it is the commonest sign of flat, lifeless shading. Light changes hue as well
+as value:
+
+- **Shadows lean cool**: toward blue-violet, and lose a little saturation. A red cloak's shadow
+  goes toward wine-purple, not toward brown-black; bone's shadow toward grey-lilac, not mud.
+- **Lights lean warm**: toward yellow-orange, and gain a little saturation. Our key light is a
+  torch, so its lit planes are warm; a cold-lit hall (the catacombs) inverts this, and its
+  shadows lean warm against cool light.
+- **Reflected light and the accent are the exceptions**: bounce takes the colour of what it
+  bounced from (the floor, a glowing core), and an accent (eyes, a rune) keeps its own hue.
+
+`G.hueShade(col, k)` does this with the same amounts as `G.shade`: `G.hueShade(c, -0.3)` for a core
+shadow, `G.hueShade(c, 0.25)` for a lit plane. Use it for the shadow and light families of every new
+mass; keep `G.shade` for small steps inside one family (a crease in a lit plane), where a hue
+jump would look like a second material. Check on `sheet.png` that the shadow side still reads as
+the same material as the lit side; if it reads as a different cloth, the shift is too strong
+for that colour (dark, already-cool colours need less).
+
 ## Planes, not blends
 
 Value follows **orientation**, not distance. Give each plane one flat value by its angle to the

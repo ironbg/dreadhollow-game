@@ -6,7 +6,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
 
   'ad.label': 'AD', 'ad.rewardIn': 'Reward in {s} s', 'ad.closeIn': 'Close in {s} s', 'ad.rewardReady': 'Reward earned!',
   'ad.demoTitle': 'Torment Pass — Season 1', 'ad.demoSub': 'Unlock the Reaper and legendary relics today!',
-  'ad.mockNote': 'Test placeholder. A real ad network (AdMob, Unity Ads…) plugs in here.', 'ad.unavailable': 'No ad available right now',
+  'ad.mockNote': 'Test placeholder. A real ad network (AdMob, Unity Ads…) plugs in here.', 'ad.loading': 'Loading the ad…', 'ad.unavailable': 'No ad available right now',
 
   'iap.confirmTitle': 'Confirm purchase', 'iap.confirmBody': 'Buy {item} for {price}?',
   'iap.mockNote': 'TEST MODE: no real money is charged. Connect Google Play / App Store billing to go live.',

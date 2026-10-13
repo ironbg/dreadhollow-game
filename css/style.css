@@ -39,7 +39,7 @@
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--body); font-weight: 500; overflow: hidden; overscroll-behavior: none; touch-action: none; user-select: none; -webkit-user-select: none; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--body); font-weight: 500; overflow: hidden; overscroll-behavior: none; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 button { font-family: inherit; color: inherit; }
 img.px, .px { image-rendering: pixelated; image-rendering: crisp-edges; }
 .hidden { display: none !important; }
@@ -435,6 +435,9 @@ select { background: #1c1420; color: var(--text); border: 1px solid var(--line);
 .dmgrow b { font: 7px var(--num); width: 52px; text-align: right; }
 
 /* ad placeholder */
+.ad-wait { position: absolute; inset: 0; z-index: 95; background: rgba(5,3,8,.72); display: flex; align-items: center; justify-content: center; animation: fadein .25s; }
+.ad-wait-t { font-weight: 800; color: var(--text); letter-spacing: .03em; animation: adwait 1.2s ease-in-out infinite alternate; }
+@keyframes adwait { from { opacity: .45; } to { opacity: 1; } }
 .ad-layer { position: absolute; inset: 0; z-index: 90; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .ad-tag { position: absolute; top: calc(12px + var(--safe-t)); left: 12px; font: 8px var(--num); background: #ffd35a; color: #000; padding: 4px 6px; border-radius: 3px; }
 .ad-body { text-align: center; padding: 20px; max-width: 360px; }

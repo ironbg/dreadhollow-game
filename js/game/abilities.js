@@ -881,10 +881,11 @@
         this.grid.query(b.x, b.y, b.r + 12, tmp);
         for (const e of tmp) {
           if (e.dead) continue;
-          if (b.cdHit) { if (!this.canHit(e, 'pj' + (b.id || (b.id = Math.random())), b.cdHit)) continue; }
-          else if (b.hit.has(e)) continue;
+          if (!b.cdHit && b.hit.has(e)) continue;
           const rr = b.r + e.r;
           if (U.dist2(b.x, b.y, e.x, e.y) >= rr * rr) continue;
+          // a shot that strikes again and again (shards, confetti) starts its pause only on a real touch, not when it merely passes near
+          if (b.cdHit && !this.canHit(e, 'pj' + (b.id || (b.id = Math.random())), b.cdHit)) continue;
           if (!b.cdHit) b.hit.add(e);
           const sp = Math.hypot(b.vx, b.vy) || 1;
           if (b.k === 'fireball') { this.explode(b); remove = true; break; }

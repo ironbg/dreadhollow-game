@@ -68,15 +68,39 @@
     /** The player may change their ad choices at any time where the law asks for it (Settings). */
     privacyRequired() { return !!(this.consent && this.consent.privacyOptionsRequirementStatus === 'REQUIRED'); },
     async privacyOptions() { await this.plugin().showPrivacyOptionsForm(); },
+    /** Loads an ad ahead, so a tap shows it at once instead of waiting for it to download. */
+    prepare(kind) {
+      const A = this.plugin(), uid = (DH.cloud && DH.cloud.authUser && DH.cloud.authUser.uid) || null;
+      const p = kind === 'rewarded'
+        ? A.prepareRewardVideoAd(Object.assign({ adId: this.unit('rewarded'), isTesting: this.testing() }, uid ? { ssv: { userId: uid, customData: 'dh' } } : {}))
+        : A.prepareInterstitial({ adId: this.unit('interstitial'), isTesting: this.testing() });
+      const entry = { uid, unit: this.unit(kind), at: Date.now(), p: Promise.resolve(p).then(() => true, (e) => { console.warn('ad load', kind, e); return false; }) };
+      (this.loaded = this.loaded || {})[kind] = entry;
+      return entry.p;
+    },
+    async preload(kind) {
+      try { await this.init(); } catch (e) { return; }
+      // a rewarded ad carries the player's account: wait (a little) for the sign-in state to be known, so it fits the tap
+      for (let i = 0; i < 16 && kind === 'rewarded' && DH.cloud && !DH.cloud.authReady; i++) await new Promise((r) => setTimeout(r, 500));
+      if (this.consent && this.consent.canRequestAds === false) return;
+      const have = this.loaded && this.loaded[kind];
+      if (!have) this.prepare(kind);
+    },
     /** Resolves when the ad window closes: true if the reward was earned (rewarded) or the ad was seen. */
     async show(kind) {
       const A = this.plugin();
       await this.init();
       if (this.consent && this.consent.canRequestAds === false) return false;
-      const uid = DH.cloud && DH.cloud.authUser && DH.cloud.authUser.uid;
+      const uid = (DH.cloud && DH.cloud.authUser && DH.cloud.authUser.uid) || null;
       const rewarded = kind === 'rewarded';
-      if (rewarded) await A.prepareRewardVideoAd(Object.assign({ adId: this.unit('rewarded'), isTesting: this.testing() }, uid ? { ssv: { userId: uid, customData: 'dh' } } : {}));
-      else await A.prepareInterstitial({ adId: this.unit('interstitial'), isTesting: this.testing() });
+      // the ad loaded ahead, if it was loaded for this player and unit (a rewarded ad carries the player's id)
+      this.loaded = this.loaded || {};
+      const ahead = this.loaded[kind];
+      this.loaded[kind] = null;
+      let ok = !!ahead && ahead.uid === uid && ahead.unit === this.unit(kind) && Date.now() - ahead.at < 45 * 60000 && (await ahead.p); // a loaded ad keeps for an hour
+      if (!ok) { ok = await this.prepare(kind); this.loaded[kind] = null; }
+      if (!ok) throw new Error('no ad');
+      setTimeout(() => this.preload(kind), 2000); // the next one starts loading while this one plays
       DH.audio.stopMusic();
       const pre = rewarded ? 'onRewardedVideoAd' : 'interstitialAd';
       return new Promise((resolve) => {
@@ -103,9 +127,13 @@
       const S = DH.save.data;
       this.busy = true;
       let ok = true;
+      // the real ad may take a moment to arrive: a dim layer says so and stops a second tap
+      const wait = !S.purchases.noAds && this.provider.name !== 'mock' ? DH.util.h('div.ad-wait', DH.util.h('div.ad-wait-t', t('ad.loading'))) : null;
+      if (wait) document.getElementById('modals').appendChild(wait);
       try {
         if (!S.purchases.noAds) ok = await this.provider.show('rewarded', placement);
       } catch (e) { console.warn('ad failed', e); ok = false; }
+      if (wait) wait.remove();
       this.busy = false;
       if (ok) {
         S.stats.adsWatched++;
@@ -115,8 +143,15 @@
       DH.events.emit('adClosed');
       return ok;
     },
-    /** Ask for ad consent at launch (the app only), so the first ad does not wait for it. */
-    init() { if (this.provider.init) this.provider.init().catch((e) => console.warn('ads init', e)); },
+    /** Ask for ad consent at launch (the app only), so the first ad does not wait for it; then load one of each ahead. */
+    init() {
+      if (!this.provider.init) return;
+      this.provider.init().then(() => {
+        if (DH.save.data.purchases.noAds || !this.provider.preload) return;
+        this.provider.preload('rewarded');
+        setTimeout(() => this.provider.preload('interstitial'), 4000);
+      }).catch((e) => console.warn('ads init', e));
+    },
     privacyRequired() { return !!(this.provider.privacyRequired && this.provider.privacyRequired()); },
     privacyOptions() { return this.provider.privacyOptions ? this.provider.privacyOptions().catch((e) => console.warn(e)) : Promise.resolve(); },
     /** Interstitial shown between runs; skipped entirely with the No-Ads purchase. */

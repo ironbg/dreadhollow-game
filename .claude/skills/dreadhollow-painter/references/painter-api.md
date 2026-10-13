@@ -47,7 +47,7 @@ Creature helpers: `P.evil(g, x, y, r, col, rot)` a slanted glowing eye (no cute 
 `rag(g, x0, y0, x1, y1, n, drop, col)` a torn hem; `P.horn2(...)` a slender horn; `P.skull(g, x, y, r, bone, eye)`;
 `P.flame(...)`. Inside `paint_foes.js` only: `horn(g, x, y, mx, my, tx, ty, w, col)`, `icicle(g, x, y, tx, ty, w, col)`,
 `crystal(g, x, y, h, col)`, `coin(g, x, y, r, tilt)`, `barnacles`, `drips`, `cracks` (export one with `P.name = name` to
-reuse it elsewhere). `G.shade(col, k)` lightens (k > 0) or darkens (k < 0); `G.rgba(col, a)`.
+reuse it elsewhere). `G.shade(col, k)` lightens (k > 0) or darkens (k < 0); `G.hueShade(col, k)` does the same with a hue shift (shadows cool, lights warm: prefer it between the light and shadow families, see `light-and-tone.md`); `G.rgba(col, a)`.
 
 ## What the grading does to your colours
 

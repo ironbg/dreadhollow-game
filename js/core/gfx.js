@@ -21,6 +21,12 @@
     if (amt >= 0) return hex(r + (255 - r) * amt, g + (255 - g) * amt, b + (255 - b) * amt);
     return hex(r * (1 + amt), g * (1 + amt), b * (1 + amt));
   }
+  /** shade with a hue shift, as a painter's light falls: shadows (amt < 0) lean to a cool violet and lose a little
+   *  saturation, lights (amt > 0) lean to a warm yellow. The same amounts as shade(), so one can replace the other. */
+  function hueShade(c, amt) {
+    const base = shade(c, amt), k = Math.min(1, Math.abs(amt));
+    return amt < 0 ? mix(base, '#2c2450', k * 0.35) : mix(base, '#fff0b8', k * 0.3);
+  }
   function mix(a, b, t) { const A = rgb(a), B = rgb(b); return hex(A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t, A[2] + (B[2] - A[2]) * t); }
   function rgba(c, a) { const [r, g, b] = rgb(c); return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')'; }
 
@@ -29,7 +35,7 @@
   /* ---------------- sprite cache ---------------- */
   const gfx = {
     CPX: 2, // sprite / buffer pixels per world unit
-    rgb, hex, shade, mix, rgba, canvas,
+    rgb, hex, shade, hueShade, mix, rgba, canvas,
     cache: {},
     painters: {},      // name -> { w, h, frames, draw(g, frame, col), colors, cx, cy }
     variants: {},      // variant name -> colour overrides (semantic keys)
