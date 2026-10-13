@@ -118,6 +118,24 @@
     }
     return s;
   }
+  /** The lowest drawn row of a frame image (in its pixels): where the figure really stands. Painters leave room below
+   *  the feet (padding, a cape's swing), so the frame's bottom edge is not the ground line. */
+  const footCache = new WeakMap();
+  let footCv = null, footG = null; // one software canvas for the read-back, so the frames stay on the graphics card
+  function footRow(img) {
+    let r = footCache.get(img);
+    if (r == null) {
+      const w = img.width, h = img.height;
+      if (!footCv) { footCv = G.canvas(w, h); footG = footCv.getContext('2d', { willReadFrequently: true }); }
+      if (footCv.width < w || footCv.height < h) { footCv.width = Math.max(footCv.width, w); footCv.height = Math.max(footCv.height, h); }
+      footG.clearRect(0, 0, w, h); footG.drawImage(img, 0, 0);
+      const d = footG.getImageData(0, 0, w, h).data;
+      r = h;
+      for (let y = h - 1; y >= 0 && r === h; y--) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 60) { r = y + 1; break; }
+      footCache.set(img, r);
+    }
+    return r;
+  }
   /* Contact shadows: a soft blob (dense under the feet, fading out) pre-drawn at the exact pixel size it is shown at,
    * so each foe costs one unscaled image copy instead of a path fill, and the edge is soft instead of a hard ring. */
   const MAX_SHADOWS = 40;
@@ -185,14 +203,15 @@
       const s = G.sprite(name, variant), img = s.frames[frame % s.frames.length];
       const dx = e.x - best.x, dy = e.y - best.y, d = Math.sqrt(bd) || 1, dirX = dx / d, dirY = dy / d;
       const rg = best.range || 130, k = (best.cast || SHADOW_LIGHTS[best.kind]) * Math.min(1, 1.3 * (1 - d / rg)), len = Math.min(1.3, 0.6 + d / 90);
-      const w = s.w * scale, h = s.h * scale, top = e.y - s.oy * scale, feet = top + h - 1.5 * scale;
+      // anchored at the figure's real feet (its lowest drawn row), so the shadow starts under it whichever way it falls
+      const w = s.w * scale, h = s.h * scale, top = e.y - s.oy * scale, foot = footRow(img) / img.height * h, feet = top + foot;
       // project the sprite onto the floor: its "up" axis maps to the direction away from the light, flattened
       let sy = -dirY * len * 0.75; if (Math.abs(sy) < 0.38) sy = sy > 0 ? 0.38 : -0.38;
       g.save();
       g.globalAlpha = Math.min(0.7, 0.88 * k);
       g.translate(e.x - cx, feet - cy);
       g.transform(1, 0, -dirX * len, sy, 0, 0);
-      g.drawImage(silhouette(face < 0 ? G.flip(img) : img), -(face < 0 ? s.w - s.ox : s.ox) * scale, -(h - 1.5 * scale), w, h);
+      g.drawImage(silhouette(face < 0 ? G.flip(img) : img), -(face < 0 ? s.w - s.ox : s.ox) * scale, -foot, w, h);
       g.restore();
     }
     g.globalAlpha = 1;
