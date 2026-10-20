@@ -44,10 +44,16 @@ async function feedback(db, uid, token, d) {
   return { ok: true };
 }
 
-/** Is this caller an admin? Their verified email is in admin/access (read at most once a minute). */
+/** Is this caller an admin? Their proven email is in admin/access (read at most once a minute).
+ *  Proven = a verified email, OR a federated sign-in (Google/Apple) that owns the address — linking a
+ *  provider to a guest account can leave email_verified false on the token though Google proved the address.
+ *  An unverified email+password account claiming an admin's address is still turned away. */
 let adminList = null, adminAt = 0;
 async function isAdmin(db, token) {
-  if (!token || !token.email || token.email_verified === false) return false;
+  if (!token || !token.email) return false;
+  const ids = token.firebase && token.firebase.identities;
+  const federated = !!(ids && (ids['google.com'] || ids['apple.com']));
+  if (token.email_verified !== true && !federated) return false;
   if (!adminList || Date.now() - adminAt > 60e3) {
     const s = await db.collection('admin').doc('access').get();
     adminList = ((s.exists && s.data().emails) || []).map((e) => String(e).trim().toLowerCase());

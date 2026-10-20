@@ -81,7 +81,7 @@
     DH.admin.uid = u.uid;
     DH.server.call('adminCheck', {}).then((r) => {
       DH.admin.ok = !!(r && r.admin);
-      if (ADBG) ui.toast('admin: ' + (DH.admin.ok ? 'YES' : 'no') + ' · ' + u.email, DH.admin.ok ? 'good' : 'bad');
+      if (ADBG) ui.toast('admin: ' + (DH.admin.ok ? 'YES' : 'no') + ' · ' + u.email + ' · verified=' + (u.emailVerified ? 'yes' : 'no'), DH.admin.ok ? 'good' : 'bad');
       done && done();
     }).catch((e) => {
       DH.admin.uid = null;
