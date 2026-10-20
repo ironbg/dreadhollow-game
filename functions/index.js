@@ -5,6 +5,7 @@
  *   runEnd    a fight ends: its summary is checked against that (runcheck.js) and only then rewarded
  *   purchase  a Google Play purchase: checked with Google (play.js), delivered once
  *   adReward  AdMob's confirmation that a rewarded ad was watched (ads.js); actions paid by an ad take one
+ *   feedback  a player's message (Settings → Send feedback); adminCheck / adminStats  the developer's overview (insights.js)
  * Every write is a transaction on the player's document, so two devices can never double-spend. */
 'use strict';
 const { onCall, onRequest, HttpsError } = require('firebase-functions/v2/https');
@@ -16,6 +17,7 @@ const { boot, withProfile, freshProfile } = require('./engine');
 const { checkRun } = require('./runcheck');
 const play = require('./play');
 const ads = require('./ads');
+const insights = require('./insights');
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -106,6 +108,7 @@ exports.sync = callable(async (req) => {
     const r = await withProfile(from || freshProfile(cfg), cfg, (DH) => { DH.actions.overlayFree(DH.save.data, d.free); DH.meta.ensureDaily(); DH.meta.ensureSeason(); });
     return { profile: r.profile, extra: Object.assign(extra, { rate: rate(doc) }) };
   });
+  await insights.note(db, uid, d, null); // played today
   return { save: out.profile, rev: out.rev };
 });
 
@@ -184,6 +187,7 @@ exports.runEnd = callable(async (req) => {
     return { profile: r.profile, result: r.result, extra: { run: null, rate: rate(doc) } };
   });
   if (out.invalid) throw fail('invalid-run', out.invalid);
+  await insights.note(db, uid, d, d.summary || {}); // a fight played today
   if (!isGuest(req)) await sendBoards(uid, out.profile, cfg);
   return { save: out.profile, rev: out.rev, result: out.result };
 });
@@ -260,7 +264,23 @@ exports.wipe = callable(async (req) => {
   batch.delete(db.collection('players').doc(uid));
   batch.delete(db.collection('saves').doc(uid));
   await batch.commit();
+  await insights.forget(db, uid);
   return { ok: true };
+});
+
+/* ---------- a player's message to the developer (Settings → Send feedback) ---------- */
+exports.feedback = callable(async (req) => {
+  const uid = uidOf(req), r = await insights.feedback(db, uid, req.auth.token, req.data || {});
+  if (r.error) throw fail(r.error, r.error, r.error === 'too-many' ? 'resource-exhausted' : 'invalid-argument');
+  return r;
+});
+
+/* ---------- the developer's overview (Settings → Overview): only for emails listed in admin/access ---------- */
+exports.adminCheck = callable(async (req) => ({ admin: !!(req.auth && await insights.isAdmin(db, req.auth.token)) }));
+exports.adminStats = callable(async (req) => {
+  uidOf(req);
+  if (!(await insights.isAdmin(db, req.auth.token))) throw fail('not-admin', 'not an admin', 'permission-denied');
+  return insights.stats(db, admin.auth(), (req.data || {}).days);
 });
 
 // for tests

@@ -181,6 +181,8 @@
       h('div.setrow', h('label', t('settings.language')), langSel),
       h('div.col', { style: { marginTop: '14px' } },
         h('button.btn.small.gold.block', { onclick: () => { m.close(); ui.openProfile('account'); } }, t('profile.accountBtn')), // sign-in, linking, purchases and transfer live in the profile's Account tab
+        h('button.btn.small.green.block', { onclick: () => { click(); m.close(); ui.openFeedback(); } }, t('fb.title')),
+        DH.admin && DH.admin.ok ? h('button.btn.small.ghost.block', { onclick: () => { click(); m.close(); ui.openAdmin(); } }, t('adm.title')) : null,
         h('div.btns', h('button.btn.small.ghost', { onclick: () => ui.openLegal('terms') }, t('title.terms')), h('button.btn.small.ghost', { onclick: () => ui.openLegal('privacy') }, t('title.privacy'))),
         DH.ads.privacyRequired() ? h('button.btn.small.ghost.block', { onclick: () => DH.ads.privacyOptions() }, t('settings.adPrivacy')) : null,
         h('button.btn.small.red.block', { onclick: async () => {

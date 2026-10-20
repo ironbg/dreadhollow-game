@@ -1316,3 +1316,21 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .lbrow.me { background: rgba(120,200,110,.14); border-color: rgba(143,224,138,.55); }
 .lbgap { text-align: center; color: var(--muted); line-height: 1; }
 .lbnote { padding: 10px 0; }
+
+/* Send feedback, What's new, the developer's overview (js/ui/insights.js) */
+.fb-kinds { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.fb-text { width: 100%; box-sizing: border-box; resize: vertical; min-height: 110px; background: rgba(0,0,0,.45); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 14px; line-height: 1.4; user-select: text; -webkit-user-select: text; }
+.fb-text:focus { outline: none; border-color: var(--gold); }
+.fb-count { text-align: right; margin: 2px 0 10px; }
+.news-ver { margin-bottom: 10px; }
+.news-v { color: var(--gold); font-weight: 800; margin-bottom: 4px; }
+.news-list { margin: 0; padding-left: 18px; line-height: 1.45; font-size: 14px; }
+.news-list li { margin-bottom: 4px; }
+.adm-range { justify-content: flex-start; margin: 0 0 8px; }
+.adm-day { display: grid; grid-template-columns: 44px 1fr; gap: 2px 8px; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.adm-day > span { grid-column: 2; color: var(--muted); }
+.adm-bar { height: 8px; background: rgba(0,0,0,.4); border-radius: 4px; overflow: hidden; }
+.adm-bar i { display: block; height: 100%; background: linear-gradient(90deg, #6a4a20, var(--gold)); }
+.adm-row { padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.adm-who { font-weight: 800; word-break: break-all; }
+.adm-text { white-space: pre-wrap; line-height: 1.4; margin-top: 3px; user-select: text; -webkit-user-select: text; }

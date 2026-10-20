@@ -158,6 +158,7 @@
     DH.title.show(() => {
       const calendar = () => { ui.flushSeason(); if (M.loginPending()) setTimeout(() => ui.openLogin(), 500); };
       if (!DH.save.data.playerName) setTimeout(() => ui.openName(true, calendar), 700); else calendar();
+      ui.checkWhatsNew(); // after an update: what changed, once the menu is free
     });
     DH.events.on('live', () => { if (game.mode !== 'run') ui.refresh(); DH.cloud.submitBoards(); }); // an event started or ended: the home buttons follow
     // daily rollover while the app stays open

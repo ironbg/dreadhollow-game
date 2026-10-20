@@ -9,6 +9,6 @@
     address: { bg: '', en: '' },
     email: 'dreadhollow.support@gmail.com', // a support address players can write to about their account, purchases and personal data
     country: 'BG', // governing law and the data protection authority players can complain to
-    updated: '2026-09-29',
+    updated: '2026-10-20',
   };
 })(window.DH = window.DH || {});

@@ -117,9 +117,40 @@ const call = async (name, data, token) => { const r = await post(FN + name, { da
   assert.ok((await call('sync', { free: {}, v: V, p: 'web' }, token)).save);
   await db.collection('test').doc('live').delete();
 
+  // feedback: kept with its version; too short or too many refused
+  assert.strictEqual((await call('feedback', { text: 'a', v: V }, token)).error, 'too-short');
+  r = await call('feedback', { text: 'The boss in hall 2 is too strong', kind: 'balance', v: V, p: 'app', hero: 'knight', level: 12 }, token);
+  assert.ok(r.ok, 'feedback stored');
+  for (let i = 0; i < 5; i++) await call('feedback', { text: 'more ' + i, v: V }, token);
+  assert.strictEqual((await call('feedback', { text: 'one too many', v: V }, token)).error, 'too-many');
+  const fbs = await db.collection('feedback').where('uid', '==', uid).get();
+  assert.strictEqual(fbs.size, 6); assert.ok(fbs.docs.some((x) => x.data().kind === 'balance' && x.data().p === 'app'));
+  // activity: today's entry for this player, with the fights played
+  const today = new Date().toISOString().slice(0, 10);
+  const act = (await db.collection('activity').doc(today).get()).data().players[uid];
+  assert.ok(act && act.runs >= 1 && act.secs > 0, 'activity noted');
+  // the overview: refused to a guest and to an unlisted email, open to a listed one
+  assert.deepStrictEqual(await call('adminCheck', {}, token), { admin: false });
+  assert.strictEqual((await call('adminStats', {}, token)).error, 'not-admin');
+  await db.collection('admin').doc('access').set({ emails: ['Boss@Example.com'] });
+  const login = async (email) => {
+    const su2 = await post(AUTH + '/identitytoolkit.googleapis.com/v1/accounts:signUp?key=test', { email, password: 'secret12', returnSecureToken: true });
+    await admin.auth().updateUser(su2.json.localId, { emailVerified: true });
+    return (await post(AUTH + '/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=test', { email, password: 'secret12', returnSecureToken: true })).json.idToken;
+  };
+  const boss = await login('boss@example.com'), other = await login('other@example.com');
+  assert.deepStrictEqual(await call('adminCheck', {}, boss), { admin: true }, 'a listed email (any case)');
+  assert.deepStrictEqual(await call('adminCheck', {}, other), { admin: false }, 'an unlisted email');
+  assert.strictEqual((await call('adminStats', {}, other)).error, 'not-admin');
+  const st = await call('adminStats', { days: 7 }, boss);
+  assert.strictEqual(st.days.length, 7); assert.ok(st.days[6].players >= 1 && st.days[6].runs >= 1, 'today counted');
+  assert.ok(st.players.some((o) => o.uid === uid && o.runs >= 1), 'the player listed'); assert.ok(st.feedback.length >= 6 && st.feedback[0].text, 'messages listed');
+
   // deleting the account removes what the server holds
   r = await call('wipe', {}, token);
   assert.ok(r.ok); assert.ok(!(await db.collection('players').doc(uid).get()).exists);
+  assert.strictEqual((await db.collection('feedback').where('uid', '==', uid).get()).size, 0, 'messages deleted');
+  assert.ok(!((await db.collection('activity').doc(today).get()).data().players || {})[uid], 'activity deleted');
   console.log('emulator tests: all passed');
   process.exit(0);
 })().catch((e) => { console.error(e); process.exit(1); });
