@@ -62,6 +62,21 @@ async function isAdmin(db, token) {
   return adminList.includes(String(token.email).toLowerCase());
 }
 
+/** What the server actually sees, for diagnosing access (returns only the caller's own email + counts). */
+async function adminDebug(db, token) {
+  const s = await db.collection('admin').doc('access').get();
+  const emails = s.exists ? s.data().emails : null;
+  const list = Array.isArray(emails) ? emails.map((e) => String(e).trim().toLowerCase()) : null;
+  return {
+    exists: s.exists,
+    isArray: Array.isArray(emails),
+    count: list ? list.length : 0,
+    tokenEmail: token.email || null,
+    provider: (token.firebase && token.firebase.sign_in_provider) || null,
+    match: !!(list && token.email && list.includes(String(token.email).toLowerCase())),
+  };
+}
+
 /** The overview: players a day, who played and how much, and the latest messages. */
 async function stats(db, auth, days) {
   days = Math.max(1, Math.min(KEEP_DAYS, Math.floor(+days || 21)));
@@ -103,4 +118,4 @@ async function forget(db, uid) {
   await batch.commit();
 }
 
-module.exports = { note, feedback, isAdmin, stats, forget, dayKey, FEEDBACK_KINDS };
+module.exports = { note, feedback, isAdmin, adminDebug, stats, forget, dayKey, FEEDBACK_KINDS };

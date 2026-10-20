@@ -79,9 +79,9 @@
     if (!u || !u.email) { DH.admin.ok = false; DH.admin.uid = null; if (ADBG) ui.toast('admin: not signed in', 'bad'); done && done(); return; }
     if (!force && DH.admin.uid === u.uid && DH.admin.ok) { done && done(); return; }
     DH.admin.uid = u.uid;
-    DH.server.call('adminCheck', {}).then((r) => {
+    DH.server.call('adminCheck', ADBG ? { dbg: 1 } : {}).then((r) => {
       DH.admin.ok = !!(r && r.admin);
-      if (ADBG) ui.toast('admin: ' + (DH.admin.ok ? 'YES' : 'no') + ' · ' + u.email + ' · verified=' + (u.emailVerified ? 'yes' : 'no'), DH.admin.ok ? 'good' : 'bad');
+      if (ADBG) ui.toast('admin:' + (DH.admin.ok ? 'YES' : 'no') + ' exists=' + r.exists + ' arr=' + r.isArray + ' n=' + r.count + ' match=' + r.match + ' prov=' + r.provider + ' em=' + r.tokenEmail, DH.admin.ok ? 'good' : 'bad');
       done && done();
     }).catch((e) => {
       DH.admin.uid = null;
