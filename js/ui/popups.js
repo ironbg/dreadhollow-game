@@ -134,6 +134,9 @@
   /* ---------------- Settings ---------------- */
   ui.openSettings = () => {
     const s = S().settings;
+    // the developer's overview button lives in this slot; it appears as soon as the server confirms the account
+    const adminSlot = h('div.admin-slot');
+    const fillAdmin = () => { adminSlot.innerHTML = ''; if (DH.admin && DH.admin.ok) adminSlot.append(h('button.btn.small.ghost.block', { onclick: () => { click(); m.close(); ui.openAdmin(); } }, t('adm.title'))); };
     const sw = (key, onchange) => {
       const el = h('div.switch' + (s[key] ? '.on' : ''), { onclick: () => { s[key] = !s[key]; el.classList.toggle('on', s[key]); click(); DH.save.persist(); onchange && onchange(); } });
       return el;
@@ -182,7 +185,7 @@
       h('div.col', { style: { marginTop: '14px' } },
         h('button.btn.small.gold.block', { onclick: () => { m.close(); ui.openProfile('account'); } }, t('profile.accountBtn')), // sign-in, linking, purchases and transfer live in the profile's Account tab
         h('button.btn.small.green.block', { onclick: () => { click(); m.close(); ui.openFeedback(); } }, t('fb.title')),
-        DH.admin && DH.admin.ok ? h('button.btn.small.ghost.block', { onclick: () => { click(); m.close(); ui.openAdmin(); } }, t('adm.title')) : null,
+        adminSlot, // the developer's overview, filled in once the server confirms this account (insights.js)
         h('div.btns', h('button.btn.small.ghost', { onclick: () => ui.openLegal('terms') }, t('title.terms')), h('button.btn.small.ghost', { onclick: () => ui.openLegal('privacy') }, t('title.privacy'))),
         DH.ads.privacyRequired() ? h('button.btn.small.ghost.block', { onclick: () => DH.ads.privacyOptions() }, t('settings.adPrivacy')) : null,
         h('button.btn.small.red.block', { onclick: async () => {
@@ -192,6 +195,8 @@
           }
         } }, t('settings.reset'))),
       h('div.note', 'Dreadhollow v' + DH.VERSION + ' · ' + t('settings.credits'))) });
+    fillAdmin(); // show it at once if we already know; then re-ask the server and fill it in when the answer is back
+    if (DH.admin && DH.admin.recheck) DH.admin.recheck(() => { if (!m.closed) fillAdmin(); });
   };
   /** The Terms of Service or the Privacy Policy (legal.html), in the game's language. */
   ui.openLegal = (doc) => {
