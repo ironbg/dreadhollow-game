@@ -62,26 +62,6 @@ async function isAdmin(db, token) {
   return adminList.includes(String(token.email).toLowerCase());
 }
 
-/** What the server actually sees, for diagnosing access (returns only the caller's own email + counts). */
-async function adminDebug(db, token) {
-  const s = await db.collection('admin').doc('access').get();
-  const emails = s.exists ? s.data().emails : null;
-  const list = Array.isArray(emails) ? emails.map((e) => String(e).trim().toLowerCase()) : null;
-  let roots = [];
-  try { roots = (await db.listCollections()).map((c) => JSON.stringify(c.id)); } catch (e) { roots = ['err:' + e.message]; }
-  let adminDocs = [];
-  try { adminDocs = (await db.collection('admin').listDocuments()).map((d) => JSON.stringify(d.id)); } catch (e) { adminDocs = ['err']; }
-  return {
-    exists: s.exists,
-    isArray: Array.isArray(emails),
-    count: list ? list.length : 0,
-    tokenEmail: token.email || null,
-    provider: (token.firebase && token.firebase.sign_in_provider) || null,
-    match: !!(list && token.email && list.includes(String(token.email).toLowerCase())),
-    roots, adminDocs, // the exact collection / document ids the server sees (reveals a stray space or wrong name)
-  };
-}
-
 /** The overview: players a day, who played and how much, and the latest messages. */
 async function stats(db, auth, days) {
   days = Math.max(1, Math.min(KEEP_DAYS, Math.floor(+days || 21)));
@@ -123,4 +103,4 @@ async function forget(db, uid) {
   await batch.commit();
 }
 
-module.exports = { note, feedback, isAdmin, adminDebug, stats, forget, dayKey, FEEDBACK_KINDS };
+module.exports = { note, feedback, isAdmin, stats, forget, dayKey, FEEDBACK_KINDS };

@@ -276,11 +276,7 @@ exports.feedback = callable(async (req) => {
 });
 
 /* ---------- the developer's overview (Settings → Overview): only for emails listed in admin/access ---------- */
-exports.adminCheck = callable(async (req) => {
-  const admin = !!(req.auth && await insights.isAdmin(db, req.auth.token));
-  if (req.data && req.data.dbg && req.auth) return Object.assign({ admin }, await insights.adminDebug(db, req.auth.token)); // ?admindbg: what the server sees (own email + counts only)
-  return { admin };
-});
+exports.adminCheck = callable(async (req) => ({ admin: !!(req.auth && await insights.isAdmin(db, req.auth.token)) }));
 exports.adminStats = callable(async (req) => {
   uidOf(req);
   if (!(await insights.isAdmin(db, req.auth.token))) throw fail('not-admin', 'not an admin', 'permission-denied');

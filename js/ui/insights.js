@@ -71,23 +71,15 @@
 
   /* ---------------- the developer's overview ---------------- */
   DH.admin = { ok: false, uid: null };
-  const ADBG = /[?&]admindbg\b/.test(location.search); // ?admindbg=1: show the server's answer on screen (diagnosing access)
   /** Ask the server whether this signed-in account may see the overview (a guest never may).
    *  force re-asks even when we already asked for this account — the admin list may have just changed. */
   const checkAdmin = (force, done) => {
     const u = DH.cloud && DH.cloud.user;
-    if (!u || !u.email) { DH.admin.ok = false; DH.admin.uid = null; if (ADBG) ui.toast('admin: not signed in', 'bad'); done && done(); return; }
+    if (!u || !u.email) { DH.admin.ok = false; DH.admin.uid = null; done && done(); return; }
     if (!force && DH.admin.uid === u.uid && DH.admin.ok) { done && done(); return; }
     DH.admin.uid = u.uid;
-    DH.server.call('adminCheck', ADBG ? { dbg: 1 } : {}).then((r) => {
-      DH.admin.ok = !!(r && r.admin);
-      if (ADBG) ui.toast('admin:' + (DH.admin.ok ? 'YES' : 'no') + ' exists=' + r.exists + ' arr=' + r.isArray + ' n=' + r.count + ' match=' + r.match + ' prov=' + r.provider + ' em=' + r.tokenEmail, DH.admin.ok ? 'good' : 'bad');
-      done && done();
-    }).catch((e) => {
-      DH.admin.uid = null;
-      if (ADBG) ui.toast('adminCheck error: ' + ((e && e.code) || 'network'), 'bad');
-      done && done();
-    });
+    DH.server.call('adminCheck', {}).then((r) => { DH.admin.ok = !!(r && r.admin); done && done(); })
+      .catch(() => { DH.admin.uid = null; done && done(); });
   };
   /** Re-ask now (used when the Settings screen opens, so a stale "no" cannot stick for the session). */
   DH.admin.recheck = (done) => checkAdmin(true, done);
