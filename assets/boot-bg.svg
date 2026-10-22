@@ -3,7 +3,7 @@
 <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a070c"/><stop offset=".55" stop-color="#140c12"/><stop offset="1" stop-color="#0c0709"/></linearGradient>
 <radialGradient id="roseglow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ff5a3a" stop-opacity=".55"/><stop offset=".6" stop-color="#a0101e" stop-opacity=".25"/><stop offset="1" stop-color="#a0101e" stop-opacity="0"/></radialGradient>
 <radialGradient id="roseglass" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffb060"/><stop offset=".35" stop-color="#d0302a"/><stop offset=".8" stop-color="#5a0812"/><stop offset="1" stop-color="#2a0408"/></radialGradient>
-<linearGradient id="shaft" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a6a" stop-opacity=".16"/><stop offset="1" stop-color="#ff8a6a" stop-opacity="0"/></linearGradient>
+<linearGradient id="shaft" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a6a" stop-opacity=".09"/><stop offset="1" stop-color="#ff8a6a" stop-opacity="0"/></linearGradient>
 <linearGradient id="stoneL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2e2630"/><stop offset="1" stop-color="#120e14"/></linearGradient>
 <linearGradient id="stoneR" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#1c161e"/><stop offset="1" stop-color="#0c090e"/></linearGradient>
 <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1216"/><stop offset="1" stop-color="#0a0608"/></linearGradient>

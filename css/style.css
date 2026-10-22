@@ -1119,6 +1119,13 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 #title.entering .t-low { opacity: 0; transform: translateX(-50%) translateY(40px); transition: opacity .35s, transform .45s ease-in; }
 #title.entering .t-top, #title.entering .t-foot { opacity: 0; transition: opacity .3s; }
 #title.entering .t-flash { animation: tflash 1.75s ease-in forwards; }
+/* diving into the window: the floor, its light shafts and the lower arcs sit just below the zoom
+   origin, so they barely move and read as a bright ghost wheel under the real one. A vignette locked
+   to the window (it lives inside .t-stage, so it scales with the zoom) sinks that periphery into the
+   dark as the dive accelerates, leaving only the glass flying at the camera. */
+.t-stage::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at 50% 41.5%, transparent 13%, rgba(5,3,8,.7) 25%, #050308 42%); }
+#title.entering .t-stage::after { opacity: 1; transition: opacity .35s ease-out; }
 #title.gone { opacity: 0; pointer-events: none; }
 @keyframes tbreathe { from { transform: translateX(-50%) scale(1); } to { transform: translateX(-50%) scale(1.045); } }
 @keyframes trose { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
