@@ -44,7 +44,7 @@
     const G = DH.gfx, C = DH.content, st = C.stages[stageId], res = G.CPX;
     const c = makeCanvas(w * res, h * res), g = c.getContext('2d');
     g.imageSmoothingEnabled = false; g.scale(res, res);
-    const fl = G.floor(st.theme, 3 + st.index * 11), ch = fl.chunk(0, 0);
+    const fl = G.floor(st.theme, 3 + st.index * 11), ch = fl.build(0, 0); // one-shot thumbnail: paint the chunk in full now (chunk() would return a streaming placeholder)
     g.drawImage(ch.canvas, 0, 0, G.CHUNK, G.CHUNK);
     const pool = Object.keys(C.timeline[4].mix).concat(['bat', 'skeleton']).map((k) => st.remap[k] || k);
     const rng = U.seeded(42 + st.index);
