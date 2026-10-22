@@ -39,6 +39,7 @@
       this.agonyOn = !!opts.agony;
       this.agony = 0; this.maxAgony = 0;
       this.floor = DH.gfx.floor(this.stage.theme, U.randi(1, 99999));
+      this.floor.warm(0, 0); // paint the first-seen ground now (the player starts at 0,0), during the level-in load
       this.time = 0; this.kills = 0; this.gold = 0; this.level = 1; this.xp = 0; this.xpNext = C.xpToNext(1, this.stageId);
       this.bossKills = 0; this.eliteKills = 0; this.championKills = 0; this.tomes = 0; this.bossesKilled = [];
       this.traits = { base: {}, elev: {}, cls: {}, ab: {}, up: {} };
