@@ -402,13 +402,22 @@
       }
     },
   };
-  function Floor(theme, seed, res) { this.theme = theme; this.seed = seed || 1; this.res = res; this.chunks = new Map(); }
+  function Floor(theme, seed, res) { this.theme = theme; this.seed = seed || 1; this.res = res; this.chunks = new Map(); this.queue = []; }
   Floor.prototype.chunk = function (cx, cy) {
-    const key = cx + ',' + cy; let ch = this.chunks.get(key);
+    const key = cx + ',' + cy; const ch = this.chunks.get(key);
     if (ch) { ch.used = performance.now(); return ch; }
-    if (this.job && this.job.key === key) { const job = this.job; this.job = null; let r; do r = job.it.next(); while (!r.done); ch = r.value; } // it was being prepared: finish it now
-    else ch = this.build(cx, cy);
-    return this.keep(key, ch);
+    // Never paint a whole chunk inside the frame that needs it — a chunk takes 25-50 ms (far more on a phone),
+    // so building it here is the floor hitch. Queue it (most-recent miss first), let prefetch finish it over the
+    // next frames, and show a flat placeholder until it is ready.
+    if ((!this.job || this.job.key !== key) && this.queue.indexOf(key) < 0) this.queue.unshift(key);
+    return this.placeholder();
+  };
+  /** A flat, instantly-ready chunk in the hall's paving colour: shown at a fresh edge until the real one is painted. */
+  Floor.prototype.placeholder = function () {
+    if (this._ph) return this._ph;
+    const c = canvas(8, 8), g = c.getContext('2d');
+    g.fillStyle = hex.apply(null, this.theme.floorA || this.theme.mortar || [18, 15, 22]); g.fillRect(0, 0, 8, 8);
+    return (this._ph = { canvas: c, lights: [] });
   };
   Floor.prototype.keep = function (key, ch) {
     ch.used = performance.now(); this.chunks.set(key, ch);
@@ -420,10 +429,14 @@
    *  coordinates [cx, cy], most wanted first. */
   Floor.prototype.prefetch = function (want, budget) {
     const t0 = performance.now();
+    if (this.queue.length) budget = Math.max(budget, 8); // a fresh edge is on screen showing a placeholder: paint it in faster
     while (performance.now() - t0 < budget) {
       if (!this.job) {
-        const next = want.find(([x, y]) => !this.chunks.has(x + ',' + y)); if (!next) return;
-        this.job = { key: next[0] + ',' + next[1], it: this.steps(next[0], next[1]) };
+        // visible misses (queued by chunk()) come first, then the camera's look-ahead ring
+        let key = this.queue.shift();
+        while (key && this.chunks.has(key)) key = this.queue.shift();
+        if (!key) { const next = want.find(([x, y]) => !this.chunks.has(x + ',' + y)); if (!next) return; key = next[0] + ',' + next[1]; }
+        const p = key.split(','); this.job = { key, it: this.steps(+p[0], +p[1]) };
       }
       const r = this.job.it.next();
       if (r.done) { this.keep(this.job.key, r.value); this.job = null; }
@@ -618,7 +631,7 @@
    *  all its canvases at once; without this every sprite would stay blank for the rest of the session. */
   gfx.flush = function () {
     this.cache = {};
-    for (const f of floors) { f.chunks.clear(); f.job = null; }
+    for (const f of floors) { f.chunks.clear(); f.job = null; f.queue = []; }
     if (DH.art && DH.art.flushGlows) DH.art.flushGlows();
     DH.events.emit('gfx:flush');
   };

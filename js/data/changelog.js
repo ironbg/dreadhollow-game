@@ -4,6 +4,15 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.6',
+      bg: [
+        'По-гладко: нова земя вече не причинява забиване при движение (особено в Бездната).',
+      ],
+      en: [
+        'Smoother play: reaching fresh ground no longer causes a hitch while moving (the Abyss most of all).',
+      ],
+    },
+    {
       v: '1.61.0',
       bg: [
         'Нов бутон „Изпрати отзив“ в Настройки: пиши ни какво да подобрим.',
