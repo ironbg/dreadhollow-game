@@ -443,15 +443,21 @@
     }
   };
   Floor.prototype.build = function (cx, cy) { const it = this.steps(cx, cy); let r; do r = it.next(); while (!r.done); return r.value; };
-  /** Paint up front the chunks the player first sees (the lit area around the start), so a new level does not show its
-   *  floor streaming in. Called once as the level loads; the rest of the ground still streams in while moving. */
-  Floor.prototype.warm = function (px, py, radius) {
-    const CH = CHUNK, r = radius || 200; // the opening light reaches ~120 units; cover a little more
-    for (let ky = Math.floor((py - r) / CH); ky <= Math.floor((py + r) / CH); ky++)
-      for (let kx = Math.floor((px - r) / CH); kx <= Math.floor((px + r) / CH); kx++) {
+  /** Paint up front every chunk touching a world rectangle (synchronous): used to have a view's floor ready before it
+   *  is shown, so it is never seen painting in. */
+  Floor.prototype.warmRect = function (x0, y0, x1, y1) {
+    const CH = CHUNK;
+    for (let ky = Math.floor(y0 / CH); ky <= Math.floor(y1 / CH); ky++)
+      for (let kx = Math.floor(x0 / CH); kx <= Math.floor(x1 / CH); kx++) {
         const key = kx + ',' + ky;
         if (!this.chunks.has(key)) this.keep(key, this.build(kx, ky));
       }
+  };
+  /** Paint up front the chunks the player first sees (the lit area around the start), so a new level does not show its
+   *  floor streaming in. Called once as the level loads; the rest of the ground still streams in while moving. */
+  Floor.prototype.warm = function (px, py, radius) {
+    const r = radius || 200; // the opening light reaches ~120 units; cover a little more
+    this.warmRect(px - r, py - r, px + r, py + r);
   };
   /** The chunk painted in small steps (a generator): the paving, the dressing, then the grading band by band. */
   Floor.prototype.steps = function* (cx, cy) {

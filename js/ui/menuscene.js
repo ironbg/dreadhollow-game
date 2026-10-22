@@ -11,6 +11,8 @@
     scene.key = key; scene.stageId = sid;
     const st = C.stages[sid];
     scene.floor = G.floor(st.theme, 7 + st.index * 13);
+    const V = DH.view, cx = -V.w / 2, cy = -V.h * scene.anchorY; // paint the menu's floor up front so it is shown ready, not streaming in
+    scene.floor.warmRect(cx, cy, cx + V.w, cy + V.h);
     const pool = ['skeleton', 'ghoul', 'bat', 'ghost', 'spider', 'cultist', 'wraith'].map((k) => st.remap[k] || k);
     scene.lurkers = pool.map((name, i) => {
       const def = C.enemies[name], p = G.painters[def.painter];
@@ -34,6 +36,7 @@
     for (let ky = Math.floor(cy / CH); ky <= Math.floor((cy + H) / CH); ky++) for (let kx = Math.floor(cx / CH); kx <= Math.floor((cx + W) / CH); kx++) {
       const ch = scene.floor.chunk(kx, ky); g.drawImage(ch.canvas, kx * CH - cx, ky * CH - cy, CH, CH); ch.lights.forEach((l) => lights.push(l));
     }
+    scene.floor.prefetch([], 4); // fill any chunk the anchor drifted onto (the menu does not move much, so this is cheap)
     const s = DH.save.data;
     scene.lurkers.forEach((l) => {
       const a = l.a + scene.t * 0.05, x = Math.cos(a) * l.d * 1.3 - cx, y = Math.sin(a) * l.d * 0.8 - cy;
