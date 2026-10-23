@@ -580,13 +580,22 @@
         const kd = Math.pow(0.0005, dt); e.kx *= kd; e.ky *= kd;
         if (Math.abs(mx) > 0.05) e.face = mx > 0 ? 1 : -1;
         if (!e.def.fly && !e.boss) {
-          this.grid.query(e.x, e.y, e.r * 2, tmp);
-          let n = 0;
+          // crowd steering: a hard shove keeps bodies from overlapping, and a softer one that reaches a
+          // little further (to 1.3x touching) fans the horde into a besieging ring instead of a packed blob.
+          this.grid.query(e.x, e.y, e.r * 2.6, tmp);
+          let n = 0, sx = 0, sy = 0;
           for (const o of tmp) {
             if (o === e || o.dead || o.def.fly) continue;
-            const ox = e.x - o.x, oy = e.y - o.y, rr = e.r + o.r, d2 = ox * ox + oy * oy;
-            if (d2 < rr * rr && d2 > 0.0001) { const d = Math.sqrt(d2), push = (rr - d) * 0.5; e.x += ox / d * push; e.y += oy / d * push; if (++n > 6) break; }
+            const ox = e.x - o.x, oy = e.y - o.y, rr = e.r + o.r, soft = rr * 1.3, d2 = ox * ox + oy * oy;
+            if (d2 < soft * soft && d2 > 0.0001) {
+              const d = Math.sqrt(d2), inv = 1 / d;
+              if (d < rr) { const push = (rr - d) * 0.5; e.x += ox * inv * push; e.y += oy * inv * push; } // never truly overlap
+              const w = 1 - d / soft; sx += ox * inv * w; sy += oy * inv * w; // steer away, stronger the closer
+              if (++n > 8) break;
+            }
           }
+          // the soft shove is capped below the seek, so a foe still advances while it spreads sideways
+          if (n) { const sm = Math.hypot(sx, sy); if (sm > 0.0001) { const k = Math.min(sm, 1) / sm * spd * 0.6 * dt; e.x += sx * k; e.y += sy * k; } }
         }
         if (e.dmg > 0 && !e.disg && dist < e.r * 0.8 + p.r && !(e.eth > 0 && !e.boss)) this.hurtPlayer(e.dmg, e); // a faded spirit passes through you
         // the attack animation: in reach of the hero, a foe coils, lunges and recovers

@@ -4,6 +4,15 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.12',
+      bg: [
+        'Враговете вече не се сбиват в една буца — тълпата се разгръща в обсаждащ пръстен около теб.',
+      ],
+      en: [
+        'Enemies no longer clump into one mass — the horde fans out into a besieging ring around you.',
+      ],
+    },
+    {
       v: '1.61.11',
       bg: [
         'Повече тежест в боя: разтърсването на екрана е по-плавно, а убийството на Лорд спира времето за миг.',
