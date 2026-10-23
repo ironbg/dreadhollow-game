@@ -4,6 +4,15 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.11',
+      bg: [
+        'Повече тежест в боя: разтърсването на екрана е по-плавно, а убийството на Лорд спира времето за миг.',
+      ],
+      en: [
+        'More impact in battle: screen shake is smoother, and slaying a Lord freezes time for a beat.',
+      ],
+    },
+    {
       v: '1.61.6',
       bg: [
         'По-гладко: нова земя вече не причинява забиване при движение (особено в Бездната).',

@@ -51,7 +51,7 @@
       this.state = 'playing'; this.pendingLevels = 0; this.queue = [];
       this.usedAdRevive = false; this.usedGemRevive = 0; this.usedAdReroll = false;
       this.warns = []; // marked ground about to burst (volatile Champions)
-      this.shake = 0; this.hurtFlash = 0; this.whiteFlash = 0; this.healGlow = 0; this.healAcc = 0; this.healT = 0; this.victoryT = -1;
+      this.shake = 0; this.freeze = 0; this.hurtFlash = 0; this.whiteFlash = 0; this.healGlow = 0; this.healAcc = 0; this.healT = 0; this.victoryT = -1;
       this.bosses = []; this.dmgByAb = {};
       this.bag = []; this.runGear = {}; this.wellSent = null; this.well = null; this.wellExtra = []; this.buckets = 0;
       this.champDrops = {};
@@ -110,6 +110,7 @@
     /* ---------------- main update ---------------- */
     update(dt) {
       if (this.state !== 'playing') return;
+      if (this.freeze > 0) { this.freeze -= dt; dt *= 0.1; } // hit-stop: a breath of slow-motion on a slain Lord; bounded by real time, so the run clock barely notices
       this.time += dt;
       const p = this.player, st = this.P;
       const ax = DH.input.axis();
@@ -832,6 +833,7 @@
       }
       if (e.boss) {
         this.bossKills++; this.bossesKilled.push(e.id); this.shake = 10; this.whiteFlash = 0.8;
+        this.freeze = Math.max(this.freeze, e.def.lord || e.final ? 0.13 : 0.09); // the killing blow lands — a beat of slow-motion
         this.bosses = this.bosses.filter((b) => b !== e);
         this.hazards = this.hazards.filter((h) => h.src !== e);
         DH.audio.play('boom'); DH.audio.vibrate(200);

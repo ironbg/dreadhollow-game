@@ -12,7 +12,11 @@
     const rd = V.snap;
     this.rd = rd;
     const sh = this.settings.shake ? this.shake : 0;
-    const cx = rd(p.x - W / 2 + (sh ? U.rand(-sh, sh) : 0)), cy = rd(p.y - H / 2 + (sh ? U.rand(-sh, sh) : 0));
+    // smooth multi-frequency shake (sampled sines, not a per-frame random jitter that reads as static);
+    // magnitude is the same `shake` value every event already sets, so each punch keeps its weight.
+    let shx = 0, shy = 0;
+    if (sh) { const tt = this.time; shx = sh * (Math.sin(tt * 55) * 0.6 + Math.sin(tt * 88) * 0.4); shy = sh * (Math.sin(tt * 67) * 0.6 + Math.sin(tt * 104) * 0.4); }
+    const cx = rd(p.x - W / 2 + shx), cy = rd(p.y - H / 2 + shy);
     this.cam.x = cx; this.cam.y = cy;
     const now = this.time, lights = [];
     g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
