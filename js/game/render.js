@@ -561,6 +561,16 @@
         g.drawImage(A.glow('rgba(190,80,255,0.8)'), x - 7, y - 7, 14, 14);
         this.sprite(g, 'hex_p', null, 0, x, y, false, 1, false, 1, b.ang || Math.atan2(b.vy, b.vx) || 0.0001);
         lights.push({ x: b.x, y: b.y, r: 16, kind: 'magic' }); break;
+      case 'fist': { // a spectral punch: a violet halo, the fist thrusting forward (swells as it flies), a mist trail
+        g.globalCompositeOperation = 'lighter';
+        g.drawImage(A.glow('rgba(170,120,255,0.6)'), x - 15, y - 15, 30, 30);
+        g.globalCompositeOperation = 'source-over';
+        const fk = 1 - b.life / (b.max || 1), punch = 1.9 + 0.55 * Math.sin(Math.min(1, fk) * Math.PI);
+        this.sprite(g, 'fist_p', null, 0, x, y, b.vx < 0, punch, false, 1, b.ang || Math.atan2(b.vy, b.vx) || 0.0001);
+        if (!this.settings.minFx) this.gpart({ x: b.x - b.vx * 0.02, y: b.y - b.vy * 0.02, vx: -b.vx * 0.07, vy: -b.vy * 0.07, life: 0.24, max: 0.24, c: '#b080ff', r: 1.5, core: '#e8d8ff' });
+        lights.push({ x: b.x, y: b.y, r: 18, kind: 'tint', color: '#b080ff', a: 0.5 });
+        break;
+      }
       default: {
         const name = { arrow: 'arrow_p', dart: 'dagger_p', axe: 'axe_p', flask: 'flask_p', chakram: 'chakram_p', fist: 'fist_p', star: 'flail_p' }[b.k];
         if (!name) break;
