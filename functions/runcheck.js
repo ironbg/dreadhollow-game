@@ -22,37 +22,37 @@ function checkRun(sum, run, now, DH) {
   if (T > 4 * 3600) return 'time-cap';
   const kills = int(sum.kills), level = int(sum.level), bossKills = int(sum.bossKills);
   if (!(kills >= 0) || !(level >= 1) || !(bossKills >= 0)) return 'numbers';
-  if (kills > 30 * T + 300) return 'kills';
-  if (level > 15 + T / 4) return 'level';
+  if (kills > 150 * T + 2000) return 'kills';
+  if (level > 40 + T / 2) return 'level';
   const bossesDue = (st.bosses || []).filter((b) => b.t <= T + 5).length;
-  if (bossKills > bossesDue + 8) return 'bosses';
+  if (bossKills > bossesDue + 20) return 'bosses';
   if (!(int(sum.eliteKills) >= 0) || sum.eliteKills > kills) return 'elites';
-  if ((sum.championKills || 0) > 60 || (sum.tomes || 0) > 60 || (sum.oozes || 0) > kills + 1) return 'counts';
+  if ((sum.championKills || 0) > 400 || (sum.tomes || 0) > 200 || (sum.oozes || 0) > kills + 1) return 'counts';
   const gold = num(sum.gold);
   const tribGold = (run.tributes || []).reduce((a, id) => a + ((E.tributes && E.tributes[id] && E.tributes[id].boon.gold) || 0), 0); // the Reliquary's tribute of Fortune
-  if (!(gold >= 0) || gold > (st.goldMult || 1) * (kills * 4 + T * 12) * (1 + (run.dread || 0) * 0.5) * (1 + tribGold) + 5000) return 'gold';
+  if (!(gold >= 0) || gold > (st.goldMult || 1) * (kills * 25 + T * 80) * (1 + (run.dread || 0)) * (1 + tribGold) + 100000) return 'gold';
   if (sum.agonyOn !== !!run.agony) return 'agony';
   if (!(int(sum.agony) >= 0) || sum.agony > C.AGONY_MAX) return 'agony-level';
   if (int(sum.dread) !== (run.dread || 0)) return 'dread';
   if (sum.victory) {
     const lord = (st.bosses || []).find((b) => b.final);
-    const byTime = lord ? T >= lord.t - 10 : T >= (sum.runLength || C.RUN_LENGTH) - 10;
+    const byTime = lord ? T >= lord.t - 30 : T >= (sum.runLength || C.RUN_LENGTH) - 30;
     const byKills = st.lordKills ? kills >= st.lordKills : false;
     if (!byTime && !byKills) return 'victory-too-early';
   }
   if (sum.rescued != null && (C.RESCUE || {})[run.stage] !== sum.rescued) return 'rescue';
-  if (!(int(sum.lateLevels || 0) >= 0) || (sum.lateLevels || 0) > 300) return 'late-levels';
-  if (!(int(sum.shards || 0) >= 0) || (sum.shards || 0) > 60) return 'shards';
-  if (!(int(sum.maxPlants || 0) >= 0) || (sum.maxPlants || 0) > 60) return 'plants';
+  if (!(int(sum.lateLevels || 0) >= 0) || (sum.lateLevels || 0) > 600) return 'late-levels';
+  if (!(int(sum.shards || 0) >= 0) || (sum.shards || 0) > 120) return 'shards';
+  if (!(int(sum.maxPlants || 0) >= 0) || (sum.maxPlants || 0) > 120) return 'plants';
   const herbs = sum.herbs || {};
-  for (const k in herbs) if (!(E.herbs || []).concat('dust').includes(k) || !(int(herbs[k]) >= 0) || herbs[k] > 40) return 'herbs';
+  for (const k in herbs) if (!(E.herbs || []).concat('dust').includes(k) || !(int(herbs[k]) >= 0) || herbs[k] > 100) return 'herbs';
   const mats = sum.mats || {};
   for (const k in mats) if (!(E.materials || []).includes(k) || !(int(mats[k]) >= 0) || mats[k] > (E.MAT_RUN_MAX || 250)) return 'mats';
   const arts = sum.artifactsFound || [];
-  if (!Array.isArray(arts) || arts.length > 3 || arts.some((k) => !E.artifacts[k])) return 'artifacts';
+  if (!Array.isArray(arts) || arts.length > 6 || arts.some((k) => !E.artifacts[k])) return 'artifacts';
   const wells = [sum.wellSent].concat(sum.wellExtra || []).filter(Boolean);
-  if (wells.length > 4 || wells.some((w) => !E.gear[w.type] || !(int(w.rarity) >= 0) || w.rarity > 4)) return 'well';
-  for (const k in sum.potionsUsed || {}) if (!E.potions[k] || !(int(sum.potionsUsed[k]) >= 0) || sum.potionsUsed[k] > 20) return 'potions';
+  if (wells.length > 6 || wells.some((w) => !E.gear[w.type] || !(int(w.rarity) >= 0) || w.rarity > 4)) return 'well';
+  for (const k in sum.potionsUsed || {}) if (!E.potions[k] || !(int(sum.potionsUsed[k]) >= 0) || sum.potionsUsed[k] > 40) return 'potions';
   const OTHER = ['burn', 'spark', 'frost', 'decay', 'imp', 'item', 'revive']; // damage of effects, the imps and the items, not of an ability
   for (const k in sum.dmgByAb || {}) if ((!C.abilities[k] && !OTHER.includes(k)) || !(num(sum.dmgByAb[k]) >= 0) || sum.dmgByAb[k] > 1e10) return 'damage';
   return null;
