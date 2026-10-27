@@ -120,7 +120,7 @@
         low.append(
           h('button.btn.gold.big.block.t-main', { onclick: tap(enter) }, t('title.guest')),
           h('div.t-or', h('span', t('title.or'))),
-          h('button.btn.block.t-google', { onclick: tap((e) => googleIn(e.currentTarget)) }, icon('google'), t('cloud.google')),
+          h('button.btn.ghost.block.t-google', { onclick: tap((e) => googleIn(e.currentTarget)) }, icon('google'), t('cloud.google')),
           h('button.btn.ghost.block', { onclick: tap(() => ui.openEmailAuth('signin')) }, icon('mail'), t('cloud.emailSignIn')),
           h('div.t-note', t('title.guestNote')));
       } else {
