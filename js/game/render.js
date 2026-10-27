@@ -452,6 +452,17 @@
     const blink = p.inv > 0 && Math.floor(p.inv * 20) % 2 === 0;
     const bob = p.moving ? -Math.abs(Math.sin(p.anim * 1.9)) : 0;
     this.sprite(g, this.hero.painter || this.heroId, null, fr, p.x - cx, p.y - cy + bob, p.face < 0, 1, blink, this.buffs && this.buffs.wraith > 0 ? 0.55 : 1);
+    if (p.atkT > 0 && this.heroId === 'huntress') { // the Huntress' spear thrust is only a sprite pose; add a visible frost swipe so the strike reads
+      const t = U.clamp(1 - p.atkT / p.atkMax, 0, 1), sweep = Math.min(1, t / 0.55), fade = t < 0.55 ? 1 : Math.max(0, 1 - (t - 0.55) / 0.45);
+      if (fade > 0.03) {
+        const x = p.x - cx, y = p.y - cy - 6, dir = p.face < 0 ? -1 : 1, R = 15, a0 = -1, a1 = 0.85, ang = a0 + (a1 - a0) * sweep;
+        g.save(); g.translate(x, y); g.scale(dir, 1); g.globalCompositeOperation = 'lighter'; g.lineCap = 'round';
+        g.strokeStyle = 'rgba(150,230,255,' + (0.55 * fade) + ')'; g.lineWidth = 3.4; g.beginPath(); g.arc(0, 0, R, a0, ang); g.stroke();
+        g.strokeStyle = 'rgba(235,250,255,' + (0.85 * fade) + ')'; g.lineWidth = 1.4; g.beginPath(); g.arc(0, 0, R, Math.max(a0, ang - 0.5), ang); g.stroke(); // bright leading edge
+        g.fillStyle = 'rgba(245,252,255,' + (0.95 * fade) + ')'; g.beginPath(); g.arc(Math.cos(ang) * R, Math.sin(ang) * R, 2.1, 0, TAU); g.fill();
+        g.restore();
+      }
+    }
     if (this.proot > 0) { // roots coiled round the legs
       const x = p.x - cx, y = p.y - cy, P = G.P;
       for (let k = 0; k < 5; k++) { const a = k / 5 * TAU + 0.3, bx = x + Math.cos(a) * 6, by = y + 1 + Math.sin(a) * 2.4; g.strokeStyle = k % 2 ? '#5a4024' : '#7a5a34'; g.lineWidth = 1.4; g.lineCap = 'round'; g.beginPath(); g.moveTo(bx, by); g.quadraticCurveTo(bx + (x - bx) * 0.3, by - 6, x + (k - 2) * 1.2, y - 7 - (k % 2) * 2); g.stroke(); }
