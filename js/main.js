@@ -66,10 +66,8 @@
       ui.flushLevelUps();
       DH.events.emit('menu'); // back in the menus: anything held during the fight (a version notice) shows now
       const s = DH.save.data;
-      if (s.runsSinceAd >= E.INTERSTITIAL_EVERY && !s.purchases.noAds) {
-        s.runsSinceAd = 0; DH.save.persist();
-        await DH.ads.interstitial('post_run');
-      }
+      // no full-screen ad after a fight — it was the most grating ad and hurt the test; only the opt-in
+      // rewarded ads remain (revive, double gold, free chest).
       DH.cloud.flush('run');
       if (win) setTimeout(() => DH.review.afterWin(), 1200); // the store's rating sheet, after a victory (app only)
       // gentle upsell after a defeat, at most once a day
