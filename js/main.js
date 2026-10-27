@@ -126,9 +126,8 @@
     try {
       if (game.mode === 'run' && game.run) {
         const r = game.run;
-        if (r.state === 'playing') { const n = dt > 1 / 40 ? 2 : 1; for (let i = 0; i < n; i++) r.update(dt / n); }
-        r.render();
-        ui.hud.update(r);
+        if (r.state === 'playing') { const n = dt > 1 / 40 ? 2 : 1; for (let i = 0; i < n; i++) r.update(dt / n); r.render(); ui.hud.update(r); r.idleFrames = 0; }
+        else if ((r.idleFrames = (r.idleFrames || 0) + 1) <= 2) { r.render(); ui.hud.update(r); } // paused / dead / level-up / an ad on top: paint the frozen scene a couple of frames, then stop redrawing it. A rewarded video over a full battle scene was starving low-RAM phones of memory — the revive-ad crash.
       } else DH.menuScene.render(dt);
     } catch (e) { console.error(e); }
   }

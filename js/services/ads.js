@@ -100,7 +100,6 @@
       let ok = !!ahead && ahead.uid === uid && ahead.unit === this.unit(kind) && Date.now() - ahead.at < 45 * 60000 && (await ahead.p); // a loaded ad keeps for an hour
       if (!ok) { ok = await this.prepare(kind); this.loaded[kind] = null; }
       if (!ok) throw new Error('no ad');
-      setTimeout(() => this.preload(kind), 2000); // the next one starts loading while this one plays
       DH.audio.stopMusic();
       const pre = rewarded ? 'onRewardedVideoAd' : 'interstitialAd';
       return new Promise((resolve) => {
@@ -135,6 +134,7 @@
       } catch (e) { console.warn('ad failed', e); ok = false; }
       if (wait) wait.remove();
       this.busy = false;
+      if (!S.purchases.noAds && this.provider.preload) setTimeout(() => this.provider.preload('rewarded'), 2500); // load the next one only now the window is closed — never two videos in memory at once
       if (ok) {
         S.stats.adsWatched++;
         DH.meta.track('ads', 1);
@@ -161,6 +161,7 @@
       this.busy = true;
       try { await this.provider.show('interstitial', placement); } catch (e) { /* ignore */ }
       this.busy = false;
+      if (!S.purchases.noAds && this.provider.preload) setTimeout(() => this.provider.preload('interstitial'), 2500);
       DH.events.emit('adClosed');
     },
   };
