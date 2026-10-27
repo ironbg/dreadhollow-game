@@ -501,6 +501,11 @@ img.ic { image-rendering: auto; }
 .herbs .herb { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 6px; gap: 2px; }
 .herbs .herb img { width: 30px; height: 30px; }
 .herbs .herb b { font: 11px var(--num); }
+/* every herb tile the same size, so the row reads as a clean grid whatever the label length (a 2-line name
+   like "Grave Moss" no longer makes its tile taller than a 1-line one). Not the materials row (its own layout). */
+.herbs:not(.mats) { align-items: stretch; }
+.herbs:not(.mats) .herb { min-width: 0; }
+.herbs:not(.mats) .herb span { min-height: 2.2em; display: flex; align-items: flex-start; justify-content: center; text-align: center; line-height: 1.1; }
 .mats .herb { flex-direction: row; justify-content: center; gap: 4px; padding: 4px 2px; flex-wrap: wrap; }
 .mats .herb img { width: 26px; height: 26px; }
 .mats .herb span { width: 100%; text-align: center; }
