@@ -28,14 +28,16 @@ const live = require('../game/live.json');
   const sum = { stage: 'crypt', hero: 'knight', time: 609, kills: 2913, gold: 1636, level: 33, bossKills: 4, eliteKills: 3, championKills: 0, tomes: 2, bosses: [], victory: true, agony: 0, agonyOn: false, dmgByAb: { cleave: 27000 }, wellSent: null, wellExtra: [], herbs: { moss: 3 }, mats: { iron: 12, silver: 1 }, dread: 0, potionsUsed: {}, lateLevels: 0, runLength: 600, artifactsFound: [], shards: 0, hexed: false, elemApplied: false, abTimes: [], oozes: 10, crits: 50, dmgTags: {} };
   assert.strictEqual(checkRun(sum, run, Date.now(), DH), null, 'honest fight passes');
   assert.strictEqual(checkRun(Object.assign({}, sum, { time: 900 }), run, Date.now(), DH), 'time-beyond-clock');
-  assert.strictEqual(checkRun(Object.assign({}, sum, { kills: 99999 }), run, Date.now(), DH), 'kills');
-  assert.strictEqual(checkRun(Object.assign({}, sum, { gold: 1e7 }), run, Date.now(), DH), 'gold');
-  assert.strictEqual(checkRun(Object.assign({}, sum, { level: 400 }), run, Date.now(), DH), 'level');
-  assert.strictEqual(checkRun(Object.assign({}, sum, { time: 120, kills: 500, level: 10, bossKills: 0 }), run, Date.now(), DH), 'victory-too-early');
+  // a number past a magnitude cap is clamped to the ceiling, not rejected: the fight still pays, up to it
+  { const s = Object.assign({}, sum, { kills: 99999 }); assert.strictEqual(checkRun(s, run, Date.now(), DH), null); assert.strictEqual(s.kills, 150 * 609 + 2000, 'kills clamped'); }
+  { const s = Object.assign({}, sum, { gold: 1e7 }); assert.strictEqual(checkRun(s, run, Date.now(), DH), null); assert.ok(s.gold > 0 && s.gold < 1e7, 'gold clamped'); }
+  { const s = Object.assign({}, sum, { level: 400 }); assert.strictEqual(checkRun(s, run, Date.now(), DH), null); assert.strictEqual(s.level, Math.floor(40 + 609 / 2), 'level clamped'); }
+  { const s = Object.assign({}, sum, { time: 120, kills: 500, level: 10, bossKills: 0 }); assert.strictEqual(checkRun(s, run, Date.now(), DH), null); assert.strictEqual(s.victory, false, 'unearned victory stripped, run still paid'); }
+  { const s = Object.assign({}, sum, { mats: { iron: 9999 } }); assert.strictEqual(checkRun(s, run, Date.now(), DH), null); assert.strictEqual(s.mats.iron, DH.economy.MAT_RUN_MAX || 250, 'mats clamped'); }
+  // integrity failures are still never rewarded
   assert.strictEqual(checkRun(Object.assign({}, sum, { stage: 'reliquary' }), run, Date.now(), DH), 'wrong-hall-or-hero');
   assert.strictEqual(checkRun(Object.assign({}, sum, { artifactsFound: ['nope'] }), run, Date.now(), DH), 'artifacts');
   assert.strictEqual(checkRun(Object.assign({}, sum, { mats: { mithril: 3 } }), run, Date.now(), DH), 'mats');
-  assert.strictEqual(checkRun(Object.assign({}, sum, { mats: { iron: 9999 } }), run, Date.now(), DH), 'mats');
   assert.strictEqual(checkRun(Object.assign({}, sum, { mats: { iron: -2 } }), run, Date.now(), DH), 'mats');
   r = await withProfile(p0, live, (DHp) => DHp.meta.settleRun(sum));
   let lvIron = 0; for (let l = 2; l <= r.profile.accountLevel; l++) lvIron += DH.economy.accountLevelReward(l).mats.iron || 0;
