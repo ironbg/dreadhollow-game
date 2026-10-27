@@ -464,7 +464,10 @@
     (res.artifacts || []).forEach((k) => extras.push({ icon: 'a_' + k, text: t('artifact.' + k + '.name'), rarity: 4 }));
     const dblBtn = h('button.btn.ad.shine', { onclick: async () => {
       if (doubled) return;
-      const g = await ui.act('doubleRunGold'); if (g) { doubled = true; goldEl.textContent = U.fmt(res.gold * 2); dblBtn.classList.add('off'); DH.audio.play('coin'); }
+      doubled = true; // claim before the ad plays, so a second tap during it cannot ask the server to double again
+      const g = await ui.act('doubleRunGold');
+      if (g) { goldEl.textContent = U.fmt(res.gold * 2); dblBtn.classList.add('off'); DH.audio.play('coin'); }
+      else doubled = false; // the ad was skipped or failed: let them try once more
     } }, h('span.adtag', 'AD'), t('results.double'));
     const hudEl = document.getElementById('hud'); if (hudEl) hudEl.classList.add('hidden'); // the run is over: its bars do not peek over the results
     ui.modal({ closable: false, cls: 'results wide', rays: win, body: (m) => h('div',

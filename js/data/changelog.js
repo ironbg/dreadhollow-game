@@ -4,6 +4,17 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.15',
+      bg: [
+        'Гледането на реклама вече коректно отчита куестовете „Изгледай N реклами" (и в Седемте Нощи).',
+        'Поправка при удвояване на златото от реклама — бързото двойно натискане вече не го задейства два пъти.',
+      ],
+      en: [
+        'Watching an ad now correctly counts toward the "watch N ads" tasks (Seven Nights included).',
+        'Doubling run gold with an ad no longer fires twice on a quick double-tap.',
+      ],
+    },
+    {
       v: '1.61.14',
       bg: [
         'Премахната е рекламата на цял екран след битка.',

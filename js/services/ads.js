@@ -136,9 +136,9 @@
       this.busy = false;
       if (!S.purchases.noAds && this.provider.preload) setTimeout(() => this.provider.preload('rewarded'), 2500); // load the next one only now the window is closed — never two videos in memory at once
       if (ok) {
-        S.stats.adsWatched++;
-        DH.meta.track('ads', 1);
-        DH.save.persist();
+        // record the watch where the profile really lives (the server, in server mode) so the "watch N ads"
+        // missions and Seven Nights tasks actually advance; the reward stands even if this tally call fails.
+        try { await DH.server.act('adSeen'); } catch (e) { /* ignore */ }
       } else DH.ui.toast(t('ad.unavailable'), 'bad');
       DH.events.emit('adClosed');
       return ok;

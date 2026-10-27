@@ -783,6 +783,9 @@
     S().freeChestTs = U.now();
     return meta.openChestContents('wood', 1);
   };
+  /** A rewarded ad was watched (any placement): record it so the "watch N ads" missions and Seven Nights
+   * tasks advance. Called by DH.ads after every ad, through DH.server.act so it counts on the server too. */
+  meta.adSeen = () => { const s = S(); s.stats.adsWatched = (s.stats.adsWatched || 0) + 1; meta.track('ads', 1); changed(); return 1; };
 
   /* ---------------- Run settlement ---------------- */
   meta.settleRun = (r) => {

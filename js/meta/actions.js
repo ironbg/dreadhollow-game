@@ -63,6 +63,7 @@
     rename: { run: (a) => M().rename(str(a.name, 40), bool(a.first)) },
     // after a fight
     doubleRunGold: { run: () => M().doubleRunGold(), ad: () => 'double_gold', adOutside: true },
+    adSeen: { run: () => M().adSeen() }, // records a watched ad for the "watch N ads" tasks; shows no ad itself (DH.ads calls it after one)
     reviveGems: { run: (a) => M().reviveGems(int(a.n)) },
   };
 
