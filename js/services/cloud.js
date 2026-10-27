@@ -235,8 +235,11 @@
     resetPassword(email) { email = email.trim().toLowerCase(); checkCreds(email); return this.auth(() => this.provider.resetPassword(email)); },
     /** Sign out: progress is safe in the cloud, so this device goes back to a fresh profile. */
     async signOut() {
-      await this.flush('signout');
-      await this.provider.signOut();
+      // leaving must always go through, even if the cloud is slow or the sign-out call stalls: cap each step and
+      // reach the reload no matter what, so the button never just sits there doing nothing.
+      const cap = (pr, ms) => Promise.race([Promise.resolve(pr).catch((e) => console.warn('signout step', e)), new Promise((r) => setTimeout(r, ms))]);
+      await cap(this.flush('signout'), 5000); // save the last progress to the cloud, but do not wait forever for it
+      await cap(this.provider.signOut(), 5000);
       await DH.save.detach(true);
       location.reload();
     },

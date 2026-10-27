@@ -167,8 +167,8 @@
       }
     },
     async signOut() {
-      if (Native()) Native().signOut().catch(() => {});
-      await A.signOut(auth);
+      if (Native()) { try { await Native().signOut(); } catch (e) { /* the web layer below is what gates the session */ } } // clear the native Google session too, or the next launch signs back in
+      try { await A.signOut(auth); } catch (e) { console.warn('signout', e); }
     },
     async deleteAccount() {
       const u = auth.currentUser; if (!u) return;
