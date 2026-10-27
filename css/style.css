@@ -1106,7 +1106,7 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .t-sub::after { transform: scaleX(-1); }
 /* the ways in */
 .t-low { position: absolute; left: 50%; bottom: calc(44px + var(--safe-b, 0px)); width: min(340px, 86vw); transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; transition: opacity .8s ease .75s, transform .8s ease .75s; }
-#title .btn { gap: 10px; }
+#title .btn { gap: 10px; border-radius: 0; } /* crisp square-cut corners, same as the in-game buttons */
 #title .btn .ti { width: 22px; height: 22px; }
 #title .t-main { min-height: 60px; animation: tglow 2.4s ease-in-out infinite; }
 /* Google's brand "G" keeps its colours; the button itself wears the same old stone as the rest */
