@@ -29,6 +29,9 @@
     return ELEM.physical;
   }
   R.elemColor = elemColor;
+  /** An ability's signature colour (DH.content.AB_COLOR), else its element's: what its hits, trails and light wear. */
+  function abColor(a) { const sig = a && DH.content.AB_COLOR && DH.content.AB_COLOR[a.id]; return sig || elemColor(a && a.tags); }
+  R.abColor = abColor;
 
   /* ---------------- fog texture (tileable value noise, soft alpha) ---------------- */
   let fogTex = null;
@@ -293,10 +296,10 @@
     const L = this.gparts; if (!L) return;
     for (let i = L.length - 1; i >= 0; i--) { const q = L[i]; q.life -= dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= q.drag || 0.92; q.vy = q.vy * (q.drag || 0.92) + (q.g || 0) * dt; if (q.life <= 0) L.splice(i, 1); }
   };
-  /** Elemental impact sparks. */
-  R.hitSpark = function (e, tags, crit) {
+  /** Impact sparks in the striking ability's own colour (their motion still follows its element). */
+  R.hitSpark = function (e, tags, crit, a) {
     if (this.settings.lowFx && Math.random() < (this.settings.minFx ? 0.9 : 0.6)) return;
-    const c = elemColor(tags), n = crit ? 5 : 2;
+    const c = a ? abColor(a) : elemColor(tags), n = crit ? 5 : 2;
     const fire = tags && tags.includes('fire'), ice = tags && tags.includes('ice'), bolt = tags && tags.includes('lightning');
     for (let i = 0; i < n; i++) {
       const a = Math.random() * TAU, sp = U.rand(30, crit ? 110 : 70);
@@ -307,7 +310,7 @@
   R.projTrail = function (b) {
     if (!b.a || this.settings.minFx || Math.random() < (this.settings.lowFx ? 0.8 : 0.45)) return;
     if (b.drag && b.vx * b.vx + b.vy * b.vy < 900) return; // hanging in the air: no trail
-    const c = b.k === 'flame' || b.k === 'fireball' || b.k === 'wave' ? '#ff8a30' : elemColor(b.a.tags);
+    const c = b.k === 'flame' || b.k === 'fireball' || b.k === 'wave' ? '#ff8a30' : abColor(b.a);
     if (b.k === 'arrow' || b.k === 'dart' || b.k === 'axe' || b.k === 'chakram' || b.k === 'flask') { if (Math.random() < 0.5) return; }
     this.gpart({ x: b.x + U.rand(-1.5, 1.5), y: b.y + U.rand(-1.5, 1.5), vx: -b.vx * 0.05, vy: -b.vy * 0.05 - 4, life: 0.35, max: 0.35, c, r: 0.8, core: c });
   };

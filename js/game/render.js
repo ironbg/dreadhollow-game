@@ -141,8 +141,21 @@
         lights.push({ x: k.x, y: k.y - 12, r: 40, kind: 'item', color: '#c070ff' });
       }
       const bob = k.type === 'xp' ? 0 : Math.sin(now * 4 + k.x) * 1.4;
+      if (k.type === 'tome') { // a dark-blue book is easily lost on a dark floor: a pulsing halo, a beam of light and rising motes
+        const pu = 0.78 + 0.22 * Math.sin(now * 3.6 + k.x * 0.1), hy = y + bob - 2;
+        g.globalCompositeOperation = 'lighter';
+        const bm = g.createLinearGradient(0, hy - 58, 0, hy + 2); // the beam, fading upward
+        bm.addColorStop(0, 'rgba(140,180,255,0)'); bm.addColorStop(0.75, 'rgba(160,195,255,' + 0.22 * pu + ')'); bm.addColorStop(1, 'rgba(200,220,255,' + 0.4 * pu + ')');
+        g.fillStyle = bm; g.fillRect(x - 3.5, hy - 58, 7, 60);
+        g.fillStyle = 'rgba(235,242,255,' + 0.35 * pu + ')'; g.fillRect(x - 0.8, hy - 44, 1.6, 46); // its bright core
+        const R0 = 17 * pu, hg = g.createRadialGradient(x, hy, 1, x, hy, R0); // the halo
+        hg.addColorStop(0, 'rgba(200,220,255,' + 0.9 * pu + ')'); hg.addColorStop(0.45, 'rgba(110,150,255,' + 0.45 * pu + ')'); hg.addColorStop(1, 'rgba(80,110,255,0)');
+        g.fillStyle = hg; g.beginPath(); g.ellipse(x, hy, R0, R0 * 0.8, 0, 0, TAU); g.fill();
+        g.globalCompositeOperation = 'source-over';
+        if (Math.random() < 0.3) this.parts.push({ x: k.x + U.rand(-5, 5), y: k.y - k.z - U.rand(0, 4), vx: U.rand(-3, 3), vy: -U.rand(14, 30), life: 1, max: 1, c: Math.random() < 0.5 ? '#d8e4ff' : '#8aa8ff', s: 1 });
+      }
       this.sprite(g, name, null, 0, x, y + bob, false, 1);
-      if (k.type !== 'xp' && k.type !== 'coin') lights.push({ x: k.x, y: k.y, r: k.type === 'tome' || k.type.startsWith('chest') ? 34 : 20, kind: 'item', color: k.type === 'artifact' ? '#ff70ff' : k.type === 'ulcer' ? '#8040c0' : k.type === 'chest_red' && k.sub ? '#60e070' : k.type === 'chest_red' ? '#ff3040' : k.type === 'chest_gold' ? '#ffd35a' : k.type === 'tome' ? '#80a0ff' : k.type === 'shard' ? '#ff40a0' : k.type.startsWith('rune_') ? DH.content.BUFFS[k.type.slice(5)].color : null });
+      if (k.type !== 'xp' && k.type !== 'coin') lights.push({ x: k.x, y: k.y, r: k.type === 'tome' ? 64 : k.type.startsWith('chest') ? 34 : 20, kind: 'item', color: k.type === 'artifact' ? '#ff70ff' : k.type === 'ulcer' ? '#8040c0' : k.type === 'chest_red' && k.sub ? '#60e070' : k.type === 'chest_red' ? '#ff3040' : k.type === 'chest_gold' ? '#ffd35a' : k.type === 'tome' ? '#a8c4ff' : k.type === 'shard' ? '#ff40a0' : k.type.startsWith('rune_') ? DH.content.BUFFS[k.type.slice(5)].color : null });
       else if (k.type === 'xp' && (k.val >= 10 || k.cluster)) lights.push({ x: k.x, y: k.y, r: 12, kind: 'gem', color: GEM_COL[k.val] || '#ff3040' });
     }
     // shadows: soft contact blobs and silhouettes thrown by nearby lights (vfx.js)
@@ -302,8 +315,8 @@
   };
 
   /** Draw a sprite centred on its anchor. */
-  R.sprite = function (g, name, variant, frame, x, y, flip, scale, flash, alpha, rot) {
-    const s = G.sprite(name, variant), f = frame % s.frames.length, img = flash ? s.flash[f] : s.frames[f];
+  R.sprite = function (g, name, variant, frame, x, y, flip, scale, flash, alpha, rot, recol) { // recol: wear an ability's signature colour
+    const s = G.sprite(name, variant), f = frame % s.frames.length, img = flash ? s.flash[f] : recol ? G.rehued(s.frames[f], recol) : s.frames[f];
     const k = scale || 1, w = s.w * k, h = s.h * k;
     if (alpha != null && alpha < 1) g.globalAlpha = alpha;
     if (rot) { g.save(); g.translate(x, y); g.rotate(rot); g.drawImage(img, -s.ox * k, -s.oy * k, w, h); g.restore(); }
@@ -420,7 +433,7 @@
       const grow = Math.min(1, al.t / 0.35), fade = Math.min(1, al.life / 0.3), sw = al.type === 'pod' && al.arm != null ? 1 + (0.45 - Math.max(0, al.arm)) * 0.6 : 1;
       if (al.type === 'snare') { g.strokeStyle = 'rgba(120,160,60,' + 0.35 * grow * fade + ')'; g.setLineDash([2, 3]); g.beginPath(); g.ellipse(x, y, 26 * al.a.s.area * grow, 26 * al.a.s.area * 0.6 * grow, 0, 0, TAU); g.stroke(); g.setLineDash([]); }
       this.sprite(g, 'plant_' + al.type, null, al.bite > 0 ? 1 : 0, x, y, al.face < 0, grow * sw, al.type === 'pod' && al.arm != null && Math.floor(al.arm * 20) % 2 === 0, fade);
-      lights.push({ x: al.x, y: al.y - 4, r: 16, kind: 'tint', color: al.type === 'pod' ? '#b070ff' : '#9adf50', a: 0.2 * fade });
+      lights.push({ x: al.x, y: al.y - 4, r: 16, kind: 'tint', color: al.type === 'pod' ? this.abColor(al.a) : '#9adf50', a: 0.2 * fade });
       return;
     }
     const name = R.SUMMON[al.kind] || 'sum_imp', variant = al.kind === 'golem' ? 'bone' : al.item ? 'ally' : null;
@@ -532,7 +545,7 @@
     }
   };
   R.drawProj = function (g, b, cx, cy, lights, now) {
-    const x = b.x - cx, y = b.y - cy;
+    const x = b.x - cx, y = b.y - cy, sig = b.a ? this.abColor(b.a) : '#d890ff'; // the throwing ability's own colour
     this.projTrail(b);
     switch (b.k) {
       case 'fireball':
@@ -549,9 +562,9 @@
         lights.push({ x: b.x, y: b.y, r: rr * 3, kind: 'fire' }); break;
       }
       case 'orb':
-        g.drawImage(A.glow('rgba(120,220,255,0.6)'), x - b.r * 2, y - b.r * 2, b.r * 4, b.r * 4);
+        g.drawImage(A.glow(G.rgba(sig, 0.6)), x - b.r * 2, y - b.r * 2, b.r * 4, b.r * 4);
         this.sprite(g, 'arcorb_p', null, Math.floor(now * 6) % 2, x, y, b.vx < 0, Math.max(1, b.r / 7));
-        lights.push({ x: b.x, y: b.y, r: 26, kind: 'magic' }); break;
+        lights.push({ x: b.x, y: b.y, r: 26, kind: 'tint', color: sig, a: 0.55 }); break;
       case 'sphere':
         g.drawImage(A.glow('rgba(255,245,150,0.8)'), x - 12, y - 12, 24, 24);
         this.sprite(g, 'storm_p', null, Math.floor(now * 16) % 2, x, y, false, 1);
@@ -559,10 +572,10 @@
         lights.push({ x: b.x, y: b.y, r: 40, kind: 'bolt' }); break;
       case 'wall': { // spectral warrior of the Wall of the Dead
         const al = Math.min(1, b.life / 0.3, (1.6 - b.life) / 0.15);
-        g.drawImage(A.glow('rgba(170,150,255,0.5)'), x - 14, y - 14, 28, 28);
+        g.drawImage(A.glow(G.rgba(sig, 0.5)), x - 14, y - 14, 28, 28);
         this.sprite(g, 'sum_phantom', null, Math.floor(now * 10) % 2, x, y, Math.cos(b.ang) < 0, 1, false, 0.85 * al);
-        if (Math.random() < 0.4) this.parts.push({ x: b.x - Math.cos(b.ang) * 6, y: b.y + U.rand(-4, 4), vx: 0, vy: -8, life: 0.4, max: 0.4, c: '#b8a8ff', s: 1 });
-        lights.push({ x: b.x, y: b.y, r: 22, kind: 'magic' }); break;
+        if (Math.random() < 0.4) this.parts.push({ x: b.x - Math.cos(b.ang) * 6, y: b.y + U.rand(-4, 4), vx: 0, vy: -8, life: 0.4, max: 0.4, c: sig, s: 1 });
+        lights.push({ x: b.x, y: b.y, r: 22, kind: 'tint', color: sig, a: 0.5 }); break;
       }
       case 'bullet': { // a lead ball with a hot tracer
         const tx = Math.cos(b.ang), ty = Math.sin(b.ang);
@@ -581,12 +594,12 @@
         break;
       }
       case 'spit':
-        g.drawImage(A.glow('rgba(170,110,255,0.7)'), x - 6, y - 6, 12, 12);
-        this.sprite(g, 'seed_p', null, 0, x, y, false, 1, false, 1, now * 8);
-        lights.push({ x: b.x, y: b.y, r: 14, kind: 'magic' }); break;
+        g.drawImage(A.glow(G.rgba(sig, 0.7)), x - 6, y - 6, 12, 12);
+        this.sprite(g, 'seed_p', null, 0, x, y, false, 1, false, 1, now * 8, sig);
+        lights.push({ x: b.x, y: b.y, r: 14, kind: 'tint', color: sig, a: 0.5 }); break;
       case 'shard': { // a splinter of arcane glass (of ice, from the Frost Nova), dimming as its strength drains
         const al = Math.min(1, b.life / 0.35) * (0.45 + 0.55 * Math.min(1, b.mult || 1)), ang = Math.hypot(b.vx, b.vy) > 8 ? Math.atan2(b.vy, b.vx) : b.ang, L = 5 * b.r / 3.2, W = 1.5 * b.r / 3.2;
-        const PAL = b.ice ? ['rgba(140,220,255,0.6)', '#0a2a44', '#9fdcff', '#f0fbff'] : ['rgba(190,110,255,0.6)', '#2a0a44', '#c890ff', '#f4e4ff'];
+        const PAL = b.ice ? ['rgba(140,220,255,0.6)', '#0a2a44', '#9fdcff', '#f0fbff'] : [G.rgba(sig, 0.6), G.shade(sig, -0.75), sig, G.shade(sig, 0.7)];
         b.ang = ang; g.save(); g.globalAlpha = al;
         g.drawImage(A.glow(PAL[0]), x - 7, y - 7, 14, 14);
         g.translate(x, y); g.rotate(ang);
@@ -594,7 +607,7 @@
         g.fillStyle = PAL[2]; g.beginPath(); g.moveTo(L, 0); g.lineTo(0, W); g.lineTo(-L * 0.6, 0); g.lineTo(0, -W); g.closePath(); g.fill();
         g.fillStyle = PAL[3]; g.beginPath(); g.moveTo(L, 0); g.lineTo(0, -W); g.lineTo(-L * 0.3, 0); g.closePath(); g.fill();
         g.restore();
-        lights.push({ x: b.x, y: b.y, r: 12, kind: b.ice ? 'frost' : 'magic' }); break;
+        lights.push(b.ice ? { x: b.x, y: b.y, r: 12, kind: 'frost' } : { x: b.x, y: b.y, r: 12, kind: 'tint', color: sig, a: 0.5 }); break;
       }
       case 'thorn': { // a flung thorn: a dark barb with a green tip
         const ang = Math.atan2(b.vy, b.vx), tx = Math.cos(ang), ty = Math.sin(ang);
@@ -620,25 +633,27 @@
         lights.push({ x: b.x, y: b.y, r: 12, kind: 'tint', color: '#ffd98a', a: 0.35 }); break;
       }
       case 'hex':
-        g.drawImage(A.glow('rgba(190,80,255,0.8)'), x - 7, y - 7, 14, 14);
-        this.sprite(g, 'hex_p', null, 0, x, y, false, 1, false, 1, b.ang || Math.atan2(b.vy, b.vx) || 0.0001);
-        lights.push({ x: b.x, y: b.y, r: 16, kind: 'magic' }); break;
+        g.drawImage(A.glow(G.rgba(sig, 0.8)), x - 7, y - 7, 14, 14);
+        this.sprite(g, 'hex_p', null, 0, x, y, false, 1, false, 1, b.ang || Math.atan2(b.vy, b.vx) || 0.0001, sig);
+        lights.push({ x: b.x, y: b.y, r: 16, kind: 'tint', color: sig, a: 0.55 }); break;
       case 'fist': { // a spectral punch: a violet halo, the fist thrusting forward (swells as it flies), a mist trail
         g.globalCompositeOperation = 'lighter';
-        g.drawImage(A.glow('rgba(170,120,255,0.6)'), x - 15, y - 15, 30, 30);
+        g.drawImage(A.glow(G.rgba(sig, 0.6)), x - 15, y - 15, 30, 30);
         g.globalCompositeOperation = 'source-over';
         const fk = 1 - b.life / (b.max || 1), punch = 1.9 + 0.55 * Math.sin(Math.min(1, fk) * Math.PI);
-        this.sprite(g, 'fist_p', null, 0, x, y, b.vx < 0, punch, false, 1, b.ang || Math.atan2(b.vy, b.vx) || 0.0001);
-        if (!this.settings.minFx) this.gpart({ x: b.x - b.vx * 0.02, y: b.y - b.vy * 0.02, vx: -b.vx * 0.07, vy: -b.vy * 0.07, life: 0.24, max: 0.24, c: '#b080ff', r: 1.5, core: '#e8d8ff' });
-        lights.push({ x: b.x, y: b.y, r: 18, kind: 'tint', color: '#b080ff', a: 0.5 });
+        this.sprite(g, 'fist_p', null, 0, x, y, b.vx < 0, punch, false, 1, b.ang || Math.atan2(b.vy, b.vx) || 0.0001, sig);
+        if (!this.settings.minFx) this.gpart({ x: b.x - b.vx * 0.02, y: b.y - b.vy * 0.02, vx: -b.vx * 0.07, vy: -b.vy * 0.07, life: 0.24, max: 0.24, c: sig, r: 1.5, core: G.shade(sig, 0.7) });
+        lights.push({ x: b.x, y: b.y, r: 18, kind: 'tint', color: sig, a: 0.5 });
         break;
       }
       default: {
         const name = { arrow: 'arrow_p', dart: 'dagger_p', axe: 'axe_p', flask: 'flask_p', chakram: 'chakram_p', fist: 'fist_p', star: 'flail_p' }[b.k];
         if (!name) break;
         this.sprite(g, name, null, 0, x, y, false, b.k === 'axe' || b.k === 'chakram' ? Math.max(1, b.r / 6) : 1, false, 1, b.ang || 0.0001);
-        const ec = b.a && b.a.tags && b.a.tags.some((t) => t === 'fire' || t === 'ice' || t === 'lightning' || t === 'magic') ? this.elemColor(b.a.tags) : b.k === 'flask' ? '#8ae060' : null;
-        if (ec) lights.push({ x: b.x, y: b.y, r: 20, kind: 'tint', color: ec, a: 0.45 }); else if (b.k !== 'axe') lights.push({ x: b.x, y: b.y, r: 10, kind: 'small' });
+        // every thrown weapon carries a faint light in its ability's colour (stronger for spells than for steel)
+        const spell = b.a && b.a.tags && b.a.tags.some((t) => t === 'fire' || t === 'ice' || t === 'lightning' || t === 'magic');
+        if (b.a) lights.push({ x: b.x, y: b.y, r: spell ? 20 : 14, kind: 'tint', color: sig, a: spell ? 0.45 : 0.3 });
+        else if (b.k !== 'axe') lights.push({ x: b.x, y: b.y, r: 10, kind: 'small' });
       }
     }
   };

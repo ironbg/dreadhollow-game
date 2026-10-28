@@ -278,7 +278,7 @@
         if (mine >= s.count * 3) return false;
         const ang = U.rand(0, TAU), d = U.rand(40, 110);
         run.zones.push({ kind: 'rift', a, x: p.x + Math.cos(ang) * d, y: p.y + Math.sin(ang) * d, r: 10, life: s.duration, max: s.duration });
-        run.castCircle(p.x + Math.cos(ang) * d, p.y + Math.sin(ang) * d, 16, '#c070ff');
+        run.castCircle(p.x + Math.cos(ang) * d, p.y + Math.sin(ang) * d, 16, run.abColor(a));
       },
     },
     skyfall: { fire(run, a) {
@@ -371,7 +371,7 @@
       if (volley(run, a, 80, 0.15, true, (ang) => proj(run, { k: 'fist', a, x: p.x + Math.cos(ang) * 6, y: p.y + Math.sin(ang) * 6, vx: Math.cos(ang) * 280, vy: Math.sin(ang) * 280, ang, r: 5, pierce: 0, life: 0.35 })) == null) return false;
       const s = a.s;
       if (s.groundpound) run.after(0.25, () => { const R = 32 * Math.sqrt(s.area); run.hitCircle(p.x, p.y, R, a, 0.3); run.fx.push({ k: 'slam', x: p.x, y: p.y + 3, R, life: 0.35, max: 0.35, color: '#c8a8ff' }); }); // Ground Pound
-      if (s.clutch) { const tg = run.strongest(120); if (tg) { const R = 14 * s.area; run.hitCircle(tg.x, tg.y, R, a, 0.7); run.grid.query(tg.x, tg.y, R, tmp); for (const e of tmp) if (!e.dead && !e.boss && U.dist2(e.x, e.y, tg.x, tg.y) < R * R) run.addSlow(e, 4); run.fx.push({ k: 'pop', x: tg.x, y: tg.y, R, life: 0.3, max: 0.3, color: '#b070ff' }); } } // Spectral Clutch
+      if (s.clutch) { const tg = run.strongest(120); if (tg) { const R = 14 * s.area; run.hitCircle(tg.x, tg.y, R, a, 0.7); run.grid.query(tg.x, tg.y, R, tmp); for (const e of tmp) if (!e.dead && !e.boss && U.dist2(e.x, e.y, tg.x, tg.y) < R * R) run.addSlow(e, 4); run.fx.push({ k: 'pop', x: tg.x, y: tg.y, R, life: 0.3, max: 0.3, color: run.abColor(a) }); } } // Spectral Clutch
       DH.audio.play('punch');
     } },
     storm: { fire(run, a) {
@@ -459,7 +459,7 @@
           proj(run, { k: 'wall', a, x: fx0 + nx * o, y: fy0 + ny * o, vx: -Math.cos(ang) * s.speed, vy: -Math.sin(ang) * s.speed, ang: ang + Math.PI, r: 8 * Math.sqrt(s.area), pierce: 999, life: 1.6, cripple: s.slowing, trailT: 0, mult: 0.35 });
         }
       }
-      if (s.crashing) run.after(70 / s.speed, () => { const R = 24 * Math.sqrt(s.area); run.hitCircle(p.x, p.y, R, a, 0.6); run.fx.push({ k: 'slam', x: p.x, y: p.y + 3, R, life: 0.4, max: 0.4, color: '#b8a8ff' }); run.shake = Math.max(run.shake, 3); DH.audio.play('boom'); });
+      if (s.crashing) run.after(70 / s.speed, () => { const R = 24 * Math.sqrt(s.area); run.hitCircle(p.x, p.y, R, a, 0.6); run.fx.push({ k: 'slam', x: p.x, y: p.y + 3, R, life: 0.4, max: 0.4, color: run.abColor(a) }); run.shake = Math.max(run.shake, 3); DH.audio.play('boom'); });
       DH.audio.play('deathwall');
     } },
     moshpit: { fire(run, a) {
@@ -681,8 +681,8 @@
       if (al.arm == null) { if (this.nearest(al.x, al.y, 22 * Math.sqrt(s.area))) al.arm = 0.45; }
       else if ((al.arm -= dt) <= 0) {
         const R = 36 * s.area; this.hitCircle(al.x, al.y, R, sub, 2.4 * bless);
-        this.fx.push({ k: 'pop', x: al.x, y: al.y, R, life: 0.35, max: 0.35, color: '#b070ff' });
-        this.burst(al.x, al.y, 14, ['#b070ff', '#6a8a30', '#e0c0ff'], 90); this.shake = Math.max(this.shake, 1.5); DH.audio.play('boom');
+        const pc = this.abColor(a); this.fx.push({ k: 'pop', x: al.x, y: al.y, R, life: 0.35, max: 0.35, color: pc });
+        this.burst(al.x, al.y, 14, [pc, '#6a8a30', DH.gfx.shade(pc, 0.6)], 90); this.shake = Math.max(this.shake, 1.5); DH.audio.play('boom');
         al.life = 0;
       }
     } else { // spitter: lobs thorny seeds at range
@@ -748,7 +748,7 @@
         const sp = Math.hypot(al.vx, al.vy), mx = s.speed * 1.6; if (sp > mx) { al.vx *= mx / sp; al.vy *= mx / sp; }
         al.x += al.vx * dt; al.y += al.vy * dt;
         if (tg && U.dist2(al.x, al.y, tg.x, tg.y) < (tg.r + 4) * (tg.r + 4)) {
-          this.hitCircle(al.x, al.y, 14 * s.area, al.a); this.fx.push({ k: 'pop', x: al.x, y: al.y, R: 14 * s.area, life: 0.25, max: 0.25, color: '#d890ff' });
+          this.hitCircle(al.x, al.y, 14 * s.area, al.a); this.fx.push({ k: 'pop', x: al.x, y: al.y, R: 14 * s.area, life: 0.25, max: 0.25, color: this.abColor(al.a) });
           this.allies.splice(i, 1);
         }
         continue;
@@ -776,7 +776,7 @@
       // in reach of its spot, or pressed against the foe's body from any side (another summon may hold its spot)
       if (tg && al.cd <= 0 && (d <= reach + 4 || U.dist2(al.x, al.y, tg.x, tg.y) <= (tg.r + (ALLY_R[al.kind] || 5.5) + reach) ** 2)) {
         if (al.kind === 'golem') { al.cd = s.cd; const R = 22 * s.area; this.hitCircle(al.x, al.y, R, al.a); this.fx.push({ k: 'slam', x: al.x, y: al.y + 4, R, life: 0.35, max: 0.35, color: s.magma ? '#ff8a30' : '#e8dcc0' }); this.shake = Math.max(this.shake, 1.5); DH.audio.play('boom'); }
-        else if (al.kind === 'phantom') { al.cd = 0.55; const R = 18 * s.area; this.hitCircle(al.x, al.y, R, al.a); this.fx.push({ k: 'slash', x: al.x, y: al.y, ang: Math.atan2(dy, dx), R, arc: 2.4, life: 0.2, max: 0.2, color: '#b8a8ff' }); }
+        else if (al.kind === 'phantom') { al.cd = 0.55; const R = 18 * s.area; this.hitCircle(al.x, al.y, R, al.a); this.fx.push({ k: 'slash', x: al.x, y: al.y, ang: Math.atan2(dy, dx), R, arc: 2.4, life: 0.2, max: 0.2, color: this.abColor(al.a) }); }
         else { al.cd = al.kind === 'imp' ? 0.9 : s.cd; this.hit(tg, al.a, 1, dx / (d || 1), dy / (d || 1)); al.bite = 0.15; }
       }
       al.bite = Math.max(0, (al.bite || 0) - dt);
@@ -825,11 +825,11 @@
       if (Math.abs(dx) > 1) al.face = dx > 0 ? 1 : -1;
       if (d <= step) {
         al.x = al.dash.x; al.y = al.dash.y; al.dash = null;
-        if (s.dashimpact) { const R = 30 * s.area; this.hitCircle(al.x, al.y, R, al.a); this.grid.query(al.x, al.y, R, tmp); for (const e of tmp) if (!e.dead && !e.boss && U.dist2(e.x, e.y, al.x, al.y) < R * R) this.addSlow(e, 4); this.fx.push({ k: 'slam', x: al.x, y: al.y + 3, R, life: 0.35, max: 0.35, color: '#b8a8ff' }); } // Dash Impact
+        if (s.dashimpact) { const R = 30 * s.area; this.hitCircle(al.x, al.y, R, al.a); this.grid.query(al.x, al.y, R, tmp); for (const e of tmp) if (!e.dead && !e.boss && U.dist2(e.x, e.y, al.x, al.y) < R * R) this.addSlow(e, 4); this.fx.push({ k: 'slam', x: al.x, y: al.y + 3, R, life: 0.35, max: 0.35, color: this.abColor(al.a) }); } // Dash Impact
       }
       else { al.x += dx / d * step; al.y += dy / d * step; }
       this.hitCircle(al.x, al.y, 14 * s.area, al.a, 1.5, (e) => this.canHit(e, 'phd' + al.id, 0.5));
-      if (Math.random() < 0.6) this.parts.push({ x: al.x, y: al.y, vx: 0, vy: 0, life: 0.3, max: 0.3, c: '#b8a8ff', s: 1 });
+      if (Math.random() < 0.6) this.parts.push({ x: al.x, y: al.y, vx: 0, vy: 0, life: 0.3, max: 0.3, c: this.abColor(al.a), s: 1 });
       al.moving = true;
       return;
     }
@@ -837,14 +837,14 @@
     this.phantomExtras(al, dt);
     if (U.dist2(al.x, al.y, p.x, p.y) > 90 * 90) {
       const a = Math.random() * TAU; al.dash = { x: p.x + Math.cos(a) * 16, y: p.y + Math.sin(a) * 12 };
-      this.fx.push({ k: 'slash', x: al.x, y: al.y, ang: Math.atan2(al.dash.y - al.y, al.dash.x - al.x), R: 20, arc: 1.2, life: 0.2, max: 0.2, color: '#d8c8ff' });
+      this.fx.push({ k: 'slash', x: al.x, y: al.y, ang: Math.atan2(al.dash.y - al.y, al.dash.x - al.x), R: 20, arc: 1.2, life: 0.2, max: 0.2, color: DH.gfx.shade(this.abColor(al.a), 0.4) });
       DH.audio.play('swing'); return;
     }
     const tg = this.nearest(al.x, al.y, 28 * s.area);
     if (tg && al.cd <= 0) {
       al.cd = s.cd; const dx = tg.x - al.x, dy = tg.y - al.y, R = 18 * s.area;
       if (Math.abs(dx) > 1) al.face = dx > 0 ? 1 : -1;
-      this.hitCircle(al.x, al.y, R, al.a); this.fx.push({ k: 'slash', x: al.x, y: al.y, ang: Math.atan2(dy, dx), R, arc: 2.4, life: 0.2, max: 0.2, color: '#b8a8ff' });
+      this.hitCircle(al.x, al.y, R, al.a); this.fx.push({ k: 'slash', x: al.x, y: al.y, ang: Math.atan2(dy, dx), R, arc: 2.4, life: 0.2, max: 0.2, color: this.abColor(al.a) });
     }
   };
   /** The Phantom Knight's upgrades that work wherever it stands: orbs about it, darts thrown from it. */
@@ -1007,7 +1007,7 @@
     if (s.riftdart && b.k === 'dart') { // Phantom Rift: a spent dart bursts in magic, harder for every pierce it had left
       const R = 14 * Math.sqrt(s.area), sub = this.subAb(b.a, 'riftdart', ['magic', 'area']);
       this.hitCircle(b.x, b.y, R, sub, 0.5 * (1 + Math.min(4, Math.max(0, b.pierce))));
-      this.fx.push({ k: 'pop', x: b.x, y: b.y, R, life: 0.25, max: 0.25, color: '#c070ff' });
+      this.fx.push({ k: 'pop', x: b.x, y: b.y, R, life: 0.25, max: 0.25, color: this.abColor(b.a) });
     }
   };
   /** A puddle of an element that keeps working on those in it (the Alchemist's brews use the same). */
@@ -1075,8 +1075,8 @@
     const R = 38 * z.a.s.area * (mult > 1 ? 1.15 : 1);
     this.hitCircle(z.x, z.y, R, z.a, mult || 1);
     if (z.a.s.riftsplinters) { const sub = this.subAb(z.a, 'riftshard', ['magic', 'projectile']); for (let i = 0; i < 6; i++) { const an = i / 6 * TAU + Math.random() * 0.5; proj(this, { k: 'shard', a: sub, x: z.x, y: z.y, vx: Math.cos(an) * 200, vy: Math.sin(an) * 200, ang: an, r: 3.2, pierce: 999, life: 1.4, max: 1.4, drag: 3, decay: 0.4, cdHit: 0.45, mult: 0.3 }); } } // Rift Splinters
-    this.fx.push({ k: 'pop', x: z.x, y: z.y, R, life: 0.35, max: 0.35, color: '#c070ff' });
-    this.burst(z.x, z.y, 14, ['#c070ff', '#ffffff', '#40106a'], 90);
+    const zc = this.abColor(z.a); this.fx.push({ k: 'pop', x: z.x, y: z.y, R, life: 0.35, max: 0.35, color: zc });
+    this.burst(z.x, z.y, 14, [zc, '#ffffff', DH.gfx.shade(zc, -0.7)], 90);
     DH.audio.play('boom');
     if (z.a.s.chainRift) for (const o of this.zones) if (o.kind === 'rift' && !o.gone && o !== z && U.dist2(o.x, o.y, z.x, z.y) < 90 * 90) this.after(0.15, () => this.detonateRift(o, 1));
   };

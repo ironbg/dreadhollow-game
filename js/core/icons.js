@@ -2227,13 +2227,14 @@
     else if (pre === 'h' && DH.gfx.painters[id]) { P.circle(g, 16, 16, 15.5, P.rg(g, 16, 20, 16, ['#4a3a44', '#1a1016'])); g.save(); g.beginPath(); g.arc(16, 16, 15, 0, Math.PI * 2); g.clip(); g.setTransform(1, 0, 0, 1, 0, 0); g.scale(U2, U2); heroPortrait(g, id); g.restore(); }
     else if (pre === 'm' && DH.gfx.painters[id]) { P.circle(g, 16, 16, 15, P.lg(g, 0, 1, 0, 31, ['#fff0a0', '#c89030', '#6a4a14'])); P.circle(g, 16, 16, 12.5, P.rg(g, 16, 18, 13, ['#4a3a44', '#1a1016'])); g.save(); g.beginPath(); g.arc(16, 16, 12.3, 0, Math.PI * 2); g.clip(); g.setTransform(1, 0, 0, 1, 0, 0); g.scale(U2, U2); heroPortrait(g, id, true); g.restore(); }
     else if (pre === 'ab') {
-      const def = C.abilities[id];
+      const def = C.abilities[id], sig = C.AB_COLOR && C.AB_COLOR[id];
       const tag = def && def.badge ? def.badge : def ? (def.tags.find((t) => ['fire', 'lightning', 'ice'].includes(t)) || (def.tags.includes('summon') ? 'summon' : def.tags.includes('magic') ? 'magic' : def.tags[0])) : 'physical';
-      frame(g, ELEM[tag] || ELEM.physical);
+      frame(g, sig || ELEM[tag] || ELEM.physical); // each ability its own colour, not its element's
       g.save(); g.beginPath(); g.rect(3.4, 3.4, 25.2, 25.2); g.clip();
       if (ABI[id]) ABI[id](g);
       else { const gl = def && GL[def.icon]; if (gl) { g.translate(16, 16); g.scale(0.82, 0.82); g.translate(-16, -16); gl(g); } }
       g.restore();
+      if (sig) G.rehueCanvas(c, sig, 7, 7, 50, 50); // the glyphs' violets follow the signature too
       if (def && def.hero) { P.circle(g, 26, 26, 4.2, INK); P.circle(g, 26, 26, 3.6, P.vol(g, 26, 26, 3.6, '#e8b840')); GL.starSmallAt(g, 26, 26); }
     }
     else if (pre === 'bl' && TRA[id]) { medal(g, TRA[id][0], false); g.save(); g.beginPath(); g.arc(16, 16, 11.6, 0, Math.PI * 2); g.clip(); TRA[id][1](g); g.restore(); } // a Blessing or Archive medal: one plain frame for all

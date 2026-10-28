@@ -191,7 +191,7 @@
     n = R.stacks(s.decay); if (n) { S.decay = Math.min(fx.edict ? 3 : ecap, S.decay + n); S.decayPS = Math.max(S.decayPS || 0, eb); }
     if (s.stun && !e.boss && Math.random() < s.stun) e.stun = C.STATUS.stun; // Stun: frozen in place; re-stunning refreshes, never stacks
     if (this.settings.dmgNumbers) this.text(e.x + U.rand(-4, 4), e.y - e.r - 4, Math.round(dmg), crit ? '#ffd35a' : '#ffffff', crit);
-    this.hitSpark(e, a.tags, crit);
+    this.hitSpark(e, a.tags, crit, a);
     DH.audio.play('hit', e.painter);
     this.itemsOnHit(e, a, dmg);
     if (e.hp <= 0) this.killEnemy(e);

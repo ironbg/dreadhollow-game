@@ -203,6 +203,20 @@
                   traits: [T('multi', { count: 1 }, 2), T('amp', { dmgPct: 0.3 }), T('kindle', { burn: 0.25 }), T('expanse', { area: 0.25 }), T('haste', { as: 0.25 }), T('static', { spark: 0.2 })] },
   };
 
+  /* Each ability's signature colour: its icon frame, the sparks of its hits, the trails and light of what it throws.
+   * Chosen by theme (fire warm, frost cold, holy gold, blood crimson...) and spread so no two read alike
+   * (closest pair about ΔE 16 in Lab). Without an entry, an ability falls back to its element's colour. */
+  C.AB_COLOR = {
+    cleave: '#768aa7', longbow: '#3bb03f', judgment: '#f6cf23', flamejet: '#ff811a', spirits: '#5aeda3', shieldbash: '#336aeb',
+    arcbolt: '#fff700', wolves: '#8ed3f6', frostaxe: '#06c2db', arcaneorb: '#708dff', bloodpulse: '#e2122e', scythes: '#1a9383',
+    chord: '#b266f5', arquebus: '#b39756', concoction: '#bff316', bogplants: '#5bb814', hexlance: '#f349e2', chakrams: '#89abb3',
+    orbs: '#ddc688', darts: '#b8e0bd', wyrmfire: '#f9391f', stormsphere: '#fff9a3', halo: '#fcac7e', rifts: '#5b22bf',
+    skyfall: '#c14915', golem: '#7e5730', phantom: '#bac1f3', avalanche: '#7be0cf', hail: '#dee8ed', flail: '#c1665c',
+    fists: '#39ef5d', storm: '#696cbf', axes: '#3d7dae', nova: '#3dc8ff', plague: '#7d8b23', fireball: '#ffad1f',
+    smite: '#ff7247', thorns: '#416f2a', illumination: '#f3edce', prism: '#f0a8da', shards: '#f86299', wardrum: '#a85d24',
+    deathwall: '#8bbb81', moshpit: '#ea8696', confetti: '#e481f8', riff: '#f910a4', pyro: '#f76464',
+  };
+
   /* Ability Upgrades: at ability level III and VI (total trait ranks) the next level-up offers one of two
    * mechanic-changing upgrades. A third one (any leftover) opens at level IX with an Ability Signet or for the
    * Oracle. Upgrades are shared archetypes (name key up.<id>) with mods added on top of the ability's traits. */

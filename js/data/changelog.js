@@ -4,6 +4,17 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.27',
+      bg: [
+        'Всяко умение вече има собствен цвят: иконата му, искрите от ударите, следите и светлината на снарядите. Уменията не се сливат в едно лилаво и се различават от пръв поглед.',
+        'Томовете на земята светят по-силно — с ореол и светъл лъч, и се виждат отдалеч.',
+      ],
+      en: [
+        'Every ability now has its own colour: its icon, the sparks of its hits, the trails and light of its missiles. Abilities no longer blur into one violet and tell apart at a glance.',
+        'Tomes on the ground glow much brighter, with a halo and a beam of light, and are easy to spot from afar.',
+      ],
+    },
+    {
       v: '1.61.26',
       bg: [
         'Призованите помощници вече имат тяло: вълците, големите и фантомите не се струпват един върху друг, обграждат врага от различни страни и не влизат в телата на враговете.',

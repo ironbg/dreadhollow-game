@@ -191,6 +191,33 @@
     return src;
   }
   gfx.classicize = classicize;
+
+  /** Steer the violets of a canvas region to the hue of `col` (a hex colour). Many spell glyphs and missiles were
+   *  painted violet, so different abilities read alike; this keeps each pixel's lightness and scales its saturation
+   *  by the signature's, so one painted sprite can wear any ability's colour. Edits the canvas in place. */
+  function rehueCanvas(c, col, x, y, w, h) {
+    const hsl = (r, g, b) => { const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn; if (!d) return [0, 0, l];
+      const s = d / (1 - Math.abs(2 * l - 1)), hh = mx === r ? ((g - b) / d + 6) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; return [hh * 60, s, l]; };
+    const rgbOf = (hh, s, l) => { const k = (n) => (n + hh / 30) % 12, a = s * Math.min(l, 1 - l), f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); return [f(0), f(8), f(4)]; };
+    const [ah, as] = hsl(...[1, 3, 5].map((i) => parseInt(col.slice(i, i + 2), 16) / 255)), sk = Math.min(1, 0.3 + as);
+    x = x || 0; y = y || 0; w = w || c.width; h = h || c.height;
+    const g = c.getContext('2d'), id = g.getImageData(x, y, w, h), d = id.data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (!d[i + 3]) continue;
+      const [hh, s, l] = hsl(d[i] / 255, d[i + 1] / 255, d[i + 2] / 255);
+      if (hh < 250 || hh > 335 || s < 0.18) continue; // only the violets
+      const o = rgbOf(ah, Math.min(1, s * sk), l); d[i] = o[0] * 255; d[i + 1] = o[1] * 255; d[i + 2] = o[2] * 255;
+    }
+    g.putImageData(id, x, y);
+    return c;
+  }
+  gfx.rehueCanvas = rehueCanvas;
+  /** A cached copy of a sprite frame with its violets in the hue of `col`. */
+  gfx.rehued = function (img, col) {
+    const m = img._rehue || (img._rehue = {});
+    if (!m[col]) { const c = canvas(img.width, img.height); c.getContext('2d').drawImage(img, 0, 0); m[col] = rehueCanvas(c, col); }
+    return m[col];
+  };
   function whiten(src) {
     const c = canvas(src.width, src.height), g = c.getContext('2d');
     g.drawImage(src, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#ffffff'; g.fillRect(0, 0, c.width, c.height);
