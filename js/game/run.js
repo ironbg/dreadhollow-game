@@ -162,7 +162,7 @@
       }
       if (this.won && this.portal) { // stepping into the rift ends the hall (a short arming beat so the killing blow doesn't trigger it)
         this.portal.t += dt;
-        if (this.portal.t > 0.6 && U.dist2(p.x, p.y, this.portal.x, this.portal.y) < 24 * 24) {
+        if (this.portal.t > 1 && U.dist2(p.x, p.y, this.portal.x, this.portal.y) < 16 * 16) {
           this.portal = null; this.lateLoot(); this.state = 'victory'; DH.audio.play('victory'); DH.events.emit('run:victory', this);
         }
       }
@@ -876,7 +876,10 @@
           // can gather the spoils the Lord dropped (its gold chest, tome, potion, artifact...). The run ends only when the
           // hero steps into the rift — so the last boss's loot is never lost to an instant cut to the results. (every hall)
           this.won = true;
-          this.portal = { x: e.x, y: e.y - 6, t: 0 }; // anchored at the ground where the Lord fell; the rift rises up from here
+          // the rift opens beside the Lord, never on its spoils (they scatter about 25 units): 75 units to the side, on the far
+          // side from the hero so the way to it leads across the loot; sideways works on the narrow bridge halls too
+          const side = Math.sign(e.x - this.player.x) || 1;
+          this.portal = { x: e.x + side * 75, y: this.onBridge(e.y - 6, 30), t: 0 }; // anchored on the ground; the rift rises from here
           for (const o of this.enemies) if (!o.dead && o !== e && !o.def.prop) { o.dead = true; this.burst(o.x, o.y, 4, ['#fff', '#aaa'], 50); }
           this.eproj.length = 0; this.hazards.length = 0;
           // sweep only the grindy scatter to the hero; leave the real prizes (chests, tome, potion, artifact, herb) to be picked up

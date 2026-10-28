@@ -465,8 +465,9 @@
    *  swirling crimson core, rising from the ground where the final Lord fell. Grows in as it opens. */
   R.drawPortal = function (g, cx, cy, now, lights) {
     const pr = this.portal, x = pr.x - cx, by = pr.y - cy; // base (ground) point, on screen
-    const grow = Math.min(1, pr.t * 1.4), flick = 0.93 + Math.sin(now * 9) * 0.045 + Math.sin(now * 23.3) * 0.025;
-    const w = 18 * grow, h = 33 * grow * flick;            // half-width / half-height of the oval
+    const gt = Math.min(1, pr.t / 1.2), grow = gt * gt * (3 - 2 * gt); // eases open over 1.2 s
+    const breathe = 0.97 + Math.sin(now * 1.8) * 0.03;    // a slow breath, not a flicker
+    const w = 14 * grow, h = 26 * grow * breathe;          // half-width / half-height of the oval
     const yc = by - h - 3;                                 // oval centre, sitting just above the ground
     // 1) broad red halo washing the ground and the air around the gate
     g.save();
@@ -488,7 +489,7 @@
     g.clip();
     g.globalCompositeOperation = 'lighter'; // molten streaks turning inside the mouth
     for (let i = 0; i < 4; i++) {
-      const a = now * 1.4 + i * TAU / 4, sx = x + Math.cos(a) * w * 0.46, sy = yc + Math.sin(a) * h * 0.46;
+      const a = now * 0.45 + i * TAU / 4, sx = x + Math.cos(a) * w * 0.46, sy = yc + Math.sin(a) * h * 0.46;
       g.beginPath(); g.ellipse(sx, sy, w * 0.3, h * 0.24, a, 0, TAU); g.fillStyle = 'rgba(255,110,50,' + 0.15 * grow + ')'; g.fill();
     }
     g.restore();
@@ -505,20 +506,20 @@
     g.beginPath(); g.ellipse(x, yc, w * 1.16, h * 1.14, 0, 0, TAU); g.fillStyle = rim; g.fill();
     // flame tongues flaring off the rim
     for (let i = 0; i < 10; i++) {
-      const a = i / 10 * TAU, fl2 = 0.7 + 0.6 * Math.abs(Math.sin(now * 6 + i * 1.7));
+      const a = i / 10 * TAU, fl2 = 0.8 + 0.35 * Math.sin(now * 2.2 + i * 1.7); // each tongue swells and ebbs slowly, out of step
       const ex = x + Math.cos(a) * w * 1.02, ey = yc + Math.sin(a) * h * 1.02;
       const tx = x + Math.cos(a) * w * (1.02 + 0.28 * fl2), ty = yc + Math.sin(a) * h * (1.02 + 0.28 * fl2);
       g.beginPath();
-      g.moveTo(ex + Math.cos(a + 1.5) * 2.6, ey + Math.sin(a + 1.5) * 2.6);
+      g.moveTo(ex + Math.cos(a + 1.5) * 2.2, ey + Math.sin(a + 1.5) * 2.2);
       g.lineTo(tx, ty);
-      g.lineTo(ex + Math.cos(a - 1.5) * 2.6, ey + Math.sin(a - 1.5) * 2.6);
+      g.lineTo(ex + Math.cos(a - 1.5) * 2.2, ey + Math.sin(a - 1.5) * 2.2);
       g.closePath();
       g.fillStyle = 'rgba(255,' + (130 + Math.floor(80 * fl2)) + ',50,' + 0.45 * grow * fl2 + ')'; g.fill();
     }
     g.restore();
-    lights.push({ x: pr.x, y: yc + cy, r: 110 * grow, kind: 'fire' });
+    lights.push({ x: pr.x, y: yc + cy, r: 90 * grow, kind: 'fire' });
     // embers rising out of the gate
-    if (grow > 0.5 && Math.random() < 0.9) this.parts.push({ x: pr.x + U.rand(-w, w), y: yc + cy + U.rand(-h * 0.5, h * 0.5), vx: U.rand(-7, 7), vy: -U.rand(24, 54), life: 1, max: 1, c: Math.random() < 0.5 ? '#ff7a20' : '#ffd264', s: 1 });
+    if (grow > 0.5 && Math.random() < 0.45) this.parts.push({ x: pr.x + U.rand(-w, w), y: yc + cy + U.rand(-h * 0.5, h * 0.5), vx: U.rand(-4, 4), vy: -U.rand(12, 26), life: 1.5, max: 1.5, c: Math.random() < 0.5 ? '#ff7a20' : '#ffd264', s: 1 });
   };
   R.drawPlayer = function (g, cx, cy) {
     const p = this.player;
