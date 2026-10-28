@@ -756,10 +756,10 @@
       if (al.kind === 'phantom') { this.updatePhantom(al, dt); continue; }
       if (al.kind === 'plant') { this.updatePlant(al, dt); continue; }
       // melee summons: wolf, golem, imp — hunt what threatens the hero and stay at their side, never trailing off-screen
-      const leash = 170;
+      const leash = 205, hunt = 180; // how far round the hero they hunt, and where they turn back to it
       const tooFar = U.dist2(al.x, al.y, p.x, p.y) > leash * leash;
       // look for a foe near the HERO, not near the summon: a kiting hero would otherwise leave them fighting the back of the horde
-      const tg = tooFar ? null : this.nearest(p.x, p.y, 150);
+      const tg = tooFar ? null : this.nearest(p.x, p.y, hunt);
       let tx = p.x + Math.cos(al.t * 1.3 + i * 2.1) * 22, ty = p.y + Math.sin(al.t * 1.3 + i * 2.1) * 16; // orbit close to the hero while idle
       if (tg) { // each takes its own side of the foe, standing against its body rather than inside it
         const rr = (tg.r || 6) + (ALLY_R[al.kind] || 5.5) + 0.5;
@@ -835,7 +835,7 @@
     }
     al.moving = false; al.id = al.id || Math.random();
     this.phantomExtras(al, dt);
-    if (U.dist2(al.x, al.y, p.x, p.y) > 90 * 90) {
+    if (U.dist2(al.x, al.y, p.x, p.y) > 108 * 108) { // dashes back once the hero is this far (a fifth wider, like the other summons)
       const a = Math.random() * TAU; al.dash = { x: p.x + Math.cos(a) * 16, y: p.y + Math.sin(a) * 12 };
       this.fx.push({ k: 'slash', x: al.x, y: al.y, ang: Math.atan2(al.dash.y - al.y, al.dash.x - al.x), R: 20, arc: 1.2, life: 0.2, max: 0.2, color: DH.gfx.shade(this.abColor(al.a), 0.4) });
       DH.audio.play('swing'); return;
