@@ -755,13 +755,16 @@
       }
       if (al.kind === 'phantom') { this.updatePhantom(al, dt); continue; }
       if (al.kind === 'plant') { this.updatePlant(al, dt); continue; }
-      // melee summons: wolf, golem, imp
-      const leash = 150;
-      const tg = this.nearest(al.x, al.y, 140);
+      // melee summons: wolf, golem, imp — hunt what threatens the hero and stay at their side, never trailing off-screen
+      const leash = 170;
       const tooFar = U.dist2(al.x, al.y, p.x, p.y) > leash * leash;
-      let tx = p.x + Math.cos(al.t + i) * 18, ty = p.y + Math.sin(al.t + i) * 12;
-      if (tg && !tooFar) { tx = tg.x + Math.cos(i * 2.4) * 7; ty = tg.y + Math.sin(i * 2.4) * 5; } // each takes its own side of the foe, not one heap
-      const spd = (al.kind === 'golem' ? s.speed : al.kind === 'phantom' ? s.speed * 1.4 : al.kind === 'imp' ? 90 : s.speed) * (tooFar ? 1.8 : 1);
+      // look for a foe near the HERO, not near the summon: a kiting hero would otherwise leave them fighting the back of the horde
+      const tg = tooFar ? null : this.nearest(p.x, p.y, 150);
+      let tx = p.x + Math.cos(al.t * 1.3 + i * 2.1) * 22, ty = p.y + Math.sin(al.t * 1.3 + i * 2.1) * 16; // orbit close to the hero while idle
+      if (tg) { tx = tg.x + Math.cos(i * 2.4) * 7; ty = tg.y + Math.sin(i * 2.4) * 5; } // each takes its own side of the foe, not one heap
+      // keep up with the hero: a wolf/imp is at least as quick as the hero is (with a burst when catching up); the golem stays its heavy self
+      const base = al.kind === 'golem' ? s.speed : Math.max(al.kind === 'imp' ? 90 : s.speed, (this.P.speed || 90) + 12);
+      const spd = base * (tooFar ? 1.9 : 1);
       const dx = tx - al.x, dy = ty - al.y, d = Math.hypot(dx, dy);
       const reach = al.kind === 'golem' ? 14 : 10;
       if (d > reach) { al.x += dx / d * spd * dt; al.y += dy / d * spd * dt; al.moving = true; } else al.moving = false;

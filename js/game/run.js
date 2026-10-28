@@ -52,6 +52,7 @@
       this.usedAdRevive = false; this.usedGemRevive = 0; this.usedAdReroll = false;
       this.warns = []; // marked ground about to burst (volatile Champions)
       this.shake = 0; this.freeze = 0; this.hurtFlash = 0; this.whiteFlash = 0; this.healGlow = 0; this.healAcc = 0; this.healT = 0; this.victoryT = -1;
+      this.won = false; this.portal = null; // the hall is cleared, and the rift the hero leaves through once the spoils are gathered
       this.bosses = []; this.dmgByAb = {};
       this.bag = []; this.runGear = {}; this.wellSent = null; this.well = null; this.wellExtra = []; this.buckets = 0;
       this.champDrops = {};
@@ -159,6 +160,12 @@
         this.victoryT -= dt;
         if (this.victoryT <= 0) { this.lateLoot(); this.state = 'victory'; DH.audio.play('victory'); DH.events.emit('run:victory', this); }
       }
+      if (this.won && this.portal) { // stepping into the rift ends the hall (a short arming beat so the killing blow doesn't trigger it)
+        this.portal.t += dt;
+        if (this.portal.t > 0.6 && U.dist2(p.x, p.y, this.portal.x, this.portal.y) < 22 * 22) {
+          this.portal = null; this.lateLoot(); this.state = 'victory'; DH.audio.play('victory'); DH.events.emit('run:victory', this);
+        }
+      }
     }
 
     /* ---------------- spawning ---------------- */
@@ -194,7 +201,7 @@
       return { rate: rate * (1 + this.stage.index * 0.1) * (1 + this.agony * 0.35) * agonyDense * (this.fx_.spawn || 1) * (this.fx_.giants ? 0.6 : 1), mix };
     }
     updateSpawns(dt) {
-      if (this.victoryT > 0) return;
+      if (this.victoryT > 0 || this.won) return; // the hall is cleared once the Lord falls; nothing new pours in while the hero gathers spoils
       const { rate, mix } = this.spawnRate();
       this.spawnAcc += rate * dt;
       const cap = this.settings.lowFx ? 220 : 330;
@@ -865,10 +872,17 @@
         }
         if (e.final && this.bosses.some((b) => b.final && !b.dead && b !== e)) { /* the Mirror: more Lords still stand */ }
         else if (e.final) {
-          this.victoryT = 2.5;
+          // The Lord falls and a rift tears open where it stood: the hall is won, but the fight pauses here so the hero
+          // can gather the spoils the Lord dropped (its gold chest, tome, potion, artifact...). The run ends only when the
+          // hero steps into the rift — so the last boss's loot is never lost to an instant cut to the results. (every hall)
+          this.won = true;
+          this.portal = { x: e.x, y: e.y - 44, t: 0 };
           for (const o of this.enemies) if (!o.dead && o !== e && !o.def.prop) { o.dead = true; this.burst(o.x, o.y, 4, ['#fff', '#aaa'], 50); }
           this.eproj.length = 0; this.hazards.length = 0;
-          this.pickups.forEach((pk) => { if (pk.type === 'xp' || pk.type === 'coin' || pk.type === 'shard' || pk.type === 'artifact' || pk.type === 'mat' || pk.type === 'herb') pk.mag = true; });
+          // sweep only the grindy scatter to the hero; leave the real prizes (chests, tome, potion, artifact, herb) to be picked up
+          this.pickups.forEach((pk) => { if (pk.type === 'xp' || pk.type === 'coin' || pk.type === 'shard' || pk.type === 'mat') pk.mag = true; });
+          DH.audio.play('victory');
+          this.text(this.portal.x, this.portal.y - 16, t('hud.exitRift'), '#d8a8ff', true);
         }
       }
     }

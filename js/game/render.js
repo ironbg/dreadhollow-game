@@ -111,6 +111,13 @@
       this.sprite(g, 'well', null, 0, w.x - cx, w.y - cy, false, 1, false, w.used ? 0.6 : 1);
       lights.push({ x: w.x, y: w.y, r: w.used ? 30 : 55, kind: 'magic' });
     }
+    // the exit rift: opens where the final Lord fell; the hero steps in to leave (grows in, breathes, trails motes)
+    if (this.portal) {
+      const pr = this.portal, x = pr.x - cx, y = pr.y - cy, grow = Math.min(1, pr.t * 1.6), k = grow * (1.7 + Math.sin(now * 5) * 0.14);
+      this.sprite(g, 'rift_p', null, 0, x, y, false, k, false, grow);
+      lights.push({ x: pr.x, y: pr.y, r: 70 * grow, kind: 'magic' });
+      if (grow > 0.5 && Math.random() < 0.6) this.parts.push({ x: pr.x + U.rand(-12, 12), y: pr.y + U.rand(-4, 10), vx: U.rand(-6, 6), vy: -U.rand(14, 30), life: 0.9, max: 0.9, c: Math.random() < 0.5 ? '#c070ff' : '#e8c0ff', s: 1 });
+    }
     // the Lord's Hex obelisk (secret)
     const hxo = this.hex;
     if (hxo && hxo.x - cx > -30 && hxo.y - cy > -40 && hxo.x - cx < W + 30 && hxo.y - cy < H + 40) {
@@ -265,6 +272,7 @@
     };
     for (const b of this.bosses) if (b && !b.dead) mark(b.x, b.y, '#ff3040', b.painter, b.variant);
     if (this.well && !this.well.used) mark(this.well.x, this.well.y, '#5ab8ff', 'well');
+    if (this.portal) mark(this.portal.x, this.portal.y, '#c070ff', 'rift_p');
     for (const q of this.pylons || []) if (!q.dead) mark(q.x, q.y, '#ffd060', 'pylon');
     this.secretMarks(mark);
     this.rescueMarks(mark);
