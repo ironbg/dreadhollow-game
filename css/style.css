@@ -1353,11 +1353,22 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .adm-who { font-weight: 800; word-break: break-all; }
 .adm-text { white-space: pre-wrap; line-height: 1.4; margin-top: 3px; user-select: text; -webkit-user-select: text; }
 /* an ability's damage types under its name: each in its own colour, small; what an upgrade can still add is fainter, in brackets */
-.abtypes { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1px 9px; margin: 1px 0 3px; font: 800 10.5px var(--body); letter-spacing: .05em; line-height: 1.25; }
+.abtypes { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1px 8px; margin: 1px 0 3px; font: 800 9.5px var(--body); letter-spacing: .05em; line-height: 1.25; }
 .abtypes .dt { color: var(--dc, #ddd); text-transform: uppercase; text-shadow: 0 1px 0 #000, 0 0 6px rgba(0,0,0,.6); }
 .abtypes .dt.later { opacity: .5; font-weight: 600; text-transform: none; letter-spacing: .01em; }
 .abtypes .dt.gain { text-shadow: 0 1px 0 #000, 0 0 7px var(--dc); }
 .dt-physical { --dc: #d6dae4; } .dt-magic { --dc: #c792ff; } .dt-fire { --dc: #ff8c3e; } .dt-lightning { --dc: #ffe14d; } .dt-ice { --dc: #80d8ff; }
-.hero-card .abtypes { margin: 1px 0 0; font-size: 9.5px; }
+.hero-card .abtypes { margin: 1px 0 0; font-size: 8.5px; }
 .abtypes .dt.later { color: #b8aea0; } .abtypes .dt.later > span { color: var(--dc); }
 .abtypes .dt.notype { --dc: #9a9088; text-transform: none; letter-spacing: .01em; font-weight: 700; }
+/* the hero card: its action on top, the "i" (details) in the bottom-right corner */
+.hero-card .hc-side { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 8px; flex: none; }
+.hero-card .hc-side .infob { min-height: 30px; width: 30px; min-width: 30px; padding: 0; font-family: Georgia, serif; font-size: 16px; }
+/* the hero details window */
+.modal.heroinfo .hi-top { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.modal.heroinfo .hi-top .pic { width: 56px; height: 56px; flex: none; display: flex; align-items: center; justify-content: center; }
+.modal.heroinfo .hi-top .pic img { width: 48px; height: 48px; }
+.modal.heroinfo .hi-row { display: flex; gap: 10px; padding: 7px 2px; border-top: 1px solid rgba(176,138,72,.22); font-size: 13.5px; line-height: 1.35; }
+.modal.heroinfo .hi-k { flex: 0 0 34%; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; padding-top: 1px; }
+.modal.heroinfo .hi-v { flex: 1; min-width: 0; }
+.modal.heroinfo img.wi { width: 22px; height: 22px; }

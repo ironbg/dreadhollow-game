@@ -21,7 +21,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'home.battle': 'BATTLE', 'home.energyNext': '+1 torch in {t}', 'home.energyFull': 'Torches full',
 
   'armory.heroes': 'Heroes', 'armory.gear': 'Relics', 'armory.selected': 'Selected', 'armory.select': 'Select', 'armory.unlocked': 'Hero unlocked!',
-  'armory.bundle': 'Bundle', 'armory.hpSpeed': 'HP {hp} · Speed {spd}', 'armory.equipped': 'Equipped', 'armory.inventory': 'Inventory ({n})',
+  'armory.bundle': 'Bundle', 'armory.heroInfo': 'Hero details', 'armory.weapon': 'Weapon', 'armory.strengths': 'Strengths', 'armory.every10': 'Every 10 levels', 'armory.hp': 'Health', 'armory.speed': 'Speed', 'armory.equipped': 'Equipped', 'armory.inventory': 'Inventory ({n})',
   'armory.autoMerge': 'Auto-merge', 'armory.getGear': 'Get relics', 'armory.noGear': 'No relics yet. Open chests or defeat bosses!', 'armory.merged': 'Relics merged!',
 
   'shrine.desc': 'Permanent Blessings. Every hero has their own: pick whose you are raising.', 'shrine.levels': 'levels raised: {n}', 'shrine.perLevel': '{v} per level', 'shrine.total': 'Total: {v}',
@@ -371,7 +371,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'well.keeperDesc': 'Items you sent up the Well wait here. Pay to claim them.', 'well.none': 'Nothing is waiting here.', 'well.claimed': 'Item claimed!',
   'hud.well': 'A Well appeared nearby!', 'hud.agony': 'Agony', 'hud.enraged': 'Enraged', 'hud.dismounted': 'The Lord dismounts!', 'hud.block': 'BLOCK',
   'home.deeds': 'Deeds', 'home.agonyLocked': 'Clear this hall to unlock Agony',
-  'armory.well': 'Wellkeeper', 'armory.affinity': 'Strengths: {list}', 'armory.perLevel': 'Every 10 levels: {list}', 'armory.noSlotItems': 'No items for this slot yet.',
+  'armory.well': 'Wellkeeper', 'armory.noSlotItems': 'No items for this slot yet.',
   'armory.lootHint': 'Champions and Lords drop items during runs. Chests favor items you\'ve found but aren\'t wearing — unequip anything you don\'t want.',
   'marks.title': 'Class Marks', 'marks.desc': 'Equip another hero\'s Mark to gain its bonus and add that hero\'s class traits to your class-trait choices.',
   'marks.name': 'Mark of the {hero}', 'marks.access': 'grants class traits',

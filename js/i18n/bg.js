@@ -21,7 +21,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'home.battle': 'БИТКА', 'home.energyNext': '+1 факла след {t}', 'home.energyFull': 'Факлите са на максимум',
 
   'armory.heroes': 'Герои', 'armory.gear': 'Реликви', 'armory.selected': 'Избран', 'armory.select': 'Избери', 'armory.unlocked': 'Героят е отключен!',
-  'armory.bundle': 'Пакет', 'armory.hpSpeed': 'Живот {hp} · Скорост {spd}', 'armory.equipped': 'Екипирани', 'armory.inventory': 'Инвентар ({n})',
+  'armory.bundle': 'Пакет', 'armory.heroInfo': 'Информация за героя', 'armory.weapon': 'Оръжие', 'armory.strengths': 'Силни страни', 'armory.every10': 'На всеки 10 нива', 'armory.hp': 'Живот', 'armory.speed': 'Скорост', 'armory.equipped': 'Екипирани', 'armory.inventory': 'Инвентар ({n})',
   'armory.autoMerge': 'Автосливане', 'armory.getGear': 'Още реликви', 'armory.noGear': 'Още нямаш реликви. Отваряй сандъци или побеждавай босове!', 'armory.merged': 'Реликвите са слети!',
 
   'shrine.desc': 'Постоянни благословии. Всеки герой има свои: избери за кого ги вдигаш.', 'shrine.levels': 'вдигнати нива: {n}', 'shrine.perLevel': '{v} на ниво', 'shrine.total': 'Сега: {v}',
@@ -371,7 +371,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'well.keeperDesc': 'Тук чакат предметите, които си изпратил през Кладенеца. Плати, за да ги получиш.', 'well.none': 'Тук нищо не чака.', 'well.claimed': 'Предметът е твой!',
   'hud.well': 'Наблизо се появи Кладенец!', 'hud.agony': 'Агония', 'hud.enraged': 'В ярост', 'hud.dismounted': 'Владетелят слиза от коня!', 'hud.block': 'БЛОК',
   'home.deeds': 'Подвизи', 'home.agonyLocked': 'Премини залата, за да отключиш Агония',
-  'armory.well': 'Пазител', 'armory.affinity': 'Силни страни: {list}', 'armory.perLevel': 'На всеки 10 нива: {list}', 'armory.noSlotItems': 'Още нямаш предмети за това място.',
+  'armory.well': 'Пазител', 'armory.noSlotItems': 'Още нямаш предмети за това място.',
   'armory.lootHint': 'Шампионите и Владетелите пускат предмети по време на битка. Сандъците по-често дават познати предмети, които не носиш — свали онова, което не ти трябва.',
   'marks.title': 'Класови белези', 'marks.desc': 'Сложи Белега на друг герой: получаваш бонуса му, а класовите му черти влизат в изборите ти за класови черти.',
   'marks.name': 'Белег на {hero}', 'marks.access': 'дава класови черти',

@@ -112,6 +112,18 @@
     if (u.deed) return ui.deedText(DH.deeds.byId[u.deed]);
     return '';
   };
+  /** A hero's details, opened from the "i" on its card: weapon and its damage types, strengths, growth, health and speed. */
+  ui.openHeroInfo = (id) => {
+    const hd = C.heroes[id];
+    const aff = Object.entries(hd.affinity || {}).filter(([, v]) => v === 2).map(([k]) => t('trait.' + k)).join(', ');
+    const row = (label, val, cls) => h('div.hi-row', h('div.hi-k', label), h('div.hi-v' + (cls ? '.' + cls : ''), val));
+    ui.modal({ title: t('hero.' + id + '.name'), cls: 'heroinfo', body: h('div',
+      h('div.hi-top', h('div.pic', A.img('h_' + id)), h('div.small.muted', t('hero.' + id + '.desc'))),
+      row(t('armory.weapon'), h('div.row', { style: { gap: '6px' } }, A.img('ab_' + hd.weapon, 'wi'), h('div', h('span', t('ab.' + hd.weapon + '.name')), ui.abTypes(hd.weapon)))),
+      aff ? row(t('armory.strengths'), aff, 'good') : null,
+      hd.perLevel ? row(t('armory.every10'), ui.fmtStats(Object.fromEntries(Object.entries(hd.perLevel).filter(([k]) => k !== 'taken')), 10), 'goldtxt') : null,
+      row(t('armory.hp'), String(hd.hp)), row(t('armory.speed'), String(hd.speed))) });
+  };
   ui.screens.armory = {
     render() {
       const tab = ui.sub.armory || 'heroes', b = M.badges();
@@ -149,11 +161,9 @@
             h('div', { style: { fontWeight: 800, fontSize: '16px' } }, t('hero.' + id + '.name')),
             h('div.small.muted', t('hero.' + id + '.desc')),
             h('div.row', { style: { marginTop: '4px', gap: '4px' } }, A.img('ab_' + hd.weapon, 'wi'), h('div', h('span.small', t('ab.' + hd.weapon + '.name')), ui.abTypes(hd.weapon))),
-            aff ? h('div.small.good', t('armory.affinity', { list: aff })) : null,
-            hd.perLevel ? h('div.small.goldtxt', t('armory.perLevel', { list: ui.fmtStats(Object.fromEntries(Object.entries(hd.perLevel).filter(([k]) => k !== 'taken')), 10) })) : null,
-            h('div.small.muted', t('armory.hpSpeed', { hp: hd.hp, spd: hd.speed })),
             !owned && hd.unlock.deed ? h('div.small.goldtxt', A.img('u_unlock', 'ci'), ' ' + ui.unlockText(hd.unlock)) : null),
-          action));
+          // the details (strengths, growth, health and speed) live behind the "i", so the card stays short on a phone
+          h('div.hc-side', action, h('button.btn.small.ghost.infob', { 'aria-label': t('armory.heroInfo'), onclick: (e) => { e.stopPropagation(); click(); ui.openHeroInfo(id); } }, 'i'))));
       });
       box.querySelectorAll('img.wi').forEach((i) => { i.style.width = '20px'; i.style.height = '20px'; });
       return box;
