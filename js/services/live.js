@@ -71,6 +71,7 @@
     /** Get the new version: the web page reloads past its offline cache; the app opens its page in the store
      *  (a link outside the game leaves the app for the Play Store). */
     update(r) {
+      if (r && r.play && DH.appUpdate) { DH.appUpdate.retry(); return; } // Google Play's own update window
       if (DH.platform.native) { location.href = (r && r.store) || (this.config && this.config.app && this.config.app.store) || STORE; return; }
       const go = () => location.reload();
       if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) navigator.serviceWorker.getRegistration().then((g) => (g ? g.update() : null)).catch(() => {}).then(go);

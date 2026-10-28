@@ -4,6 +4,15 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.34',
+      bg: [
+        'Приложението само проверява в Google Play за нова версия при пускане и при връщане в играта, и я инсталира (никога по време на битка).',
+      ],
+      en: [
+        'The app now checks Google Play for a new version when it starts and when you come back to it, and installs it (never during a fight).',
+      ],
+    },
+    {
       v: '1.61.33',
       bg: [
         'Акведукт: двата тома на моста вече са в противоположни посоки — един нагоре и един надолу — и по-близо (около 180 м).',

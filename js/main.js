@@ -151,6 +151,7 @@
     DH.live.init(); // versions, events and the real date from the web host
     DH.ads.init(); // the app: ad consent where the law asks for it, then the ads SDK
     DH.iap.init(); // the app: the store's products and any purchase not yet delivered
+    DH.appUpdate.init(); // the app: Google Play has a newer build -> its update, before playing on
     // the title screen first; the daily calendar waits until the player has come through the window
     DH.title.show(() => {
       const calendar = () => { ui.flushSeason(); if (M.loginPending()) setTimeout(() => ui.openLogin(), 500); };

@@ -1,6 +1,6 @@
 {
   "name": "dreadhollow",
-  "version": "1.61.33",
+  "version": "1.61.34",
   "private": true,
   "description": "Dreadhollow - dark fantasy horde-survival roguelite for web and mobile",
   "scripts": {
@@ -22,6 +22,7 @@
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.3",
+    "@capawesome/capacitor-app-update": "8.1.0",
     "@capgo/native-purchases": "^8.8.1",
     "firebase": "^12.19.0"
   },
