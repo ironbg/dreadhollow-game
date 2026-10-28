@@ -111,13 +111,8 @@
       this.sprite(g, 'well', null, 0, w.x - cx, w.y - cy, false, 1, false, w.used ? 0.6 : 1);
       lights.push({ x: w.x, y: w.y, r: w.used ? 30 : 55, kind: 'magic' });
     }
-    // the exit rift: opens where the final Lord fell; the hero steps in to leave (grows in, breathes, trails motes)
-    if (this.portal) {
-      const pr = this.portal, x = pr.x - cx, y = pr.y - cy, grow = Math.min(1, pr.t * 1.6), k = grow * (1.7 + Math.sin(now * 5) * 0.14);
-      this.sprite(g, 'rift_p', null, 0, x, y, false, k, false, grow);
-      lights.push({ x: pr.x, y: pr.y, r: 70 * grow, kind: 'magic' });
-      if (grow > 0.5 && Math.random() < 0.6) this.parts.push({ x: pr.x + U.rand(-12, 12), y: pr.y + U.rand(-4, 10), vx: U.rand(-6, 6), vy: -U.rand(14, 30), life: 0.9, max: 0.9, c: Math.random() < 0.5 ? '#c070ff' : '#e8c0ff', s: 1 });
-    }
+    // the exit rift: a big red town-portal-style gateway that opens where the final Lord fell; the hero steps in to leave
+    if (this.portal) this.drawPortal(g, cx, cy, now, lights);
     // the Lord's Hex obelisk (secret)
     const hxo = this.hex;
     if (hxo && hxo.x - cx > -30 && hxo.y - cy > -40 && hxo.x - cx < W + 30 && hxo.y - cy < H + 40) {
@@ -452,6 +447,65 @@
       else { g.strokeStyle = '#1a1c22'; g.lineWidth = 1.3; g.beginPath(); g.ellipse(x, 0, 1.9, 1.25, 0, 0, TAU); g.stroke(); g.strokeStyle = '#b4bac8'; g.lineWidth = 0.6; g.stroke(); } // face-on ring
     }
     g.restore();
+  };
+  /** The exit rift: a tall red gateway in the Diablo town-portal mould — a white-hot fiery rim around a dark,
+   *  swirling crimson core, rising from the ground where the final Lord fell. Grows in as it opens. */
+  R.drawPortal = function (g, cx, cy, now, lights) {
+    const pr = this.portal, x = pr.x - cx, by = pr.y - cy; // base (ground) point, on screen
+    const grow = Math.min(1, pr.t * 1.4), flick = 0.93 + Math.sin(now * 9) * 0.045 + Math.sin(now * 23.3) * 0.025;
+    const w = 18 * grow, h = 33 * grow * flick;            // half-width / half-height of the oval
+    const yc = by - h - 3;                                 // oval centre, sitting just above the ground
+    // 1) broad red halo washing the ground and the air around the gate
+    g.save();
+    g.globalCompositeOperation = 'lighter';
+    let gl = g.createRadialGradient(x, yc, 2, x, yc, h * 2.3);
+    gl.addColorStop(0, 'rgba(255,120,45,' + 0.6 * grow + ')');
+    gl.addColorStop(0.5, 'rgba(225,40,18,' + 0.26 * grow + ')');
+    gl.addColorStop(1, 'rgba(120,8,8,0)');
+    g.beginPath(); g.ellipse(x, yc, h * 1.9, h * 2.2, 0, 0, TAU); g.fillStyle = gl; g.fill();
+    g.restore();
+    // 2) the dark swirling crimson mouth (drawn first; the rim then burns over its edge)
+    g.save();
+    const inner = g.createRadialGradient(x - w * 0.12, yc - h * 0.08, 1, x, yc, w);
+    inner.addColorStop(0, 'rgba(70,6,6,' + grow + ')');        // dark crimson depth at the core
+    inner.addColorStop(0.5, 'rgba(165,24,14,' + 0.96 * grow + ')');
+    inner.addColorStop(0.85, 'rgba(255,86,34,' + 0.96 * grow + ')'); // brightening toward the burning rim
+    inner.addColorStop(1, 'rgba(255,140,60,' + grow + ')');
+    g.beginPath(); g.ellipse(x, yc, w * 0.84, h * 0.86, 0, 0, TAU); g.fillStyle = inner; g.fill();
+    g.clip();
+    g.globalCompositeOperation = 'lighter'; // molten streaks turning inside the mouth
+    for (let i = 0; i < 4; i++) {
+      const a = now * 1.4 + i * TAU / 4, sx = x + Math.cos(a) * w * 0.46, sy = yc + Math.sin(a) * h * 0.46;
+      g.beginPath(); g.ellipse(sx, sy, w * 0.3, h * 0.24, a, 0, TAU); g.fillStyle = 'rgba(255,110,50,' + 0.15 * grow + ')'; g.fill();
+    }
+    g.restore();
+    // 3) the burning rim: a thick glowing ring, white-hot at its heart, licking over the mouth's edge
+    g.save();
+    g.globalCompositeOperation = 'lighter';
+    const rim = g.createRadialGradient(x, yc, w * 0.62, x, yc, w * 1.16);
+    rim.addColorStop(0, 'rgba(255,40,10,0)');
+    rim.addColorStop(0.62, 'rgba(255,80,24,' + 0.4 * grow + ')');
+    rim.addColorStop(0.78, 'rgba(255,170,60,' + grow + ')');
+    rim.addColorStop(0.88, 'rgba(255,252,224,' + grow + ')'); // white-hot ring
+    rim.addColorStop(0.95, 'rgba(255,150,50,' + 0.9 * grow + ')');
+    rim.addColorStop(1, 'rgba(255,90,30,0)');
+    g.beginPath(); g.ellipse(x, yc, w * 1.16, h * 1.14, 0, 0, TAU); g.fillStyle = rim; g.fill();
+    // flame tongues flaring off the rim
+    for (let i = 0; i < 10; i++) {
+      const a = i / 10 * TAU, fl2 = 0.7 + 0.6 * Math.abs(Math.sin(now * 6 + i * 1.7));
+      const ex = x + Math.cos(a) * w * 1.02, ey = yc + Math.sin(a) * h * 1.02;
+      const tx = x + Math.cos(a) * w * (1.02 + 0.28 * fl2), ty = yc + Math.sin(a) * h * (1.02 + 0.28 * fl2);
+      g.beginPath();
+      g.moveTo(ex + Math.cos(a + 1.5) * 2.6, ey + Math.sin(a + 1.5) * 2.6);
+      g.lineTo(tx, ty);
+      g.lineTo(ex + Math.cos(a - 1.5) * 2.6, ey + Math.sin(a - 1.5) * 2.6);
+      g.closePath();
+      g.fillStyle = 'rgba(255,' + (130 + Math.floor(80 * fl2)) + ',50,' + 0.45 * grow * fl2 + ')'; g.fill();
+    }
+    g.restore();
+    lights.push({ x: pr.x, y: yc + cy, r: 110 * grow, kind: 'fire' });
+    // embers rising out of the gate
+    if (grow > 0.5 && Math.random() < 0.9) this.parts.push({ x: pr.x + U.rand(-w, w), y: yc + cy + U.rand(-h * 0.5, h * 0.5), vx: U.rand(-7, 7), vy: -U.rand(24, 54), life: 1, max: 1, c: Math.random() < 0.5 ? '#ff7a20' : '#ffd264', s: 1 });
   };
   R.drawPlayer = function (g, cx, cy) {
     const p = this.player;
