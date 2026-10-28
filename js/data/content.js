@@ -36,7 +36,7 @@
   C.STAGE_START = {
     crypt:      ['tome', 'tome'],
     abyss:      ['tome', 'magnet'],
-    aqueduct:   ['tome', 'potion', 'tome'],
+    aqueduct:   ['tome', 'tome', 'potion'], // on the bridge the items alternate sides: one tome up the viaduct, one down (Up and Down)
     catacombs:  ['tome', 'magnet'],
     discord:    ['tome', 'chest_red'],
     blightmire: ['tome', 'magnet'],
@@ -47,6 +47,7 @@
   C.defenseDR = (d) => { const D = d * 100; if (!D) return 0; return Math.min(0.99, Math.sign(D) * (0.6 - 24 / (Math.abs(D) + 40)) + Math.min(0.4, 0.004 * D)); };
   C.UNITS_PER_M = 14;           // world units per metre: heroes (~70 units/s) walk ~5 m/s
   C.START_DIST = [320 * C.UNITS_PER_M, 380 * C.UNITS_PER_M]; // 320-380 m: about a minute's walk (a 10-minute hall leaves time for the rest)
+  C.START_DIST_HALL = { aqueduct: [170 * C.UNITS_PER_M, 190 * C.UNITS_PER_M] }; // the viaduct's tomes lie closer, one each way: up, back and down is about 1:50
   /* "Starting Ability": a hall quest (deed) that puts an Arcane Tome right next to the hero at the start */
   // the deed that puts an Arcane Tome beside the hero at the start of each hall
   C.START_TOME_QUEST = { crypt: { kills: 2000 }, abyss: { kills: 2000 }, catacombs: { survive: 6 }, blightmire: { survive: 4 }, reliquary: { kills: 2000 } };

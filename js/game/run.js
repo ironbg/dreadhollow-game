@@ -64,9 +64,9 @@
       // Starting Ability: once the hall's quest is done, an Arcane Tome waits next to the hero
       if (C.START_TOME_DEED[this.stageId] && DH.meta.deedDone(C.START_TOME_DEED[this.stageId])) this.drop('tome', 34, -10);
       { // the hall's starting items, spread around the spawn
-        const items = C.STAGE_START[this.stageId] || [], a0 = Math.random() * TAU;
+        const items = C.STAGE_START[this.stageId] || [], a0 = Math.random() * TAU, DR = (C.START_DIST_HALL || {})[this.stageId] || C.START_DIST;
         items.forEach((type, i) => {
-          const a = a0 + (i / items.length) * TAU + U.rand(-0.25, 0.25), d = U.rand(C.START_DIST[0], C.START_DIST[1]);
+          const a = a0 + (i / items.length) * TAU + U.rand(-0.25, 0.25), d = U.rand(DR[0], DR[1]);
           const x = this.bridge ? (i % 2 ? 1 : -1) * d * (1 + Math.floor(i / 2) * 0.12) : Math.cos(a) * d, y = this.bridge ? U.rand(-this.bridge * 0.5, this.bridge * 0.5) : Math.sin(a) * d;
           this.pickups.push({ type, x, y, val: 1, cluster: false, vx: 0, vy: 0, z: 0, vz: 0, mag: false, t: 1, start: true });
         });
