@@ -761,7 +761,10 @@
       // look for a foe near the HERO, not near the summon: a kiting hero would otherwise leave them fighting the back of the horde
       const tg = tooFar ? null : this.nearest(p.x, p.y, 150);
       let tx = p.x + Math.cos(al.t * 1.3 + i * 2.1) * 22, ty = p.y + Math.sin(al.t * 1.3 + i * 2.1) * 16; // orbit close to the hero while idle
-      if (tg) { tx = tg.x + Math.cos(i * 2.4) * 7; ty = tg.y + Math.sin(i * 2.4) * 5; } // each takes its own side of the foe, not one heap
+      if (tg) { // each takes its own side of the foe, standing against its body rather than inside it
+        const rr = (tg.r || 6) + (ALLY_R[al.kind] || 5.5) + 0.5;
+        tx = tg.x + Math.cos(i * 2.4) * rr; ty = tg.y + Math.sin(i * 2.4) * rr;
+      }
       // keep up with the hero: a wolf/imp is at least as quick as the hero is (with a burst when catching up); the golem stays its heavy self
       const base = al.kind === 'golem' ? s.speed : Math.max(al.kind === 'imp' ? 90 : s.speed, (this.P.speed || 90) + 12);
       const spd = base * (tooFar ? 1.9 : 1);
@@ -770,13 +773,47 @@
       if (d > reach) { al.x += dx / d * spd * dt; al.y += dy / d * spd * dt; al.moving = true; } else al.moving = false;
       if (Math.abs(dx) > 1) al.face = dx > 0 ? 1 : -1;
       al.cd = (al.cd || 0) - dt;
-      if (tg && d <= reach + 4 && al.cd <= 0) {
+      // in reach of its spot, or pressed against the foe's body from any side (another summon may hold its spot)
+      if (tg && al.cd <= 0 && (d <= reach + 4 || U.dist2(al.x, al.y, tg.x, tg.y) <= (tg.r + (ALLY_R[al.kind] || 5.5) + reach) ** 2)) {
         if (al.kind === 'golem') { al.cd = s.cd; const R = 22 * s.area; this.hitCircle(al.x, al.y, R, al.a); this.fx.push({ k: 'slam', x: al.x, y: al.y + 4, R, life: 0.35, max: 0.35, color: s.magma ? '#ff8a30' : '#e8dcc0' }); this.shake = Math.max(this.shake, 1.5); DH.audio.play('boom'); }
         else if (al.kind === 'phantom') { al.cd = 0.55; const R = 18 * s.area; this.hitCircle(al.x, al.y, R, al.a); this.fx.push({ k: 'slash', x: al.x, y: al.y, ang: Math.atan2(dy, dx), R, arc: 2.4, life: 0.2, max: 0.2, color: '#b8a8ff' }); }
         else { al.cd = al.kind === 'imp' ? 0.9 : s.cd; this.hit(tg, al.a, 1, dx / (d || 1), dy / (d || 1)); al.bite = 0.15; }
       }
       al.bite = Math.max(0, (al.bite || 0) - dt);
       if (al.kind === 'golem' && s.earthen && al.moving && (al.trail = (al.trail || 0) - dt) <= 0) { al.trail = 0.8; this.puddle(al.a, 'earth', al.x, al.y + 3, 14 * Math.sqrt(s.area), 3, 0.15); } // Earthen Trails
+    }
+    this.separateAllies();
+  };
+  /** Summons have bodies: walking ones (wolves, golems, imps, phantoms, item beasts) push apart when they overlap, so a pack
+   *  spreads around its foe instead of piling into one sprite, and none sits on top of the hero. Plants (rooted) and
+   *  spirits (thrown) are left alone. A few relaxation steps over a handful of allies: cheap. */
+  const ALLY_R = { wolf: 6, golem: 9, imp: 4.5, phantom: 6.5 };
+  R.separateAllies = function () {
+    const list = this.allies, p = this.player, pr = p.r || 7;
+    for (let it = 0; it < 2; it++) {
+      for (let i = 0; i < list.length; i++) {
+        const a = list[i], ra = ALLY_R[a.kind] || (a.item ? 5.5 : 0); if (!ra) continue;
+        for (let j = i + 1; j < list.length; j++) {
+          const b = list[j], rb = ALLY_R[b.kind] || (b.item ? 5.5 : 0); if (!rb) continue;
+          let dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy; const min = ra + rb;
+          if (d2 >= min * min) continue;
+          if (d2 < 1e-4) { const an = i * 2.399 + j; dx = Math.cos(an); dy = Math.sin(an); d2 = 1; } // exactly stacked: split along a varied angle
+          const d = Math.sqrt(d2), push = (min - d) * 0.5, ux = dx / d, uy = dy / d;
+          a.x -= ux * push; a.y -= uy * push; b.x += ux * push; b.y += uy * push;
+        }
+        // out of the bodies of foes on the ground (fliers pass overhead, as they do for everyone); only the summon gives way
+        if (it === 0) {
+          this.grid.query(a.x, a.y, ra + 24, tmp);
+          for (const e of tmp) {
+            if (e.dead || e.def.fly || e.def.prop) continue;
+            const ex = a.x - e.x, ey = a.y - e.y, e2 = ex * ex + ey * ey, m = ra + e.r;
+            if (e2 < m * m) { const d = Math.sqrt(e2) || 1, ux = e2 ? ex / d : 1, uy = e2 ? ey / d : 0; a.x = e.x + ux * m; a.y = e.y + uy * m; }
+          }
+        }
+        // and off the hero (only the summon moves: the hero is never shoved by its own pack)
+        const dx = a.x - p.x, dy = a.y - p.y, d2 = dx * dx + dy * dy, min = ra + pr;
+        if (d2 < min * min) { const d = Math.sqrt(d2) || 1, ux = d2 ? dx / d : Math.cos(i * 2.399), uy = d2 ? dy / d : Math.sin(i * 2.399); a.x = p.x + ux * min; a.y = p.y + uy * min; }
+      }
     }
   };
   /** Spirit Warrior: fights where it stands; when the hero moves away it dashes after them, cutting through everything on the way. */
