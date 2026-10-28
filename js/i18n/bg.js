@@ -337,7 +337,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'mod.orbit': 'Обикаля около теб, преди да излети', 'mod.stream': 'Става непрекъснат поток', 'mod.chainRift': 'Разломите взривяват един друг', 'mod.fork': 'Раздвоява се при първия удар',
 
   'tag.physical': 'Физическо', 'tag.magic': 'Магия', 'tag.projectile': 'Снаряд', 'tag.melee': 'Близък бой', 'tag.area': 'Обхват', 'tag.summon': 'Призоваване',
-  'tag.fire': 'Огън', 'tag.lightning': 'Мълния', 'tag.ice': 'Лед',
+  'tag.fire': 'Огън', 'tag.lightning': 'Мълния', 'tag.ice': 'Лед', 'abtype.lv': '(ниво {n})', 'abtype.none': 'Без тип щета',
 
   'lv.base': 'Черта', 'lv.elevated': 'Висша черта', 'lv.class.wp': 'Владеене на оръжие', 'lv.class.st': 'Стойка', 'lv.class.dd': 'Посвещение',
   'lv.ability': 'Черта на умение', 'lv.mark': 'Белег на {hero}', 'lv.sister': 'Заключва сдвоената черта: {name}', 'lv.rank': 'Ранг {n}',

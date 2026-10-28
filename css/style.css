@@ -1352,3 +1352,12 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .adm-row { padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
 .adm-who { font-weight: 800; word-break: break-all; }
 .adm-text { white-space: pre-wrap; line-height: 1.4; margin-top: 3px; user-select: text; -webkit-user-select: text; }
+/* an ability's damage types under its name: each in its own colour, small; what an upgrade can still add is fainter, in brackets */
+.abtypes { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1px 9px; margin: 1px 0 3px; font: 800 10.5px var(--body); letter-spacing: .05em; line-height: 1.25; }
+.abtypes .dt { color: var(--dc, #ddd); text-transform: uppercase; text-shadow: 0 1px 0 #000, 0 0 6px rgba(0,0,0,.6); }
+.abtypes .dt.later { opacity: .5; font-weight: 600; text-transform: none; letter-spacing: .01em; }
+.abtypes .dt.gain { text-shadow: 0 1px 0 #000, 0 0 7px var(--dc); }
+.dt-physical { --dc: #d6dae4; } .dt-magic { --dc: #c792ff; } .dt-fire { --dc: #ff8c3e; } .dt-lightning { --dc: #ffe14d; } .dt-ice { --dc: #80d8ff; }
+.hero-card .abtypes { margin: 1px 0 0; font-size: 9.5px; }
+.abtypes .dt.later { color: #b8aea0; } .abtypes .dt.later > span { color: var(--dc); }
+.abtypes .dt.notype { --dc: #9a9088; text-transform: none; letter-spacing: .01em; font-weight: 700; }

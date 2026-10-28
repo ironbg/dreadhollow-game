@@ -333,6 +333,9 @@
   };
   /** Upgrades that change an ability's damage type: add tags, or swap one for another. */
   C.UPGRADE_TAGS = { froststrike: { swap: ['fire', 'ice'] }, staticice: { add: ['lightning'] }, frozenfire: { add: ['fire'] }, heatblast: { add: ['physical'] }, magma: { add: ['fire'] }, elementalrift: { add: ['fire'] }, elements: { add: ['fire', 'ice', 'lightning'] }, firebass: { add: ['fire'] }, iceconfetti: { add: ['ice'] }, fireriff: { add: ['fire'] }, hotspark: { add: ['lightning'] } };
+  /* Upgrades that keep the ability's own type but add a separate hit of another (a sub-ability with its own tags): shown
+   * beside the ability's damage types as what it can still gain. */
+  C.UPGRADE_HITS = { explosive: ['fire'], piercingblades: ['magic'], riftdart: ['magic'] };
   /** Upgrade mods that change how an ability works rather than a number: each is copied onto the ability as a flag
    *  (its value a strength where it has one) and described by its own line (mod.<key>). */
   C.UNIQUE_MODS = ['orbit', 'stream', 'chainRift', 'fork', 'purge', 'pulse'];

@@ -337,7 +337,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'mod.orbit': 'Circles you before flying out', 'mod.stream': 'Becomes a continuous stream', 'mod.chainRift': 'Rifts set each other off', 'mod.fork': 'Splits in two on the first hit',
 
   'tag.physical': 'Physical', 'tag.magic': 'Magic', 'tag.projectile': 'Projectile', 'tag.melee': 'Melee', 'tag.area': 'Area', 'tag.summon': 'Summon',
-  'tag.fire': 'Fire', 'tag.lightning': 'Lightning', 'tag.ice': 'Ice',
+  'tag.fire': 'Fire', 'tag.lightning': 'Lightning', 'tag.ice': 'Ice', 'abtype.lv': '(level {n})', 'abtype.none': 'No damage type',
 
   'lv.base': 'Trait', 'lv.elevated': 'Elevated Trait', 'lv.class.wp': 'Weapon Proficiency', 'lv.class.st': 'Stance', 'lv.class.dd': 'Dedication',
   'lv.ability': 'Ability Trait', 'lv.mark': 'Mark of the {hero}', 'lv.sister': 'Locks out its sister trait: {name}', 'lv.rank': 'Rank {n}',

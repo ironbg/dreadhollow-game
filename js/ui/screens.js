@@ -148,7 +148,7 @@
           h('div.grow',
             h('div', { style: { fontWeight: 800, fontSize: '16px' } }, t('hero.' + id + '.name')),
             h('div.small.muted', t('hero.' + id + '.desc')),
-            h('div.row', { style: { marginTop: '4px', gap: '4px' } }, A.img('ab_' + hd.weapon, 'wi'), h('span.small', t('ab.' + hd.weapon + '.name'))),
+            h('div.row', { style: { marginTop: '4px', gap: '4px' } }, A.img('ab_' + hd.weapon, 'wi'), h('div', h('span.small', t('ab.' + hd.weapon + '.name')), ui.abTypes(hd.weapon))),
             aff ? h('div.small.good', t('armory.affinity', { list: aff })) : null,
             hd.perLevel ? h('div.small.goldtxt', t('armory.perLevel', { list: ui.fmtStats(Object.fromEntries(Object.entries(hd.perLevel).filter(([k]) => k !== 'taken')), 10) })) : null,
             h('div.small.muted', t('armory.hpSpeed', { hp: hd.hp, spd: hd.speed })),

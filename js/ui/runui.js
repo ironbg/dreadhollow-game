@@ -27,13 +27,53 @@
     }
     if (c.kind === 'ab') {
       const T = C.abilities[c.ab].traits[c.idx];
-      return { icon: 'ab_' + c.ab, name: t('ab.' + c.ab + '.name') + ': ' + t('at.' + T.k), desc: ui.fmtMods(T.m), tag: t('lv.ability'), tcls: 'abt' };
+      return { icon: 'ab_' + c.ab, ab: c.ab, name: t('ab.' + c.ab + '.name') + ': ' + t('at.' + T.k), desc: ui.fmtMods(T.m), tag: t('lv.ability'), tcls: 'abt' };
     }
-    if (c.kind === 'up') return { icon: 'ab_' + c.ab, name: t('ab.' + c.ab + '.name') + ': ' + t('up.' + c.id), desc: ui.fmtMods(C.UPGRADES[c.id]), tag: t('lv.upgrade', { n: ['', 'III', 'VI', 'IX'][c.tier] }), tcls: 'upg' };
-    if (c.kind === 'ability') { const d = C.abilities[c.id]; return { icon: 'ab_' + c.id, name: t('ab.' + c.id + '.name'), desc: t('ab.' + c.id + '.desc'), tag: d.tags.map((x) => t('tag.' + x)).join(' · '), tcls: 'abt' }; }
+    if (c.kind === 'up') return { icon: 'ab_' + c.ab, ab: c.ab, up: c.id, name: t('ab.' + c.ab + '.name') + ': ' + t('up.' + c.id), desc: ui.fmtMods(C.UPGRADES[c.id]), tag: t('lv.upgrade', { n: ['', 'III', 'VI', 'IX'][c.tier] }), tcls: 'upg' };
+    if (c.kind === 'ability') { const d = C.abilities[c.id]; return { icon: 'ab_' + c.id, ab: c.id, name: t('ab.' + c.id + '.name'), desc: t('ab.' + c.id + '.desc'), tag: d.tags.filter((x) => !DMG_TYPES.includes(x)).map((x) => t('tag.' + x)).join(' · '), tcls: 'abt' }; } // the damage types get their own coloured line
     if (c.kind === 'edge') return { icon: 'a_edge', name: t('stat.' + c.stat), desc: ui.fmtStats({ [c.stat]: c.v }), tag: t('artifact.edge.name'), tcls: 'upg' };
     if (c.kind === 'gold') return { icon: 'i_gold', name: t('levelup.gold'), desc: '+' + c.amount };
     return { icon: 'heart', name: t('levelup.heal'), desc: t('levelup.healDesc') };
+  };
+
+  /* The damage types of an ability, each in its own colour, in a small line under its name: those it deals now, then,
+   * fainter and in brackets, those an upgrade can still add and the ability level that offers it. Out of a fight (no
+   * run) every reachable type is shown; in one, the choices already made are counted. upId: an upgrade card, whose
+   * own new types are shown as gained (+) instead. */
+  const DMG_TYPES = ['physical', 'magic', 'fire', 'lightning', 'ice'], ROMAN = { 3: 'III', 6: 'VI', 9: 'IX' };
+  const upGives = (u) => {
+    const ut = C.UPGRADE_TAGS[u] || {}, out = [];
+    (ut.add || []).forEach((x) => out.push({ type: x }));
+    if (ut.swap) out.push({ type: ut.swap[1], swap: ut.swap[0] });
+    ((C.UPGRADE_HITS || {})[u] || []).forEach((x) => out.push({ type: x }));
+    return out.filter((o) => DMG_TYPES.includes(o.type));
+  };
+  ui.abTypes = (id, run, upId) => {
+    const def = C.abilities[id]; if (!def) return null;
+    const own = run && run.abilities.find((a) => a.id === id), taken = (run && run.traits.up[id]) || [];
+    let cur = (own && own.tags ? own.tags : def.tags).filter((x) => DMG_TYPES.includes(x));
+    const later = [], gain = upId ? upGives(upId) : [];
+    (def.ups || []).forEach((tier, ti) => {
+      const chosen = tier.some((u) => taken.includes(u));
+      for (const u of tier) for (const g of upGives(u)) {
+        if (taken.includes(u)) { if (!cur.includes(g.type)) cur = cur.concat(g.type); continue; } // already won (its extra hit)
+        if (chosen || upId) continue; // that tier went another way (the leftover only returns at IX with a Signet); an upgrade card shows its own gain
+        if (cur.includes(g.type) || later.some((l) => l.type === g.type)) continue;
+        later.push(Object.assign({ lv: C.UPGRADE_LEVELS[ti] }, g));
+      }
+    });
+    const el = h('div.abtypes');
+    cur.forEach((x) => { if (!gain.some((g) => g.swap === x)) el.append(h('span.dt.dt-' + x, t('tag.' + x))); });
+    gain.forEach((g) => { if (!cur.includes(g.type)) el.append(h('span.dt.gain.dt-' + g.type, '+' + t('tag.' + g.type))); });
+    // the ones within reach: grouped by the level that offers them, "Fire · Ice · Lightning (level VI)", each in its colour
+    const groups = []; later.forEach((l) => { const k = l.lv + (l.swap ? 's' : ''); let gr = groups.find((x) => x.k === k); if (!gr) groups.push(gr = { k, lv: l.lv, swap: l.swap, list: [] }); gr.list.push(l.type); });
+    groups.forEach((gr) => {
+      const sp = h('span.dt.later'); if (gr.swap) sp.append('→ ');
+      gr.list.forEach((x, i) => { if (i) sp.append(' · '); sp.append(h('span.dt-' + x, t('tag.' + x))); });
+      sp.append(' ' + t('abtype.lv', { n: ROMAN[gr.lv] || gr.lv })); el.append(sp);
+    });
+    if (!el.childNodes.length) el.append(h('span.dt.notype', t('abtype.none'))); // e.g. the Plague Flask: no type bonus touches it
+    return el;
   };
 
   /* ---------------- HUD ---------------- */
@@ -180,7 +220,7 @@
           if (run.state === 'playing') DH.input.enable(true);
         } },
           h('div.ico', A.img(info.icon)),
-          h('div.grow', h('div.tg', info.tag || ''), h('div.t', info.name, rank), h('div.d', info.desc), info.note ? h('div.note2', info.note) : null, c.remembered ? h('div.note2.mem', t('potion.remembered')) : null));
+          h('div.grow', h('div.tg', info.tag || ''), h('div.t', info.name, rank), info.ab ? ui.abTypes(info.ab, run, info.up) : null, h('div.d', info.desc), info.note ? h('div.note2', info.note) : null, c.remembered ? h('div.note2.mem', t('potion.remembered')) : null));
       });
       const pot = (k) => {
         const n = run.potions[k] || 0;
@@ -211,7 +251,7 @@
       h('div', { style: { marginTop: '8px' } }, data.choices.map((c, i) => {
         const info = ui.choiceInfo(run, c);
         return h('div.choice.abt', { style: { animationDelay: (i * 0.06) + 's' }, onclick: () => { click(); m.close(); run.chooseTome(c); if (run.state === 'playing') DH.input.enable(true); } },
-          h('div.ico', A.img(info.icon)), h('div.grow', h('div.tg', info.tag || ''), h('div.t', info.name), h('div.d', info.desc)));
+          h('div.ico', A.img(info.icon)), h('div.grow', h('div.tg', info.tag || ''), h('div.t', info.name), info.ab ? ui.abTypes(info.ab, run, info.up) : null, h('div.d', info.desc)));
       })),
       ui.rerollPotion(run, 'renewal', !data.traitsOnly && data.choices.some((c) => c.kind === 'ability'), () => { m.close(); ui.openTome(run, run.rerollTome(data)); })) });
   };
