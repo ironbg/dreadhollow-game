@@ -85,7 +85,8 @@
     /* ---------------- level & xp ---------------- */
     /** Experience multiplier now: Growth, Agony (per hall) and Torment. */
     // Agony's extra foes (+35% a rank) share the horde's usual XP between them: only the hall's Agony bonus raises it
-    xpMult() { return (1 + (this.trib.xp || 0)) * this.P.growth * (1 + this.agony * (this.stage.agonyXp || 0.15)) / (1 + this.agony * 0.35) * (this.tormentXp || 1); }
+    // Agony halves XP: the denser horde (below) hands out twice the kills, so leveling stays about the same pace.
+    xpMult() { return (1 + (this.trib.xp || 0)) * this.P.growth * (1 + this.agony * (this.stage.agonyXp || 0.15)) / (1 + this.agony * 0.35) * (this.tormentXp || 1) * (this.agonyOn ? 0.5 : 1); }
     gainXp(v, mult) {
       this.xp += v * (mult == null ? this.xpMult() : mult); // a gem's worth is fixed when it drops
       while (this.xp >= this.xpNext) {
@@ -187,7 +188,10 @@
       // the hall's own foes join the mix from their hour on (C.HALL_FOES)
       let mix = a.mix; const foes = C.HALL_FOES[this.stageId];
       if (foes) { const n = foes.filter((f) => f[1] <= tt).length, k = i + ':' + n; if (this._mixK !== k) { this._mixK = k; this._mix = Object.assign({}, a.mix); foes.forEach((f) => { if (f[1] <= tt) this._mix[f[0]] = f[2]; }); } mix = this._mix; }
-      return { rate: rate * (1 + this.stage.index * 0.1) * (1 + this.agony * 0.35) * (this.fx_.spawn || 1) * (this.fx_.giants ? 0.6 : 1), mix };
+      // Agony density: the early minutes felt empty, so push 2x spawns at the start, easing to a steady +25% by ~4:00
+      // (normalised time). On top of the usual +35%/rank, this fills the horde out from the first wave to the last.
+      const agonyDense = this.agonyOn ? (1.25 + 0.75 * Math.max(0, 1 - tt / 240)) : 1;
+      return { rate: rate * (1 + this.stage.index * 0.1) * (1 + this.agony * 0.35) * agonyDense * (this.fx_.spawn || 1) * (this.fx_.giants ? 0.6 : 1), mix };
     }
     updateSpawns(dt) {
       if (this.victoryT > 0) return;
@@ -304,13 +308,13 @@
       const rank = o.champion ? C.CHAMPION : o.elite ? C.ELITE : null;
       const T = E.TORMENT, tr = def.prop ? 0 : this.dread, fx = this.fx_;
       const hpMult = def.prop ? 1 : this.stage.hpMult * (def.boss ? (1 + this.stage.index * 0.1) * (this.stage.bossHp || 1) : ts) * (rank ? rank.hp : 1) * Math.pow(T.hp, tr) * (fx.giants && !def.boss ? 2 : 1)
-        * (1 + this.agony * 0.25) * (this.fx_.enemyHp || 1);
+        * (1 + this.agony * 0.25) * (def.boss && this.agonyOn ? 2 : 1) * (this.fx_.enemyHp || 1); // Agony: bosses carry double health
       const fv = !def.variant && (C.HALL_FOES[this.stageId] || []).find((f) => f[0] === id && f[3]);
       const variant = (o.variant || def.variant || (fv && fv[3])) || (this.stage.variant && this.stage.foeVariant !== false && DH.gfx.painters[def.painter] && DH.gfx.painters[def.painter].variants && DH.gfx.painters[def.painter].variants[this.stage.variant] ? this.stage.variant : null);
       const e = {
         id, def, x, y, kx: 0, ky: 0, hp: def.hp * hpMult, maxHp: def.hp * hpMult,
         r: def.r * (rank ? rank.scale * 0.85 : 1), spd: def.spd * (rank ? 0.9 : 1) * U.rand(0.92, 1.08) * (fx.enemySpeed || 1) * (fx.allSpeed || 1) * (1 + T.speed * tr) * (fx.giants && !def.boss ? 0.8 : 1),
-        dmg: def.dmg * this.stage.dmgMult * (1 + this.time / 60 * (this.stage.dmgGrow || 0.07)) * (rank ? rank.dmg : 1) * (1 + this.agony * 0.1) * (1 + T.dmg * tr) * (fx.enemyDmg || 1),
+        dmg: def.dmg * this.stage.dmgMult * (1 + this.time / 60 * (this.stage.dmgGrow || 0.07)) * (rank ? rank.dmg : 1) * (1 + this.agony * 0.1) * (1 + T.dmg * tr) * (fx.enemyDmg || 1) * (this.agonyOn ? 0.75 : 1), // Agony: foes hit 25% softer, the denser horde stays survivable
         xp: def.xp * (o.champion ? 30 : o.elite ? 12 : 1) * (fx.giants && !def.boss ? 1.8 : 1), scale: (rank ? rank.scale : 1) * (fx.giants && !def.boss && !def.prop ? 1.35 : 1),
         mass: (def.mass || 1) * (rank ? 4 : 1), armor: Math.min(0.75, (def.def || 0) * Math.pow(1.1, tr) + (rank ? rank.def : 0) + T.armor * tr), // Torment: base defense x1.10 per rank
         elite: !!o.elite, champion: !!o.champion, boss: !!def.boss, final: !!o.final, flash: 0, anim: Math.random() * 10,

@@ -4,6 +4,15 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.23',
+      bg: [
+        'Agony: тълпата е по-гъста от първата вълна (двойно повече в началото, повече прииждащи през цялата битка), но враговете удрят с 25% по-меко, а Босовете имат двойно повече кръв. Опитът е наполовина, за да остане изравняването равномерно.',
+      ],
+      en: [
+        'Agony: the horde is denser from the first wave (twice as many early on, more pouring in throughout), but foes hit 25% softer and Bosses carry double health. XP is halved so leveling stays steady.',
+      ],
+    },
+    {
       v: '1.61.19',
       bg: [
         'Поправено: бутонът „Изход" вече наистина излиза от акаунта (можеше да увисне).',
