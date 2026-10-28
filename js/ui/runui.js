@@ -253,7 +253,12 @@
         return h('div.choice.abt', { style: { animationDelay: (i * 0.06) + 's' }, onclick: () => { click(); m.close(); run.chooseTome(c); if (run.state === 'playing') DH.input.enable(true); } },
           h('div.ico', A.img(info.icon)), h('div.grow', h('div.tg', info.tag || ''), h('div.t', info.name), info.ab ? ui.abTypes(info.ab, run, info.up) : null, h('div.d', info.desc)));
       })),
-      ui.rerollPotion(run, 'renewal', !data.traitsOnly && data.choices.some((c) => c.kind === 'ability'), () => { m.close(); ui.openTome(run, run.rerollTome(data)); })) });
+      ui.rerollPotion(run, 'renewal', !data.traitsOnly && data.choices.some((c) => c.kind === 'ability'), () => { m.close(); ui.openTome(run, run.rerollTome(data)); }),
+      // turn the tome down (the Adept's quest wants the main weapon alone): gold or half a level instead
+      data.choices.some((c) => c.kind !== 'gold') ? h('div.tome-decline',
+        h('span.small.muted', t('tome.decline')),
+        h('button.btn.small.ghost', { onclick: () => { click(); m.close(); run.declineTome('gold'); if (run.state === 'playing') DH.input.enable(true); } }, A.img('i_gold'), t('tome.declineGold', { n: C.TOME_DECLINE_GOLD })),
+        h('button.btn.small.ghost', { onclick: () => { click(); m.close(); run.declineTome('xp'); if (run.state === 'playing') DH.input.enable(true); } }, t('tome.declineXp'))) : null) });
   };
   /** A flask that rolls a tome's or a chest's offer again: shown while the hero carries one. */
   ui.rerollPotion = (run, kind, ok, then) => {

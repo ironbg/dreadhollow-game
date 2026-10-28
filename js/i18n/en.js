@@ -350,7 +350,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'potion.hint.remembrance': 'Tap a card to remember it', 'potion.hint.resonance': 'Tap a card to take it twice', 'potion.hint.lethe': 'Tap a card to banish it', 'potion.hint.renewal': 'Drink it when a tome opens', 'potion.hint.visions': 'Drink it when a chest opens',
   'potion.remembered': 'Remembered',
   'herb.moss': 'Grave Moss', 'herb.ember': 'Ember Salt', 'herb.lily': 'Frost Lily', 'herb.frostcap': 'Frostcap', 'herb.nightshade': 'Nightshade',
-  'tome.title': 'Arcane Tome', 'tome.sub': 'Learn a new ability', 'tome.full': 'All ability slots are full — empower one instead',
+  'tome.decline': 'No new ability:', 'tome.declineGold': '+{n} gold', 'tome.declineXp': '+½ level', 'tome.title': 'Arcane Tome', 'tome.sub': 'Learn a new ability', 'tome.full': 'All ability slots are full — empower one instead',
   'loot.champion': 'Champion\'s Chest', 'loot.boss': 'Lord\'s Hoard', 'loot.equipped': 'Equipped for this run', 'loot.bagged': 'Put in your bag',
   'loot.pendulum': 'Jade Pendulum', 'loot.ivory': 'The Ivory Dice chose for you', 'loot.pick': 'Choose one of {n}', 'loot.newItem': 'An item you\'ve never found before',
   'loot.upgrade': 'Better than what you\'re wearing', 'loot.sidegrade': 'Same rarity as what you\'re wearing', 'loot.worse': 'Your equipped piece is {r}', 'hud.pendulum': 'The pendulum swings: treasure is near…',

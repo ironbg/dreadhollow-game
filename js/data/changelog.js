@@ -4,6 +4,15 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.32',
+      bg: [
+        'Тайнственият том вече може да се откаже: вместо ново умение вземи 250 злато или половин ниво опит. Така постижението „Адепт“ (само с основното оръжие) не се разваля от том, паднал до теб.',
+      ],
+      en: [
+        'An Arcane Tome can now be turned down: take 250 gold or half a level of experience instead of a new ability. A tome landing at your feet no longer spoils the Adept quest (main weapon only).',
+      ],
+    },
+    {
       v: '1.61.31',
       bg: [
         'Призованите помощници (вълци, големи, фантоми и др.) вече ловуват в малко по-широк кръг около героя.',

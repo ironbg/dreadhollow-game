@@ -1372,3 +1372,7 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .modal.heroinfo .hi-k { flex: 0 0 34%; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; padding-top: 1px; }
 .modal.heroinfo .hi-v { flex: 1; min-width: 0; }
 .modal.heroinfo img.wi { width: 22px; height: 22px; }
+/* turning a tome down: gold or half a level, under the offers */
+.tome-decline { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(176,138,72,.22); }
+.tome-decline > span { flex: 1 1 auto; }
+.tome-decline .btn img { width: 16px; height: 16px; }

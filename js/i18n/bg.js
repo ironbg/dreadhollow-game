@@ -350,7 +350,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'potion.hint.remembrance': 'Докосни карта, за да я запомниш', 'potion.hint.resonance': 'Докосни карта, за да я вземеш два пъти', 'potion.hint.lethe': 'Докосни карта, за да я прогониш', 'potion.hint.renewal': 'Изпий я, когато се отвори том', 'potion.hint.visions': 'Изпий го, когато се отвори сандък',
   'potion.remembered': 'Запомнена',
   'herb.moss': 'Гробен мъх', 'herb.ember': 'Жарка сол', 'herb.lily': 'Ледена лилия', 'herb.frostcap': 'Ледена гъба', 'herb.nightshade': 'Нощна сянка',
-  'tome.title': 'Тайнствен том', 'tome.sub': 'Научи ново умение', 'tome.full': 'Нямаш място за нови умения — подсили някое от тях',
+  'tome.decline': 'Не искам ново умение:', 'tome.declineGold': '+{n} злато', 'tome.declineXp': '+½ ниво', 'tome.title': 'Тайнствен том', 'tome.sub': 'Научи ново умение', 'tome.full': 'Нямаш място за нови умения — подсили някое от тях',
   'loot.champion': 'Сандък на шампион', 'loot.boss': 'Съкровището на Владетеля', 'loot.equipped': 'Екипиран за тази битка', 'loot.bagged': 'Прибран в торбата',
   'loot.pendulum': 'Нефритено махало', 'loot.ivory': 'Костените зарове избраха вместо теб', 'loot.pick': 'Избери един от {n}', 'loot.newItem': 'Предмет, който още не си намирал',
   'loot.upgrade': 'По-добър от този, който носиш', 'loot.sidegrade': 'Със същата рядкост като носения', 'loot.worse': 'Тук носиш {r} вещ', 'hud.pendulum': 'Махалото се люлее: наблизо има съкровище…',

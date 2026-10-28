@@ -996,6 +996,14 @@
       else this.applyChoice(c);
       this.resume();
     }
+    /** Turn a tome down (no new ability — e.g. for the Adept's weapon-only quest): 250 gold, or half a level of
+     *  experience (as much as an unopened tome is worth when the hall ends). */
+    declineTome(kind) {
+      const p = this.player;
+      if (kind === 'gold') { this.gold += C.TOME_DECLINE_GOLD; this.text(p.x, p.y - 20, '+' + C.TOME_DECLINE_GOLD, '#ffd35a', true); }
+      else { this.text(p.x, p.y - 20, t('tome.declineXp'), '#9ad8ff', true); this.gainXp(this.xpNext * 0.5, 1); }
+      this.resume();
+    }
 
     /* ---------------- items found in the run ---------------- */
     /** One reward from an Agony champion: the first roll that succeeds, top to bottom (150 gold if all fail). */
