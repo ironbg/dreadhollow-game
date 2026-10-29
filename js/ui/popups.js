@@ -608,7 +608,15 @@
             : h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('adRes'); if (r) ui.rewardPopup(t('resshop.title'), r); draw(); } }, h('span.adtag', 'AD'), t('common.watch') + ' (' + left + ')'));
       const tm = h('div.small.muted.center.rs-timer'), upd = () => { tm.textContent = t('resshop.daily', { t: U.fmtDuration(U.msToMidnight()) }); };
       upd(); clearInterval(timer); timer = setInterval(upd, 1000);
-      m.set(h('div', card, tm));
+      // the paid packs: gold and every metal, bought as often as wanted
+      const packs = E.resPackOrder.map((id) => {
+        const p = E.products[id];
+        return h('div.panel.rs-pack' + (p.tag ? '.tagged' : ''), { onclick: () => DH.iap.buy(id) },
+          h('div.slot.rs-pico', A.img(p.icon)),
+          h('div.grow', h('div.rs-t', t('product.' + id), p.tag ? h('span.tag', t('shop.tag.' + p.tag)) : null), items(p.grant), h('div.bonus', t('shop.bonus', { v: p.value }))),
+          h('button.btn.small.green', DH.iap.price(id)));
+      });
+      m.set(h('div', card, tm, h('h3.sect.rs-sect', t('resshop.packs')), packs));
     };
     draw();
   };

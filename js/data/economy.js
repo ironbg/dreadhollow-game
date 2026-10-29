@@ -384,7 +384,15 @@
     pass:     { type: 'pass', price: 9.99 },
     reaper:   { type: 'bundle', price: 4.99, once: true, grant: { hero: 'reaper', gems: 500, chest: 'gold' }, value: 400 },
     legend:   { type: 'bundle', price: 19.99, once: true, grant: { gems: 2500, gear: { rarity: 4 }, chest: 'gold', gold: 50000, mats: { gold: 40, starsteel: 20 } }, value: 500 },
+    // resource packs (the Armory's Resource Store), bought again and again; value: how much more they hold than the same
+    // gold and metal bought with gems in the shop (gold 80 a gem; iron, silver, gold ingots, starsteel as in the Forge)
+    res_1: { type: 'bundle', price: 0.99,  icon: 'mat_iron',      grant: { gold: 4000, mats: { iron: 30 } }, value: 30 },
+    res_2: { type: 'bundle', price: 4.99,  icon: 'mat_silver',    grant: { gold: 20000, mats: { iron: 100, silver: 30 } }, value: 35 },
+    res_3: { type: 'bundle', price: 9.99,  icon: 'mat_gold',      grant: { gold: 40000, mats: { silver: 80, gold: 40 } }, value: 35, tag: 'popular' },
+    res_4: { type: 'bundle', price: 19.99, icon: 'mat_starsteel', grant: { gold: 90000, mats: { silver: 120, gold: 80, starsteel: 30 } }, value: 40 },
+    res_5: { type: 'bundle', price: 49.99, icon: 'c_gold',        grant: { gold: 250000, mats: { iron: 300, silver: 300, gold: 200, starsteel: 100 } }, value: 50, tag: 'best' },
   };
+  E.resPackOrder = ['res_1', 'res_2', 'res_3', 'res_4', 'res_5'];
   E.gemPackOrder = ['gems_1', 'gems_2', 'gems_3', 'gems_4', 'gems_5', 'gems_6'];
 
   /* Gold for gems */

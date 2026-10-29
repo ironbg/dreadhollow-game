@@ -1479,3 +1479,12 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .rs-it b { font: 10px var(--num); color: #fff; }
 .rs-row .btn { flex: none; min-width: 92px; }
 .rs-timer { margin-top: 2px; }
+.rs-sect { margin: 12px 0 6px; }
+.rs-pack { display: flex; align-items: center; gap: 8px; padding: 7px 8px; margin-bottom: 6px; cursor: pointer; }
+.rs-pack .rs-pico { width: 44px; flex: none; }
+.rs-pack .rs-t { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.rs-pack .rs-t .tag { font-size: 9px; padding: 1px 5px; background: var(--blood, #a02020); color: #fff; border-radius: 3px; }
+.rs-pack .bonus { font-size: 10px; margin-top: 2px; color: var(--good); font-weight: 800; }
+.rs-pack .btn { flex: none; min-width: 72px; }
+.rs-pack .rs-items { gap: 4px; }
+.rs-pack .rs-it img { width: 18px; height: 18px; }

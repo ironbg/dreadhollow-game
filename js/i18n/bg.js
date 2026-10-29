@@ -23,6 +23,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'armory.heroes': 'Герои', 'armory.gear': 'Реликви', 'armory.selected': 'Избран', 'armory.select': 'Избери', 'armory.unlocked': 'Героят е отключен!',
   'armory.bundle': 'Пакет', 'armory.heroInfo': 'Информация за героя', 'armory.weapon': 'Оръжие', 'armory.strengths': 'Силни страни', 'armory.every10': 'На всеки 10 нива', 'armory.hp': 'Живот', 'armory.speed': 'Скорост', 'armory.equipped': 'Екипирани', 'armory.inventory': 'Инвентар ({n})',
   'resshop.title': 'Склад с ресурси', 'resshop.btn': 'Ресурси', 'resshop.free': 'Безплатно днес', 'resshop.ad': 'Награда за реклама', 'resshop.taken': 'Взето', 'resshop.daily': 'Подновява се всеки ден (след {t})', 'resshop.allTaken': 'Всичко за днес е взето',
+  'resshop.packs': 'Пакети с ресурси', 'product.res_1': 'Торба на чирака', 'product.res_2': 'Сандък на ковача', 'product.res_3': 'Склад на майстора', 'product.res_4': 'Съкровище на гилдията', 'product.res_5': 'Кралското хранилище',
   'forge.title': 'Коване', 'forge.skip': 'Докосни, за да прескочиш', 'forge.tap': 'Докосни, за да продължиш',
   'armory.autoMerge': 'Автосливане', 'armory.getGear': 'Още реликви', 'armory.noGear': 'Още нямаш реликви. Отваряй сандъци или побеждавай босове!', 'armory.merged': 'Реликвите са слети!',
 
