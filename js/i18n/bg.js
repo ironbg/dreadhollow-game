@@ -22,7 +22,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
 
   'armory.heroes': 'Герои', 'armory.gear': 'Реликви', 'armory.selected': 'Избран', 'armory.select': 'Избери', 'armory.unlocked': 'Героят е отключен!',
   'armory.bundle': 'Пакет', 'armory.heroInfo': 'Информация за героя', 'armory.weapon': 'Оръжие', 'armory.strengths': 'Силни страни', 'armory.every10': 'На всеки 10 нива', 'armory.hp': 'Живот', 'armory.speed': 'Скорост', 'armory.equipped': 'Екипирани', 'armory.inventory': 'Инвентар ({n})',
-  'resshop.title': 'Склад с ресурси', 'resshop.btn': 'Ресурси', 'resshop.free': 'Безплатно днес', 'resshop.ad': 'Реклама {n} от {m}', 'resshop.taken': 'Взето', 'resshop.desc': 'Всеки ден: безплатно злато и желязо, а после още три пъти срещу реклама.', 'resshop.allTaken': 'Всичко за днес е взето',
+  'resshop.title': 'Склад с ресурси', 'resshop.btn': 'Ресурси', 'resshop.free': 'Безплатно днес', 'resshop.ad': 'Награда за реклама', 'resshop.taken': 'Взето', 'resshop.daily': 'Подновява се всеки ден (след {t})', 'resshop.allTaken': 'Всичко за днес е взето',
   'forge.title': 'Коване', 'forge.skip': 'Докосни, за да прескочиш', 'forge.tap': 'Докосни, за да продължиш',
   'armory.autoMerge': 'Автосливане', 'armory.getGear': 'Още реликви', 'armory.noGear': 'Още нямаш реликви. Отваряй сандъци или побеждавай босове!', 'armory.merged': 'Реликвите са слети!',
 

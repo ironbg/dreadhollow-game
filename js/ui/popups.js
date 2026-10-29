@@ -600,17 +600,15 @@
     const draw = () => {
       if (m.closed) return;
       // one card that turns over: today's free handful first, then the ads one after another in its place
-      const free = M.resFreeReady(), used = E.RES_ADS - M.resAdsLeft(), step = free ? 0 : 1 + used, all = !free && used >= E.RES_ADS;
-      const pips = h('div.rs-pips'); for (let i = 0; i <= E.RES_ADS; i++) pips.append(h('i' + (i < step ? '.on' : i === step ? '.cur' : '')));
+      const free = M.resFreeReady(), left = M.resAdsLeft(), all = !free && left <= 0;
       const card = h('div.panel.rs-row' + (all ? '.done' : ''),
-        h('div.grow', h('div.rs-t', all ? t('resshop.allTaken') : free ? t('resshop.free') : t('resshop.ad', { n: used + 1, m: E.RES_ADS })), items(free ? E.RES_FREE : E.RES_AD)),
+        h('div.grow', h('div.rs-t', all ? t('resshop.allTaken') : free ? t('resshop.free') : t('resshop.ad')), items(free ? E.RES_FREE : E.RES_AD)),
         all ? h('button.btn.small.ghost.off', A.img('u_check', 'ci'), t('resshop.taken'))
           : free ? h('button.btn.small.gold', { onclick: async () => { const r = await ui.act('claimResFree'); if (r) { DH.audio.play('reward'); ui.rewardPopup(t('resshop.title'), r); } draw(); } }, t('common.claim'))
-            : h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('adRes'); if (r) ui.rewardPopup(t('resshop.title'), r); draw(); } }, h('span.adtag', 'AD'), t('common.watch')));
-      const rows = [pips, card];
-      const tm = h('div.small.muted.center.rs-timer'), upd = () => { tm.textContent = t('quests.resetsIn', { t: U.fmtDuration(U.msToMidnight()) }); };
+            : h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('adRes'); if (r) ui.rewardPopup(t('resshop.title'), r); draw(); } }, h('span.adtag', 'AD'), t('common.watch') + ' (' + left + ')'));
+      const tm = h('div.small.muted.center.rs-timer'), upd = () => { tm.textContent = t('resshop.daily', { t: U.fmtDuration(U.msToMidnight()) }); };
       upd(); clearInterval(timer); timer = setInterval(upd, 1000);
-      m.set(h('div', h('div.small.muted.center.rs-desc', t('resshop.desc')), rows, tm));
+      m.set(h('div', card, tm));
     };
     draw();
   };
