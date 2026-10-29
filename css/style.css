@@ -1376,3 +1376,34 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .tome-decline { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(176,138,72,.22); }
 .tome-decline > span { flex: 1 1 auto; }
 .tome-decline .btn img { width: 16px; height: 16px; }
+/* settings: tabs over a framed panel; quick tiles on top, compact rows with the game's icons; account, feedback and links below */
+.modal.settings .set-tabs { margin: 0 0 8px; }
+.modal.settings .set-panel { border: 2px solid #050308; background: var(--tex-panel, none) 0 0 / 64px 64px, #1a1220; padding: 8px 10px 2px;
+  box-shadow: inset 0 0 0 2px var(--ring), inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo); }
+.set-tiles { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; } /* the tiles share the row; the quality band takes a row of its own */
+.set-tile { flex: 1 1 0; min-width: 62px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 3px; padding: 6px 4px 7px; border: 2px solid #050308; clip-path: var(--notch);
+  background: linear-gradient(180deg, rgba(255,220,150,.16) 0 2px, transparent 2px), linear-gradient(180deg, rgba(120,90,50,.32), rgba(40,26,18,.62)), var(--tex-stone, none) 0 0 / 64px 64px, #2a1e22;
+  box-shadow: inset 0 0 0 1px #b08a48; }
+/* the quality tile: one full-width band (icon and name, then the three-stop slider), so the tiles stay one short row */
+.set-tile.wide { flex-basis: 100%; flex-direction: row; justify-content: flex-start; gap: 10px; padding: 6px 12px; }
+.set-tile.wide .st-l { white-space: nowrap; }
+.set-tile.wide .fxstep { flex: 1; }
+.set-tile img.sti { width: 26px; height: 26px; }
+.set-tile .st-l { font: 800 12px var(--body); color: #f4d07a; text-shadow: 0 1px 0 #000; text-align: center; line-height: 1.1; }
+.set-tile .fxstep { display: flex; flex-direction: column; align-items: center; gap: 1px; width: 100%; }
+.set-tile .fxstep input { width: 92%; accent-color: var(--gold); }
+.set-tile .fxname { font-size: 11px; line-height: 1.1; color: var(--gold); white-space: nowrap; }
+.setrow img.sri { width: 22px; height: 22px; flex: none; }
+.modal.settings .setrow { padding: 7px 2px; }
+.modal.settings .setrow label { font-size: 14px; line-height: 1.2; }
+.modal.settings .setrow input[type=range] { width: 118px; }
+@media (max-width: 420px) { .modal.settings .setrow input[type=range] { width: 96px; } .modal.settings .setrow label { font-size: 13.5px; } }
+.modal.settings .sethint { margin: -4px 0 6px 32px; font-size: 11.5px; line-height: 1.3; }
+.set-div { height: 1px; margin: 6px 0; background: linear-gradient(90deg, transparent, rgba(200,154,72,.45), transparent); }
+.modal.settings .set-lang { border-bottom: 0; }
+.set-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.set-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 16px; margin-top: 10px; }
+.set-link { background: none; border: 0; padding: 4px 2px; color: #d8c8a8; font: 700 12.5px var(--body); text-decoration: underline; cursor: pointer; }
+.set-link.danger { color: #ff8a80; }
+.modal.settings .admin-slot:not(:empty) { margin-top: 8px; }
+.modal.settings .note { text-align: center; }

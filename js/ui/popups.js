@@ -141,8 +141,20 @@
       const el = h('div.switch' + (s[key] ? '.on' : ''), { onclick: () => { s[key] = !s[key]; el.classList.toggle('on', s[key]); click(); DH.save.persist(); onchange && onchange(); } });
       return el;
     };
-    const slider = (key) => h('input', { type: 'range', min: 0, max: 100, value: Math.round(s[key] * 100), oninput: (e) => { s[key] = e.target.value / 100; DH.audio.setVolumes(s.sfx * s.master, s.music * s.master); DH.save.persist(); } });
-    const desk = DH.input.desktop, row = (key, ctl, hint) => [h('div.setrow', h('label', t('settings.' + key)), ctl), hint ? h('div.small.muted.sethint', t('settings.' + key + 'Hint')) : null];
+    const sliders = {}, tiles = {};
+    const syncTiles = () => { for (const k in tiles) tiles[k].classList.toggle('on', s[k] > 0); };
+    const slider = (key) => (sliders[key] = h('input', { type: 'range', min: 0, max: 100, value: Math.round(s[key] * 100), oninput: (e) => { s[key] = e.target.value / 100; DH.audio.setVolumes(s.sfx * s.master, s.music * s.master); DH.save.persist(); syncTiles(); } }));
+    // each setting with its little picture (the game's own pixel icons)
+    const ICON = { master: 'rings', music: 'lute', sfx: 'bell', vibration: 'drum', autoAim: 'target', pauseOnBlur: 'u_pause', fullscreen: 'u_full', twinStick: 'u_hand', hideJoystick: 'mask',
+      aimLine: 'arrows', dmgNumbers: 'sword', flash: 'bolt', fxAlpha: 'sphere', shake: 'wheel', outlines: 'lens', autoFx: 'hourglass', showFps: 'eye', language: 'scroll' };
+    const desk = DH.input.desktop, row = (key, ctl, hint) => [h('div.setrow', ICON[key] ? A.img(ICON[key], 'sri') : null, h('label', t('settings.' + key)), ctl), hint ? h('div.small.muted.sethint', t('settings.' + key + 'Hint')) : null];
+    // the quick tiles on top: music and sounds on/off (each remembers its level), vibration, and the graphics quality
+    const quick = (key) => (tiles[key] = h('div.switch' + (s[key] > 0 ? '.on' : ''), { onclick: () => {
+      if (s[key] > 0) { s[key + 'Was'] = s[key]; s[key] = 0; } else s[key] = s[key + 'Was'] || 0.8;
+      if (sliders[key]) sliders[key].value = Math.round(s[key] * 100);
+      DH.audio.setVolumes(s.sfx * s.master, s.music * s.master); click(); DH.save.persist(); syncTiles();
+    } }));
+    const tile = (icon, label, ctl, cls) => h('div.set-tile' + (cls || ''), A.img(icon, 'sti'), h('div.st-l', label), ctl);
     // graphics effects: a slider with three stops, its step named beside it
     const fxName = h('span.fxname', t('settings.fxLevel' + s.fxLevel));
     const fxStep = h('div.fxstep', h('input', { type: 'range', min: 0, max: 2, step: 1, value: s.fxLevel, oninput: (e) => {
@@ -158,43 +170,54 @@
       langSel.append(
         h('button.dd-btn', { onclick: (e) => { e.stopPropagation(); click(); langSel.classList.toggle('open'); if (!langSel.dataset.l) { langSel.dataset.l = 1; m.el.addEventListener('click', () => langSel.classList.remove('open')); } } }, h('span', cur.native), h('i.dd-arrow')),
         h('div.dd-list', langs.map((l) => h('button.dd-opt' + (l.code === cur.code ? '.on' : ''), { onclick: (e) => { e.stopPropagation(); pick(l); } }, h('span', l.native), l.code === cur.code ? A.img('u_check', 'ci') : null)))); }
-    const m = ui.modal({ title: t('settings.title'), body: h('div',
-      h('div.setsec', t('settings.secAudio')),
-      row('master', slider('master')),
-      row('music', slider('music')),
-      row('sfx', slider('sfx')),
-      desk ? null : row('vibration', sw('vibration')),
-      h('div.setsec', t('settings.secControls')),
-      desk ? row('autoAim', autoAim, true) : null,
-      desk ? row('pauseOnBlur', sw('pauseOnBlur')) : null,
-      desk && DH.input.fullscreenAvailable() ? row('fullscreen', fsSw, true) : null,
-      desk ? null : row('twinStick', sw('twinStick'), true),
-      desk ? null : row('hideJoystick', sw('hideJoystick')),
-      h('div.setsec', t('settings.secInterface')),
-      row('aimLine', sw('aimLine'), true),
-      row('dmgNumbers', sw('dmgNumbers')),
-      row('flash', slider('flash')),
-      row('fxAlpha', slider('fxAlpha')),
-      row('shake', sw('shake')),
-      row('outlines', sw('outlines')),
-      row('fxLevel', fxStep),
-      row('autoFx', sw('autoFx'), true),
-      row('showFps', sw('showFps')),
-      h('div.setsec', t('settings.secGame')),
-      h('div.setrow', h('label', t('settings.language')), langSel),
-      h('div.col', { style: { marginTop: '14px' } },
-        h('button.btn.small.gold.block', { onclick: () => { m.close(); ui.openProfile('account'); } }, t('profile.accountBtn')), // sign-in, linking, purchases and transfer live in the profile's Account tab
-        h('button.btn.small.green.block', { onclick: () => { click(); m.close(); ui.openFeedback(); } }, t('fb.title')),
-        adminSlot, // the developer's overview, filled in once the server confirms this account (insights.js)
-        h('div.btns', h('button.btn.small.ghost', { onclick: () => ui.openLegal('terms') }, t('title.terms')), h('button.btn.small.ghost', { onclick: () => ui.openLegal('privacy') }, t('title.privacy'))),
-        DH.ads.privacyRequired() ? h('button.btn.small.ghost.block', { onclick: () => DH.ads.privacyOptions() }, t('settings.adPrivacy')) : null,
-        h('button.btn.small.red.block', { onclick: async () => {
+    // three tabs (the last one opened is remembered); the language, the account and the links stay below them
+    const TABS = { general: 'settings.tabGeneral', game: 'settings.secGame', iface: 'settings.secInterface' };
+    const fsOk = desk && DH.input.fullscreenAvailable();
+    const content = {
+      general: () => [
+        h('div.set-tiles', tile('lute', t('settings.music'), quick('music')), tile('bell', t('settings.tileSfx'), quick('sfx')),
+          desk ? null : tile('drum', t('settings.vibration'), sw('vibration')), tile('cog', t('settings.tileQuality'), fxStep, '.wide')),
+        row('master', slider('master')), row('music', slider('music')), row('sfx', slider('sfx')),
+        h('div.set-div'),
+        row('autoFx', sw('autoFx'), true), row('outlines', sw('outlines')),
+      ],
+      game: () => [
+        desk ? row('autoAim', autoAim, true) : null, desk ? row('pauseOnBlur', sw('pauseOnBlur')) : null, fsOk ? row('fullscreen', fsSw, true) : null,
+        desk ? null : row('twinStick', sw('twinStick'), true), desk ? null : row('hideJoystick', sw('hideJoystick')),
+        row('aimLine', sw('aimLine'), true),
+      ],
+      iface: () => [
+        row('dmgNumbers', sw('dmgNumbers')), row('shake', sw('shake')), row('flash', slider('flash')), row('fxAlpha', slider('fxAlpha')),
+        h('div.set-div'), row('showFps', sw('showFps')),
+      ],
+    };
+    const pane = h('div.set-pane'), tabBar = h('div.tabs.set-tabs');
+    const show = (k) => {
+      ui.settingsTab = k; for (const key in tiles) delete tiles[key];
+      tabBar.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.k === k));
+      pane.replaceChildren(...content[k]().flat().filter(Boolean));
+    };
+    Object.keys(TABS).forEach((k) => tabBar.append(h('button', { 'data-k': k, onclick: () => { click(); show(k); } }, t(TABS[k]))));
+    const link = (label, fn, cls) => h('button.set-link' + (cls || ''), { onclick: () => { click(); fn(); } }, label);
+    const m = ui.modal({ title: t('settings.title'), cls: 'settings', body: h('div',
+      tabBar,
+      h('div.set-panel', pane, h('div.set-div'), h('div.setrow.set-lang', A.img(ICON.language, 'sri'), h('label', t('settings.language')), langSel)),
+      h('div.set-btns',
+        h('button.btn.small.gold', { onclick: () => { m.close(); ui.openProfile('account'); } }, t('profile.accountBtn')), // sign-in, linking, purchases and transfer live in the profile's Account tab
+        h('button.btn.small.green', { onclick: () => { click(); m.close(); ui.openFeedback(); } }, t('fb.title'))),
+      adminSlot, // the developer's overview, filled in once the server confirms this account (insights.js)
+      h('div.set-links',
+        link(t('title.terms'), () => ui.openLegal('terms')),
+        link(t('title.privacy'), () => ui.openLegal('privacy')),
+        DH.ads.privacyRequired() ? link(t('settings.adPrivacy'), () => DH.ads.privacyOptions()) : null,
+        link(t('settings.reset'), async () => {
           if (await ui.confirm({ title: t('settings.reset'), body: t(DH.cloud.user ? 'settings.resetConfirmCloud' : 'settings.resetConfirm'), okCls: 'red', ok: t('settings.reset') })) {
             if (DH.server.remote()) { try { DH.server.adopt((await DH.server.call('reset', {})).save); } catch (e) { ui.serverErr(e); return; } } else await DH.save.reset();
             location.reload();
           }
-        } }, t('settings.reset'))),
+        }, '.danger')),
       h('div.note', 'Dreadhollow v' + DH.VERSION + ' · ' + t('settings.credits'))) });
+    show(TABS[ui.settingsTab] ? ui.settingsTab : 'general');
     fillAdmin(); // show it at once if we already know; then re-ask the server and fill it in when the answer is back
     if (DH.admin && DH.admin.recheck) DH.admin.recheck(() => { if (!m.closed) fillAdmin(); });
   };

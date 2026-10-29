@@ -87,9 +87,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'energy.title': 'Факли', 'energy.desc': 'Всяка битка струва {n} факли. Една факла се възстановява на всеки {m} минути.',
   'energy.ad': '+{n} факли', 'energy.gems': '+{n} факли', 'energy.notEnough': 'Нямаш достатъчно факли',
 
-  'settings.secGame': 'Игра', 'settings.secAudio': 'Звук',
-  'settings.secControls': 'Управление',
-  'settings.secInterface': 'Интерфейс',
+  'settings.tabGeneral': 'Общи', 'settings.tileSfx': 'Звуци', 'settings.tileQuality': 'Качество', 'settings.secGame': 'Игра',     'settings.secInterface': 'Интерфейс',
   'settings.master': 'Обща сила на звука',
   'settings.autoAim': 'Автоматично прицелване',
   'settings.autoAimHint': 'Изключено: основното оръжие стреля към мишката. В битка се превключва с R.',

@@ -87,9 +87,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'energy.title': 'Torches', 'energy.desc': 'Each run costs {n} torches. One torch is restored every {m} minutes.',
   'energy.ad': '+{n} torches', 'energy.gems': '+{n} torches', 'energy.notEnough': 'Not enough torches',
 
-  'settings.secGame': 'Game', 'settings.secAudio': 'Sound',
-  'settings.secControls': 'Controls',
-  'settings.secInterface': 'Interface',
+  'settings.tabGeneral': 'General', 'settings.tileSfx': 'Sounds', 'settings.tileQuality': 'Quality', 'settings.secGame': 'Game',     'settings.secInterface': 'Interface',
   'settings.master': 'Master volume',
   'settings.autoAim': 'Auto-aim',
   'settings.autoAimHint': 'Off: the main weapon fires toward the mouse. R toggles it in battle.',
