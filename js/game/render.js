@@ -467,7 +467,7 @@
     const pr = this.portal, x = pr.x - cx, by = pr.y - cy; // base (ground) point, on screen
     const gt = Math.min(1, pr.t / 1.2), grow = gt * gt * (3 - 2 * gt); // eases open over 1.2 s
     const breathe = 0.97 + Math.sin(now * 1.8) * 0.03;    // a slow breath, not a flicker
-    const w = 14 * grow, h = 26 * grow * breathe;          // half-width / half-height of the oval
+    const w = C.PORTAL.w * grow, h = C.PORTAL.h * grow * breathe; // half-width / half-height of the oval
     const yc = by - h - 3;                                 // oval centre, sitting just above the ground
     // 1) broad red halo washing the ground and the air around the gate
     g.save();

@@ -376,6 +376,7 @@
     pyro: UP(['smallcircle', 'moreflames'], ['hotspark', 'overpower']),
   }).forEach(([id, ups]) => { C.abilities[id].ups = ups; });
   C.UPGRADE_LEVELS = [3, 6, 9];
+  C.PORTAL = { w: 14, h: 26 }; // the exit rift's oval (half-width, half-height) rising from its foot: drawn this size, entered anywhere inside it
   C.TOME_DECLINE_GOLD = 250; // a tome turned down pays this much gold (or half a level of experience)
   C.exclusiveAbilities = Object.keys(C.abilities).filter((k) => C.abilities[k].exclusive);
   C.tomeAbilities = ['darts', 'orbs', 'halo', 'chakrams', 'hexlance', 'hail', 'fists', 'storm', 'axes', 'nova', 'plague', 'fireball', 'wyrmfire', 'stormsphere', 'rifts', 'skyfall', 'golem', 'phantom', 'avalanche', 'flail', 'smite', 'thorns', 'illumination', 'prism', 'shards'];

@@ -4,6 +4,15 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.35',
+      bg: [
+        'Поправено: влизането в разлома след Лорда вече работи от всяка посока — стъпи където и да е в него и идва екранът за победа с наградите. Подсказката „Влез в разлома“ се показва отново на няколко секунди.',
+      ],
+      en: [
+        'Fixed: stepping into the rift after the Lord now works from any side — walk in anywhere and the victory screen with your rewards follows. The "Step into the rift" hint repeats every few seconds.',
+      ],
+    },
+    {
       v: '1.61.34',
       bg: [
         'Приложението само проверява в Google Play за нова версия при пускане и при връщане в играта, и я инсталира (никога по време на битка).',

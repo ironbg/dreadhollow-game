@@ -162,7 +162,10 @@
       }
       if (this.won && this.portal) { // stepping into the rift ends the hall (a short arming beat so the killing blow doesn't trigger it)
         this.portal.t += dt;
-        if (this.portal.t > 1 && U.dist2(p.x, p.y, this.portal.x, this.portal.y) < 16 * 16) {
+        // entered anywhere the rift is drawn: the hero's feet inside its oval (a little wider, so it never feels fussy)
+        const P = this.portal, ox = (p.x - P.x) / (C.PORTAL.w + 6), oy = (p.y - (P.y - C.PORTAL.h - 3)) / (C.PORTAL.h + 8);
+        if ((P.hint = (P.hint || 0) - dt) <= 0 && P.t > 1) { P.hint = 6; this.text(P.x, P.y - 2 * C.PORTAL.h - 14, t('hud.enterRift'), '#ffb08a', true); } // say it again now and then
+        if (P.t > 1 && ox * ox + oy * oy <= 1) {
           this.portal = null; this.lateLoot(); this.state = 'victory'; DH.audio.play('victory'); DH.events.emit('run:victory', this);
         }
       }
