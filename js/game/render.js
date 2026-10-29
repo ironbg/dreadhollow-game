@@ -280,7 +280,7 @@
     };
     for (const b of this.bosses) if (b && !b.dead) mark(b.x, b.y, '#ff3040', b.painter, b.variant);
     if (this.well && !this.well.used) mark(this.well.x, this.well.y, '#5ab8ff', 'well');
-    if (this.portal) mark(this.portal.x, this.portal.y, '#c070ff', 'rift_p');
+    if (this.portal) mark(this.portal.x, this.portal.y, '#ff5a28', 'rift_icon'); // the exit rift: crimson, its own badge
     for (const q of this.pylons || []) if (!q.dead) mark(q.x, q.y, '#ffd060', 'pylon');
     this.secretMarks(mark);
     this.rescueMarks(mark);

@@ -467,8 +467,8 @@
       h('div.center.small.muted', { style: { marginBottom: '8px' } }, t('login.desc')),
       cal,
       pending ? h('div.btns',
-        h('button.btn.gold', { onclick: async () => { const r = await ui.act('claimLogin', { double: false }); if (!r) return; m.close(); ui.rewardPopup(t('login.title'), r); } }, t('common.claim')),
-        h('button.btn.ad.shine', { onclick: async () => { if (await DH.ads.rewarded('login_x2')) { const r = await ui.act('claimLogin', { double: true }); if (!r) return; m.close(); ui.rewardPopup(t('login.title'), r); } } }, h('span.adtag', 'AD'), t('common.claimX2')))
+        h('button.btn.gold', { onclick: async () => { const r = await ui.act('claimLogin', { double: false }); if (!r) { if (r === null) { ui.toast(t('login.already'), 'bad'); m.close(); ui.refresh(); } return; } m.close(); ui.rewardPopup(t('login.title'), r); } }, t('common.claim')),
+        h('button.btn.ad.shine', { onclick: async () => { if (await DH.ads.rewarded('login_x2')) { const r = await ui.act('claimLogin', { double: true }); if (!r) { if (r === null) { ui.toast(t('login.already'), 'bad'); m.close(); ui.refresh(); } return; } m.close(); ui.rewardPopup(t('login.title'), r); } } }, h('span.adtag', 'AD'), t('common.claimX2')))
         : h('div.note', t('login.comeBack', { t: U.fmtDuration(U.msToMidnight()) }))) });
   };
 

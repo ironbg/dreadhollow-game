@@ -4,6 +4,17 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.48',
+      bg: [
+        'Поправено: дневната награда (и другите дневни неща) понякога не можеше да се вземе след полунощ. Новият ден вече започва за всички в полунощ българско време, еднакво на телефона и на сървъра.',
+        'Стрелката към разлома след Лорда вече показва самия червен разлом.',
+      ],
+      en: [
+        'Fixed: the daily reward (and the other dailies) sometimes could not be claimed after midnight. The new day now starts for everyone at midnight Bulgarian time, the same on the phone and on the server.',
+        'The arrow pointing to the rift after the Lord now shows the red rift itself.',
+      ],
+    },
+    {
       v: '1.61.47',
       bg: [
         'Победата вече не може да се изгуби: ако не влезеш в разлома, той те прибира сам след минута (последните 10 секунди се отброяват). Изходът през паузата след Лорда също се брои за победа, а след него нищо не може да те нарани.',

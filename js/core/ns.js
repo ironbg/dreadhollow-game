@@ -4,6 +4,7 @@
 window.DH = window.DH || {};
 (function (DH) {
   'use strict';
+  let gameFmt = null; // the game clock's formatter (Europe/Sofia), made once
 
   const U = {
     clamp: (v, a, b) => (v < a ? a : v > b ? b : v),
@@ -59,16 +60,32 @@ window.DH = window.DH || {};
       return arr;
     },
 
-    /** Local calendar day key, used for daily resets. */
-    dayKey(ts) {
-      const d = new Date(ts || DH.util.now());
-      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    /** The game's calendar: every daily, weekly-by-day and monthly reset happens at midnight in Sofia, for every player,
+     *  on the phone and on the server alike (the server runs on UTC: a day of the phone's own would not match it).
+     *  { y, m (1-12), d, H, M, S } of that clock at a moment. */
+    gameDate(ts) {
+      const at = new Date(ts == null ? DH.util.now() : ts), o = {};
+      try {
+        if (!gameFmt) gameFmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Sofia', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23' });
+        gameFmt.formatToParts(at).forEach((p) => { if (p.type !== 'literal') o[p.type] = +p.value; });
+        return { y: o.year, m: o.month, d: o.day, H: o.hour % 24, M: o.minute, S: o.second };
+      } catch (e) { // no time-zone data: Sofia is UTC+2 (+3 in summer), close enough for a fallback
+        const s = new Date(at.getTime() + 2 * 3600e3);
+        return { y: s.getUTCFullYear(), m: s.getUTCMonth() + 1, d: s.getUTCDate(), H: s.getUTCHours(), M: s.getUTCMinutes(), S: s.getUTCSeconds() };
+      }
     },
+    /** The game day's key (YYYY-MM-DD), used for daily resets. */
+    dayKey(ts) {
+      const g = DH.util.gameDate(ts);
+      return g.y + '-' + String(g.m).padStart(2, '0') + '-' + String(g.d).padStart(2, '0');
+    },
+    /** Until the next game day (midnight in Sofia). */
     msToMidnight() {
-      const d = new Date(DH.util.now()); const m = new Date(d); m.setHours(24, 0, 0, 0); return m - d;
+      const now = DH.util.now(), g = DH.util.gameDate(now);
+      return Math.max(1000, 86400e3 - ((g.H * 60 + g.M) * 60 + g.S) * 1000 - (now % 1000));
     },
     daysBetween(k1, k2) {
-      const a = new Date(k1 + 'T00:00:00'), b = new Date(k2 + 'T00:00:00');
+      const a = Date.parse(k1 + 'T00:00:00Z'), b = Date.parse(k2 + 'T00:00:00Z');
       return Math.round((b - a) / 86400000);
     },
 
@@ -142,7 +159,7 @@ window.DH = window.DH || {};
   };
 
   DH.util = U;
-  DH.VERSION = '1.61.47';
+  DH.VERSION = '1.61.48';
   /** Which build this is: 'web' (the browser version), or the app's 'debug' (test phones: test ads only) or 'release'
    *  (Google Play). tools/build-www.js sets it from DH_BUILD when it packs the app. */
   DH.BUILD = 'web';

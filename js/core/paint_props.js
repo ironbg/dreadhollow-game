@@ -394,6 +394,16 @@
     P.path(g, [5, 3, 8, 0.6, 11.6, 3, 8, 5.4]); P.fill(g, P.lg(g, 5, 0, 12, 6, ['#f0c0ff', '#be50ff', '#5a1a8a']));
     g.strokeStyle = '#ffffff'; g.lineWidth = 0.3; g.beginPath(); g.moveTo(7, 3); g.lineTo(9.6, 3); g.moveTo(8.3, 1.8); g.lineTo(8.3, 4.2); g.stroke();
   } });
+  // the exit rift as a small badge (the off-screen arrow that points to it): a crimson oval gate, burning rim, dark heart
+  def('rift_icon', { w: 12, h: 16, frames: 2, draw(g, f) {
+    P.glow(g, 6, 8, 8, '#ff5a28', f ? 0.75 : 0.6);
+    P.ell(g, 6, 8, 5.4, 7.6, P.rg(g, 6, 8, 7.6, [[0, '#fff0b0'], [0.55, '#ff8a30'], [1, '#c02010']]));
+    P.ell(g, 6, 8.2, 3.8, 5.9, P.rg(g, 5.6, 7.6, 5.9, [[0, '#3a0404'], [0.6, '#7a0c08'], [1, '#c42a14']]));
+    g.save(); g.beginPath(); g.ellipse(6, 8.2, 3.8, 5.9, 0, 0, Math.PI * 2); g.clip(); // a slow molten swirl inside
+    g.strokeStyle = 'rgba(255,120,50,0.7)'; g.lineWidth = 0.7; g.beginPath(); g.arc(6, 8.2, 2.4, f ? 0.6 : 2.2, (f ? 0.6 : 2.2) + 3.4); g.stroke();
+    g.restore();
+    for (const [x, y, r] of f ? [[2.2, 2.6, 0.6], [9.6, 4.4, 0.5]] : [[3.4, 1.4, 0.5], [8.8, 2.8, 0.6]]) P.circle(g, x, y, r, '#ffd070'); // sparks lifting off the rim
+  } });
   def('rift_p', { w: 14, h: 10, outline: 0, draw(g) {
     P.glow(g, 7, 5, 7, '#b050ff', 0.7);
     g.beginPath(); g.moveTo(1, 5); g.quadraticCurveTo(7, -1, 13, 5); g.quadraticCurveTo(7, 11, 1, 5); P.fill(g, P.rg(g, 7, 5, 6, ['#ffffff', '#c070ff', '#40106a']));

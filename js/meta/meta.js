@@ -628,8 +628,8 @@
 
   /* ---------------- Season pass: a new season every calendar month ---------------- */
   // Season 1 is September 2026, each month after it the next (on the game clock, in the player's time zone)
-  meta.seasonNow = () => { const d = new Date(U.now()); return (d.getFullYear() - 2026) * 12 + d.getMonth() - 8 + 1; };
-  meta.seasonEndsIn = () => { const d = new Date(U.now()); return new Date(d.getFullYear(), d.getMonth() + 1, 1) - d; };
+  meta.seasonNow = () => { const g = U.gameDate(); return (g.y - 2026) * 12 + g.m - 9 + 1; }; // the game's month (Sofia), the same on the server
+  meta.seasonEndsIn = () => { const g = U.gameDate(), days = new Date(Date.UTC(g.y, g.m, 0)).getUTCDate(); return U.msToMidnight() + (days - g.d) * 86400e3; };
   /** A new month: what was earned and not taken is handed over (shown on the home screen), then the pass starts again. */
   meta.ensureSeason = () => {
     const s = S(), p = s.pass, cur = meta.seasonNow();
