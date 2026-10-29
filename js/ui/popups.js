@@ -597,21 +597,17 @@
     let timer = 0;
     const m = ui.modal({ title: t('resshop.title'), cls: 'resshop', body: () => h('div'), onClose: () => { clearInterval(timer); ui.refresh(); } });
     const items = (rw) => h('div.rs-items', h('div.rs-it', A.img('i_gold'), h('b', U.fmt(rw.gold))), Object.keys(rw.mats).map((k) => h('div.rs-it', A.img('mat_' + k), h('b', rw.mats[k]))));
-    const taken = () => h('button.btn.small.ghost.off', A.img('u_check', 'ci'), t('resshop.taken'));
     const draw = () => {
       if (m.closed) return;
-      const free = M.resFreeReady(), used = E.RES_ADS - M.resAdsLeft();
-      const row = (title, rw, btn, state) => h('div.panel.rs-row' + (state ? '.' + state : ''), h('div.grow', h('div.rs-t', title), items(rw)), btn);
-      const rows = [row(t('resshop.free'), E.RES_FREE, free ? h('button.btn.small.gold', { onclick: async () => {
-        const r = await ui.act('claimResFree'); if (r) { DH.audio.play('reward'); ui.rewardPopup(t('resshop.title'), r); } draw();
-      } }, t('common.claim')) : taken(), free ? '' : 'done')];
-      for (let i = 0; i < E.RES_ADS; i++) {
-        const done = i < used, next = i === used && !free; // one at a time, after the free one
-        rows.push(row(t('resshop.ad', { n: i + 1 }), E.RES_AD, done ? taken() : h('button.btn.small.ad' + (next ? '' : '.off'), { onclick: async () => {
-          if (!next) { ui.toast(t(free ? 'resshop.freeFirst' : 'resshop.inOrder'), 'bad'); return; }
-          const r = await ui.act('adRes'); if (r) ui.rewardPopup(t('resshop.title'), r); draw();
-        } }, h('span.adtag', 'AD'), t('common.watch')), done ? 'done' : next ? '' : 'locked'));
-      }
+      // one card that turns over: today's free handful first, then the ads one after another in its place
+      const free = M.resFreeReady(), used = E.RES_ADS - M.resAdsLeft(), step = free ? 0 : 1 + used, all = !free && used >= E.RES_ADS;
+      const pips = h('div.rs-pips'); for (let i = 0; i <= E.RES_ADS; i++) pips.append(h('i' + (i < step ? '.on' : i === step ? '.cur' : '')));
+      const card = h('div.panel.rs-row' + (all ? '.done' : ''),
+        h('div.grow', h('div.rs-t', all ? t('resshop.allTaken') : free ? t('resshop.free') : t('resshop.ad', { n: used + 1, m: E.RES_ADS })), items(free ? E.RES_FREE : E.RES_AD)),
+        all ? h('button.btn.small.ghost.off', A.img('u_check', 'ci'), t('resshop.taken'))
+          : free ? h('button.btn.small.gold', { onclick: async () => { const r = await ui.act('claimResFree'); if (r) { DH.audio.play('reward'); ui.rewardPopup(t('resshop.title'), r); } draw(); } }, t('common.claim'))
+            : h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('adRes'); if (r) ui.rewardPopup(t('resshop.title'), r); draw(); } }, h('span.adtag', 'AD'), t('common.watch')));
+      const rows = [pips, card];
       const tm = h('div.small.muted.center.rs-timer'), upd = () => { tm.textContent = t('quests.resetsIn', { t: U.fmtDuration(U.msToMidnight()) }); };
       upd(); clearInterval(timer); timer = setInterval(upd, 1000);
       m.set(h('div', h('div.small.muted.center.rs-desc', t('resshop.desc')), rows, tm));
