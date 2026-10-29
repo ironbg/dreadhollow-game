@@ -180,6 +180,8 @@
       box.append(h('div.doll',
         h('div.dcol', ['head', 'neck', 'chest', 'hands'].map(dslot)),
         h('div.dmid', { onclick: () => { click(); ui.go('armory', 'heroes'); } }, heroFigure(s.selectedHero),
+          h('button.resbtn', { 'aria-label': t('resshop.title'), onclick: (e) => { e.stopPropagation(); click(); ui.openResShop(); } }, // the resource store, its badge while today's free handful waits
+            h('div.ic', A.img('mat_iron')), h('span.l', t('resshop.btn')), M.resFreeReady() ? h('span.badge', '!') : null),
           h('div.dname', t('hero.' + s.selectedHero + '.name')),
           h('span.power', t('home.power'), h('b', U.fmt(M.powerScore())))),
         h('div.dcol', ['feet', 'ring1', 'ring2'].map(dslot).concat(mark))));

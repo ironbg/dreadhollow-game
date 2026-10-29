@@ -776,6 +776,15 @@
     if (!(await DH.ads.rewarded('energy'))) return null;
     d.ads.energy++; return meta.grant({ energy: E.ENERGY_AD_AMOUNT });
   };
+  /* ---------------- The resource store (Armory): a free handful a day, then a few more for an ad each ---------------- */
+  meta.resFreeReady = () => !meta.ensureDaily().resFree;
+  meta.resAdsLeft = () => Math.max(0, E.RES_ADS - (meta.ensureDaily().ads.res || 0));
+  meta.claimResFree = () => { const d = meta.ensureDaily(); if (d.resFree) return null; d.resFree = true; return meta.grant(E.RES_FREE); };
+  meta.adRes = async () => {
+    const d = meta.ensureDaily(); if (!d.resFree || meta.resAdsLeft() <= 0) return null; // the ads open once the free one is taken
+    if (!(await DH.ads.rewarded('res_shop'))) return null;
+    d.ads.res = (d.ads.res || 0) + 1; return meta.grant(E.RES_AD);
+  };
   meta.gemEnergy = () => { if (!meta.spend({ gems: E.ENERGY_GEM_COST })) return null; return meta.grant({ energy: E.ENERGY_GEM_AMOUNT }); };
   meta.freeChestAd = async () => {
     if (meta.freeChestReadyIn() > 0) return null;

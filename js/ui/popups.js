@@ -592,6 +592,32 @@
     };
     draw();
   };
+  /** The resource store: a free handful of gold and iron once a day, then a few more for an ad each. */
+  ui.openResShop = () => {
+    let timer = 0;
+    const m = ui.modal({ title: t('resshop.title'), cls: 'resshop', body: () => h('div'), onClose: () => { clearInterval(timer); ui.refresh(); } });
+    const items = (rw) => h('div.rs-items', h('div.rs-it', A.img('i_gold'), h('b', U.fmt(rw.gold))), Object.keys(rw.mats).map((k) => h('div.rs-it', A.img('mat_' + k), h('b', rw.mats[k]))));
+    const taken = () => h('button.btn.small.ghost.off', A.img('u_check', 'ci'), t('resshop.taken'));
+    const draw = () => {
+      if (m.closed) return;
+      const free = M.resFreeReady(), used = E.RES_ADS - M.resAdsLeft();
+      const row = (title, rw, btn, state) => h('div.panel.rs-row' + (state ? '.' + state : ''), h('div.grow', h('div.rs-t', title), items(rw)), btn);
+      const rows = [row(t('resshop.free'), E.RES_FREE, free ? h('button.btn.small.gold', { onclick: async () => {
+        const r = await ui.act('claimResFree'); if (r) { DH.audio.play('reward'); ui.rewardPopup(t('resshop.title'), r); } draw();
+      } }, t('common.claim')) : taken(), free ? '' : 'done')];
+      for (let i = 0; i < E.RES_ADS; i++) {
+        const done = i < used, next = i === used && !free; // one at a time, after the free one
+        rows.push(row(t('resshop.ad', { n: i + 1 }), E.RES_AD, done ? taken() : h('button.btn.small.ad' + (next ? '' : '.off'), { onclick: async () => {
+          if (!next) { ui.toast(t(free ? 'resshop.freeFirst' : 'resshop.inOrder'), 'bad'); return; }
+          const r = await ui.act('adRes'); if (r) ui.rewardPopup(t('resshop.title'), r); draw();
+        } }, h('span.adtag', 'AD'), t('common.watch')), done ? 'done' : next ? '' : 'locked'));
+      }
+      const tm = h('div.small.muted.center.rs-timer'), upd = () => { tm.textContent = t('quests.resetsIn', { t: U.fmtDuration(U.msToMidnight()) }); };
+      upd(); clearInterval(timer); timer = setInterval(upd, 1000);
+      m.set(h('div', h('div.small.muted.center.rs-desc', t('resshop.desc')), rows, tm));
+    };
+    draw();
+  };
   /** A slot's picker: the item worn there on top (details / unequip), every item that fits below; tapping one equips it. */
   ui.openSlotPicker = (slot) => {
     const row = (g, worn, m) => {

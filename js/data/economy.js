@@ -359,6 +359,10 @@
   /* ---------- Free gems via ads ---------- */
   E.FREE_GEM_ADS = 5;
   E.FREE_GEM_AMOUNT = 10;
+  // the resource store in the Armory: one free handful a day, then a few more for a rewarded ad each
+  E.RES_FREE = { gold: 1000, mats: { iron: 10 } };
+  E.RES_AD = { gold: 1500, mats: { iron: 15 } };
+  E.RES_ADS = 3;
 
   /* ---------- Account level ---------- */
   E.accountXpNext = (lvl) => 100 + (lvl - 1) * 60;

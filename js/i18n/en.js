@@ -22,6 +22,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
 
   'armory.heroes': 'Heroes', 'armory.gear': 'Relics', 'armory.selected': 'Selected', 'armory.select': 'Select', 'armory.unlocked': 'Hero unlocked!',
   'armory.bundle': 'Bundle', 'armory.heroInfo': 'Hero details', 'armory.weapon': 'Weapon', 'armory.strengths': 'Strengths', 'armory.every10': 'Every 10 levels', 'armory.hp': 'Health', 'armory.speed': 'Speed', 'armory.equipped': 'Equipped', 'armory.inventory': 'Inventory ({n})',
+  'resshop.title': 'Resource Store', 'resshop.btn': 'Resources', 'resshop.free': 'Free today', 'resshop.ad': 'Ad {n}', 'resshop.taken': 'Claimed', 'resshop.desc': 'Every day: a free handful of gold and iron, then three more for watching an ad.', 'resshop.freeFirst': 'Take the free reward first.', 'resshop.inOrder': 'Watch the ads in order.',
   'forge.title': 'Forging', 'forge.skip': 'Tap to skip', 'forge.tap': 'Tap to continue',
   'armory.autoMerge': 'Auto-merge', 'armory.getGear': 'Get relics', 'armory.noGear': 'No relics yet. Open chests or defeat bosses!', 'armory.merged': 'Relics merged!',
 

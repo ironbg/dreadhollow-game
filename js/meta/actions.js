@@ -19,6 +19,8 @@
     quickVigil: { run: (a) => M().quickVigil(str(a.mode, 8)), ad: (a) => (a.mode === 'ad' ? 'quick_vigil' : null) },
     adEnergy: { run: () => M().adEnergy(), ad: () => 'energy' },
     gemEnergy: { run: () => M().gemEnergy() },
+    claimResFree: { run: () => M().claimResFree() },
+    adRes: { run: () => M().adRes(), ad: () => (M().ensureDaily().resFree && M().resAdsLeft() > 0 ? 'res_shop' : null) },
     adGems: { run: () => M().adGems(), ad: () => 'free_gems' },
     claimSoulCard: { run: () => M().claimSoulCard() },
     // shop
