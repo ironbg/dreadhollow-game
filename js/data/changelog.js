@@ -4,12 +4,12 @@
   'use strict';
   DH.changelog = [
     {
-      v: '1.61.40',
+      v: '1.61.41',
       bg: [
-        'Ковачницата при сливане е прерисувана в стила на залите: каменно огнище с жив огън и тлеещи въглени, наковалня на дървен пън и тежък ковашки чук, на пода на криптата и на светлината на огъня.',
+        'Ковачницата при сливане е прерисувана в стила на залите: каменно огнище с жив огън и тлеещи въглени, наковалня на каменен блок и тежък ковашки чук, на пода на криптата и на светлината на огъня.',
       ],
       en: [
-        'The forge scene for merging is redrawn in the style of the halls: a stone hearth with a living fire and glowing coals, an anvil on a wooden stump and a heavy smith\'s sledge, on the crypt\'s floor in the firelight.',
+        'The forge scene for merging is redrawn in the style of the halls: a stone hearth with a living fire and glowing coals, an anvil on a stone block and a heavy smith\'s sledge, on the crypt\'s floor in the firelight.',
       ],
     },
     {

@@ -710,16 +710,20 @@
     P.glow(g, 31, 53, 22, '#ffb040', 0.35);
     for (let i = 0; i < 6; i++) P.circle(g, 6 + r() * 50, 6 + r() * 34, 0.4, '#ffd070');
   } });
-  // the anvil on its stump: a horn to the left, the heel with its hardy hole to the right, the face polished bright by the hammer
+  // the anvil on a stone block: a horn to the left, the heel with its hardy hole to the right, the face polished bright by the hammer
   def('forge_anvil', { w: 76, h: 50, cx: 38, cy: 48, frames: 1, draw(g) {
     P.ell(g, 38, 48, 26, 3.4, 'rgba(0,0,0,0.55)');
-    // the stump: bark down its sides, an iron band, the sawn top with its rings
-    P.path(g, [22, 31, 54, 31, 55, 46, 21, 46]); P.fill(g, P.lg(g, 21, 0, 55, 0, ['#8a5a32', '#6a4224', '#4a2c16', '#24140a']));
-    P.ell(g, 38, 46, 17, 2.4, '#24140a');
-    for (const x of [25, 29.5, 34, 39, 44, 48.5, 52]) P.line(g, x, 32.5, x + (x < 38 ? -0.4 : 0.4), 45.5, 0.45, 'rgba(20,10,4,0.7)');
-    P.path(g, [21.6, 38.2, 54.4, 38.2, 54.6, 40.6, 21.4, 40.6]); P.fill(g, P.lg(g, 21, 0, 55, 0, ['#7a7486', '#4a4654', '#26222c']));
-    for (const x of [24, 38, 52]) P.circle(g, x, 39.4, 0.5, '#b8b2c4');
-    P.ell(g, 38, 31, 16, 3, P.lg(g, 22, 28, 54, 34, ['#c89a64', '#a07448', '#7a5430']));
+    // the block it stands on: a squat dressed stone like the hearth's, its top seen from above, chipped and scattered with scale
+    const r = seeded(23), base = '#5a5266';
+    P.path(g, [17.4, 33, 58.6, 33, 59.4, 34.6, 59.4, 46.2, 58, 47.4, 18.6, 47.4, 16.6, 45.8, 16.6, 34.8]);
+    P.fill(g, P.lg(g, 16, 33, 40, 48, [sh(base, 0.12), base, sh(base, -0.38)]));
+    P.path(g, [20.6, 28.6, 56, 28.6, 59.4, 33.2, 16.6, 33.2]); P.fill(g, P.lg(g, 0, 28.6, 0, 33.2, [sh(base, 0.42), sh(base, 0.22)]));
+    P.line(g, 16.8, 33.3, 59.2, 33.3, 0.6, G.rgba(sh(base, 0.6), 0.8));
+    P.line(g, 17, 35, 17, 45.4, 0.6, G.rgba(sh(base, 0.3), 0.6));
+    P.path(g, [56.6, 33.4, 59.4, 33.4, 59.4, 37.2]); P.fill(g, '#16121c'); // a chipped corner
+    P.path(g, [31, 33.6, 32.4, 38.4, 30.8, 41.6, 31.6, 46.8], false); P.stroke(g, 'rgba(18,14,22,0.9)', 0.5); // a crack
+    for (let i = 0; i < 5; i++) P.circle(g, 20 + r() * 36, 36 + r() * 9, 0.35 + r() * 0.3, G.rgba(sh(base, -0.45), 0.8));
+    for (let i = 0; i < 7; i++) { const x = 21 + r() * 34, y = 29.4 + r() * 3; P.rect(g, x, y, 0.7 + r() * 0.8, 0.45, r() < 0.5 ? '#2a2630' : '#4a3a34'); } // scale knocked off the iron
     // the anvil's feet, waist and body
     const IRON = ['#77738a', '#4a4656', '#2a2632', '#1a1620'];
     P.path(g, [23, 32, 53, 32, 50.5, 26.5, 47, 25, 29, 25, 25.5, 26.5]); P.fill(g, P.lg(g, 23, 0, 53, 0, IRON));
