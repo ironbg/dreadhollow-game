@@ -1454,7 +1454,7 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 @keyframes ffxin { from { opacity: 0; } to { opacity: 1; } }
 .ffx-title { font-family: var(--title, inherit); font-size: 24px; font-weight: 800; color: var(--gold); text-shadow: 0 2px 0 #000, 0 0 12px rgba(255,140,40,.6); letter-spacing: 1px; }
 .ffx-stage { position: relative; width: 360px; height: 400px; max-width: 100vw; border: 2px solid #050308; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 2px var(--bronze, #8a6a3a), 0 0 40px rgba(255,120,40,.25); zoom: var(--ffxz, 1); }
-.ffx-cv { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ffx-cv { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 .ffx-stage .slot { position: absolute; left: 0; top: 0; width: 68px; opacity: 0; will-change: transform; transform-origin: 50% 50%; }
 .ffx-stage .slot.ffx-out { box-shadow: 0 0 22px var(--rc), inset 0 0 12px rgba(0,0,0,.8); animation: none; }
 .ffx-name { text-align: center; font-weight: 800; font-size: 17px; color: #fff; text-shadow: 0 1px 0 #000; opacity: 0; transform: translateY(6px); transition: opacity .3s, transform .3s; min-height: 2.6em; }

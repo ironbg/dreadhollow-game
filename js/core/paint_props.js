@@ -612,4 +612,142 @@
     g.strokeStyle = 'rgba(255,255,255,0.4)'; g.lineWidth = 0.25; g.beginPath(); g.moveTo(8.4, 6); g.lineTo(7.8, 9); g.lineTo(8.6, 11); g.stroke();
     for (const [x, rx] of [[2.6, 2.4], [8, 3], [13.4, 2.4]]) P.ell(g, x, 17.8, rx, 1, P.lg(g, 0, 16.8, 0, 18.8, ['#ffffff', '#c8e4f4']));
   } });
+
+  /* ---------- The forge (the scene that plays when relics merge) ---------- */
+  // dressed stone of the halls: chipped corners, a lit top and left edge, a crack or a few pits here and there
+  function stoneBlock(g, x, y, w, h, base, r) {
+    const c = 0.6 + r() * 0.9;
+    P.path(g, [x + c, y, x + w - c * 0.7, y, x + w, y + c * 0.8, x + w, y + h - c, x + w - c, y + h, x + c * 0.8, y + h, x, y + h - c * 0.7, x, y + c]);
+    P.fill(g, P.lg(g, x, y, x + w * 0.5, y + h, [sh(base, 0.2), base, sh(base, -0.34)]));
+    P.line(g, x + c, y + 0.45, x + w - c, y + 0.45, 0.8, G.rgba(sh(base, 0.5), 0.75));
+    P.line(g, x + 0.45, y + c, x + 0.45, y + h - c, 0.6, G.rgba(sh(base, 0.32), 0.55));
+    if (r() < 0.3) { const cx = x + w * (0.25 + r() * 0.5); P.path(g, [cx, y + 0.6, cx + 1.1, y + h * 0.45, cx - 0.4, y + h * 0.75], false); P.stroke(g, G.rgba('#120e16', 0.85), 0.45); }
+    for (let i = 0; i < 3; i++) P.circle(g, x + 1 + r() * (w - 2), y + 1 + r() * (h - 2), 0.3 + r() * 0.35, G.rgba(sh(base, -0.45), 0.7));
+  }
+  const seeded = (n) => () => ((n = (n * 16807) % 2147483647) / 2147483647);
+  const FORGE_STONE = ['#5c5468', '#4f4a5c', '#635b6e', '#565062', '#4a4456'];
+  // the smithy's great hearth: a sooty stone hood, two pillars, an arch of wedge stones over the fire, an iron grate, tongs on a peg.
+  // The mouth is left empty: the fire (forge_fire) burns behind it.
+  def('forge_hearth', { w: 150, h: 118, cy: 118, frames: 1, draw(g) {
+    const r = seeded(7), st = () => FORGE_STONE[(r() * FORGE_STONE.length) | 0], MORTAR = '#16121c';
+    const course = (x0, x1, y, hgt, minW, maxW) => { let x = x0 - r() * minW * 0.5; while (x < x1) { const w = Math.min(x1 - x, minW + r() * (maxW - minW)); if (w > 2) stoneBlock(g, Math.max(x0, x) + 0.35, y + 0.35, w - 0.7 - (x < x0 ? x0 - x : 0), hgt - 0.7, st(), r); x += w; } };
+    // the hood, narrowing to the chimney
+    g.save(); P.path(g, [36, 0, 114, 0, 132, 27, 18, 27]); g.clip(); P.rect(g, 0, 0, 150, 27, MORTAR);
+    for (let y = 0, i = 0; y < 27; y += 9, i++) course(14, 136, y, 9, 10, 18);
+    g.restore();
+    // the cornice: one long dressed stone under the hood
+    P.path(g, [9, 27, 141, 27, 139, 33, 11, 33]); P.fill(g, P.lg(g, 0, 27, 0, 33, ['#7a7288', '#5a5266', '#38324a']));
+    P.line(g, 10, 27.5, 140, 27.5, 0.8, 'rgba(200,190,220,0.45)');
+    // the walls and pillars, then the mouth cut out of them
+    P.rect(g, 8, 33, 134, 68, MORTAR);
+    for (let y = 33, i = 0; y < 101; y += 11.3, i++) course(8, 142, y, 11.3, 9, 17);
+    g.save(); g.globalCompositeOperation = 'destination-out';
+    g.beginPath(); g.arc(75, 70, 29, Math.PI, 0); g.lineTo(104, 101); g.lineTo(46, 101); g.closePath(); g.fill(); g.restore();
+    // the arch of wedge stones, the keystone the largest
+    const N = 9;
+    for (let i = 0; i < N; i++) {
+      const a0 = Math.PI + (i / N) * Math.PI + 0.02, a1 = Math.PI + ((i + 1) / N) * Math.PI - 0.02, key = i === 4, ro = key ? 44 : 40, ri = 29;
+      const pts = [75 + Math.cos(a0) * ri, 70 + Math.sin(a0) * ri, 75 + Math.cos(a0) * ro, 70 + Math.sin(a0) * ro, 75 + Math.cos(a1) * ro, 70 + Math.sin(a1) * ro, 75 + Math.cos(a1) * ri, 70 + Math.sin(a1) * ri];
+      P.path(g, pts); P.fill(g, MORTAR); const base = key ? '#6e667c' : st(), am = (a0 + a1) / 2;
+      const sh1 = 0.3; P.path(g, [pts[0] + Math.cos(am) * sh1, pts[1] + Math.sin(am) * sh1, pts[2] - Math.cos(am) * sh1, pts[3] - Math.sin(am) * sh1, pts[4] - Math.cos(am) * sh1, pts[5] - Math.sin(am) * sh1, pts[6] + Math.cos(am) * sh1, pts[7] + Math.sin(am) * sh1]);
+      P.fill(g, P.lg(g, 75 + Math.cos(am) * ro, 70 + Math.sin(am) * ro, 75 + Math.cos(am) * ri, 70 + Math.sin(am) * ri, [sh(base, 0.24), base, sh(base, -0.2)]));
+      P.line(g, pts[2], pts[3], pts[4], pts[5], 0.7, G.rgba(sh(base, 0.5), 0.6));
+    }
+    // a hammer carved in the keystone
+    P.line(g, 72.4, 36.6, 77.6, 31.6, 0.9, '#2e283a'); P.path(g, [75.6, 29.4, 79.6, 33.4, 81, 32, 77, 28]); P.fill(g, '#2e283a');
+    // the jambs: the inner edge of the arch and of the mouth, deep in shadow
+    g.beginPath(); g.arc(75, 70, 29.2, Math.PI, 0); g.strokeStyle = '#0e0a10'; g.lineWidth = 1.2; g.stroke();
+    P.line(g, 46.4, 70, 46.4, 101, 1.2, '#0e0a10'); P.line(g, 103.6, 70, 103.6, 101, 1.2, '#0e0a10');
+    // soot over the mouth and up the hood; the fire's warmth on the stones round it
+    g.save(); g.globalCompositeOperation = 'source-atop';
+    P.ell(g, 75, 30, 44, 34, P.rg(g, 75, 30, 44, [[0, 'rgba(8,4,8,0.62)'], [1, 'rgba(8,4,8,0)']]));
+    P.ell(g, 75, 82, 62, 40, P.rg(g, 75, 82, 62, [[0, 'rgba(255,120,40,0.32)'], [0.6, 'rgba(255,90,30,0.12)'], [1, 'rgba(255,90,30,0)']]));
+    g.restore();
+    // the hearth ledge and its footing
+    P.rect(g, 2, 100, 146, 18, MORTAR);
+    P.path(g, [1, 100, 149, 100, 148, 106.5, 2, 106.5]); P.fill(g, P.lg(g, 0, 100, 0, 106.5, ['#7c7488', '#5c546a', '#3c3448']));
+    P.line(g, 2, 100.5, 148, 100.5, 0.8, 'rgba(210,200,230,0.5)');
+    for (let x = 2; x < 148;) { const w = 14 + r() * 12; stoneBlock(g, x + 0.35, 106.9, Math.min(w, 148 - x) - 0.7, 10.8, st(), r); x += w; }
+    // the grate: iron bars across the foot of the fire
+    for (let x = 50; x <= 100; x += 6.2) { P.line(g, x, 87, x, 100, 1.6, '#100c12'); P.line(g, x - 0.2, 87.5, x - 0.2, 99.5, 0.6, '#5a5462'); }
+    P.rect(g, 46.5, 88.4, 57, 2, '#141018'); P.line(g, 46.5, 88.7, 103.5, 88.7, 0.6, '#6a6474');
+    // tongs hanging on the right pillar
+    P.circle(g, 124, 45, 1.4, '#141018'); P.circle(g, 123.7, 44.7, 0.7, '#8a8494');
+    for (const [x2, c] of [[120.4, '#3a3644'], [127.6, '#4c4858']]) { P.line(g, 124, 45.5, x2, 76, 1.5, '#0e0a10'); P.line(g, 124, 45.5, x2, 76, 0.7, c); }
+    P.path(g, [119.4, 75.6, 121.8, 75.6, 121.2, 80.4]); P.fill(g, '#2a2632'); P.path(g, [126.4, 75.6, 128.8, 75.6, 127, 80.4]); P.fill(g, '#2a2632');
+  } });
+  // the fire inside the hearth: a back wall of glowing brick, a bed of coals, flames in four phases
+  def('forge_fire', { w: 62, h: 62, cx: 31, cy: 62, frames: 4, draw(g, f) {
+    const r = seeded(11 + f * 3);
+    P.rect(g, 0, 0, 62, 62, '#1a0a08');
+    for (let y = 0, i = 0; y < 62; y += 5.5, i++) for (let x = -(i % 2) * 6; x < 62; x += 12) {
+      const d = Math.hypot(x + 6 - 31, y + 2.7 - 52) / 52, k = Math.max(0, 1 - d);
+      P.rect(g, x + 0.5, y + 0.5, 11, 4.5, G.rgba(sh('#7a2c14', k * 0.5), 0.35 + k * 0.65));
+    }
+    P.glow(g, 31, 50, 36, '#ff7a20', 0.75 + (f % 2) * 0.1);
+    // flames: uneven tongues that lean and curl, each its own width and height, a hot core inside the tallest
+    const ph = f * Math.PI / 2;
+    const tongue = (x, w, top, lean, col) => {
+      g.beginPath(); g.moveTo(x - w, 51);
+      g.bezierCurveTo(x - w * 1.1, 51 - (51 - top) * 0.45, x + lean * 0.2 - w * 0.5, top + (51 - top) * 0.3, x + lean, top);
+      g.bezierCurveTo(x + lean * 0.4 + w * 0.3, top + (51 - top) * 0.35, x + w * 1.15, 51 - (51 - top) * 0.4, x + w, 51);
+      g.closePath(); P.fill(g, col);
+    };
+    const T = [[9, 5, 20], [17, 6.5, 31], [26, 7, 40], [34, 7.5, 44], [42, 6.5, 34], [50, 5.5, 24], [56, 4, 16], [4, 3.5, 13], [30, 4, 28]];
+    const outer = P.lg(g, 0, 4, 0, 51, ['#ffe080', '#ff9a28', '#e04a10', '#a02008']), mid = P.lg(g, 0, 10, 0, 51, ['#fff0b0', '#ffc048', '#ff7a20']);
+    T.forEach(([x, w, hgt], i) => { const k = 0.72 + 0.28 * Math.sin(ph + i * 2.1), ln = Math.sin(ph * 1.3 + i * 1.7) * (2 + hgt * 0.08); tongue(x, w, 51 - hgt * k, ln, outer); });
+    T.forEach(([x, w, hgt], i) => { if (hgt < 20) return; const k = 0.7 + 0.3 * Math.sin(ph + i * 2.1 + 0.6); tongue(x + 0.4, w * 0.55, 51 - hgt * 0.62 * k, Math.sin(ph * 1.3 + i * 1.7) * 1.6, mid); });
+    for (const [x, hgt] of [[25, 18], [34, 22], [42, 14]]) tongue(x, 2.2, 51 - hgt * (0.8 + 0.2 * Math.sin(ph + x)), Math.sin(ph + x) * 0.8, '#fff8dc');
+    // loose wisps of flame torn off the tips
+    for (let i = 0; i < 3; i++) { const x = 14 + ((i * 17 + f * 9) % 34), y = 10 + ((i * 11 + f * 7) % 14); P.ell(g, x, y, 0.9, 1.6, '#ffb040'); }
+    // the coals: crusted dark, glowing red-gold in the gaps and along their tops
+    P.rect(g, 0, 51, 62, 11, P.lg(g, 0, 51, 0, 62, ['#ff8a28', '#c03a10', '#5a1408']));
+    for (let i = 0; i < 24; i++) {
+      const x = 3 + r() * 56, y = 51.5 + r() * 9, rx = 2.2 + r() * 2.4, hot = r();
+      P.ell(g, x, y, rx, rx * 0.68, P.lg(g, x - rx, y - rx, x + rx * 0.6, y + rx, hot > 0.6 ? ['#ff9a40', '#c04010', '#4a1408'] : ['#7a2e14', '#3a1208', '#160604']));
+      P.line(g, x - rx * 0.6, y - rx * 0.5, x + rx * 0.4, y - rx * 0.62, 0.55, hot > 0.4 ? '#ffc060' : '#ff7a28');
+    }
+    P.glow(g, 31, 53, 22, '#ffb040', 0.35);
+    for (let i = 0; i < 6; i++) P.circle(g, 6 + r() * 50, 6 + r() * 34, 0.4, '#ffd070');
+  } });
+  // the anvil on its stump: a horn to the left, the heel with its hardy hole to the right, the face polished bright by the hammer
+  def('forge_anvil', { w: 76, h: 50, cx: 38, cy: 48, frames: 1, draw(g) {
+    P.ell(g, 38, 48, 26, 3.4, 'rgba(0,0,0,0.55)');
+    // the stump: bark down its sides, an iron band, the sawn top with its rings
+    P.path(g, [22, 31, 54, 31, 55, 46, 21, 46]); P.fill(g, P.lg(g, 21, 0, 55, 0, ['#8a5a32', '#6a4224', '#4a2c16', '#24140a']));
+    P.ell(g, 38, 46, 17, 2.4, '#24140a');
+    for (const x of [25, 29.5, 34, 39, 44, 48.5, 52]) P.line(g, x, 32.5, x + (x < 38 ? -0.4 : 0.4), 45.5, 0.45, 'rgba(20,10,4,0.7)');
+    P.path(g, [21.6, 38.2, 54.4, 38.2, 54.6, 40.6, 21.4, 40.6]); P.fill(g, P.lg(g, 21, 0, 55, 0, ['#7a7486', '#4a4654', '#26222c']));
+    for (const x of [24, 38, 52]) P.circle(g, x, 39.4, 0.5, '#b8b2c4');
+    P.ell(g, 38, 31, 16, 3, P.lg(g, 22, 28, 54, 34, ['#c89a64', '#a07448', '#7a5430']));
+    // the anvil's feet, waist and body
+    const IRON = ['#77738a', '#4a4656', '#2a2632', '#1a1620'];
+    P.path(g, [23, 32, 53, 32, 50.5, 26.5, 47, 25, 29, 25, 25.5, 26.5]); P.fill(g, P.lg(g, 23, 0, 53, 0, IRON));
+    P.line(g, 25.8, 26.6, 50.2, 26.6, 0.6, 'rgba(200,196,220,0.45)');
+    P.path(g, [30.5, 25.4, 45.5, 25.4, 43.5, 15, 32.5, 15]); P.fill(g, P.lg(g, 30, 0, 46, 0, ['#5a5668', '#3a3644', '#1c1822']));
+    // the body with its horn and heel
+    P.path(g, [14, 6.8, 64, 6.8, 70, 6.8, 70, 12.4, 64.6, 12.4, 62, 15.4, 16, 15.4, 13.4, 13.6, 6, 11.8, 0.6, 9.4, 6, 7.6]);
+    P.fill(g, P.lg(g, 0, 6.8, 0, 15.4, ['#6c687c', '#4a4658', '#2a2632']));
+    P.path(g, [0.6, 9.4, 6, 7.6, 14, 6.8, 14, 9.2, 6.4, 9.6]); P.fill(g, G.rgba('#9a96ac', 0.55)); // light along the horn's back
+    // the face, seen from above: polished, brightest where the hammer falls
+    P.path(g, [13.4, 4.2, 69.2, 4.2, 70.4, 6.9, 13.8, 6.9, 6.2, 7.5]); P.fill(g, P.lg(g, 10, 0, 70, 0, ['#8e8aa2', '#d8d4ea', '#e8e4f8', '#b8b4ca', '#8a869c']));
+    P.line(g, 13.6, 4.4, 69, 4.4, 0.5, '#f4f2ff');
+    P.rect(g, 60.4, 4.9, 2.4, 1.3, '#16121a'); P.circle(g, 56.2, 5.5, 0.65, '#16121a'); // the hardy and pritchel holes
+    P.line(g, 14, 7.3, 69.8, 7.3, 0.6, 'rgba(255,255,255,0.22)');
+    P.line(g, 16, 15.2, 62, 15.2, 0.8, 'rgba(0,0,0,0.5)');
+  } });
+  // the smith's sledge, lying with its head to the left (the scene turns it about the grip, cx/cy)
+  def('forge_hammer', { w: 64.4, h: 28, cx: 60.2, cy: 14, frames: 1, draw(g) {
+    g.scale(1.4, 1.4); // a heavy sledge, drawn on the 46 x 20 grid below
+    P.path(g, [11, 8.9, 45, 8.4, 45, 11.6, 11, 11.1]); P.fill(g, P.lg(g, 0, 8.4, 0, 11.6, ['#c49060', '#8a5a30', '#4a2c16']));
+    P.rect(g, 35, 8.2, 10, 3.6, '#3a2216'); for (let x = 35.6; x < 45; x += 1.6) P.line(g, x, 8.4, x + 1, 11.6, 0.4, 'rgba(160,110,70,0.6)'); // the leather grip
+    P.ell(g, 45, 10, 1, 1.9, '#5a5664');
+    P.path(g, [12, 7.6, 19, 8.4, 19, 9, 12, 8.8]); P.fill(g, '#3a3644'); P.path(g, [12, 11.2, 19, 11, 19, 11.6, 12, 12.4]); P.fill(g, '#2a2632'); // the iron straps
+    // the head: a heavy block, its two faces wider and polished
+    P.path(g, [2.2, 2.4, 11.8, 2.4, 11.8, 17.6, 2.2, 17.6]); P.fill(g, P.lg(g, 2, 0, 12, 0, ['#9c98b0', '#6a6678', '#3a3646', '#24202c']));
+    for (const [y0, y1] of [[0.4, 3], [17, 19.6]]) { P.path(g, [1, y0, 13, y0, 13, y1, 1, y1]); P.fill(g, P.lg(g, 1, 0, 13, 0, ['#c4c0d6', '#8a869c', '#4a4656'])); }
+    P.line(g, 1, 0.6, 13, 0.6, 0.6, '#f0eeff'); P.line(g, 1, 19.4, 13, 19.4, 0.6, '#e0dcf0');
+    P.rect(g, 5.2, 8.6, 3.6, 2.8, '#1c1822'); P.line(g, 5.6, 9.2, 8.4, 9.2, 0.5, '#8a6a4a'); // the eye and its wedge
+    P.line(g, 2.6, 3.4, 2.6, 16.6, 0.6, 'rgba(230,226,250,0.5)');
+  } });
 })(window.DH);

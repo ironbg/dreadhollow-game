@@ -4,6 +4,15 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.40',
+      bg: [
+        'Ковачницата при сливане е прерисувана в стила на залите: каменно огнище с жив огън и тлеещи въглени, наковалня на дървен пън и тежък ковашки чук, на пода на криптата и на светлината на огъня.',
+      ],
+      en: [
+        'The forge scene for merging is redrawn in the style of the halls: a stone hearth with a living fire and glowing coals, an anvil on a wooden stump and a heavy smith\'s sledge, on the crypt\'s floor in the firelight.',
+      ],
+    },
+    {
       v: '1.61.39',
       bg: [
         'Оръжейната е преработена и е много по-компактна: героят стои в средата, а екипировката му е от двете страни. Материалите са на един ред, а реликвите са в решетка с по 5 на ред.',
