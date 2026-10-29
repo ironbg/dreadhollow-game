@@ -1424,3 +1424,41 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .modal.settings .set-links { margin-top: 6px; }
 .modal.settings .note { margin-top: 4px; }
 .modal.settings .set-lang .dd-list { top: auto; bottom: calc(100% + 4px); } /* it sits at the bottom: the list opens upward */
+
+/* ===================== Armory: relics (the hero among their gear) ===================== */
+.doll { display: grid; grid-template-columns: 62px minmax(0, 1fr) 62px; gap: 8px; margin: 4px 0 8px; }
+.doll .dcol { display: flex; flex-direction: column; gap: 6px; }
+.doll .dcol .slot { width: 62px; }
+.doll .dcol .slot .lv { font-size: 6px; }
+.doll .dmid { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; padding: 6px 4px 8px; cursor: pointer; overflow: hidden;
+  border: 2px solid #050308; box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), inset 0 0 30px #000;
+  background: radial-gradient(ellipse 46% 9% at 50% 70%, rgba(0,0,0,.7), transparent 100%), radial-gradient(ellipse at 50% 60%, rgba(255,130,50,.22), transparent 62%), var(--tex-panel, none) 0 0 / 64px 64px, #1a1220; }
+.doll .dhero { flex: 1; min-height: 0; width: auto; max-width: 100%; height: 180px; object-fit: contain; image-rendering: pixelated; animation: dbreathe 2.8s ease-in-out infinite; transform-origin: 50% 100%; filter: drop-shadow(0 3px 0 rgba(0,0,0,.6)); }
+@keyframes dbreathe { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(1.025); } }
+.doll .dname { font-weight: 800; font-size: 14px; color: var(--gold); text-shadow: 0 1px 0 #000, 0 0 6px #000; text-align: center; line-height: 1.1; }
+.doll .power { margin-top: 0; }
+.matline { display: flex; align-items: center; gap: 4px; margin: 0 0 8px; }
+.matline .mchip { flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 3px; padding: 3px 4px; background: rgba(0,0,0,.45); border: 1px solid var(--line); border-radius: 7px; cursor: pointer; }
+.matline .mchip img { width: 20px; height: 20px; flex: none; }
+.matline .mchip b { font: 10px var(--num); color: #fff; overflow: hidden; text-overflow: ellipsis; }
+.matline .btn { flex: none; }
+.invbar { gap: 6px; margin-bottom: 6px; }
+.grid5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.grid5.inv { margin-top: 6px; }
+.grid5 .slot { border-radius: 8px; }
+.grid5 .slot .lv { font-size: 6px; bottom: 2px; right: 3px; }
+
+/* the forge scene when relics merge */
+.ffx { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: rgba(4,2,6,.975); animation: ffxin .25s ease-out; cursor: pointer; user-select: none; -webkit-user-select: none; }
+.ffx.out { opacity: 0; transition: opacity .2s; }
+@keyframes ffxin { from { opacity: 0; } to { opacity: 1; } }
+.ffx-title { font-family: var(--title, inherit); font-size: 24px; font-weight: 800; color: var(--gold); text-shadow: 0 2px 0 #000, 0 0 12px rgba(255,140,40,.6); letter-spacing: 1px; }
+.ffx-stage { position: relative; width: 360px; height: 400px; max-width: 100vw; border: 2px solid #050308; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 2px var(--bronze, #8a6a3a), 0 0 40px rgba(255,120,40,.25); zoom: var(--ffxz, 1); }
+.ffx-cv { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ffx-stage .slot { position: absolute; left: 0; top: 0; width: 68px; opacity: 0; will-change: transform; transform-origin: 50% 50%; }
+.ffx-stage .slot.ffx-out { box-shadow: 0 0 22px var(--rc), inset 0 0 12px rgba(0,0,0,.8); animation: none; }
+.ffx-name { text-align: center; font-weight: 800; font-size: 17px; color: #fff; text-shadow: 0 1px 0 #000; opacity: 0; transform: translateY(6px); transition: opacity .3s, transform .3s; min-height: 2.6em; }
+.ffx-name .rtxt { font-size: 13px; }
+.ffx-name.on { opacity: 1; transform: none; }
+.ffx-hint { font-size: 12px; color: var(--muted); animation: ffxblink 1.6s ease-in-out infinite; }
+@keyframes ffxblink { 0%,100% { opacity: .45; } 50% { opacity: 1; } }

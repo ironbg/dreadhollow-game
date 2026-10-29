@@ -582,7 +582,7 @@
               t('gear.levelAll'), all.n >= 1 ? h('span.small', ' +' + all.n) : null)) : h('button.btn.ghost.block.off', t('common.max')),
           g.rarity < 5 ? h('button.btn.gem.block' + (cands.length >= 2 ? '.shine' : '.dim'), { onclick: async () => {
             if (cands.length < 2) { ui.toast(t('gear.mergeNeed', { n: 2 - cands.length, g: t('gear.' + g.type), r: t('rarity.' + E.rarities[g.rarity]) }), 'bad'); return; }
-            if (await ui.act('merge', { id: g.id })) { DH.audio.play('chest'); const gg = M.gearById(id); ui.rewardPopup(t('armory.merged'), [{ icon: 'g_' + gg.type, text: t('gear.' + gg.type), rarity: gg.rarity }]); draw(); }
+            if (await ui.act('merge', { id: g.id })) { draw(); await ui.forgeAnim(M.gearById(id)); }
           } }, t('gear.merge', { n: Math.min(3, cands.length + 1) })) : null,
           h('div.small.muted.center', g.rarity < 5 ? t('gear.mergeHint', { r: t('rarity.' + E.rarities[g.rarity + 1]) }) : ''),
           h('button.btn.small.red', { onclick: async () => {

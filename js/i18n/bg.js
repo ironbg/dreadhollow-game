@@ -22,6 +22,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
 
   'armory.heroes': 'Герои', 'armory.gear': 'Реликви', 'armory.selected': 'Избран', 'armory.select': 'Избери', 'armory.unlocked': 'Героят е отключен!',
   'armory.bundle': 'Пакет', 'armory.heroInfo': 'Информация за героя', 'armory.weapon': 'Оръжие', 'armory.strengths': 'Силни страни', 'armory.every10': 'На всеки 10 нива', 'armory.hp': 'Живот', 'armory.speed': 'Скорост', 'armory.equipped': 'Екипирани', 'armory.inventory': 'Инвентар ({n})',
+  'forge.title': 'Коване', 'forge.skip': 'Докосни, за да прескочиш', 'forge.tap': 'Докосни, за да продължиш',
   'armory.autoMerge': 'Автосливане', 'armory.getGear': 'Още реликви', 'armory.noGear': 'Още нямаш реликви. Отваряй сандъци или побеждавай босове!', 'armory.merged': 'Реликвите са слети!',
 
   'shrine.desc': 'Постоянни благословии. Всеки герой има свои: избери за кого ги вдигаш.', 'shrine.levels': 'вдигнати нива: {n}', 'shrine.perLevel': '{v} на ниво', 'shrine.total': 'Сега: {v}',

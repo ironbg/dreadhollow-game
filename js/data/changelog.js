@@ -4,6 +4,17 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.39',
+      bg: [
+        'Оръжейната е преработена и е много по-компактна: героят стои в средата, а екипировката му е от двете страни. Материалите са на един ред, а реликвите са в решетка с по 5 на ред.',
+        'Сливането на реликви вече става в ковачницата: трите предмета падат на наковалнята, чукът удря три пъти сред дъжд от искри и новият предмет изгрява в цвета на рядкостта си.',
+      ],
+      en: [
+        'The Armory is redone and far more compact: the hero stands in the middle with their gear on both sides, the materials sit on one line, and the relics fill a grid five to a row.',
+        'Merging relics now happens at the forge: the three pieces drop onto the anvil, the hammer strikes three times in a shower of sparks, and the new piece rises in its rarity\'s light.',
+      ],
+    },
+    {
       v: '1.61.36',
       bg: [
         'Настройките са преработени: табове „Общи“, „Игра“ и „Интерфейс“, бързи плочки за музика, звуци, вибрация и качество, и по-кратко меню с икони.',

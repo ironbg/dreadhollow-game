@@ -370,6 +370,13 @@
       metal(rnd(300, 360), 0.09, 0.035, PLATE);
     },
     reward() { metal(440, 1.6, 0.07, BELL, { rev: true }); metal(660, 1.4, 0.05, BELL, { rev: true, delay: 0.18 }); },
+    anvil(n) { // a hammer on hot iron at the forge: the anvil rings, a bright clank, a hiss of sparks (each blow a touch higher)
+      const k = 1 + (n || 0) * 0.05;
+      metal(520 * k, 0.9, 0.06, [1, 2.76, 5.4, 8.93], { rev: true });
+      burst({ t: 0.05, filter: 'bandpass', ff: 3200, q: 1.2, vol: 0.16 });
+      thud(110, 0.14, 0.14);
+      burst({ t: 0.35, filter: 'highpass', ff: 5000, vol: 0.03, delay: 0.04 });
+    },
 
     /* ---- the hero's abilities: each weapon its own voice ---- */
     wisp() { // grave spirits: a breath rising, a faint moan under it

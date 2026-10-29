@@ -169,32 +169,35 @@
       return box;
     },
     gear() {
-      const s = S(), box = h('div');
-      box.append(h('div.center', h('span.power', t('home.power'), h('b', U.fmt(M.powerScore())))));
-      box.append(h('h3.sect.herosect', A.img('h_' + s.selectedHero), t('armory.equippedFor', { hero: t('hero.' + s.selectedHero + '.name') })));
-      const eq = h('div.grid4'), eqp = M.eq();
-      E.slots.forEach((slot) => {
-        const g = M.gearById(eqp[slot]);
-        eq.append(h('div', g ? gearSlot(g, true, () => ui.openSlotPicker(slot)) : h('div.slot.empty', { onclick: () => ui.openSlotPicker(slot) }, A.img('s_' + slot)), h('div.center.small.muted', t('slot.' + slot))));
-      });
+      const s = S(), box = h('div'), eqp = M.eq();
+      // the hero in the middle, what they wear on both sides of them (the slots are their own labels)
+      const dslot = (slot) => {
+        const g = M.gearById(eqp[slot]), lbl = { title: t('slot.' + slot), 'aria-label': t('slot.' + slot) };
+        return g ? Object.assign(gearSlot(g, true, () => ui.openSlotPicker(slot)), lbl) : h('div.slot.empty', Object.assign({ onclick: () => { click(); ui.openSlotPicker(slot); } }, lbl), A.img('s_' + slot));
+      };
       const mk = eqp.mark;
-      eq.append(h('div', h('div.slot.mark' + (mk ? '.rar4' : '.empty'), { onclick: () => ui.openMarks() }, A.img(mk ? 'm_' + mk : 'm_knight')), h('div.center.small.muted', t('slot.mark'))));
-      box.append(eq);
-      box.append(ui.matsRow(), h('div.row', { style: { marginBottom: '6px', gap: '6px' } }, h('div.small.muted.grow', t('armory.matsHint')), h('button.btn.tiny.gold', { onclick: () => { click(); ui.go('shop', 'forge'); } }, t('armory.toForge'))));
-      box.append(h('h3.sect', t('armory.inventory', { n: s.gear.length })));
+      const mark = h('div.slot.mark' + (mk ? '.rar4' : '.empty'), { title: t('slot.mark'), onclick: () => { click(); ui.openMarks(); } }, A.img(mk ? 'm_' + mk : 'm_knight'));
+      box.append(h('div.doll',
+        h('div.dcol', ['head', 'neck', 'chest', 'hands'].map(dslot)),
+        h('div.dmid', { onclick: () => { click(); ui.go('armory', 'heroes'); } }, heroFigure(s.selectedHero),
+          h('div.dname', t('hero.' + s.selectedHero + '.name')),
+          h('span.power', t('home.power'), h('b', U.fmt(M.powerScore())))),
+        h('div.dcol', ['feet', 'ring1', 'ring2'].map(dslot).concat(mark))));
+      // the forging materials on one line, the forge beside them
+      box.append(h('div.matline', E.materials.map((k) => h('div.mchip', { title: t('mat.' + k), onclick: () => ui.toast(t('mat.' + k) + ': ' + t('armory.matsHint')) }, A.img('mat_' + k), h('b', U.fmt(M.matCount(k))))),
+        h('button.btn.tiny.gold', { onclick: () => { click(); ui.go('shop', 'forge'); } }, t('armory.toForge'))));
       const canMerge = s.gear.some((g) => M.mergeCandidates(g.id).length >= 2);
-      box.append(h('div.row', { style: { marginBottom: '8px' } },
-        h('button.btn.small.blue.grow' + (canMerge ? '' : '.off'), { onclick: () => autoMerge() }, t('armory.autoMerge')),
+      box.append(h('div.row.invbar',
+        h('button.btn.small.blue.grow' + (canMerge ? '.shine' : '.off'), { onclick: () => autoMerge() }, t('armory.autoMerge')),
         h('button.btn.small.gold.grow', { onclick: () => ui.go('shop', 'chests') }, A.img('c_gold'), t('armory.getGear'))));
       // filters by kind: all, helmets, amulets, armour, gloves, boots, rings
       const GF_ICON = { head: 'warden_helm', neck: 'wrath_amulet', chest: 'stalwart_cuirass', hands: 'stalker_grips', feet: 'striders', ring: 'oak_band' };
       const kindOf = (g) => E.gear[g.type].slot, FILTERS = ['all', 'head', 'neck', 'chest', 'hands', 'feet', 'ring'];
       const cur = FILTERS.includes(ui.sub.gearFilter) ? ui.sub.gearFilter : 'all';
       const count = (f) => f === 'all' ? s.gear.length : s.gear.filter((g) => kindOf(g) === f).length;
-      box.append(h('div.gfilters', FILTERS.map((f) => h('button.gf' + (f === cur ? '.on' : '') + (count(f) ? '' : '.empty'), { onclick: () => { click(); ui.sub.gearFilter = f; ui.refresh(); }, 'aria-label': t('filter.' + f) },
+      box.append(h('div.gfilters', FILTERS.map((f) => h('button.gf' + (f === cur ? '.on' : '') + (count(f) ? '' : '.empty'), { title: t('filter.' + f), onclick: () => { click(); ui.sub.gearFilter = f; ui.refresh(); }, 'aria-label': t('filter.' + f) },
         f === 'all' ? h('span.gf-all', '✦') : A.img('g_' + GF_ICON[f]), h('i', count(f))))));
-      box.append(h('div.gf-name', t('filter.' + cur)));
-      const inv = h('div.grid4');
+      const inv = h('div.grid5.inv');
       const list = s.gear.filter((g) => cur === 'all' || kindOf(g) === cur).sort((a, b) => b.rarity - a.rarity || b.level - a.level || a.type.localeCompare(b.type));
       list.forEach((g) => inv.append(gearSlot(g)));
       if (!list.length) box.append(h('div.panel.center.muted', s.gear.length ? t('armory.noSlotItems') : t('armory.noGear')));
@@ -218,6 +221,12 @@
       return box;
     },
   };
+  /** The selected hero at full height, crisp pixels, breathing gently. */
+  function heroFigure(id) {
+    const c = h('canvas.dhero');
+    try { const f = DH.gfx.sprite(id).frames[0]; c.width = f.width; c.height = f.height; const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(f, 0, 0); } catch (e) { return A.img('h_' + id, 'dhero'); }
+    return c;
+  }
   function gearSlot(g, hideEq, onTap) {
     const eq = M.isEquipped(g.id);
     return h('div.slot.rar' + g.rarity, { onclick: () => { click(); if (onTap) onTap(); else ui.openGear(g.id); } },
@@ -230,7 +239,10 @@
     const last = {}; all.forEach((g) => { last[g.id] = g; }); // an item merged twice shows once, at its final rarity
     const merged = Object.values(last);
     ui.refresh();
-    if (merged.length) { DH.audio.play('chest'); ui.rewardPopup(t('armory.merged'), [...new Set(merged)].map((g) => ({ icon: 'g_' + g.type, text: t('gear.' + g.type), rarity: g.rarity }))); }
+    if (!merged.length) return;
+    const best = merged.slice().sort((a, b) => b.rarity - a.rarity)[0]; // the forge shows the finest piece; the list follows when there were more
+    await ui.forgeAnim(best);
+    if (merged.length > 1) ui.rewardPopup(t('armory.merged'), merged.map((g) => ({ icon: 'g_' + g.type, text: t('gear.' + g.type), rarity: g.rarity })));
   }
 
   /* ================= SHRINE ================= */
