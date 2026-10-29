@@ -1407,3 +1407,20 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .set-link.danger { color: #ff8a80; }
 .modal.settings .admin-slot:not(:empty) { margin-top: 8px; }
 .modal.settings .note { text-align: center; }
+/* settings fit the screen without scrolling: compact on phones, and scaled down by script (zoom) if still too tall */
+.modal.settings { max-height: none; overflow: visible; }
+.modal.settings .set-tabs { margin: 0 0 6px; }
+.modal.settings .set-tabs button { min-height: 30px; }
+.modal.settings .set-panel { padding: 6px 8px 2px; }
+.modal.settings .set-tile { padding: 4px 4px 5px; gap: 2px; }
+.modal.settings .set-tile img.sti { width: 22px; height: 22px; }
+.modal.settings .set-tile .st-l { font-size: 11.5px; }
+.modal.settings .set-tile.wide { padding: 4px 10px; }
+.modal.settings .setrow { padding: 5px 2px; gap: 9px; }
+.modal.settings .setrow img.sri { width: 20px; height: 20px; }
+.modal.settings .sethint { margin: -3px 0 4px 31px; font-size: 11px; line-height: 1.25; }
+.modal.settings .set-div { margin: 4px 0; }
+.modal.settings .set-btns { margin-top: 8px; }
+.modal.settings .set-links { margin-top: 6px; }
+.modal.settings .note { margin-top: 4px; }
+.modal.settings .set-lang .dd-list { top: auto; bottom: calc(100% + 4px); } /* it sits at the bottom: the list opens upward */

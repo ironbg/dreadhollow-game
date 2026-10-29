@@ -180,6 +180,7 @@
         row('master', slider('master')), row('music', slider('music')), row('sfx', slider('sfx')),
         h('div.set-div'),
         row('autoFx', sw('autoFx'), true), row('outlines', sw('outlines')),
+        h('div.set-div'), h('div.setrow.set-lang', A.img(ICON.language, 'sri'), h('label', t('settings.language')), langSel), // the language: here only
       ],
       game: () => [
         desk ? row('autoAim', autoAim, true) : null, desk ? row('pauseOnBlur', sw('pauseOnBlur')) : null, fsOk ? row('fullscreen', fsSw, true) : null,
@@ -196,12 +197,25 @@
       ui.settingsTab = k; for (const key in tiles) delete tiles[key];
       tabBar.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.k === k));
       pane.replaceChildren(...content[k]().flat().filter(Boolean));
+      fit();
     };
+    // the window always fits the screen, never scrolls: measured at its natural size, then scaled down if it is taller
+    const fit = () => {
+      if (!m || m.closed) return;
+      const box = m.el, cs = getComputedStyle(m.bg); box.style.zoom = '';
+      const avail = m.bg.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom), need = box.offsetHeight;
+      box.style.maxHeight = ''; box.style.overflowY = '';
+      if (!(need > avail && avail > 0)) return;
+      const k = Math.max(0.55, Math.floor(avail / need * 1000) / 1000); box.style.zoom = String(k);
+      if (need * k > avail) { box.style.maxHeight = Math.floor(avail / k) + 'px'; box.style.overflowY = 'auto'; } // a screen too small even for that: scroll as a last resort
+    };
+    const onResize = () => fit();
+    window.addEventListener('resize', onResize);
     Object.keys(TABS).forEach((k) => tabBar.append(h('button', { 'data-k': k, onclick: () => { click(); show(k); } }, t(TABS[k]))));
     const link = (label, fn, cls) => h('button.set-link' + (cls || ''), { onclick: () => { click(); fn(); } }, label);
     const m = ui.modal({ title: t('settings.title'), cls: 'settings', body: h('div',
       tabBar,
-      h('div.set-panel', pane, h('div.set-div'), h('div.setrow.set-lang', A.img(ICON.language, 'sri'), h('label', t('settings.language')), langSel)),
+      h('div.set-panel', pane),
       h('div.set-btns',
         h('button.btn.small.gold', { onclick: () => { m.close(); ui.openProfile('account'); } }, t('profile.accountBtn')), // sign-in, linking, purchases and transfer live in the profile's Account tab
         h('button.btn.small.green', { onclick: () => { click(); m.close(); ui.openFeedback(); } }, t('fb.title'))),
@@ -216,8 +230,9 @@
             location.reload();
           }
         }, '.danger')),
-      h('div.note', 'Dreadhollow v' + DH.VERSION + ' · ' + t('settings.credits'))) });
+      h('div.note', 'Dreadhollow v' + DH.VERSION + ' · ' + t('settings.credits'))), onClose: () => window.removeEventListener('resize', onResize) });
     show(TABS[ui.settingsTab] ? ui.settingsTab : 'general');
+    requestAnimationFrame(fit); // once the fonts and icons have laid out
     fillAdmin(); // show it at once if we already know; then re-ask the server and fill it in when the answer is back
     if (DH.admin && DH.admin.recheck) DH.admin.recheck(() => { if (!m.closed) fillAdmin(); });
   };
