@@ -44,6 +44,7 @@
     finishRun(run) {
       if (!run || run.finished) return;
       run.finished = true;
+      if (run.won && run.state !== 'victory') { run.portal = null; run.lateLoot(); run.state = 'victory'; } // left from the pause menu after the Lord fell: still a victory
       if (run.state !== 'victory') run.state = 'over';
       DH.input.enable(false);
       const sum = run.summary();

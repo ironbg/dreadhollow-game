@@ -357,7 +357,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'loot.upgrade': 'Better than what you\'re wearing', 'loot.sidegrade': 'Same rarity as what you\'re wearing', 'loot.worse': 'Your equipped piece is {r}', 'hud.pendulum': 'The pendulum swings: treasure is near…',
   'tome.mastery': 'Tome of Mastery', 'tome.masterySub': 'Choose any ability you can learn',
   'hud.cursed': 'Cursed! You die in 40 s unless you revive', 'hud.curse': 'Curse {n} s', 'hud.curseDeath': 'The Curse takes you',
-  'hud.enterRift': 'Step into the rift', 'hud.exitRift': 'Gather the spoils — step into the rift to leave',
+  'hud.riftAuto': 'The rift draws you in: {n}', 'hud.enterRift': 'Step into the rift', 'hud.exitRift': 'Gather the spoils — step into the rift to leave',
   'deed.heathen': 'Elemental Heathen: survive {t} min without dealing Fire, Ice or Lightning damage (hazards count!)', 'deed.direct': 'Direct Damage: survive {t} min without applying Burn, Spark or Frost (hazards count!)',
   'loot.wellHint': 'Items found in a run are lost when it ends. Send one up the Well to keep it.',
   'inv.title': 'Character', 'inv.equipment': 'Equipment', 'inv.bag': 'Bag ({n}/{m})', 'inv.stats': 'Attributes', 'inv.damage': 'Damage',

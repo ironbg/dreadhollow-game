@@ -4,6 +4,15 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.47',
+      bg: [
+        'Победата вече не може да се изгуби: ако не влезеш в разлома, той те прибира сам след минута (последните 10 секунди се отброяват). Изходът през паузата след Лорда също се брои за победа, а след него нищо не може да те нарани.',
+      ],
+      en: [
+        'A victory can no longer be lost: if you do not step into the rift, it draws you in after a minute (the last ten seconds are counted down). Leaving from the pause menu after the Lord also counts as a victory, and nothing can hurt you once he falls.',
+      ],
+    },
+    {
       v: '1.61.45',
       bg: [
         'В Склада с ресурси вече има и пет пакета със злато и метали за ковачницата, с до 50% повече отколкото поотделно.',

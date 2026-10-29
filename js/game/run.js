@@ -164,8 +164,10 @@
         this.portal.t += dt;
         // entered anywhere the rift is drawn: the hero's feet inside its oval (a little wider, so it never feels fussy)
         const P = this.portal, ox = (p.x - P.x) / (C.PORTAL.w + 6), oy = (p.y - (P.y - C.PORTAL.h - 3)) / (C.PORTAL.h + 8);
-        if ((P.hint = (P.hint || 0) - dt) <= 0 && P.t > 1) { P.hint = 6; this.text(P.x, P.y - 2 * C.PORTAL.h - 14, t('hud.enterRift'), '#ffb08a', true); } // say it again now and then
-        if (P.t > 1 && ox * ox + oy * oy <= 1) {
+        const left = Math.ceil(C.PORTAL.auto - P.t);
+        if (left <= 10 && left !== P.cd) { P.cd = left; P.hint = 6; if (left > 0) this.text(p.x, p.y - 30, t('hud.riftAuto', { n: left }), '#ffb08a', true); } // the last ten seconds counted down over the hero
+        else if ((P.hint = (P.hint || 0) - dt) <= 0 && P.t > 1) { P.hint = 6; this.text(P.x, P.y - 2 * C.PORTAL.h - 14, t('hud.enterRift'), '#ffb08a', true); } // say it again now and then
+        if ((P.t > 1 && ox * ox + oy * oy <= 1) || P.t >= C.PORTAL.auto) { // stepped in, or drawn in by the rift after a minute so the victory can never be lost
           this.portal = null; this.lateLoot(); this.state = 'victory'; DH.audio.play('victory'); DH.events.emit('run:victory', this);
         }
       }
@@ -698,6 +700,7 @@
 
     /* ---------------- player ---------------- */
     hurtPlayer(dmg, src) {
+      if (this.won) return; // the Lord has fallen: nothing left can take the victory away
       const p = this.player;
       if (p.inv > 0 || this.buffs.wraith > 0 || this.state !== 'playing' || this.victoryT > 0) return;
       const P = this.P;
