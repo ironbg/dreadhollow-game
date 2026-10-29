@@ -197,7 +197,6 @@
       ui.settingsTab = k; for (const key in tiles) delete tiles[key];
       tabBar.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.k === k));
       pane.replaceChildren(...content[k]().flat().filter(Boolean));
-      fit();
     };
     // the window always fits the screen, never scrolls: measured at its natural size, then scaled down if it is taller
     const fit = () => {
@@ -209,7 +208,16 @@
       const k = Math.max(0.55, Math.floor(avail / need * 1000) / 1000); box.style.zoom = String(k);
       if (need * k > avail) { box.style.maxHeight = Math.floor(avail / k) + 'px'; box.style.overflowY = 'auto'; } // a screen too small even for that: scroll as a last resort
     };
-    const onResize = () => fit();
+    // one size for every tab: the panel is as tall as the tallest of them, so switching tabs never resizes the window
+    const sizePane = () => {
+      if (!m || m.closed) return;
+      m.el.style.zoom = ''; pane.style.minHeight = '';
+      let max = 0;
+      for (const k of Object.keys(TABS)) { pane.replaceChildren(...content[k]().flat().filter(Boolean)); max = Math.max(max, pane.offsetHeight + 1); } // +1: offsetHeight rounds (the opening animation scales the box, so no getBoundingClientRect)
+      pane.style.minHeight = max + 'px';
+    };
+    const layout = () => { sizePane(); show(TABS[ui.settingsTab] ? ui.settingsTab : 'general'); fit(); }; // the scale is set once, the same for every tab
+    const onResize = () => layout();
     window.addEventListener('resize', onResize);
     Object.keys(TABS).forEach((k) => tabBar.append(h('button', { 'data-k': k, onclick: () => { click(); show(k); } }, t(TABS[k]))));
     const link = (label, fn, cls) => h('button.set-link' + (cls || ''), { onclick: () => { click(); fn(); } }, label);
@@ -231,8 +239,8 @@
           }
         }, '.danger')),
       h('div.note', 'Dreadhollow v' + DH.VERSION + ' · ' + t('settings.credits'))), onClose: () => window.removeEventListener('resize', onResize) });
-    show(TABS[ui.settingsTab] ? ui.settingsTab : 'general');
-    requestAnimationFrame(fit); // once the fonts and icons have laid out
+    layout();
+    requestAnimationFrame(layout); // again once the fonts and icons have laid out
     fillAdmin(); // show it at once if we already know; then re-ask the server and fill it in when the answer is back
     if (DH.admin && DH.admin.recheck) DH.admin.recheck(() => { if (!m.closed) fillAdmin(); });
   };
