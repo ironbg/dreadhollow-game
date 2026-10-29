@@ -1444,7 +1444,7 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .matline .btn { flex: none; }
 .invbar { gap: 6px; margin-bottom: 6px; }
 .grid5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.grid5.inv { margin-top: 6px; }
+.grid5.inv { margin-top: 6px; grid-template-columns: repeat(auto-fill, 62px); justify-content: space-between; row-gap: 6px; } /* the same size as the worn pieces: more to a row on a wider screen */
 .grid5 .slot { border-radius: 8px; }
 .grid5 .slot .lv { font-size: 6px; bottom: 2px; right: 3px; }
 

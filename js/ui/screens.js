@@ -185,9 +185,8 @@
           h('div.dname', t('hero.' + s.selectedHero + '.name')),
           h('span.power', t('home.power'), h('b', U.fmt(M.powerScore())))),
         h('div.dcol', ['feet', 'ring1', 'ring2'].map(dslot).concat(mark))));
-      // the forging materials on one line, the forge beside them
-      box.append(h('div.matline', E.materials.map((k) => h('div.mchip', { title: t('mat.' + k), onclick: () => ui.toast(t('mat.' + k) + ': ' + t('armory.matsHint')) }, A.img('mat_' + k), h('b', U.fmt(M.matCount(k))))),
-        h('button.btn.tiny.gold', { onclick: () => { click(); ui.go('shop', 'forge'); } }, t('armory.toForge'))));
+      // the forging materials on one line
+      box.append(h('div.matline', E.materials.map((k) => h('div.mchip', { title: t('mat.' + k), onclick: () => ui.toast(t('mat.' + k) + ': ' + t('armory.matsHint')) }, A.img('mat_' + k), h('b', U.fmt(M.matCount(k)))))));
       const canMerge = s.gear.some((g) => M.mergeCandidates(g.id).length >= 2);
       box.append(h('div.row.invbar',
         h('button.btn.small.blue.grow' + (canMerge ? '.shine' : '.off'), { onclick: () => autoMerge() }, t('armory.autoMerge')),
