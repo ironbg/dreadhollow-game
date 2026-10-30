@@ -32,7 +32,7 @@
 
   /** Draw a painter's sprite at a point in units (its own anchor), optionally turned about that anchor. */
   function put(g, name, x, y, frame, rot) {
-    const sp = G.sprite(name), img = sp.frames[(frame || 0) % sp.frames.length];
+    const sp = G.sprite(name), n = sp.frames.length, img = sp.frames[(((frame || 0) % n) + n) % n];
     if (!rot) { g.drawImage(img, Math.round((x - sp.ox) * 2) / 2, Math.round((y - sp.oy) * 2) / 2, sp.w, sp.h); return; }
     g.save(); g.translate(x, y); g.rotate(rot); g.drawImage(img, -sp.ox, -sp.oy, sp.w, sp.h); g.restore();
   }
@@ -76,7 +76,9 @@
     });
     const snap = (v) => Math.round(v * 2) / 2;
     const frame = (now) => {
-      const T = (now - t0) / 1000, dt = 1 / 60;
+      if (closed) return;
+      raf = requestAnimationFrame(frame); // asked first: a fault in one frame never freezes the scene
+      const T = Math.max(0, (now - t0) / 1000), dt = 1 / 60; // the frame's timestamp can fall just before t0: never a negative time
       // the blows: sparks, a jolt and the clang
       for (let i = lastHit + 1; i < HITS.length; i++) if (T >= HITS[i]) {
         lastHit = i; shake = 3;
@@ -144,7 +146,6 @@
       });
       const since = T - REVEAL, pop = since < 0.28 ? 0.3 + 0.95 * ease(Math.max(0, since) / 0.28) : 1.25 - 0.25 * ease(Math.min(1, (since - 0.28) / 0.25)); // it bursts out, then settles
       place(out, 90 + sx, AY - 46 + sy + (shown ? Math.sin(T * 2) * 1.5 : 0), shown ? pop : 0.3, shown ? 1 : 0);
-      raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
   });
