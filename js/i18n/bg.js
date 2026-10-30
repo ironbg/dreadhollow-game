@@ -112,7 +112,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'loot.xpHint': 'С X отказваш предметите и вземаш опит: +{v}% от ниво', 'loot.xpTaken': '+{v}% от ниво опит',
   'enemy.ooze': 'Мършава маса', 'enemy.oozelet': 'Отломък от маса', 'enemy.shieldbearer': 'Щитоносец', 'enemy.hound': 'Гробищна хрътка', 'enemy.watcher': 'Плачещ наблюдател', 'enemy.bloater': 'Издут',
   'affix.swift': 'Бърз', 'affix.gunner': 'Стрелец', 'affix.summoner': 'Призовател', 'affix.ironclad': 'Железен', 'affix.regen': 'Възстановяващ се', 'affix.volatile': 'Взривоопасен', 'affix.charger': 'Нападател',
-  'hud.march': 'Шествието идва! Отдръпни се', 'enemy.marcher': 'Монах от шествието',
+  'hud.squad': 'Приближава отряд!', 'hud.march': 'Шествието идва! Отдръпни се', 'enemy.marcher': 'Монах от шествието',
   'enemy.bonemage': 'Костен маг', 'enemy.gravechief': 'Гробищен вожд', 'enemy.bonetyrant': 'Костен тиранин',
   'enemy.scarab': 'Златен скарабей', 'enemy.mimic': 'Мимик', 'enemy.gildedknight': 'Позлатен рицар', 'enemy.vaultwarden': 'Пазител на трезора', 'enemy.coinwraith': 'Монетен призрак', 'enemy.mimicking': 'Кралят на мимиците', 'enemy.sentinel': 'Позлатеният страж', 'enemy.magistrate': 'Кухият съдия', 'hud.judged': 'Осъден!',
   'enemy.mosquito': 'Чумен комар', 'enemy.bogcorpse': 'Блатен труп', 'enemy.bogwraith': 'Блатна вещица', 'enemy.toad': 'Блатна жаба', 'enemy.treant': 'Дървесник', 'enemy.blightfiend': 'Чумният демон', 'enemy.bogserpent': 'Блатният змей', 'enemy.eldertreant': 'Древният дървесник', 'enemy.rotlord': 'Господарят на гнилото',
@@ -269,7 +269,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'hud.boss': 'Бос', 'hud.finalBoss': 'Последен бос',
   'tutorial.move': 'Плъзни пръст където и да е, за да се движиш', 'tutorial.auto': 'Героят ти атакува автоматично',
 
-  'levelup.title': 'НОВО НИВО!', 'levelup.sub': 'Ниво {n} · направи избор', 'levelup.new': 'НОВО', 'levelup.reroll': 'Презавърти ({n})',
+  'levelup.lock': 'Заключи: остава при презавъртане', 'levelup.stats': 'Статистики', 'levelup.title': 'НОВО НИВО!', 'levelup.sub': 'Ниво {n} · направи избор', 'levelup.new': 'НОВО', 'levelup.reroll': 'Презавърти ({n})',
   'levelup.rerollAd': 'Презавърти', 'levelup.gold': 'Злато', 'levelup.heal': 'Изцеление', 'levelup.healDesc': 'Възстановява 30% живот',
   'treasure.title': 'Съкровище!',
   'pause.title': 'Пауза', 'pause.resume': 'Продължи', 'pause.quit': 'Напусни битката', 'pause.quitConfirm': 'Да прекратиш битката? Запазваш събраното злато.',

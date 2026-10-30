@@ -190,7 +190,7 @@
     n = R.stacks(s.frost); if (n) this.addFrost(e, n, eb * (1 + (P.tag.ice || 0)));
     n = R.stacks(s.decay); if (n) { S.decay = Math.min(fx.edict ? 3 : ecap, S.decay + n); S.decayPS = Math.max(S.decayPS || 0, eb); }
     if (s.stun && !e.boss && Math.random() < s.stun) e.stun = C.STATUS.stun; // Stun: frozen in place; re-stunning refreshes, never stacks
-    if (this.settings.dmgNumbers) this.text(e.x + U.rand(-4, 4), e.y - e.r - 4, Math.round(dmg), crit ? '#ffd35a' : '#ffffff', crit);
+    if (this.settings.dmgNumbers) this.dmgNumber(e, dmg, crit, 'hit');
     this.hitSpark(e, a.tags, crit, a);
     DH.audio.play('hit', e.painter);
     this.itemsOnHit(e, a, dmg);
@@ -202,6 +202,20 @@
     return dmg;
   };
   /** Damage from status effects and hazards: no crit, amplified by Affliction and Decay (Fragile only amplifies direct hits). */
+  /** A damage number over a foe. Hits on the same foe within a moment add up into one number instead of a pile of
+   *  them; a critical turns it big and red. Effects (burn, poison...) keep their own number in their colour. */
+  R.dmgNumber = function (e, v, crit, kind, color) {
+    const k = kind === 'dot' ? 'dnDot' : 'dnHit', x = e[k];
+    const win = kind === 'dot' ? 1 : 0.45; // hits within half a second add up; an effect's ticks within a second
+    if (x && x.life > 0 && x.age < win && this.texts.includes(x)) { // still fresh: add to it
+      x.v += v; x.str = String(Math.round(x.v)); x.life = x.max; x.x = e.x; x.y = Math.min(x.y, e.y - e.r - 4);
+      if (crit && !x.big) { x.big = true; x.c = '#ff4a3a'; x.life = x.max = 1.1; }
+      return;
+    }
+    if (this.texts.length >= 80) return;
+    const t = { x: e.x + U.rand(-5, 5), y: e.y - e.r - (kind === 'dot' ? 1 : 4), v, str: String(Math.round(v)), c: crit ? '#ff4a3a' : color || '#ffffff', big: !!crit, small: kind === 'dot', age: 0, life: crit ? 1.1 : 0.7, max: crit ? 1.1 : 0.7 };
+    this.texts.push(t); e[k] = t;
+  };
   R.rawDamage = function (e, dmg, color, abId) {
     if (!e || e.dead) return;
     if (e.def.prop) { this.killEnemy(e); return; }
@@ -210,7 +224,7 @@
     const S = e.st, d = dmg * (1 + C.AFFLICT_PER * S.affl) * (1 - Math.max(0, e.armor - 0.06 * S.decay)); // Affliction: +5% effect damage per stack
     e.hp -= d;
     if (abId) this.dmgByAb[abId] = (this.dmgByAb[abId] || 0) + d;
-    if (color && this.settings.dmgNumbers && Math.random() < 0.5) this.text(e.x, e.y - e.r - 2, Math.round(d), color);
+    if (color && this.settings.dmgNumbers) this.dmgNumber(e, d, false, 'dot', color);
     if (e.hp <= 0) this.killEnemy(e);
   };
   /** Burn: n stacks worth `base`; every stack refreshes the fire, and past 20 a stack burns at once. */
@@ -410,7 +424,10 @@
   };
   R.reroll = function (free) {
     if (!free) { if (this.rerolls <= 0) return false; this.rerolls--; }
-    this.choices = this.rollChoices(this.levelFor || this.level);
+    // a locked card stays where it is; the others are dealt afresh (never a copy of a locked one)
+    const key = (c) => [c.kind, c.id, c.stat, c.ab, c.up].join('|'), keep = this.choices.filter((c) => c.locked), held = new Set(keep.map(key));
+    const fresh = this.rollChoices(this.levelFor || this.level).filter((c) => !held.has(key(c)));
+    this.choices = this.choices.map((c) => (c.locked ? c : fresh.shift() || c));
     return true;
   };
   /** Renewal (a tome's abilities offered afresh) and Visions (a chest's items rolled again): a flask spent, new choices back. */

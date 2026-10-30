@@ -104,6 +104,55 @@
     } });
 
   /* ---------- Bat: a ragged blood-bat with torn wings and long fangs ---------- */
+  // the skeleton archer: the same dead soldier, standing back, a quiver of black-fletched arrows on its spine and a horn bow drawn
+  def('skelarcher', { w: 22, h: 22, cy: 12.5, frames: 2,
+    colors: { bone: '#d8ccaa', eye: '#ff3a2a', rust: '#7a5a3a', wood: '#5a3a22' },
+    variants: { ice: { bone: '#c8e0ee', eye: '#8ff0ff', rust: '#5a7a98', wood: '#3a4a5e' }, fire: { bone: '#e0b890', eye: '#ffd040', rust: '#8a3a18', wood: '#4a2410' }, bog: { bone: '#bcbc8e', eye: '#b0ff50', rust: '#4a5a22', wood: '#3e3a1c' }, gold: { bone: '#eadaa4', eye: '#fff0a0', rust: '#a8843a', wood: '#6a4a1e' }, purple: { bone: '#d0c4e0', eye: '#ff50c0', rust: '#5a3a7a', wood: '#3a2440' }, drowned: { bone: '#b0c8bc', eye: '#70ffd0', rust: '#2e5a5a', wood: '#2a3a34' } },
+    draw(g, f, c) {
+      const b = c.bone, bd = sh(b, -0.5), bm = sh(b, -0.2), w = f ? 1 : 0, wood = c.wood;
+      g.translate(0, 1.5);
+      // the quiver slung on the back, black fletchings showing over the shoulder
+      g.save(); g.translate(6.4, 7.6); g.rotate(-0.45);
+      for (const [x, l] of [[-0.9, 4.2], [0, 4.8], [0.9, 3.9]]) { P.line(g, x, -3.2, x, -3.2 - l * 0.4, 0.3, '#3a3036'); P.path(g, [x - 0.7, -3.4 - l * 0.4, x, -4.8 - l * 0.4, x + 0.7, -3.4 - l * 0.4, x, -2.9 - l * 0.4]); P.fill(g, '#1e1820'); }
+      P.rrect(g, -1.6, -3.4, 3.2, 8.4, 0.9, P.lg(g, -1.6, 0, 1.6, 0, [sh(c.rust, 0.05), sh(c.rust, -0.35), sh(c.rust, -0.6)]));
+      P.rect(g, -1.6, -2.6, 3.2, 0.6, sh(c.rust, -0.7)); P.rect(g, -1.6, 2.4, 3.2, 0.6, sh(c.rust, -0.7));
+      g.restore();
+      // a rag of a loincloth
+      P.path(g, [7.8, 11.6, 11.6, 11.4, 11.8, 14.6, 10.8, 13.8, 10, 15.6, 9.2, 13.8, 8.2, 15, 7.6, 13.6]); P.fill(g, P.lg(g, 7, 11, 12, 15, [sh(c.rust, -0.3), sh(c.rust, -0.65)]));
+      // legs braced apart, the archer's stance
+      P.bone(g, 8.6, 12, 6.8 - w, 15.4, 0.75, bd); P.bone(g, 6.8 - w, 15.4, 6.6 - w * 1.4, 18.4, 0.7, bd); P.circle(g, 6.8 - w, 15.4, 0.7, bd);
+      P.path(g, [5.6 - w * 1.4, 18.2, 8.4 - w * 1.4, 18.4, 8.2 - w * 1.4, 19.2, 5.4 - w * 1.4, 19.2]); P.fill(g, bd);
+      P.bone(g, 10.6, 12, 12.2 + w, 15.2, 0.8, bm); P.bone(g, 12.2 + w, 15.2, 12.8 + w * 1.2, 18.4, 0.72, bm); P.circle(g, 12.2 + w, 15.2, 0.75, b);
+      P.path(g, [12 + w * 1.2, 18.2, 15 + w * 1.2, 18.4, 14.8 + w * 1.2, 19.2, 11.8 + w * 1.2, 19.2]); P.fill(g, bm);
+      // pelvis, spine, ribcage
+      P.path(g, [7.6, 10.4, 11.8, 10.2, 11.4, 12.6, 9.6, 13, 8, 12.6]); P.fill(g, P.lg(g, 8, 10, 12, 13, [b, bd]));
+      P.circle(g, 8.8, 11.6, 0.45, VOID); P.circle(g, 10.6, 11.5, 0.45, VOID);
+      for (let i = 0; i < 4; i++) P.ell(g, 9.4, 10 - i * 0.9, 0.5, 0.4, bm);
+      P.ell(g, 10, 7, 2.6, 2.3, VOID);
+      for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(8.6, 5.4 + i * 1.3); g.quadraticCurveTo(11.4, 5 + i * 1.4, 12.2, 6.6 + i * 1.3); g.strokeStyle = i === 2 ? bm : b; g.lineWidth = 0.7; g.stroke(); }
+      P.line(g, 12, 5.4, 12.2, 8.6, 0.6, bm);
+      P.line(g, 7.6, 5, 11.8, 4.6, 0.55, b); P.circle(g, 7.6, 5.4, 0.8, bm);
+      // skull, upright and level along the arrow
+      const hx = 11.2, hy = 2.2;
+      P.circle(g, hx, hy, 2.6, P.vol(g, hx - 0.6, hy - 0.8, 2.7, b));
+      P.path(g, [hx - 0.2, hy + 1.2, hx + 2.6, hy + 1, hx + 2.4, hy + 2.7, hx + 0.2, hy + 2.7]); P.fill(g, bm);
+      P.rect(g, hx + 0.3, hy + 1.4, 2.2, 0.7, VOID); teeth(g, hx + 0.3, hy + 1.4, hx + 2.5, hy + 1.4, 4, 0.45, 1, b);
+      P.ell(g, hx + 1.2, hy, 0.95, 0.9, VOID, -0.3); P.ell(g, hx - 0.8, hy + 0.1, 0.75, 0.8, VOID, 0.3);
+      evil(g, hx + 1.25, hy + 0.05, 0.4, c.eye); evil(g, hx - 0.75, hy + 0.1, 0.3, c.eye);
+      // the bow: a dark recurve held out in front, its string drawn back to the jaw, an arrow on it
+      const bx = 18.4, top = -2.6, bot = 13.4, mid = (top + bot) / 2;
+      g.beginPath(); g.moveTo(bx - 1.2, top - 0.4); g.quadraticCurveTo(bx + 0.6, top + 0.6, bx + 1.2, mid - 2.4); g.quadraticCurveTo(bx + 1.6, mid, bx + 1.2, mid + 2.4); g.quadraticCurveTo(bx + 0.6, bot - 0.6, bx - 1.2, bot + 0.4);
+      g.strokeStyle = sh(wood, -0.55); g.lineWidth = 1.5; g.stroke(); g.strokeStyle = wood; g.lineWidth = 0.9; g.stroke();
+      P.rect(g, bx + 0.7, mid - 1.2, 1.2, 2.4, sh(c.rust, -0.3)); // the grip, bound in leather
+      const nx = 12.6; // the nock, drawn back to the cheek
+      g.beginPath(); g.moveTo(bx - 1.2, top - 0.4); g.lineTo(nx, mid - 0.6); g.lineTo(bx - 1.2, bot + 0.4); g.strokeStyle = 'rgba(230,224,206,0.75)'; g.lineWidth = 0.3; g.stroke();
+      P.line(g, nx, mid - 0.6, bx + 3.4, mid - 0.6, 0.45, '#4a3a2c');
+      P.path(g, [bx + 3.2, mid - 1.5, bx + 4.8, mid - 0.6, bx + 3.2, mid + 0.3]); P.fill(g, P.lg(g, bx + 3, 0, bx + 5, 0, ['#c8ccd4', '#6a6e78']));
+      P.path(g, [nx - 0.4, mid - 1.6, nx + 1.4, mid - 0.6, nx - 0.4, mid + 0.4]); P.fill(g, '#1e1820'); // its black fletching
+      // arms: the near one straight out to the bow, the far one bent, pulling the string
+      P.bone(g, 11.8, 5, 15.2, 5.6, 0.7, b); P.bone(g, 15.2, 5.6, bx + 1, mid - 0.4, 0.65, b); P.circle(g, 15.2, 5.6, 0.6, b);
+      P.bone(g, 7.8, 5.6, 10.2, 7.6, 0.65, bd); P.bone(g, 10.2, 7.6, nx + 0.2, mid - 0.4, 0.6, bd); P.circle(g, nx + 0.2, mid - 0.5, 0.6, bm);
+    } });
   def('bat', { w: 24, h: 16, frames: 2,
     colors: { wing: '#3a1a4e', body: '#2a1236', eye: '#ff2a2a' },
     variants: { fire: { wing: '#6a140c', body: '#420c08', eye: '#ffd040' }, ice: { wing: '#223c66', body: '#14223e', eye: '#8ff0ff' }, bog: { wing: '#2e3c1a', body: '#202a10', eye: '#b0ff50' }, purple: { wing: '#561656', body: '#3a083a', eye: '#ff50c0' }, drowned: { wing: '#143e3e', body: '#0a2626', eye: '#70ffd0' }, gold: { wing: '#5a4a22', body: '#3a2e14', eye: '#fff0a0' } },

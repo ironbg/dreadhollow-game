@@ -1507,3 +1507,10 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .offer .obody .contents { flex: 1; min-width: 0; margin: 0; gap: 4px; }
 .offer .obody .grow { flex: 1; }
 .offer .oprice { flex: none; min-width: 84px; padding-left: 10px; padding-right: 10px; }
+/* level-up: the lock in a card's corner (kept through a reroll) */
+.levelup .choice { position: relative; }
+.levelup .lockb { position: absolute; top: 4px; right: 4px; z-index: 2; width: 26px; height: 26px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;
+  border: 2px solid #050308; background: linear-gradient(180deg, #2c2232, #18101c); opacity: .7; }
+.levelup .lockb img.ci { width: 14px; height: 14px; margin: 0; }
+.levelup .lockb.on { opacity: 1; background: linear-gradient(180deg, #6a4a1e, #3a2810); box-shadow: inset 0 0 0 1px #e0b050, 0 0 8px rgba(255,190,80,.5); }
+.levelup .choice:has(.lockb.on) { box-shadow: inset 0 0 0 2px #e0b050; }

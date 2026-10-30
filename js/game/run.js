@@ -208,6 +208,18 @@
     updateSpawns(dt) {
       if (this.victoryT > 0 || this.won) return; // the hall is cleared once the Lord falls; nothing new pours in while the hero gathers spoils
       const { rate, mix } = this.spawnRate();
+      // a squad in ranks every minute and a bit, from the third minute
+      const SQ = C.SQUADS, sc = this.runLength / C.RUN_LENGTH;
+      if (this.time >= SQ.from * sc) {
+        this.squadT = (this.squadT == null ? 0 : this.squadT) - dt;
+        if (this.squadT <= 0) { this.squadT = U.rand(SQ.every[0], SQ.every[1]) * sc; this.spawnSquad(mix); }
+      }
+      // groups of skeleton archers, every half-minute or so from the second minute
+      const AR = C.ARCHERS;
+      if (this.time >= AR.from * sc) {
+        this.archerT = (this.archerT == null ? 0 : this.archerT) - dt;
+        if (this.archerT <= 0) { this.archerT = U.rand(AR.every[0], AR.every[1]) * sc; this.spawnArchers(U.randi(AR.group[0], AR.group[1])); }
+      }
       this.spawnAcc += rate * dt;
       const cap = this.settings.lowFx ? 220 : 330;
       while (this.spawnAcc >= 1) {
@@ -286,6 +298,28 @@
         const a = Math.random() * TAU, d = Math.hypot(v.w, v.h) / 2 + 20, cx = p.x + Math.cos(a) * d, cy = p.y + Math.sin(a) * d;
         for (let i = 0; i < ev.count; i++) { const e = this.spawnEnemy(ev.enemy, cx + U.rand(-30, 30), cy + U.rand(-30, 30)); if (e) e.spd *= 1.35; }
       }
+    }
+    /** A squad of the hall's own foes in two or three straight ranks, marching in from one side towards where the hero stands. */
+    spawnSquad(mix) {
+      const SQ = C.SQUADS, v = DH.view, p = this.player, prog = Math.min(1, this.time / this.runLength);
+      if (this.enemies.length >= (this.settings.lowFx ? 200 : 300)) return;
+      const n = Math.min(SQ.max, U.randi(SQ.size[0], SQ.size[1]) + Math.floor(SQ.grow * prog)), rows = n <= 12 ? 2 : 3, cols = Math.ceil(n / rows);
+      const melee = (k) => { const d = C.enemies[this.remap(k)] || {}; return !d.fly && !d.shot && !d.boom && d.ai !== 'ranged' && d.ai !== 'flee'; }, kinds = Object.keys(mix).filter(melee), // foot soldiers only: no flyers, casters or bombs in the ranks
+        type = U.pick(kinds.length ? kinds : Object.keys(mix)), alt = U.pick(kinds.length ? kinds : Object.keys(mix));
+      const a = Math.random() * TAU, d = Math.hypot(v.w, v.h) / 2 + 16, ux = -Math.cos(a), uy = -Math.sin(a), px = -uy, py = ux, ox = p.x - ux * d, oy = p.y - uy * d;
+      let k = 0;
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols && k < n; c++, k++) {
+        const off = (c - (cols - 1) / 2) * 15, back = r * 17;
+        const e = this.spawnEnemy(r === rows - 1 && rows > 2 ? alt : type, ox + px * off - ux * back, oy + py * off - uy * back); // the back rank may be another kind
+        if (e) { e.sq = { dx: ux, dy: uy, t: 14 }; e.face = ux >= 0 ? 1 : -1; if (r === 0 && c === Math.floor((cols - 1) / 2)) e.sqLead = true; }
+      }
+      DH.events.emit('run:warning', t('hud.squad'));
+    }
+    /** A group of skeleton archers at the edge of sight, close together, tinted to the hall. */
+    spawnArchers(n) {
+      if (this.enemies.length >= (this.settings.lowFx ? 220 : 330)) return;
+      const pt = this.edgePoint(), pa = DH.gfx.painters.skelarcher, variant = this.stage.variant && pa.variants[this.stage.variant] ? this.stage.variant : null;
+      for (let i = 0; i < n; i++) this.spawnEnemy('archer', pt.x + U.rand(-16, 16), pt.y + U.rand(-16, 16), { variant });
     }
     /** A Champion's affixes (C.HALL_AFFIX) and its health, which grows with the hall's progress. */
     champAffix(e) {
@@ -563,6 +597,15 @@
         else if (ai === 'ranged') {
           if (dist < 90) { mx = -dx; my = -dy; } else if (dist < 130) { mx = -dy; my = dx; spd *= 0.5; }
           if (e.t > e.def.shot.cd && dist < 200) { e.t = 0; this.enemyShot(e, Math.atan2(dy, dx), e.def.shot.spd, e.def.shot.dmg * this.stage.dmgMult, '#c070ff'); }
+        } else if (ai === 'archer') { // keeps to a ring round the hero, circling, and stops to loose an arrow
+          if (e.side == null) { e.side = Math.random() < 0.5 ? 1 : -1; e.t = U.rand(0, e.def.shot.cd); }
+          if (e.draw > 0) { // drawing the bow: it stands still, then the arrow flies
+            e.draw -= dt; mx = my = 0; spd = 0;
+            if (e.draw <= 0) this.enemyShot(e, Math.atan2(dy, dx), e.def.shot.spd, e.def.shot.dmg * this.stage.dmgMult, '#e8d8b0', 'arrow');
+          } else {
+            if (dist < 95) { mx = -dx; my = -dy; } else if (dist < 150) { mx = -dy * e.side; my = dx * e.side; spd *= 0.6; }
+            if (e.t > e.def.shot.cd && dist < 215) { e.t = U.rand(-0.3, 0.3); e.draw = 0.35; this.enemyAttackAnim(e); }
+          }
         } else if (ai === 'flee') {
           mx = -dx + Math.sin(e.t * 1.7) * 0.6; my = -dy + Math.cos(e.t * 1.3) * 0.6; if (dist > 150) spd *= 0.45;
           e.life -= dt; e.trail = (e.trail || 0) - dt;
@@ -592,6 +635,9 @@
           e.iceArm = false; e.variant = 'bare'; e.spd *= 1.6; e.dmg *= 1.2; this.burst(e.x, e.y, 18, ['#d8f4ff', '#a8d8f0', '#ffffff'], 90); DH.audio.play('frost');
         }
         if ((e.elite || e.move) && !e.boss) { const o = this.eliteMove(e, dt, dx, dy, dist); if (o) { mx = o.x; my = o.y; spd = o.s * slowK; } }
+        if (e.sq) { // marching in a squad's ranks: one heading, one pace, until it closes on the hero (then each fights its own way)
+          if (dist < 75 || (e.sq.t -= dt) <= 0) e.sq = null; else { mx = e.sq.dx; my = e.sq.dy; spd = C.SQUADS.pace * slowK; }
+        }
         e.x += (mx * spd + e.kx) * dt; e.y += (my * spd + e.ky) * dt;
         const kd = Math.pow(0.0005, dt); e.kx *= kd; e.ky *= kd;
         if (Math.abs(mx) > 0.05) e.face = mx > 0 ? 1 : -1;
@@ -1171,7 +1217,7 @@
       for (let i = this.parts.length - 1; i >= 0; i--) { const q = this.parts[i]; q.life -= dt;
         if (q.home) { const P = this.player, dx = P.x - q.x, dy = P.y - 6 - q.y, d = Math.hypot(dx, dy) || 1; q.vx += dx / d * 520 * dt; q.vy += dy / d * 520 * dt; if (d < 4) q.life = 0; }
         q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= 0.94; q.vy = q.vy * 0.94 + (q.g || 0) * dt; if (q.life <= 0) this.parts.splice(i, 1); }
-      for (let i = this.texts.length - 1; i >= 0; i--) { const x = this.texts[i]; x.life -= dt; x.y -= dt * 22; if (x.life <= 0) this.texts.splice(i, 1); }
+      for (let i = this.texts.length - 1; i >= 0; i--) { const x = this.texts[i]; x.life -= dt; if (x.age != null) x.age += dt; x.y -= dt * 22; if (x.life <= 0) this.texts.splice(i, 1); }
       for (let i = this.decals.length - 1; i >= 0; i--) { const d = this.decals[i]; d.life -= dt; if (d.life <= 0) this.decals.splice(i, 1); }
     }
     /** Damage dealt this run by kind (element / type), by the hero weapon and by all other abilities. */

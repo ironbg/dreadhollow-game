@@ -519,6 +519,10 @@
   // Gilded Ooze: a treasure champion. Every hit deals exactly 1 damage and knocks out gold; flees and escapes after 20s.
   /* Hall foes: behaviours the common horde lacks (see Run.updateEnemies). Each hall brings two or three (C.HALL_FOES). */
   // the Procession: a column of hollow spirits marching straight across the hall; all but untouchable, step aside
+  // the skeleton archer: comes in groups of a few, keeps its distance, walks round the hero and looses arrows (in every hall, tinted to it)
+  C.enemies.archer = { painter: 'skelarcher', hp: 20, spd: 30, dmg: 6, xp: 3, r: 6, mass: 1, ai: 'archer', shot: { dmg: 9, spd: 130, cd: 2.7, kind: 'arrow' } };
+  C.SQUADS = { from: 180, every: [65, 85], size: [10, 16], grow: 4, max: 20, pace: 30 }; // a squad in ranks from one side: seconds in, between squads, its size (+grow by the end)
+  C.ARCHERS = { from: 120, every: [26, 36], group: [3, 5] }; // seconds into the hall, between groups, archers in a group
   C.enemies.marcher = { painter: 'monk', hp: 400, spd: 26, dmg: 12, xp: 0, r: 6, mass: 99, ai: 'march', fly: true, dmgFactor: 0.05, alpha: 0.9 };
   C.enemies.ooze = { painter: 'slime', hp: 34, spd: 30, dmg: 9, xp: 2, r: 8, mass: 1.4, ai: 'hop', split: 'oozelet', scale: 0.72, anim: 0.3, particles: ['#7ab040', '#d0ff80', '#2a4a10'] };
   C.enemies.oozelet = { painter: 'slime', hp: 10, spd: 40, dmg: 5, xp: 1, r: 5, mass: 0.6, ai: 'hop', scale: 0.45, anim: 0.25, particles: ['#7ab040', '#d0ff80'] };

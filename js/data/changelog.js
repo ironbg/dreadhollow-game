@@ -4,6 +4,21 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.51',
+      bg: [
+        'Нов враг: скелет-стрелец. От 2-рата минута идват групи стрелци, които стоят на разстояние, обикалят около теб и стрелят със стрели, във всяка зала в нейните цветове.',
+        'Отряди: от 3-тата минута на около минута и четвърт нахлува отряд от 10–20 врага в редици от една посока, с предупреждение и стрелка накъде е.',
+        'При ново ниво: катинар на всяка карта (заключената остава при „Презавърти“) и бутон „Статистики“.',
+        'По-четими щети: ударите по един враг се събират в едно число, критичните са големи и червени, а горенето и отровата са по-дребни.',
+      ],
+      en: [
+        'New foe: the skeleton archer. From the second minute groups of archers keep their distance, circle you and loose arrows, in every hall in its colours.',
+        'Squads: from the third minute, about every minute and a quarter, a squad of 10–20 foes marches in ranks from one side, with a warning and an arrow showing where.',
+        'On level-up: a lock on every card (a locked one stays through a reroll) and a Stats button.',
+        'Clearer damage: hits on one foe add up into one number, crits are big and red, and burns and poisons are smaller.',
+      ],
+    },
+    {
       v: '1.61.50',
       bg: [
         'Магазинът е подреден по табове: Оферти, Дневни, Ковачница, Сандъци, Диаманти, Злато и Безплатно. Червена точка показва къде има нещо безплатно, а офертите са по-компактни.',

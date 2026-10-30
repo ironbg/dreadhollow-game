@@ -235,6 +235,9 @@
       else if (b.kind === 'coin') { G.P.ell(g, x, y, 2.2 * (0.5 + 0.5 * Math.abs(Math.sin(now * 12 + b.x))), 2.2, '#ffd35a'); }
       else if (b.kind === 'web') { const P = G.P; for (let k = 0; k < 4; k++) { const a = k * Math.PI / 4; P.line(g, x - Math.cos(a) * 3, y - Math.sin(a) * 3, x + Math.cos(a) * 3, y + Math.sin(a) * 3, 0.5, '#e8e8d8'); } g.strokeStyle = '#e8e8d8'; g.lineWidth = 0.4; g.beginPath(); g.arc(x, y, 1.8, 0, TAU); g.stroke(); }
       else if (b.kind === 'frost') { const l = Math.hypot(b.vx, b.vy) || 1, ux = b.vx / l, uy = b.vy / l; G.P.path(g, [x + ux * 3, y + uy * 3, x - uy * 1.2, y + ux * 1.2, x - ux * 3, y - uy * 3, x + uy * 1.2, y - ux * 1.2]); G.P.fill(g, '#d8f4ff'); }
+      else if (b.kind === 'arrow') { const l = Math.hypot(b.vx, b.vy) || 1, ux = b.vx / l, uy = b.vy / l, P = G.P; // a black-fletched arrow, point first
+        P.line(g, x - ux * 7, y - uy * 7, x + ux * 2, y + uy * 2, 0.8, '#5a4636'); P.path(g, [x + ux * 4, y + uy * 4, x + ux * 1.4 - uy * 1.3, y + uy * 1.4 + ux * 1.3, x + ux * 1.4 + uy * 1.3, y + uy * 1.4 - ux * 1.3]); P.fill(g, '#d8dce4');
+        P.path(g, [x - ux * 7, y - uy * 7, x - ux * 5 - uy * 1.4, y - uy * 5 + ux * 1.4, x - ux * 4.4, y - uy * 4.4, x - ux * 5 + uy * 1.4, y - uy * 5 - ux * 1.4]); P.fill(g, '#2a2228'); }
       else if (b.kind === 'bolt') { const l = Math.hypot(b.vx, b.vy) || 1, ux = b.vx / l, uy = b.vy / l; G.P.line(g, x - ux * 6, y - uy * 6, x + ux * 2, y + uy * 2, 1, '#e8e0c8'); G.P.line(g, x + ux * 1, y + uy * 1, x + ux * 3, y + uy * 3, 1.4, '#c8ccd8'); }
       else { g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x, y, 1.4, 0, TAU); g.fill(); }
       if (FIREY(b.color)) { lights.push({ x: b.x, y: b.y, r: 30, kind: 'fire' }); if (Math.random() < 0.4) this.parts.push({ x: b.x, y: b.y, vx: U.rand(-8, 8), vy: U.rand(-14, 4), life: 0.3, max: 0.3, c: U.pick(['#ff8a30', '#ffd040']), s: 1 }); }
@@ -280,6 +283,7 @@
     };
     for (const b of this.bosses) if (b && !b.dead) mark(b.x, b.y, '#ff3040', b.painter, b.variant);
     if (this.well && !this.well.used) mark(this.well.x, this.well.y, '#5ab8ff', 'well');
+    for (const e of this.enemies) if (e.sqLead && e.sq && !e.dead) mark(e.x, e.y, '#ff6040', e.painter, e.variant); // a squad on its way: where it comes from
     if (this.portal) mark(this.portal.x, this.portal.y, '#ff5a28', 'rift_icon'); // the exit rift: crimson, its own badge
     for (const q of this.pylons || []) if (!q.dead) mark(q.x, q.y, '#ffd060', 'pylon');
     this.secretMarks(mark);
@@ -983,7 +987,7 @@
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
     for (const x of this.texts) {
       const a = Math.min(1, x.life / x.max * 2), pop = 1 + Math.max(0, (x.life / x.max) - 0.8) * 2;
-      const size = Math.round((x.big ? 9 : 6.5) * S * pop * 0.5) * 2;
+      const size = Math.round((x.big ? 10 : x.small ? 5 : 6.5) * S * pop * 0.5) * 2; // crits and callouts big, plain hits small
       ctx.font = '800 ' + size + 'px "DHNum", "Alegreya Sans", sans-serif'; ctx.globalAlpha = a;
       ctx.lineWidth = Math.max(2, S * 1.2); ctx.strokeStyle = '#0b0610';
       const sx = (x.x - cx) * S, sy = (x.y - cy) * S;

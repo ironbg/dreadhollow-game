@@ -206,7 +206,7 @@
     let mode = null; // potion mode: remembrance | resonance | lethe
     const m = ui.modal({ closable: false, cls: 'levelup', body: () => h('div') });
     const draw = () => {
-      const isClass = C.CLASS_LEVELS.includes(run.levelFor);
+      const isClass = C.CLASS_LEVELS.includes(run.levelFor), canLock = !mode && (run.rerolls > 0 || !run.usedAdReroll);
       const cards = run.choices.map((c, i) => {
         const info = ui.choiceInfo(run, c);
         const rank = c.rank ? (c.rank === 1 ? h('span.new', t('levelup.new')) : h('span.lv', t('lv.rank', { n: c.rank }))) : null;
@@ -219,6 +219,7 @@
           m.close(); run.choose(c);
           if (run.state === 'playing') DH.input.enable(true);
         } },
+          canLock ? h('button.lockb' + (c.locked ? '.on' : ''), { 'aria-label': t('levelup.lock'), onclick: (e) => { e.stopPropagation(); click(); c.locked = !c.locked; draw(); } }, A.img(c.locked ? 'u_lock' : 'u_unlock', 'ci')) : null, // kept through a reroll
           h('div.ico', A.img(info.icon)),
           h('div.grow', h('div.tg', info.tag || ''), h('div.t', info.name, rank), info.ab ? ui.abTypes(info.ab, run, info.up) : null, h('div.d', info.desc), info.note ? h('div.note2', info.note) : null, c.remembered ? h('div.note2.mem', t('potion.remembered')) : null));
       });
@@ -237,7 +238,9 @@
         buildRow(run),
         mode ? h('div.center.potionhint', t('potion.hint.' + mode)) : null,
         h('div', { style: { marginTop: '8px' } }, cards),
-        h('div.row.lvfoot', hasPot ? h('div.row.pots', LV.map(pot)) : h('span'), h('span.grow'), rerollBtn)));
+        h('div.row.lvfoot', hasPot ? h('div.row.pots', LV.map(pot)) : h('span'), h('span.grow'),
+          h('button.btn.small.ghost', { onclick: () => { click(); ui.openCharacter(run, {}); } }, t('levelup.stats')), // the hero's stats and gear while choosing
+          rerollBtn)));
     };
     draw();
   };

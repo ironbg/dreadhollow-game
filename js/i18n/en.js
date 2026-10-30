@@ -112,7 +112,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'loot.xpHint': 'The X refuses the pieces: +{v}% of a level in experience instead', 'loot.xpTaken': '+{v}% of a level in experience',
   'enemy.ooze': 'Carrion Ooze', 'enemy.oozelet': 'Ooze Spawn', 'enemy.shieldbearer': 'Shieldbearer', 'enemy.hound': 'Grave Hound', 'enemy.watcher': 'Weeping Watcher', 'enemy.bloater': 'Bloater',
   'affix.swift': 'Swift', 'affix.gunner': 'Gunner', 'affix.summoner': 'Summoner', 'affix.ironclad': 'Ironclad', 'affix.regen': 'Regenerating', 'affix.volatile': 'Volatile', 'affix.charger': 'Charger',
-  'hud.march': 'The Procession marches! Step aside', 'enemy.marcher': 'Procession Monk',
+  'hud.squad': 'A squad is coming!', 'hud.march': 'The Procession marches! Step aside', 'enemy.marcher': 'Procession Monk',
   'enemy.bonemage': 'Bone Mage', 'enemy.gravechief': 'Grave Chieftain', 'enemy.bonetyrant': 'Bone Tyrant',
   'enemy.scarab': 'Gold Scarab', 'enemy.mimic': 'Mimic', 'enemy.gildedknight': 'Gilded Knight', 'enemy.vaultwarden': 'Vault Warden', 'enemy.coinwraith': 'Coin Wraith', 'enemy.mimicking': 'Mimic King', 'enemy.sentinel': 'Gilded Sentinel', 'enemy.magistrate': 'Hollow Magistrate', 'hud.judged': 'Judged!',
   'enemy.mosquito': 'Blight Mosquito', 'enemy.bogcorpse': 'Bog Corpse', 'enemy.bogwraith': 'Bog Wraith', 'enemy.toad': 'Bog Toad', 'enemy.treant': 'Treant', 'enemy.blightfiend': 'Blightfiend', 'enemy.bogserpent': 'Bog Serpent', 'enemy.eldertreant': 'Elder Treant', 'enemy.rotlord': 'Lord of Rot',
@@ -269,7 +269,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'hud.boss': 'Boss', 'hud.finalBoss': 'Final boss',
   'tutorial.move': 'Drag anywhere to move', 'tutorial.auto': 'Your hero attacks automatically',
 
-  'levelup.title': 'LEVEL UP!', 'levelup.sub': 'Level {n} · choose one', 'levelup.new': 'NEW', 'levelup.reroll': 'Reroll ({n})',
+  'levelup.lock': 'Lock: keep it through a reroll', 'levelup.stats': 'Stats', 'levelup.title': 'LEVEL UP!', 'levelup.sub': 'Level {n} · choose one', 'levelup.new': 'NEW', 'levelup.reroll': 'Reroll ({n})',
   'levelup.rerollAd': 'Reroll', 'levelup.gold': 'Gold', 'levelup.heal': 'Healing', 'levelup.healDesc': 'Restores 30% HP',
   'treasure.title': 'Treasure!',
   'pause.title': 'Paused', 'pause.resume': 'Resume', 'pause.quit': 'Abandon run', 'pause.quitConfirm': 'End this run now? You keep the gold you collected.',
