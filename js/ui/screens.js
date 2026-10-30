@@ -535,10 +535,13 @@
   /* ================= SHOP ================= */
   ui.screens.shop = {
     render() {
-      const s = S(), d = M.ensureDaily(), root = h('div');
+      // one category at a time, picked on the tab bar at the top (each section is built, only the chosen one shown)
+      const s = S(), d = M.ensureDaily(), page = h('div'), sec = {};
+      let root = page;
       root.append(h('h2.title', t('nav.shop')));
 
       // ---- special offers
+      root = sec.offers = h('div.shop-sec');
       root.append(h('h3.sect', { id: 'shop-offers' }, t('shop.offers')));
       if (!s.purchases.once.starter) root.append(offerCard('starter', 'offer', t('shop.starterDesc'), t('shop.value', { v: E.products.starter.value + '%' })));
       if (M.soulCardActive()) {
@@ -555,6 +558,7 @@
       root.append(ui.ratesLink()); // the packs hold random relics and chests: their odds, before buying
 
       // ---- daily deals
+      root = sec.deals = h('div.shop-sec');
       const dealTimer = h('span.timer');
       root.append(h('h3.sect', t('shop.deals'), dealTimer));
       const deals = h('div.grid3');
@@ -571,6 +575,7 @@
       if (d.deals.some((deal) => E.dealPool[deal.i].grant.gear || E.dealPool[deal.i].grant.chest)) root.append(ui.ratesLink());
 
       // ---- the Forge: forging metal, herbs, a few packs of each a day
+      root = sec.forge = h('div.shop-sec');
       root.append(h('h3.sect', { id: 'shop-forge' }, t('shop.forge'), h('span.timer', t('shop.forgeDaily'))));
       const forge = h('div.grid3');
       E.stockPacks.forEach((p, i) => {
@@ -586,6 +591,7 @@
       root.append(forge);
 
       // ---- chests
+      root = sec.chests = h('div.shop-sec');
       root.append(h('h3.sect', { id: 'shop-chests' }, t('shop.chests')));
       const ch = h('div.grid3');
       const freeIn = M.freeChestReadyIn();
@@ -610,6 +616,7 @@
       root.append(h('div.center', { style: { marginTop: '6px' } }, h('button.btn.tiny.ghost', { onclick: () => ui.openRates() }, t('shop.rates'))));
 
       // ---- gems
+      root = sec.gems = h('div.shop-sec');
       root.append(h('h3.sect', { id: 'shop-gems' }, t('shop.gems')));
       const gp = h('div.grid3');
       E.gemPackOrder.forEach((id) => {
@@ -624,6 +631,7 @@
       root.append(gp);
 
       // ---- gold
+      root = sec.gold = h('div.shop-sec');
       root.append(h('h3.sect', { id: 'shop-gold' }, t('shop.gold')));
       const gg = h('div.grid3');
       E.goldPacks.forEach((p) => {
@@ -633,6 +641,7 @@
       root.append(gg);
 
       // ---- free
+      root = sec.free = h('div.shop-sec');
       root.append(h('h3.sect', { id: 'shop-free' }, t('shop.free')));
       const gemsLeft = E.FREE_GEM_ADS - d.ads.gems, enLeft = E.ENERGY_AD_LIMIT - d.ads.energy;
       root.append(h('div.panel.item', h('div.ico', A.img('i_gem')),
@@ -642,6 +651,16 @@
         h('div.grow', h('div.t', t('shop.freeEnergy', { n: E.ENERGY_AD_AMOUNT })), h('div.d', t('shop.leftToday', { n: enLeft }))),
         h('button.btn.small.ad' + (enLeft > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('adEnergy'); if (r) ui.rewardPopup(t('shop.free'), r); ui.refresh(); } }, h('span.adtag', 'AD'), t('common.watch'))));
 
+      // the tab bar, the chosen section, then what belongs under every section
+      const TABS = { offers: 'n_pass', deals: 'hourglass', forge: 'mat_silver', chests: 'c_gold', gems: 'i_gem', gold: 'i_gold', free: 'n_ad' };
+      const dot = { // something free waits in that section
+        offers: M.soulCardClaimable(), deals: d.deals.some((x) => !x.bought && E.dealPool[x.i].cost.ad), chests: M.freeChestReadyIn() <= 0,
+        free: E.FREE_GEM_ADS - d.ads.gems > 0 || E.ENERGY_AD_LIMIT - d.ads.energy > 0,
+      };
+      const cur = TABS[ui.sub.shop] ? ui.sub.shop : 'offers';
+      page.append(h('div.shop-tabs', Object.keys(TABS).map((k) => h('button.stab' + (k === cur ? '.on' : ''), { onclick: () => { if (k === cur) return; click(); ui.sub.shop = k; ui.refresh(true); } },
+        A.img(TABS[k]), h('span', t('shoptab.' + k)), dot[k] ? h('i.sdot') : null))), sec[cur]);
+      root = page;
       root.append(h('div.center', { style: { margin: '18px 0 6px' } }, h('button.btn.tiny.ghost', { onclick: () => DH.iap.restore() }, t('shop.restore'))));
       if (DH.iap.provider.name === 'mock') root.append(h('div.center.small', { style: { color: 'var(--dim)' } }, t('shop.testMode'))); // the browser's pretend store only
 
@@ -650,14 +669,9 @@
         const f = M.freeChestReadyIn(); chestTimer.textContent = f > 0 ? U.fmtDuration(f) : '';
       };
       upd(); ui.tick = upd;
-      return root;
+      return page;
     },
-    scrollTo(sub) {
-      requestAnimationFrame(() => {
-        const el = document.getElementById('shop-' + sub);
-        if (el) ui.contentEl.scrollTop = el.offsetTop - 8;
-      });
-    },
+    scrollTo() { ui.contentEl.scrollTop = 0; }, // a link to a section opens its tab (ui.sub.shop), from the top
   };
   function offerCard(id, cls, desc, ribbon) {
     const p = E.products[id];
@@ -665,9 +679,9 @@
     if (id === 'soulcard') contents.push(...M.rewardPreview(p.daily).map((e) => ({ icon: e.icon, text: e.text + t('shop.perDay') })));
     return h('div.panel.' + cls.split(' ').join('.'), { style: { marginTop: '8px' } },
       h('div.ohead', h('div.ot', t('product.' + id)), ribbon ? h('div.ribbon', ribbon) : null), // the tag sits beside the title, never over the text
-      h('div.small', desc),
-      contents.length ? h('div.contents', contents.map(ui.rw)) : null,
-      h('button.btn.gold.block.shine', { onclick: () => DH.iap.buy(id) }, DH.iap.price(id)));
+      h('div.small.odesc', desc),
+      h('div.obody', contents.length ? h('div.contents', contents.map(ui.rw)) : h('div.grow'), // what it holds, its price beside it
+        h('button.btn.gold.shine.oprice', { onclick: () => DH.iap.buy(id) }, DH.iap.price(id))));
   }
   async function buyChest(type, x10) {
     const r = await ui.act('buyChest', { type, x10: !!x10 });
