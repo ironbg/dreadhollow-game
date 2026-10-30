@@ -768,6 +768,37 @@
         lights.push({ x: f.x, y: f.y - 10, r: 70 * a + 10, kind: 'holy' });
         break;
       }
+      case 'ascend': { // level-up: a golden sigil opens on the ground, wings of light unfold behind the hero and rise, a column and a ring of light
+        const open = Math.min(1, k / 0.22), oe = 1 - (1 - open) * (1 - open), fade = k < 0.6 ? 1 : 1 - (k - 0.6) / 0.4, rd = this.rd.bind(this);
+        g.save(); g.globalCompositeOperation = 'lighter';
+        // the sigil on the ground: two rings, a hexagram, runes turning round the rim
+        const Rr = 28 * oe, rot = k * 2.4, gy = y + 3;
+        g.globalAlpha = fade; g.lineWidth = 1;
+        g.strokeStyle = '#ffcf5a'; g.beginPath(); g.ellipse(x, gy, Rr, Rr * 0.42, 0, 0, TAU); g.stroke();
+        g.strokeStyle = '#fff0b0'; g.beginPath(); g.ellipse(x, gy, Rr * 0.74, Rr * 0.31, 0, 0, TAU); g.stroke();
+        g.strokeStyle = 'rgba(255,207,90,0.8)';
+        for (const o of [0, Math.PI]) { g.beginPath(); for (let i = 0; i <= 3; i++) { const an = rot + o + i * TAU / 3, px = x + Math.cos(an) * Rr * 0.74, py = gy + Math.sin(an) * Rr * 0.31; if (i) g.lineTo(px, py); else g.moveTo(px, py); } g.stroke(); }
+        g.fillStyle = '#ffe9a0'; for (let i = 0; i < 16; i++) { const an = -rot + i / 16 * TAU, px = x + Math.cos(an) * Rr * 0.87, py = gy + Math.sin(an) * Rr * 0.365; g.fillRect(rd(px), rd(py) - (i % 2), 1, 1 + (i % 2)); } // the runes: little standing marks
+        g.globalAlpha = fade * 0.55; g.drawImage(A.glow('rgba(255,200,90,0.9)'), x - Rr * 1.1, gy - Rr * 0.5, Rr * 2.2, Rr);
+        // a ring of light thrown outward at the start
+        if (k < 0.35) { const sk = k / 0.35, sr = 10 + sk * 44; g.globalAlpha = 1 - sk; g.strokeStyle = '#fff4c8'; g.lineWidth = 1.5; g.beginPath(); g.ellipse(x, gy, sr, sr * 0.42, 0, 0, TAU); g.stroke(); g.lineWidth = 1; }
+        // the column of light
+        const ca = Math.sin(Math.min(1, k * 1.3) * Math.PI) * fade, cw = 7 * (1 - k * 0.4);
+        const grd = g.createLinearGradient(0, y - 100, 0, y); grd.addColorStop(0, 'rgba(255,230,150,0)'); grd.addColorStop(1, 'rgba(255,230,150,' + 0.5 * ca + ')');
+        g.globalAlpha = 1; g.fillStyle = grd; g.fillRect(x - cw, y - 100, cw * 2, 100);
+        // the wings: two fans of feathers from the shoulders, unfolding and lifting
+        const lift = 4 + k * 14, wy = y - 13 - lift, span = 7 + 19 * oe;
+        for (const sd of [-1, 1]) for (let i = 0; i < 7; i++) {
+          const t2 = i / 6, an = -Math.PI / 2 + sd * (0.35 + t2 * 1.15) * oe, len = span * (1 - t2 * 0.38), fx = x + sd * 2 + Math.cos(an) * len, fy = wy + Math.sin(an) * len;
+          g.globalAlpha = fade * (0.9 - t2 * 0.35);
+          g.strokeStyle = i % 2 ? '#ffd870' : '#fff6d8'; g.lineWidth = 2.2 - t2; g.beginPath(); g.moveTo(x + sd * 2, wy + 2); g.quadraticCurveTo(x + sd * (2 + len * 0.35), wy - len * 0.2 + 3, fx, fy); g.stroke();
+          g.fillStyle = '#fffaf0'; g.fillRect(rd(fx) - 0.5, rd(fy) - 0.5, 1.5, 1.5); // each feather's bright tip
+        }
+        g.globalAlpha = fade * 0.5; g.drawImage(A.glow('rgba(255,225,140,0.9)'), x - span * 1.2, wy - span, span * 2.4, span * 1.6);
+        g.restore(); g.globalAlpha = 1; g.lineWidth = 1;
+        lights.push({ x: p.x, y: p.y - 10, r: (80 * Math.max(ca, fade * 0.6)) + 12, kind: 'holy' });
+        break;
+      }
       case 'runecircle': { // ground sigil under big spells
         const a = 1 - k, Rr = f.R * (0.7 + k * 0.3), rot = f.rot + k * 2;
         g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = a;

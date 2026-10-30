@@ -317,8 +317,9 @@
   /** Pillar of light and rising motes when the hero levels up. */
   R.levelUpVfx = function () {
     const p = this.player;
-    this.fx.push({ k: 'pillar', x: p.x, y: p.y, life: 0.9, max: 0.9, color: '#ffe08a' });
-    for (let i = 0; i < 18; i++) { const a = i / 18 * TAU; this.gpart({ x: p.x + Math.cos(a) * 10, y: p.y + Math.sin(a) * 4, vx: 0, vy: U.rand(-60, -30), drag: 0.97, life: U.rand(0.6, 1.1), max: 1.1, c: '#ffd35a', r: 1, core: '#fff6c8' }); }
+    this.fx.push({ k: 'ascend', x: p.x, y: p.y, follow: true, life: 1.5, max: 1.5 }); // the sigil, the wings, the column (render.js)
+    for (let i = 0; i < 28; i++) { const a = i / 28 * TAU, r = U.rand(8, 26); this.gpart({ x: p.x + Math.cos(a) * r, y: p.y + Math.sin(a) * r * 0.42, vx: Math.cos(a) * 6, vy: U.rand(-70, -30), drag: 0.97, life: U.rand(0.7, 1.4), max: 1.4, c: '#ffd35a', r: 1, core: '#fff6c8' }); }
+    this.flashLight && this.flashLight(0.22, 'rgba(255,220,140,');
   };
   /** A burst of light over the whole hall (lightning strikes, big explosions); fades within a fraction of a second. */
   R.flashLight = function (a, col) {

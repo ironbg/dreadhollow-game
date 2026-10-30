@@ -4,6 +4,15 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.52',
+      bg: [
+        'По-силен ефект при ново ниво: под героя се отваря златен руничен кръг, зад него се разтварят и издигат криле от светлина, със стълб светлина и вълна около него.',
+      ],
+      en: [
+        'A grander level-up: a golden rune circle opens under the hero, wings of light unfold and rise behind them, with a column of light and a ring rolling outward.',
+      ],
+    },
+    {
       v: '1.61.51',
       bg: [
         'Нов враг: скелет-стрелец. От 2-рата минута идват групи стрелци, които стоят на разстояние, обикалят около теб и стрелят със стрели, във всяка зала в нейните цветове.',
