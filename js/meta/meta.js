@@ -81,7 +81,7 @@
     if (rw.passXp) { meta.addPassXp(rw.passXp); out.push({ icon: 'n_pass', text: '+' + rw.passXp + ' ' + t('pass.xp'), kind: 'pass' }); }
     if (rw.accountXp) meta.addAccountXp(rw.accountXp);
     if (rw.hero) {
-      if (s.heroes[rw.hero]) { s.gems += 300; out.push({ icon: 'i_gem', text: '+300', kind: 'gems' }); }
+      if (s.heroes[rw.hero]) { s.gems += E.HERO_DUPE_GEMS; out.push({ icon: 'i_gem', text: '+' + E.HERO_DUPE_GEMS, kind: 'gems' }); } // already owned: gems instead
       else { s.heroes[rw.hero] = true; out.push({ icon: 'h_' + rw.hero, text: t('hero.' + rw.hero + '.name'), kind: 'hero' }); }
     }
     if (rw.gear) {
@@ -104,7 +104,7 @@
     if (rw.passXp) out.push({ icon: 'n_pass', text: rw.passXp });
     if (rw.chest) out.push({ icon: E.chests[rw.chest].icon, text: t('chest.' + rw.chest) });
     if (rw.gear) out.push({ icon: 'g_wrath_amulet', text: t('rarity.' + E.rarities[rw.gear.rarity]), rarity: rw.gear.rarity });
-    if (rw.hero) out.push({ icon: 'h_' + rw.hero, text: t('hero.' + rw.hero + '.name') });
+    if (rw.hero) out.push(S().heroes[rw.hero] ? { icon: 'i_gem', text: U.fmt(E.HERO_DUPE_GEMS) } : { icon: 'h_' + rw.hero, text: t('hero.' + rw.hero + '.name') }); // owned already: shown as the gems it gives
     return out;
   };
 
@@ -637,12 +637,25 @@
     let out = [];
     const reached = Math.min(E.PASS_TIERS, Math.floor(p.xp / E.PASS_XP_PER_TIER));
     for (let i = 1; i <= reached; i++) ['free', 'prem'].forEach((tr) => { if ((tr === 'free' || p.premium) && !p[tr][i]) { p[tr][i] = true; out = out.concat(meta.grant(E.passRewards[tr][i - 1])); } });
+    const bn = Math.max(0, Math.floor((p.bonusXp || 0) / E.PASS_BONUS.xp) - (p.bonusGot || 0)), brw = p.premium ? E.PASS_BONUS.prem : E.PASS_BONUS.free; // bonus rewards left untaken
+    if (bn) out = out.concat(meta.grant({ gold: brw.gold * bn, gems: brw.gems * bn }));
     if (out.length) meta.pendingSeason = { n: p.season, rewards: out };
     s.pass = { season: cur, xp: 0, premium: false, free: {}, prem: {} };
     changed();
   };
   meta.passTier = () => { meta.ensureSeason(); return Math.min(E.PASS_TIERS, Math.floor(S().pass.xp / E.PASS_XP_PER_TIER)); };
-  meta.addPassXp = (n) => { meta.ensureSeason(); const k = S().pass.premium ? 1 + E.PASS_PERKS.xpPct : 1; S().pass.xp = Math.min(S().pass.xp + Math.floor(n * k), E.PASS_TIERS * E.PASS_XP_PER_TIER); persist(); }; // the premium pass: +25% XP
+  meta.addPassXp = (n) => { // the premium pass: +25% XP; past the last level it fills the bonus rewards
+    meta.ensureSeason(); const p = S().pass, cap = E.PASS_TIERS * E.PASS_XP_PER_TIER, add = Math.floor(n * (p.premium ? 1 + E.PASS_PERKS.xpPct : 1));
+    const over = Math.max(0, p.xp + add - cap); p.xp = Math.min(cap, p.xp + add); if (over) p.bonusXp = (p.bonusXp || 0) + over;
+    persist();
+  };
+  /** Bonus rewards past the last level: how many are waiting, how far the next one is. */
+  meta.passBonus = () => { meta.ensureSeason(); const p = S().pass, xp = p.bonusXp || 0, got = p.bonusGot || 0, n = Math.floor(xp / E.PASS_BONUS.xp); return { ready: Math.max(0, n - got), got, into: xp - n * E.PASS_BONUS.xp }; };
+  meta.claimPassBonus = () => {
+    const b = meta.passBonus(); if (b.ready <= 0) return null;
+    const p = S().pass, rw = p.premium ? E.PASS_BONUS.prem : E.PASS_BONUS.free; p.bonusGot = b.got + b.ready;
+    return meta.grant({ gold: rw.gold * b.ready, gems: rw.gems * b.ready });
+  };
   /** The season's premium Battle Pass: its row of rewards, the premium sign-in, no ads, more gold and pass XP. */
   meta.passPremium = () => { meta.ensureSeason(); return !!S().pass.premium; };
   /** No ads: bought for good, or while the season's premium pass lasts. */
@@ -1081,7 +1094,7 @@
     const d = meta.ensureDaily();
     const missions = d.missions.filter((m) => m.done && !m.claimed).length + meta.activityReadyCount();
     const ach = E.achievements.filter(meta.achClaimable).length;
-    let pass = 0; for (let i = 1; i <= meta.passTier(); i++) { if (meta.passClaimable(i, 'free')) pass++; if (meta.passClaimable(i, 'prem')) pass++; }
+    let pass = meta.passBonus().ready; for (let i = 1; i <= meta.passTier(); i++) { if (meta.passClaimable(i, 'free')) pass++; if (meta.passClaimable(i, 'prem')) pass++; }
     const shop = (meta.freeChestReadyIn() <= 0 ? 1 : 0) + (meta.soulCardClaimable() ? 1 : 0) + (d.ads.gems < E.FREE_GEM_ADS ? 0 : 0);
     const newGear = S().gear.filter((g) => g.isNew).length;
     let shrineAff = 0;

@@ -36,6 +36,7 @@
     claimAch: { run: (a) => M().claimAch(str(a.id)) },
     claimPass: { run: (a) => M().claimPass(int(a.tier), a.track === 'prem' ? 'prem' : 'free') },
     claimAllPass: { run: () => M().claimAllPass() },
+    claimPassBonus: { run: () => M().claimPassBonus() },
     buyPassTier: { run: () => M().buyPassTier() },
     claimMainQuest: { run: () => M().claimMainQuest() },
     trackDeed: { run: (a) => M().trackDeed(a.id == null ? null : str(a.id)) },

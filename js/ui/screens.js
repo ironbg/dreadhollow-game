@@ -491,6 +491,15 @@
           h('div.tier', h('div.trk', h('i', { style: { height: (fill * 100) + '%' } })), h('b', i)), cell('prem')));
       }
       box.append(list);
+      // past the last level: a bonus reward for every 1000 XP more
+      if (max) {
+        const bn = M.passBonus(), brw = p.premium ? E.PASS_BONUS.prem : E.PASS_BONUS.free;
+        box.append(h('div.panel.passbonus' + (bn.ready ? '.can' : ''), { onclick: async () => { if (!bn.ready) return; const r = await ui.act('claimPassBonus'); if (r) { DH.audio.play('reward'); ui.rewardPopup(t('pass.rewards'), r); } ui.refresh(); } },
+          h('div.slot.pb-ico', A.img('c_gold')),
+          h('div.grow', h('div.t', t('pass.bonusTitle')), ui.rewardChips(brw),
+            h('div.ph-xp', h('div.bar.blue', h('i', { style: { width: (bn.into / E.PASS_BONUS.xp * 100) + '%' } })), h('span', U.fmt(bn.into) + ' / ' + U.fmt(E.PASS_BONUS.xp)))),
+          bn.ready ? h('button.btn.small.green.shine', t('pass.bonusClaim', { n: bn.ready })) : null));
+      } else box.append(h('div.small.muted.center.pb-note', t('pass.bonusNote', { n: U.fmt(E.PASS_BONUS.xp) })));
       return box;
     },
     ach() {

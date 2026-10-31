@@ -310,6 +310,9 @@
   E.PASS_TIER_GEM_COST = 90;
   // the premium Battle Pass's perks, for the season it is bought in (besides its row of rewards and the premium sign-in)
   E.PASS_PERKS = { goldPct: 0.2, xpPct: 0.25, noAds: true };
+  // past the last level, every 1000 XP more brings a bonus reward (larger with the premium pass)
+  E.PASS_BONUS = { xp: 1000, free: { gold: 3000, gems: 25 }, prem: { gold: 5000, gems: 50 } };
+  E.HERO_DUPE_GEMS = 300; // a hero reward for a hero already owned: gems instead
   E.passRewards = (function () {
     const free = [], prem = [], metal = (i, a) => a[i <= 20 ? 0 : i <= 40 ? 1 : 2]; // forging metal, finer as the season goes on
     for (let i = 1; i <= 60; i++) {
