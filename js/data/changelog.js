@@ -10,6 +10,7 @@
         'Докосни иконата на умение (горе в битката или в прозореца за ниво), за да видиш какво прави: щети на удар, презареждане, брой, обхват, щети в секунда и чертите, взети в тази битка.',
         'Нов „Ежедневен вход“ със седмичен и месечен календар: награда за всеки ден, която се взима с докосване, и премиум ред с по-големи награди, отключен с Премиум бойния пропуск. Пропуснат ден остава пропуснат.',
         'Бойният пропуск вече има 60 нива с повече награди, лента с опита до следващото ниво и пътечка по нивата. Премиумът вече включва и без реклами, +20% злато от битки и +25% опит за пропуска; „Какво включва“ показва всичко. След последното ниво всеки 1000 опит носи бонус злато и диаманти, а герой, който вече имаш, се дава като 300 диаманта.',
+        'По-добра производителност в големи битки: числата на щетите се рисуват от готови картинки, по-малко частици, екранът не се рисува на повече от двойна плътност, а при спад на кадрите логиката вече не се смята двойно.',
         'Поправено: бутонът „Презавърти“ вече се побира в прозореца за ниво.',
       ],
       en: [
@@ -17,6 +18,7 @@
         'Tap an ability\'s icon (at the top in a fight or in the level-up window) to see what it does: damage per hit, cooldown, amount, area, damage per second and the traits taken this fight.',
         'A new Sign-In with a weekly and a monthly calendar: a reward for every day, taken with a tap, and a premium row with bigger rewards, opened by the Premium Battle Pass. A day missed stays missed.',
         'The Battle Pass now has 60 levels with more rewards, an XP bar to the next level and a track down the levels. Premium now also brings no ads, +20% gold from fights and +25% pass XP; "What it gives" shows it all. Past the last level every 1000 XP brings bonus gold and gems, and a hero you already own comes as 300 gems.',
+        'Smoother big fights: damage numbers are drawn from ready-made images, fewer particles, the screen is never drawn above double density, and a slow frame no longer runs the game logic twice.',
         'Fixed: the Reroll button now fits in the level-up window.',
       ],
     },

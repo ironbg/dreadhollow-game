@@ -18,7 +18,9 @@
     /** Snap a world coordinate to the buffer pixel grid. */
     snap(v) { return Math.round(v * view.px) / view.px; },
     resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      // the world is pixel art drawn at 2 pixels a unit and scaled up: past 2 device pixels per CSS pixel the screen only costs
+      // more to fill (three times the pixels on a dense phone) and looks the same, so the canvas stops at 2
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const cw = Math.floor(window.innerWidth * dpr), ch = Math.floor(window.innerHeight * dpr);
       this.dpr = dpr; this.cw = cw; this.ch = ch;
       this.px = DH.gfx.CPX;

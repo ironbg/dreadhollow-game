@@ -801,7 +801,7 @@
     bloodIn(n) {
       const p = this.player; if (this.settings.lowFx) n = Math.ceil(n / 2);
       for (let i = 0; i < n; i++) {
-        if (this.parts.length > 700) this.parts.shift();
+        if (this.parts.length > (this.settings.minFx ? 150 : this.settings.lowFx ? 300 : 500)) this.parts.shift();
         const a = Math.random() * TAU, r = U.rand(14, 24);
         this.parts.push({ x: p.x + Math.cos(a) * r, y: p.y - 6 + Math.sin(a) * r * 0.8, vx: -Math.sin(a) * 30, vy: Math.cos(a) * 30 - 10, life: U.rand(0.6, 0.9), max: 0.9, c: U.pick(['#e01830', '#ff4050', '#b00c20', '#ff8a96']), s: Math.random() < 0.5 ? 3 : 2, home: true });
       }
@@ -1186,7 +1186,7 @@
     burst(x, y, n, colors, spd) {
       if (this.settings.lowFx) n = Math.ceil(n / (this.settings.minFx ? 4 : 2));
       for (let i = 0; i < n; i++) {
-        if (this.parts.length > 700) this.parts.shift();
+        if (this.parts.length > (this.settings.minFx ? 150 : this.settings.lowFx ? 300 : 500)) this.parts.shift();
         const a = Math.random() * TAU, s = Math.random() * spd;
         this.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 20, life: U.rand(0.3, 0.8), max: 0.8, c: U.pick(colors), s: Math.random() < 0.3 ? 2 : 1, g: 120 });
       }

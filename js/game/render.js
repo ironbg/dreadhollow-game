@@ -1014,18 +1014,31 @@
     g.globalCompositeOperation = 'lighter'; g.drawImage(A.glow(tint + '0.16)'), p.x - cx - 70, p.y - cy - 70, 140, 140); g.globalCompositeOperation = 'source-over';
   };
 
+  /* Floating texts are drawn from cached bitmaps: an outlined text is costly to lay out and stroke every frame, and a big
+   * fight shows dozens of them. One bitmap per text, colour and size, drawn scaled for the pop and faded with alpha. */
+  const textCache = new Map();
+  const textBitmap = (str, col, size, S) => {
+    const key = str + '|' + col + '|' + size;
+    let c = textCache.get(key); if (c) return c;
+    if (textCache.size > 500) textCache.clear();
+    const lw = Math.max(2, S * 1.2), font = '800 ' + size + 'px "DHNum", "Alegreya Sans", sans-serif';
+    const mc = textBitmap.m || (textBitmap.m = document.createElement('canvas').getContext('2d')); mc.font = font;
+    const w = Math.ceil(mc.measureText(str).width + lw * 2 + 2), h = Math.ceil(size * 1.3 + lw * 2);
+    c = document.createElement('canvas'); c.width = w; c.height = h;
+    const g = c.getContext('2d'); g.font = font; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+    g.lineWidth = lw; g.strokeStyle = '#0b0610'; g.strokeText(str, w / 2, h / 2); g.fillStyle = col; g.fillText(str, w / 2, h / 2);
+    textCache.set(key, c); return c;
+  };
   R.renderTexts = function (ctx, cx, cy, S) {
     if (!this.texts.length) return;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    const smooth = ctx.imageSmoothingEnabled; ctx.imageSmoothingEnabled = true;
     for (const x of this.texts) {
       const a = Math.min(1, x.life / x.max * 2), pop = 1 + Math.max(0, (x.life / x.max) - 0.8) * 2;
-      const size = Math.round((x.big ? 10 : x.small ? 5 : 6.5) * S * pop * 0.5) * 2; // crits and callouts big, plain hits small
-      ctx.font = '800 ' + size + 'px "DHNum", "Alegreya Sans", sans-serif'; ctx.globalAlpha = a;
-      ctx.lineWidth = Math.max(2, S * 1.2); ctx.strokeStyle = '#0b0610';
-      const sx = (x.x - cx) * S, sy = (x.y - cy) * S;
-      ctx.strokeText(x.str, sx, sy); ctx.fillStyle = x.c; ctx.fillText(x.str, sx, sy);
+      const size = Math.round((x.big ? 10 : x.small ? 5 : 6.5) * S * 0.5) * 2; // crits and callouts big, plain hits small
+      const bm = textBitmap(x.str, x.c, size, S), w = bm.width * pop, h = bm.height * pop;
+      ctx.globalAlpha = a; ctx.drawImage(bm, Math.round((x.x - cx) * S - w / 2), Math.round((x.y - cy) * S - h / 2), w, h);
     }
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = 1; ctx.imageSmoothingEnabled = smooth;
   };
   /** Off-screen markers: an iron arrowhead with a gold rim and a gem in the target's colour, a badge with the target's
    *  own sprite, and the distance in metres. Drawn on the full-resolution canvas so the numbers stay sharp. */
