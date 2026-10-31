@@ -387,26 +387,25 @@ select { background: #1c1420; color: var(--text); border: 1px solid var(--line);
 #hud .build .b { position: relative; width: 22px; height: 22px; background: rgba(0,0,0,.6); border: 1px solid #3a2c40; border-radius: 5px; display: flex; align-items: center; justify-content: center; }
 #hud .build .b img { width: 18px; height: 18px; }
 #hud .build .b i { position: absolute; bottom: -3px; right: -3px; font: 6px/1 var(--num); color: var(--gold); background: #000; padding: 1px 2px; border-radius: 2px; font-style: normal; }
-/* the boss bar: at the top, just under the abilities (runui.js stackBoss places it), the quest tracker moving down under it */
-#hud .bossbar { position: absolute; top: calc(92px + var(--safe-t)); left: 50%; transform: translateX(-50%); width: min(88%, 440px); text-align: center; pointer-events: none; }
-#hud .bossbar .bb-plate { position: relative; display: inline-flex; align-items: center; gap: 6px; margin: 0 auto -2px; padding: 3px 18px 4px; z-index: 1;
-  background: linear-gradient(180deg, #2a1418, #120709); border: 2px solid #050308; box-shadow: inset 0 0 0 1px #8a5a30, inset 0 1px 0 rgba(255,180,160,.15), 0 2px 6px rgba(0,0,0,.7);
-  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%); }
-#hud .bossbar .bb-plate img.ci { width: 14px; height: 14px; margin: 0; filter: drop-shadow(0 0 3px rgba(255,60,60,.7)); }
-#hud .bossbar .n { font-family: var(--title); color: #ffc8b8; font-size: 14px; letter-spacing: .06em; text-shadow: 0 2px 0 #000, 0 0 8px rgba(255,40,40,.55); white-space: nowrap; }
-#hud .bossbar .bb-frame { position: relative; padding: 4px 6px; background: linear-gradient(180deg, #3a3036, #1a1418 55%, #0c080a); border: 2px solid #050308;
-  box-shadow: inset 0 0 0 1px #6a4a2a, inset 0 2px 0 rgba(255,220,170,.14), inset 0 -1px 0 rgba(0,0,0,.6), 0 3px 8px rgba(0,0,0,.8); }
-#hud .bossbar .bb-frame::before, #hud .bossbar .bb-frame::after { content: ''; position: absolute; top: 50%; width: 16px; height: 22px; margin-top: -11px; background: linear-gradient(180deg, #4a3e44, #1a1418); border: 2px solid #050308; }
-#hud .bossbar .bb-frame::before { left: -13px; clip-path: polygon(100% 0, 0 50%, 100% 100%); }   /* iron spikes at both ends */
-#hud .bossbar .bb-frame::after { right: -13px; clip-path: polygon(0 0, 100% 50%, 0 100%); }
-#hud .bossbar .bar { position: relative; height: 14px; border: 2px solid #050308; border-radius: 0; background: #1a0608; box-shadow: inset 0 2px 4px #000; overflow: hidden; }
+/* the boss bar: at the top, just under the abilities (runui.js stackBoss places it), the quest tracker moving down under it.
+   Plain and fine: the name above, a thin bronze frame with spear-tip ends, a thin line of dark blood, a filigree under it. */
+#hud .bossbar { position: absolute; top: calc(92px + var(--safe-t)); left: 50%; transform: translateX(-50%); width: min(84%, 420px); text-align: center; pointer-events: none; }
+#hud .bossbar .n { font-family: var(--title); color: #ece0c8; font-size: 13px; letter-spacing: .08em; text-shadow: 0 1px 0 #000, 0 0 6px rgba(0,0,0,.9); white-space: nowrap; margin-bottom: 2px; }
+#hud .bossbar .bb-frame { position: relative; margin: 0 12px; padding: 2px; background: linear-gradient(180deg, #e8c27a, #8a6430 50%, #4a3418); box-shadow: 0 1px 0 #000, 0 2px 6px rgba(0,0,0,.8); }
+#hud .bossbar .bb-frame::before, #hud .bossbar .bb-frame::after { content: ''; position: absolute; top: 50%; width: 16px; height: 14px; margin-top: -7px; background: linear-gradient(180deg, #f0d08a, #a07838 50%, #4a3418); }
+#hud .bossbar .bb-frame::before { left: -13px; clip-path: polygon(0 50%, 55% 0, 100% 22%, 100% 78%, 55% 100%); }   /* spear tips at both ends */
+#hud .bossbar .bb-frame::after { right: -13px; clip-path: polygon(100% 50%, 45% 0, 0 22%, 0 78%, 45% 100%); }
+#hud .bossbar .bar { position: relative; height: 6px; border: 1px solid #050308; border-radius: 0; background: #120a0c; box-shadow: inset 0 1px 3px #000; overflow: hidden; }
 #hud .bossbar .bar b, #hud .bossbar .bar i { position: absolute; left: 0; top: 0; bottom: 0; display: block; }
-#hud .bossbar .bar b { background: linear-gradient(180deg, #ffd0b0, #e07060); transition: width .9s ease-in .25s; }   /* the trail of each blow */
-#hud .bossbar .bar i { border-radius: 0; background: linear-gradient(180deg, #ff5a4a 0%, #c41020 45%, #6a0610 100%); transition: width .12s; }
-#hud .bossbar .bar s { position: absolute; inset: 0; text-decoration: none; pointer-events: none;
-  background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), rgba(0,0,0,.55) calc(10% - 1px) 10%), linear-gradient(180deg, rgba(255,255,255,.22), transparent 45%); }
-#hud .bossbar.enraged .bb-frame { animation: bbrage .9s ease-in-out infinite; }
-@keyframes bbrage { 50% { box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 0 14px rgba(255,40,30,.75), 0 3px 8px rgba(0,0,0,.8); } }
+#hud .bossbar .bar b { background: rgba(190,90,90,.5); transition: width .9s ease-in .25s; }   /* the trail of each blow */
+#hud .bossbar .bar i { border-radius: 0; transition: width .12s;
+  background: linear-gradient(180deg, #d0283a 0%, #8a0a18 55%, #4a040c 100%); }
+#hud .bossbar .bar i::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 8px; background: linear-gradient(90deg, rgba(255,150,150,0), rgba(255,210,200,.95)); } /* the bright leading edge */
+#hud .bossbar .bb-orn { width: 110px; height: 11px; margin: -1px auto 0; filter: drop-shadow(0 1px 0 #000); }
+#hud .bossbar .bb-orn svg { display: block; width: 100%; height: 100%; }
+#hud .bossbar.enraged .n { color: #ffb0a0; text-shadow: 0 1px 0 #000, 0 0 8px rgba(255,40,30,.8); }
+#hud .bossbar.enraged .bar i { animation: bbrage .9s ease-in-out infinite; }
+@keyframes bbrage { 50% { filter: brightness(1.45); } }
 /* the level-up footer: potions on the left, Stats and Reroll on the right, wrapping to a second line when narrow */
 .lvfoot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .lvfoot .lvacts { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }

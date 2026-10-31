@@ -85,9 +85,10 @@
     r.xpFill = h('i'); r.lvl = h('span');
     r.timer = h('div.timer'); r.fps = h('div.fps' + (DH.save.data.settings.showFps ? '' : '.hidden')); fpsN = 0; fpsT0 = 0; fpsLast = 0; fpsWorst = 0; r.kills = h('span'); r.gold = h('span');
     r.build = h('div.build'); r.buffs = h('div.buffs'); r.curse = h('div.cursed.hidden', A.img('u_agony', 'ci'), r.curseT = h('b'));
-    // the boss's bar, at the foot of the screen: a black iron plate with its name between two skulls, a spiked iron frame,
-    // a crimson fill with a paler trail that lags behind each blow
-    r.boss = h('div.bossbar.hidden', h('div.bb-plate', A.img('n_skull', 'ci'), r.bossName = h('span.n'), A.img('n_skull', 'ci')), h('div.bb-frame', h('div.bar', r.bossLag = h('b'), r.bossFill = h('i'), h('s'))));
+    // the boss's bar: its name above, a thin bronze frame with spear-tip ends and a filigree under its middle, a thin line of
+    // dark blood with a bright leading edge, a paler trail lagging behind each blow
+    const orn = h('div.bb-orn'); orn.innerHTML = '<svg viewBox="0 0 120 14" preserveAspectRatio="none"><path d="M0 1 L46 1 Q52 1 54 6 Q57 13 60 13 Q63 13 66 6 Q68 1 74 1 L120 1" fill="none" stroke="#c9a060" stroke-width="1.6"/><path d="M38 1 Q44 7 50 4 M82 1 Q76 7 70 4 M56 6 Q60 2 64 6" fill="none" stroke="#8a6430" stroke-width="1.2"/><circle cx="60" cy="9.5" r="1.8" fill="#e8c27a"/></svg>';
+    r.boss = h('div.bossbar.hidden', r.bossName = h('div.n'), h('div.bb-frame', h('div.bar', r.bossLag = h('b'), r.bossFill = h('i'))), orn);
     r.agony = run.agonyOn ? h('div.agony', h('span.al', t('hud.agony')), r.agFill = h('div.agbar', h('i')), r.agNum = h('b')) : null;
     el.append(...[h('div.xp', r.xpFill, r.lvl),
       h('div.top', h('div.hbtns',

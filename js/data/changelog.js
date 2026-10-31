@@ -6,11 +6,11 @@
     {
       v: '1.61.54',
       bg: [
-        'Лентата на боса вече стои горе точно под уменията, без да ги застъпва (мисията се мести под нея), с нов готически вид: желязна табела с името между два черепа, рамка с шипове и следа от всеки удар.',
+        'Лентата на боса вече стои горе точно под уменията, без да ги застъпва (мисията се мести под нея), в нов семпъл вид: името отгоре, тънка бронзова рамка с върхове като копие и тънка линия кръв.',
         'Поправено: бутонът „Презавърти“ вече се побира в прозореца за ниво.',
       ],
       en: [
-        'The boss bar now sits at the top just under the abilities, never over them (the quest moves down beneath it), in a new gothic look: an iron plate with its name between two skulls, a spiked frame and a trail behind each blow.',
+        'The boss bar now sits at the top just under the abilities, never over them (the quest moves down beneath it), in a new plain look: the name above, a thin bronze frame with spear-tip ends and a thin line of blood.',
         'Fixed: the Reroll button now fits in the level-up window.',
       ],
     },
