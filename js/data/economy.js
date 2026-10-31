@@ -335,14 +335,13 @@
   E.loginRewards = [
     { gold: 1000 }, { gems: 25 }, { energy: 20 }, { mats: { iron: 25 } }, { chest: 'silver' }, { gems: 60 }, { chest: 'gold' },
   ];
-  /* Sign-in: a reward for every day of the week (Monday to Sunday) and of the month, a free row and a premium one (bought
-   * for the current week or month). A day not signed in on its day is missed. Days follow the game calendar (Sofia). */
+  /* Sign-in: a reward for every day of the week (Monday to Sunday) and of the month, a free row and a premium one (open
+   * with the season's premium Battle Pass). A day not signed in on its day is missed. Days follow the game calendar (Sofia). */
   E.SIGNIN = {
-    week: { free: E.loginRewards, prem: [{ gems: 50 }, { gold: 5000 }, { mats: { silver: 10 } }, { gems: 60 }, { chest: 'silver' }, { mats: { gold: 8 } }, { gems: 150 }], product: 'signin_week' },
+    week: { free: E.loginRewards, prem: [{ gems: 50 }, { gold: 5000 }, { mats: { silver: 10 } }, { gems: 60 }, { chest: 'silver' }, { mats: { gold: 8 } }, { gems: 150 }] },
     month: {
       free: (d) => (d === 28 ? { chest: 'gold' } : d % 7 === 0 ? { chest: 'silver' } : [{ gold: 1500 }, { gems: 15 }, { mats: { iron: 20 } }, { energy: 10 }][(d - 1) % 4]),
       prem: (d) => (d === 28 ? { gems: 200 } : d % 7 === 0 ? { chest: 'gold' } : [{ gems: 40 }, { gold: 4000 }, { mats: { silver: 10 } }, { gems: 50 }][(d - 1) % 4]),
-      product: 'signin_month',
     },
   };
 
@@ -393,8 +392,6 @@
     soulcard: { type: 'sub', price: 4.99, grant: { gems: 300 }, daily: { gems: 100, energy: 10, mats: { iron: 5 } }, days: 30 },
     pass:     { type: 'pass', price: 9.99 },
     reaper:   { type: 'bundle', price: 4.99, once: true, grant: { hero: 'reaper', gems: 500, chest: 'gold' }, value: 400 },
-    signin_week:  { type: 'signin', period: 'week', price: 1.99 },  // the premium row of this week's sign-in
-    signin_month: { type: 'signin', period: 'month', price: 4.99 }, // and of this month's
     legend:   { type: 'bundle', price: 19.99, once: true, grant: { gems: 2500, gear: { rarity: 4 }, chest: 'gold', gold: 50000, mats: { gold: 40, starsteel: 20 } }, value: 500 },
     // resource packs (the Armory's Resource Store), bought again and again; value: how much more they hold than the same
     // gold and metal bought with gems in the shop (gold 80 a gem; iron, silver, gold ingots, starsteel as in the Forge)

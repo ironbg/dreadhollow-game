@@ -469,7 +469,7 @@
     const draw = () => {
       if (m.closed) return;
       ui.signinTab = tab;
-      const { per, r } = M.signin(tab), p = E.products[E.SIGNIN[tab].product];
+      const { per, r } = M.signin(tab), prem = M.signinPremium();
       const rows = [];
       for (let d = 0; d < per.days; d++) {
         const fs = M.signinState(tab, 'free', d), today = d === per.today;
@@ -488,8 +488,8 @@
         h('div.si-prog', h('span', t('signin.count', { n: got, m: per.days })), h('div.bar', h('i', { style: { width: (got / per.days * 100) + '%' } }))),
         h('div.si-head', h('span', t('signin.day')), h('span', t('signin.free')), h('span.prem', t('signin.prem'))),
         list,
-        r.premium ? h('div.si-premon', A.img('u_check', 'ci'), t('signin.premActive'))
-          : h('button.btn.gold.block.shine.si-buy', { onclick: async () => { DH.audio.play('click'); if (await DH.iap.buy(E.SIGNIN[tab].product)) draw(); } }, t('signin.buyPrem', { p: DH.iap.price(E.SIGNIN[tab].product) })),
+        prem ? h('div.si-premon', A.img('u_check', 'ci'), t('signin.premActive'))
+          : h('button.btn.gold.block.shine.si-buy', { onclick: () => { DH.audio.play('click'); m.close(); ui.go('quests', 'pass'); } }, A.img('n_pass'), t('signin.buyPrem')), // the premium row comes with the premium Battle Pass
         tm));
       requestAnimationFrame(() => { const el = list.querySelector('.si-row.today'); if (el) list.scrollTop = el.offsetTop - list.clientHeight / 2 + el.offsetHeight / 2; }); // today in view
     };

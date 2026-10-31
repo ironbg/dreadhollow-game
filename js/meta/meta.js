@@ -680,22 +680,24 @@
     const s = S(), per = meta.signinPeriod(kind);
     s.signin = s.signin || {};
     let r = s.signin[kind];
-    if (!r || r.key !== per.key) r = s.signin[kind] = { key: per.key, free: [], prem: [], premium: false };
+    if (!r || r.key !== per.key) r = s.signin[kind] = { key: per.key, free: [], prem: [] };
     return Object.assign({ per }, { r });
   };
+  /** The premium row is open while the season's Battle Pass is premium. */
+  meta.signinPremium = () => { meta.ensureSeason(); return !!S().pass.premium; };
   meta.signinReward = (kind, track, day) => { const d = E.SIGNIN[kind][track]; return typeof d === 'function' ? d(day + 1) : d[day]; };
   /** What a day's tile is: 'got', 'ready' (tap to take), 'missed', 'later', or 'locked' (premium not bought). */
   meta.signinState = (kind, track, day) => {
     const { per, r } = meta.signin(kind), got = r[track].includes(day);
     if (got) return 'got';
     if (track === 'prem') {
-      if (!r.premium) return day > per.today ? 'later' : 'locked';
-      if (day === per.today || (day < per.today && r.free.includes(day))) return 'ready'; // a premium row bought late pays for the days signed in
+      if (!meta.signinPremium()) return day > per.today ? 'later' : 'locked';
+      if (day === per.today || (day < per.today && r.free.includes(day))) return 'ready'; // a pass bought late pays for the days signed in
       return day > per.today ? 'later' : 'missed';
     }
     return day === per.today ? 'ready' : day < per.today ? 'missed' : 'later';
   };
-  meta.signinPending = () => ['week', 'month'].some((k) => { const { per, r } = meta.signin(k); return !r.free.includes(per.today) || (r.premium && meta.signinState(k, 'prem', per.today) === 'ready') || (r.premium && r.free.some((d) => !r.prem.includes(d))); });
+  meta.signinPending = () => ['week', 'month'].some((k) => { const { per, r } = meta.signin(k); return !r.free.includes(per.today) || (meta.signinPremium() && (meta.signinState(k, 'prem', per.today) === 'ready' || r.free.some((d) => !r.prem.includes(d)))); });
   meta.claimSignin = (kind, track, day) => {
     if (!E.SIGNIN[kind] || (track !== 'free' && track !== 'prem') || !(day >= 0)) return null;
     if (meta.signinState(kind, track, day) !== 'ready') return null;
@@ -768,7 +770,6 @@
     else if (p.type === 'noads') { s.purchases.noAds = true; out = [{ icon: 'n_ad', text: t('product.noads') }]; }
     else if (p.type === 'pass') { meta.ensureSeason(); S().pass.premium = true; // premium for the season it is bought in
       out = [{ icon: 'n_pass', text: t('pass.premiumOn') }]; }
-    else if (p.type === 'signin') { meta.signin(p.period).r.premium = true; out = [{ icon: 'n_calendar', text: t('signin.premOn') }]; } // the premium row of the current period
     else if (p.type === 'sub') {
       s.purchases.soulUntil = Math.max(U.now(), s.purchases.soulUntil) + p.days * 86400e3;
       out = meta.grant(p.grant);
