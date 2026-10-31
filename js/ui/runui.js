@@ -404,7 +404,7 @@
         const ok = await DH.ads.rewarded('start_bonus'); busy = false;
         if (!ok || DH.game.run !== run) return;
         run.takeStartBonus(pick); DH.audio.play('reward'); done(m);
-      } }, DH.save.data.purchases.noAds ? null : h('span.adtag', 'AD'), t('startBonus.claim'))));
+      } }, DH.meta.noAds() ? null : h('span.adtag', 'AD'), t('startBonus.claim'))));
     m = ui.modal({ title: t('startBonus.title'), rays: true, cls: 'levelup startbonus', onX: () => { click(); done(m); }, body: () => h('div') });
     draw();
   };

@@ -642,7 +642,11 @@
     changed();
   };
   meta.passTier = () => { meta.ensureSeason(); return Math.min(E.PASS_TIERS, Math.floor(S().pass.xp / E.PASS_XP_PER_TIER)); };
-  meta.addPassXp = (n) => { meta.ensureSeason(); S().pass.xp = Math.min(S().pass.xp + Math.floor(n), E.PASS_TIERS * E.PASS_XP_PER_TIER); persist(); };
+  meta.addPassXp = (n) => { meta.ensureSeason(); const k = S().pass.premium ? 1 + E.PASS_PERKS.xpPct : 1; S().pass.xp = Math.min(S().pass.xp + Math.floor(n * k), E.PASS_TIERS * E.PASS_XP_PER_TIER); persist(); }; // the premium pass: +25% XP
+  /** The season's premium Battle Pass: its row of rewards, the premium sign-in, no ads, more gold and pass XP. */
+  meta.passPremium = () => { meta.ensureSeason(); return !!S().pass.premium; };
+  /** No ads: bought for good, or while the season's premium pass lasts. */
+  meta.noAds = () => !!S().purchases.noAds || (E.PASS_PERKS.noAds && meta.passPremium());
   meta.passClaimable = (tier, track) => {
     meta.ensureSeason();
     const p = S().pass;
@@ -684,7 +688,7 @@
     return Object.assign({ per }, { r });
   };
   /** The premium row is open while the season's Battle Pass is premium. */
-  meta.signinPremium = () => { meta.ensureSeason(); return !!S().pass.premium; };
+  meta.signinPremium = () => meta.passPremium();
   meta.signinReward = (kind, track, day) => { const d = E.SIGNIN[kind][track]; return typeof d === 'function' ? d(day + 1) : d[day]; };
   /** What a day's tile is: 'got', 'ready' (tap to take), 'missed', 'later', or 'locked' (premium not bought). */
   meta.signinState = (kind, track, day) => {
@@ -844,7 +848,7 @@
     const dk = 1 + r.dread * E.DREAD.gold;
     const timeBonus = Math.floor(r.time / 60 * 40 * st.goldMult * dk);
     const winBonus = r.victory ? Math.floor(1200 * st.goldMult * dk * (1 + r.agony * 0.3)) : 0;
-    const gold = Math.floor(r.gold + timeBonus + winBonus);
+    const gold = Math.floor((r.gold + timeBonus + winBonus) * (meta.passPremium() ? 1 + E.PASS_PERKS.goldPct : 1)); // the premium pass: +20% gold
     const res = {
       gold, goldRun: Math.floor(r.gold), timeBonus, winBonus,
       accountXp: Math.floor(r.kills / 6 + r.time / 8 + (r.victory ? 120 : 0)),

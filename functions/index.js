@@ -126,7 +126,7 @@ exports.act = callable(async (req) => {
     if (snap.exists) {
       const r = await withProfile(JSON.parse(snap.data().save), cfg, (DH) => {
         DH.actions.overlayFree(DH.save.data, d.free);
-        return !DH.save.data.purchases.noAds && !!def.ad(d.args || {}); // No Ads: the reward comes without an ad
+        return !DH.meta.noAds() && !!def.ad(d.args || {}); // No Ads (bought, or the season's premium pass): the reward comes without an ad
       });
       needAd = !!r.result;
     }

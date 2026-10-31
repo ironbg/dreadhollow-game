@@ -451,6 +451,23 @@
     draw();
   };
 
+  /** What the premium Battle Pass gives, for the season it is bought in, and its button. */
+  ui.openPassPerks = () => {
+    const P = E.PASS_PERKS, prem = M.passPremium();
+    const perk = (icon, title, sub) => h('div.pp-perk', h('div.slot.pp-ico', A.img(icon)), h('div', h('b', title), h('div.small.muted', sub)));
+    const best = [E.passRewards.prem[0], E.passRewards.prem[E.PASS_TIERS - 1]].map((rw) => M.rewardPreview(rw)[0]);
+    const m = ui.modal({ title: t('pass.perksTitle'), cls: 'passperks', body: () => h('div',
+      h('div.pp-hero', A.img('n_pass'), h('div.small', t('pass.perksIntro'))),
+      h('div.pp-grid',
+        perk('c_gold', t('pass.perk.rewards', { n: E.PASS_TIERS }), t('pass.perk.rewardsSub', { a: best[0].text, b: best[1].text })),
+        perk('n_calendar', t('pass.perk.signin'), t('pass.perk.signinSub')),
+        P.noAds ? perk('n_ad', t('pass.perk.noads'), t('pass.perk.noadsSub')) : null,
+        perk('i_gold', t('pass.perk.gold', { v: Math.round(P.goldPct * 100) }), t('pass.perk.goldSub')),
+        perk('n_pass', t('pass.perk.xp', { v: Math.round(P.xpPct * 100) }), t('pass.perk.xpSub'))),
+      h('div.small.muted.center', { style: { margin: '8px 0' } }, t('pass.premiumNote')),
+      prem ? h('div.si-premon', A.img('u_check', 'ci'), t('pass.premiumOn'))
+        : h('button.btn.gold.block.big.shine', { onclick: async () => { if (await DH.iap.buy('pass')) { m.close(); ui.refresh(); } } }, t('pass.unlock', { price: DH.iap.price('pass') }))) });
+  };
   /** Sign-in: this week's and this month's days, a free reward and a premium one for each; tap a glowing reward to take it. */
   ui.openLogin = (kind) => {
     let tab = kind || ui.signinTab || 'week', timer = 0;

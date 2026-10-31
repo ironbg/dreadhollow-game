@@ -453,22 +453,26 @@
     },
     pass() {
       M.ensureSeason(); // a new month starts a new season before anything is read
-      const s = S(), p = s.pass, tier = M.passTier(), box = h('div');
-      const inTier = p.xp - tier * E.PASS_XP_PER_TIER;
+      const s = S(), p = s.pass, tier = M.passTier(), box = h('div'), max = tier >= E.PASS_TIERS;
+      const inTier = max ? E.PASS_XP_PER_TIER : p.xp - tier * E.PASS_XP_PER_TIER;
+      // the head: the level reached in a badge, the XP toward the next one, what premium gives
       box.append(h('div.panel.gold.passhead',
-        h('div.row',
-          A.img('n_pass'),
-          h('div.grow', h('div', { style: { fontFamily: 'var(--title)', color: 'var(--gold)', fontSize: '17px' } }, t('pass.season', { n: p.season })),
-            h('div.small.muted', t('pass.tierOf', { n: tier, max: E.PASS_TIERS }) + ' · ' + t('pass.seasonEnds', { t: ui.fmtDays(M.seasonEndsIn()) }))),
-          p.premium ? h('span.small.good', { style: { fontWeight: 800 } }, t('pass.premiumOn'))
-            : h('button.btn.small.gold.shine', { onclick: () => DH.iap.buy('pass') }, t('pass.unlock', { price: DH.iap.price('pass') }))),
-        p.premium ? null : h('div.small.muted', { style: { marginTop: '4px' } }, t('pass.premiumNote')), // bought for this season only: said before buying
-        h('div.bar.blue', { style: { marginTop: '8px' } }, h('i', { style: { width: (tier >= E.PASS_TIERS ? 100 : inTier / E.PASS_XP_PER_TIER * 100) + '%' } })),
-        h('div.row', { style: { marginTop: '6px' } },
-          h('div.small.muted.grow', tier >= E.PASS_TIERS ? t('pass.maxed') : t('pass.xpToNext', { v: E.PASS_XP_PER_TIER - inTier })),
-          tier < E.PASS_TIERS ? h('button.btn.tiny.gem', { onclick: async () => { const ok = await ui.act('buyPassTier'); if (ok) DH.audio.play('buy'); else if (ok === false) ui.toast(t('common.notEnough'), 'bad'); ui.refresh(); } }, t('pass.buyTier'), A.img('i_gem'), E.PASS_TIER_GEM_COST) : null,
+        h('div.ph-top',
+          h('div.ph-badge', A.img('n_pass'), h('b', tier)),
+          h('div.grow',
+            h('div.ph-title', t('pass.season', { n: p.season })),
+            h('div.small.muted', t('pass.earnHint') + ' · ' + t('pass.seasonEnds', { t: ui.fmtDays(M.seasonEndsIn()) })),
+            h('div.ph-xp', h('div.bar.blue', h('i', { style: { width: (inTier / E.PASS_XP_PER_TIER * 100) + '%' } })), h('span', max ? t('pass.maxed') : U.fmt(inTier) + ' / ' + U.fmt(E.PASS_XP_PER_TIER))))),
+        h('div.ph-acts',
+          p.premium ? h('span.ph-on', A.img('u_check', 'ci'), t('pass.premiumOn'))
+            : h('button.btn.small.gold.shine', { onclick: () => ui.openPassPerks() }, t('pass.unlock', { price: DH.iap.price('pass') })),
+          h('button.btn.small.ghost', { onclick: () => { click(); ui.openPassPerks(); } }, t('pass.perksBtn')),
+          h('span.grow'),
+          !max ? h('button.btn.tiny.gem', { onclick: async () => { const ok = await ui.act('buyPassTier'); if (ok) DH.audio.play('buy'); else if (ok === false) ui.toast(t('common.notEnough'), 'bad'); ui.refresh(); } }, t('pass.buyTier'), A.img('i_gem'), E.PASS_TIER_GEM_COST) : null,
           M.badges().pass ? h('button.btn.tiny.green', { onclick: async () => { const r = await ui.act('claimAllPass'); if (r) ui.rewardPopup(t('pass.rewards'), r); ui.refresh(); } }, t('pass.claimAll')) : null)));
-      box.append(h('div.pass-row', { style: { marginTop: '10px' } }, h('div.center.small.muted', t('pass.free')), h('div'), h('div.center.small.goldtxt', { style: { fontWeight: 800 } }, t('pass.premium'))));
+      box.append(h('div.pass-row.pass-headrow', h('div.center.small.muted', t('pass.free')), h('div.center.small.muted', t('pass.level')), h('div.center.small.goldtxt', { style: { fontWeight: 800 } }, t('pass.premium'))));
+      // the levels: a track down the middle filled up to where the XP has reached, a node for each level
+      const list = h('div.pass-list');
       for (let i = 1; i <= E.PASS_TIERS; i++) {
         const cell = (track) => {
           const rw = E.passRewards[track][i - 1], got = p[track][i], can = M.passClaimable(i, track);
@@ -476,14 +480,17 @@
           return h('div.pass-cell' + (track === 'prem' ? '.prem' : '') + (got ? '.got' : '') + (can ? '.can' : ''), {
             onclick: () => {
               if (can) { ui.act('claimPass', { tier: i, track }).then((r) => { if (r) ui.rewardPopup(t('pass.rewards'), r); ui.refresh(); }); }
-              else if (track === 'prem' && !p.premium) DH.iap.buy('pass');
+              else if (track === 'prem' && !p.premium) { click(); ui.openPassPerks(); }
             } },
             h('div.slot' + (pv.rarity != null ? '.rar' + pv.rarity : ''), { style: { width: '38px', flex: 'none' } }, A.img(pv.icon)),
             h('span.v' + (ui.isWord(pv.text) ? '.word' : ''), pv.text),
-            track === 'prem' && !p.premium ? h('span.lockic', A.img('u_lock', 'ci')) : null);
+            got ? h('span.lockic', A.img('u_check', 'ci')) : track === 'prem' && !p.premium ? h('span.lockic', A.img('u_lock', 'ci')) : null);
         };
-        box.append(h('div.pass-row' + (i <= tier ? '.reached' : ''), cell('free'), h('div.tier', i), cell('prem')));
+        const fill = i <= tier ? 1 : i === tier + 1 ? inTier / E.PASS_XP_PER_TIER : 0; // the track up to this level's node
+        list.append(h('div.pass-row' + (i <= tier ? '.reached' : '') + (i === tier + 1 ? '.next' : ''), cell('free'),
+          h('div.tier', h('div.trk', h('i', { style: { height: (fill * 100) + '%' } })), h('b', i)), cell('prem')));
       }
+      box.append(list);
       return box;
     },
     ach() {

@@ -305,28 +305,30 @@
   ];
 
   /* ---------- Season pass ---------- */
-  E.PASS_TIERS = 30;
-  E.PASS_XP_PER_TIER = 300;
+  E.PASS_TIERS = 60;
+  E.PASS_XP_PER_TIER = 500;
   E.PASS_TIER_GEM_COST = 90;
+  // the premium Battle Pass's perks, for the season it is bought in (besides its row of rewards and the premium sign-in)
+  E.PASS_PERKS = { goldPct: 0.2, xpPct: 0.25, noAds: true };
   E.passRewards = (function () {
-    const free = [], prem = [];
-    for (let i = 1; i <= 30; i++) {
+    const free = [], prem = [], metal = (i, a) => a[i <= 20 ? 0 : i <= 40 ? 1 : 2]; // forging metal, finer as the season goes on
+    for (let i = 1; i <= 60; i++) {
       // free track
       if (i % 10 === 0) free.push({ chest: 'gold' });
       else if (i % 5 === 0) free.push({ chest: 'silver' });
-      else if (i % 3 === 0) free.push({ gems: 20 + i * 2 });
-      else if (i % 4 === 0) free.push({ mats: { [i < 10 ? 'iron' : i < 20 ? 'silver' : 'gold']: i < 10 ? 15 : 10 } }); // forging metal, finer as the season goes on
+      else if (i % 3 === 0) free.push({ gems: 20 + Math.round(i * 1.5) });
+      else if (i % 4 === 0) free.push({ mats: { [metal(i, ['iron', 'silver', 'gold'])]: i <= 20 ? 15 : 10 } });
       else if (i % 2 === 0) free.push({ energy: 10 });
-      else free.push({ gold: 400 + i * 80 });
+      else free.push({ gold: 400 + i * 60 });
       // premium track
       if (i === 1) prem.push({ hero: 'reaper' });
-      else if (i === 30) prem.push({ gear: { rarity: 5 } });
+      else if (i === 60) prem.push({ gear: { rarity: 5 } });
       else if (i % 10 === 0) prem.push({ gear: { rarity: 4 } });
       else if (i % 5 === 0) prem.push({ chest: 'gold' });
-      else if (i % 3 === 0) prem.push({ gems: 60 + i * 4 });
+      else if (i % 3 === 0) prem.push({ gems: 60 + i * 3 });
       else if (i % 2 === 0) prem.push({ chest: 'silver' });
-      else if (i % 4 === 3) prem.push({ mats: { [i < 10 ? 'silver' : i < 20 ? 'gold' : 'starsteel']: i < 20 ? 15 : 10 } });
-      else prem.push({ gold: 1500 + i * 200 });
+      else if (i % 4 === 3) prem.push({ mats: { [metal(i, ['silver', 'gold', 'starsteel'])]: i <= 40 ? 15 : 10 } });
+      else prem.push({ gold: 1500 + i * 150 });
     }
     return { free, prem };
   })();

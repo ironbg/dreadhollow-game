@@ -127,14 +127,14 @@
       this.busy = true;
       let ok = true;
       // the real ad may take a moment to arrive: a dim layer says so and stops a second tap
-      const wait = !S.purchases.noAds && this.provider.name !== 'mock' ? DH.util.h('div.ad-wait', DH.util.h('div.ad-wait-t', t('ad.loading'))) : null;
+      const wait = !DH.meta.noAds() && this.provider.name !== 'mock' ? DH.util.h('div.ad-wait', DH.util.h('div.ad-wait-t', t('ad.loading'))) : null;
       if (wait) document.getElementById('modals').appendChild(wait);
       try {
-        if (!S.purchases.noAds) ok = await this.provider.show('rewarded', placement);
+        if (!DH.meta.noAds()) ok = await this.provider.show('rewarded', placement);
       } catch (e) { console.warn('ad failed', e); ok = false; }
       if (wait) wait.remove();
       this.busy = false;
-      if (!S.purchases.noAds && this.provider.preload) setTimeout(() => this.provider.preload('rewarded'), 2500); // load the next one only now the window is closed — never two videos in memory at once
+      if (!DH.meta.noAds() && this.provider.preload) setTimeout(() => this.provider.preload('rewarded'), 2500); // load the next one only now the window is closed — never two videos in memory at once
       if (ok) {
         // record the watch where the profile really lives (the server, in server mode) so the "watch N ads"
         // missions and Seven Nights tasks actually advance; the reward stands even if this tally call fails.
@@ -147,7 +147,7 @@
     init() {
       if (!this.provider.init) return;
       this.provider.init().then(() => {
-        if (DH.save.data.purchases.noAds || !this.provider.preload) return;
+        if (DH.meta.noAds() || !this.provider.preload) return;
         this.provider.preload('rewarded');
         setTimeout(() => this.provider.preload('interstitial'), 4000);
       }).catch((e) => console.warn('ads init', e));
@@ -157,11 +157,11 @@
     /** Interstitial shown between runs; skipped entirely with the No-Ads purchase. */
     async interstitial(placement) {
       const S = DH.save.data;
-      if (S.purchases.noAds || this.busy) return;
+      if (DH.meta.noAds() || this.busy) return;
       this.busy = true;
       try { await this.provider.show('interstitial', placement); } catch (e) { /* ignore */ }
       this.busy = false;
-      if (!S.purchases.noAds && this.provider.preload) setTimeout(() => this.provider.preload('interstitial'), 2500);
+      if (!DH.meta.noAds() && this.provider.preload) setTimeout(() => this.provider.preload('interstitial'), 2500);
       DH.events.emit('adClosed');
     },
   };
