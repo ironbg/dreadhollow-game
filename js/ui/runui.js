@@ -107,14 +107,13 @@
     return h('div.tracker', h('div.trh', A.img('u_pin', 'ci'), t('hud.quest')), h('div.trt', ui.deedText(d)), h('div.trp', h('div.trbar', r.trFill), r.trV));
   };
   /** The boss bar's frame, a painter as wide as the bar (in world units: two CSS pixels each), made once per width. */
-  const BB_H = 18, BB_CH = [12, 5.4, 9.6]; // the painter's height; the blood channel: inset from each end, top, bottom (units)
+  const BB_H = 18, BB_CH = [11.2, 5.4, 9.6]; // the channel: from socket ring to socket ring, between the two rails // the painter's height; the blood channel: inset from each end, top, bottom (units)
   const bossFrame = (W) => {
     const G = DH.gfx, name = 'bossbar_' + W;
     if (!G.painters[name]) G.painters[name] = { w: W, h: BB_H, cy: BB_H, frames: 1, draw(g) {
       const P = G.P, BR = ['#f0c060', '#b8802c', '#7a4c16', '#3e260c'];
       const rail = (y0, y1) => { P.rect(g, 9, y0, W - 18, y1 - y0, P.lg(g, 0, y0, 0, y1, [BR[0], BR[1], BR[2]])); P.line(g, 9, y0 + 0.3, W - 9, y0 + 0.3, 0.4, 'rgba(255,230,170,0.75)'); };
       rail(3.6, 5.4); rail(9.6, 11.4);  // the rail above and below the channel (the channel itself left open: the blood shows through)
-      P.rect(g, 9, 5.4, 1.6, 4.2, BR[2]); P.rect(g, W - 10.6, 5.4, 1.6, 4.2, BR[2]); // the channel's end walls
       // spear tips at both ends: a leaf-blade with a socket ring
       for (const sd of [-1, 1]) {
         const x0 = sd < 0 ? 10 : W - 10, tip = sd < 0 ? 4.6 : W - 4.6, mid = (x0 + tip) / 2, cy = 7.5; // a small spear tip
@@ -147,7 +146,8 @@
     if (cv.width !== sp.frames[0].width) { cv.width = sp.frames[0].width; cv.height = sp.frames[0].height; cv.style.width = (cv.width / PX * 2) + 'px'; }
     const g = cv.getContext('2d'); g.setTransform(PX, 0, 0, PX, 0, 0); g.imageSmoothingEnabled = false; g.clearRect(0, 0, cv.width, cv.height);
     const o = (sp.w - W) / 2, [inset, top, bot] = BB_CH, x0 = o + inset, len = W - inset * 2, y0 = o + top, hgt = bot - top;
-    g.fillStyle = '#140a0c'; g.fillRect(x0, y0, len, hgt);                                     // the empty channel
+    g.drawImage(sp.frames[0], 0, 0, sp.w, sp.h);                                               // the frame first: the blood lies over its inner rim,
+    g.fillStyle = '#140a0c'; g.fillRect(x0, y0, len, hgt);                                     // so it meets the rails and the rings with no dark seam
     const snap = (v) => Math.round(v * 2) / 2, lagW = snap(len * st.lag), fw = snap(len * pct), hot = b.enr > 1.01 && Math.floor(now / 150) % 2;
     if (lagW > fw) { g.fillStyle = '#6e3034'; g.fillRect(x0 + fw, y0, lagW - fw, hgt); }         // the trail of the last blow
     if (fw > 0) {
@@ -156,7 +156,6 @@
       g.fillStyle = hot ? '#ff6a6a' : '#d8384a'; g.fillRect(x0, y0, fw, 1);                   // a lit top line
       g.fillStyle = '#ffc8b8'; g.fillRect(x0 + fw - 1, y0, 1, hgt);                           // and a bright leading edge
     }
-    g.drawImage(sp.frames[0], 0, 0, sp.w, sp.h);
   };
   /** The boss bar sits just under whatever the top of the HUD holds (abilities, buffs, the Agony gauge, the Lord's tally),
    *  and the quest tracker moves down under the bar while it is shown. */
