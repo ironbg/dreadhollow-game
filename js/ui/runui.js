@@ -261,7 +261,7 @@
     const sig = run.abilities.map((a) => a.id + JSON.stringify(run.traits.ab[a.id] || {})).join() + '|' + run.level;
     if (sig !== hud.sig) {
       hud.sig = sig; r.build.innerHTML = '';
-      r.build.append(h('div.r', run.abilities.map((a) => { const n = Object.values(run.traits.ab[a.id] || {}).reduce((x, y) => x + y, 0); return h('div.b', A.img('ab_' + a.id), n ? h('i', n) : null); })));
+      r.build.append(h('div.r', run.abilities.map((a) => { const n = Object.values(run.traits.ab[a.id] || {}).reduce((x, y) => x + y, 0); return h('div.b', { onclick: () => DH.game.abilityInfo(a) }, A.img('ab_' + a.id), n ? h('i', n) : null); }))); // tap: what it does, how far it has grown
     }
     const bs = Object.keys(run.buffs).filter((k) => run.buffs[k] > 0).map((k) => k + Math.ceil(run.buffs[k])).join();
     if (bs !== r.bsig) { r.bsig = bs; r.buffs.innerHTML = ''; Object.keys(run.buffs).forEach((k) => { if (run.buffs[k] > 0) r.buffs.append(h('div.bf.' + k, A.img('rune_' + k), h('b', Math.ceil(run.buffs[k])))); }); }
@@ -283,7 +283,7 @@
       const a = run.abilities[i];
       if (!a) { row.append(h('div.b.empty')); continue; }
       const n = Object.values(run.traits.ab[a.id] || {}).reduce((x, y) => x + y, 0);
-      row.append(h('div.b', A.img('ab_' + a.id), n ? h('i', n) : null));
+      row.append(h('div.b', { onclick: (e) => { e.stopPropagation(); click(); ui.openAbilityInfo(run, a); } }, A.img('ab_' + a.id), n ? h('i', n) : null));
     }
     return row;
   }
@@ -294,6 +294,29 @@
     for (const k in run.traits.cls) { const c = run.traits.cls[k]; row.append(h('div.b.cls', A.img(c.hero === run.heroId ? 'h_' + c.hero : 'm_' + c.hero), h('i', c.rank))); }
     return row.childNodes.length ? row : null;
   }
+
+  /* ---------------- An ability's details (tap its icon) ---------------- */
+  ui.openAbilityInfo = (run, a, onClose) => {
+    const def = C.abilities[a.id], s = a.s || {}, P = run.P;
+    let pct = 1 + (P.dmgPct || 0) + (s.dmgPct || 0); for (const tg of a.tags || def.tags) if (P.tag && P.tag[tg]) pct += P.tag[tg];
+    if ((a.tags || def.tags).includes('summon')) pct += P.summonPct || 0;
+    const hit = Math.round(((s.dmg || 0) + (P.addBase || 0)) * pct), crit = Math.round(Math.min(1, (s.crit || 0) + (P.critPct || 0)) * 100);
+    const stat = (k, v) => (v == null || v === '' ? null : h('div.ai-st', h('span', t('abinfo.' + k)), h('b', v)));
+    const rnd = (v, d) => Math.round(v * Math.pow(10, d || 0)) / Math.pow(10, d || 0);
+    // the ability's traits taken this fight, with their ranks, and its upgrades
+    const tr = run.traits.ab[a.id] || {}, taken = Object.keys(tr).filter((i) => tr[i] > 0).map((i) => { const T = def.traits[i]; return h('div.ai-tr', h('b', t('at.' + T.k) + (tr[i] > 1 ? ' ×' + tr[i] : '')), h('span', ui.fmtMods(T.m, tr[i]))); });
+    const ups = (run.traits.up[a.id] || []).map((u) => h('div.ai-tr.up', h('b', t('up.' + u)), h('span', ui.fmtMods(C.UPGRADES[u]))));
+    const i = run.abilities.indexOf(a), d = run.dmgByAb[a.id] || 0, since = Math.max(1, run.time - ((run.abTimes || [])[i] || 0));
+    ui.modal({ title: t('ab.' + a.id + '.name'), cls: 'abinfo', onClose, body: () => h('div',
+      h('div.ai-head', h('div.slot.ai-ico', A.img('ab_' + a.id)), h('div.grow', ui.abTypes(a.id, run), h('div.small', t('ab.' + a.id + '.desc')))),
+      h('div.ai-stats',
+        hit ? stat('dmg', U.fmt(hit)) : null, s.cd ? stat('cd', rnd(s.cd, 2) + ' ' + t('abinfo.sec')) : null,
+        def.base.count != null || s.count > 1 ? stat('count', s.count) : null, def.base.area != null ? stat('area', Math.round(s.area * 100) + '%') : null,
+        s.pierce ? stat('pierce', s.pierce) : null, s.chain ? stat('chain', s.chain) : null, s.duration ? stat('duration', rnd(s.duration, 1) + ' ' + t('abinfo.sec')) : null,
+        crit && !a.noCrit ? stat('crit', crit + '%') : null, s.ms ? stat('ms', Math.round(s.ms * 100) + '%') : null,
+        stat('dps', U.fmt(Math.round(d / since))), stat('total', U.fmt(Math.round(d)))),
+      h('div.ai-sect', t('abinfo.traits')), taken.length || ups.length ? h('div', taken, ups) : h('div.small.muted', t('abinfo.none'))) });
+  };
 
   /* ---------------- Level up ---------------- */
   ui.openLevelUp = (run) => {

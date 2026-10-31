@@ -26,6 +26,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'resshop.packs': 'Пакети с ресурси', 'product.res_1': 'Торба на чирака', 'product.res_2': 'Сандък на ковача', 'product.res_3': 'Склад на майстора', 'product.res_4': 'Съкровище на гилдията', 'product.res_5': 'Кралското хранилище',
   'login.already': 'Наградата за днес вече е взета.',
   'shoptab.offers': 'Оферти', 'shoptab.deals': 'Дневни', 'shoptab.forge': 'Ковачница', 'shoptab.chests': 'Сандъци', 'shoptab.gems': 'Диаманти', 'shoptab.gold': 'Злато', 'shoptab.free': 'Безплатно',
+  'abinfo.dmg': 'Щети на удар', 'abinfo.cd': 'Презареждане', 'abinfo.sec': 'с', 'abinfo.count': 'Брой', 'abinfo.area': 'Обхват', 'abinfo.pierce': 'Пробиване', 'abinfo.chain': 'Вериги', 'abinfo.duration': 'Продължителност', 'abinfo.crit': 'Шанс за крит', 'abinfo.ms': 'Многоудар', 'abinfo.dps': 'Щети/сек', 'abinfo.total': 'Общо щети', 'abinfo.traits': 'Взето в тази битка', 'abinfo.none': 'Още нищо: чертите му идват с новите нива.',
   'forge.title': 'Коване', 'forge.skip': 'Докосни, за да прескочиш', 'forge.tap': 'Докосни, за да продължиш',
   'armory.autoMerge': 'Автосливане', 'armory.getGear': 'Още реликви', 'armory.noGear': 'Още нямаш реликви. Отваряй сандъци или побеждавай босове!', 'armory.merged': 'Реликвите са слети!',
 

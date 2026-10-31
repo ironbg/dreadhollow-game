@@ -26,6 +26,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'resshop.packs': 'Resource packs', 'product.res_1': "Apprentice's Pouch", 'product.res_2': "Smith's Crate", 'product.res_3': "Master's Stockpile", 'product.res_4': 'Guild Hoard', 'product.res_5': 'Royal Vault',
   'login.already': "Today's reward is already claimed.",
   'shoptab.offers': 'Offers', 'shoptab.deals': 'Daily', 'shoptab.forge': 'Forge', 'shoptab.chests': 'Chests', 'shoptab.gems': 'Gems', 'shoptab.gold': 'Gold', 'shoptab.free': 'Free',
+  'abinfo.dmg': 'Damage per hit', 'abinfo.cd': 'Cooldown', 'abinfo.sec': 's', 'abinfo.count': 'Amount', 'abinfo.area': 'Area', 'abinfo.pierce': 'Pierce', 'abinfo.chain': 'Chains', 'abinfo.duration': 'Duration', 'abinfo.crit': 'Crit chance', 'abinfo.ms': 'Multistrike', 'abinfo.dps': 'Damage/sec', 'abinfo.total': 'Total damage', 'abinfo.traits': 'Taken this fight', 'abinfo.none': 'Nothing yet: its traits come with level-ups.',
   'forge.title': 'Forging', 'forge.skip': 'Tap to skip', 'forge.tap': 'Tap to continue',
   'armory.autoMerge': 'Auto-merge', 'armory.getGear': 'Get relics', 'armory.noGear': 'No relics yet. Open chests or defeat bosses!', 'armory.merged': 'Relics merged!',
 

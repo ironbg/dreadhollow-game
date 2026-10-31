@@ -1519,3 +1519,19 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .levelup .lockb img.ci { width: 14px; height: 14px; margin: 0; }
 .levelup .lockb.on { opacity: 1; background: linear-gradient(180deg, #6a4a1e, #3a2810); box-shadow: inset 0 0 0 1px #e0b050, 0 0 8px rgba(255,190,80,.5); }
 .levelup .choice:has(.lockb.on) { box-shadow: inset 0 0 0 2px #e0b050; }
+
+/* an ability's details: its icons on the HUD and in the level-up window open them */
+#hud .build .b { pointer-events: auto; cursor: pointer; }
+.levelup .buildrow .b { cursor: pointer; }
+.modal.abinfo .ai-head { display: flex; gap: 10px; align-items: flex-start; }
+.modal.abinfo .ai-ico { width: 52px; flex: none; }
+.modal.abinfo .ai-head .small { margin-top: 3px; line-height: 1.3; }
+.modal.abinfo .ai-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin: 10px 0 4px; padding: 8px 10px; border: 2px solid #050308; background: rgba(0,0,0,.35); }
+.modal.abinfo .ai-st { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; }
+.modal.abinfo .ai-st span { color: var(--muted); }
+.modal.abinfo .ai-st b { color: var(--text); font-family: var(--num); font-size: 10px; font-weight: 400; }
+.modal.abinfo .ai-sect { font-family: var(--title); color: var(--bronze-hi); font-size: 13px; margin: 10px 0 4px; letter-spacing: .06em; }
+.modal.abinfo .ai-tr { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.modal.abinfo .ai-tr b { color: var(--gold); }
+.modal.abinfo .ai-tr.up b { color: #9ad0ff; }
+.modal.abinfo .ai-tr span { color: var(--muted); text-align: right; }

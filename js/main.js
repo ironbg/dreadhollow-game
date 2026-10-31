@@ -40,6 +40,11 @@
       const r = this.run; if (!r || r.state !== 'playing') return;
       r.state = 'paused'; DH.input.enable(false); ui.openCharacter(r, { onClose: () => this.resume() });
     },
+    /** An ability's details, from its icon on the HUD: pauses the run while open. */
+    abilityInfo(a) {
+      const r = this.run; if (!r || r.state !== 'playing') return;
+      DH.audio.play('click'); r.state = 'paused'; DH.input.enable(false); ui.openAbilityInfo(r, a, () => this.resume());
+    },
     resume() { const r = this.run; if (r && r.state === 'paused') { r.state = 'playing'; DH.input.enable(true); r.pump(); } },
     finishRun(run) {
       if (!run || run.finished) return;
