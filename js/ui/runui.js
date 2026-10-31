@@ -134,19 +134,19 @@
     if (!G.painters.bossbar_cap) G.painters.bossbar_cap = { w: BB_CAP, h: BB_H, cy: BB_H, frames: 1, draw(g) {
       const P = G.P, B = BRZ, cy = BB_CY, L = BB_CAP, nx = 3.4; // nx: where the barbs meet the collar
       // the head: an outline in deep bronze, then its two facets
-      const head = (k) => { g.beginPath(); g.moveTo(L - 0.2 * k, cy); g.quadraticCurveTo(7.6, 2.6 + k * 0.6, 1.2 + k * 0.6, 0.9 + k * 0.7); g.lineTo(nx, 4.8); g.lineTo(nx, 10.2); g.lineTo(1.2 + k * 0.6, 14.1 - k * 0.7); g.quadraticCurveTo(7.6, 12.4 - k * 0.6, L - 0.2 * k, cy); g.closePath(); };
+      const head = (k) => { const t = 2.6 + k * 0.6; g.beginPath(); g.moveTo(L - 0.2 * k, cy); g.bezierCurveTo(9, cy - 2.2, 6.8, t, nx + 1.6, t); g.quadraticCurveTo(nx, t, nx, t + 1.4); g.lineTo(nx, 15 - t - 1.4); g.quadraticCurveTo(nx, 15 - t, nx + 1.6, 15 - t); g.bezierCurveTo(6.8, 15 - t, 9, cy + 2.2, L - 0.2 * k, cy); g.closePath(); }; // rounded shoulders, no barbs
       head(0); P.fill(g, B.dp);
       g.save(); head(1); g.clip();
       P.rect(g, 0, 0, L, cy, P.lg(g, 2, 1, 9, cy, [B.hi, B.lt, B.md]));            // the upper facet, in the light
       P.rect(g, 0, cy, L, BB_H - cy, P.lg(g, 2, cy, 8, 14, [B.md, B.dk, B.dp]));     // the lower facet, in shade
       g.restore();
       // a second, inner blade engraved in the head: the layered look of forged work
-      g.beginPath(); g.moveTo(L - 2.2, cy); g.quadraticCurveTo(7.2, 4.2, nx + 1.2, 3.6); g.moveTo(L - 2.2, cy); g.quadraticCurveTo(7.2, 10.8, nx + 1.2, 11.4);
+      g.beginPath(); g.moveTo(L - 2.2, cy); g.quadraticCurveTo(7.2, 4.6, nx + 1.6, 4.4); g.moveTo(L - 2.2, cy); g.quadraticCurveTo(7.2, 10.4, nx + 1.6, 10.6);
       g.strokeStyle = G.rgba(B.dp, 0.75); g.lineWidth = 0.4; g.stroke();
-      g.beginPath(); g.moveTo(L - 2.6, cy - 0.4); g.quadraticCurveTo(7.2, 3.7, nx + 1.2, 3.1); g.strokeStyle = G.rgba('#fff4d0', 0.55); g.lineWidth = 0.3; g.stroke();
+      g.beginPath(); g.moveTo(L - 2.6, cy - 0.4); g.quadraticCurveTo(7.2, 4.1, nx + 1.6, 3.9); g.strokeStyle = G.rgba('#fff4d0', 0.55); g.lineWidth = 0.3; g.stroke();
       P.line(g, nx + 0.4, cy - 0.15, L - 1, cy - 0.15, 0.45, '#fff0c8');              // the ridge's lit edge
       P.line(g, nx + 0.4, cy + 0.35, L - 1.4, cy + 0.35, 0.35, B.dp);                // and its shadow
-      P.line(g, 1.8, 1.6, 7.4, 3.6, 0.35, G.rgba('#fff4d0', 0.75));                   // light along the upper barb
+      g.beginPath(); g.moveTo(nx + 1.6, 3); g.bezierCurveTo(6.8, 3, 8.8, cy - 2.4, L - 0.6, cy - 0.3); g.strokeStyle = G.rgba('#fff4d0', 0.75); g.lineWidth = 0.35; g.stroke(); // light along the upper shoulder
       // the collar: a band of three rings round the shaft, its back hollowed for the blood
       g.beginPath(); g.moveTo(0, 3.6); g.lineTo(nx + 0.6, 3.6); g.lineTo(nx + 0.6, 11.4); g.lineTo(0, 11.4); g.quadraticCurveTo(1.6, cy, 0, 3.6); g.closePath();
       P.fill(g, P.lg(g, 0, 3.6, 0, 11.4, [B.hi, B.lt, B.md, B.dk]));
