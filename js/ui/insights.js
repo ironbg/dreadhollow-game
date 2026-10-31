@@ -119,7 +119,9 @@
     const drawFeedback = () => h('div',
       data.feedback.length ? data.feedback.map((f) => h('div.adm-row',
         h('div.small.muted', when(f.at) + ' · ' + t('fb.kind.' + (f.kind || 'other')) + ' · ' + who(f) + ' · v' + (f.v || '?') + ' ' + (f.p === 'app' ? 'Android' : 'web') + (f.hero ? ' · ' + t('hero.' + f.hero + '.name') : '')),
-        h('div.adm-text', f.text)))
+        h('div.adm-text', f.text),
+        f.refused ? h('div.small.bad', t('adm.refused', { n: f.refused.n }) + ' ' + (f.refused.log.length ? f.refused.log : [{ why: f.refused.last, at: f.refused.lastAt }]).slice(-4).reverse()
+          .map((x) => x.why + (x.stage ? ' (' + t('stage.' + x.stage + '.name') + (x.v ? ' v' + x.v : '') + ')' : '') + (x.at ? ' ' + when(x.at) : '')).join(' · ')) : null))
         : h('div.small.muted', t('adm.none')));
     const draw = () => {
       box.innerHTML = '';

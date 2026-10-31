@@ -35,18 +35,24 @@ function checkRun(sum, run, now, DH) {
   if (!(int(sum.kills) >= 0) || !(int(sum.level) >= 1) || !(int(sum.bossKills) >= 0)) return 'numbers';
   if (sum.agonyOn !== !!run.agony) return 'agony';
   if (int(sum.dread) !== (run.dread || 0)) return 'dread';
-  if (sum.rescued != null && (C.RESCUE || {})[run.stage] !== sum.rescued) return 'rescue';
-  const herbs = sum.herbs || {};
-  for (const k in herbs) if (!(E.herbs || []).concat('dust').includes(k) || !(int(herbs[k]) >= 0)) return 'herbs';
-  const mats = sum.mats || {};
-  for (const k in mats) if (!(E.materials || []).includes(k) || !(int(mats[k]) >= 0)) return 'mats';
-  const arts = sum.artifactsFound || [];
-  if (!Array.isArray(arts) || arts.some((k) => !E.artifacts[k])) return 'artifacts';
-  const wells = [sum.wellSent].concat(sum.wellExtra || []).filter(Boolean);
-  if (wells.some((w) => !E.gear[w.type] || !(int(w.rarity) >= 0) || w.rarity > 4)) return 'well';
-  for (const k in sum.potionsUsed || {}) if (!E.potions[k] || !(int(sum.potionsUsed[k]) >= 0)) return 'potions';
+  /* ---- contents: a piece the server does not know (another version, a type renamed) is dropped, never the fight ----
+   * (refusing the whole fight here cost honest players their victory: a Mythic piece sent down the Well was refused) */
+  if (sum.rescued != null && (C.RESCUE || {})[run.stage] !== sum.rescued) sum.rescued = null;
+  const RAR = (E.rarities || []).length || 6;
+  const herbs = sum.herbs = (sum.herbs && typeof sum.herbs === 'object') ? sum.herbs : {};
+  for (const k in herbs) if (!(E.herbs || []).concat('dust').includes(k) || !(int(herbs[k]) >= 0)) delete herbs[k];
+  const mats = sum.mats = (sum.mats && typeof sum.mats === 'object') ? sum.mats : {};
+  for (const k in mats) if (!(E.materials || []).includes(k) || !(int(mats[k]) >= 0)) delete mats[k];
+  const arts = sum.artifactsFound = (Array.isArray(sum.artifactsFound) ? sum.artifactsFound : []).filter((k) => E.artifacts[k]);
+  const okWell = (w) => !!w && typeof w === 'object' && !!E.gear[w.type] && int(w.rarity) >= 0;
+  const wells = [sum.wellSent].concat(Array.isArray(sum.wellExtra) ? sum.wellExtra : []).filter(okWell);
+  wells.forEach((w) => { if (w.rarity > RAR - 1) w.rarity = RAR - 1; });
+  sum.wellSent = wells[0] || null; sum.wellExtra = wells.slice(1);
+  const pots = sum.potionsUsed = (sum.potionsUsed && typeof sum.potionsUsed === 'object') ? sum.potionsUsed : {};
+  for (const k in pots) if (!E.potions[k] || !(int(pots[k]) >= 0)) delete pots[k];
   const OTHER = ['burn', 'spark', 'frost', 'decay', 'imp', 'item', 'revive']; // damage of effects, the imps and the items, not of an ability
-  for (const k in sum.dmgByAb || {}) if ((!C.abilities[k] && !OTHER.includes(k)) || !(num(sum.dmgByAb[k]) >= 0)) return 'damage';
+  const dmg = sum.dmgByAb = (sum.dmgByAb && typeof sum.dmgByAb === 'object') ? sum.dmgByAb : {};
+  for (const k in dmg) if ((!C.abilities[k] && !OTHER.includes(k)) || !(num(dmg[k]) >= 0)) delete dmg[k];
 
   /* ---- magnitude caps: clamp past the ceiling, still rewarded ---- */
   const cap = (k, max) => { if (num(sum[k]) > max) sum[k] = max; };

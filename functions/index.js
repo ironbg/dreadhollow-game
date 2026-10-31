@@ -181,6 +181,7 @@ exports.runEnd = callable(async (req) => {
     const DHc = boot(cfg), why = checkRun(d.summary, run, Date.now(), DHc);
     if (why) { // not rewarded; the fight is closed and noted
       const flags = Object.assign({ invalidRuns: 0 }, doc.flags); flags.invalidRuns++; flags.last = why; flags.lastAt = Date.now();
+      flags.log = (Array.isArray(flags.log) ? flags.log : []).concat({ why, stage: run.stage, hero: run.hero, at: Date.now(), v: String(d.v || '').slice(0, 16) }).slice(-8); // shown in the developer's overview
       return { profile, extra: { run: null, flags }, invalid: why };
     }
     const r = await withProfile(profile, cfg, (DH) => DH.meta.settleRun(Object.assign({}, d.summary, { stage: run.stage, hero: run.hero })));

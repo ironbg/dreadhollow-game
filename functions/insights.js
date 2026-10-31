@@ -89,6 +89,14 @@ async function stats(db, auth, days) {
   const fb = await db.collection('feedback').orderBy('at', 'desc').limit(100).get();
   const emails = Object.fromEntries(list.filter((o) => o.email).map((o) => [o.uid, o.email]));
   const messages = fb.docs.map((x) => { const m = x.data(); return { uid: m.uid, email: emails[m.uid] || null, text: m.text, kind: m.kind, at: m.at, p: m.p, v: m.v, hero: m.hero, level: m.level, guest: m.guest }; });
+  // fights the server refused to reward, for whoever wrote: a report of a missing reward can be traced to its reason
+  const authors = [...new Set(messages.map((m) => m.uid).filter(Boolean))], refused = {};
+  try {
+    if (authors.length) (await db.getAll(...authors.map((u) => db.collection('players').doc(u)), { fieldMask: ['flags'] })).forEach((d) => {
+      const f = d.exists && d.data().flags; if (f && f.invalidRuns) refused[d.id] = { n: f.invalidRuns, last: f.last || null, lastAt: f.lastAt || null, log: Array.isArray(f.log) ? f.log : [] };
+    });
+  } catch (e) { console.warn('admin flags', e.message); }
+  messages.forEach((m) => { if (refused[m.uid]) m.refused = refused[m.uid]; });
   return { days: perDay, players: list, feedback: messages, now: Date.now() };
 }
 

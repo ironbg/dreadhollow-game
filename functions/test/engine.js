@@ -36,9 +36,13 @@ const live = require('../game/live.json');
   { const s = Object.assign({}, sum, { mats: { iron: 9999 } }); assert.strictEqual(checkRun(s, run, Date.now(), DH), null); assert.strictEqual(s.mats.iron, DH.economy.MAT_RUN_MAX || 250, 'mats clamped'); }
   // integrity failures are still never rewarded
   assert.strictEqual(checkRun(Object.assign({}, sum, { stage: 'reliquary' }), run, Date.now(), DH), 'wrong-hall-or-hero');
-  assert.strictEqual(checkRun(Object.assign({}, sum, { artifactsFound: ['nope'] }), run, Date.now(), DH), 'artifacts');
-  assert.strictEqual(checkRun(Object.assign({}, sum, { mats: { mithril: 3 } }), run, Date.now(), DH), 'mats');
-  assert.strictEqual(checkRun(Object.assign({}, sum, { mats: { iron: -2 } }), run, Date.now(), DH), 'mats');
+  // an unknown piece is dropped, the fight is still paid (a Mythic piece in the Well once cost players their victory)
+  { const s = Object.assign({}, sum, { artifactsFound: ['nope'] }); assert.strictEqual(checkRun(s, run, Date.now(), DH), null); assert.deepStrictEqual(s.artifactsFound, []); }
+  { const s = Object.assign({}, sum, { mats: { mithril: 3, iron: -2, silver: 1 } }); assert.strictEqual(checkRun(s, run, Date.now(), DH), null); assert.deepStrictEqual(s.mats, { silver: 1 }); }
+  { const s = Object.assign({}, sum, { wellSent: { type: DH.economy.gearOrder[0], rarity: 5 }, wellExtra: [{ type: 'nope', rarity: 1 }, { type: DH.economy.gearOrder[1], rarity: 9 }] });
+    assert.strictEqual(checkRun(s, run, Date.now(), DH), null, 'a Mythic piece in the Well is a fight like any other');
+    assert.strictEqual(s.wellSent.rarity, 5); assert.strictEqual(s.wellExtra.length, 1); assert.strictEqual(s.wellExtra[0].rarity, DH.economy.rarities.length - 1); }
+  { const s = Object.assign({}, sum, { dmgByAb: { nope: 5, burn: 3 }, potionsUsed: { nope: 1 }, herbs: { nope: 2 } }); assert.strictEqual(checkRun(s, run, Date.now(), DH), null); assert.deepStrictEqual(s.dmgByAb, { burn: 3 }); assert.deepStrictEqual(s.potionsUsed, {}); assert.deepStrictEqual(s.herbs, {}); }
   r = await withProfile(p0, live, (DHp) => DHp.meta.settleRun(sum));
   let lvIron = 0; for (let l = 2; l <= r.profile.accountLevel; l++) lvIron += DH.economy.accountLevelReward(l).mats.iron || 0;
   assert.strictEqual(r.profile.mats.iron, 10 + 12 + lvIron, 'materials come home (and each account level adds its metal)'); assert.strictEqual(r.profile.mats.silver, 1);
