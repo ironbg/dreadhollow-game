@@ -387,8 +387,8 @@ select { background: #1c1420; color: var(--text); border: 1px solid var(--line);
 #hud .build .b { position: relative; width: 22px; height: 22px; background: rgba(0,0,0,.6); border: 1px solid #3a2c40; border-radius: 5px; display: flex; align-items: center; justify-content: center; }
 #hud .build .b img { width: 18px; height: 18px; }
 #hud .build .b i { position: absolute; bottom: -3px; right: -3px; font: 6px/1 var(--num); color: var(--gold); background: #000; padding: 1px 2px; border-radius: 2px; font-style: normal; }
-/* the boss bar: at the foot of the screen, clear of the abilities and quests at the top */
-#hud .bossbar { position: absolute; bottom: calc(22px + var(--safe-b)); left: 50%; transform: translateX(-50%); width: min(88%, 440px); text-align: center; pointer-events: none; }
+/* the boss bar: at the top, just under the abilities (runui.js stackBoss places it), the quest tracker moving down under it */
+#hud .bossbar { position: absolute; top: calc(92px + var(--safe-t)); left: 50%; transform: translateX(-50%); width: min(88%, 440px); text-align: center; pointer-events: none; }
 #hud .bossbar .bb-plate { position: relative; display: inline-flex; align-items: center; gap: 6px; margin: 0 auto -2px; padding: 3px 18px 4px; z-index: 1;
   background: linear-gradient(180deg, #2a1418, #120709); border: 2px solid #050308; box-shadow: inset 0 0 0 1px #8a5a30, inset 0 1px 0 rgba(255,180,160,.15), 0 2px 6px rgba(0,0,0,.7);
   clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%); }

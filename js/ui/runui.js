@@ -106,6 +106,19 @@
     r.trD = d; r.trV = h('b'); r.trFill = h('i');
     return h('div.tracker', h('div.trh', A.img('u_pin', 'ci'), t('hud.quest')), h('div.trt', ui.deedText(d)), h('div.trp', h('div.trbar', r.trFill), r.trV));
   };
+  /** The boss bar sits just under whatever the top of the HUD holds (abilities, buffs, the Agony gauge, the Lord's tally),
+   *  and the quest tracker moves down under the bar while it is shown. */
+  const stackBoss = (r) => {
+    const host = r.boss.parentElement; if (!host) return;
+    const top0 = host.getBoundingClientRect().top;
+    let low = 0;
+    for (const el of [r.build, r.buffs, r.agony, r.lordK, r.curse]) {
+      if (!el || el.classList.contains('hidden') || !el.childNodes.length) continue;
+      const rc = el.getBoundingClientRect(); if (rc.height) low = Math.max(low, rc.bottom - top0);
+    }
+    r.boss.style.top = Math.round(low + 6) + 'px';
+    if (r.track) r.track.style.top = Math.round(low + 6 + r.boss.offsetHeight + 6) + 'px';
+  };
   const trackUpdate = (run) => {
     const r = hud.refs; if (!r.track) return;
     const p = DH.meta.deedLive(r.trD, run), done = p.here && p.v >= p.n;
@@ -177,6 +190,7 @@
     const b = run.bosses[0];
     r.boss.classList.toggle('hidden', !b);
     if (b) { r.bossName.textContent = t('enemy.' + b.id) + (b.enr > 1.01 ? ' · ' + t('hud.enraged') : ''); const pc = Math.max(0, b.hp / b.maxHp * 100) + '%'; r.bossFill.style.width = pc; r.bossLag.style.width = pc; r.boss.classList.toggle('enraged', b.enr > 1.01); }
+    if (b && now - (r.bbT || 0) > 300) { r.bbT = now; stackBoss(r); } else if (!b && r.track && r.track.style.top) r.track.style.top = '';
     if (r.agony) { r.agFill.firstChild.style.width = (run.agony / C.AGONY_MAX * 100) + '%'; r.agNum.textContent = ['0', 'I', 'II', 'III', 'IV', 'V'][Math.floor(run.agony + 1e-6)]; }
     if (r.track && now - (r.trT || 0) > 400) { r.trT = now; trackUpdate(run); }
     if (r.fsBtn) { const fs = DH.input.isFullscreen(); if (fs !== r.fsOn) { r.fsOn = fs; r.fsBtn.firstChild.replaceWith(A.img(fs ? 'u_unfull' : 'u_full')); } }
