@@ -106,46 +106,57 @@
     r.trD = d; r.trV = h('b'); r.trFill = h('i');
     return h('div.tracker', h('div.trh', A.img('u_pin', 'ci'), t('hud.quest')), h('div.trt', ui.deedText(d)), h('div.trp', h('div.trbar', r.trFill), r.trV));
   };
-  /** The boss bar's frame, a painter as wide as the bar (in world units: two CSS pixels each), made once per width. */
-  const BB_H = 18, BB_CH = [9, 5.4, 9.6], BB_CAP = 13; // the channel between the two rails, its ends under the caps; a cap's length // the painter's height; the blood channel: inset from each end, top, bottom (units)
+  /** The boss bar, drawn like the game's own models (painters, graded and outlined like every sprite), in units of two pixels.
+   *  Antique bronze: two fine rails with the blood's channel between them, a broadhead at each end whose collar the blood
+   *  runs into, a small pendant under the middle. */
+  const BB_H = 18, BB_CY = 7.5, BB_CH = [9.6, 5.8, 9.2], BB_CAP = 13; // height; the channel (inset from each end, top, bottom); a cap's length
+  const BRZ = { hi: '#fae4a0', lt: '#dcaa4c', md: '#9c6c20', dk: '#55360c', dp: '#241606' }; // saturated: the grading tones it down
   const bossFrame = (W) => {
     const G = DH.gfx, name = 'bossbar_' + W;
     if (!G.painters[name]) G.painters[name] = { w: W, h: BB_H, cy: BB_H, frames: 1, draw(g) {
-      const P = G.P, BR = ['#f0c060', '#b8802c', '#7a4c16', '#3e260c'];
-      const rail = (y0, y1) => { P.rect(g, 8, y0, W - 16, y1 - y0, P.lg(g, 0, y0, 0, y1, [BR[0], BR[1], BR[2]])); P.line(g, 8, y0 + 0.3, W - 8, y0 + 0.3, 0.4, 'rgba(255,230,170,0.75)'); }; // their ends hide under the caps
-      rail(3.6, 5.4); rail(9.6, 11.4);  // the rail above and below the channel (the channel itself left open: the blood shows through)
-      // rivets along the rails
-      for (let x = 24; x < W - 20; x += 22) { P.circle(g, x, 4.5, 0.55, '#ffe8a8'); P.circle(g, x, 10.5, 0.55, BR[3]); }
-      // the filigree under the middle: two scrolls and a blood-red stone
+      const P = G.P, B = BRZ, x0 = 8, x1 = W - 8;
+      // two rails: a lit top edge, a body, a dark under-edge; an engraved line along each
+      const rail = (y) => { P.rect(g, x0, y, x1 - x0, 1.6, P.lg(g, 0, y, 0, y + 1.6, [B.lt, B.md, B.dk])); P.line(g, x0, y + 0.2, x1, y + 0.2, 0.4, B.hi); P.line(g, x0, y + 1, x1, y + 1, 0.3, G.rgba(B.dp, 0.5)); }; // a fine lit edge over darker bronze
+      rail(4.2); rail(9.2);
+      // the pendant under the middle: a pointed drop of bronze holding a red stone, two short swept wings
       const c = W / 2;
-      for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(c + sd * 12, 11.6); g.quadraticCurveTo(c + sd * 6, 11.6, c + sd * 4.2, 14.2); g.quadraticCurveTo(c + sd * 3, 16.2, c + sd * 1.6, 14.6); g.strokeStyle = BR[1]; g.lineWidth = 0.9; g.stroke(); P.circle(g, c + sd * 12.4, 12.4, 0.7, BR[1]); }
-      P.path(g, [c, 11.6, c + 2.4, 14, c, 16.6, c - 2.4, 14]); P.fill(g, P.lg(g, c, 11.6, c, 16.6, [BR[0], BR[2]]));
-      P.circle(g, c, 14, 1.1, P.vol(g, c, 14, 1.1, '#c01828'));
+      for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(c + sd * 2, 10.8); g.quadraticCurveTo(c + sd * 7, 11, c + sd * 10, 13.4); g.quadraticCurveTo(c + sd * 6.4, 11.8, c + sd * 2, 12.4); g.closePath(); P.fill(g, P.lg(g, 0, 10.8, 0, 13.4, [B.lt, B.md, B.dk])); }
+      P.path(g, [c - 2.4, 10.8, c + 2.4, 10.8, c + 1.6, 13.4, c, 16.2, c - 1.6, 13.4]); P.fill(g, P.lg(g, c - 2, 10.8, c + 2, 16.2, [B.hi, B.lt, B.md, B.dk]));
+      P.line(g, c, 11.2, c, 15.6, 0.3, G.rgba(B.dp, 0.5));
+      P.ell(g, c, 12.6, 1.05, 1.25, P.vol(g, c, 12.6, 1.2, '#b0101e')); P.circle(g, c - 0.35, 12.2, 0.3, '#ffb0a0');
     } };
     return G.sprite(name);
   };
-  /** The bar's end cap, pointing right (mirrored for the left): an arrowhead of layered bronze blades, taller than the bar, its
-   *  back curved in so the blood ends in the hollow. Drawn over the blood. */
+  /** The end cap, pointing right (mirrored on the left): a broadhead, its barbs flaring back over the rails, two facets
+   *  split by a ridge (the upper one lit, the lower in shade), and a collar whose hollowed back the blood runs into. */
   const bossCap = () => {
     const G = DH.gfx;
     if (!G.painters.bossbar_cap) G.painters.bossbar_cap = { w: BB_CAP, h: BB_H, cy: BB_H, frames: 1, draw(g) {
-      const P = G.P, BR = ['#f0c060', '#b8802c', '#7a4c16', '#3e260c'], cy = 7.5, L = BB_CAP;
-      // the outer blades: a broad arrowhead, its back hollowed
-      g.beginPath(); g.moveTo(0.4, 1.8); g.quadraticCurveTo(4, 1.2, 6.4, 2.6); g.lineTo(L - 0.4, cy); g.lineTo(6.4, 12.4); g.quadraticCurveTo(4, 13.8, 0.4, 13.2);
-      g.quadraticCurveTo(3.4, cy, 0.4, 1.8); g.closePath(); P.fill(g, P.lg(g, 0, 1.2, 0, 13.8, [BR[0], BR[1], BR[2], BR[3]]));
-      // the inner blades: a narrower arrowhead laid over it, lit along its upper edge
-      g.beginPath(); g.moveTo(2.6, 3.6); g.quadraticCurveTo(5.4, 3.6, 7.4, 4.8); g.lineTo(L - 2, cy); g.lineTo(7.4, 10.2); g.quadraticCurveTo(5.4, 11.4, 2.6, 11.4);
-      g.quadraticCurveTo(4.6, cy, 2.6, 3.6); g.closePath(); P.fill(g, P.lg(g, 0, 3.6, 0, 11.4, ['#ffe09a', BR[1], BR[3]]));
-      // grooves between the blades and the ridge down the middle
-      g.strokeStyle = BR[3]; g.lineWidth = 0.45;
-      g.beginPath(); g.moveTo(1.6, 2.6); g.quadraticCurveTo(5, 2.8, L - 1.6, cy - 0.3); g.moveTo(1.6, 12.4); g.quadraticCurveTo(5, 12.2, L - 1.6, cy + 0.3); g.stroke();
-      P.line(g, 4.2, cy, L - 1.2, cy, 0.5, '#fff0c0'); P.line(g, 4.2, cy + 0.6, L - 2, cy + 0.6, 0.35, BR[3]);
-      // the hollow back's lit rim, where the blood meets it
-      g.beginPath(); g.moveTo(0.6, 2); g.quadraticCurveTo(3.4, cy, 0.6, 13); g.strokeStyle = 'rgba(255,230,160,0.8)'; g.lineWidth = 0.5; g.stroke();
+      const P = G.P, B = BRZ, cy = BB_CY, L = BB_CAP, nx = 3.4; // nx: where the barbs meet the collar
+      // the head: an outline in deep bronze, then its two facets
+      const head = (k) => { g.beginPath(); g.moveTo(L - 0.2 * k, cy); g.quadraticCurveTo(7.6, 2.6 + k * 0.6, 1.2 + k * 0.6, 0.9 + k * 0.7); g.lineTo(nx, 4.8); g.lineTo(nx, 10.2); g.lineTo(1.2 + k * 0.6, 14.1 - k * 0.7); g.quadraticCurveTo(7.6, 12.4 - k * 0.6, L - 0.2 * k, cy); g.closePath(); };
+      head(0); P.fill(g, B.dp);
+      g.save(); head(1); g.clip();
+      P.rect(g, 0, 0, L, cy, P.lg(g, 2, 1, 9, cy, [B.hi, B.lt, B.md]));            // the upper facet, in the light
+      P.rect(g, 0, cy, L, BB_H - cy, P.lg(g, 2, cy, 8, 14, [B.md, B.dk, B.dp]));     // the lower facet, in shade
+      g.restore();
+      // a second, inner blade engraved in the head: the layered look of forged work
+      g.beginPath(); g.moveTo(L - 2.2, cy); g.quadraticCurveTo(7.2, 4.2, nx + 1.2, 3.6); g.moveTo(L - 2.2, cy); g.quadraticCurveTo(7.2, 10.8, nx + 1.2, 11.4);
+      g.strokeStyle = G.rgba(B.dp, 0.75); g.lineWidth = 0.4; g.stroke();
+      g.beginPath(); g.moveTo(L - 2.6, cy - 0.4); g.quadraticCurveTo(7.2, 3.7, nx + 1.2, 3.1); g.strokeStyle = G.rgba('#fff4d0', 0.55); g.lineWidth = 0.3; g.stroke();
+      P.line(g, nx + 0.4, cy - 0.15, L - 1, cy - 0.15, 0.45, '#fff0c8');              // the ridge's lit edge
+      P.line(g, nx + 0.4, cy + 0.35, L - 1.4, cy + 0.35, 0.35, B.dp);                // and its shadow
+      P.line(g, 1.8, 1.6, 7.4, 3.6, 0.35, G.rgba('#fff4d0', 0.75));                   // light along the upper barb
+      // the collar: a band of three rings round the shaft, its back hollowed for the blood
+      g.beginPath(); g.moveTo(0, 3.6); g.lineTo(nx + 0.6, 3.6); g.lineTo(nx + 0.6, 11.4); g.lineTo(0, 11.4); g.quadraticCurveTo(1.6, cy, 0, 3.6); g.closePath();
+      P.fill(g, P.lg(g, 0, 3.6, 0, 11.4, [B.hi, B.lt, B.md, B.dk]));
+      for (const x of [1.5, 2.6]) P.line(g, x, 3.9, x, 11.1, 0.3, G.rgba(B.dp, 0.6));
+      g.beginPath(); g.moveTo(0.1, 3.8); g.quadraticCurveTo(1.7, cy, 0.1, 11.2); g.strokeStyle = G.rgba(B.hi, 0.9); g.lineWidth = 0.35; g.stroke(); // the hollow's lit lip
     } };
     return G.sprite('bossbar_cap');
   };
-  /** Draw the boss bar: the blood (a trail behind each blow, then the live part with a bright edge), the frame over it. */
+  /** Draw the boss bar: the frame, the blood in its channel (a trail behind each blow, the live part with a glowing edge),
+   *  the caps over both ends. Redrawn only when something changed. */
   const drawBossBar = (r, b) => {
     const cv = r.bossCv; if (!cv || !b) { if (r.bb) r.bb.boss = null; return; }
     const cw = r.boss.clientWidth; if (!cw) return;
@@ -154,27 +165,31 @@
     if (st.boss !== b) { st.boss = b; st.lag = pct; st.hold = 0; }
     const now = performance.now(), dt = Math.min(0.1, (now - (st.t || now)) / 1000); st.t = now;
     if (pct < st.lag) { if ((st.hold += dt) > 0.25) st.lag = Math.max(pct, st.lag - dt * 0.6); } else { st.lag = pct; st.hold = 0; }
-    const key = W + '|' + pct.toFixed(4) + '|' + st.lag.toFixed(4) + '|' + (b.enr > 1.01 ? Math.floor(now / 150) % 2 : 0);
+    const rage = b.enr > 1.01 ? 0.5 + 0.5 * Math.sin(now / 120) : 0;
+    const key = W + '|' + pct.toFixed(4) + '|' + st.lag.toFixed(4) + '|' + rage.toFixed(1);
     if (key === st.key) return; st.key = key;
-    const sp = bossFrame(W);
-    const cap = bossCap(), ci = cap.frames[0];
+    const sp = bossFrame(W), cap = bossCap(), ci = cap.frames[0];
     if (cv.width !== sp.frames[0].width) { cv.width = sp.frames[0].width; cv.height = sp.frames[0].height; cv.style.width = (cv.width / PX * 2) + 'px'; }
-    const g = cv.getContext('2d'); g.setTransform(PX, 0, 0, PX, 0, 0); g.imageSmoothingEnabled = false; g.clearRect(0, 0, cv.width, cv.height);
-    const o = (sp.w - W) / 2, [inset, top, bot] = BB_CH, x0 = o + inset, len = W - inset * 2, y0 = o + top, hgt = bot - top;
-    g.drawImage(sp.frames[0], 0, 0, sp.w, sp.h);                                               // the frame first: the blood lies over its inner rim,
-    g.fillStyle = '#140a0c'; g.fillRect(x0, y0, len, hgt);                                     // so it meets the rails and the rings with no dark seam
-    const snap = (v) => Math.round(v * 2) / 2, lagW = snap(len * st.lag), fw = snap(len * pct), hot = b.enr > 1.01 && Math.floor(now / 150) % 2;
-    if (lagW > fw) { g.fillStyle = '#6e3034'; g.fillRect(x0 + fw, y0, lagW - fw, hgt); }         // the trail of the last blow
+    const g = cv.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false; g.clearRect(0, 0, cv.width, cv.height);
+    g.drawImage(sp.frames[0], 0, 0);
+    // the blood, pixel by pixel (in canvas pixels): the channel between the rails
+    const o = (sp.w - W) / 2, [inset, top, bot] = BB_CH, X0 = Math.round((o + inset) * PX), X1 = Math.round((o + W - inset) * PX), Y0 = Math.round((o + top) * PX), Y1 = Math.round((o + bot) * PX);
+    const len = X1 - X0, hgt = Y1 - Y0, fw = Math.round(len * pct), lw = Math.round(len * st.lag);
+    g.fillStyle = '#120708'; g.fillRect(X0, Y0, len, hgt); g.fillStyle = '#060203'; g.fillRect(X0, Y0, len, 1);   // the empty channel, its top in shadow
+    if (lw > fw) { g.fillStyle = '#5c1c22'; g.fillRect(X0 + fw, Y0, lw - fw, hgt); g.fillStyle = '#7a3036'; g.fillRect(X0 + fw, Y0, lw - fw, 1); }
     if (fw > 0) {
-      g.fillStyle = hot ? '#7a0a16' : '#5a0610'; g.fillRect(x0, y0, fw, hgt);                  // the blood: dark below,
-      g.fillStyle = hot ? '#d0182c' : '#9a1020'; g.fillRect(x0, y0, fw, hgt - 1.5);           // red in the body,
-      g.fillStyle = hot ? '#ff6a6a' : '#d8384a'; g.fillRect(x0, y0, fw, 1);                   // a lit top line
-      g.fillStyle = '#ffc8b8'; g.fillRect(x0 + fw - 1, y0, 1, hgt);                           // and a bright leading edge
+      const mix = (a, c, k) => '#' + [0, 2, 4].map((i) => Math.round(parseInt(a.substr(1 + i, 2), 16) * (1 - k) + parseInt(c.substr(1 + i, 2), 16) * k).toString(16).padStart(2, '0')).join('');
+      const rows = [mix('#e04450', '#ff7070', rage), mix('#b4182a', '#e02838', rage), mix('#8e0c1c', '#b81424', rage), mix('#6a0814', '#8a0c18', rage), mix('#480410', '#600812', rage), '#2e0208'];
+      for (let y = 0; y < hgt; y++) { g.fillStyle = rows[Math.min(rows.length - 1, Math.floor(y / hgt * rows.length))]; g.fillRect(X0, Y0 + y, fw, 1); }
+      g.fillStyle = 'rgba(30,0,6,0.35)'; for (let x = X0 + 3; x < X0 + fw - 2; x += 7) g.fillRect(x + ((x * 7) % 3), Y0 + 2 + ((x * 13) % Math.max(1, hgt - 3)), 2, 1); // a little texture: clotted flecks
+      const gl = g.createLinearGradient(X0 + fw - 8, 0, X0 + fw, 0); gl.addColorStop(0, 'rgba(255,140,140,0)'); gl.addColorStop(1, 'rgba(255,190,180,0.85)');
+      g.fillStyle = gl; g.fillRect(Math.max(X0, X0 + fw - 8), Y0, Math.min(8, fw), hgt);                      // the glowing leading edge
+      g.fillStyle = '#ffe0d8'; g.fillRect(X0 + fw - 1, Y0, 1, hgt);
     }
-    // the caps over both ends (in units: the cap's back at W - BB_CAP from the right, mirrored on the left)
-    const pad = (cap.w - BB_CAP) / 2;
-    g.drawImage(ci, o + W - BB_CAP - pad, 0, cap.w, cap.h);
-    g.drawImage(DH.gfx.flip(ci), o + BB_CAP + pad - cap.w, 0, cap.w, cap.h);
+    // the caps over both ends
+    const k = PX, pad = (cap.w - BB_CAP) / 2;
+    g.drawImage(ci, Math.round((o + W - BB_CAP - pad) * k), 0);
+    g.drawImage(DH.gfx.flip(ci), Math.round((o + BB_CAP + pad - cap.w) * k), 0);
   };
   /** The boss bar sits just under whatever the top of the HUD holds (abilities, buffs, the Agony gauge, the Lord's tally),
    *  and the quest tracker moves down under the bar while it is shown. */
