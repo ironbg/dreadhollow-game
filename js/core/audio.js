@@ -8,7 +8,7 @@
   'use strict';
   let ctx = null, master = null, sfxBus = null, musicBus = null, musicLP = null, reverb = null, revOut = null, darkF = null, space = null;
   const last = {};
-  let musicState = null;
+  let musicState = null, swapT = null;
   const settings = { sfx: 0.8, music: 0.5 };
   const rnd = (a, b) => a + Math.random() * (b - a);
   /* A phone's audio thread has a hard budget: in a big fight hundreds of short voices a second used to
@@ -26,10 +26,19 @@
   let keep = false; // set while an effect that must always be heard (level up, a hurt, a roar, the menus) is playing
   const crowded = (o) => { if (o.dest || keep) return false; const v = live(); return v >= HARD || (v >= SOFT && (o.vol || 0.2) < 0.07); };
   const ANDROID = /Android/i.test(navigator.userAgent || '');
+  /** A voice of a music session: kept so stopping the music also stops its long notes, which would
+   *  otherwise ring on unheard for up to ten seconds and pile up when the halls are flipped through. */
+  const own = (dest, n, end) => { if (dest && dest._voices) { n._end = end; dest._voices.push(n); } };
+  const impulses = new Map(); // a hall's reverb is computed once
 
   /** Dark hall impulse: short pre-delay, early reflections, then a tail that loses its highs as it decays.
    *  bright > 1 keeps more of the highs (ice, marble), < 1 swallows them (water, fire, mud). */
   function hallImpulse(seconds, bright) {
+    const key = seconds + '|' + (bright || 1);
+    if (!impulses.has(key)) impulses.set(key, makeImpulse(seconds, bright));
+    return impulses.get(key);
+  }
+  function makeImpulse(seconds, bright) {
     if (ANDROID) seconds = Math.min(seconds, 3.2); // a long stereo tail is costly to convolve on a phone
     const sr = ctx.sampleRate, len = Math.floor(sr * seconds), buf = ctx.createBuffer(2, len, sr), pre = Math.floor(sr * 0.022), b = bright || 1;
     for (let ch = 0; ch < 2; ch++) {
@@ -101,7 +110,7 @@
     if (o.f2) osc.frequency.exponentialRampToValueAtTime(Math.max(20, o.f2), end);
     if (o.detune) osc.detune.value = o.detune;
     let lfo = null;
-    if (o.vib) { lfo = ctx.createOscillator(); lfo.frequency.value = o.vibRate || 5; const lg = ctx.createGain(); lg.gain.value = o.vib; lfo.connect(lg); lg.connect(osc.frequency); lfo.start(t0); lfo.stop(end + 0.1); }
+    if (o.vib) { lfo = ctx.createOscillator(); lfo.frequency.value = o.vibRate || 5; const lg = ctx.createGain(); lg.gain.value = o.vib; lfo.connect(lg); lg.connect(osc.frequency); lfo.start(t0); lfo.stop(end + 0.1); own(o.dest, lfo, end + 0.1); }
     const g = ctx.createGain(), at = o.attack || 0.005;
     g.gain.setValueAtTime(0.0001, t0);
     g.gain.exponentialRampToValueAtTime(o.vol || 0.2, t0 + at);
@@ -115,7 +124,7 @@
     }
     node.connect(g); g.connect(o.dest || sfxBus);
     if (o.rev) { const s = ctx.createGain(); s.gain.value = o.rev === true ? 1 : o.rev; g.connect(s); s.connect(revFor(o.dest)); }
-    osc.start(t0); osc.stop(end + 0.05);
+    osc.start(t0); osc.stop(end + 0.05); own(o.dest, osc, end + 0.05);
     if (!o.dest) born(end + 0.05);
   }
   /** Filtered noise. o: {t, vol, filter, ff, ff2, q, attack, delay, dest, rev} */
@@ -132,7 +141,7 @@
     g.gain.exponentialRampToValueAtTime(0.0001, end);
     src.connect(f); f.connect(g); g.connect(o.dest || sfxBus);
     if (o.rev) { const s = ctx.createGain(); s.gain.value = o.rev === true ? 1 : o.rev; g.connect(s); s.connect(revFor(o.dest)); }
-    src.start(t0, Math.random() * 1.2); src.stop(end + 0.05);
+    src.start(t0, Math.random() * 1.2); src.stop(end + 0.05); own(o.dest, src, end + 0.05);
     if (!o.dest) born(end + 0.05);
   }
   /** Inharmonic metal (clinks, clangs, bells). ratios of a struck plate / bell. */
@@ -529,10 +538,10 @@
     const f2 = ctx.createBiquadFilter(); f2.type = 'bandpass'; f2.frequency.value = fm[1]; f2.Q.value = 7;
     const mixG = ctx.createGain(); mixG.gain.value = 1;
     f1.connect(mixG); f2.connect(mixG); mixG.connect(g); g.connect(dest); const s = ctx.createGain(); s.gain.value = 0.9; g.connect(s); s.connect(revFor(dest));
-    const lfo = ctx.createOscillator(); lfo.frequency.value = rnd(4.5, 5.5); const lg = ctx.createGain(); lg.gain.value = 3; lfo.connect(lg); lfo.start(t0); lfo.stop(end + 0.1); // one vibrato for the three voices
+    const lfo = ctx.createOscillator(); lfo.frequency.value = rnd(4.5, 5.5); const lg = ctx.createGain(); lg.gain.value = 3; lfo.connect(lg); lfo.start(t0); lfo.stop(end + 0.1); own(dest, lfo, end + 0.1); // one vibrato for the three voices
     [-9, 0, 8].forEach((dt) => {
       const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = midi(n); o.detune.value = dt; lg.connect(o.detune);
-      o.connect(f1); o.connect(f2); o.start(t0); o.stop(end + 0.1);
+      o.connect(f1); o.connect(f2); o.start(t0); o.stop(end + 0.1); own(dest, o, end + 0.1);
     });
   }
   /** Plucked string: a saw whose lowpass closes quickly, kept dull so it reads as an old lute. */
@@ -684,7 +693,7 @@
     const H = HALL_MUSIC[hall] || HALL_MUSIC.crypt, battle = mood === 'battle';
     setSpace(hall);
     // every voice of this session, dry and reverb send, passes one gate that closes when the music stops
-    const out = ctx.createGain(); out.connect(musicBus);
+    const out = ctx.createGain(); out.connect(musicBus); out._voices = [];
     out._rsend = ctx.createGain();
     const rlp = ctx.createBiquadFilter(); rlp.type = 'lowpass'; rlp.frequency.value = 16000; out._rsend.connect(rlp); rlp.connect(reverb);
     const st = { mood, hall, alive: true, step: 0, nodes: [], out, rlp };
@@ -756,16 +765,18 @@
           } else if (s % 4 === 0 && Math.random() < (H.lead === 'brass' ? 0.3 : 0.5)) lead(H.lead, melNote(s >> 2), d, 0.03, out, beat * 3);
         }
         next += beat / 2;
+        if (s % 32 === 0) { const now = ctx.currentTime; out._voices = out._voices.filter((n) => n._end > now); } // let finished notes go
       }
     }, 120);
   }
   function stopMusic() {
+    clearTimeout(swapT);
     const st = musicState; if (!st || !ctx || st.pending) { musicState = null; return; }
     musicLP.frequency.setTargetAtTime(16000, ctx.currentTime, 0.3);
     st.alive = false; clearInterval(st.timer);
     const t = ctx.currentTime;
     [st.droneG, st.windG, st.texG, st.out, st.out && st.out._rsend].forEach((g) => { if (g) { g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(Math.max(0.0001, g.gain.value), t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.8); } });
-    st.nodes.forEach((n) => { try { n.stop(t + 0.9); } catch (e) { /* already stopped */ } });
+    st.nodes.concat(st.out ? st.out._voices : []).forEach((n) => { try { n.stop(t + 0.9); } catch (e) { /* already stopped */ } });
     const out = st.out; if (out) setTimeout(() => { try { out.disconnect(); out._rsend.disconnect(); } catch (e) { /* already gone */ } }, 1500);
     musicState = null;
   }
@@ -825,8 +836,11 @@
     /** Play the score of a hall (the selected one when not given) for a mood: 'menu' or 'battle'. */
     music(mood, hall) {
       hall = hall || (DH.save && DH.save.data && DH.save.data.selectedStage) || 'crypt';
+      clearTimeout(swapT);
       if (musicState && musicState.mood === mood && musicState.hall === hall && !musicState.pending) return;
       if (!ctx) { musicState = { mood, hall, pending: true }; return; }
+      // flipping through the halls in the menu: only the hall the player stops on starts its score
+      if (mood === 'menu' && musicState && musicState.mood === 'menu' && !musicState.pending) { swapT = setTimeout(() => startMusic(mood, hall), 350); return; }
       startMusic(mood, hall);
     },
     stopMusic,
