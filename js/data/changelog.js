@@ -4,6 +4,17 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.54',
+      bg: [
+        'Лентата на боса вече е долу в екрана, далеч от уменията горе, с нов готически вид: желязна табела с името между два черепа, рамка с шипове и следа от всеки удар.',
+        'Поправено: бутонът „Презавърти“ вече се побира в прозореца за ниво.',
+      ],
+      en: [
+        'The boss bar now sits at the foot of the screen, clear of the abilities at the top, in a new gothic look: an iron plate with its name between two skulls, a spiked frame and a trail behind each blow.',
+        'Fixed: the Reroll button now fits in the level-up window.',
+      ],
+    },
+    {
       v: '1.61.53',
       bg: [
         'Поправено: сцената с ковачницата при сливане понякога показваше само пода и спираше.',

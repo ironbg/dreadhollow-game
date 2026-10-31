@@ -387,10 +387,29 @@ select { background: #1c1420; color: var(--text); border: 1px solid var(--line);
 #hud .build .b { position: relative; width: 22px; height: 22px; background: rgba(0,0,0,.6); border: 1px solid #3a2c40; border-radius: 5px; display: flex; align-items: center; justify-content: center; }
 #hud .build .b img { width: 18px; height: 18px; }
 #hud .build .b i { position: absolute; bottom: -3px; right: -3px; font: 6px/1 var(--num); color: var(--gold); background: #000; padding: 1px 2px; border-radius: 2px; font-style: normal; }
-#hud .bossbar { position: absolute; top: calc(66px + var(--safe-t)); left: 50%; transform: translateX(-50%); width: min(80%, 420px); text-align: center; }
-#hud .bossbar .n { font-family: var(--title); color: #ffb0b8; font-size: 13px; text-shadow: 0 2px 0 #000; }
-#hud .bossbar .bar { height: 9px; border-color: #3a0a10; }
-#hud .bossbar .bar i { background: linear-gradient(180deg, #ff6a70, #a0101e); }
+/* the boss bar: at the foot of the screen, clear of the abilities and quests at the top */
+#hud .bossbar { position: absolute; bottom: calc(22px + var(--safe-b)); left: 50%; transform: translateX(-50%); width: min(88%, 440px); text-align: center; pointer-events: none; }
+#hud .bossbar .bb-plate { position: relative; display: inline-flex; align-items: center; gap: 6px; margin: 0 auto -2px; padding: 3px 18px 4px; z-index: 1;
+  background: linear-gradient(180deg, #2a1418, #120709); border: 2px solid #050308; box-shadow: inset 0 0 0 1px #8a5a30, inset 0 1px 0 rgba(255,180,160,.15), 0 2px 6px rgba(0,0,0,.7);
+  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%); }
+#hud .bossbar .bb-plate img.ci { width: 14px; height: 14px; margin: 0; filter: drop-shadow(0 0 3px rgba(255,60,60,.7)); }
+#hud .bossbar .n { font-family: var(--title); color: #ffc8b8; font-size: 14px; letter-spacing: .06em; text-shadow: 0 2px 0 #000, 0 0 8px rgba(255,40,40,.55); white-space: nowrap; }
+#hud .bossbar .bb-frame { position: relative; padding: 4px 6px; background: linear-gradient(180deg, #3a3036, #1a1418 55%, #0c080a); border: 2px solid #050308;
+  box-shadow: inset 0 0 0 1px #6a4a2a, inset 0 2px 0 rgba(255,220,170,.14), inset 0 -1px 0 rgba(0,0,0,.6), 0 3px 8px rgba(0,0,0,.8); }
+#hud .bossbar .bb-frame::before, #hud .bossbar .bb-frame::after { content: ''; position: absolute; top: 50%; width: 16px; height: 22px; margin-top: -11px; background: linear-gradient(180deg, #4a3e44, #1a1418); border: 2px solid #050308; }
+#hud .bossbar .bb-frame::before { left: -13px; clip-path: polygon(100% 0, 0 50%, 100% 100%); }   /* iron spikes at both ends */
+#hud .bossbar .bb-frame::after { right: -13px; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+#hud .bossbar .bar { position: relative; height: 14px; border: 2px solid #050308; border-radius: 0; background: #1a0608; box-shadow: inset 0 2px 4px #000; overflow: hidden; }
+#hud .bossbar .bar b, #hud .bossbar .bar i { position: absolute; left: 0; top: 0; bottom: 0; display: block; }
+#hud .bossbar .bar b { background: linear-gradient(180deg, #ffd0b0, #e07060); transition: width .9s ease-in .25s; }   /* the trail of each blow */
+#hud .bossbar .bar i { border-radius: 0; background: linear-gradient(180deg, #ff5a4a 0%, #c41020 45%, #6a0610 100%); transition: width .12s; }
+#hud .bossbar .bar s { position: absolute; inset: 0; text-decoration: none; pointer-events: none;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), rgba(0,0,0,.55) calc(10% - 1px) 10%), linear-gradient(180deg, rgba(255,255,255,.22), transparent 45%); }
+#hud .bossbar.enraged .bb-frame { animation: bbrage .9s ease-in-out infinite; }
+@keyframes bbrage { 50% { box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 0 14px rgba(255,40,30,.75), 0 3px 8px rgba(0,0,0,.8); } }
+/* the level-up footer: potions on the left, Stats and Reroll on the right, wrapping to a second line when narrow */
+.lvfoot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.lvfoot .lvacts { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
 .banner { position: absolute; top: 30%; left: 0; right: 0; text-align: center; font-family: var(--title); font-size: clamp(22px, 7vw, 40px); color: var(--blood-hi); text-shadow: 0 3px 0 #000, 0 0 24px rgba(226,56,74,.8); animation: banner 3s forwards; pointer-events: none; letter-spacing: .06em; padding: 0 10px; }
 .banner.warn { color: var(--gold); font-size: clamp(16px, 5vw, 26px); text-shadow: 0 2px 0 #000, 0 0 16px rgba(240,200,96,.6); }
 .banner small { display: block; font-family: var(--body); font-size: 14px; color: var(--text); letter-spacing: .3em; text-transform: uppercase; }
@@ -656,7 +675,7 @@ html { image-rendering: pixelated; }
 .rw { box-shadow: inset 0 0 0 1px rgba(0,0,0,.6); }
 .switch { box-shadow: inset 0 0 0 2px #050308; }
 #hud .build .b, #hud .buffs .bf { border: 2px solid #050308; box-shadow: inset 0 0 0 1px var(--ring); }
-#hud .bossbar .bar, #hud .agony .agbar { border: 2px solid #050308; }
+#hud .agony .agbar { border: 2px solid #050308; }
 .switch, .switch::after { border-radius: 0 !important; }
 .switch::after { box-shadow: inset -2px -2px 0 rgba(0,0,0,.35), inset 2px 2px 0 rgba(255,255,255,.3); }
 input[type=range] { accent-color: var(--gold); }

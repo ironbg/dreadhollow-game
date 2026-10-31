@@ -85,7 +85,9 @@
     r.xpFill = h('i'); r.lvl = h('span');
     r.timer = h('div.timer'); r.fps = h('div.fps' + (DH.save.data.settings.showFps ? '' : '.hidden')); fpsN = 0; fpsT0 = 0; fpsLast = 0; fpsWorst = 0; r.kills = h('span'); r.gold = h('span');
     r.build = h('div.build'); r.buffs = h('div.buffs'); r.curse = h('div.cursed.hidden', A.img('u_agony', 'ci'), r.curseT = h('b'));
-    r.boss = h('div.bossbar.hidden', r.bossName = h('div.n'), h('div.bar', r.bossFill = h('i')));
+    // the boss's bar, at the foot of the screen: a black iron plate with its name between two skulls, a spiked iron frame,
+    // a crimson fill with a paler trail that lags behind each blow
+    r.boss = h('div.bossbar.hidden', h('div.bb-plate', A.img('n_skull', 'ci'), r.bossName = h('span.n'), A.img('n_skull', 'ci')), h('div.bb-frame', h('div.bar', r.bossLag = h('b'), r.bossFill = h('i'), h('s'))));
     r.agony = run.agonyOn ? h('div.agony', h('span.al', t('hud.agony')), r.agFill = h('div.agbar', h('i')), r.agNum = h('b')) : null;
     el.append(...[h('div.xp', r.xpFill, r.lvl),
       h('div.top', h('div.hbtns',
@@ -174,7 +176,7 @@
     r.curse.classList.toggle('hidden', !(run.curse > 0)); if (run.curse > 0) r.curseT.textContent = t('hud.curse', { n: Math.ceil(run.curse) });
     const b = run.bosses[0];
     r.boss.classList.toggle('hidden', !b);
-    if (b) { r.bossName.textContent = t('enemy.' + b.id) + (b.enr > 1.01 ? ' · ' + t('hud.enraged') : ''); r.bossFill.style.width = Math.max(0, b.hp / b.maxHp * 100) + '%'; }
+    if (b) { r.bossName.textContent = t('enemy.' + b.id) + (b.enr > 1.01 ? ' · ' + t('hud.enraged') : ''); const pc = Math.max(0, b.hp / b.maxHp * 100) + '%'; r.bossFill.style.width = pc; r.bossLag.style.width = pc; r.boss.classList.toggle('enraged', b.enr > 1.01); }
     if (r.agony) { r.agFill.firstChild.style.width = (run.agony / C.AGONY_MAX * 100) + '%'; r.agNum.textContent = ['0', 'I', 'II', 'III', 'IV', 'V'][Math.floor(run.agony + 1e-6)]; }
     if (r.track && now - (r.trT || 0) > 400) { r.trT = now; trackUpdate(run); }
     if (r.fsBtn) { const fs = DH.input.isFullscreen(); if (fs !== r.fsOn) { r.fsOn = fs; r.fsBtn.firstChild.replaceWith(A.img(fs ? 'u_unfull' : 'u_full')); } }
@@ -238,9 +240,9 @@
         buildRow(run),
         mode ? h('div.center.potionhint', t('potion.hint.' + mode)) : null,
         h('div', { style: { marginTop: '8px' } }, cards),
-        h('div.row.lvfoot', hasPot ? h('div.row.pots', LV.map(pot)) : h('span'), h('span.grow'),
-          h('button.btn.small.ghost', { onclick: () => { click(); ui.openCharacter(run, {}); } }, t('levelup.stats')), // the hero's stats and gear while choosing
-          rerollBtn)));
+        h('div.lvfoot', hasPot ? h('div.row.pots', LV.map(pot)) : null,
+          h('div.lvacts', h('button.btn.small.ghost', { onclick: () => { click(); ui.openCharacter(run, {}); } }, t('levelup.stats')), // the hero's stats and gear while choosing
+            rerollBtn))));
     };
     draw();
   };
