@@ -255,11 +255,16 @@
     const g = meta.gearById(id); if (!g) return;
     const s = S(), slots = meta.slotsFor(g.type);
     const eqp = meta.eq();
+    // two rings of one kind are never worn together: a ring may only take its twin's own place
+    const twin = meta.twinSlot(g.type, (sl) => (eqp[sl] === id ? null : meta.gearById(eqp[sl])));
+    if (twin && slot && slots.includes(slot) && slot !== twin) return false;
     slots.forEach((sl) => { if (eqp[sl] === id) eqp[sl] = null; });
-    const twin = meta.twinSlot(g.type, (sl) => meta.gearById(eqp[sl])); // a ring takes the place of its twin
     const target = twin || (slot && slots.includes(slot) ? slot : (slots.find((sl) => eqp[sl] == null) || slots[0]));
     eqp[target] = id; g.isNew = false; changed();
+    return true;
   };
+  /** Would this ring be the twin of the one worn in the other ring slot (so it cannot go in this slot)? */
+  meta.twinBlocked = (g, slot) => { const eqp = meta.eq(), tw = g && meta.twinSlot(g.type, (sl) => (eqp[sl] === g.id ? null : meta.gearById(eqp[sl]))); return !!tw && tw !== slot; };
   meta.unequip = (slot) => { meta.eq()[slot] = null; changed(); };
   meta.unequipItem = (id) => { const eqp = meta.eq(); E.slots.forEach((sl) => { if (eqp[sl] === id) eqp[sl] = null; }); changed(); };
   meta.gearMaxLevel = (g) => E.rarityMaxLevel[g.rarity];

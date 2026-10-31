@@ -1132,7 +1132,9 @@
     /** Put on a piece from the bag; the found piece it replaces goes back into the bag (your own gear simply waits at home). */
     equipFromBag(item, slot) {
       const i = this.bag.indexOf(item); if (i < 0) return false;
-      slot = DH.meta.twinSlot(item.type, (sl) => (sl === slot ? null : this.runGear[sl] || DH.meta.equippedItem(sl))) || slot || DH.meta.slotForRun(item.type, this.runGear); // never two rings of one kind
+      const twin = DH.meta.twinSlot(item.type, (sl) => this.runGear[sl] || DH.meta.equippedItem(sl)); // never two rings of one kind:
+      if (twin && slot && slot !== twin) return false; // the twin's place only
+      slot = twin || slot || DH.meta.slotForRun(item.type, this.runGear);
       if ((this.fx_ || {}).commit && this.runGear[slot]) return false;
       const prev = this.runGear[slot];
       this.bag.splice(i, 1, ...(prev ? [prev] : []));

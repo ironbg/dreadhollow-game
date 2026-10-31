@@ -15,7 +15,7 @@
         'Поправено: битка, в която в Кладенеца е пратен митичен предмет, вече не остава без награда. Сървърът вече не отхвърля цяла битка заради непознат предмет, а само го пропуска.',
         'Докато си неуязвим (руната-призрак, мигът след съживяване или след падането на Владетеля), нищо не те дърпа, не те задържа и не те забавя: езикът на жабата, корените, лъчът на сифона, разломите и локвите.',
         'Чертите „Призоваване“ и „Залп“ вече се предлагат само ако имаш умение, което има полза от тях.',
-        'Два еднакви пръстена вече не могат да се носят заедно: нов пръстен от същия вид заема мястото на първия.',
+        'Два еднакви пръстена вече не могат да се носят заедно: второто място за пръстен не приема пръстен от вид, който вече носиш (може само да го смениш на същото място), и в Оръжейната, и в битка.',
         'Поправено: бутонът „Презавърти“ вече се побира в прозореца за ниво.',
       ],
       en: [
@@ -28,7 +28,7 @@
         'Fixed: a fight in which a Mythic piece was sent down the Well no longer goes unrewarded; the server no longer refuses a whole fight over a piece it does not know, it only leaves that piece out.',
         'While you are invulnerable (the wraith rune, the moment after a revive or after the Lord falls) nothing drags, holds or slows you: the toad\'s tongue, roots, the syphon\'s beam, rifts and puddles.',
         'The Summoner and Volley traits are now offered only when you have an ability they work on.',
-        'Two rings of the same kind can no longer be worn together: a new ring of that kind takes the first one\'s place.',
+        'Two rings of the same kind can no longer be worn together: the other ring slot refuses a ring of a kind you already wear (you can only swap it in the same slot), in the Armory and in a fight.',
         'Fixed: the Reroll button now fits in the level-up window.',
       ],
     },

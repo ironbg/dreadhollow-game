@@ -406,6 +406,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'gear.stillhunter_garb': 'Одежда на дебнещия', 'gear.stalker_grips': 'Ръкавици на преследвача', 'gear.spark_gauntlets': 'Искрящи ръкавици', 'gear.duelist_ember': 'Жарта на дуелиста',
   'gear.tempo_treads': 'Ботуши на ритъма', 'gear.striders': 'Скороходи', 'gear.grave_walkers': 'Гробоходи', 'gear.oak_band': 'Дъбов пръстен', 'gear.bronze_loop': 'Бронзова халка',
   'gear.steel_signet': 'Стоманен перстен', 'gear.infernal_pact': 'Адски пакт', 'gear.greed_signet': 'Перстен на алчността', 'gear.aegis_ring': 'Пръстен на егидата',
+  'gear.twinRing': 'Не можеш да носиш два еднакви пръстена.',
   'gear.equipIn': 'Екипирай ({slot})',
   'gearsp.gale_circlet': '+{killAs}% скорост на атака за всяко убийство (до {killAsMax}%)', 'gearsp.brawler_band': 'Възстановява {eliteHeal}% живот, когато умре елит или бос',
   'gearsp.crimson_chalice': '{killHealChance}% шанс за лечение при убийство', 'gearsp.gore_tunic': '{killHeal}% шанс за лечение при убийство',

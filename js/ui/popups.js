@@ -599,7 +599,7 @@
       const hasMat = M.matCount(price.mat) >= price.n, hasGold = S().gold >= price.gold;
       const msDefs = E.gearMilestoneDefs(g.type).filter((ms) => ms.lv <= maxL);
       const equipBtns = eq ? [h('button.btn.ghost.block', { onclick: async () => { click(); await ui.act('unequipItem', { id: g.id }); draw(); } }, t('gear.unequip'))]
-        : slots.map((sl) => h('button.btn.blue.block', { onclick: async () => { click(); await ui.act('equip', { id: g.id, slot: sl }); draw(); } }, slots.length > 1 ? t('gear.equipIn', { slot: t('slot.' + sl) }) : t('gear.equip')));
+        : slots.map((sl) => h('button.btn.blue.block' + (M.twinBlocked(g, sl) ? '.off' : ''), { onclick: async () => { click(); if (M.twinBlocked(g, sl)) { ui.toast(t('gear.twinRing'), 'bad'); return; } await ui.act('equip', { id: g.id, slot: sl }); draw(); } }, slots.length > 1 ? t('gear.equipIn', { slot: t('slot.' + sl) }) : t('gear.equip')));
       m.set(h('div',
         h('div.row', { style: { alignItems: 'flex-start' } },
           h('div', { style: { width: '84px', flex: 'none' } }, ui.gearSlot(g, true)),
@@ -665,14 +665,16 @@
   ui.openSlotPicker = (slot) => {
     const row = (g, worn, m) => {
       const sp = E.gearSpecial(g.type, g.rarity), other = !worn && M.isEquipped(g.id) ? M.slotsFor(g.type).find((sl) => sl !== slot && M.eq()[sl] === g.id) : null;
-      return h('div.panel.item.pick' + (worn ? '.done' : ''), { onclick: () => { click(); m.close(); if (worn) ui.openGear(g.id); else ui.act('equip', { id: g.id, slot }).then(() => ui.refresh()); } },
+      const twin = !worn && !other && M.twinBlocked(g, slot); // the same kind of ring is worn in the other ring slot
+      return h('div.panel.item.pick' + (worn ? '.done' : '') + (twin ? '.claimed' : ''), { onclick: () => { click(); if (twin) { ui.toast(t('gear.twinRing'), 'bad'); return; } m.close(); if (worn) ui.openGear(g.id); else ui.act('equip', { id: g.id, slot }).then(() => ui.refresh()); } },
         h('div', { style: { width: '52px', flex: 'none' } }, h('div.slot.rar' + g.rarity, A.img('g_' + g.type), g.isNew ? h('span.newdot') : null)),
         h('div.grow',
           h('div.t', t('gear.' + g.type)),
           h('div.small.rar' + g.rarity, h('span.rtxt', t('rarity.' + E.rarities[g.rarity])), h('span.muted', ' · ' + t('common.lv') + ' ' + g.level)),
           h('div.d', ui.fmtStats(E.gearStat(g.type, g.rarity, g.level))),
           sp ? h('div.small.goldtxt', ui.gearSpecialText(g.type, sp)) : null,
-          other ? h('div', h('span.wornpill', A.img('u_check', 'ci'), t('armory.alreadyWorn'))) : null),
+          other ? h('div', h('span.wornpill', A.img('u_check', 'ci'), t('armory.alreadyWorn'))) : null,
+          twin ? h('div.small.bad', t('gear.twinRing')) : null),
         worn ? h('button.btn.small.ghost', { onclick: (e) => { e.stopPropagation(); click(); ui.act('unequipItem', { id: g.id }).then(() => ui.refresh()); m.close(); } }, t('gear.unequip'))
           : h('button.btn.small.ghost.infob', { onclick: (e) => { e.stopPropagation(); click(); m.close(); ui.openGear(g.id); } }, 'i'));
     };

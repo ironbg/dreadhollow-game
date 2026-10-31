@@ -406,6 +406,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'gear.stillhunter_garb': 'Stillhunter Garb', 'gear.stalker_grips': 'Stalker\'s Grips', 'gear.spark_gauntlets': 'Sparkfinger Gauntlets', 'gear.duelist_ember': 'Duelist\'s Ember',
   'gear.tempo_treads': 'Tempo Treads', 'gear.striders': 'Striders', 'gear.grave_walkers': 'Gravewalkers', 'gear.oak_band': 'Oak Band', 'gear.bronze_loop': 'Bronze Loop',
   'gear.steel_signet': 'Steel Signet', 'gear.infernal_pact': 'Infernal Pact', 'gear.greed_signet': 'Signet of Greed', 'gear.aegis_ring': 'Aegis Ring',
+  'gear.twinRing': "You can't wear two rings of the same kind.",
   'gear.equipIn': 'Equip ({slot})',
   'gearsp.gale_circlet': '+{killAs}% attack speed per kill (up to {killAsMax}%)', 'gearsp.brawler_band': 'Heal {eliteHeal}% HP when an elite or boss dies',
   'gearsp.crimson_chalice': '{killHealChance}% chance to heal on kill', 'gearsp.gore_tunic': '{killHeal}% chance to heal on kill',
