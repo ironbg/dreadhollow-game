@@ -117,10 +117,10 @@
       P.rect(g, 9, 5.4, 1.6, 4.2, BR[2]); P.rect(g, W - 10.6, 5.4, 1.6, 4.2, BR[2]); // the channel's end walls
       // spear tips at both ends: a leaf-blade with a socket ring
       for (const sd of [-1, 1]) {
-        const x0 = sd < 0 ? 10 : W - 10, tip = sd < 0 ? 0.6 : W - 0.6, mid = (x0 + tip) / 2, cy = 7.5;
-        P.path(g, [x0, cy - 3.6, mid, cy - 4.6, tip, cy, mid, cy + 4.6, x0, cy + 3.6]); P.fill(g, P.lg(g, mid, cy - 4.6, mid, cy + 4.6, [BR[0], BR[1], BR[3]]));
-        P.line(g, x0, cy, tip + sd * -1.2, cy, 0.5, 'rgba(255,240,200,0.7)'); // the blade's ridge
-        P.rect(g, sd < 0 ? x0 - 0.4 : x0 - 1.6, cy - 4.4, 2, 8.8, P.lg(g, 0, cy - 4.4, 0, cy + 4.4, [BR[1], BR[3]])); // the socket ring
+        const x0 = sd < 0 ? 10 : W - 10, tip = sd < 0 ? 4.6 : W - 4.6, mid = (x0 + tip) / 2, cy = 7.5; // a small spear tip
+        P.path(g, [x0, cy - 2.2, mid, cy - 2.8, tip, cy, mid, cy + 2.8, x0, cy + 2.2]); P.fill(g, P.lg(g, mid, cy - 2.8, mid, cy + 2.8, [BR[0], BR[1], BR[3]]));
+        P.line(g, x0, cy, tip + sd * -0.8, cy, 0.4, 'rgba(255,240,200,0.7)'); // the blade's ridge
+        P.rect(g, sd < 0 ? x0 - 0.4 : x0 - 1.2, cy - 2.8, 1.6, 5.6, P.lg(g, 0, cy - 2.8, 0, cy + 2.8, [BR[1], BR[3]])); // the socket ring
       }
       // rivets along the rails
       for (let x = 24; x < W - 20; x += 22) { P.circle(g, x, 4.5, 0.55, '#ffe8a8'); P.circle(g, x, 10.5, 0.55, BR[3]); }
