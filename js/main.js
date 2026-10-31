@@ -160,7 +160,7 @@
     DH.appUpdate.init(); // the app: Google Play has a newer build -> its update, before playing on
     // the title screen first; the daily calendar waits until the player has come through the window
     DH.title.show(() => {
-      const calendar = () => { ui.flushSeason(); if (M.loginPending()) setTimeout(() => ui.openLogin(), 500); };
+      const calendar = () => { ui.flushSeason(); if (M.signinPending()) setTimeout(() => ui.openLogin(), 500); };
       if (!DH.save.data.playerName) setTimeout(() => ui.openName(true, calendar), 700); else calendar();
       ui.checkWhatsNew(); // after an update: what changed, once the menu is free
     });

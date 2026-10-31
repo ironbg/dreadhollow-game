@@ -667,6 +667,46 @@
     return true;
   };
 
+  /* ---------------- Sign-in: a week and a month of days, a free row and a premium one ---------------- */
+  /** The period a day falls in: its key, how many days it has, which of them is today (0-based). */
+  meta.signinPeriod = (kind) => {
+    const g = U.gameDate(), pad = (n) => String(n).padStart(2, '0');
+    if (kind === 'month') return { key: g.y + '-' + pad(g.m), days: new Date(Date.UTC(g.y, g.m, 0)).getUTCDate(), today: g.d - 1 };
+    const wd = (new Date(Date.UTC(g.y, g.m - 1, g.d)).getUTCDay() + 6) % 7, mon = new Date(Date.UTC(g.y, g.m - 1, g.d - wd)); // Monday of this week
+    return { key: mon.getUTCFullYear() + '-' + pad(mon.getUTCMonth() + 1) + '-' + pad(mon.getUTCDate()), days: 7, today: wd };
+  };
+  /** This period's sign-in record for a kind ('week' | 'month'), fresh when a new period begins. */
+  meta.signin = (kind) => {
+    const s = S(), per = meta.signinPeriod(kind);
+    s.signin = s.signin || {};
+    let r = s.signin[kind];
+    if (!r || r.key !== per.key) r = s.signin[kind] = { key: per.key, free: [], prem: [], premium: false };
+    return Object.assign({ per }, { r });
+  };
+  meta.signinReward = (kind, track, day) => { const d = E.SIGNIN[kind][track]; return typeof d === 'function' ? d(day + 1) : d[day]; };
+  /** What a day's tile is: 'got', 'ready' (tap to take), 'missed', 'later', or 'locked' (premium not bought). */
+  meta.signinState = (kind, track, day) => {
+    const { per, r } = meta.signin(kind), got = r[track].includes(day);
+    if (got) return 'got';
+    if (track === 'prem') {
+      if (!r.premium) return day > per.today ? 'later' : 'locked';
+      if (day === per.today || (day < per.today && r.free.includes(day))) return 'ready'; // a premium row bought late pays for the days signed in
+      return day > per.today ? 'later' : 'missed';
+    }
+    return day === per.today ? 'ready' : day < per.today ? 'missed' : 'later';
+  };
+  meta.signinPending = () => ['week', 'month'].some((k) => { const { per, r } = meta.signin(k); return !r.free.includes(per.today) || (r.premium && meta.signinState(k, 'prem', per.today) === 'ready') || (r.premium && r.free.some((d) => !r.prem.includes(d))); });
+  meta.claimSignin = (kind, track, day) => {
+    if (!E.SIGNIN[kind] || (track !== 'free' && track !== 'prem') || !(day >= 0)) return null;
+    if (meta.signinState(kind, track, day) !== 'ready') return null;
+    const { r } = meta.signin(kind), s = S();
+    if (track === 'free' && !['week', 'month'].some((k) => k !== kind && meta.signin(k).r.free.includes(meta.signinPeriod(k).today))) s.stats.loginDays++; // a day counts once
+    r[track].push(day);
+    const rw = meta.signinReward(kind, track, day);
+    s.login.lastDay = U.dayKey(); // the old calendar's mark: today has been visited
+    return meta.grant(rw);
+  };
+
   /* ---------------- Login calendar ---------------- */
   meta.checkLogin = () => {
     const s = S(), today = U.dayKey();
@@ -728,6 +768,7 @@
     else if (p.type === 'noads') { s.purchases.noAds = true; out = [{ icon: 'n_ad', text: t('product.noads') }]; }
     else if (p.type === 'pass') { meta.ensureSeason(); S().pass.premium = true; // premium for the season it is bought in
       out = [{ icon: 'n_pass', text: t('pass.premiumOn') }]; }
+    else if (p.type === 'signin') { meta.signin(p.period).r.premium = true; out = [{ icon: 'n_calendar', text: t('signin.premOn') }]; } // the premium row of the current period
     else if (p.type === 'sub') {
       s.purchases.soulUntil = Math.max(U.now(), s.purchases.soulUntil) + p.days * 86400e3;
       out = meta.grant(p.grant);
@@ -1042,7 +1083,7 @@
     E.shrineOrder.forEach((id) => { const l = meta.shrineLevel(id); if (l < E.shrine[id].max && meta.shrineUnlocked(id) && S().gold >= E.shrineCost(id, l)) shrineAff++; });
     const well = S().wellkeeper.length;
     if (meta.archiveAffordable()) shrineAff++;
-    return { missions, ach, pass, quests: missions + ach + pass, login: meta.loginPending() ? 1 : 0, shop, gear: newGear + well, well, shrine: shrineAff, nights: meta.nbActive() ? meta.nbClaimable() : 0 };
+    return { missions, ach, pass, quests: missions + ach + pass, login: meta.signinPending() ? 1 : 0, shop, gear: newGear + well, well, shrine: shrineAff, nights: meta.nbActive() ? meta.nbClaimable() : 0 };
   };
 
   DH.meta = meta;

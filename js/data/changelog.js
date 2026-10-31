@@ -8,11 +8,13 @@
       bg: [
         'Лентата на боса вече стои горе точно под уменията, без да ги застъпва (мисията се мести под нея), нарисувана в стила на играта: името отгоре, бронзова рамка с върхове като копие и филигран, и тънка линия кръв.',
         'Докосни иконата на умение (горе в битката или в прозореца за ниво), за да видиш какво прави: щети на удар, презареждане, брой, обхват, щети в секунда и чертите, взети в тази битка.',
+        'Нов „Ежедневен вход“ със седмичен и месечен календар: награда за всеки ден, която се взима с докосване, и премиум ред с по-големи награди. Пропуснат ден остава пропуснат.',
         'Поправено: бутонът „Презавърти“ вече се побира в прозореца за ниво.',
       ],
       en: [
         'The boss bar now sits at the top just under the abilities, never over them (the quest moves down beneath it), drawn in the game\'s own style: the name above, a bronze frame with spear-tip ends and a filigree, and a thin line of blood.',
         'Tap an ability\'s icon (at the top in a fight or in the level-up window) to see what it does: damage per hit, cooldown, amount, area, damage per second and the traits taken this fight.',
+        'A new Sign-In with a weekly and a monthly calendar: a reward for every day, taken with a tap, and a premium row with bigger rewards. A day missed stays missed.',
         'Fixed: the Reroll button now fits in the level-up window.',
       ],
     },

@@ -451,25 +451,49 @@
     draw();
   };
 
-  ui.openLogin = () => {
-    const s = S(), pending = M.loginPending();
-    const cur = s.login.index % 7;
-    const cal = h('div.cal');
-    E.loginRewards.forEach((rw, i) => {
-      const pv = M.rewardPreview(rw)[0];
-      const claimedCount = pending ? cur : ((s.login.index - 1) % 7) + 1;
-      const got = i < claimedCount;
-      const isToday = pending && i === cur;
-      cal.append(h('div.day' + (isToday ? '.today' : '') + (got && !isToday ? '.got' : '') + (i === 6 ? '.big' : ''),
-        h('span.dn', t('login.day', { n: i + 1 })), A.img(pv.icon), h('span.v' + (ui.isWord(pv.text) ? '.word' : ''), pv.text)));
-    });
-    ui.modal({ title: t('login.title'), body: (m) => h('div',
-      h('div.center.small.muted', { style: { marginBottom: '8px' } }, t('login.desc')),
-      cal,
-      pending ? h('div.btns',
-        h('button.btn.gold', { onclick: async () => { const r = await ui.act('claimLogin', { double: false }); if (!r) { if (r === null) { ui.toast(t('login.already'), 'bad'); m.close(); ui.refresh(); } return; } m.close(); ui.rewardPopup(t('login.title'), r); } }, t('common.claim')),
-        h('button.btn.ad.shine', { onclick: async () => { if (await DH.ads.rewarded('login_x2')) { const r = await ui.act('claimLogin', { double: true }); if (!r) { if (r === null) { ui.toast(t('login.already'), 'bad'); m.close(); ui.refresh(); } return; } m.close(); ui.rewardPopup(t('login.title'), r); } } }, h('span.adtag', 'AD'), t('common.claimX2')))
-        : h('div.note', t('login.comeBack', { t: U.fmtDuration(U.msToMidnight()) }))) });
+  /** Sign-in: this week's and this month's days, a free reward and a premium one for each; tap a glowing reward to take it. */
+  ui.openLogin = (kind) => {
+    let tab = kind || ui.signinTab || 'week', timer = 0;
+    const m = ui.modal({ title: t('signin.title'), cls: 'signin', body: () => h('div'), onClose: () => { clearInterval(timer); ui.refresh(); } });
+    const WD = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    const tile = (kind2, track, day) => {
+      const st = M.signinState(kind2, track, day), pv = M.rewardPreview(M.signinReward(kind2, track, day))[0];
+      return h('div.si-rw.' + track + '.' + st, { onclick: async () => {
+        if (st === 'locked') { ui.toast(t('signin.needPrem'), 'bad'); return; }
+        if (st !== 'ready') return;
+        const r = await ui.act('claimSignin', { kind: kind2, track, day }); if (!r) { if (r === null) ui.toast(t('login.already'), 'bad'); draw(); return; }
+        DH.audio.play('reward'); ui.rewardPopup(t('signin.title'), r); draw();
+      } }, A.img(pv.icon), h('b' + (ui.isWord(pv.text) ? '.word' : ''), pv.text),
+        st === 'got' ? h('i.si-ok', A.img('u_check', 'ci')) : st === 'locked' ? h('i.si-lock', A.img('u_lock', 'ci')) : null);
+    };
+    const draw = () => {
+      if (m.closed) return;
+      ui.signinTab = tab;
+      const { per, r } = M.signin(tab), p = E.products[E.SIGNIN[tab].product];
+      const rows = [];
+      for (let d = 0; d < per.days; d++) {
+        const fs = M.signinState(tab, 'free', d), today = d === per.today;
+        rows.push(h('div.si-row' + (today ? '.today' : '') + (fs === 'missed' ? '.missedrow' : ''),
+          h('div.si-day', h('b', tab === 'week' ? t('signin.wd.' + WD[d]) : String(d + 1)),
+            fs === 'got' ? h('span.si-stamp.ok', t('signin.signed')) : fs === 'missed' ? h('span.si-stamp.miss', t('signin.missed')) : today ? h('span.si-stamp.now', t('signin.today')) : null),
+          tile(tab, 'free', d), tile(tab, 'prem', d)));
+      }
+      const list = h('div.si-list', rows);
+      const tm = h('div.small.muted.center.si-timer'), upd = () => { const ms = U.msToMidnight() + (per.days - 1 - per.today) * 86400e3; tm.textContent = t('signin.ends', { t: ui.fmtDays ? ui.fmtDays(ms) : U.fmtDuration(ms) }); };
+      upd(); clearInterval(timer); timer = setInterval(upd, 1000);
+      const got = r.free.length;
+      m.set(h('div',
+        h('div.tabs.si-tabs', ['week', 'month'].map((k) => h('button' + (k === tab ? '.on' : ''), { onclick: () => { if (k === tab) return; DH.audio.play('click'); tab = k; draw(); } }, t('signin.' + k)))),
+        h('div.center.small.muted', t('signin.desc')),
+        h('div.si-prog', h('span', t('signin.count', { n: got, m: per.days })), h('div.bar', h('i', { style: { width: (got / per.days * 100) + '%' } }))),
+        h('div.si-head', h('span', t('signin.day')), h('span', t('signin.free')), h('span.prem', t('signin.prem'))),
+        list,
+        r.premium ? h('div.si-premon', A.img('u_check', 'ci'), t('signin.premActive'))
+          : h('button.btn.gold.block.shine.si-buy', { onclick: async () => { DH.audio.play('click'); if (await DH.iap.buy(E.SIGNIN[tab].product)) draw(); } }, t('signin.buyPrem', { p: DH.iap.price(E.SIGNIN[tab].product) })),
+        tm));
+      requestAnimationFrame(() => { const el = list.querySelector('.si-row.today'); if (el) list.scrollTop = el.offsetTop - list.clientHeight / 2 + el.offsetHeight / 2; }); // today in view
+    };
+    draw();
   };
 
   /* ---------------- Vigil ---------------- */

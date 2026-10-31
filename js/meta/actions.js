@@ -15,6 +15,7 @@
   const A = {
     // daily, login, vigil, energy
     claimLogin: { run: (a) => M().claimLogin(bool(a.double)) },
+    claimSignin: { run: (a) => M().claimSignin(a.kind === 'month' ? 'month' : 'week', a.track === 'prem' ? 'prem' : 'free', int(a.day)) },
     claimVigil: { run: (a) => M().claimVigil(bool(a.double)) },
     quickVigil: { run: (a) => M().quickVigil(str(a.mode, 8)), ad: (a) => (a.mode === 'ad' ? 'quick_vigil' : null) },
     adEnergy: { run: () => M().adEnergy(), ad: () => 'energy' },
