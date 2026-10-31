@@ -391,21 +391,8 @@ select { background: #1c1420; color: var(--text); border: 1px solid var(--line);
    Plain and fine: the name above, a thin bronze frame with spear-tip ends, a thin line of dark blood, a filigree under it. */
 #hud .bossbar { position: absolute; top: calc(92px + var(--safe-t)); left: 50%; transform: translateX(-50%); width: min(84%, 420px); text-align: center; pointer-events: none; }
 #hud .bossbar .n { font-family: var(--title); color: #ece0c8; font-size: 13px; letter-spacing: .08em; text-shadow: 0 1px 0 #000, 0 0 6px rgba(0,0,0,.9); white-space: nowrap; margin-bottom: 2px; }
-#hud .bossbar .bb-frame { position: relative; margin: 0 12px; padding: 2px; background: linear-gradient(180deg, #e8c27a, #8a6430 50%, #4a3418); box-shadow: 0 1px 0 #000, 0 2px 6px rgba(0,0,0,.8); }
-#hud .bossbar .bb-frame::before, #hud .bossbar .bb-frame::after { content: ''; position: absolute; top: 50%; width: 16px; height: 14px; margin-top: -7px; background: linear-gradient(180deg, #f0d08a, #a07838 50%, #4a3418); }
-#hud .bossbar .bb-frame::before { left: -13px; clip-path: polygon(0 50%, 55% 0, 100% 22%, 100% 78%, 55% 100%); }   /* spear tips at both ends */
-#hud .bossbar .bb-frame::after { right: -13px; clip-path: polygon(100% 50%, 45% 0, 0 22%, 0 78%, 45% 100%); }
-#hud .bossbar .bar { position: relative; height: 6px; border: 1px solid #050308; border-radius: 0; background: #120a0c; box-shadow: inset 0 1px 3px #000; overflow: hidden; }
-#hud .bossbar .bar b, #hud .bossbar .bar i { position: absolute; left: 0; top: 0; bottom: 0; display: block; }
-#hud .bossbar .bar b { background: rgba(190,90,90,.5); transition: width .9s ease-in .25s; }   /* the trail of each blow */
-#hud .bossbar .bar i { border-radius: 0; transition: width .12s;
-  background: linear-gradient(180deg, #d0283a 0%, #8a0a18 55%, #4a040c 100%); }
-#hud .bossbar .bar i::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 8px; background: linear-gradient(90deg, rgba(255,150,150,0), rgba(255,210,200,.95)); } /* the bright leading edge */
-#hud .bossbar .bb-orn { width: 110px; height: 11px; margin: -1px auto 0; filter: drop-shadow(0 1px 0 #000); }
-#hud .bossbar .bb-orn svg { display: block; width: 100%; height: 100%; }
+#hud .bossbar .bb-cv { display: block; margin: 0 auto; image-rendering: pixelated; filter: drop-shadow(0 2px 2px rgba(0,0,0,.8)); }
 #hud .bossbar.enraged .n { color: #ffb0a0; text-shadow: 0 1px 0 #000, 0 0 8px rgba(255,40,30,.8); }
-#hud .bossbar.enraged .bar i { animation: bbrage .9s ease-in-out infinite; }
-@keyframes bbrage { 50% { filter: brightness(1.45); } }
 /* the level-up footer: potions on the left, Stats and Reroll on the right, wrapping to a second line when narrow */
 .lvfoot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .lvfoot .lvacts { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }

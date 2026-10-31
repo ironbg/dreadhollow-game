@@ -85,10 +85,9 @@
     r.xpFill = h('i'); r.lvl = h('span');
     r.timer = h('div.timer'); r.fps = h('div.fps' + (DH.save.data.settings.showFps ? '' : '.hidden')); fpsN = 0; fpsT0 = 0; fpsLast = 0; fpsWorst = 0; r.kills = h('span'); r.gold = h('span');
     r.build = h('div.build'); r.buffs = h('div.buffs'); r.curse = h('div.cursed.hidden', A.img('u_agony', 'ci'), r.curseT = h('b'));
-    // the boss's bar: its name above, a thin bronze frame with spear-tip ends and a filigree under its middle, a thin line of
-    // dark blood with a bright leading edge, a paler trail lagging behind each blow
-    const orn = h('div.bb-orn'); orn.innerHTML = '<svg viewBox="0 0 120 14" preserveAspectRatio="none"><path d="M0 1 L46 1 Q52 1 54 6 Q57 13 60 13 Q63 13 66 6 Q68 1 74 1 L120 1" fill="none" stroke="#c9a060" stroke-width="1.6"/><path d="M38 1 Q44 7 50 4 M82 1 Q76 7 70 4 M56 6 Q60 2 64 6" fill="none" stroke="#8a6430" stroke-width="1.2"/><circle cx="60" cy="9.5" r="1.8" fill="#e8c27a"/></svg>';
-    r.boss = h('div.bossbar.hidden', r.bossName = h('div.n'), h('div.bb-frame', h('div.bar', r.bossLag = h('b'), r.bossFill = h('i'))), orn);
+    // the boss's bar, drawn like the game's own models: its name above, then a bronze rail with spear-tip ends, rivets and a
+    // filigree under its middle (a painter, graded and outlined like every sprite), the blood a thin line of pixels inside it
+    r.boss = h('div.bossbar.hidden', r.bossName = h('div.n'), r.bossCv = h('canvas.bb-cv'));
     r.agony = run.agonyOn ? h('div.agony', h('span.al', t('hud.agony')), r.agFill = h('div.agbar', h('i')), r.agNum = h('b')) : null;
     el.append(...[h('div.xp', r.xpFill, r.lvl),
       h('div.top', h('div.hbtns',
@@ -106,6 +105,58 @@
     const r = hud.refs;
     r.trD = d; r.trV = h('b'); r.trFill = h('i');
     return h('div.tracker', h('div.trh', A.img('u_pin', 'ci'), t('hud.quest')), h('div.trt', ui.deedText(d)), h('div.trp', h('div.trbar', r.trFill), r.trV));
+  };
+  /** The boss bar's frame, a painter as wide as the bar (in world units: two CSS pixels each), made once per width. */
+  const BB_H = 18, BB_CH = [12, 5.4, 9.6]; // the painter's height; the blood channel: inset from each end, top, bottom (units)
+  const bossFrame = (W) => {
+    const G = DH.gfx, name = 'bossbar_' + W;
+    if (!G.painters[name]) G.painters[name] = { w: W, h: BB_H, cy: BB_H, frames: 1, draw(g) {
+      const P = G.P, BR = ['#f0c060', '#b8802c', '#7a4c16', '#3e260c'];
+      const rail = (y0, y1) => { P.rect(g, 9, y0, W - 18, y1 - y0, P.lg(g, 0, y0, 0, y1, [BR[0], BR[1], BR[2]])); P.line(g, 9, y0 + 0.3, W - 9, y0 + 0.3, 0.4, 'rgba(255,230,170,0.75)'); };
+      rail(3.6, 5.4); rail(9.6, 11.4);  // the rail above and below the channel (the channel itself left open: the blood shows through)
+      P.rect(g, 9, 5.4, 1.6, 4.2, BR[2]); P.rect(g, W - 10.6, 5.4, 1.6, 4.2, BR[2]); // the channel's end walls
+      // spear tips at both ends: a leaf-blade with a socket ring
+      for (const sd of [-1, 1]) {
+        const x0 = sd < 0 ? 10 : W - 10, tip = sd < 0 ? 0.6 : W - 0.6, mid = (x0 + tip) / 2, cy = 7.5;
+        P.path(g, [x0, cy - 3.6, mid, cy - 4.6, tip, cy, mid, cy + 4.6, x0, cy + 3.6]); P.fill(g, P.lg(g, mid, cy - 4.6, mid, cy + 4.6, [BR[0], BR[1], BR[3]]));
+        P.line(g, x0, cy, tip + sd * -1.2, cy, 0.5, 'rgba(255,240,200,0.7)'); // the blade's ridge
+        P.rect(g, sd < 0 ? x0 - 0.4 : x0 - 1.6, cy - 4.4, 2, 8.8, P.lg(g, 0, cy - 4.4, 0, cy + 4.4, [BR[1], BR[3]])); // the socket ring
+      }
+      // rivets along the rails
+      for (let x = 24; x < W - 20; x += 22) { P.circle(g, x, 4.5, 0.55, '#ffe8a8'); P.circle(g, x, 10.5, 0.55, BR[3]); }
+      // the filigree under the middle: two scrolls and a blood-red stone
+      const c = W / 2;
+      for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(c + sd * 12, 11.6); g.quadraticCurveTo(c + sd * 6, 11.6, c + sd * 4.2, 14.2); g.quadraticCurveTo(c + sd * 3, 16.2, c + sd * 1.6, 14.6); g.strokeStyle = BR[1]; g.lineWidth = 0.9; g.stroke(); P.circle(g, c + sd * 12.4, 12.4, 0.7, BR[1]); }
+      P.path(g, [c, 11.6, c + 2.4, 14, c, 16.6, c - 2.4, 14]); P.fill(g, P.lg(g, c, 11.6, c, 16.6, [BR[0], BR[2]]));
+      P.circle(g, c, 14, 1.1, P.vol(g, c, 14, 1.1, '#c01828'));
+    } };
+    return G.sprite(name);
+  };
+  /** Draw the boss bar: the blood (a trail behind each blow, then the live part with a bright edge), the frame over it. */
+  const drawBossBar = (r, b) => {
+    const cv = r.bossCv; if (!cv || !b) { if (r.bb) r.bb.boss = null; return; }
+    const cw = r.boss.clientWidth; if (!cw) return;
+    const W = Math.max(60, Math.floor(cw / 2)), PX = DH.gfx.CPX, pct = Math.max(0, Math.min(1, b.hp / b.maxHp));
+    const st = r.bb || (r.bb = {});
+    if (st.boss !== b) { st.boss = b; st.lag = pct; st.hold = 0; }
+    const now = performance.now(), dt = Math.min(0.1, (now - (st.t || now)) / 1000); st.t = now;
+    if (pct < st.lag) { if ((st.hold += dt) > 0.25) st.lag = Math.max(pct, st.lag - dt * 0.6); } else { st.lag = pct; st.hold = 0; }
+    const key = W + '|' + pct.toFixed(4) + '|' + st.lag.toFixed(4) + '|' + (b.enr > 1.01 ? Math.floor(now / 150) % 2 : 0);
+    if (key === st.key) return; st.key = key;
+    const sp = bossFrame(W);
+    if (cv.width !== sp.frames[0].width) { cv.width = sp.frames[0].width; cv.height = sp.frames[0].height; cv.style.width = (cv.width / PX * 2) + 'px'; }
+    const g = cv.getContext('2d'); g.setTransform(PX, 0, 0, PX, 0, 0); g.imageSmoothingEnabled = false; g.clearRect(0, 0, cv.width, cv.height);
+    const o = (sp.w - W) / 2, [inset, top, bot] = BB_CH, x0 = o + inset, len = W - inset * 2, y0 = o + top, hgt = bot - top;
+    g.fillStyle = '#140a0c'; g.fillRect(x0, y0, len, hgt);                                     // the empty channel
+    const snap = (v) => Math.round(v * 2) / 2, lagW = snap(len * st.lag), fw = snap(len * pct), hot = b.enr > 1.01 && Math.floor(now / 150) % 2;
+    if (lagW > fw) { g.fillStyle = '#6e3034'; g.fillRect(x0 + fw, y0, lagW - fw, hgt); }         // the trail of the last blow
+    if (fw > 0) {
+      g.fillStyle = hot ? '#7a0a16' : '#5a0610'; g.fillRect(x0, y0, fw, hgt);                  // the blood: dark below,
+      g.fillStyle = hot ? '#d0182c' : '#9a1020'; g.fillRect(x0, y0, fw, hgt - 1.5);           // red in the body,
+      g.fillStyle = hot ? '#ff6a6a' : '#d8384a'; g.fillRect(x0, y0, fw, 1);                   // a lit top line
+      g.fillStyle = '#ffc8b8'; g.fillRect(x0 + fw - 1, y0, 1, hgt);                           // and a bright leading edge
+    }
+    g.drawImage(sp.frames[0], 0, 0, sp.w, sp.h);
   };
   /** The boss bar sits just under whatever the top of the HUD holds (abilities, buffs, the Agony gauge, the Lord's tally),
    *  and the quest tracker moves down under the bar while it is shown. */
@@ -174,6 +225,7 @@
     autoQuality(run);
     if (DH.save.data.settings.showFps) fpsTick(r); else if (!r.fps.classList.contains('hidden')) r.fps.classList.add('hidden');
     r.xpFill.style.width = Math.min(100, run.xp / run.xpNext * 100) + '%';
+    drawBossBar(r, run.bosses[0]); // every frame: the trail behind a blow eases down smoothly
     const now = performance.now(); if (now - lastTxt < 120) return; lastTxt = now;
     r.lvl.textContent = t('common.lv') + ' ' + run.level;
     r.timer.textContent = U.fmtTime(run.time); r.timer.classList.toggle('boss', run.time >= run.runLength);
@@ -190,7 +242,7 @@
     r.curse.classList.toggle('hidden', !(run.curse > 0)); if (run.curse > 0) r.curseT.textContent = t('hud.curse', { n: Math.ceil(run.curse) });
     const b = run.bosses[0];
     r.boss.classList.toggle('hidden', !b);
-    if (b) { r.bossName.textContent = t('enemy.' + b.id) + (b.enr > 1.01 ? ' · ' + t('hud.enraged') : ''); const pc = Math.max(0, b.hp / b.maxHp * 100) + '%'; r.bossFill.style.width = pc; r.bossLag.style.width = pc; r.boss.classList.toggle('enraged', b.enr > 1.01); }
+    if (b) { r.bossName.textContent = t('enemy.' + b.id) + (b.enr > 1.01 ? ' · ' + t('hud.enraged') : ''); r.boss.classList.toggle('enraged', b.enr > 1.01); }
     if (b && now - (r.bbT || 0) > 300) { r.bbT = now; stackBoss(r); } else if (!b && r.track && r.track.style.top) r.track.style.top = '';
     if (r.agony) { r.agFill.firstChild.style.width = (run.agony / C.AGONY_MAX * 100) + '%'; r.agNum.textContent = ['0', 'I', 'II', 'III', 'IV', 'V'][Math.floor(run.agony + 1e-6)]; }
     if (r.track && now - (r.trT || 0) > 400) { r.trT = now; trackUpdate(run); }
