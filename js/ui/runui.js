@@ -107,20 +107,13 @@
     return h('div.tracker', h('div.trh', A.img('u_pin', 'ci'), t('hud.quest')), h('div.trt', ui.deedText(d)), h('div.trp', h('div.trbar', r.trFill), r.trV));
   };
   /** The boss bar's frame, a painter as wide as the bar (in world units: two CSS pixels each), made once per width. */
-  const BB_H = 18, BB_CH = [11.2, 5.4, 9.6]; // the channel: from socket ring to socket ring, between the two rails // the painter's height; the blood channel: inset from each end, top, bottom (units)
+  const BB_H = 18, BB_CH = [9, 5.4, 9.6], BB_CAP = 13; // the channel between the two rails, its ends under the caps; a cap's length // the painter's height; the blood channel: inset from each end, top, bottom (units)
   const bossFrame = (W) => {
     const G = DH.gfx, name = 'bossbar_' + W;
     if (!G.painters[name]) G.painters[name] = { w: W, h: BB_H, cy: BB_H, frames: 1, draw(g) {
       const P = G.P, BR = ['#f0c060', '#b8802c', '#7a4c16', '#3e260c'];
-      const rail = (y0, y1) => { P.rect(g, 9, y0, W - 18, y1 - y0, P.lg(g, 0, y0, 0, y1, [BR[0], BR[1], BR[2]])); P.line(g, 9, y0 + 0.3, W - 9, y0 + 0.3, 0.4, 'rgba(255,230,170,0.75)'); };
+      const rail = (y0, y1) => { P.rect(g, 8, y0, W - 16, y1 - y0, P.lg(g, 0, y0, 0, y1, [BR[0], BR[1], BR[2]])); P.line(g, 8, y0 + 0.3, W - 8, y0 + 0.3, 0.4, 'rgba(255,230,170,0.75)'); }; // their ends hide under the caps
       rail(3.6, 5.4); rail(9.6, 11.4);  // the rail above and below the channel (the channel itself left open: the blood shows through)
-      // spear tips at both ends: a leaf-blade with a socket ring
-      for (const sd of [-1, 1]) {
-        const x0 = sd < 0 ? 10 : W - 10, tip = sd < 0 ? 4.6 : W - 4.6, mid = (x0 + tip) / 2, cy = 7.5; // a small spear tip
-        P.path(g, [x0, cy - 2.2, mid, cy - 2.8, tip, cy, mid, cy + 2.8, x0, cy + 2.2]); P.fill(g, P.lg(g, mid, cy - 2.8, mid, cy + 2.8, [BR[0], BR[1], BR[3]]));
-        P.line(g, x0, cy, tip + sd * -0.8, cy, 0.4, 'rgba(255,240,200,0.7)'); // the blade's ridge
-        P.rect(g, sd < 0 ? x0 - 0.4 : x0 - 1.2, cy - 2.8, 1.6, 5.6, P.lg(g, 0, cy - 2.8, 0, cy + 2.8, [BR[1], BR[3]])); // the socket ring
-      }
       // rivets along the rails
       for (let x = 24; x < W - 20; x += 22) { P.circle(g, x, 4.5, 0.55, '#ffe8a8'); P.circle(g, x, 10.5, 0.55, BR[3]); }
       // the filigree under the middle: two scrolls and a blood-red stone
@@ -130,6 +123,27 @@
       P.circle(g, c, 14, 1.1, P.vol(g, c, 14, 1.1, '#c01828'));
     } };
     return G.sprite(name);
+  };
+  /** The bar's end cap, pointing right (mirrored for the left): an arrowhead of layered bronze blades, taller than the bar, its
+   *  back curved in so the blood ends in the hollow. Drawn over the blood. */
+  const bossCap = () => {
+    const G = DH.gfx;
+    if (!G.painters.bossbar_cap) G.painters.bossbar_cap = { w: BB_CAP, h: BB_H, cy: BB_H, frames: 1, draw(g) {
+      const P = G.P, BR = ['#f0c060', '#b8802c', '#7a4c16', '#3e260c'], cy = 7.5, L = BB_CAP;
+      // the outer blades: a broad arrowhead, its back hollowed
+      g.beginPath(); g.moveTo(0.4, 1.8); g.quadraticCurveTo(4, 1.2, 6.4, 2.6); g.lineTo(L - 0.4, cy); g.lineTo(6.4, 12.4); g.quadraticCurveTo(4, 13.8, 0.4, 13.2);
+      g.quadraticCurveTo(3.4, cy, 0.4, 1.8); g.closePath(); P.fill(g, P.lg(g, 0, 1.2, 0, 13.8, [BR[0], BR[1], BR[2], BR[3]]));
+      // the inner blades: a narrower arrowhead laid over it, lit along its upper edge
+      g.beginPath(); g.moveTo(2.6, 3.6); g.quadraticCurveTo(5.4, 3.6, 7.4, 4.8); g.lineTo(L - 2, cy); g.lineTo(7.4, 10.2); g.quadraticCurveTo(5.4, 11.4, 2.6, 11.4);
+      g.quadraticCurveTo(4.6, cy, 2.6, 3.6); g.closePath(); P.fill(g, P.lg(g, 0, 3.6, 0, 11.4, ['#ffe09a', BR[1], BR[3]]));
+      // grooves between the blades and the ridge down the middle
+      g.strokeStyle = BR[3]; g.lineWidth = 0.45;
+      g.beginPath(); g.moveTo(1.6, 2.6); g.quadraticCurveTo(5, 2.8, L - 1.6, cy - 0.3); g.moveTo(1.6, 12.4); g.quadraticCurveTo(5, 12.2, L - 1.6, cy + 0.3); g.stroke();
+      P.line(g, 4.2, cy, L - 1.2, cy, 0.5, '#fff0c0'); P.line(g, 4.2, cy + 0.6, L - 2, cy + 0.6, 0.35, BR[3]);
+      // the hollow back's lit rim, where the blood meets it
+      g.beginPath(); g.moveTo(0.6, 2); g.quadraticCurveTo(3.4, cy, 0.6, 13); g.strokeStyle = 'rgba(255,230,160,0.8)'; g.lineWidth = 0.5; g.stroke();
+    } };
+    return G.sprite('bossbar_cap');
   };
   /** Draw the boss bar: the blood (a trail behind each blow, then the live part with a bright edge), the frame over it. */
   const drawBossBar = (r, b) => {
@@ -143,6 +157,7 @@
     const key = W + '|' + pct.toFixed(4) + '|' + st.lag.toFixed(4) + '|' + (b.enr > 1.01 ? Math.floor(now / 150) % 2 : 0);
     if (key === st.key) return; st.key = key;
     const sp = bossFrame(W);
+    const cap = bossCap(), ci = cap.frames[0];
     if (cv.width !== sp.frames[0].width) { cv.width = sp.frames[0].width; cv.height = sp.frames[0].height; cv.style.width = (cv.width / PX * 2) + 'px'; }
     const g = cv.getContext('2d'); g.setTransform(PX, 0, 0, PX, 0, 0); g.imageSmoothingEnabled = false; g.clearRect(0, 0, cv.width, cv.height);
     const o = (sp.w - W) / 2, [inset, top, bot] = BB_CH, x0 = o + inset, len = W - inset * 2, y0 = o + top, hgt = bot - top;
@@ -156,6 +171,10 @@
       g.fillStyle = hot ? '#ff6a6a' : '#d8384a'; g.fillRect(x0, y0, fw, 1);                   // a lit top line
       g.fillStyle = '#ffc8b8'; g.fillRect(x0 + fw - 1, y0, 1, hgt);                           // and a bright leading edge
     }
+    // the caps over both ends (in units: the cap's back at W - BB_CAP from the right, mirrored on the left)
+    const pad = (cap.w - BB_CAP) / 2;
+    g.drawImage(ci, o + W - BB_CAP - pad, 0, cap.w, cap.h);
+    g.drawImage(DH.gfx.flip(ci), o + BB_CAP + pad - cap.w, 0, cap.w, cap.h);
   };
   /** The boss bar sits just under whatever the top of the HUD holds (abilities, buffs, the Agony gauge, the Lord's tally),
    *  and the quest tracker moves down under the bar while it is shown. */
