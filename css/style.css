@@ -1597,3 +1597,8 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .passbonus .pb-ico { width: 44px; flex: none; }
 .passbonus .t { font-weight: 800; color: var(--gold); margin-bottom: 3px; }
 .pb-note { margin: 10px 4px 4px; }
+/* the abilities on the HUD: larger icons, easy to read and to tap */
+#hud .build .r { gap: 4px; flex-wrap: wrap; max-width: calc(100vw - 120px); }
+#hud .build .b { width: 32px; height: 32px; }
+#hud .build .b img { width: 28px; height: 28px; }
+#hud .build .b i { font-size: 7px; bottom: -4px; right: -4px; padding: 1px 3px; }
