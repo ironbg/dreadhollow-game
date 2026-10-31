@@ -515,7 +515,7 @@
         } else if (ai === 'tether') { // the void syphon: latches a beam onto you, drags you in and drinks
           e.tthCd = (e.tthCd == null ? U.rand(1, 3) : e.tthCd) - dt;
           if (e.tether > 0) {
-            e.tether -= dt; spd = 0; const pull = 30 * dt; p.x -= dx * pull; p.y -= dy * pull;
+            e.tether -= dt; spd = 0; const pull = this.unmoved() ? 0 : 30 * dt; p.x -= dx * pull; p.y -= dy * pull;
             e.tick = (e.tick || 0) - dt; if (e.tick <= 0) { e.tick = 0.5; this.hurtPlayer(e.dmg * 0.2, e); }
             if (dist > 200 || e.tether <= 0) { e.tether = 0; e.tthCd = U.rand(4.5, 6); }
           } else if (e.tthCd <= 0 && dist < 150 && !this.enemies.some((o) => o.tether > 0)) { e.tether = 2.4; e.tick = 0.3; DH.audio.play('zap'); }
@@ -552,12 +552,12 @@
             if (e.tgCd <= 0 && dist < 120) {
               e.tgCd = U.rand(4.5, 6); e.tng = 1; const a = Math.atan2(dy, dx), tx = e.x, ty = e.y;
               this.hazard({ kind: 'line', x: e.x, y: e.y, ang: a, len: 130, w: 8, delay: 0.6, dmg: e.dmg, color: '#c85060', src: e, sound: 'swing',
-                onFire: (r, h) => { const q = r.player; if (r.inHazard(h, q.x, q.y)) { q.x += (tx - q.x) * 0.6; q.y += (ty - q.y) * 0.6; } } });
+                onFire: (r, h) => { const q = r.player; if (!r.unmoved() && r.inHazard(h, q.x, q.y)) { q.x += (tx - q.x) * 0.6; q.y += (ty - q.y) * 0.6; } } });
             }
           }
         } else if (ai === 'root') { // the treant: plods on; the ground under you bursts into roots that hold you fast
           e.rtT = (e.rtT == null ? U.rand(2, 4) : e.rtT) - dt;
-          if (e.rtT <= 0 && dist < 150) { e.rtT = U.rand(5.5, 7); this.enemyAttackAnim(e); this.hazard({ kind: 'circle', x: p.x, y: p.y, r: 20, delay: 1.1, dmg: e.dmg * 0.6, color: '#8a6a3a', src: e, sound: 'swing', onFire: (r, h) => { if (r.inHazard(h, r.player.x, r.player.y)) r.proot = 1.1; } }); }
+          if (e.rtT <= 0 && dist < 150) { e.rtT = U.rand(5.5, 7); this.enemyAttackAnim(e); this.hazard({ kind: 'circle', x: p.x, y: p.y, r: 20, delay: 1.1, dmg: e.dmg * 0.6, color: '#8a6a3a', src: e, sound: 'swing', onFire: (r, h) => { if (!r.unmoved() && r.inHazard(h, r.player.x, r.player.y)) r.proot = 1.1; } }); }
         } else if (ai === 'thief') { // the gold scarab: runs in, snatches your gold and scuttles off with it; kill it to get it back
           if (e.fleeT > 0) { e.fleeT -= dt; mx = -dx; my = -dy; spd *= 1.4; }
           else if (dist < e.r + p.r + 3) {
@@ -745,6 +745,9 @@
     }
 
     /* ---------------- player ---------------- */
+    /** Untouchable as well as unharmed: the wraith rune, the grace after a revive, a won hall. Nothing then drags, roots or
+     *  slows the hero (a toad's tongue, a treant's roots, a syphon's beam, a rift, a puddle). Not the brief grace after a blow. */
+    unmoved() { return this.buffs.wraith > 0 || this.won || this.time < (this.graceUntil || 0); }
     hurtPlayer(dmg, src) {
       if (this.won) return; // the Lord has fallen: nothing left can take the victory away
       const p = this.player;
@@ -779,7 +782,7 @@
     }
     revive(auto) {
       const p = this.player;
-      p.hp = this.P.maxHp * (auto ? 0.5 : 1); p.inv = 2.5; this.curse = 0; // a revive lifts the Curse
+      p.hp = this.P.maxHp * (auto ? 0.5 : 1); p.inv = 2.5; this.graceUntil = this.time + 2.5; this.curse = 0; // a revive lifts the Curse
       if (this.agonyOn) this.agony = Math.max(0, this.agony - C.AGONY.revive); // a revive drains a fifth of the Agony gauge
       this.nova(p.x, p.y, 60 * this.stage.hpMult, 95, 'revive'); // room to breathe: pushes the horde back, kills only the weakest close by
       this.state = 'playing';
@@ -1129,7 +1132,7 @@
     /** Put on a piece from the bag; the found piece it replaces goes back into the bag (your own gear simply waits at home). */
     equipFromBag(item, slot) {
       const i = this.bag.indexOf(item); if (i < 0) return false;
-      slot = slot || DH.meta.slotForRun(item.type, this.runGear);
+      slot = DH.meta.twinSlot(item.type, (sl) => (sl === slot ? null : this.runGear[sl] || DH.meta.equippedItem(sl))) || slot || DH.meta.slotForRun(item.type, this.runGear); // never two rings of one kind
       if ((this.fx_ || {}).commit && this.runGear[slot]) return false;
       const prev = this.runGear[slot];
       this.bag.splice(i, 1, ...(prev ? [prev] : []));

@@ -338,13 +338,16 @@
     }
     return out;
   };
+  const ELEV_NEEDS = { summoner: 'summon', volley: 'projectile' };
   R.normalPool = function (level, abilityOnly) {
     const out = [];
     if (!abilityOnly) {
       const fx = this.fx_ || {}, DEF = ['vitality', 'metabolism', 'parry', 'thickhide'];
       if (!fx.leash) for (const id in C.baseTraits) { if (fx.glass && DEF.includes(id)) continue; const r = this.traits.base[id] || 0; if (r < C.BASE_TRAIT_MAX) out.push({ kind: 'base', id, rank: r + 1, w: 1 }); }
       const tiers = C.ELEVATED_LEVELS.filter((l) => l <= level).length;
-      for (const id in C.elevatedTraits) { const r = this.traits.elev[id] || 0; if (r < tiers) out.push({ kind: 'elev', id, rank: r + 1, w: 1.3 }); }
+      // a trait that works on one kind of ability comes only when the hero has one: Summoner (summons), Volley (projectiles)
+      const has = (tg) => this.abilities.some((a) => C.abilities[a.id] && C.abilities[a.id].tags.includes(tg));
+      for (const id in C.elevatedTraits) { const need = ELEV_NEEDS[id]; if (need && !has(need)) continue; const r = this.traits.elev[id] || 0; if (r < tiers) out.push({ kind: 'elev', id, rank: r + 1, w: 1.3 }); }
     }
     if (level >= C.ABILITY_TRAIT_EVERY) {
       const allowed = Math.floor(level / C.ABILITY_TRAIT_EVERY);

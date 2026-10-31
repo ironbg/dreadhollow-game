@@ -34,15 +34,15 @@
       if (!h.fired && h.t >= h.delay) {
         h.fired = true;
         const eye = this.crackedEye && h.src && h.src.def && h.src.def.lord; // Cracked Ember Eye: the Lord's bombs and flames pass you by
-        if (!eye && h.dmg && this.inHazard(h, p.x, p.y)) { this.hurtPlayer(h.dmg); if (h.slow) this.pslow = Math.max(this.pslow, h.slow); }
+        if (!eye && h.dmg && this.inHazard(h, p.x, p.y)) { this.hurtPlayer(h.dmg); if (h.slow && !this.unmoved()) this.pslow = Math.max(this.pslow, h.slow); }
         if (h.onFire) h.onFire(this, h);
         this.fx.push({ k: 'hzfire', h: Object.assign({}, h), life: 0.35, max: 0.35 });
         if (h.sound) DH.audio.play(h.sound);
       }
       if (h.fired && h.dur) {
         h.tick -= dt;
-        if (h.pull) { const d = Math.hypot(p.x - h.x, p.y - h.y); if (d > 3 && d < h.r * 2.4) { p.x -= (p.x - h.x) / d * h.pull * dt; p.y -= (p.y - h.y) / d * h.pull * dt; } } // a rift drags you toward it
-        if ((h.dmg || h.slow) && !(this.crackedEye && h.src && h.src.def && h.src.def.lord) && this.inHazard(h, p.x, p.y)) { if (h.slow) this.pslow = Math.max(this.pslow, 0.25); if (h.dmg && h.tick <= 0) { h.tick = 0.5; this.hurtPlayer(h.dmg * 0.5); } } // a slowing puddle may do no harm at all
+        if (h.pull && !this.unmoved()) { const d = Math.hypot(p.x - h.x, p.y - h.y); if (d > 3 && d < h.r * 2.4) { p.x -= (p.x - h.x) / d * h.pull * dt; p.y -= (p.y - h.y) / d * h.pull * dt; } } // a rift drags you toward it
+        if ((h.dmg || h.slow) && !(this.crackedEye && h.src && h.src.def && h.src.def.lord) && this.inHazard(h, p.x, p.y)) { if (h.slow && !this.unmoved()) this.pslow = Math.max(this.pslow, 0.25); if (h.dmg && h.tick <= 0) { h.tick = 0.5; this.hurtPlayer(h.dmg * 0.5); } } // a slowing puddle may do no harm at all
       }
       if (h.fired && h.t >= h.delay + (h.dur || 0)) this.hazards.splice(i, 1);
     }
@@ -417,7 +417,7 @@
     if (e.c1 > 4 && e.phase === 0) { e.c1 = 0; const a = Math.atan2(dy, dx); for (let i = -3; i <= 3; i++) shot(run, e, a + i * 0.16, 100, 0.45, '#ffd35a', 'coin'); DH.audio.play('coin'); }
     if (e.c2 > 6 && e.phase === 0 && dist < 140) {
       e.c2 = 0; const a = Math.atan2(dy, dx), tx = e.x, ty = e.y;
-      run.hazard({ kind: 'line', x: e.x, y: e.y, ang: a, len: 150, w: 12, delay: 0.7, dmg: e.dmg * e.enr, color: '#c83050', src: e, boss: true, sound: 'swing', onFire: (r, h) => { const q = r.player; if (r.inHazard(h, q.x, q.y)) { q.x += (tx - q.x) * 0.6; q.y += (ty - q.y) * 0.6; } } });
+      run.hazard({ kind: 'line', x: e.x, y: e.y, ang: a, len: 150, w: 12, delay: 0.7, dmg: e.dmg * e.enr, color: '#c83050', src: e, boss: true, sound: 'swing', onFire: (r, h) => { const q = r.player; if (!r.unmoved() && r.inHazard(h, q.x, q.y)) { q.x += (tx - q.x) * 0.6; q.y += (ty - q.y) * 0.6; } } });
     }
     if (e.c3 > 12) { e.c3 = 0; for (let i = 0; i < 3; i++) { const a = i / 3 * TAU + Math.random(); run.spawnEnemy('mimic', p.x + Math.cos(a) * 80, p.y + Math.sin(a) * 80); } }
   };

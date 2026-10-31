@@ -139,9 +139,11 @@
     const sup = (meta.artifactFx().suppress || 1); // Torment Suppressor weakens the Archive
     const arc = (s.archiveBy && s.archiveBy[heroId]) || {}, eqp = meta.eq(heroId); // this hero's own Archive and loadout
     for (const id in arc) if (E.archive[id]) { const n = arc[id], whole = 'count' in E.archive[id].per || 'rerolls' in E.archive[id].per; meta.addStats(st, E.archive[id].per, whole ? Math.floor(n * sup) : n * sup); }
+    let ring = null;
     for (const slot of E.slots) {
       const g = (runGear && runGear[slot]) || meta.gearById(eqp[slot]);
       if (!g) continue;
+      if (E.gear[g.type].slot === 'ring') { if (ring === g.type) continue; ring = g.type; } // a second ring of the same kind gives nothing
       meta.addStats(st, E.gearStat(g.type, g.rarity, g.level));
       meta.addStats(st, E.gearMilestones(g.type, g.rarity, g.level));
       const sp = E.gearSpecial(g.type, g.rarity); if (sp) meta.addStats(st, sp);
@@ -230,8 +232,12 @@
   meta.eq = (hero) => {
     const s = S(); hero = hero || s.selectedHero; s.loadouts = s.loadouts || {};
     if (!s.loadouts[hero]) s.loadouts[hero] = Object.assign(EMPTY_LOADOUT(), s.loadouts[s.selectedHero] || {});
-    return s.loadouts[hero];
+    const L = s.loadouts[hero];
+    if (L.ring1 != null && L.ring2 != null) { const a = meta.gearById(L.ring1), b = meta.gearById(L.ring2); if (a && b && a.type === b.type) L.ring2 = null; } // two rings of one kind: the second comes off
+    return L;
   };
+  /** Two rings of one kind are never worn together: the ring slot already holding this kind (item(slot) gives what a slot wears). */
+  meta.twinSlot = (type, item) => (E.gear[type] && E.gear[type].slot === 'ring' ? ['ring1', 'ring2'].find((sl) => { const g = item(sl); return !!g && g.type === type; }) || null : null);
   /** Remove a gear id from every hero's loadout (it was merged or sold). */
   meta.unequipEverywhere = (id) => { const s = S(); for (const h in s.loadouts || {}) E.slots.forEach((sl) => { if (s.loadouts[h][sl] === id) s.loadouts[h][sl] = null; }); };
   meta.equippedItem = (slot) => meta.gearById(meta.eq()[slot]);
@@ -241,7 +247,7 @@
     const g = { id: s.nextGearId++, type: type || meta.rollItemType(), rarity: U.clamp(rarity | 0, 0, 5), level: 1, isNew: true };
     s.gear.push(g); s.discovered[g.type] = true;
     const eqp = meta.eq(), free = meta.slotsFor(g.type).find((sl) => eqp[sl] == null);
-    if (free) eqp[free] = g.id;
+    if (free && !meta.twinSlot(g.type, (sl) => meta.gearById(eqp[sl]))) eqp[free] = g.id;
     return g;
   };
   meta.isEquipped = (id) => { const eqp = meta.eq(); return E.slots.some((sl) => eqp[sl] === id); };
@@ -250,7 +256,8 @@
     const s = S(), slots = meta.slotsFor(g.type);
     const eqp = meta.eq();
     slots.forEach((sl) => { if (eqp[sl] === id) eqp[sl] = null; });
-    const target = slot && slots.includes(slot) ? slot : (slots.find((sl) => eqp[sl] == null) || slots[0]);
+    const twin = meta.twinSlot(g.type, (sl) => meta.gearById(eqp[sl])); // a ring takes the place of its twin
+    const target = twin || (slot && slots.includes(slot) ? slot : (slots.find((sl) => eqp[sl] == null) || slots[0]));
     eqp[target] = id; g.isNew = false; changed();
   };
   meta.unequip = (slot) => { meta.eq()[slot] = null; changed(); };
@@ -349,6 +356,7 @@
     const slots = meta.slotsFor(type);
     if (slots.length === 1) return slots[0];
     const eqp = meta.eq(), cur = slots.map((sl) => (runGear[sl] || meta.gearById(eqp[sl])));
+    const twin = meta.twinSlot(type, (sl) => runGear[sl] || meta.gearById(eqp[sl])); if (twin) return twin; // never two rings of one kind
     if (!cur[0]) return slots[0]; if (!cur[1]) return slots[1];
     return cur[0].rarity <= cur[1].rarity ? slots[0] : slots[1];
   };
