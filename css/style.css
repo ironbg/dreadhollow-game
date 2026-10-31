@@ -1602,3 +1602,13 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 #hud .build .b { width: 32px; height: 32px; }
 #hud .build .b img { width: 28px; height: 28px; }
 #hud .build .b i { font-size: 7px; bottom: -4px; right: -4px; padding: 1px 3px; }
+/* the pause window: larger icons of the abilities and traits, each opening its details */
+.modal.pausewin .buildrow { gap: 6px; }
+.modal.pausewin .buildrow .b { width: 38px; height: 38px; cursor: pointer; }
+.modal.pausewin .buildrow .b img { width: 32px; height: 32px; }
+.modal.pausewin .buildrow .b i { font-size: 8px; bottom: -4px; right: -4px; padding: 1px 3px; }
+.modal.pausewin .buildrow.traits .b { width: 34px; height: 34px; }
+.modal.pausewin .buildrow.traits .b img { width: 28px; height: 28px; }
+.modal.pausewin .statgrid.three > div { min-width: 0; }
+.modal.pausewin .statgrid.three span { min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 370px) { .modal.pausewin .statgrid.three { grid-template-columns: 1fr 1fr; } }

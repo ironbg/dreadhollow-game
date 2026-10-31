@@ -289,12 +289,23 @@
     return row;
   }
   function traitRow(run) {
-    const row = h('div.buildrow.traits');
-    for (const id in run.traits.base) row.append(h('div.b', A.img('tr_' + id), h('i', run.traits.base[id])));
-    for (const id in run.traits.elev) row.append(h('div.b.elev', A.img('tr_' + id), h('i', run.traits.elev[id])));
-    for (const k in run.traits.cls) { const c = run.traits.cls[k]; row.append(h('div.b.cls', A.img(c.hero === run.heroId ? 'h_' + c.hero : 'm_' + c.hero), h('i', c.rank))); }
+    const row = h('div.buildrow.traits'), tap = (c, n) => (e) => { e.stopPropagation(); click(); ui.openTraitInfo(run, c, n); };
+    for (const id in run.traits.base) row.append(h('div.b', { onclick: tap({ kind: 'base', id }, run.traits.base[id]) }, A.img('tr_' + id), h('i', run.traits.base[id])));
+    for (const id in run.traits.elev) row.append(h('div.b.elev', { onclick: tap({ kind: 'elev', id }, run.traits.elev[id]) }, A.img('tr_' + id), h('i', run.traits.elev[id])));
+    for (const k in run.traits.cls) { const c = run.traits.cls[k]; row.append(h('div.b.cls', { onclick: tap(Object.assign({ kind: 'cls' }, c), c.rank) }, A.img(c.hero === run.heroId ? 'h_' + c.hero : 'm_' + c.hero), h('i', c.rank))); }
     return row.childNodes.length ? row : null;
   }
+  /** A trait's details (tap its icon): what each rank gives and what all its ranks give together. */
+  ui.openTraitInfo = (run, c, n) => {
+    const info = ui.choiceInfo(run, c);
+    let total = '';
+    if (c.kind === 'base') { const af = (run.hero.affinity || {})[c.id]; total = ui.fmtStats(C.baseTraits[c.id].per, C.AFFINITY[af == null ? 1 : af] * n); }
+    else if (c.kind === 'elev') total = ui.fmtStats(C.elevatedTraits[c.id].per, n);
+    else if (c.kind === 'cls') { const ct = C.heroes[c.hero].ct[c.cat][c.v], parts = []; if (Object.keys(ct.w).length) parts.push(ui.fmtMods(ct.w, n)); if (Object.keys(ct.s).length) parts.push(ui.fmtStats(ct.s, n)); total = parts.join(' · '); }
+    ui.modal({ title: info.name, cls: 'abinfo', body: () => h('div',
+      h('div.ai-head', h('div.slot.ai-ico', A.img(info.icon)), h('div.grow', h('div.small.goldtxt', info.tag || ''), h('div.small', t('abinfo.perRank') + ': ' + info.desc), info.note ? h('div.small.muted', info.note) : null)),
+      h('div.ai-stats', h('div.ai-st', h('span', t('abinfo.ranks')), h('b', n)), h('div.ai-st', { style: { gridColumn: '1 / -1' } }, h('span', t('abinfo.total')), h('b', total)))) });
+  };
 
   /* ---------------- An ability's details (tap its icon) ---------------- */
   ui.openAbilityInfo = (run, a, onClose) => {
@@ -582,7 +593,7 @@
       [t('stat.critPct'), '+' + U.pct(P.critPct)], [t('stat.critBonus'), '+' + U.pct(P.critBonus)], [t('stat.ms'), U.pct(P.ms)],
       [t('stat.regen'), P.regen.toFixed(1)], [t('stat.speedPct'), Math.round(P.speed)], [t('stat.growth'), U.pct(P.growth)],
     ];
-    ui.modal({ title: t('pause.title'), closable: false, body: (m) => h('div',
+    const m0 = ui.modal({ title: t('pause.title'), closable: false, cls: 'pausewin', body: (m) => h('div',
       h('div.center.small.muted', t('stage.' + run.stageId + '.name') + ' · ' + U.fmtTime(run.time) + (run.dread ? ' · ' + t('dread.rank', { n: run.dread }) : '')),
       buildRow(run), traitRow(run),
       h('div.statgrid.three', statRows.map(([k, v]) => h('div', h('span', k), h('b', v)))),
@@ -593,6 +604,7 @@
         h('button.btn.red.block', { onclick: async () => {
           if (await ui.confirm({ title: t('pause.quit'), body: t('pause.quitConfirm'), okCls: 'red', ok: t('pause.quit') })) { m.close(); DH.game.finishRun(run); }
         } }, t('pause.quit')))) });
+    ui.fitModal(m0); // always the whole window on screen, however many abilities and traits
   };
 
   /* ---------------- Revive ---------------- */

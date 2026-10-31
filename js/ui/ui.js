@@ -46,6 +46,20 @@
     ui.toast(t(c === 'offline' ? 'server.offline' : c === 'requires-login' ? 'server.login' : c === 'invalid-run' ? 'server.invalidRun' : c === 'outdated' ? 'server.outdated' : c === 'ad-not-verified' ? 'ad.notConfirmed' : 'server.error'), 'bad');
     if (!(e && e.code)) console.error(e);
   };
+  /** Keep a modal whole on screen: measured at its natural size, then scaled down to fit (scrolling only as a last resort);
+   *  again on every resize until it closes. */
+  ui.fitModal = (m) => {
+    const fit = () => {
+      if (!m || m.closed) { window.removeEventListener('resize', fit); return; }
+      const box = m.el, cs = getComputedStyle(m.bg); box.style.zoom = ''; box.style.maxHeight = 'none'; box.style.overflowY = 'visible'; // measured at its whole height, not the capped one
+      const avail = m.bg.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom), need = box.offsetHeight;
+      if (!(need > avail && avail > 0)) return;
+      const k = Math.max(0.55, Math.floor(avail / need * 1000) / 1000); box.style.zoom = String(k);
+      if (need * k > avail) { box.style.maxHeight = Math.floor(avail / k) + 'px'; box.style.overflowY = 'auto'; }
+    };
+    window.addEventListener('resize', fit); fit(); requestAnimationFrame(fit);
+    return fit;
+  };
   ui.toast = (msg, kind) => {
     const box = document.getElementById('toasts');
     const el = h('div.toast' + (kind ? '.' + kind : ''), msg);
