@@ -107,51 +107,44 @@
     return h('div.tracker', h('div.trh', A.img('u_pin', 'ci'), t('hud.quest')), h('div.trt', ui.deedText(d)), h('div.trp', h('div.trbar', r.trFill), r.trV));
   };
   /** The boss bar, drawn like the game's own models (painters, graded and outlined like every sprite), in units of two pixels.
-   *  Antique bronze: two fine rails with the blood's channel between them, a broadhead at each end whose collar the blood
-   *  runs into, a small pendant under the middle. */
-  const BB_H = 18, BB_CY = 7.5, BB_CH = [9.6, 5.8, 9.2], BB_CAP = 13; // height; the channel (inset from each end, top, bottom); a cap's length
-  const BRZ = { hi: '#fae4a0', lt: '#dcaa4c', md: '#9c6c20', dk: '#55360c', dp: '#241606' }; // saturated: the grading tones it down
+   *  Dark bronze with fine gold edges: two slim rails with the blood's channel between them, a round boss with a red stone at
+   *  each end that the blood runs into, a short rounded point beyond it, and a small lancet pendant under the middle. */
+  const BB_H = 18, BB_CY = 7.5, BB_CH = [5.2, 5.9, 9.1], BB_CAP = 13; // height; the channel (inset from each end, top, bottom); a cap's length
+  const BRZ = { gold: '#ffe6a0', hi: '#e8b860', lt: '#b07a30', md: '#6e4818', dk: '#3a240a', dp: '#1a0e04' }; // saturated: the grading tones it down
   const bossFrame = (W) => {
     const G = DH.gfx, name = 'bossbar_' + W;
     if (!G.painters[name]) G.painters[name] = { w: W, h: BB_H, cy: BB_H, frames: 1, draw(g) {
-      const P = G.P, B = BRZ, x0 = 8, x1 = W - 8;
-      // two rails: a lit top edge, a body, a dark under-edge; an engraved line along each
-      const rail = (y) => { P.rect(g, x0, y, x1 - x0, 1.6, P.lg(g, 0, y, 0, y + 1.6, [B.lt, B.md, B.dk])); P.line(g, x0, y + 0.2, x1, y + 0.2, 0.4, B.hi); P.line(g, x0, y + 1, x1, y + 1, 0.3, G.rgba(B.dp, 0.5)); }; // a fine lit edge over darker bronze
-      rail(4.2); rail(9.2);
-      // the pendant under the middle: a pointed drop of bronze holding a red stone, two short swept wings
+      const P = G.P, B = BRZ, x0 = 6, x1 = W - 6;
+      // two slim rails of dark bronze, each with a fine gold edge facing the light and a dark one under it
+      const rail = (y, lit) => { P.rect(g, x0, y, x1 - x0, 1.3, P.lg(g, 0, y, 0, y + 1.3, [B.lt, B.md, B.dk])); P.line(g, x0, lit ? y + 0.2 : y + 1.1, x1, lit ? y + 0.2 : y + 1.1, 0.35, lit ? B.gold : B.dp); };
+      rail(4.6, true); rail(9.1, false);
+      // the pendant under the middle: a lancet arch of bronze framing a small red stone, two short tendrils
       const c = W / 2;
-      for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(c + sd * 2, 10.8); g.quadraticCurveTo(c + sd * 7, 11, c + sd * 10, 13.4); g.quadraticCurveTo(c + sd * 6.4, 11.8, c + sd * 2, 12.4); g.closePath(); P.fill(g, P.lg(g, 0, 10.8, 0, 13.4, [B.lt, B.md, B.dk])); }
-      P.path(g, [c - 2.4, 10.8, c + 2.4, 10.8, c + 1.6, 13.4, c, 16.2, c - 1.6, 13.4]); P.fill(g, P.lg(g, c - 2, 10.8, c + 2, 16.2, [B.hi, B.lt, B.md, B.dk]));
-      P.line(g, c, 11.2, c, 15.6, 0.3, G.rgba(B.dp, 0.5));
-      P.ell(g, c, 12.6, 1.05, 1.25, P.vol(g, c, 12.6, 1.2, '#b0101e')); P.circle(g, c - 0.35, 12.2, 0.3, '#ffb0a0');
+      for (const sd of [-1, 1]) { g.beginPath(); g.moveTo(c + sd * 2.4, 10.6); g.quadraticCurveTo(c + sd * 6, 10.6, c + sd * 8.6, 12.2); g.strokeStyle = B.lt; g.lineWidth = 0.6; g.stroke(); P.circle(g, c + sd * 8.8, 12.3, 0.55, B.hi); }
+      g.beginPath(); g.moveTo(c - 2.6, 10.4); g.lineTo(c + 2.6, 10.4); g.quadraticCurveTo(c + 2.6, 13.4, c, 15.8); g.quadraticCurveTo(c - 2.6, 13.4, c - 2.6, 10.4); g.closePath();
+      P.fill(g, P.lg(g, c - 2.6, 10.4, c + 2.6, 15.8, [B.hi, B.lt, B.md, B.dk]));
+      g.beginPath(); g.moveTo(c - 1.4, 11.2); g.lineTo(c + 1.4, 11.2); g.quadraticCurveTo(c + 1.4, 13, c, 14.4); g.quadraticCurveTo(c - 1.4, 13, c - 1.4, 11.2); g.closePath(); P.fill(g, P.vol(g, c, 12.4, 1.6, '#a00c1c'));
+      P.circle(g, c - 0.45, 11.9, 0.3, '#ffc0b0');
     } };
     return G.sprite(name);
   };
-  /** The end cap, pointing right (mirrored on the left): a broadhead, its barbs flaring back over the rails, two facets
-   *  split by a ridge (the upper one lit, the lower in shade), and a collar whose hollowed back the blood runs into. */
+  /** The end cap, pointing right (mirrored on the left): a round boss of bronze with a red stone, laid over the end of the
+   *  channel so the blood runs into it, and a short rounded point beyond. */
   const bossCap = () => {
     const G = DH.gfx;
     if (!G.painters.bossbar_cap) G.painters.bossbar_cap = { w: BB_CAP, h: BB_H, cy: BB_H, frames: 1, draw(g) {
-      const P = G.P, B = BRZ, cy = BB_CY, L = BB_CAP, nx = 3.4; // nx: where the barbs meet the collar
-      // the head: an outline in deep bronze, then its two facets
-      const head = (k) => { const t = 2.6 + k * 0.6; g.beginPath(); g.moveTo(L - 0.2 * k, cy); g.bezierCurveTo(9, cy - 2.2, 6.8, t, nx + 1.6, t); g.quadraticCurveTo(nx, t, nx, t + 1.4); g.lineTo(nx, 15 - t - 1.4); g.quadraticCurveTo(nx, 15 - t, nx + 1.6, 15 - t); g.bezierCurveTo(6.8, 15 - t, 9, cy + 2.2, L - 0.2 * k, cy); g.closePath(); }; // rounded shoulders, no barbs
-      head(0); P.fill(g, B.dp);
-      g.save(); head(1); g.clip();
-      P.rect(g, 0, 0, L, cy, P.lg(g, 2, 1, 9, cy, [B.hi, B.lt, B.md]));            // the upper facet, in the light
-      P.rect(g, 0, cy, L, BB_H - cy, P.lg(g, 2, cy, 8, 14, [B.md, B.dk, B.dp]));     // the lower facet, in shade
-      g.restore();
-      // a second, inner blade engraved in the head: the layered look of forged work
-      g.beginPath(); g.moveTo(L - 2.2, cy); g.quadraticCurveTo(7.2, 4.6, nx + 1.6, 4.4); g.moveTo(L - 2.2, cy); g.quadraticCurveTo(7.2, 10.4, nx + 1.6, 10.6);
-      g.strokeStyle = G.rgba(B.dp, 0.75); g.lineWidth = 0.4; g.stroke();
-      g.beginPath(); g.moveTo(L - 2.6, cy - 0.4); g.quadraticCurveTo(7.2, 4.1, nx + 1.6, 3.9); g.strokeStyle = G.rgba('#fff4d0', 0.55); g.lineWidth = 0.3; g.stroke();
-      P.line(g, nx + 0.4, cy - 0.15, L - 1, cy - 0.15, 0.45, '#fff0c8');              // the ridge's lit edge
-      P.line(g, nx + 0.4, cy + 0.35, L - 1.4, cy + 0.35, 0.35, B.dp);                // and its shadow
-      g.beginPath(); g.moveTo(nx + 1.6, 3); g.bezierCurveTo(6.8, 3, 8.8, cy - 2.4, L - 0.6, cy - 0.3); g.strokeStyle = G.rgba('#fff4d0', 0.75); g.lineWidth = 0.35; g.stroke(); // light along the upper shoulder
-      // the collar: a band of three rings round the shaft, its back hollowed for the blood
-      g.beginPath(); g.moveTo(0, 3.6); g.lineTo(nx + 0.6, 3.6); g.lineTo(nx + 0.6, 11.4); g.lineTo(0, 11.4); g.quadraticCurveTo(1.6, cy, 0, 3.6); g.closePath();
-      P.fill(g, P.lg(g, 0, 3.6, 0, 11.4, [B.hi, B.lt, B.md, B.dk]));
-      for (const x of [1.5, 2.6]) P.line(g, x, 3.9, x, 11.1, 0.3, G.rgba(B.dp, 0.6));
-      g.beginPath(); g.moveTo(0.1, 3.8); g.quadraticCurveTo(1.7, cy, 0.1, 11.2); g.strokeStyle = G.rgba(B.hi, 0.9); g.lineWidth = 0.35; g.stroke(); // the hollow's lit lip
+      const P = G.P, B = BRZ, cy = BB_CY, bx = 4.8, R = 4.3;
+      // the point: a leaf of bronze, its tip rounded, lit along its upper edge
+      g.beginPath(); g.moveTo(bx + 2, cy - 2.2); g.quadraticCurveTo(10.6, cy - 2, 12.4, cy - 0.3); g.quadraticCurveTo(12.8, cy, 12.4, cy + 0.3); g.quadraticCurveTo(10.6, cy + 2, bx + 2, cy + 2.2); g.closePath();
+      P.fill(g, P.lg(g, 0, cy - 2.2, 0, cy + 2.2, [B.hi, B.lt, B.md, B.dk]));
+      g.beginPath(); g.moveTo(bx + 2.6, cy - 1.7); g.quadraticCurveTo(10.4, cy - 1.6, 12.1, cy - 0.3); g.strokeStyle = G.rgba(B.gold, 0.8); g.lineWidth = 0.35; g.stroke();
+      P.line(g, bx + 3, cy + 0.15, 11.8, cy + 0.15, 0.3, G.rgba(B.dp, 0.6));
+      // the boss: a ring of bronze lit from the top left, a darker inner ring, the stone in its middle
+      P.circle(g, bx, cy, R, P.lg(g, bx - R, cy - R, bx + R, cy + R, [B.gold, B.hi, B.lt, B.md, B.dk]));
+      P.circle(g, bx, cy, R - 1.1, P.lg(g, bx - R, cy - R, bx + R, cy + R, [B.dk, B.md, B.lt]));
+      P.circle(g, bx, cy, R - 1.7, P.vol(g, bx, cy, R - 1.7, '#a8101e'));
+      P.circle(g, bx - 0.8, cy - 0.8, 0.55, '#ffc8b8'); P.circle(g, bx + 0.9, cy + 0.9, 0.35, G.rgba('#ff6a60', 0.7)); // the stone's glint and its inner light
+      for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2; P.circle(g, bx + Math.cos(a) * (R - 0.55), cy + Math.sin(a) * (R - 0.55), 0.38, i === 2 ? B.gold : B.dk); } // four rivets in the ring
     } };
     return G.sprite('bossbar_cap');
   };
