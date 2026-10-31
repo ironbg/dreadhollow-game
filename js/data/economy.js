@@ -191,8 +191,9 @@
   };
   E.MAT_RUN_MAX = 250; // the most of one material a run can bring home (the server checks it)
   /* Wellkeeper redemption price for items sent up the Well */
-  E.wellPrice = (rarity) => [300, 700, 1600, 3500, 8000, 18000][rarity];
-  E.wellGems = (rarity) => [10, 20, 40, 80, 150, 300][rarity];
+  // what the Wellkeeper asks for a piece sent up the Well: steeper with each rarity (a Legendary or Mythic is no small thing to bring home)
+  E.wellPrice = (rarity) => [500, 1500, 4000, 12000, 35000, 90000][rarity];
+  E.wellGems = (rarity) => [15, 40, 100, 300, 800, 2000][rarity];
   E.WELL_MAX = 12;
 
   /* ---------- Potions (Apothecary) & ingredients ---------- */

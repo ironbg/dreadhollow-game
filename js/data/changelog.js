@@ -4,6 +4,19 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.55',
+      bg: [
+        'Стрелките към целите извън екрана вече не се крият под джойстика: стрелка под него се плъзга встрани по ръба, а разстоянието остава до нея.',
+        'Червеното число на Оръжейната вече брои само екипираните предмети, които можеш да подобриш сега (ниво или сливане). Новите предмети се отбелязват само с червена точка.',
+        'Кладенецът вече иска повече за пратените предмети и цената расте силно с рядкостта: от 500 злато / 15 диаманта за обикновен до 90 000 злато / 2000 диаманта за митичен.',
+      ],
+      en: [
+        'Arrows to targets off the screen no longer hide under the joystick: one under it slides along the edge, its distance beside it.',
+        'The Armory\'s red number now counts only the worn pieces you can improve now (a level or a merge). New pieces show just a red dot.',
+        'The Well now asks more for the pieces sent up, and the price climbs steeply with rarity: from 500 gold / 15 gems for a Common to 90,000 gold / 2000 gems for a Mythic.',
+      ],
+    },
+    {
       v: '1.61.54',
       bg: [
         'Лентата на боса вече стои горе точно под уменията, без да ги застъпва (мисията се мести под нея), нарисувана в стила на играта: името отгоре, бронзова рамка с върхове като копие и филигран, и тънка линия кръв.',

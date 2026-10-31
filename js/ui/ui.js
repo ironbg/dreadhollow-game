@@ -240,7 +240,7 @@
 
   const NAV = [
     { id: 'shop', icon: 'c_gold', badge: 'shop' },
-    { id: 'armory', icon: 'h_knight', badge: 'gear' },
+    { id: 'armory', icon: 'h_knight', badge: 'gear', dotKey: 'gearDot' }, // a number for the worn pieces to improve, a dot for new pieces
     { id: 'home', icon: 'n_battle', cls: 'battle' },
     { id: 'shrine', icon: 'n_shrine', badge: 'shrine', dot: true },
     { id: 'quests', icon: 'n_scroll', badge: 'quests' },
@@ -249,10 +249,10 @@
     const b = DH.meta.badges();
     ui.navEl.innerHTML = '';
     NAV.forEach((n) => {
-      const cnt = n.badge ? b[n.badge] : 0;
+      const cnt = n.badge ? b[n.badge] : 0, dot = !cnt && n.dotKey && b[n.dotKey] > 0;
       ui.navEl.appendChild(h('button' + (ui.screen === n.id ? '.on' : '') + (n.cls ? '.' + n.cls : ''), {
         onclick: () => { DH.audio.play(ui.screen === n.id ? 'click' : 'page'); ui.go(n.id); },
-      }, A.img(n.icon), h('span', t('nav.' + n.id)), cnt ? h('span.badge' + (n.dot ? '.dot' : ''), n.dot ? '' : cnt) : null));
+      }, A.img(n.icon), h('span', t('nav.' + n.id)), cnt ? h('span.badge' + (n.dot ? '.dot' : ''), n.dot ? '' : cnt) : dot ? h('span.badge.dot') : null));
     });
   };
 

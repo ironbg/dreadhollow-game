@@ -131,7 +131,7 @@
       root.append(h('h2.title', t('nav.armory')));
       root.append(h('div.tabs',
         h('button' + (tab === 'heroes' ? '.on' : ''), { onclick: () => { click(); ui.go('armory', 'heroes'); } }, t('armory.heroes')),
-        h('button' + (tab === 'gear' ? '.on' : ''), { onclick: () => { click(); ui.go('armory', 'gear'); } }, t('armory.gear'), b.gear - b.well > 0 ? h('span.badge', b.gear - b.well) : null),
+        h('button' + (tab === 'gear' ? '.on' : ''), { onclick: () => { click(); ui.go('armory', 'gear'); } }, t('armory.gear'), b.gear > 0 ? h('span.badge', b.gear) : b.gearNew > 0 ? h('span.badge.dot') : null),
         h('button' + (tab === 'well' ? '.on' : ''), { onclick: () => { click(); ui.go('armory', 'well'); } }, t('armory.well'), b.well ? h('span.badge', b.well) : null)));
       root.append(tab === 'heroes' ? this.heroes() : tab === 'gear' ? this.gear() : this.well());
       return root;

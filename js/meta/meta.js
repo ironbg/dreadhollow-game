@@ -309,7 +309,7 @@
     s.gear = s.gear.filter((o) => !used.includes(o));
     g.rarity++; s.stats.itemsMerged++;
     const eqp = meta.eq(), free = meta.slotsFor(g.type).find((sl) => eqp[sl] == null);
-    if (free && !meta.isEquipped(g.id)) eqp[free] = g.id;
+    if (free && !meta.isEquipped(g.id) && !meta.twinSlot(g.type, (sl) => meta.gearById(eqp[sl]))) eqp[free] = g.id; // never next to its twin ring
     changed();
     return true;
   };
@@ -1110,11 +1110,13 @@
     let pass = meta.passBonus().ready; for (let i = 1; i <= meta.passTier(); i++) { if (meta.passClaimable(i, 'free')) pass++; if (meta.passClaimable(i, 'prem')) pass++; }
     const shop = (meta.freeChestReadyIn() <= 0 ? 1 : 0) + (meta.soulCardClaimable() ? 1 : 0) + (d.ads.gems < E.FREE_GEM_ADS ? 0 : 0);
     const newGear = S().gear.filter((g) => g.isNew).length;
+    // a number only for the worn pieces that can be made better now (a level paid for, or two twins to merge); new pieces are a dot
+    const eqp = meta.eq(), gearUp = E.slots.filter((sl) => { const g = meta.gearById(eqp[sl]); return g && (meta.canLevelGear(g) || meta.mergeCandidates(g.id).length >= 2); }).length;
     let shrineAff = 0;
     E.shrineOrder.forEach((id) => { const l = meta.shrineLevel(id); if (l < E.shrine[id].max && meta.shrineUnlocked(id) && S().gold >= E.shrineCost(id, l)) shrineAff++; });
     const well = S().wellkeeper.length;
     if (meta.archiveAffordable()) shrineAff++;
-    return { missions, ach, pass, quests: missions + ach + pass, login: meta.signinPending() ? 1 : 0, shop, gear: newGear + well, well, shrine: shrineAff, nights: meta.nbActive() ? meta.nbClaimable() : 0 };
+    return { missions, ach, pass, quests: missions + ach + pass, login: meta.signinPending() ? 1 : 0, shop, gear: gearUp, gearNew: newGear, gearDot: newGear + well, well, shrine: shrineAff, nights: meta.nbActive() ? meta.nbClaimable() : 0 };
   };
 
   DH.meta = meta;

@@ -1046,8 +1046,23 @@
     const list = this.markers; if (!list || !list.length) return;
     const now = performance.now() / 1000, u = S, line = Math.max(1, Math.round(u * 0.8));
     ctx.save(); ctx.imageSmoothingEnabled = false; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    // a touch stick is drawn over the markers: a marker under it slides along its screen edge to just clear the ring
+    const d = DH.view.dpr, sticks = this.settings.hideJoystick ? [] : [DH.input.stick, DH.input.aimStick].filter((q) => q && q.active && q.touch)
+      .map((q) => ({ x: q.ox * d, y: q.oy * d, R: (DH.input.RADIUS + 8) * d + 11 * u }));
+    const CW = ctx.canvas.width, CH = ctx.canvas.height;
     for (const m of list) {
-      const x = m.x * S, y = m.y * S, r = 9.5 * u, pulse = Math.sin(now * 5 + m.a * 3) * 0.9 * u;
+      let x = m.x * S, y = m.y * S;
+      for (const st of sticks) {
+        const dx = x - st.x, dy = y - st.y; if (dx * dx + dy * dy >= st.R * st.R) continue;
+        if (Math.abs(Math.sin(m.a)) > Math.abs(Math.cos(m.a))) { // on the top or bottom edge: slide sideways, away from the stick
+          const side = dx !== 0 ? Math.sign(dx) : (st.x > CW / 2 ? -1 : 1), off = Math.sqrt(Math.max(0, st.R * st.R - dy * dy));
+          x = st.x + side * off; if (x < 14 * u || x > CW - 14 * u) x = st.x - side * off;
+        } else { // on a side edge: slide up or down
+          const side = dy !== 0 ? Math.sign(dy) : -1, off = Math.sqrt(Math.max(0, st.R * st.R - dx * dx));
+          y = st.y + side * off; if (y < 14 * u || y > CH - 14 * u) y = st.y - side * off;
+        }
+      }
+      const r = 9.5 * u, pulse = Math.sin(now * 5 + m.a * 3) * 0.9 * u;
       // arrowhead
       ctx.save(); ctx.translate(x, y); ctx.rotate(m.a);
       const tip = r + 10 * u + pulse, base = r + 1 * u, w = 6 * u;
