@@ -1081,10 +1081,10 @@
         const s = G.sprite(m.icon, m.variant), img = s.frames[Math.floor(now * 4) % s.frames.length], k = Math.min(13 / s.w, 13 / s.h) * u;
         ctx.drawImage(img, Math.round(x - s.w * k / 2), Math.round(y - s.h * k / 2), Math.round(s.w * k), Math.round(s.h * k));
       }
-      // distance, on the side facing the hero
+      // distance, centred under the badge (over it when the arrow points down, so the two never meet)
       const txt = String(Math.max(1, Math.round(m.dist / C.UNITS_PER_M))), size = Math.max(10, Math.round(3.2 * u) * 2); // the distance in metres: the number alone
       ctx.font = '800 ' + size + 'px "DHNum", "Alegreya Sans", sans-serif';
-      const half = ctx.measureText(txt).width / 2, tx = x - Math.cos(m.a) * (r + 3 * u + half), ty = y - Math.sin(m.a) * (r + 7 * u); ctx.lineWidth = Math.max(2, u * 1.1); ctx.strokeStyle = '#0b0610';
+      const tx = x, ty = y + (Math.sin(m.a) > 0.35 ? -1 : 1) * (r + size / 2 + 2 * u); ctx.lineWidth = Math.max(2, u * 1.1); ctx.strokeStyle = '#0b0610';
       ctx.strokeText(txt, tx, ty); ctx.fillStyle = '#f2e6c8'; ctx.fillText(txt, tx, ty);
     }
     ctx.restore();
