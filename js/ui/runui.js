@@ -195,6 +195,7 @@
       const rc = el.getBoundingClientRect(); if (rc.height) low = Math.max(low, rc.bottom - top0);
     }
     r.boss.style.top = Math.round(low + 6) + 'px';
+    if (DH.game.run) DH.game.run.hudBottom = r.boss.getBoundingClientRect().bottom; // the off-screen markers stay below the bar (render.js)
     if (r.track) r.track.style.top = Math.round(low + 6 + r.boss.offsetHeight + 6) + 'px';
   };
   const trackUpdate = (run) => {

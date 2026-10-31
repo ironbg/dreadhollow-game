@@ -273,7 +273,8 @@
     g.fillStyle = p.hp / this.P.maxHp < 0.3 ? '#ff4040' : '#e8303c'; g.fillRect(hx, hy, Math.max(0, hpw * p.hp / this.P.maxHp), 2);
     // off-screen markers: collected here, drawn crisp over the scaled view (renderMarkers)
     const marks = this.markers || (this.markers = []); marks.length = 0;
-    const px = p.x - cx, py = p.y - cy, ML = 26, MT = this.bosses.some((b) => b && !b.dead) ? 76 : 54, MB = 28;
+    const px = p.x - cx, py = p.y - cy, ML = 26, MB = 28, bossUp = this.bosses.some((b) => b && !b.dead);
+    const MT = bossUp && this.hudBottom ? Math.max(76, this.hudBottom * V.dpr / V.S + 14) : bossUp ? 76 : 54; // below the boss bar, wherever it sits
     const mark = (tx, ty, color, icon, variant) => {
       const x = tx - cx, y = ty - cy; if (x >= -4 && y >= -4 && x <= W + 4 && y <= H + 4) return;
       const a = Math.atan2(ty - p.y, tx - p.x), c = Math.cos(a), s = Math.sin(a);
@@ -1053,7 +1054,7 @@
         ctx.drawImage(img, Math.round(x - s.w * k / 2), Math.round(y - s.h * k / 2), Math.round(s.w * k), Math.round(s.h * k));
       }
       // distance, on the side facing the hero
-      const txt = U.tr('unit.meters', { n: Math.max(1, Math.round(m.dist / C.UNITS_PER_M)) }, Math.max(1, Math.round(m.dist / C.UNITS_PER_M)) + 'm'), size = Math.max(10, Math.round(3.2 * u) * 2);
+      const txt = String(Math.max(1, Math.round(m.dist / C.UNITS_PER_M))), size = Math.max(10, Math.round(3.2 * u) * 2); // the distance in metres: the number alone
       ctx.font = '800 ' + size + 'px "DHNum", "Alegreya Sans", sans-serif';
       const half = ctx.measureText(txt).width / 2, tx = x - Math.cos(m.a) * (r + 3 * u + half), ty = y - Math.sin(m.a) * (r + 7 * u); ctx.lineWidth = Math.max(2, u * 1.1); ctx.strokeStyle = '#0b0610';
       ctx.strokeText(txt, tx, ty); ctx.fillStyle = '#f2e6c8'; ctx.fillText(txt, tx, ty);
