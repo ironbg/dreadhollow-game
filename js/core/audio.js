@@ -11,10 +11,26 @@
   let musicState = null;
   const settings = { sfx: 0.8, music: 0.5 };
   const rnd = (a, b) => a + Math.random() * (b - a);
+  /* A phone's audio thread has a hard budget: in a big fight hundreds of short voices a second used to
+   * overrun it and the sound crackled at any volume. Live effect voices are counted; past SOFT the quiet
+   * garnish (shards, ticks, upper partials) is dropped and combat chatter is spaced out, past HARD it waits. */
+  const SOFT = 18, HARD = 32, ends = []; // when each live effect voice falls silent (audio clock)
+  const born = (end) => { ends.push(end); };
+  /** Effect voices still sounding. */
+  function live() {
+    const now = ctx.currentTime; let j = 0;
+    for (let i = 0; i < ends.length; i++) if (ends[i] > now) ends[j++] = ends[i];
+    ends.length = j; return j;
+  }
+  /** An effect voice (not music) that the mix has no room for right now. */
+  let keep = false; // set while an effect that must always be heard (level up, a hurt, a roar, the menus) is playing
+  const crowded = (o) => { if (o.dest || keep) return false; const v = live(); return v >= HARD || (v >= SOFT && (o.vol || 0.2) < 0.07); };
+  const ANDROID = /Android/i.test(navigator.userAgent || '');
 
   /** Dark hall impulse: short pre-delay, early reflections, then a tail that loses its highs as it decays.
    *  bright > 1 keeps more of the highs (ice, marble), < 1 swallows them (water, fire, mud). */
   function hallImpulse(seconds, bright) {
+    if (ANDROID) seconds = Math.min(seconds, 3.2); // a long stereo tail is costly to convolve on a phone
     const sr = ctx.sampleRate, len = Math.floor(sr * seconds), buf = ctx.createBuffer(2, len, sr), pre = Math.floor(sr * 0.022), b = bright || 1;
     for (let ch = 0; ch < 2; ch++) {
       const d = buf.getChannelData(ch); let y = 0;
@@ -32,7 +48,8 @@
     if (ctx) return true;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return false;
-    ctx = new AC();
+    // a larger buffer on Android phones: a few ms more latency, no underruns when the scene is heavy
+    try { ctx = new AC({ latencyHint: ANDROID ? 'playback' : 'balanced' }); } catch (e) { ctx = new AC(); }
     master = ctx.createGain(); master.gain.value = 0.95; master.connect(ctx.destination);
     const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 5; comp.knee.value = 12;
     comp.connect(master);
@@ -77,6 +94,7 @@
 
   /** Oscillator voice. o: {type, f, f2, t, vol, attack, delay, dest, filter, ff, ff2, q, rev, vib, vibRate, detune} */
   function tone(o) {
+    if (crowded(o)) return;
     const t0 = ctx.currentTime + (o.delay || 0), end = t0 + o.t;
     const osc = ctx.createOscillator(); osc.type = o.type || 'sine';
     osc.frequency.setValueAtTime(o.f, t0);
@@ -98,9 +116,11 @@
     node.connect(g); g.connect(o.dest || sfxBus);
     if (o.rev) { const s = ctx.createGain(); s.gain.value = o.rev === true ? 1 : o.rev; g.connect(s); s.connect(revFor(o.dest)); }
     osc.start(t0); osc.stop(end + 0.05);
+    if (!o.dest) born(end + 0.05);
   }
   /** Filtered noise. o: {t, vol, filter, ff, ff2, q, attack, delay, dest, rev} */
   function burst(o) {
+    if (crowded(o)) return;
     const t0 = ctx.currentTime + (o.delay || 0), end = t0 + o.t;
     const src = ctx.createBufferSource(); src.buffer = noise();
     const f = ctx.createBiquadFilter(); f.type = o.filter || 'lowpass'; f.frequency.setValueAtTime(o.ff || 1800, t0);
@@ -108,17 +128,19 @@
     f.Q.value = o.q || 0.7;
     const g = ctx.createGain();
     if (o.attack) { g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(o.vol || 0.3, t0 + o.attack); }
-    else g.gain.setValueAtTime(o.vol || 0.3, t0);
+    else { g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(o.vol || 0.3, t0 + 0.002); } // a 2 ms edge: still a hard hit, no click
     g.gain.exponentialRampToValueAtTime(0.0001, end);
     src.connect(f); f.connect(g); g.connect(o.dest || sfxBus);
     if (o.rev) { const s = ctx.createGain(); s.gain.value = o.rev === true ? 1 : o.rev; g.connect(s); s.connect(revFor(o.dest)); }
     src.start(t0, Math.random() * 1.2); src.stop(end + 0.05);
+    if (!o.dest) born(end + 0.05);
   }
   /** Inharmonic metal (clinks, clangs, bells). ratios of a struck plate / bell. */
   const BELL = [0.5, 1, 1.19, 1.56, 2, 2.51, 2.66, 3.01, 4.1];
   const PLATE = [1, 2.32, 4.25, 6.63];
   function metal(f, t, vol, ratios, o) {
     o = o || {};
+    if (!o.dest && !keep && live() >= SOFT) ratios = ratios.slice(0, 3); // in a crowded mix the upper partials are not heard anyway
     ratios.forEach((r, i) => tone({ type: 'sine', f: f * r, t: t * (1 - i / (ratios.length * 1.6)), vol: vol / (1 + i * 0.55), attack: 0.002, delay: o.delay, dest: o.dest, rev: o.rev }));
   }
   /** Low body impact: pitched thump plus muffled noise. */
@@ -450,7 +472,9 @@
     },
   };
   const MIN_GAP = { block: 0.08, hit: 0.05, xp: 0.04, enter: 2, page: 0.1, open: 0.15, close: 0.15, herb: 0.08, eat: 0.2, rune: 0.3, kill: 0.06, coin: 0.06, swing: 0.07, bow: 0.05, fire: 0.1, throw: 0.07, zap: 0.1, glass: 0.08, boom: 0.1, gun: 0.08, roar: 0.4,
-    wisp: 0.08, arcane: 0.2, blood: 0.3, flask: 0.08, hex: 0.08, blade: 0.08, dart: 0.05, phantom: 0.6, punch: 0.07, storm: 0.1, axe: 0.1, plague: 0.1, deathwall: 0.8, thorns: 0.12, prism: 0.1 };
+    wisp: 0.08, arcane: 0.2, blood: 0.3, flask: 0.08, hex: 0.08, blade: 0.08, dart: 0.05, phantom: 0.6, punch: 0.07, storm: 0.1, axe: 0.1, plague: 0.1, deathwall: 0.8, thorns: 0.12, prism: 0.1, frost: 0.1, splash: 0.1, heal: 0.15 };
+  /** Sounds a fight repeats many times a second: they are spaced out when the mix is crowded. */
+  const CHATTER = new Set('hit kill xp coin block frost fire glass zap boom gun throw swing bow splash wisp arcane flask hex blade dart punch storm axe plague thorns prism'.split(' '));
 
   /* ---------------- Music ---------------- */
   function midi(n) { return 440 * Math.pow(2, (n - 69) / 12); }
@@ -505,10 +529,10 @@
     const f2 = ctx.createBiquadFilter(); f2.type = 'bandpass'; f2.frequency.value = fm[1]; f2.Q.value = 7;
     const mixG = ctx.createGain(); mixG.gain.value = 1;
     f1.connect(mixG); f2.connect(mixG); mixG.connect(g); g.connect(dest); const s = ctx.createGain(); s.gain.value = 0.9; g.connect(s); s.connect(revFor(dest));
+    const lfo = ctx.createOscillator(); lfo.frequency.value = rnd(4.5, 5.5); const lg = ctx.createGain(); lg.gain.value = 3; lfo.connect(lg); lfo.start(t0); lfo.stop(end + 0.1); // one vibrato for the three voices
     [-9, 0, 8].forEach((dt) => {
-      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = midi(n); o.detune.value = dt;
-      const lfo = ctx.createOscillator(); lfo.frequency.value = rnd(4.5, 5.5); const lg = ctx.createGain(); lg.gain.value = 3; lfo.connect(lg); lg.connect(o.detune);
-      o.connect(f1); o.connect(f2); o.start(t0); o.stop(end + 0.1); lfo.start(t0); lfo.stop(end + 0.1);
+      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = midi(n); o.detune.value = dt; lg.connect(o.detune);
+      o.connect(f1); o.connect(f2); o.start(t0); o.stop(end + 0.1);
     });
   }
   /** Plucked string: a saw whose lowpass closes quickly, kept dull so it reads as an old lute. */
@@ -790,10 +814,13 @@
     /** Play an effect. arg goes to the effect: for 'hit' and 'kill' it is the foe's painter, which picks its material. */
     play(name, arg) {
       if (!ctx || settings.sfx <= 0 || ctx.state !== 'running') return;
-      const gap = MIN_GAP[name] || 0.02, now = ctx.currentTime;
+      let gap = MIN_GAP[name] || 0.02; const now = ctx.currentTime;
+      const v = CHATTER.has(name) ? live() : 0;
+      if (v >= SOFT) { if (v >= HARD) return; gap *= 1 + (v - SOFT) / 6; }
       if (last[name] && now - last[name] < gap) return;
       last[name] = now;
-      try { SFX[name] && SFX[name](arg); } catch (e) { /* ignore audio errors */ }
+      keep = !CHATTER.has(name);
+      try { SFX[name] && SFX[name](arg); } catch (e) { /* ignore audio errors */ } finally { keep = false; }
     },
     /** Play the score of a hall (the selected one when not given) for a mood: 'menu' or 'battle'. */
     music(mood, hall) {
@@ -812,8 +839,9 @@
     },
     setVolumes(sfx, music) {
       settings.sfx = sfx; settings.music = music;
-      if (sfxBus) sfxBus.gain.value = sfx;
-      if (musicBus) musicBus.gain.value = music * 0.6;
+      // glide to the new level: a jump of gain mid-sound is itself a click
+      if (sfxBus) sfxBus.gain.setTargetAtTime(sfx, ctx.currentTime, 0.03);
+      if (musicBus) musicBus.gain.setTargetAtTime(music * 0.6, ctx.currentTime, 0.03);
     },
     vibrate(ms) {
       if (DH.save && DH.save.data && !DH.save.data.settings.vibration) return;
