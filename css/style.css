@@ -1614,7 +1614,7 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 @media (max-width: 370px) { .modal.pausewin .statgrid.three { grid-template-columns: 1fr 1fr; } }
 
 /* ---------- the developer's panel (js/ui/adminpanel.js) ---------- */
-.ap { position: absolute; inset: 0; z-index: 1; background: var(--bg); display: flex; flex-direction: column; padding: calc(8px + var(--safe-t)) 0 var(--safe-b); font-family: var(--body); color: var(--text); }
+.ap { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; padding: calc(8px + var(--safe-t)) 0 var(--safe-b); font-family: var(--body); color: var(--text); } /* no z-index: a confirm opened over it (a later sibling) must paint on top */
 .ap-top { display: flex; align-items: center; gap: 8px; padding: 4px 12px 8px; }
 .ap-title { flex: 1; font-family: var(--title); font-size: 20px; color: var(--gold); }
 .ap-tabs { display: flex; gap: 4px; overflow-x: auto; padding: 0 12px 8px; border-bottom: 1px solid var(--line); flex: none; scrollbar-width: none; }
