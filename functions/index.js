@@ -70,13 +70,14 @@ const uidOf = (req) => { if (!req.auth || !req.auth.uid) throw fail('requires-lo
 const cmp = (a, b) => { const x = String(a || '0').split('.').map(Number), y = String(b || '0').split('.').map(Number); for (let i = 0; i < 4; i++) { const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 /** Too old a game build is turned away (its economy code would not match the server's). The store app (p: 'app') has
  *  its own minimum (live.json app.min): an app update takes days to reach every phone, the web version minutes. */
-/** Maintenance (live: maintenance { on, msg { bg, en } }): the game's own calls wait; admins pass. */
+/** Maintenance (live: maintenance { on, msg }): the game's own calls wait; admins pass. msg: one text for every language. */
 async function checkOpen(req, cfg) {
   const m = cfg && cfg.maintenance;
   if (!(m && m.on)) return;
   if (req.auth && await insights.isAdmin(db, req.auth.token)) return;
   const lang = (req.data && req.data.lang) === 'bg' ? 'bg' : 'en';
-  throw new HttpsError('unavailable', 'maintenance', { code: 'maintenance', reason: (m.msg && (m.msg[lang] || m.msg.en || m.msg.bg)) || '' });
+  const reason = typeof m.msg === 'string' ? m.msg : (m.msg && (m.msg[lang] || m.msg.en || m.msg.bg)) || ''; // one text for every language (or an older { bg, en })
+  throw new HttpsError('unavailable', 'maintenance', { code: 'maintenance', reason: String(reason).slice(0, 400) });
 }
 function checkVersion(d, cfg) {
   const rules = (cfg && (d.p === 'app' ? cfg.app : cfg.web)) || {};

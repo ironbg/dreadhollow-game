@@ -105,7 +105,7 @@
     changed();
   };
   meta.inboxRead = (id) => { const s = S(); const n = (s.inbox || []).length; s.inbox = (s.inbox || []).filter((m) => m.id !== id); if (s.inbox.length !== n) changed(); return true; };
-  /** Gifts to everyone (live: gifts [{ id, start, end, reward, msg { bg, en }, title { bg, en } }]): each given once, while open. */
+  /** Gifts to everyone (live: gifts [{ id, start, end, reward, msg, title }], texts one for every language): each given once, while open. */
   meta.takeGifts = (list) => {
     const s = S(), now = U.now(); s.giftsTaken = s.giftsTaken || {};
     (Array.isArray(list) ? list : []).forEach((g) => {

@@ -35,10 +35,10 @@
       st_open: 'Отворено', st_done: 'Готово', st_later: 'По-късно', all: 'Всички', del: 'Изтрий', delQ: 'Да изтрия ли това съобщение?',
       k_bug: 'Бъг', k_idea: 'Идея', k_balance: 'Баланс', k_other: 'Друго',
       test: 'тест', order: 'Поръчка', total: 'Общо',
-      maintH: 'Профилактика', maintHint: 'Докато е включена, играчите не могат да влизат и да започват битки (битка и покупка, вече направени, се приключват). Админите влизат.', msgBg: 'Текст (БГ)', msgEn: 'Текст (EN)',
+      maintH: 'Профилактика', maintHint: 'Докато е включена, играчите не могат да влизат и да започват битки (битка и покупка, вече направени, се приключват). Админите влизат.', msgText: 'Текст (вижда се на всеки език)',
       verH: 'Версии', webMin: 'Уеб: минимална', appMin: 'Приложение: минимална', appLatest: 'Приложение: най-нова', verHint: 'По-стара версия от минималната трябва да се обнови.',
       adsH: 'Реклами', adsVerify: 'Сървърът плаща реклама само след потвърждение от AdMob',
-      newsH: 'Новини', newsHint: 'Показват се веднъж на всеки играч в менюто, докато са активни.', titleBg: 'Заглавие (БГ)', titleEn: 'Заглавие (EN)', start: 'От (UTC)', end: 'До (UTC)', add: 'Добави', remove: 'Махни',
+      newsH: 'Новини', newsHint: 'Показват се веднъж на всеки играч в менюто, докато са активни.', titleOne: 'Заглавие', start: 'От (UTC)', end: 'До (UTC)', add: 'Добави', remove: 'Махни',
       giftsH: 'Подарък за всички', giftsHint: 'Всеки играч го получава веднъж при следващото влизане, докато е активен, със съобщението.',
       jsonH: 'Всички настройки на живо (JSON)', jsonHint: 'Ключовете тук заместват тези от live.json. Внимавай: грешна настройка засяга всички играчи.', effective: 'В сила в момента', base: 'live.json от последното качване',
       adminsHint: 'Само тези имейли (потвърдени, или с вход през Google) отварят панела. Своя имейл не можеш да махнеш.', addEmail: 'Добави имейл',
@@ -66,10 +66,10 @@
       st_open: 'Open', st_done: 'Done', st_later: 'Later', all: 'All', del: 'Delete', delQ: 'Delete this message?',
       k_bug: 'Bug', k_idea: 'Idea', k_balance: 'Balance', k_other: 'Other',
       test: 'test', order: 'Order', total: 'Total',
-      maintH: 'Maintenance', maintHint: 'While on, players cannot come in or start fights (a fight or purchase already made is still settled). Admins come in.', msgBg: 'Text (BG)', msgEn: 'Text (EN)',
+      maintH: 'Maintenance', maintHint: 'While on, players cannot come in or start fights (a fight or purchase already made is still settled). Admins come in.', msgText: 'Text (shown in every language)',
       verH: 'Versions', webMin: 'Web: minimum', appMin: 'App: minimum', appLatest: 'App: newest', verHint: 'A version older than the minimum must update.',
       adsH: 'Ads', adsVerify: 'The server pays an ad only once AdMob confirms it',
-      newsH: 'News', newsHint: 'Shown once to every player in the menus while open.', titleBg: 'Title (BG)', titleEn: 'Title (EN)', start: 'From (UTC)', end: 'Until (UTC)', add: 'Add', remove: 'Remove',
+      newsH: 'News', newsHint: 'Shown once to every player in the menus while open.', titleOne: 'Title', start: 'From (UTC)', end: 'Until (UTC)', add: 'Add', remove: 'Remove',
       giftsH: 'Gift to everyone', giftsHint: 'Every player gets it once at their next visit while it is open, with its message.',
       jsonH: 'All live settings (JSON)', jsonHint: 'Keys here replace those of live.json. Careful: a wrong setting reaches every player.', effective: 'In effect now', base: 'live.json as last deployed',
       adminsHint: 'Only these emails (verified, or signed in with Google) open the panel. You cannot remove your own.', addEmail: 'Add an email',
@@ -78,6 +78,8 @@
     },
   };
   const tx = (k, a) => { let s = (L[DH.i18n.current === 'bg' ? 'bg' : 'en'][k]) || k; for (const x in a || {}) s = s.replace('{' + x + '}', a[x]); return s; };
+  /** A text as kept: one string, or an older { bg, en } pair (the panel now writes one string for every language). */
+  const one = (v) => (v && typeof v === 'object' ? v.bg || v.en || '' : String(v || ''));
   const call = (op, args) => DH.server.call('admin', Object.assign({ op }, args || {}));
   const when = (ms) => { if (!ms) return '—'; const d = new Date(typeof ms === 'number' ? ms : Date.parse(ms)); return isNaN(d) ? String(ms) : d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); };
   const day = (k) => k.slice(8, 10) + '.' + k.slice(5, 7);
@@ -265,10 +267,10 @@
     const saveO = async (next) => { await call('liveset', { override: next }); ui.toast(tx('saved'), 'good'); show(pageLive); };
     // maintenance
     const m = o.maintenance || eff.maintenance || {};
-    const mBg = input(tx('msgBg'), (m.msg || {}).bg), mEn = input(tx('msgEn'), (m.msg || {}).en);
-    const maint = sect(tx('maintH') + ': ' + (m.on ? tx('on') : tx('off')), h('div.ap-muted', tx('maintHint')), mBg, mEn,
-      h('div.ap-row', btn(m.on ? tx('off') : tx('on'), () => saveO(Object.assign({}, o, { maintenance: { on: !m.on, msg: { bg: mBg.value.trim(), en: mEn.value.trim() } } })), m.on ? 'green' : 'red'),
-        btn(tx('save'), () => saveO(Object.assign({}, o, { maintenance: { on: !!m.on, msg: { bg: mBg.value.trim(), en: mEn.value.trim() } } })))));
+    const mText = input(tx('msgText'), one(m.msg));
+    const maint = sect(tx('maintH') + ': ' + (m.on ? tx('on') : tx('off')), h('div.ap-muted', tx('maintHint')), mText,
+      h('div.ap-row', btn(m.on ? tx('off') : tx('on'), () => saveO(Object.assign({}, o, { maintenance: { on: !m.on, msg: mText.value.trim() } })), m.on ? 'green' : 'red'),
+        btn(tx('save'), () => saveO(Object.assign({}, o, { maintenance: { on: !!m.on, msg: mText.value.trim() } })))));
     // versions
     const web = Object.assign({}, eff.web || {}), app = Object.assign({}, eff.app || {});
     const wMin = input('1.61.0', web.min), aMin = input('1.61.0', app.min), aLat = input('1.61.0', app.latest);
@@ -284,20 +286,20 @@
     // news and gifts to everyone
     const listEditor = (key, title, hint, extra) => {
       const list = (o[key] || eff[key] || []).slice();
-      const f = { tBg: input(tx('titleBg')), tEn: input(tx('titleEn')), xBg: area(tx('msgBg'), '', 2), xEn: area(tx('msgEn'), '', 2), start: input('', iso(new Date().toISOString()), 'datetime-local'), end: input('', '', 'datetime-local') };
+      const f = { title: input(tx('titleOne')), text: area(tx('msgText'), '', 3), start: input('', iso(new Date().toISOString()), 'datetime-local'), end: input('', '', 'datetime-local') };
       const ex = extra ? extra() : null;
       return sect(title, h('div.ap-muted', hint),
         list.length ? h('div.ap-list', list.map((n, i) => h('div.ap-item.flat',
-          h('b', (n.title && (n.title.bg || n.title.en)) || n.id), ' ', h('span.ap-muted', [n.id, n.start ? when(n.start) : null, n.end ? '→ ' + when(n.end) : null, n.reward ? JSON.stringify(n.reward) : null].filter(Boolean).join(' · ')),
-          h('div', (n.text || n.msg || {}).bg || ''),
+          h('b', one(n.title) || n.id), ' ', h('span.ap-muted', [n.id, n.start ? when(n.start) : null, n.end ? '→ ' + when(n.end) : null, n.reward ? JSON.stringify(n.reward) : null].filter(Boolean).join(' · ')),
+          h('div', one(n.text || n.msg)),
           h('div.ap-row', btn(tx('remove'), () => { const next = list.slice(); next.splice(i, 1); return saveO(Object.assign({}, o, { [key]: next })); }, 'red'))))) : null,
-        h('div.ap-form', f.tBg, f.tEn), f.xBg, f.xEn, h('div.ap-form', h('label', tx('start'), f.start), h('label', tx('end'), f.end)), ex ? ex.el : null,
+        f.title, f.text, h('div.ap-form', h('label', tx('start'), f.start), h('label', tx('end'), f.end)), ex ? ex.el : null,
         h('div.ap-row', btn(tx('add'), () => {
-          const item = { id: key + '-' + Date.now().toString(36), title: { bg: f.tBg.value.trim(), en: f.tEn.value.trim() || f.tBg.value.trim() }, start: toIso(f.start.value), end: toIso(f.end.value) };
-          const text = { bg: f.xBg.value.trim(), en: f.xEn.value.trim() || f.xBg.value.trim() };
+          const item = { id: key + '-' + Date.now().toString(36), title: f.title.value.trim(), start: toIso(f.start.value), end: toIso(f.end.value) };
+          const text = f.text.value.trim();
           if (key === 'news') item.text = text; else item.msg = text;
           if (ex) { const rw = ex.read(); if (!rw) { ui.toast(tx('empty'), 'bad'); return null; } item.reward = rw; }
-          if (!item.title.bg && !text.bg) { ui.toast(tx('empty'), 'bad'); return null; }
+          if (!item.title && !text) { ui.toast(tx('empty'), 'bad'); return null; }
           Object.keys(item).forEach((k) => item[k] === undefined && delete item[k]);
           return saveO(Object.assign({}, o, { [key]: list.concat(item) }));
         }, 'gold')));
