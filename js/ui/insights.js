@@ -85,51 +85,5 @@
   DH.admin.recheck = (done) => checkAdmin(true, done);
   DH.events.on('cloud', () => checkAdmin(false));
 
-  const day = (k) => k.slice(8, 10) + '.' + k.slice(5, 7);
-  const when = (ms) => { const d = new Date(ms); return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); };
-  const who = (o) => o.email || t('adm.guest') + ' ' + String(o.uid || '').slice(0, 6);
-  const mins = (s) => Math.round((s || 0) / 60);
-  ui.openAdmin = () => {
-    let tab = 'days', days = 14, data = null, err = null;
-    const box = h('div.adm');
-    const m = ui.modal({ title: t('adm.title'), cls: 'wide', body: box });
-    const load = async () => {
-      data = null; err = null; draw();
-      try { data = await DH.server.call('adminStats', { days }); } catch (e) { err = e && e.code; }
-      if (!m.closed) draw();
-    };
-    const tabs = () => h('div.tabs', ['days', 'players', 'feedback'].map((k) => h('button' + (tab === k ? '.on' : ''), { onclick: () => { click(); tab = k; draw(); } }, t('adm.tab.' + k))));
-    const range = () => h('div.btns.adm-range', [7, 14, 30].map((n) => h('button.btn.tiny' + (n === days ? '.gold' : '.ghost'), { onclick: () => { click(); days = n; load(); } }, t('adm.days', { n }))));
-    const drawDays = () => {
-      const max = Math.max(1, ...data.days.map((d) => d.players));
-      const tot = data.days.reduce((a, d) => ({ players: Math.max(a.players, d.players), runs: a.runs + d.runs }), { players: 0, runs: 0 });
-      return h('div',
-        h('div.small.muted', t('adm.sumDays', { n: data.players.length, runs: U.fmt(tot.runs) })),
-        data.days.slice().reverse().map((d) => h('div.adm-day',
-          h('b', day(d.day)),
-          h('div.adm-bar', h('i', { style: { width: (d.players / max * 100) + '%' } })),
-          h('span.small', t('adm.dayLine', { n: d.players, app: d.app, web: d.web, runs: d.runs, min: mins(d.secs) })))));
-    };
-    const drawPlayers = () => h('div',
-      h('div.small.muted', t('adm.playersNote')),
-      data.players.length ? data.players.map((o) => h('div.adm-row',
-        h('div.adm-who', who(o)),
-        h('div.small.muted', t('adm.playerLine', { days: o.days, runs: o.runs, min: mins(o.secs), last: day(o.last), p: o.p === 'app' ? 'Android' : 'web', v: o.v || '?' }))))
-        : h('div.small.muted', t('adm.none')));
-    const drawFeedback = () => h('div',
-      data.feedback.length ? data.feedback.map((f) => h('div.adm-row',
-        h('div.small.muted', when(f.at) + ' · ' + t('fb.kind.' + (f.kind || 'other')) + ' · ' + who(f) + ' · v' + (f.v || '?') + ' ' + (f.p === 'app' ? 'Android' : 'web') + (f.hero ? ' · ' + t('hero.' + f.hero + '.name') : '')),
-        h('div.adm-text', f.text),
-        f.refused ? h('div.small.bad', t('adm.refused', { n: f.refused.n }) + ' ' + (f.refused.log.length ? f.refused.log : [{ why: f.refused.last, at: f.refused.lastAt }]).slice(-4).reverse()
-          .map((x) => x.why + (x.stage ? ' (' + t('stage.' + x.stage + '.name') + (x.v ? ' v' + x.v : '') + ')' : '') + (x.at ? ' ' + when(x.at) : '')).join(' · ')) : null))
-        : h('div.small.muted', t('adm.none')));
-    const draw = () => {
-      box.innerHTML = '';
-      box.append(tabs(), range());
-      if (err) box.append(h('div.small.bad', t(err === 'not-admin' ? 'adm.denied' : 'adm.failed')));
-      else if (!data) box.append(h('div.small.muted', t('lb.loading')));
-      else box.append(tab === 'days' ? drawDays() : tab === 'players' ? drawPlayers() : drawFeedback());
-    };
-    load();
-  };
+  // the panel itself: js/ui/adminpanel.js (ui.openAdmin)
 })(window.DH);

@@ -69,6 +69,8 @@
     doubleRunGold: { run: () => M().doubleRunGold(), ad: () => 'double_gold', adOutside: true },
     adSeen: { run: () => M().adSeen() }, // records a watched ad for the "watch N ads" tasks; shows no ad itself (DH.ads calls it after one)
     reviveGems: { run: (a) => M().reviveGems(int(a.n)) },
+    // the developer's messages and gifts, once seen
+    inboxRead: { run: (a) => M().inboxRead(str(a.id, 40)) },
   };
 
   /** Fields the player sets freely (settings, choices on screen): the server takes them from the device, checked. */

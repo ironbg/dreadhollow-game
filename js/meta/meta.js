@@ -95,6 +95,27 @@
     changed();
     return out;
   };
+  /* ---------------- The developer's messages and gifts (admin panel, gifts to everyone) ---------------- */
+  /** A note for the player, shown once in the game. o: { kind: 'gift' | 'note', msg, title?, reward? } (a reward is already given). */
+  meta.inboxAdd = (o) => {
+    const s = S(); s.inbox = Array.isArray(s.inbox) ? s.inbox : [];
+    s.inbox.push({ id: 'm' + U.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), at: U.now(), kind: o.kind || 'note', msg: o.msg && typeof o.msg === 'object' ? { bg: String(o.msg.bg || '').slice(0, 400), en: String(o.msg.en || '').slice(0, 400) } : String(o.msg || '').slice(0, 400), // a text, or one per language
+      title: o.title || null, reward: o.reward || null });
+    if (s.inbox.length > 30) s.inbox.splice(0, s.inbox.length - 30);
+    changed();
+  };
+  meta.inboxRead = (id) => { const s = S(); const n = (s.inbox || []).length; s.inbox = (s.inbox || []).filter((m) => m.id !== id); if (s.inbox.length !== n) changed(); return true; };
+  /** Gifts to everyone (live: gifts [{ id, start, end, reward, msg { bg, en }, title { bg, en } }]): each given once, while open. */
+  meta.takeGifts = (list) => {
+    const s = S(), now = U.now(); s.giftsTaken = s.giftsTaken || {};
+    (Array.isArray(list) ? list : []).forEach((g) => {
+      if (!g || !g.id || s.giftsTaken[g.id] || !g.reward) return;
+      if ((g.start && Date.parse(g.start) > now) || (g.end && Date.parse(g.end) <= now)) return;
+      s.giftsTaken[g.id] = now;
+      meta.grant(g.reward);
+      meta.inboxAdd({ kind: 'gift', msg: g.msg || '', title: g.title || null, reward: g.reward });
+    });
+  };
   meta.rewardPreview = (rw) => {
     const out = [];
     if (rw.gold) out.push({ icon: 'i_gold', text: U.fmt(rw.gold) });

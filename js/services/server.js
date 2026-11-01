@@ -48,6 +48,7 @@
         const d = j.error && j.error.details;
         const code = (d && d.code) || (j.error && j.error.status === 'UNAUTHENTICATED' ? 'requires-login' : res.status === 429 ? 'too-many' : 'server');
         if (code === 'outdated') DH.live.outdated(); // this copy is too old for the server: the update window
+        if (code === 'banned' || code === 'maintenance') DH.events.emit('server:blocked', { code, details: d }); // told in a window (ui/mail.js)
         throw fail(code, { details: d });
       }
       return j.result;

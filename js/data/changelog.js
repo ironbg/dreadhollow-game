@@ -8,12 +8,14 @@
       bg: [
         'Стрелките към целите извън екрана вече не се крият под джойстика: стрелка под него се плъзга встрани по ръба. Разстоянието стои центрирано под значката (над нея, когато стрелката сочи надолу).',
         'Червеното число на Оръжейната вече брои само екипираните предмети, които можеш да подобриш сега (ниво или сливане). Новите предмети се отбелязват само с червена точка.',
+        'Съобщения и подаръци от екипа: те идват в играта с прозорец и се взимат с едно докосване. Новините също се показват веднъж в менюто.',
         'Бутонът „Дневни“ вече се казва „Календар“, а прозорецът – „Календар за вход“.',
         'Кладенецът вече иска повече за пратените предмети и цената расте силно с рядкостта: от 500 злато / 15 диаманта за обикновен до 90 000 злато / 2000 диаманта за митичен.',
       ],
       en: [
         'Arrows to targets off the screen no longer hide under the joystick: one under it slides along the edge. The distance sits centred under the badge (over it when the arrow points down).',
         'The Armory\'s red number now counts only the worn pieces you can improve now (a level or a merge). New pieces show just a red dot.',
+        'Messages and gifts from the team now arrive in the game in a window and are taken with one tap; news shows once in the menus.',
         'The Daily button is now called Calendar, and its window Sign-In Calendar.',
         'The Well now asks more for the pieces sent up, and the price climbs steeply with rarity: from 500 gold / 15 gems for a Common to 90,000 gold / 2000 gems for a Mythic.',
       ],

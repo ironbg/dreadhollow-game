@@ -6,6 +6,8 @@
   'use strict';
   const U = DH.util;
   const HOST = 'https://dreadhollow-b49c7.web.app/';
+  // live.json with the admin panel's override on top (functions: live); the plain file when the server cannot answer
+  const FN = 'https://europe-west1-dreadhollow-b49c7.cloudfunctions.net/live';
   const HOSTS = ['dreadhollow-b49c7.web.app', 'dreadhollow-b49c7.firebaseapp.com', 'localhost', '127.0.0.1'];
   const KEY = 'dh_live';
   const STORE = 'https://play.google.com/store/apps/details?id=com.dreadhollow.game';
@@ -26,6 +28,8 @@
     cmp,
     /** Where live.json is read from: this host when it is the game's own (or a local copy), else the web host. */
     url() { return (HOSTS.includes(location.hostname) && !DH.platform.native ? '' : HOST) + 'live.json'; },
+    /** Where to ask, in turn: the server (with the panel's changes), then the file. A local copy reads its own file only. */
+    urls() { return /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && !DH.platform.native ? [this.url()] : [FN, this.url()]; },
     /** Start: the last known answer at once (the clock too), then a fresh one. */
     init() {
       const saved = read();
@@ -40,13 +44,16 @@
       if (!force && Date.now() - this.fetchedAt < RECHECK_MS) return this.config;
       this.fetchedAt = Date.now();
       const t0 = Date.now();
-      let res;
-      try { res = await fetch(this.url() + '?t=' + t0, { cache: 'no-store' }); } catch (e) { this.online = false; this.check(); return this.config; }
+      let res = null, ta = t0;
+      for (const u of this.urls()) {
+        ta = Date.now(); // the round trip that answered sets the clock
+        try { const r = await fetch(u + '?t=' + ta, { cache: 'no-store' }); if (r.ok) { res = r; break; } } catch (e) { /* the next one */ }
+      }
       const t1 = Date.now();
-      if (!res.ok) { this.online = false; this.check(); return this.config; }
+      if (!res) { this.online = false; this.check(); return this.config; }
       // the host's clock: Date is whole seconds, so the middle of that second, against the middle of the round trip
       const server = Date.parse(res.headers.get('Date') || '');
-      if (Number.isFinite(server)) this.setOffset(server + 500 - (t0 + t1) / 2);
+      if (Number.isFinite(server)) this.setOffset(server + 500 - (ta + t1) / 2);
       try { this.config = await res.json(); this.online = true; } catch (e) { this.online = false; }
       write({ config: this.config, offset: this.offset });
       DH.events.emit('live', this.config);
