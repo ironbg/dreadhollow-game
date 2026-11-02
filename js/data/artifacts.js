@@ -68,7 +68,7 @@
   E.artifactOrder = Object.keys(E.artifacts);
   E.hallArtifact = {}; E.artifactOrder.forEach((k) => { if (E.artifacts[k].hall) E.hallArtifact[E.artifacts[k].hall] = k; });
   /* Torment Rank = number of active Artifacts. Per rank: */
-  E.TORMENT = { hp: 1.11, armor: 0.01, dmg: 0.02, speed: 0.015, xp: 0.05, champion: 0.95, gold: 0.08 };
+  E.TORMENT = { hp: 1.13, armor: 0.01, dmg: 0.03, speed: 0.02, xp: 0.05, champion: 0.95, gold: 0.08 };
   E.DREAD = { gold: E.TORMENT.gold, hp: 0.11 }; // legacy name used by settle/combat
   // old Altar artifacts carried over to their closest new counterparts
   E.ARTIFACT_MIGRATE = { hourglass: 'sands', famine: 'hunger', ironhorde: 'idol', bloodmoon: 'accolade', glasssoul: 'glass', exchange: 'scales', frenzy: 'gaze' };

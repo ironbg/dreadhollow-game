@@ -572,7 +572,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
 DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'dread.short': 'Torment {n}', 'dread.rank': 'Torment Rank {n}',
   'altar.desc': 'With Agony on, Lords drop Artifacts: each hall has a guaranteed Hall Artifact, plus a chance at a random one. Each active Artifact adds +1 Torment Rank. Per rank, enemies gain +{hp}% HP, +{dmg}% damage and +{spd}% speed, and champions appear more often; you gain +{xp}% XP, +{g}% gold and better loot.',
-  'altar.count': '{n}/{m} found',
+  'altar.short': 'Each active Artifact is +1 Rank: foes grow stronger, and you earn more XP, gold and better loot.', 'altar.info': 'How the Torment Rank works', 'altar.count': '{n}/{m} found',
   'altar.hintHall': 'Hall Artifact: defeat the Lord of {hall} with Agony on.',
   'altar.hintHallAny': 'Hall Artifact of {hall}. Can also drop elsewhere.',
   'altar.hintOnly': 'Can only drop from Lords in {hall}.',

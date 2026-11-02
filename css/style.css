@@ -1692,3 +1692,4 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .ss-row b.bad { color: var(--blood-hi); }
 .ss-tip { text-align: center; }
 .charsheet .ssheet { margin-top: 4px; }
+.modal.altarinfo p { margin: 4px 0 10px; line-height: 1.45; }

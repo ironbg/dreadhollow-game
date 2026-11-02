@@ -26,7 +26,9 @@
   ];
   /* Agony: the gauge climbs by itself (+1 rank every 4:48 of a 30-minute hall = every 96 s here) and with every
    * kill; a revive drains a fifth of it. With Agony on, champions come every (50 - 3 x AR) x 0.95^TR seconds. */
-  C.AGONY = { passive: 1 / 96, kill: 0, eliteKill: 5, revive: 1, champBase: 50, champPerAR: 3 }; // the gauge climbs with time only: rank V at 8:00 of a 10-minute hall
+  C.AGONY = { passive: 1 / 96, kill: 0, eliteKill: 5, revive: 1, champBase: 50, champPerAR: 3,
+    hp: 0.35, dmg: 0.15, bossHp: 2.5, soft: 0.85 }; // the gauge climbs with time only: rank V at 8:00 of a 10-minute hall.
+  // Foes get +35% health and +15% damage per Agony rank, bosses x2.5 health, and the denser horde hits 15% softer.
   /* Lament Shards per Lord by Torment Rank (chance of at least 2 / 3 / 4), interpolated between ranks */
   C.SHARD_TABLE = [[0, 0, 0, 0], [10, 1, 0.57, 0.1], [20, 1, 1, 0.62], [30, 1, 1, 1]];
   C.LOOT_TIERS = { champion: 11, lord: 16, all: 25 };

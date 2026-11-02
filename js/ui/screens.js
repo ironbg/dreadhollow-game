@@ -289,10 +289,15 @@
       const s = S(), root = h('div'), rank = M.dreadRank(), T = E.TORMENT;
       if (!M.altarUnlocked()) { root.append(h('div.panel.item', h('div.ico', { style: { filter: 'grayscale(1) brightness(0.55)' } }, A.img('a_mirror')), h('div.grow', h('div.t', t('shrine.altar')), h('div.d', t('altar.locked'))), A.img('u_lock', 'ci'))); return root; }
       const pct = (v) => Math.round(v * 100);
+      // the rules in short; the whole of them (what a rank does, the loot tiers) behind the "i"
+      const info = () => ui.modal({ title: t('dread.rank', { n: rank }), cls: 'altarinfo', body: (m) => h('div',
+        h('p', t('altar.desc', { hp: pct(T.hp - 1), dmg: pct(T.dmg), spd: pct(T.speed), xp: pct(T.xp), g: pct(T.gold) })),
+        h('p.goldtxt', t('altar.tiers', { c: C.LOOT_TIERS.champion, l: C.LOOT_TIERS.lord, a: C.LOOT_TIERS.all })),
+        h('div.btns', h('button.btn.gold', { onclick: () => m.close() }, t('common.close')))) });
       root.append(h('div.panel.gold.item', h('div.ico', A.img('a_mirror')), h('div.grow',
         h('div.t', t('dread.rank', { n: rank }), ' ', h('span.small.muted', t('altar.count', { n: M.artifactsOwnedCount(), m: E.artifactOrder.length }))),
-        h('div.d', t('altar.desc', { hp: pct(T.hp - 1), dmg: pct(T.dmg), spd: pct(T.speed), xp: pct(T.xp), g: pct(T.gold) })),
-        h('div.small.goldtxt', { style: { marginTop: '4px' } }, t('altar.tiers', { c: C.LOOT_TIERS.champion, l: C.LOOT_TIERS.lord, a: C.LOOT_TIERS.all })))));
+        h('div.d', t('altar.short'))),
+        h('button.btn.small.ghost.infob', { 'aria-label': t('altar.info'), onclick: (e) => { e.stopPropagation(); click(); info(); } }, 'i')));
       const hint = (a) => a.deed ? ui.deedText(DH.deeds.byId[a.deed])
         : a.hall && !a.generic ? t('altar.hintHall', { hall: t('stage.' + a.hall + '.name') })
         : a.hall ? t('altar.hintHallAny', { hall: t('stage.' + a.hall + '.name') })
