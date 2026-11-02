@@ -306,7 +306,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'ab.stormsphere.name': 'Storm Sphere', 'ab.stormsphere.desc': 'A slow ball of lightning that shocks everything near it.',
   'ab.halo.name': 'Radiant Halo', 'ab.halo.desc': 'A holy ring that burns nearby enemies. Its damage is split among them.',
   'ab.rifts.name': 'Void Rifts', 'ab.rifts.desc': 'Rifts open around you and burst when their time is up. Walk through one to set off a blast twice as strong.',
-  'ab.skyfall.name': 'Skyfall', 'ab.skyfall.desc': 'Three meteors at a time crash down on your enemies.',
+  'ab.skyfall.name': 'Skyfall', 'ab.skyfall.desc': 'A meteor crashes down on your enemies; every Amount adds one more.',
   'ab.golem.name': 'Bone Golem', 'ab.golem.desc': 'A lumbering golem that slams groups of enemies.',
   'ab.phantom.name': 'Phantom Knight', 'ab.phantom.desc': 'Summons a spectral knight that holds its ground and cuts down what comes near. When you move away, it dashes after you through the horde.',
   'ab.avalanche.name': 'Glacial Surge', 'ab.avalanche.desc': 'Four waves of ice spikes run out along the diagonals, building Frost.',

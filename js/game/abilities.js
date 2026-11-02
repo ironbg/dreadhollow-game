@@ -283,10 +283,10 @@
     },
     skyfall: { fire(run, a) {
       const p = run.player, s = a.s;
-      // three meteors a cast and one more for every Amount past the first; each seeks a foe no other meteor of this
+      // one meteor a cast for every Amount (it starts with one); each seeks a foe no other meteor of this
       // cast (or of its Multistrike repeats, a moment later) has taken, and only the first leans toward a boss
       const now = run.time; if (!a.mTaken || now - a.mAt > 0.6) { a.mTaken = new Set(); a.mAt = now; }
-      for (let i = 0; i < 2 + s.count; i++) {
+      for (let i = 0; i < Math.max(1, s.count); i++) {
         const tg = run.spreadTarget(220, a.mTaken, i === 0 && a.mTaken.size === 0);
         if (tg) a.mTaken.add(tg);
         const x = tg ? tg.x + U.rand(-8, 8) : p.x + U.rand(-120, 120), y = tg ? tg.y + U.rand(-8, 8) : p.y + U.rand(-90, 90), R = 30 * s.area;
