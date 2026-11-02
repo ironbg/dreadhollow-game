@@ -339,7 +339,7 @@
     return out;
   };
   const ELEV_NEEDS = { summoner: 'summon', volley: 'projectile' };
-  R.normalPool = function (level, abilityOnly) {
+  R.normalPool = function (level, abilityOnly, noCap) {
     const out = [];
     if (!abilityOnly) {
       const fx = this.fx_ || {}, DEF = ['vitality', 'metabolism', 'parry', 'thickhide'];
@@ -349,12 +349,13 @@
       const has = (tg) => this.abilities.some((a) => C.abilities[a.id] && C.abilities[a.id].tags.includes(tg));
       for (const id in C.elevatedTraits) { const need = ELEV_NEEDS[id]; if (need && !has(need)) continue; const r = this.traits.elev[id] || 0; if (r < tiers) out.push({ kind: 'elev', id, rank: r + 1, w: 1.3 }); }
     }
-    if (level >= C.ABILITY_TRAIT_EVERY) {
+    if (noCap || level >= C.ABILITY_TRAIT_EVERY) {
+      // one ability-trait rank per ability per 8 levels; ranks a tome gave do not count (a tome is never held back by it)
       const allowed = Math.floor(level / C.ABILITY_TRAIT_EVERY);
       for (const a of this.abilities) {
-        const tr = this.traits.ab[a.id] || {}; const used = Object.values(tr).reduce((x, y) => x + y, 0);
+        const tr = this.traits.ab[a.id] || {}; const used = Object.values(tr).reduce((x, y) => x + y, 0) - ((this.tomeRanks && this.tomeRanks[a.id]) || 0);
         const sig = this.signetBonus(a.id);
-        if (used >= allowed + sig) continue;
+        if (!noCap && used >= allowed + sig) continue;
         C.abilities[a.id].traits.forEach((T, idx) => {
           const r = tr[idx] || 0;
           if (r >= (T.max || C.ABILITY_TRAIT_MAX) + (sig ? 1 : 0)) return;
@@ -384,13 +385,13 @@
     }
     return null;
   };
-  R.rollChoices = function (level, abilityOnly) {
+  R.rollChoices = function (level, abilityOnly, noCap) {
     const up = !abilityOnly && !C.CLASS_LEVELS.includes(level) && this.pendingUpgrade();
     if (up) return up;
     let pool = !abilityOnly && C.CLASS_LEVELS.includes(level) ? this.classPool(level) : [];
     let n = C.MAX_TRAIT_CHOICES;
     if (pool.length) n = Math.min(4, pool.length);
-    else pool = this.normalPool(level, abilityOnly);
+    else pool = this.normalPool(level, abilityOnly, noCap);
     const out = [];
     pool = pool.slice();
     while (out.length < n && pool.length) {

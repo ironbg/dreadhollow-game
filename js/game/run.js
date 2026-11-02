@@ -1046,13 +1046,15 @@
         const pick = songs.slice(0, 1).concat(pool).slice(0, n).map((id) => ({ kind: 'ability', id }));
         if (pick.length) return { choices: pick };
       }
-      const tr = this.rollChoices(Math.max(this.level, 8), true).filter((c) => c.kind === 'ab');
+      // every ability slot taken: an upgrade of an ability, past the per-level limit, until they are truly at their best
+      const tr = this.rollChoices(this.level, true, true).filter((c) => c.kind === 'ab').map((c) => Object.assign(c, { tome: true }));
       if (tr.length) return { choices: tr.slice(0, n), traitsOnly: true };
       return { choices: [{ kind: 'gold', amount: Math.round(40 * this.stage.goldMult) }] };
     }
     chooseTome(c) {
       if (c.kind === 'ability') this.addAbility(c.id);
       else this.applyChoice(c);
+      if (c.kind === 'ab' && c.tome) { this.tomeRanks = this.tomeRanks || {}; this.tomeRanks[c.ab] = (this.tomeRanks[c.ab] || 0) + 1; } // outside the per-level limit
       this.resume();
     }
     /** Turn a tome down (no new ability — e.g. for the Adept's weapon-only quest): 250 gold, or half a level of
