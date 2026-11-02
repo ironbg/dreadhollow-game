@@ -631,11 +631,11 @@
   /* ------------------------------------------------------------------ */
   /* Spawn timeline (shared); stages remap enemy types and tint them with a variant. */
   C.timeline = [
-    { t: 0,   rate: 1.0, mix: { bat: 3, skeleton: 2, rat: 1 } },
-    { t: 40,  rate: 1.6, mix: { bat: 2, skeleton: 4, rat: 1 } },
-    { t: 80,  rate: 2.1, mix: { skeleton: 4, ghoul: 2, bat: 1 } },
-    { t: 130, rate: 2.7, mix: { skeleton: 3, ghoul: 2, ghost: 3 } },
-    { t: 180, rate: 3.1, mix: { ghoul: 3, ghost: 2, spider: 3 } },
+    { t: 0,   rate: 2.0, mix: { bat: 3, skeleton: 2, rat: 1 } }, // a full screen from the first seconds (was 1.0 / 1.6 / 2.1 / 2.7 / 3.1: the opening felt empty)
+    { t: 40,  rate: 2.6, mix: { bat: 2, skeleton: 4, rat: 1 } },
+    { t: 80,  rate: 3.0, mix: { skeleton: 4, ghoul: 2, bat: 1 } },
+    { t: 130, rate: 3.2, mix: { skeleton: 3, ghoul: 2, ghost: 3 } },
+    { t: 180, rate: 3.4, mix: { ghoul: 3, ghost: 2, spider: 3 } },
     { t: 240, rate: 3.7, mix: { skeleton: 3, ghoul: 3, cultist: 1, spider: 2 } },
     { t: 300, rate: 3.0, mix: { skeleton: 4, ghost: 2 } },
     { t: 330, rate: 4.5, mix: { ghoul: 3, wraith: 2, cultist: 1, ghost: 2, hknight: 1 } },
@@ -686,12 +686,12 @@
       remap: { bat: 'rat', rat: 'rat', skeleton: 'spirit', ghoul: 'drowned', ghost: 'spirit', spider: 'gargoyle', cultist: 'arbalist', wraith: 'watcher', hknight: 'gargoyle', golem: 'drowned' },
       bosses: [{ t: 150, id: 'hydra' }, { t: 300, id: 'bellwarden' }, { t: 450, id: 'sunkknight' }, { t: 600, id: 'horseman', final: true }],
       theme: { floor: 'aqueduct', floorA: [58, 76, 78], floorB: [44, 60, 62], mortar: [12, 22, 24], moss: [60, 130, 110], dark: [3, 10, 12], darkness: 0.8, lightTint: 'rgba(140,255,220,', accent: '#70ffd0', pools: [30, 70, 80], accentRate: 0.14 } },
-    catacombs: { index: 3, agonyXp: 0.395, hpMult: 4.94, dmgMult: 2.3, dmgGrow: 0.11, bossHp: 2.4, goldMult: 3, variant: 'ice', foeVariant: false, herb: 'frostcap',
+    catacombs: { index: 3, agonyXp: 0.395, hpMult: 5.4, dmgMult: 2.3, dmgGrow: 0.11, bossHp: 2.4, goldMult: 3, variant: 'ice', foeVariant: false, herb: 'frostcap',
       // frost crawlers, ice skulls, frost ghouls, frost guards, snow effigies, ice bears
       remap: { bat: 'iceskull', rat: 'iceskull', skeleton: 'frostghoul', ghoul: 'frostcrawler', ghost: 'iceskull', spider: 'effigy', cultist: 'frostcrawler', wraith: 'frostguard', hknight: 'frostguard', golem: 'icebear' },
       bosses: [{ t: 150, id: 'frostconstruct' }, { t: 300, id: 'basilisk' }, { t: 450, id: 'iceprism' }, { t: 600, id: 'jotun', final: true }],
       theme: { floor: 'catacombs', floorA: [60, 74, 96], floorB: [46, 58, 78], mortar: [14, 20, 32], moss: [150, 200, 230], dark: [4, 8, 18], darkness: 0.8, lightTint: 'rgba(150,210,255,', accent: '#7fd0ff', crystals: [140, 220, 255], accentRate: 0.14 } },
-    discord: { index: 4, agonyXp: 0.13, hpMult: 6.9, dmgMult: 2.8, dmgGrow: 0.11, bossHp: 2.4, goldMult: 3.8, variant: 'purple', foeVariant: false, herb: 'nightshade', dissonator: true,
+    discord: { index: 4, agonyXp: 0.13, hpMult: 7.6, dmgMult: 3.0, dmgGrow: 0.11, bossHp: 2.4, goldMult: 3.8, variant: 'purple', foeVariant: false, herb: 'nightshade', dissonator: true,
       // merging homunculi, leaping capra fiends, fiend casters, shapeshifters, void syphons, clockwork constructs
       remap: { bat: 'homunculus', rat: 'homunculus', skeleton: 'homunculus', ghoul: 'shapeshifter', ghost: 'capra', spider: 'capra', cultist: 'fiendcaster', wraith: 'syphon', hknight: 'clockwork', golem: 'clockwork' },
       bosses: [{ t: 150, id: 'voidcaller' }, { t: 300, id: 'discolossus' }, { t: 450, id: 'twistedknight' }, { t: 600, id: 'archdemon', final: true }],

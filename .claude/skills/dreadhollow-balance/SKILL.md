@@ -48,6 +48,10 @@ lead: read its `fire()` before calling it broken. For a real reading, measure in
   pack size and bundles should beat plain gems without making them pointless.
 
 **Progression**
+- Halls: `node .claude/skills/dreadhollow-balance/scripts/hallcurve.js` (expected horde strength per hall at every
+  step of `C.timeline`, from the formulas; each hall must be above the one before at every step, and the bosses too)
+  and `scripts/halls.js` (the same measured in the game: foes per minute, on screen at once, health, blow; bosses
+  there never die, so their summoned helpers inflate the late phases).
 - Account level curve, run level curve (`C.xpToNext`), hall difficulty (`C.stages[...]`: hpMult, dmgMult, dmgGrow,
   bossHp, goldMult), Torment and Agony. Look for dead zones (long stretches with nothing new) and walls (a hall
   that a fully geared hero of the expected level cannot clear).

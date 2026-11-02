@@ -8,6 +8,8 @@
       bg: [
         'Намерен предмет вече не сменя сам по-силния, който носиш: със същата рядкост се слага само ако е поне на същото ниво (по-рядък предмет се слага както досега).',
         'Поправено: бързите изстрели вече не прескачат враговете при по-нисък брой кадри, а аркебузът уцелва и враг плътно до героя (преди не го уцелваше изобщо).',
+        'Повече врагове в първите минути: появяват се почти двойно повече в началото, така че екранът е пълен от първите секунди.',
+        'Всяка зала вече е по-трудна от предишната във всяка минута: враговете на залата имат силата на врага, когото заместват (вид, скорост и поведение остават свои), а Катакомбите и Залите на раздора са малко по-силни.',
         'Баланс на уменията след измерване в битка. По-слаби: Пламтящ удар (по-малко горене), Трънлив корен, Сияен ореол (по-бавно презареждане), Драконов огън (по-малко горене), Убийствен риф, Кървав пулс, Присъда, Огнена струя, Блатни растения. По-силни: Дълъг лък, Призрачни игли, Въртящи се чакрами и Градушка.',
         'Звездопад вече започва с един метеор (преди три); всеки Брой добавя още един.',
         'Прозорецът на умение показва истинския шанс за критичен удар: базовият шанс по бонуса от героя, и над 100% (всеки пълни 100% са сигурен крит).',
@@ -15,6 +17,8 @@
       en: [
         'A piece you find no longer replaces a stronger one you wear: of the same rarity it is put on only at the same level or above (a rarer piece is put on as before).',
         'Fixed: fast shots no longer skip over foes at a lower frame rate, and the arquebus hits a foe right next to the hero too (it used to miss it entirely).',
+        'More foes in the first minutes: almost twice as many appear at the start, so the screen is full from the first seconds.',
+        'Every hall is now harder than the one before it at every minute: a hall\'s own foes have the strength of the foe they stand in for (their look, pace and way of fighting stay their own), and the Catacombs and the Halls of Discord are a little stronger.',
         'Ability balance after measuring them in fights. Weaker: Searing Smite (less burn), Thornroot, Radiant Halo (slower), Wyrmfire (less burn), Killer Riff, Blood Pulse, Judgment, Flame Jet, Bog Plants. Stronger: Longbow, Ghost Darts, Whirling Chakrams and Hail.',
         'Skyfall now starts with one meteor (it was three); every Amount adds one more.',
         'An ability\'s window shows the true critical chance: the base chance times the hero\'s bonus, past 100% too (every full 100% is a sure crit).',
