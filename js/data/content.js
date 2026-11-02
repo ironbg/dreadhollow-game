@@ -701,7 +701,7 @@
       remap: { bat: 'mosquito', rat: 'mosquito', skeleton: 'spider', ghoul: 'bogcorpse', ghost: 'bogwraith', spider: 'toad', cultist: 'bogwraith', wraith: 'toad', hknight: 'treant', golem: 'treant' },
       bosses: [{ t: 150, id: 'blightfiend' }, { t: 300, id: 'bogserpent' }, { t: 450, id: 'eldertreant' }, { t: 600, id: 'rotlord', final: true }],
       theme: { floor: 'blightmire', floorA: [64, 70, 46], floorB: [50, 54, 36], mortar: [16, 18, 8], moss: [120, 150, 40], dark: [6, 8, 2], darkness: 0.82, lightTint: 'rgba(200,255,120,', accent: '#b0ff50', pools: [50, 70, 30], accentRate: 0.22, blood: '#2a3a0a' } },
-    reliquary: { index: 6, agonyXp: 0.1, hpMult: 11.5, dmgMult: 3.6, dmgGrow: 0.11, bossHp: 2.4, goldMult: 6, variant: 'gold', foeVariant: false, herb: 'dust', vault: true,
+    reliquary: { index: 6, agonyXp: 0.1, hpMult: 11.5, dmgMult: 3.6, dmgGrow: 0.11, bossHp: 2.4, goldMult: 5.2, variant: 'gold', foeVariant: false, herb: 'dust', vault: true,
       // gold scarabs, mimics, gilded knights, treasure golems, vault wardens, coin wraiths
       remap: { bat: 'scarab', rat: 'scarab', skeleton: 'scarab', ghoul: 'gildedknight', ghost: 'coinwraith', spider: 'mimic', cultist: 'vaultwarden', wraith: 'coinwraith', hknight: 'gildedknight', golem: 'golem' },
       bosses: [{ t: 150, id: 'mimicking' }, { t: 300, id: 'sentinel' }, { t: 450, id: 'magistrate' }, { t: 600, id: 'custodian', final: true }],

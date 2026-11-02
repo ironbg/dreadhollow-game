@@ -343,7 +343,8 @@
     }
     return out;
   };
-  meta.salvageValue = (g) => Math.floor(80 * Math.pow(2.2, g.rarity) + (g.level - 1) * 40 * (1 + g.rarity * 0.6));
+  /** Gold back for a salvaged item: a little for its rarity, and half of the gold its levels cost (as the metals). */
+  meta.salvageValue = (g) => { let lv = 0; for (let l = 1; l < g.level; l++) lv += E.gearLevelCost(g.rarity, l); return Math.floor(80 * Math.pow(2.2, g.rarity) + lv / 2); };
   /** The materials a salvaged item gives back: a little of its rarity's metal, and half of what its levels cost. */
   meta.salvageMats = (g) => {
     const out = {}, add = (k, n) => { if (n > 0) out[k] = (out[k] || 0) + n; };
@@ -901,8 +902,8 @@
     const gold = Math.floor((r.gold + timeBonus + winBonus) * (meta.passPremium() ? 1 + E.PASS_PERKS.goldPct : 1)); // the premium pass: +20% gold
     const res = {
       gold, goldRun: Math.floor(r.gold), timeBonus, winBonus,
-      accountXp: Math.floor(r.kills / 6 + r.time / 8 + (r.victory ? 120 : 0)),
-      passXp: Math.floor(15 + r.kills / 20 + (r.victory ? 120 : 0) + r.bossKills * 30),
+      accountXp: Math.floor((r.kills / 6 + r.time / 8 + (r.victory ? 120 : 0)) * (1 + st.index * 0.1)), // +10% a hall deeper
+      passXp: Math.floor((15 + r.kills / 20 + (r.victory ? 120 : 0) + r.bossKills * 30) * (1 + st.index * 0.1)),
       gems: 0, gear: [], firstClear: false,
     };
     if (r.victory) {
@@ -910,7 +911,9 @@
       if (!meta.vigilOpen()) { s.vigil.ts = U.now(); res.vigilOpened = true; } // the first victory opens the Vigil: it starts from now
       s.cleared[r.stage] = (s.cleared[r.stage] || 0) + 1;
       // boss trophy: one piece of gear, better odds on harder stages
-      const odds = st.index === 0 ? [40, 40, 17, 3, 0, 0] : st.index === 1 ? [0, 45, 40, 13, 2, 0] : [0, 10, 50, 32, 7.5, 0.5];
+      // from the third hall on, each hall deeper a better piece: Legendary 7.5% -> 15%, Mythic 0.5% -> 2% in the seventh
+      const k = Math.max(0, st.index - 2), hi = [0, Math.max(0, 10 - 3 * k), 0, 32 + 3 * k, 7.5 + 1.875 * k, 0.5 + 0.375 * k]; hi[2] = 100 - hi.reduce((a, b) => a + b, 0);
+      const odds = st.index === 0 ? [40, 40, 17, 3, 0, 0] : st.index === 1 ? [0, 45, 40, 13, 2, 0] : hi;
       res.gear.push(meta.createGear(meta.rollRarity(odds)));
     }
     // stats

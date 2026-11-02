@@ -891,7 +891,7 @@
       this.mergeGems();
       if (e.loot) { for (let v = e.loot; v > 0; v -= 20) this.drop('coin', e.x + U.rand(-6, 6), e.y + U.rand(-6, 6), Math.min(20, v)); } // a scarab gives back what it stole
       if (e.hXp) this.drop('xp', e.x, e.y, e.hXp); if (e.hGold) this.drop('coin', e.x, e.y, e.hGold, 'bag'); // a coin wraith's hoard spills out
-      if (e.def.chest) this.drop('coin', e.x, e.y, Math.ceil(C.COIN_VALUE.coins * this.stage.goldMult), 'stack'); // a mimic's hoard
+      if (e.def.chest && Math.random() < 0.3) this.drop('coin', e.x, e.y, Math.ceil(C.COIN_VALUE.coins * this.stage.goldMult), 'stack'); // a mimic's hoard (now and then: the Reliquary is full of mimics, and paid twice the hall before it)
       if (e.def.gas) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 22, delay: 0.2, dur: 3, dmg: e.dmg * 0.3, color: '#90b030', src: e }); // a bog corpse bursts in a cloud of foul gas
       if (e.def.shards) { const o = Math.random() * TAU; for (let i = 0; i < e.def.shards; i++) this.enemyShot(e, o + i / e.def.shards * TAU, 75, e.dmg * 0.6, '#a8e0ff', 'frost'); } // an ice skull bursts into frost shards
       if (e.def.puddle) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 20, delay: 0.2, dur: 4, dmg: 0, slow: 1, color: '#3a8aa0', src: e }); // the drowned leave a pool that drags at your feet

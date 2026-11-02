@@ -8,6 +8,11 @@
       bg: [
         'Намерен предмет вече не сменя сам по-силния, който носиш: със същата рядкост се слага само ако е поне на същото ниво (по-рядък предмет се слага както досега).',
         'Поправено: бързите изстрели вече не прескачат враговете при по-нисък брой кадри, а аркебузът уцелва и враг плътно до героя (преди не го уцелваше изобщо).',
+        'Разглобяването на реликва връща половината от златото, вложено в нивата ѝ (както металите), вместо малка част.',
+        'Наградата за победа расте с всяка зала: от третата нататък шансът за легендарна реликва се вдига от 7,5% до 15%, а за митична от 0,5% до 2% в седмата.',
+        'Всяка следваща зала дава с 10% повече опит за акаунта и за Бойния пропуск.',
+        'Реликварият плаща малко по-малко злато (беше двойно повече от Блатото): съкровището на Мимика пада понякога, а множителят на златото е 5,2.',
+        'Факлите се възстановяват по една на 12 минути (бяха 6).',
         'Повече врагове в първите минути: появяват се почти двойно повече в началото, така че екранът е пълен от първите секунди.',
         'Всяка зала вече е по-трудна от предишната във всяка минута: враговете на залата имат силата на врага, когото заместват (вид, скорост и поведение остават свои), а Катакомбите и Залите на раздора са малко по-силни.',
         'Баланс на уменията след измерване в битка. По-слаби: Пламтящ удар (по-малко горене), Трънлив корен, Сияен ореол (по-бавно презареждане), Драконов огън (по-малко горене), Убийствен риф, Кървав пулс, Присъда, Огнена струя, Блатни растения. По-силни: Дълъг лък, Призрачни игли, Въртящи се чакрами и Градушка.',
@@ -17,6 +22,11 @@
       en: [
         'A piece you find no longer replaces a stronger one you wear: of the same rarity it is put on only at the same level or above (a rarer piece is put on as before).',
         'Fixed: fast shots no longer skip over foes at a lower frame rate, and the arquebus hits a foe right next to the hero too (it used to miss it entirely).',
+        'Salvaging a relic gives back half the gold put into its levels (as the metals), not a small part.',
+        'The victory reward grows with every hall: from the third on, the chance of a Legendary relic rises from 7.5% to 15% and of a Mythic from 0.5% to 2% in the seventh.',
+        'Each deeper hall gives 10% more account and Battle Pass XP.',
+        'The Reliquary pays a little less gold (it paid twice the Blightmire): a Mimic\'s hoard drops now and then, and its gold multiplier is 5.2.',
+        'Torches come back one every 12 minutes (was 6).',
         'More foes in the first minutes: almost twice as many appear at the start, so the screen is full from the first seconds.',
         'Every hall is now harder than the one before it at every minute: a hall\'s own foes have the strength of the foe they stand in for (their look, pace and way of fighting stay their own), and the Catacombs and the Halls of Discord are a little stronger.',
         'Ability balance after measuring them in fights. Weaker: Searing Smite (less burn), Thornroot, Radiant Halo (slower), Wyrmfire (less burn), Killer Riff, Blood Pulse, Judgment, Flame Jet, Bog Plants. Stronger: Longbow, Ghost Darts, Whirling Chakrams and Hail.',
