@@ -58,7 +58,15 @@ lead: read its `fire()` before calling it broken. For a real reading, measure in
 
 ## 3. Measure in a fight when the baseline is not enough
 
-Use the headless game (Playwright, the pre-installed Chromium, `python3 -m http.server 8123` from the repo root).
+With the game served (`python3 -m http.server 8123` from the repo root):
+```bash
+node .claude/skills/dreadhollow-balance/scripts/measure.js 30            # every ability, 30 s in each field
+node .claude/skills/dreadhollow-balance/scripts/measure.js 30 skyfall halo  # some of them
+```
+It measures damage per second at pick-up against one foe 25 units away and against a ring of 30, both standing
+still. Orbiting and arcing abilities (scythes, axes, shards, orbs) can show 0 against the single foe only because
+their path misses that one spot; read those from the crowd column. For anything else, build it yourself:
+use the headless game (Playwright, the pre-installed Chromium).
 In the page: `DH.server.remote = () => false`, build a `new DH.Run({ hero, stage })`, `addAbility(id)`, spawn foes,
 step `run.update(1/30)` with `player.inv` kept high, then read `run.dmgByAb` (damage per ability) and `run.time`.
 Compare abilities under the same conditions (same hero, same foes, same time). Keep scripts in the scratchpad.

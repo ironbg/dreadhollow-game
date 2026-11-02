@@ -7,11 +7,13 @@
       v: '1.61.56',
       bg: [
         'Намерен предмет вече не сменя сам по-силния, който носиш: със същата рядкост се слага само ако е поне на същото ниво (по-рядък предмет се слага както досега).',
+        'Поправено: бързите изстрели вече не прескачат враговете при по-нисък брой кадри, а аркебузът уцелва и враг плътно до героя (преди не го уцелваше изобщо).',
         'Звездопад вече започва с един метеор (преди три); всеки Брой добавя още един.',
         'Прозорецът на умение показва истинския шанс за критичен удар: базовият шанс по бонуса от героя, и над 100% (всеки пълни 100% са сигурен крит).',
       ],
       en: [
         'A piece you find no longer replaces a stronger one you wear: of the same rarity it is put on only at the same level or above (a rarer piece is put on as before).',
+        'Fixed: fast shots no longer skip over foes at a lower frame rate, and the arquebus hits a foe right next to the hero too (it used to miss it entirely).',
         'Skyfall now starts with one meteor (it was three); every Amount adds one more.',
         'An ability\'s window shows the true critical chance: the base chance times the hero\'s bonus, past 100% too (every full 100% is a sure crit).',
       ],

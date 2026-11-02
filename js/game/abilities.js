@@ -173,7 +173,7 @@
         const mx = p.x + Math.cos(base) * 14, my = p.y - 3 + Math.sin(base) * 14;
         for (let i = 0; i < s.count; i++) {
           const ang = base + (i - (s.count - 1) / 2) * 0.12 + U.rand(-0.03, 0.03);
-          proj(run, { k: 'bullet', a, x: mx, y: my, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 3, pierce: s.pierce, life: 0.7 });
+          proj(run, { k: 'bullet', a, x: mx, y: my, ox: p.x, oy: p.y - 3, vx: Math.cos(ang) * s.speed, vy: Math.sin(ang) * s.speed, ang, r: 3, pierce: s.pierce, life: 0.7 }); // its first step starts at the hero: a foe hugging him is hit too
         }
         run.fx.push({ k: 'muzzle', x: mx, y: my, ang: base, life: 0.14, max: 0.14 });
         for (let i = 0; i < 7; i++) { const sp = U.rand(8, 40); run.parts.push({ x: mx, y: my, vx: Math.cos(base) * sp + U.rand(-10, 10), vy: Math.sin(base) * sp - U.rand(6, 22), life: U.rand(0.5, 1.1), max: 1.1, c: U.pick(['#8a8a90', '#6a6a72', '#b4b4bc']), s: U.pick([1, 2]) }); }
@@ -872,6 +872,9 @@
     for (let i = list.length - 1; i >= 0; i--) {
       const b = list[i];
       b.life -= dt;
+      // where the shot was before this step: it hits whatever lies along the way, not only where it lands (a fast shot
+      // at a low frame rate jumped over a foe right in front of it); a shot born ahead of the hero starts at the hero
+      const ox = b.ox != null ? b.ox : b.x, oy = b.oy != null ? b.oy : b.y; b.ox = b.oy = null;
       if (b.k === 'grenade' || b.k === 'brewflask') { // lobbed: an arc to the target point
         b.ft += dt; const k = Math.min(1, b.ft / b.fd);
         b.x = U.lerp(b.sx, b.tx, k); b.y = U.lerp(b.sy, b.ty, k) - Math.sin(k * Math.PI) * (b.k === 'grenade' ? 40 : 30); b.ang += dt * (b.k === 'grenade' ? 9 : 12);
@@ -923,16 +926,20 @@
       }
       let remove = b.life <= 0;
       if (!remove && b.k !== 'sphere') {
-        this.grid.query(b.x, b.y, b.r + 12, tmp);
+        const sx = b.x - ox, sy = b.y - oy, sl2 = sx * sx + sy * sy, half = Math.sqrt(sl2) / 2;
+        this.grid.query((b.x + ox) / 2, (b.y + oy) / 2, b.r + 12 + half, tmp);
         for (const e of tmp) {
           if (e.dead) continue;
           if (!b.cdHit && b.hit.has(e)) continue;
           const rr = b.r + e.r;
-          if (U.dist2(b.x, b.y, e.x, e.y) >= rr * rr) continue;
+          let t = sl2 ? ((e.x - ox) * sx + (e.y - oy) * sy) / sl2 : 1; t = t < 0 ? 0 : t > 1 ? 1 : t; // the nearest point of the step's path
+          const qx = ox + sx * t - e.x, qy = oy + sy * t - e.y;
+          if (qx * qx + qy * qy >= rr * rr) continue;
           // a shot that strikes again and again (shards, confetti) starts its pause only on a real touch, not when it merely passes near
           if (b.cdHit && !this.canHit(e, 'pj' + (b.id || (b.id = Math.random())), b.cdHit)) continue;
           if (!b.cdHit) b.hit.add(e);
           const sp = Math.hypot(b.vx, b.vy) || 1;
+          if (b.k === 'fireball' || b.k === 'fist') { b.x = ox + sx * t; b.y = oy + sy * t; } // they burst where they struck
           if (b.k === 'fireball') { this.explode(b); remove = true; break; }
           if (b.k === 'fist') { this.hitCircle(b.x, b.y, 10 * b.a.s.area, b.a); this.fx.push({ k: 'pop', x: b.x, y: b.y, R: 10 * b.a.s.area, life: 0.2, max: 0.2, color: '#c8a8ff' }); remove = true; break; }
           // a Shieldbearer's shield faces the hero: shots striking it from the front glance off for a quarter and stop there
