@@ -91,7 +91,7 @@
     const eff = (1 + P.effectPct) * (fx.goblet ? Math.max(0.1, 1 - 0.333 * P.area) : 1) * (fx.incubator ? 0.3 : 1), w = a.weapon ? 1 : 0;
     a.s = {
       dmg: b.dmg, dmgPct: m.dmgPct || 0,
-      cd: b.cd ? b.cd / Math.max(0.25, 1 + (def.noAs ? 0 : P.as) + (m.as || 0)) : 0,
+      cd: b.cd ? b.cd * C.ATK_SLOW / Math.max(0.25, 1 + (def.noAs ? 0 : P.as) + (m.as || 0)) : 0,
       area: (b.area || 1) * (1 + P.area + (m.area || 0)),
       count: (b.count || 1) + Math.floor(m.count || 0) + (isProj || isSum ? P.count : 0) + (isSum ? P.summons : 0),
       pierce: (b.pierce || 0) + Math.floor(m.pierce || 0) + (isProj ? P.pierce : 0),
@@ -114,7 +114,7 @@
     if (a.s.frozenfire) a.s.burn += a.s.frost; // Frozen Fire: every chance of Frost is a chance of Burn too
     if (def.msToAs) { a.s.cd /= 1 + 0.5 * Math.max(0, a.s.ms); a.s.ms = 0; } // Arquebus: Multistrike speeds up the reload instead of adding shots
     if (def.beat) {
-      const want = def.beat / Math.max(0.25, 1 + P.as + (m.as || 0));
+      const want = def.beat * C.ATK_SLOW / Math.max(0.25, 1 + P.as + (m.as || 0));
       a.s.every = [8, 4, 2, 1, 0.5].find((v) => v <= want * 1.15) || 0.5;
       a.s.cd = a.s.every * 60 / DH.audio.BATTLE_BPM;
     }

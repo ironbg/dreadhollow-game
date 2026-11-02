@@ -81,6 +81,7 @@
     slow: { mult: 0.91, max: 20, tick: 3 },
     stun: 0.4, curse: 40,
   };
+  C.ATK_SLOW = 1;               // every ability's reload (and beat) is this many times longer
   C.FRAGILE_PER = 0.05;         // Fragile: +5% direct damage taken per stack (unlimited, permanent)
   C.AFFLICT_PER = 0.05;         // Affliction: +5% effect damage taken per stack; half the stacks spread on death
   C.ABILITY_TRAIT_EVERY = 8;    // one ability-trait rank per ability per 8 player levels
