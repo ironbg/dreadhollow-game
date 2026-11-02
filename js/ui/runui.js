@@ -540,7 +540,7 @@
     };
     const stats = () => {
       const b = DH.meta.baseStats(run.heroId, {}), P = run.P, z = (k) => b[k] || 0;
-      const row = (k, base, now, fmt) => h('div.cs-row', ui.statTap(k.slice(5)), h('span', t(k)), h('b', fmt(base)), h('b' + (now > base + 1e-6 ? '.good' : now < base - 1e-6 ? '.bad' : ''), fmt(now)));
+      const row = (k, base, now, fmt) => h('div.cs-row', ui.statTap(k.slice(5)), ui.statLabel(k.slice(5)), h('b', fmt(base)), h('b' + (now > base + 1e-6 ? '.good' : now < base - 1e-6 ? '.bad' : ''), fmt(now)));
       const n0 = (v) => String(Math.round(v)), n1 = (v) => v.toFixed(1), pc = (v) => (v >= 0 ? '+' : '') + U.pct(v);
       return h('div.cs-stats',
         h('div.cs-head', h('span', t('inv.attribute')), h('span', t('inv.base')), h('span', t('inv.total'))),
@@ -597,11 +597,16 @@
       ['dmgPct', '+' + U.pct(P.dmgPct)], ['as', '+' + U.pct(P.as)], ['area', '+' + U.pct(P.area)],
       ['critPct', '+' + U.pct(P.critPct)], ['critBonus', '+' + U.pct(P.critBonus)], ['ms', U.pct(P.ms)],
       ['regen', P.regen.toFixed(1)], ['speedPct', Math.round(P.speed)], ['growth', U.pct(P.growth)],
+      ...['burn', 'spark', 'frost', 'decay', 'fragile', 'affliction'].map((k) => [k, '+' + U.pct(P[k])]),
     ];
+    // two columns that scroll on their own, so the buttons below always stay in place
+    const fade = (el) => el.classList.toggle('end', el.scrollTop + el.clientHeight >= el.scrollHeight - 2);
+    const grid = h('div.pstats', { onscroll: (e) => fade(e.currentTarget) },
+      h('div.statgrid', statRows.map(([k, v]) => h('div', ui.statTap(k), ui.statLabel(k), h('b', v)))));
     const m0 = ui.modal({ title: t('pause.title'), closable: false, cls: 'pausewin', body: (m) => h('div',
       h('div.center.small.muted', t('stage.' + run.stageId + '.name') + ' · ' + U.fmtTime(run.time) + (run.dread ? ' · ' + t('dread.rank', { n: run.dread }) : '')),
       buildRow(run), traitRow(run),
-      h('div.statgrid.three', statRows.map(([k, v]) => h('div', ui.statTap(k), h('span', t('stat.' + k)), h('b', v)))),
+      grid,
       h('div.col',
         h('button.btn.gold.block', { onclick: () => { click(); m.close(); DH.game.resume(); } }, t('pause.resume')),
         h('button.btn.ghost.block', { onclick: () => { click(); ui.openCharacter(run); } }, A.img('u_bag', 'ci'), ' ', t('inv.title')),
@@ -610,6 +615,7 @@
           if (await ui.confirm({ title: t('pause.quit'), body: t('pause.quitConfirm'), okCls: 'red', ok: t('pause.quit') })) { m.close(); DH.game.finishRun(run); }
         } }, t('pause.quit')))) });
     ui.fitModal(m0); // always the whole window on screen, however many abilities and traits
+    requestAnimationFrame(() => fade(grid));
   };
 
   /* ---------------- Revive ---------------- */

@@ -775,7 +775,8 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .charsheet .cs-row b.good { color: #7ee89a; }
 .charsheet .cs-row b.bad { color: var(--blood-hi); }
 .stattap { cursor: pointer; }
-.stattap > span:first-child::after { content: '?'; display: inline-block; width: 11px; height: 11px; margin-left: 4px; border: 1px solid var(--line); border-radius: 50%; font-size: 8px; line-height: 11px; text-align: center; color: var(--dim); vertical-align: 1px; }
+.stattap .nw { white-space: nowrap; }
+.stattap .qm { font-style: normal; display: inline-block; width: 11px; height: 11px; margin-left: 4px; border: 1px solid var(--line); border-radius: 50%; font-size: 8px; line-height: 11px; text-align: center; color: var(--dim); vertical-align: 1px; font-weight: 400; }
 .stattap:active { filter: brightness(1.3); }
 .charsheet .cs-tip { text-align: center; margin-top: 4px; }
 .statinfo p { margin: 4px 0 8px; line-height: 1.45; }
@@ -1614,9 +1615,13 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .modal.pausewin .buildrow .b i { font-size: 8px; bottom: -4px; right: -4px; padding: 1px 3px; }
 .modal.pausewin .buildrow.traits .b { width: 34px; height: 34px; }
 .modal.pausewin .buildrow.traits .b img { width: 28px; height: 28px; }
-.modal.pausewin .statgrid.three > div { min-width: 0; }
-.modal.pausewin .statgrid.three span { min-width: 0; overflow-wrap: anywhere; }
-@media (max-width: 370px) { .modal.pausewin .statgrid.three { grid-template-columns: 1fr 1fr; } }
+.modal.pausewin .pstats { max-height: 152px; overflow-y: auto; margin: 6px 0 8px; padding-right: 2px; overscroll-behavior: contain;
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent); mask-image: linear-gradient(to bottom, #000 78%, transparent); }
+.modal.pausewin .pstats.end { -webkit-mask-image: none; mask-image: none; }
+.modal.pausewin .pstats .statgrid { margin: 0; }
+.modal.pausewin .pstats .statgrid > div { min-width: 0; align-items: center; gap: 6px; }
+.modal.pausewin .pstats .statgrid span { min-width: 0; line-height: 1.2; }
+.modal.pausewin .pstats .statgrid b { white-space: nowrap; }
 
 /* ---------- the developer's panel (js/ui/adminpanel.js) ---------- */
 .ap { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; padding: calc(8px + var(--safe-t)) 0 var(--safe-b); font-family: var(--body); color: var(--text); } /* no z-index: a confirm opened over it (a later sibling) must paint on top */

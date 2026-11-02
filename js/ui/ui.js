@@ -36,6 +36,8 @@
       h('div.btns', h('button.btn.gold', { onclick: () => m.close() }, t('common.close')))) });
   };
   /** A stats-table row that opens the stat's details when tapped. */
+  /** The stat's name with its "?" kept on the line of the last word. */
+  ui.statLabel = (k) => { const w = t('stat.' + k).split(' '), last = w.pop(); return h('span', w.length ? w.join(' ') + ' ' : '', h('span.nw', last, h('i.qm', '?'))); };
   ui.statTap = (k) => ({ cls: 'stattap', onclick: (e) => { e.stopPropagation(); ui.statInfo(k); } });
   ui.weaponUpText = (id, level) => {
     if (level <= 1) return t('wpn.' + id + '.desc');
