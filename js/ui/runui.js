@@ -572,8 +572,30 @@
   /** The hero's stats in four groups (attack, effects, defence, utility), two columns of "name: value".
    *  A value above the hero's own base is green, below it red; every stat opens its details when tapped.
    *  Rare stats appear only when something gives them. */
-  ui.statSheet = (run) => {
-    const b = DH.meta.baseStats(run.heroId, {}), P = run.P, z = (k) => b[k] || 0;
+  ui.statSheet = (run) => sheet(run.P, DH.meta.baseStats(run.heroId, {}), () => Math.round(run.player.hp) + '/' + run.P.maxHp);
+  /** The same sheet out of a fight: what the hero brings into one (relics, Blessings, Archive, Mark). Green is what
+   *  all that adds to the hero's own stats. */
+  ui.openHeroStats = (heroId) => {
+    const st = DH.meta.baseStats(heroId), z = (k) => st[k] || 0, hero = C.heroes[heroId];
+    const P = {
+      maxHp: Math.round(z('baseHp') * (1 + z('maxHpPct'))), speed: z('baseSpeed') * (1 + z('speedPct')), regen: hero.noRegen ? 0 : z('regen'),
+      defense: z('defense'), block: z('block'), dmgPct: z('dmgPct'), addBase: z('addBase'), critPct: z('critPct'), addCrit: z('addCrit'),
+      critBonus: st.critBonus || 0.5, as: z('as'), area: z('area'), duration: z('duration'), count: Math.floor(z('count')), pierce: Math.floor(z('pierce')),
+      ms: z('ms'), msProj: z('msProj'), pickupR: 30 * (1 + z('pickup')), summonPct: z('summonPct'), summons: Math.floor(z('summons')),
+      tag: { physical: z('physPct'), magic: z('magicPct'), fire: z('firePct'), lightning: z('lightningPct'), ice: z('icePct') },
+      growth: 1 + z('growth'), greed: 1 + z('greed'), revives: z('revives'), rerolls: z('rerolls'), chestDrop: z('chestDrop'), tomeDrop: z('tomeDrop'),
+      effectPct: z('effectPct'), grenadePct: z('grenadePct'),
+    };
+    for (const k of ['burn', 'spark', 'frost', 'decay', 'fragile', 'affliction', 'wBurn', 'wSpark', 'wFrost', 'wDecay']) P[k] = z(k);
+    const own = DH.meta.addStats({ baseHp: hero.hp, baseSpeed: hero.speed, regen: hero.regen || 0, defense: hero.defense || 0, block: hero.block || 0, critBonus: 0.5, rerolls: 1, revives: 0 }, hero.bonus || {});
+    click();
+    ui.modal({ title: t('hero.' + heroId + '.name'), cls: 'herostats', body: (m) => h('div',
+      h('div.center.small.muted', t('sheet.sub')),
+      sheet(P, own),
+      h('div.btns', h('button.btn.gold', { onclick: () => m.close() }, t('common.close')))) });
+  };
+  const sheet = (P, b, hpText) => {
+    const z = (k) => b[k] || 0;
     const pc = (v) => (v > 0 ? '+' : '') + U.pct(v), n0 = (v) => String(Math.round(v)), pl = (v) => (v > 0 ? '+' : '') + Math.round(v);
     // [stat, value now, base value, format, always shown]
     const groups = [
@@ -592,7 +614,7 @@
         ['effectPct', P.effectPct, z('effectPct'), pc],
         ...['wBurn', 'wSpark', 'wFrost', 'wDecay'].map((k) => [k, P[k], z(k), pc])]],
       ['defense', 'tr_parry', [
-        ['maxHp', P.maxHp, z('baseHp') * (1 + z('maxHpPct')), () => Math.round(run.player.hp) + '/' + P.maxHp, 1],
+        ['maxHp', P.maxHp, z('baseHp') * (1 + z('maxHpPct')), hpText || n0, 1],
         ['defense', P.defense, z('defense'), (v) => Math.round(v * 100) + ' (' + U.pct(C.defenseDR(v)) + ')', 1],
         ['block', P.block, z('block'), n0, 1], ['regen', P.regen, z('regen'), (v) => v.toFixed(1), 1],
         ['revives', P.revives, z('revives'), n0, 1]]],

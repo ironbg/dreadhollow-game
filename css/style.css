@@ -1480,6 +1480,8 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .doll .resbtn > .ic img { width: 28px; height: 28px; }
 .doll .resbtn .l { font-size: 9px; font-weight: 800; color: var(--text); text-shadow: 0 1px 2px #000, 0 0 4px #000; line-height: 1; }
 .doll .resbtn .badge { top: -4px; right: -2px; }
+.doll .resbtn.statbtn { right: auto; left: 4px; width: auto; min-width: 46px; }
+.modal.herostats .ssheet { margin: 6px 0 4px; }
 .rs-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin-bottom: 6px; }
 .rs-row.done { opacity: .6; }
 .rs-row.locked { opacity: .5; }
