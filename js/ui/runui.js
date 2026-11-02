@@ -538,28 +538,7 @@
             note ? h('div.small.muted', { style: { marginTop: '3px' } }, note) : null)),
         btns.length ? h('div.btns', { style: { marginTop: '8px' } }, btns) : null);
     };
-    const stats = () => {
-      const b = DH.meta.baseStats(run.heroId, {}), P = run.P, z = (k) => b[k] || 0;
-      const row = (k, base, now, fmt) => h('div.cs-row', ui.statTap(k.slice(5)), ui.statLabel(k.slice(5)), h('b', fmt(base)), h('b' + (now > base + 1e-6 ? '.good' : now < base - 1e-6 ? '.bad' : ''), fmt(now)));
-      const n0 = (v) => String(Math.round(v)), n1 = (v) => v.toFixed(1), pc = (v) => (v >= 0 ? '+' : '') + U.pct(v);
-      return h('div.cs-stats',
-        h('div.cs-head', h('span', t('inv.attribute')), h('span', t('inv.base')), h('span', t('inv.total'))),
-        row('stat.maxHp', z('baseHp') * (1 + z('maxHpPct')), P.maxHp, n0),
-        row('stat.regen', z('regen'), P.regen, n1),
-        row('stat.block', z('block'), P.block, n0),
-        row('stat.defense', z('defense') * 100, P.defense * 100, n0),
-        row('stat.speedPct', z('baseSpeed') * (1 + z('speedPct')), P.speed, n0),
-        row('stat.pickup', 30 * (1 + z('pickup')), P.pickupR, n0),
-        row('stat.dmgPct', z('dmgPct'), P.dmgPct, pc),
-        row('stat.as', z('as'), P.as, pc),
-        row('stat.area', z('area'), P.area, pc),
-        row('stat.critPct', z('critPct'), P.critPct, pc),
-        row('stat.critBonus', 0.5 + z('critBonus') - 0.5, P.critBonus, pc),
-        row('stat.ms', z('ms'), P.ms, pc),
-        row('stat.growth', 1 + z('growth'), P.growth, U.pct),
-        ['burn', 'spark', 'frost', 'decay', 'fragile', 'affliction'].map((k) => row('stat.' + k, z(k), P[k], pc)),
-        h('div.small.muted.cs-tip', t('sinfo.tap')));
-    };
+    const stats = () => ui.statSheet(run);
     const damage = () => h('div.cs-stats',
       h('div.cs-head', h('span', t('inv.ability')), h('span', t('inv.dps')), h('span', t('inv.totalDmg'))),
       run.abilities.map((a, i) => {
@@ -589,20 +568,52 @@
     draw();
   };
 
+  /* ---------------- Stat sheet ---------------- */
+  /** The hero's stats in four groups (attack, effects, defence, utility), two columns of "name: value".
+   *  A value above the hero's own base is green, below it red; every stat opens its details when tapped.
+   *  Rare stats appear only when something gives them. */
+  ui.statSheet = (run) => {
+    const b = DH.meta.baseStats(run.heroId, {}), P = run.P, z = (k) => b[k] || 0;
+    const pc = (v) => (v > 0 ? '+' : '') + U.pct(v), n0 = (v) => String(Math.round(v)), pl = (v) => (v > 0 ? '+' : '') + Math.round(v);
+    // [stat, value now, base value, format, always shown]
+    const groups = [
+      ['attack', 'tr_strength', [
+        ['dmgPct', P.dmgPct, z('dmgPct'), pc, 1], ['addBase', P.addBase, z('addBase'), pl, 1],
+        ['as', P.as, z('as'), pc, 1], ['area', P.area, z('area'), pc, 1],
+        ['critPct', P.critPct, z('critPct'), pc, 1], ['critBonus', P.critBonus, 0.5 + z('critBonus') - 0.5, pc, 1],
+        ['addCrit', P.addCrit, z('addCrit'), pc], ['ms', P.ms, z('ms'), pc, 1], ['msProj', P.msProj, z('msProj'), pc],
+        ['count', P.count, z('count'), pl, 1], ['pierce', P.pierce, z('pierce'), pl, 1], ['duration', P.duration, z('duration'), pc, 1],
+        ['physPct', P.tag.physical, z('physPct'), pc, 1], ['magicPct', P.tag.magic, z('magicPct'), pc, 1],
+        ['firePct', P.tag.fire, z('firePct'), pc, 1], ['lightningPct', P.tag.lightning, z('lightningPct'), pc, 1],
+        ['icePct', P.tag.ice, z('icePct'), pc, 1], ['summonPct', P.summonPct, z('summonPct'), pc, 1],
+        ['summons', P.summons, z('summons'), pl], ['grenadePct', P.grenadePct, z('grenadePct'), pc]]],
+      ['effects', 'tr_elementalist', [
+        ...['burn', 'spark', 'frost', 'decay', 'fragile', 'affliction'].map((k) => [k, P[k], z(k), pc, 1]),
+        ['effectPct', P.effectPct, z('effectPct'), pc],
+        ...['wBurn', 'wSpark', 'wFrost', 'wDecay'].map((k) => [k, P[k], z(k), pc])]],
+      ['defense', 'tr_parry', [
+        ['maxHp', P.maxHp, z('baseHp') * (1 + z('maxHpPct')), () => Math.round(run.player.hp) + '/' + P.maxHp, 1],
+        ['defense', P.defense, z('defense'), (v) => Math.round(v * 100) + ' (' + U.pct(C.defenseDR(v)) + ')', 1],
+        ['block', P.block, z('block'), n0, 1], ['regen', P.regen, z('regen'), (v) => v.toFixed(1), 1],
+        ['revives', P.revives, z('revives'), n0, 1]]],
+      ['utility', 'tr_magnetism', [
+        ['speedPct', P.speed, z('baseSpeed') * (1 + z('speedPct')), n0, 1], ['pickup', P.pickupR, 30 * (1 + z('pickup')), n0, 1],
+        ['growth', P.growth, 1 + z('growth'), U.pct, 1], ['greed', P.greed, 1 + z('greed'), U.pct, 1],
+        ['rerolls', P.rerolls, z('rerolls'), n0, 1], ['chestDrop', P.chestDrop, z('chestDrop'), pc], ['tomeDrop', P.tomeDrop, z('tomeDrop'), pc]]],
+    ];
+    return h('div.ssheet', groups.map(([id, icon, rows]) => h('div.ss-sec',
+      h('div.ss-head', h('span', t('sheet.' + id)), A.img(icon, 'ss-ic')),
+      h('div.ss-grid', rows.filter((r) => r[4] || Math.abs(r[1] || 0) > 1e-9).map(([k, now, base, fmt]) =>
+        h('div.ss-row', ui.statTap(k), h('span', t('stat.' + k) + ':'), h('b' + (now > base + 1e-6 ? '.good' : now < base - 1e-6 ? '.bad' : ''), fmt(now || 0))))))),
+      h('div.small.muted.ss-tip', t('sinfo.tap')));
+  };
+
   /* ---------------- Pause ---------------- */
   ui.openPause = (run) => {
     const P = run.P;
-    const statRows = [
-      ['maxHp', Math.round(run.player.hp) + '/' + P.maxHp], ['defense', Math.round(P.defense * 100) + ' (' + U.pct(C.defenseDR(P.defense)) + ')'], ['block', Math.round(P.block)],
-      ['dmgPct', '+' + U.pct(P.dmgPct)], ['as', '+' + U.pct(P.as)], ['area', '+' + U.pct(P.area)],
-      ['critPct', '+' + U.pct(P.critPct)], ['critBonus', '+' + U.pct(P.critBonus)], ['ms', U.pct(P.ms)],
-      ['regen', P.regen.toFixed(1)], ['speedPct', Math.round(P.speed)], ['growth', U.pct(P.growth)],
-      ...['burn', 'spark', 'frost', 'decay', 'fragile', 'affliction'].map((k) => [k, '+' + U.pct(P[k])]),
-    ];
-    // two columns that scroll on their own, so the buttons below always stay in place
+    // the stat sheet scrolls on its own, so the buttons below always stay in place
     const fade = (el) => el.classList.toggle('end', el.scrollTop + el.clientHeight >= el.scrollHeight - 2);
-    const grid = h('div.pstats', { onscroll: (e) => fade(e.currentTarget) },
-      h('div.statgrid', statRows.map(([k, v]) => h('div', ui.statTap(k), ui.statLabel(k), h('b', v)))));
+    const grid = h('div.pstats', { onscroll: (e) => fade(e.currentTarget) }, ui.statSheet(run));
     const m0 = ui.modal({ title: t('pause.title'), closable: false, cls: 'pausewin', body: (m) => h('div',
       h('div.center.small.muted', t('stage.' + run.stageId + '.name') + ' · ' + U.fmtTime(run.time) + (run.dread ? ' · ' + t('dread.rank', { n: run.dread }) : '')),
       buildRow(run), traitRow(run),

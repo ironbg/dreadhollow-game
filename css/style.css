@@ -1615,13 +1615,9 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .modal.pausewin .buildrow .b i { font-size: 8px; bottom: -4px; right: -4px; padding: 1px 3px; }
 .modal.pausewin .buildrow.traits .b { width: 34px; height: 34px; }
 .modal.pausewin .buildrow.traits .b img { width: 28px; height: 28px; }
-.modal.pausewin .pstats { max-height: 152px; overflow-y: auto; margin: 6px 0 8px; padding-right: 2px; overscroll-behavior: contain;
+.modal.pausewin .pstats { max-height: 220px; overflow-y: auto; margin: 6px 0 8px; padding-right: 2px; overscroll-behavior: contain;
   -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent); mask-image: linear-gradient(to bottom, #000 78%, transparent); }
 .modal.pausewin .pstats.end { -webkit-mask-image: none; mask-image: none; }
-.modal.pausewin .pstats .statgrid { margin: 0; }
-.modal.pausewin .pstats .statgrid > div { min-width: 0; align-items: center; gap: 6px; }
-.modal.pausewin .pstats .statgrid span { min-width: 0; line-height: 1.2; }
-.modal.pausewin .pstats .statgrid b { white-space: nowrap; }
 
 /* ---------- the developer's panel (js/ui/adminpanel.js) ---------- */
 .ap { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; padding: calc(8px + var(--safe-t)) 0 var(--safe-b); font-family: var(--body); color: var(--text); } /* no z-index: a confirm opened over it (a later sibling) must paint on top */
@@ -1676,3 +1672,18 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .ap-pre { max-height: 360px; overflow: auto; background: #0d090f; border: 1px solid var(--line); padding: 6px; font-size: 11px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .ap details summary { cursor: pointer; color: var(--muted); font-size: 13px; margin-top: 6px; }
 .mail-msg { white-space: pre-wrap; line-height: 1.4; margin: 6px 0 10px; }
+
+/* Stat sheet: four groups, two columns of "name: value" */
+.ssheet { display: flex; flex-direction: column; gap: 8px; }
+.ss-sec { background: rgba(0,0,0,.35); border: 1px solid var(--line); padding: 0 0 6px; }
+.ss-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; background: rgba(0,0,0,.45); border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+.ss-head span { font-weight: 800; color: var(--gold); font-size: 13px; letter-spacing: .3px; }
+.ss-head .ss-ic { width: 22px; height: 22px; }
+.ss-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 10px; row-gap: 1px; padding: 0 8px; }
+.ss-row { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 4px; min-width: 0; font-size: 12px; line-height: 1.3; padding: 2px 0; }
+.ss-row > span:first-child { color: #e8dccb; }
+.ss-row b { font-weight: 800; color: #f0e2b0; white-space: nowrap; }
+.ss-row b.good { color: #7ee89a; }
+.ss-row b.bad { color: var(--blood-hi); }
+.ss-tip { text-align: center; }
+.charsheet .ssheet { margin-top: 4px; }
