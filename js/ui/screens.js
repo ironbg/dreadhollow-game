@@ -78,7 +78,6 @@
         h('img.thumb.art', { src: thumbs[sid].url, alt: '' }),
         h('div.chips',
           cleared ? h('button.chip' + (agonyOn ? '.on' : ''), { onclick: (e) => { e.stopPropagation(); click(); s.agony[sid] = !s.agony[sid]; DH.save.persist(); ui.refresh(); } }, A.img('u_agony', 'ci'), t('hud.agony'), agonyOn ? A.img('u_check', 'ci') : null) : h('button.chip.off', { onclick: (e) => { e.stopPropagation(); click(); ui.toast(t('home.agonyLocked')); } }, A.img('u_lock', 'ci'), t('hud.agony')),
-          M.altarUnlocked() && !st.lordKills && !st.vault ? h('button.chip' + (s.killMode ? '.on' : ''), { onclick: (e) => { e.stopPropagation(); click(); s.killMode = !s.killMode; DH.save.persist(); ui.toast(s.killMode ? t('home.killModeOn', { n: C.KILL_MODE }) : t('home.killModeOff')); ui.refresh(); } }, A.img('u_kill', 'ci'), t('home.killMode'), s.killMode ? A.img('u_check', 'ci') : null) : null,
           s.secrets[sid] ? h('span.chip.secret', A.img('u_secret', 'ci'), t('home.secret')) : null,
           dread ? h('button.chip.dread', { onclick: (e) => { e.stopPropagation(); ui.go('shrine', 'altar'); } }, A.img('a_mirror', 'ci'), t('dread.short', { n: dread })) : null),
         h('div.info',

@@ -16,9 +16,7 @@
   R.initHall = function () {
     const st = this.stage;
     this.bridge = st.bridge || 0;
-    const km = !st.lordKills && !st.vault && DH.save.data.killMode && DH.meta.altarUnlocked() ? C.KILL_MODE : 0; // Kill Mode (Shrine)
-    this.killMode = !!km;
-    this.lordKills = st.lordKills || km ? Math.round((st.lordKills || km) * this.runLength / C.RUN_LENGTH) : 0;
+    this.lordKills = st.lordKills ? Math.round(st.lordKills * this.runLength / C.RUN_LENGTH) : 0;
     this.vaultLevel = 0;
     this.pylons = [];
     if (st.dissonator) { this.hex = null; this.initDissonator(); }

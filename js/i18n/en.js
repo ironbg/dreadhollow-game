@@ -641,7 +641,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'hud.dissoFound': 'Light relays hum in the dark… align them with the golden arrows',
   'hud.dissoSolved': 'The Dissonator Monolith awakens!',
   'stage.discord.rule': 'Hell knights and swarms of bats flood the halls. The light relays all around hide a secret against the Lord.',
-  'home.killMode': 'Kill Mode', 'home.killModeOn': 'Kill Mode: the final Lord comes after {n} kills instead of at 10:00.', 'home.killModeOff': 'Kill Mode off: the final Lord comes at 10:00.',
+ 
   'revive.noMore': 'No gem revives left this run', 'revive.left': '{n} left',
   'deeds.unlockBlessing': 'Unlocks the {name} Blessing',
   'armory.equippedFor': 'Equipped: {hero}', 'archive.spent': 'Shards assigned: {n}', 'archive.reset': 'Reclaim', 'archive.resetBody': 'Take back all shards this hero has assigned ({n})?',

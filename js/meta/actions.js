@@ -74,7 +74,7 @@
   };
 
   /** Fields the player sets freely (settings, choices on screen): the server takes them from the device, checked. */
-  const FREE = ['settings', 'selectedHero', 'selectedStage', 'trackedDeed', 'tutorialDone', 'titleChosen', 'seen', 'agony', 'killMode'];
+  const FREE = ['settings', 'selectedHero', 'selectedStage', 'trackedDeed', 'tutorialDone', 'titleChosen', 'seen', 'agony'];
   /** Copy the free fields of `from` onto `to` (both profiles), keeping only values that make sense for `to`. */
   const overlayFree = (to, from) => {
     if (!from || typeof from !== 'object') return to;
@@ -83,7 +83,7 @@
     if (typeof from.selectedHero === 'string' && C.heroes[from.selectedHero] && (to.heroes[from.selectedHero] || C.heroes[from.selectedHero].unlock.free)) to.selectedHero = from.selectedHero;
     if (typeof from.selectedStage === 'string' && C.stages[from.selectedStage]) to.selectedStage = from.selectedStage;
     if (from.trackedDeed === null || typeof from.trackedDeed === 'string') to.trackedDeed = from.trackedDeed;
-    ['tutorialDone', 'titleChosen', 'killMode'].forEach((k) => { if (typeof from[k] === 'boolean') to[k] = from[k]; });
+    ['tutorialDone', 'titleChosen'].forEach((k) => { if (typeof from[k] === 'boolean') to[k] = from[k]; });
     if (from.seen && typeof from.seen === 'object') to.seen = Object.assign({}, to.seen, from.seen);
     if (from.agony && typeof from.agony === 'object') { to.agony = {}; for (const k in from.agony) if (C.stages[k] && to.cleared[k]) to.agony[k] = !!from.agony[k]; }
     return to;
