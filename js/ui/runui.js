@@ -312,7 +312,8 @@
     const def = C.abilities[a.id], s = a.s || {}, P = run.P;
     let pct = 1 + (P.dmgPct || 0) + (s.dmgPct || 0); for (const tg of a.tags || def.tags) if (P.tag && P.tag[tg]) pct += P.tag[tg];
     if ((a.tags || def.tags).includes('summon')) pct += P.summonPct || 0;
-    const hit = Math.round(((s.dmg || 0) + (P.addBase || 0)) * pct), crit = Math.round(Math.min(1, (s.crit || 0) + (P.critPct || 0)) * 100);
+    const hit = Math.round(((s.dmg || 0) + (P.addBase || 0)) * pct), critC = ((s.crit || 0) + (P.addCrit || 0)) * (1 + (P.critPct || 0)) * (run.fx_ && run.fx_.goblet ? Math.max(0.1, 1 - 0.333 * (P.area || 0)) : 1), // as combat.js critRoll: past 100% every full 100% is a sure crit
+      crit = critC > 0 ? (critC < 0.1 ? Math.round(critC * 1000) / 10 : Math.round(critC * 100)) : 0;
     const stat = (k, v) => (v == null || v === '' ? null : h('div.ai-st', h('span', t('abinfo.' + k)), h('b', v)));
     const rnd = (v, d) => Math.round(v * Math.pow(10, d || 0)) / Math.pow(10, d || 0);
     // the ability's traits taken this fight, with their ranks, and its upgrades
@@ -427,7 +428,7 @@
     const gearLine = (it) => {
       const def = E.gear[it.type], st = E.gearStat(it.type, it.rarity, 1), sp = E.gearSpecial(it.type, it.rarity);
       const slot = DH.meta.slotForRun(it.type, run.runGear), cur = run.runGear[slot] || DH.meta.equippedItem(slot);
-      const better = !cur || it.rarity > cur.rarity, same = cur && cur.rarity === it.rarity;
+      const better = !cur || it.rarity > cur.rarity, same = !!cur && cur.rarity === it.rarity && DH.meta.lootBetter(it, cur); // a find of the same rarity below the worn piece's level is worse
       return { def, st, sp, cur, better, same };
     };
     // the X refuses the pieces: half a level of experience instead (not when Ivory Dice already chose)

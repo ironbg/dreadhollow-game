@@ -384,8 +384,11 @@
     const eqp = meta.eq(), cur = slots.map((sl) => (runGear[sl] || meta.gearById(eqp[sl])));
     const twin = meta.twinSlot(type, (sl) => runGear[sl] || meta.gearById(eqp[sl])); if (twin) return twin; // never two rings of one kind
     if (!cur[0]) return slots[0]; if (!cur[1]) return slots[1];
-    return cur[0].rarity <= cur[1].rarity ? slots[0] : slots[1];
+    return meta.lootBetter(cur[1], cur[0]) ? slots[0] : slots[1]; // the weaker of the two
   };
+  /** Does a found piece beat the one worn? A higher rarity does; the same rarity only at the same level or above
+   *  (a level-1 find never pushes off a piece of its rarity forged to level 40). */
+  meta.lootBetter = (item, cur) => !cur || item.rarity > cur.rarity || (item.rarity === cur.rarity && (item.level || 1) >= (cur.level || 1));
 
   /* ---------------- Marks ---------------- */
   meta.markUnlocked = (hero) => meta.deedDone('d_mark_' + hero);

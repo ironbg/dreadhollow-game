@@ -1117,7 +1117,7 @@
       const slot = DH.meta.slotForRun(item.type, this.runGear), cur = this.runGear[slot] || DH.meta.equippedItem(slot), fx = this.fx_ || {};
       let equipped = false;
       if (fx.commit && this.runGear[slot]) equipped = false; // Curse of Commitment: what you put on stays on
-      else if (!cur || item.rarity >= cur.rarity || fx.ivoryDice) equipped = true;
+      else if (DH.meta.lootBetter(item, cur) || fx.ivoryDice) equipped = true;
       if (equipped) { const prev = this.runGear[slot]; this.runGear[slot] = item; if (prev) this.bag.push(prev); this.recompute(); }
       else this.bag.push(item);
       if (!fx.ivoryDice) this.player.inv = Math.max(this.player.inv, 0.5); // half a second of grace after choosing (not with Ivory Dice)
