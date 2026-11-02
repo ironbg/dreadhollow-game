@@ -8,7 +8,7 @@
       bg: [
         'Намерен предмет вече не сменя сам по-силния, който носиш: със същата рядкост се слага само ако е поне на същото ниво (по-рядък предмет се слага както досега).',
         'Поправено: бързите изстрели вече не прескачат враговете при по-нисък брой кадри, а аркебузът уцелва и враг плътно до героя (преди не го уцелваше изобщо).',
-        'Разглобяването на реликва връща половината от златото, вложено в нивата ѝ (както металите), вместо малка част.',
+        'Разглобяването на реликва връща четвърт от златото, вложено в нивата ѝ, вместо малка част.',
         'Наградата за победа расте с всяка зала: от третата нататък шансът за легендарна реликва се вдига от 7,5% до 15%, а за митична от 0,5% до 2% в седмата.',
         'Всяка следваща зала дава с 10% повече опит за акаунта и за Бойния пропуск.',
         'Реликварият плаща малко по-малко злато (беше двойно повече от Блатото): съкровището на Мимика пада понякога, а множителят на златото е 5,2.',
@@ -22,7 +22,7 @@
       en: [
         'A piece you find no longer replaces a stronger one you wear: of the same rarity it is put on only at the same level or above (a rarer piece is put on as before).',
         'Fixed: fast shots no longer skip over foes at a lower frame rate, and the arquebus hits a foe right next to the hero too (it used to miss it entirely).',
-        'Salvaging a relic gives back half the gold put into its levels (as the metals), not a small part.',
+        'Salvaging a relic gives back a quarter of the gold put into its levels, not a small part.',
         'The victory reward grows with every hall: from the third on, the chance of a Legendary relic rises from 7.5% to 15% and of a Mythic from 0.5% to 2% in the seventh.',
         'Each deeper hall gives 10% more account and Battle Pass XP.',
         'The Reliquary pays a little less gold (it paid twice the Blightmire): a Mimic\'s hoard drops now and then, and its gold multiplier is 5.2.',

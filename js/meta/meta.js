@@ -343,8 +343,8 @@
     }
     return out;
   };
-  /** Gold back for a salvaged item: a little for its rarity, and half of the gold its levels cost (as the metals). */
-  meta.salvageValue = (g) => { let lv = 0; for (let l = 1; l < g.level; l++) lv += E.gearLevelCost(g.rarity, l); return Math.floor(80 * Math.pow(2.2, g.rarity) + lv / 2); };
+  /** Gold back for a salvaged item: a little for its rarity, and a quarter of the gold its levels cost. */
+  meta.salvageValue = (g) => { let lv = 0; for (let l = 1; l < g.level; l++) lv += E.gearLevelCost(g.rarity, l); return Math.floor(40 * Math.pow(2.2, g.rarity) + lv / 4); };
   /** The materials a salvaged item gives back: a little of its rarity's metal, and half of what its levels cost. */
   meta.salvageMats = (g) => {
     const out = {}, add = (k, n) => { if (n > 0) out[k] = (out[k] || 0) + n; };
