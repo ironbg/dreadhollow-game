@@ -38,6 +38,9 @@ lead: read its `fire()` before calling it broken. For a real reading, measure in
 - Defence that can make the hero untouchable for long stretches (block, revives, invulnerability windows).
 
 **Economy (faucets and sinks)**
+- What one won fight pays in each hall, played and settled by the game itself:
+  `node .claude/skills/dreadhollow-balance/scripts/fightpay.js 10` (gold split into fight / time / win bonus,
+  metals, herbs, account and pass XP, the victory relic). Pair it with `balance.js economy` for the prices.
 - Faucets: fights (`settleRun`: gold, account XP, pass XP, metals, herbs, the victory chest piece), Vigil, daily
   missions and activity chests, sign-in calendars, Battle Pass, events (`live.json` / the admin panel's live
   settings), resource store (free + ads), ads, deeds, store products.
