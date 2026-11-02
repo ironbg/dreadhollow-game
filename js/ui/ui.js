@@ -94,6 +94,17 @@
   const stack = [];
   /** Windows in the menus open and shut with a sound; during a run they stay quiet (a level-up comes every few seconds). */
   const inMenu = () => !(DH.game && DH.game.mode === 'run');
+  /** A window's closing row of buttons: the last thing in its content — a .btns row (at most three levels down), or
+   *  a lone button / a column of nothing but buttons straight in the content (not the last entry of some list), or
+   *  whatever the window marks with .mact. */
+  const isActs = (el, d) => el.matches('.btns') || (d <= 1 && (el.matches('button.btn') || (el.children.length > 0 && [...el.children].every((c) => c.matches('button.btn')))));
+  const dockOf = (content) => {
+    if (!content || content.nodeType !== 1) return null;
+    const marked = content.querySelectorAll('.mact'); if (marked.length) return marked[marked.length - 1]; // a window can name its row
+    let el = content;
+    for (let d = 0; el && el.nodeType === 1 && d < 4; d++, el = el.lastElementChild) if (isActs(el, d)) return el;
+    return null;
+  };
   ui.modal = (o) => {
     const layer = document.getElementById('modals');
     const box = h('div.modal' + (o.cls ? '.' + o.cls.split(' ').join('.') : ''));
@@ -116,6 +127,8 @@
         onX ? h('button.x', { onclick: onX, 'aria-label': t('common.close') }, DH.icons.img('u_close', 'ci')) : null));
       if (typeof content === 'function') content = content(api);
       if (content) box.appendChild(content);
+      const act = o.dock === false ? null : dockOf(content);
+      if (act) box.appendChild(h('div.mdock', act)); // the window's buttons stay pinned at the bottom; the content scrolls behind them
       box.appendChild(h('div.mfoot')); // a pinned bottom margin: scrolled content stops as far from the frame as at the sides
     }
     fill(o.body);

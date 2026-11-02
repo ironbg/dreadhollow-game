@@ -369,7 +369,7 @@
         buildRow(run),
         mode ? h('div.center.potionhint', t('potion.hint.' + mode)) : null,
         h('div', { style: { marginTop: '8px' } }, cards),
-        h('div.lvfoot', hasPot ? h('div.row.pots', LV.map(pot)) : null,
+        h('div.lvfoot.mact', hasPot ? h('div.row.pots', LV.map(pot)) : null,
           h('div.lvacts', h('button.btn.small.ghost', { onclick: () => { click(); ui.openCharacter(run, {}); } }, t('levelup.stats')), // the hero's stats and gear while choosing
             rerollBtn))));
     };

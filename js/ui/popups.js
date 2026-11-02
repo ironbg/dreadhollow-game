@@ -43,7 +43,7 @@
       return h('div.avtab',
         h('div.avpick', h('b', sel ? avName(sel) : ''), h('span.small.muted', ' · ' + t('avatar.count', { n: C.AVATARS.filter((a) => M.avatarUnlocked(a.id)).length, m: C.AVATARS.length }))),
         grid,
-        h('button.btn.green.block.avapply' + (changed ? '' : '.off'), { onclick: async () => {
+        h('button.btn.green.block.avapply.mact' + (changed ? '' : '.off'), { onclick: async () => {
           if (!changed) return;
           if (await ui.act('setAvatar', { id: pick })) { DH.audio.play('buy'); ui.refresh(); draw(); }
         } }, t('avatar.apply')));
@@ -570,7 +570,7 @@
       m.set(h('div',
         h('div.center.small.muted', { style: { marginBottom: '8px' } }, t('trib.desc')),
         list,
-        h('div.row.trib-foot', h('div', t('trib.total'), ' ', A.img('i_gold'), h('b' + (s.gold >= cost ? '' : '.bad'), U.fmt(cost)), h('span.small.muted', ' / ' + U.fmt(Math.floor(s.gold)))),
+        h('div.row.trib-foot.mact', h('div', t('trib.total'), ' ', A.img('i_gold'), h('b' + (s.gold >= cost ? '' : '.bad'), U.fmt(cost)), h('span.small.muted', ' / ' + U.fmt(Math.floor(s.gold)))),
           h('button.btn.gold' + (can ? '' : '.off'), { onclick: async () => {
             if (!pick.length) { ui.toast(t('trib.needOne'), 'bad'); return; }
             if (s.gold < cost) { ui.toast(t('common.notEnough'), 'bad'); return; }
