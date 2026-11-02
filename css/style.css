@@ -774,6 +774,11 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .charsheet .cs-row b:nth-child(2) { color: var(--dim); }
 .charsheet .cs-row b.good { color: #7ee89a; }
 .charsheet .cs-row b.bad { color: var(--blood-hi); }
+.stattap { cursor: pointer; }
+.stattap > span:first-child::after { content: '?'; display: inline-block; width: 11px; height: 11px; margin-left: 4px; border: 1px solid var(--line); border-radius: 50%; font-size: 8px; line-height: 11px; text-align: center; color: var(--dim); vertical-align: 1px; }
+.stattap:active { filter: brightness(1.3); }
+.charsheet .cs-tip { text-align: center; margin-top: 4px; }
+.statinfo p { margin: 4px 0 8px; line-height: 1.45; }
 .charsheet .cs-row span { display: flex; align-items: center; gap: 4px; min-width: 0; }
 .charsheet .cs-row .ci { width: 18px; height: 18px; }
 

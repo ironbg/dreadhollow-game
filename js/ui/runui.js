@@ -540,7 +540,7 @@
     };
     const stats = () => {
       const b = DH.meta.baseStats(run.heroId, {}), P = run.P, z = (k) => b[k] || 0;
-      const row = (k, base, now, fmt) => h('div.cs-row', h('span', t(k)), h('b', fmt(base)), h('b' + (now > base + 1e-6 ? '.good' : now < base - 1e-6 ? '.bad' : ''), fmt(now)));
+      const row = (k, base, now, fmt) => h('div.cs-row', ui.statTap(k.slice(5)), h('span', t(k)), h('b', fmt(base)), h('b' + (now > base + 1e-6 ? '.good' : now < base - 1e-6 ? '.bad' : ''), fmt(now)));
       const n0 = (v) => String(Math.round(v)), n1 = (v) => v.toFixed(1), pc = (v) => (v >= 0 ? '+' : '') + U.pct(v);
       return h('div.cs-stats',
         h('div.cs-head', h('span', t('inv.attribute')), h('span', t('inv.base')), h('span', t('inv.total'))),
@@ -554,7 +554,11 @@
         row('stat.as', z('as'), P.as, pc),
         row('stat.area', z('area'), P.area, pc),
         row('stat.critPct', z('critPct'), P.critPct, pc),
-        row('stat.critBonus', 0.5 + z('critBonus') - 0.5, P.critBonus, pc));
+        row('stat.critBonus', 0.5 + z('critBonus') - 0.5, P.critBonus, pc),
+        row('stat.ms', z('ms'), P.ms, pc),
+        row('stat.growth', 1 + z('growth'), P.growth, U.pct),
+        ['burn', 'spark', 'frost', 'decay', 'fragile', 'affliction'].map((k) => row('stat.' + k, z(k), P[k], pc)),
+        h('div.small.muted.cs-tip', t('sinfo.tap')));
     };
     const damage = () => h('div.cs-stats',
       h('div.cs-head', h('span', t('inv.ability')), h('span', t('inv.dps')), h('span', t('inv.totalDmg'))),
@@ -589,15 +593,15 @@
   ui.openPause = (run) => {
     const P = run.P;
     const statRows = [
-      [t('stat.maxHp'), Math.round(run.player.hp) + '/' + P.maxHp], [t('stat.defense'), Math.round(P.defense * 100) + ' (' + U.pct(C.defenseDR(P.defense)) + ')'], [t('stat.block'), Math.round(P.block)],
-      [t('stat.dmgPct'), '+' + U.pct(P.dmgPct)], [t('stat.as'), '+' + U.pct(P.as)], [t('stat.area'), '+' + U.pct(P.area)],
-      [t('stat.critPct'), '+' + U.pct(P.critPct)], [t('stat.critBonus'), '+' + U.pct(P.critBonus)], [t('stat.ms'), U.pct(P.ms)],
-      [t('stat.regen'), P.regen.toFixed(1)], [t('stat.speedPct'), Math.round(P.speed)], [t('stat.growth'), U.pct(P.growth)],
+      ['maxHp', Math.round(run.player.hp) + '/' + P.maxHp], ['defense', Math.round(P.defense * 100) + ' (' + U.pct(C.defenseDR(P.defense)) + ')'], ['block', Math.round(P.block)],
+      ['dmgPct', '+' + U.pct(P.dmgPct)], ['as', '+' + U.pct(P.as)], ['area', '+' + U.pct(P.area)],
+      ['critPct', '+' + U.pct(P.critPct)], ['critBonus', '+' + U.pct(P.critBonus)], ['ms', U.pct(P.ms)],
+      ['regen', P.regen.toFixed(1)], ['speedPct', Math.round(P.speed)], ['growth', U.pct(P.growth)],
     ];
     const m0 = ui.modal({ title: t('pause.title'), closable: false, cls: 'pausewin', body: (m) => h('div',
       h('div.center.small.muted', t('stage.' + run.stageId + '.name') + ' · ' + U.fmtTime(run.time) + (run.dread ? ' · ' + t('dread.rank', { n: run.dread }) : '')),
       buildRow(run), traitRow(run),
-      h('div.statgrid.three', statRows.map(([k, v]) => h('div', h('span', k), h('b', v)))),
+      h('div.statgrid.three', statRows.map(([k, v]) => h('div', ui.statTap(k), h('span', t('stat.' + k)), h('b', v)))),
       h('div.col',
         h('button.btn.gold.block', { onclick: () => { click(); m.close(); DH.game.resume(); } }, t('pause.resume')),
         h('button.btn.ghost.block', { onclick: () => { click(); ui.openCharacter(run); } }, A.img('u_bag', 'ci'), ' ', t('inv.title')),

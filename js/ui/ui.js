@@ -18,6 +18,25 @@
   };
   ui.fmtStat = (k, v) => fmtStat1(k, v).replace('+-', '−'); // trade-offs read '−15% …'
   ui.fmtStats = (mods, mult) => Object.keys(mods).map((k) => ui.fmtStat(k, mods[k] * (mult == null ? 1 : mult))).join(', ');
+  /** What a stat does, opened by tapping it in a stats table. The effects' numbers come from C.STATUS. */
+  const EFFECT_STATS = ['burn', 'spark', 'frost', 'decay', 'fragile', 'affliction'];
+  const r2 = (v) => { const n = Math.round(v * 100) / 100; return document.documentElement.lang === 'bg' ? String(n).replace('.', ',') : n; };
+  ui.statInfo = (k) => {
+    const T = C.STATUS, a = {
+      burn: { per: r2(T.burn.per * 100), tick: r2(T.burn.tick), dur: r2(T.burn.dur), max: T.burn.max },
+      spark: { per: r2(T.spark.per * 100), tick: r2(T.spark.tick), max: T.spark.max },
+      frost: { per: r2(T.frost.per * 100), window: T.frost.window, max: T.frost.max },
+      decay: { per: r2(T.decay.per * 100), armor: r2(T.decay.armor * 100) },
+      fragile: { v: r2(C.FRAGILE_PER * 100) }, affliction: { v: r2(C.AFFLICT_PER * 100) },
+    }[k] || {};
+    DH.audio.play('click');
+    ui.modal({ title: t('stat.' + k), cls: 'statinfo', body: (m) => h('div',
+      h('p', t('sinfo.' + k, a)),
+      EFFECT_STATS.includes(k) ? h('p.small.muted', t('sinfo.over')) : null,
+      h('div.btns', h('button.btn.gold', { onclick: () => m.close() }, t('common.close')))) });
+  };
+  /** A stats-table row that opens the stat's details when tapped. */
+  ui.statTap = (k) => ({ cls: 'stattap', onclick: (e) => { e.stopPropagation(); ui.statInfo(k); } });
   ui.weaponUpText = (id, level) => {
     if (level <= 1) return t('wpn.' + id + '.desc');
     const m = C.weapons[id].levels[level - 2], parts = [];
