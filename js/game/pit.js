@@ -50,7 +50,7 @@
   /** Each frame in place of the hall's spawning: the clock, the waves, the hazards. */
   R.updatePit = function (dt) {
     const P = this.pit;
-    if (this.time >= E.PIT.secs) { this.pitOver(); return; }
+    if (this.time >= (P.secs || E.PIT.secs)) { this.pitOver(); return; }
     let alive = 0; for (const e of this.enemies) if (e.pitW && !e.dead) alive++;
     if (P.alive > 0 && alive === 0) { // a wave falls: the next one comes at once
       P.cleared++; P.next = this.time + 0.6;

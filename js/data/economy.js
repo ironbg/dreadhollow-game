@@ -399,6 +399,21 @@
     weekly: [[1, { essence: 3000, gems: 500 }], [2, { essence: 2000, gems: 300 }], [3, { essence: 1500, gems: 200 }],
       [10, { essence: 1000, gems: 100 }], [25, { essence: 600, gems: 50 }], [50, { essence: 300, gems: 20 }]],
   };
+  /** The Pit's Mastery: experience from every Pit fight (and sweep), a level up to E.PIT_MASTERY.max, a point a level
+   *  to put in its cards (they work in the Pit only, except Essence and the entry). Freely reset. */
+  E.PIT_MASTERY = {
+    max: 100, xpPerWave: 5,                                   // a fight or a sweep: 5 experience per wave reached
+    next: (lv) => 60 + 15 * lv,                               // experience from level lv to lv + 1
+    perks: {
+      power:   { icon: 'tr_strength',    max: 10, cost: 2, per: 0.15 },  // +15% damage a level
+      guard:   { icon: 'tr_thickhide',   max: 10, cost: 2, per: 0.05 },  // +5 Defense a level
+      fort:    { icon: 'tr_parry',       max: 5,  cost: 3, per: 0.03 },  // 3% less damage taken a level
+      execute: { icon: 'u_kill',         max: 5,  cost: 3, per: 0.1 },   // +10% damage a level on foes under 30% health
+      time:    { icon: 'tr_persistence', max: 4,  cost: 4, per: 15 },    // +15 s a level
+      essence: { icon: 'i_essence',      max: 4,  cost: 3, per: 0.1 },   // +10% Essence a level
+      entry:   { icon: 'n_skull',        max: 1,  cost: 10, per: 1 },    // one more entry a day
+    },
+  };
   E.pitWeeklyReward = (rank) => { const r = E.PIT.weekly.find(([n]) => rank <= n); return r ? r[1] : null; };
   /** The account's reward track: a bigger reward every 5 levels, for ever. Each milestone pays gems, the metal of its
    *  level, and in turn a Silver chest (x5), a Gold chest (x10) or a sure relic (x20: Epic, Legendary from 60);

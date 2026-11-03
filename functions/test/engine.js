@@ -141,5 +141,13 @@ const live = require('../game/live.json');
   r.profile.pit.active = { at: Date.now() - 90000, from: 0, affixes: [] };
   r = await withProfile(r.profile, live, (DH) => { DH.actions.list.pitEnd.run({ waves: 17 }); return DH.meta.boardPending().map((b) => b.key.split('__')[0] + ':' + b.entry.score); });
   assert.deepStrictEqual(r.result, ['pit:17', 'pit:17']);
+  // the Pit's Mastery: experience from a fight, points per level, a card bought, the time and Essence it adds, a free reset
+  r = await withProfile(Object.assign({}, p0, { pit: { best: 0, day: null, used: 0, active: { at: Date.now() - 120000, from: 40, affixes: [] }, pass: false } }), live, (DH) => { DH.actions.list.pitEnd.run({ waves: 20 }); return DH.meta.pitMastery(); });
+  assert.ok(r.result.lv >= 3, 'wave 60 gives some levels');
+  r.profile.pit.mxp = 99999;
+  r = await withProfile(r.profile, live, (DH) => { const M = DH.meta; for (let i = 0; i < 4; i++) DH.actions.list.pitPerkUp.run({ id: 'time' }); DH.actions.list.pitPerkUp.run({ id: 'essence' }); return [M.pitSecs(), M.pitPerWave(), M.pitPerk('time'), DH.actions.list.pitPerkUp.run({ id: 'time' })]; });
+  assert.deepStrictEqual(r.result, [240, 11, 4, null]);
+  r = await withProfile(r.profile, live, (DH) => { DH.actions.list.pitPerkReset.run({}); return DH.meta.pitSecs(); });
+  assert.strictEqual(r.result, 180);
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });

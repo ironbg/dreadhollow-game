@@ -26,6 +26,8 @@
     let taken = 1;
     if (this.hero.perLevel) for (const k in this.hero.perLevel) { const v = this.hero.perLevel[k] * lv; if (k === 'taken') taken += v; else st[k] = (st[k] || 0) + v; } // Level Up Bonuses
     if (this.pit && this.pit.affixes.includes('chains')) taken *= C.PIT_FX.chains; // the Pit's Chained Flesh
+    const pm = this.pit && this.pit.perks; // the Pit's Mastery cards
+    if (pm) { st.dmgPct = (st.dmgPct || 0) + (pm.power || 0); st.defense = (st.defense || 0) + (pm.guard || 0); taken *= 1 - (pm.fort || 0); }
     if (st.killAs) st.as = (st.as || 0) + Math.min(st.killAsMax || 0.1, this.killAsStacks * st.killAs);
     if (this.fx_.swapCrit) { const a = st.critPct || 0; st.critPct = st.critBonus - 0.5; st.critBonus = 0.5 + a; }
     // Artifacts that shape the hero's stats
@@ -174,7 +176,8 @@
     const exp = e.exposed > 0; // Hating Heart: the Lord's guard is down
     const vul = (1 + C.FRAGILE_PER * S.fragile) * (exp ? 1.5 : 1); // Fragile: +5% direct damage per stack
     const def = exp ? 0 : Math.max(0, e.armor - C.STATUS.decay.armor * S.decay); // Decay strips armor for good
-    const dmg = Math.max(1, base * pct * cm * vul * (1 - def) * (mult == null ? 1 : mult) * (e.def.dmgFactor || 1) * (e.perch ? 0.2 : 1) * (e.guard > 0 ? 0.15 : 1) * (e.ward > 0 ? 0.5 : 1) * (e.def.iceArmor && e.iceArm !== false ? 0.5 : 1) * U.rand(0.92, 1.08)); // a perched gargoyle is stone
+    const pexe = this.pit && this.pit.perks && this.pit.perks.execute && e.hp < e.maxHp * 0.3 ? 1 + this.pit.perks.execute : 1; // Mastery: the finishing blow
+    const dmg = Math.max(1, pexe * base * pct * cm * vul * (1 - def) * (mult == null ? 1 : mult) * (e.def.dmgFactor || 1) * (e.perch ? 0.2 : 1) * (e.guard > 0 ? 0.15 : 1) * (e.ward > 0 ? 0.5 : 1) * (e.def.iceArmor && e.iceArm !== false ? 0.5 : 1) * U.rand(0.92, 1.08)); // a perched gargoyle is stone
     e.hp -= dmg; e.flash = 0.1;
     this.dmgByAb[a.id] = (this.dmgByAb[a.id] || 0) + dmg;
     if (this.gAcc != null && a.tags.includes('projectile')) this.gAcc += dmg; // Landsknecht: projectile damage fills the next grenade

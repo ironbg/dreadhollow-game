@@ -42,7 +42,8 @@
       DH.audio.play('click');
       ui.closeAll(); ui.show(false);
       const st = DH.Run.pitStage(r.from);
-      this.run = new DH.Run({ hero: s.selectedHero, stage: st.id, stageDef: st.def, pit: { from: r.from, affixes: r.affixes, paid: r.paid } });
+      this.run = new DH.Run({ hero: s.selectedHero, stage: st.id, stageDef: st.def, pit: { from: r.from, affixes: r.affixes, paid: r.paid, secs: M.pitSecs(),
+        perks: { power: M.pitPerkVal('power'), guard: M.pitPerkVal('guard'), fort: M.pitPerkVal('fort'), execute: M.pitPerkVal('execute') } } });
       this.mode = 'run';
       ui.hud.build(this.run);
       DH.input.enable(true);

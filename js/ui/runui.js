@@ -256,7 +256,7 @@
     drawBossBar(r, run.bosses[0]); // every frame: the trail behind a blow eases down smoothly
     const now = performance.now(); if (now - lastTxt < 120) return; lastTxt = now;
     r.lvl.textContent = t('common.lv') + ' ' + run.level;
-    if (run.pit) { const left = Math.max(0, E.PIT.secs - run.time); r.timer.textContent = U.fmtTime(left); r.timer.classList.toggle('boss', left <= 30); r.pitT.textContent = t('hud.pitLine', { n: run.pit.wave, c: run.pit.cleared }); }
+    if (run.pit) { const left = Math.max(0, (run.pit.secs || E.PIT.secs) - run.time); r.timer.textContent = U.fmtTime(left); r.timer.classList.toggle('boss', left <= 30); r.pitT.textContent = t('hud.pitLine', { n: run.pit.wave, c: run.pit.cleared }); }
     else { r.timer.textContent = U.fmtTime(run.time); r.timer.classList.toggle('boss', run.time >= run.runLength); }
     r.kills.textContent = U.fmt(run.kills); r.gold.textContent = U.fmt(run.gold);
     r.bagN.textContent = run.bag.length ? run.bag.length + '/' + C.BAG_SIZE : ''; r.bagN.classList.toggle('full', run.bag.length >= C.BAG_SIZE);

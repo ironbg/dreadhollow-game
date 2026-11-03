@@ -41,6 +41,8 @@
     pitStart: { run: () => M().pitStart() },
     pitEnd: { run: (a) => M().pitEnd(int(a.waves)) },
     pitSweep: { run: () => M().pitSweep() },
+    pitPerkUp: { run: (a) => M().pitPerkUp(str(a.id, 12)) },
+    pitPerkReset: { run: () => M().pitPerkReset() },
     consBuy: { run: (a) => M().consBuy(str(a.id, 40), int(a.n)) },
     consReset: { run: () => M().consReset() },
     buyPassTier: { run: () => M().buyPassTier() },

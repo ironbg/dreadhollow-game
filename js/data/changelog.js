@@ -17,6 +17,7 @@
         'Класации за Ямата – седмична и за всички времена, по най-далечната вълна в битка (бързото минаване не се брои).',
         'Пропуск за Ямата: +50% Есенция и +1 влизане на ден, завинаги, с еднократно плащане.',
         'Седмични награди за класацията на Ямата: първите 50 получават Есенция и скъпоценни камъни сами в началото на новата седмица (1-во място: 3000 Есенция и 500 камъка).',
+        'Майсторство в Ямата: всяка битка и бързо минаване дават опит за всяка достигната вълна; всяко ниво (до 100) дава точка за карти – Сила, Броня, Укрепление, Довършване, Повече време, Повече Есенция и Още влизане. Пропускът за Ямата удвоява опита. Нулирането е безплатно.',
       ],
       en: [
         'Every stat on relics (and their level bonuses) is a quarter of what it was: with rarity and levels one piece reached +96% attack speed, +268% Multistrike, +339% crit damage or +230% fire damage. Relic specials, traits, abilities and blessings give as much as before.',
@@ -30,6 +31,7 @@
         'Pit leaderboards – weekly and all time, by the farthest wave reached in a fight (Sweep does not count).',
         'The Pit Pass: +50% Essence and +1 entry a day, forever, for a single payment.',
         'Weekly rewards for the Pit board: the top 50 get Essence and gems on their own as the new week begins (1st place: 3000 Essence and 500 gems).',
+        'Pit Mastery: every fight and sweep gives XP for each wave reached; every level (up to 100) gives a point for cards – Power, Armor, Fortify, Finishing Blow, More Time, More Essence and Extra Entry. The Pit Pass doubles the XP. Resetting is free.',
       ],
     },
     {

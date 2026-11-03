@@ -160,10 +160,26 @@
   /* ---------------- The Pit (Trials) ---------------- */
   const pitS = () => { const s = S(); s.pit = s.pit || { best: 0, day: null, used: 0, active: null, pass: false }; const d = U.dayKey(); if (s.pit.day !== d) { s.pit.day = d; s.pit.used = 0; } return s.pit; };
   meta.pitPass = () => !!pitS().pass;
-  meta.pitEntries = () => E.PIT.entries + (pitS().pass ? 1 : 0) + (meta.consSpecials().plunder >= 3 ? 1 : 0); // the third Plunder Specialty: one more a day
+  /* the Pit's Mastery (E.PIT_MASTERY) */
+  const PM = () => E.PIT_MASTERY;
+  meta.pitMastery = () => { const p = pitS(); let lv = 0, xp = p.mxp || 0; while (lv < PM().max && xp >= PM().next(lv)) { xp -= PM().next(lv); lv++; } return { lv, xp, next: lv < PM().max ? PM().next(lv) : 0 }; };
+  meta.pitPerk = (id) => ((pitS().perks || {})[id] || 0);
+  meta.pitPerkVal = (id) => meta.pitPerk(id) * ((PM().perks[id] || {}).per || 0);
+  meta.pitPointsUsed = () => { const pk = pitS().perks || {}; let n = 0; for (const id in pk) if (PM().perks[id]) n += pk[id] * PM().perks[id].cost; return n; };
+  meta.pitPointsFree = () => meta.pitMastery().lv - meta.pitPointsUsed();
+  meta.pitSecs = () => E.PIT.secs + meta.pitPerkVal('time');
+  const addMastery = (waves) => { const p = pitS(); p.mxp = (p.mxp || 0) + Math.round(waves * PM().xpPerWave * (p.pass ? 2 : 1)); };
+  /** A level of a Mastery card: one if the points reach. */
+  meta.pitPerkUp = (id) => {
+    const d = PM().perks[id], p = pitS(); if (!d || meta.pitPerk(id) >= d.max || meta.pitPointsFree() < d.cost) return null;
+    p.perks = p.perks || {}; p.perks[id] = meta.pitPerk(id) + 1; changed(); return p.perks[id];
+  };
+  /** Every point back (free). */
+  meta.pitPerkReset = () => { pitS().perks = {}; changed(); return true; };
+  meta.pitEntries = () => E.PIT.entries + (pitS().pass ? 1 : 0) + meta.pitPerkVal('entry') + (meta.consSpecials().plunder >= 3 ? 1 : 0); // the third Plunder Specialty: one more a day
   meta.pitLeft = () => Math.max(0, meta.pitEntries() - pitS().used);
   meta.pitCheckpoint = () => Math.floor(pitS().best / E.PIT.every) * E.PIT.every;
-  meta.pitPerWave = () => Math.round(E.PIT.perWave * (pitS().pass ? 1.5 : 1) * (1 + (meta.consStats().essencePct || 0) + (meta.consSpecials().plunder >= 1 ? 0.2 : 0)));
+  meta.pitPerWave = () => Math.round(E.PIT.perWave * (pitS().pass ? 1.5 : 1) * (1 + (meta.consStats().essencePct || 0) + (meta.consSpecials().plunder >= 1 ? 0.2 : 0) + meta.pitPerkVal('essence')));
   meta.essence = () => S().essence || 0;
   const addEssence = (n) => { const s = S(); s.essence = (s.essence || 0) + n; s.stats.essence = (s.stats.essence || 0) + n; };
   /** Enter: one of today's entries, two hazards rolled, the checkpoint paid at once. { from, affixes, paid } */
@@ -182,18 +198,19 @@
     const p = pitS(), a = p.active; if (!a) return null;
     p.active = null;
     const secs = Math.max(0, (U.now() - a.at) / 1000);
-    waves = Math.max(0, Math.min(waves | 0, Math.floor(Math.min(secs, E.PIT.secs + 30) / E.PIT.minWaveSecs)));
+    waves = Math.max(0, Math.min(waves | 0, Math.floor(Math.min(secs, meta.pitSecs() + 30) / E.PIT.minWaveSecs)));
     const reached = a.from + waves, record = reached > p.best;
     if (record) p.best = reached;
     if (reached > 0) meta.boardRecord({ pitWave: reached, hero: S().selectedHero, stage: null, victory: false }, {}); // the Pit's boards (a sweep never counts)
     const paid = waves * meta.pitPerWave(); if (paid) addEssence(paid);
+    const lv0 = meta.pitMastery().lv; addMastery(reached);
     changed();
-    return { waves, reached, paid, best: p.best, record, from: a.from };
+    return { waves, reached, paid, best: p.best, record, from: a.from, mastery: meta.pitMastery().lv - lv0 };
   };
   /** Sweep: an entry paid as your best wave, without fighting (no record). */
   meta.pitSweep = () => {
     const p = pitS(); if (meta.pitLeft() <= 0 || p.best <= 0) return null;
-    p.used++; const paid = p.best * meta.pitPerWave(); addEssence(paid);
+    p.used++; const paid = p.best * meta.pitPerWave(); addEssence(paid); addMastery(p.best);
     meta.track('pit', 1); changed();
     return { paid };
   };
