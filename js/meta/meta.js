@@ -73,6 +73,7 @@
     if (!rw) return out;
     if (rw.gold) { const g = Math.floor(rw.gold); s.gold += g; out.push({ icon: 'i_gold', text: '+' + U.fmt(g), kind: 'gold' }); }
     if (rw.gems) { s.gems += rw.gems; out.push({ icon: 'i_gem', text: '+' + U.fmt(rw.gems), kind: 'gems' }); }
+    if (rw.essence) { s.essence = (s.essence || 0) + rw.essence; out.push({ icon: 'i_essence', text: '+' + U.fmt(rw.essence), kind: 'essence' }); }
     if (rw.energy) { meta.energy(); s.energy += rw.energy; out.push({ icon: 'i_energy', text: '+' + rw.energy, kind: 'energy' }); }
     for (const [key, list, store, pre, tk] of STOCK) for (const k in rw[key] || {}) { // forging materials, herbs, potions: { id: count }
       const n = Math.floor(rw[key][k]); if (!(n > 0) || !list().includes(k)) continue;
@@ -120,6 +121,7 @@
     const out = [];
     if (rw.gold) out.push({ icon: 'i_gold', text: U.fmt(rw.gold) });
     if (rw.gems) out.push({ icon: 'i_gem', text: U.fmt(rw.gems) });
+    if (rw.essence) out.push({ icon: 'i_essence', text: U.fmt(rw.essence) });
     if (rw.energy) out.push({ icon: 'i_energy', text: rw.energy });
     for (const [key, list, , pre, tk] of STOCK) for (const k in rw[key] || {}) if (list().includes(k)) out.push({ icon: pre + k, text: U.fmt(rw[key][k]), name: t(tk(k)) });
     if (rw.passXp) out.push({ icon: 'n_pass', text: rw.passXp });

@@ -395,7 +395,11 @@
     halls: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'blightmire', 'blightmire', 'blightmire'], // the floor of each ten (no hall rules)
     hallStats: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'discord', 'blightmire', 'reliquary'], // and the strength of its foes
     hpGrow: 1.12, dmgGrow: 1.05,                             // per wave, from the first of its ten
+    // the week's board pays its top 50 when the week is over (functions/pitpay.js): [up to rank, reward]
+    weekly: [[1, { essence: 3000, gems: 500 }], [2, { essence: 2000, gems: 300 }], [3, { essence: 1500, gems: 200 }],
+      [10, { essence: 1000, gems: 100 }], [25, { essence: 600, gems: 50 }], [50, { essence: 300, gems: 20 }]],
   };
+  E.pitWeeklyReward = (rank) => { const r = E.PIT.weekly.find(([n]) => rank <= n); return r ? r[1] : null; };
   /** The account's reward track: a bigger reward every 5 levels, for ever. Each milestone pays gems, the metal of its
    *  level, and in turn a Silver chest (x5), a Gold chest (x10) or a sure relic (x20: Epic, Legendary from 60);
    *  every 25 levels torches too. Claimed by the player in the profile (late joiners claim the ones they passed). */

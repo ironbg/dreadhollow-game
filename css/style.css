@@ -1775,3 +1775,8 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .pit-pass { position: absolute; right: 8px; bottom: 6px; display: flex; align-items: center; gap: 4px; background: rgba(0,0,0,.65); padding: 3px 8px; border: 1px solid #3a6a3a; color: #7ee89a; font-weight: 800; font-size: 13px; }
 .pit-passcard { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 7px 9px; cursor: pointer; background: linear-gradient(90deg, rgba(120,20,30,.55), rgba(40,10,20,.6)); border: 1px solid #8a4a3a; }
 .pit-passcard b { color: #ffd0a0; } .pit-passcard .small { color: var(--muted); }
+.lbprize { margin: 6px 0; padding: 6px 8px; background: rgba(0,0,0,.35); border: 1px solid var(--line); }
+.lbprize-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; margin-top: 4px; font-size: 12px; }
+.lbprize-grid div { display: flex; justify-content: space-between; align-items: center; gap: 4px; }
+.lbprize-grid b { color: var(--gold); }
+.lbprize-grid span { display: flex; align-items: center; gap: 2px; }

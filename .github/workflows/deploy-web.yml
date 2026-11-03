@@ -32,7 +32,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - run: npm ci --prefix functions
-      - run: node tools/build-functions.js && node functions/test/engine.js && node functions/test/admin.js
+      - run: node tools/build-functions.js && node functions/test/engine.js && node functions/test/admin.js && node functions/test/pitpay.js
       - name: Deploy rules and functions
         env:
           SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

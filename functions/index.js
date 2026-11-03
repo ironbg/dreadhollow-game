@@ -8,6 +8,7 @@
  *   feedback  a player's message (Settings → Send feedback); adminCheck / adminStats  the developer's overview (insights.js)
  *   admin     the developer's panel (admin.js): players, rewards, bans, messages, purchases, live settings, its own log
  *   live      live.json as deployed with the panel's override on top (config/live): what newer game copies read
+ * The Pit's weekly board pays its top 50 at the first sync of a new week (pitpay.js).
  * A banned account is turned away by every call that plays; under maintenance (live: maintenance.on) the game's
  * own calls wait, except settling a fight or a purchase already made.
  * Every write is a transaction on the player's document, so two devices can never double-spend. */
@@ -23,6 +24,7 @@ const play = require('./play');
 const ads = require('./ads');
 const insights = require('./insights');
 const { makeAdmin } = require('./admin');
+const { makePitPay } = require('./pitpay');
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -112,6 +114,9 @@ async function onProfile(uid, fn, opts) {
   });
 }
 
+let pitPayer = null;
+const pitPay = () => pitPayer || (pitPayer = makePitPay({ db, FieldValue, onProfile, withProfile, boot }));
+
 /** Too many calls in a minute (a script, not a player): refused. */
 function rate(doc) {
   const now = Date.now(), r = (doc && doc.rate) || { t: now, n: 0 };
@@ -125,6 +130,7 @@ function rate(doc) {
 exports.sync = callable(async (req) => {
   const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
   checkVersion(d, cfg); await checkOpen(req, cfg);
+  try { await pitPay().payIfDue(cfg); } catch (e) { console.error('pit payout', e); } // a new week: last week's Pit board is paid (once)
   const out = await onProfile(uid, async (profile, doc) => {
     let from = profile, extra = {};
     if (!profile) { // first visit: the old cloud save if there is one, else what this device holds

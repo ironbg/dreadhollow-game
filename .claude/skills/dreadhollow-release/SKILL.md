@@ -19,7 +19,7 @@ model names in commits or files. Changes to `live.json` server flags need the us
    for f in <changed .js files>; do node --check "$f"; done
    node tools/check-i18n.js            # every t('...') key in both languages
    node tools/build-functions.js       # the server's copy of the game code
-   node functions/test/engine.js && node functions/test/admin.js
+   node functions/test/engine.js && node functions/test/admin.js && node functions/test/pitpay.js
    ```
    Then, with the game served (`python3 -m http.server 8123` from the repo root), the smoke test, and if fights,
    loot, the run summary or the server check changed, the reward audit (every hero to a victory, each summary
