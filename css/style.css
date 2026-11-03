@@ -1951,3 +1951,7 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .pit-more .btn { gap: 3px; padding: 4px 3px; font-size: 11px; letter-spacing: 0; }
 .pit-more .btn img.ic.ci { width: 14px; height: 14px; }
 .pm-head .infob { align-self: center; }
+/* the Pit's shop door: a square, the Essence above its name */
+.pit-shopbtn { width: 62px; height: 62px; padding: 4px 2px 3px; justify-content: center; gap: 1px; box-sizing: border-box; }
+.pit-shopbtn .ic { width: 32px; height: 32px; }
+.pit-shopbtn span { font-size: 11px; line-height: 1; }
