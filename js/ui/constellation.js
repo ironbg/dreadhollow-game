@@ -11,6 +11,8 @@
   const ZMIN = 0.15, ZMAX = 1.6;
   const radius = (n, z) => Math.max(4, n.r * z); // stars keep their size in the world, so the spacing holds at every zoom
   const BRANCHES = ['fury', 'bastion', 'plunder'];
+  /** Each branch's sign: the Blessing medal nearest its nature (claws for Fury, the shield for Bastion, the coin for Plunder). */
+  const BR_ICON = { fury: 'bl_brutality', bastion: 'bl_thickhide', plunder: 'bl_greed' };
 
   /* The night behind the stars, in depth: a far haze of nebulae and a band of the galaxy (drawn once on a wrapping tile),
    * then three layers of stars, the farther the smaller, dimmer and slower to move when the map is dragged (parallax);
@@ -110,7 +112,7 @@
         h('div.cons-brs', BRANCHES.map((b) => {
           const p = M.consPoints(b), next = CS.specials[b].find((v) => v > p), prev = [0].concat(CS.specials[b]).filter((v) => v <= p).pop();
           const k = next ? (p - prev) / (next - prev) : 1;
-          return h('div.cons-br.' + b, h('div.cons-brt', h('b', p), h('span.small', next ? ' / ' + next : ' ✓')), h('div.cons-bar', h('i', { style: { width: Math.round(k * 100) + '%' } })));
+          return h('div.cons-br.' + b, h('div.cons-brt', A.img(BR_ICON[b], 'ci'), h('b', p), h('span.small', next ? ' / ' + next : ' ✓')), h('div.cons-bar', h('i', { style: { width: Math.round(k * 100) + '%' } })));
         })));
     };
     foot.append(
@@ -269,11 +271,13 @@
       let tab = 'fury';
       const sm = ui.modal({ title: t('cons.specials'), cls: 'consspec', body: () => h('div') });
       const body = () => {
-        const p = M.consPoints(tab), have = M.consSpecials()[tab];
+        // every branch's list is laid in the same cell (only the chosen one seen), so the window keeps one height on every tab
+        const list = (b) => { const p = M.consPoints(b), have = M.consSpecials()[b]; return h('div.cons-sl' + (b === tab ? '' : '.hid'),
+          h('div.small.center.muted.cons-spent', A.img(BR_ICON[b], 'ci'), ' ', t('cons.spentIn', { n: p })),
+          CS.specials[b].map((need, i) => h('div.cons-spec' + (i < have ? '.on' : ''), A.img(BR_ICON[b], 'ci'), h('div.cons-need', i < have ? '✓' : need), h('div', t('cons.sp.' + b + (i + 1)))))); };
         sm.set(h('div',
-          h('div.tabs', BRANCHES.map((b) => h('button.' + b + (tab === b ? '.on' : ''), { onclick: () => { click(); tab = b; body(); } }, t('cons.br.' + b)))),
-          h('div.small.center.muted', t('cons.spentIn', { n: p })),
-          CS.specials[tab].map((need, i) => h('div.cons-spec' + (i < have ? '.on' : ''), h('div.cons-need', i < have ? '✓' : need), h('div', t('cons.sp.' + tab + (i + 1))))),
+          h('div.tabs', BRANCHES.map((b) => h('button.' + b + (tab === b ? '.on' : ''), { onclick: () => { click(); tab = b; body(); } }, A.img(BR_ICON[b], 'ci'), ' ', t('cons.br.' + b)))),
+          h('div.cons-sls', BRANCHES.map(list)),
           h('div.btns', h('button.btn.gold', { onclick: () => sm.close() }, t('common.close')))));
       };
       body();

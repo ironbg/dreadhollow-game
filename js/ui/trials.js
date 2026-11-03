@@ -75,33 +75,6 @@
     const id = g.getImageData(0, 0, W, H); G.quantize(id, { dither: 6, sat: 0.95, contrast: 1.08 }); g.putImageData(id, 0, 0);
     return c.toDataURL();
   };
-  /** A gothic window's frame for the arches: a lancet of carved stone with a keystone and a finial, the outside dark. */
-  let archFrame = null;
-  const gothicFrame = () => {
-    if (archFrame) return archFrame;
-    const G = DH.gfx, P = G.P, W = 80, H = 120, c = G.canvas(W, H), g = c.getContext('2d');
-    const sl = 70, path = (inset) => { // an equilateral pointed arch over straight sides
-      const w = W - inset * 2, R2 = w, x0 = inset, x1 = W - inset;
-      g.beginPath(); g.moveTo(x0, H); g.lineTo(x0, sl);
-      g.arc(x1, sl, R2, Math.PI, Math.PI + Math.PI / 3, false);
-      g.arc(x0, sl, R2, -Math.PI / 3, 0, false);
-      g.lineTo(x1, H);
-    };
-    g.fillStyle = '#0b080d'; g.fillRect(0, 0, W, H); // outside the window: the wall
-    g.save(); g.globalCompositeOperation = 'destination-out'; path(7); g.closePath(); g.fill(); g.restore();
-    g.lineJoin = 'round';
-    g.lineWidth = 8; g.strokeStyle = '#050308'; path(4); g.stroke();
-    g.lineWidth = 6; g.strokeStyle = P.lg(g, 0, 0, W, H, ['#a89c94', '#6a5e5a', '#3a3236']); path(4); g.stroke();
-    g.lineWidth = 1; g.strokeStyle = 'rgba(255,240,220,0.35)'; path(2); g.stroke();
-    g.strokeStyle = 'rgba(0,0,0,0.6)'; path(7); g.stroke();
-    // the joints of the voussoirs
-    for (let i = 1; i < 6; i++) { g.strokeStyle = 'rgba(0,0,0,0.6)'; g.beginPath(); const y = sl + i * 12; g.moveTo(1, y); g.lineTo(7, y); g.moveTo(W - 7, y); g.lineTo(W - 1, y); g.stroke(); }
-    // keystone and a finial at the apex
-    const ay = sl - Math.sqrt(3) / 2 * (W - 8);
-    P.rect(g, W / 2 - 4, ay - 3, 8, 8, '#050308'); P.rect(g, W / 2 - 3, ay - 2, 6, 6, '#8a7e78'); P.rect(g, W / 2 - 3, ay - 2, 6, 1, '#c8bcb0');
-    const id = g.getImageData(0, 0, W, H); G.quantize(id, { dither: 6, sat: 0.9, contrast: 1.05 }); g.putImageData(id, 0, 0);
-    return (archFrame = c.toDataURL());
-  };
 
   /** The Trials: three arches side by side, the chosen one in the middle, its name under them, and Enter. */
   ui.openTrials = (start) => {
@@ -111,7 +84,7 @@
     const arch = (k, side) => {
       const md = MODES[(i + k + MODES.length) % MODES.length];
       return h('div.tr-arch' + (side ? '.side' : '.mid') + (md.open ? '' : '.soon'), { onclick: () => { if (side) go(k); } },
-        h('img', { src: art(md), alt: '' }), h('img.tr-frame', { src: gothicFrame(), alt: '' }), md.open ? null : h('div.tr-soon', A.img('u_lock', 'ci'), h('span', t('trials.soon'))));
+        h('img', { src: art(md), alt: '' }), md.open ? null : h('div.tr-soon', A.img('u_lock', 'ci'), h('span', t('trials.soon'))));
     };
     const draw = () => {
       const md = MODES[i];
@@ -326,7 +299,7 @@
     DH.input.enable(false);
     const P = run.pit;
     ui.modal({ closable: false, cls: 'pitintro', body: (m) => h('div',
-      h('div.pi-art', h('div.tr-arch.mid', h('img', { src: art(MODES[0]), alt: '' }), h('img.tr-frame', { src: gothicFrame(), alt: '' }))),
+      h('div.pi-art', h('div.tr-arch.mid', h('img', { src: art(MODES[0]), alt: '' }))),
       h('div.pi-t', t('pit.name')),
       h('div.pi-wave', t('hud.pitWave', { n: U.fmt((P.from || 0) + 1) })),
       h('div.pi-sub', t('pit.affixes')),

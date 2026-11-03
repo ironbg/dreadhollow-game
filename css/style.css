@@ -1966,13 +1966,14 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .cons-foot .btn { width: 100%; min-width: 0; }
 .consren .field { margin-bottom: 10px; }
 
-/* the Trials' arches: each picture in a carved lancet window (the frame is a picture over it), in big pixels */
-.tr-arch { border: 0 !important; box-shadow: none !important; background: #0b080d; image-rendering: pixelated; }
+/* the Trials' arches: square stone frames with forged corners, the picture in big pixels */
+.tr-arch { border: 2px solid #050308 !important; background: #0b080d; image-rendering: pixelated;
+  box-shadow: inset 0 0 0 2px var(--ring), 0 3px 0 #000 !important; }
+.tr-arch.mid { box-shadow: inset 0 0 0 2px var(--ring-gold), 0 0 12px rgba(255,120,60,.3), 0 3px 0 #000 !important; }
 .tr-arch img { image-rendering: pixelated; }
-.tr-arch img.tr-frame { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; filter: none !important; pointer-events: none; }
-.tr-arch.mid img.tr-frame { filter: drop-shadow(0 0 4px rgba(255,120,60,.45)) !important; }
-.tr-arch.side img.tr-frame { filter: brightness(.7) !important; }
-.tr-soon { z-index: 1; }
+.tr-arch::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: var(--corner-tl) 0 0 / 14px 14px no-repeat, var(--corner-tr) 100% 0 / 14px 14px no-repeat, var(--corner-bl) 0 100% / 14px 14px no-repeat, var(--corner-br) 100% 100% / 14px 14px no-repeat; }
+.tr-soon { z-index: 2; }
 /* the Pit's picture on its own screen: the same, in a stone frame with forged corners */
 .pit-art { image-rendering: pixelated; border: 2px solid #050308; box-shadow: inset 0 0 0 2px var(--ring-gold), 0 3px 0 #000; }
 .pit-art img { image-rendering: pixelated; object-position: 50% 62%; filter: none; }
@@ -1999,3 +2000,13 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
   box-shadow: inset 0 0 0 2px var(--ring-gold), inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo), 0 3px 0 #000; }
 .cons-cb img { width: 30px; height: 30px; } .cons-cb .badge { top: -6px; right: -6px; }
 .cons-slide { top: 42%; height: 46%; }
+
+/* the Specialties: icons of the branches; every tab's list in one cell so the window keeps its height */
+.cons-sls { display: grid; }
+.cons-sls > .cons-sl { grid-area: 1 / 1; }
+.cons-sls > .cons-sl.hid { visibility: hidden; }
+.cons-spec { grid-template-columns: 22px 40px 1fr; }
+.cons-spec > img.ci { width: 22px; height: 22px; }
+.cons-spec:not(.on) > img.ci { filter: grayscale(.8) brightness(.6); }
+.cons-spent img.ci, .modal.consspec .tabs img.ci { width: 18px; height: 18px; vertical-align: -4px; }
+.cons-brt img.ci { width: 16px; height: 16px; vertical-align: -3px; margin-right: 3px; }
