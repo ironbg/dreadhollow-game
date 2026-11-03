@@ -1867,3 +1867,21 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 #hud .pb-cbar { height: 5px; width: 74px; margin: 3px 0 2px auto; background: rgba(10,6,8,.8); border: 1px solid #050308; }
 #hud .pb-cbar i { display: block; height: 100%; background: linear-gradient(90deg, #8a1a10, #ff5a30); box-shadow: 0 0 5px #ff5a30; }
 #hud .pb-skip { font: 800 12px var(--num); color: #c8b8a0; } #hud .pb-skip.on { color: #7ee89a; }
+
+/* a Mastery card's panel, over the card in its colour, with − and + coming down on the card's top edge */
+.pm-root { position: relative; }
+.pm-card.sel { outline: 2px solid #f4e6d0; outline-offset: 1px; }
+.pm-pop { position: absolute; z-index: 5; filter: drop-shadow(0 4px 10px rgba(0,0,0,.85)); }
+.pp-panel { position: relative; padding: 8px 10px 9px; background: linear-gradient(180deg, var(--c1), var(--c2)); border: 2px solid var(--bd); box-shadow: inset 0 0 0 1px rgba(0,0,0,.7), inset 0 0 18px rgba(0,0,0,.55); }
+.pp-x { position: absolute; top: -12px; right: -10px; width: 28px; height: 28px; padding: 0; font-size: 20px; font-weight: 900; line-height: 24px; color: #fff; cursor: pointer;
+  background: linear-gradient(180deg, #c03030, #7a1418); border: 1px solid #050308; box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+.pp-t { font: 800 18px var(--title, serif); color: #fff; text-shadow: 0 2px 0 #000; padding-right: 16px; line-height: 1.1; }
+.pp-lv { margin-top: 2px; font-weight: 800; font-size: 13px; color: #7ee89a; }
+.pp-d { margin-top: 5px; font-size: 14px; line-height: 1.3; color: #f4e6d0; } .pp-d b.good { color: #7ee89a; }
+.pp-next { margin-top: 3px; font-size: 12px; color: #b8a890; } .pp-next b.good { color: #a8f0b8; }
+.pp-cost { margin-top: 8px; font-weight: 800; font-size: 13px; color: #f08a90; }
+.pp-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px; }
+.pp-b { height: 36px; padding: 0; font-size: 26px; font-weight: 900; line-height: 30px; color: #fff; cursor: pointer; border: 1px solid #050308;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), inset 0 -3px 0 rgba(0,0,0,.35); text-shadow: 0 2px 0 rgba(0,0,0,.6); }
+.pp-b.minus { background: linear-gradient(180deg, #c03a3a, #7a1418); } .pp-b.plus { background: linear-gradient(180deg, #7ab83a, #3e6e18); }
+.pp-b.off { filter: grayscale(.85) brightness(.55); }
