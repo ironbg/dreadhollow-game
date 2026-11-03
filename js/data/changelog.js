@@ -4,6 +4,15 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.57',
+      bg: [
+        'Скоростта на атака от реликвите е четири пъти по-малка: с рядкостта и нивата тя стигаше до +96% на един предмет и уменията стреляха почти четири пъти по-често. Чертите, уменията и благословиите дават колкото досега.',
+      ],
+      en: [
+        'Attack speed from relics is a quarter of what it was: with rarity and levels it reached +96% on one piece and abilities fired almost four times as often. Traits, abilities and blessings give as much as before.',
+      ],
+    },
+    {
       v: '1.61.56',
       bg: [
         'Намерен предмет вече не сменя сам по-силния, който носиш: със същата рядкост се слага само ако е поне на същото ниво (по-рядък предмет се слага както досега).',

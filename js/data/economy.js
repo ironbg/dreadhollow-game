@@ -141,9 +141,13 @@
   E.tributesCost = (n) => { let c = 0; for (let k = 0; k < n; k++) c += E.tributeCost(k); return c; };
   E.gearOrder = Object.keys(E.gear);
   E.STARTER_GEAR = ['wrath_amulet', 'striders', 'oak_band', 'warden_helm', 'gore_tunic', 'tempo_treads'];
+  /** Attack speed on relics counts a quarter: it multiplies every other stat, and with rarity and levels (x38 at a
+   *  Mythic 50) it made abilities fire four times as often. */
+  E.GEAR_AS = 0.25;
+  const asK = (k) => (k === 'as' ? E.GEAR_AS : 1);
   E.gearStat = (type, rarity, level) => {
     const out = {}; const g = E.gear[type];
-    for (const k in g.stats) out[k] = g.stats[k] * E.rarityMult[rarity] * (1 + 0.1 * (level - 1));
+    for (const k in g.stats) out[k] = g.stats[k] * asK(k) * E.rarityMult[rarity] * (1 + 0.1 * (level - 1));
     return out;
   };
   E.gearSpecial = (type, rarity) => {
@@ -174,7 +178,7 @@
     ring:  [['growth', 0.03], ['as', 0.02], ['critPct', 0.02], ['greed', 0.04]],
   };
   /** The stats an item type gains at its milestones, in order: [{ lv, k, v }] (v before the rarity). */
-  E.gearMilestoneDefs = (type) => E.SLOT_MILESTONES[E.gear[type].slot].map(([k, v], i) => ({ lv: E.GEAR_MILESTONES[i], k, v }));
+  E.gearMilestoneDefs = (type) => E.SLOT_MILESTONES[E.gear[type].slot].map(([k, v], i) => ({ lv: E.GEAR_MILESTONES[i], k, v: v * asK(k) }));
   /** What an item's milestones give at this rarity and level (only those reached). */
   E.gearMilestones = (type, rarity, level) => {
     const out = {};
