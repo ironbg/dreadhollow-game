@@ -65,7 +65,7 @@
       return h('div.avtab',
         h('div.avpick', h('b', sel ? avName(sel) : ''), h('span.small.muted', ' · ' + t('avatar.count', { n: C.AVATARS.filter((a) => M.avatarUnlocked(a.id)).length, m: C.AVATARS.length }))),
         grid,
-        h('button.btn.green.block.avapply.mact' + (changed ? '' : '.off'), { onclick: async () => {
+        h('button.btn.green.block.avapply' + (changed ? '' : '.off'), { onclick: async () => {
           if (!changed) return;
           if (await ui.act('setAvatar', { id: pick })) { DH.audio.play('buy'); ui.refresh(); draw(); }
         } }, t('avatar.apply')));

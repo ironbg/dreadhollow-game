@@ -9,11 +9,13 @@
         'Всички характеристики на реликвите (и бонусите на нивата им) са четири пъти по-малки: с рядкостта и нивата един предмет стигаше до +96% скорост на атака, +268% Многоудар, +339% критични щети или +230% огнени щети. Специалните ефекти на реликвите, чертите, уменията и благословиите дават колкото досега.',
         'Всяка екипирана реликва в Оръжейната показва червена значка с броя нива, с които можеш да я вдигнеш сега.',
         'Нов Път на нивата в профила: на всеки 5 нива на профила те чака голяма награда – сребърен или златен сандък, сигурна епична (от ниво 60 легендарна) реликва, скъпоценни камъни, метали и на всеки 25 нива факли. Наградите за вече минатите нива също могат да се вземат.',
+        'Профилът е с еднаква височина във всеки раздел; аватарите са по пет на ред.',
       ],
       en: [
         'Every stat on relics (and their level bonuses) is a quarter of what it was: with rarity and levels one piece reached +96% attack speed, +268% Multistrike, +339% crit damage or +230% fire damage. Relic specials, traits, abilities and blessings give as much as before.',
         'Every worn relic in the Armory shows a red badge with how many levels you can raise it right now.',
         'A new Path in the profile: every 5 profile levels a big reward awaits – a Silver or Gold chest, a sure Epic (Legendary from level 60) relic, gems, metals and, every 25 levels, torches. Rewards for levels already passed can be claimed too.',
+        'The profile window keeps one height on every tab; avatars sit five to a row.',
       ],
     },
     {
