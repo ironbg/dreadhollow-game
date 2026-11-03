@@ -96,7 +96,10 @@
         desk && DH.input.fullscreenAvailable() ? r.fsBtn = h('button.pause.fsbtn', { onclick: () => { DH.input.toggleFullscreen(); }, title: t('settings.fullscreen') + ' [F]' }, A.img(DH.input.isFullscreen() ? 'u_unfull' : 'u_full'), h('b.key', 'F')) : null), r.timer,
         h('div.stats', h('div', r.kills, A.img('n_skull')), h('div', r.gold, A.img('i_gold')))),
       r.fps, r.build, r.buffs, r.curse, r.boss, r.agony, r.track = hud.tracker(run), r.lordK = run.lordKills ? h('div.lordk', A.img('u_agony', 'ci'), r.lordKT = h('span')) : null,
-      r.pitL = run.pit ? h('div.lordk.pitw', A.img('n_skull', 'ci'), r.pitT = h('span')) : null].filter(Boolean)); // append() would print a null as text
+      r.pitL = run.pit ? h('div.pitbar', // the Pit, top right: the Essence this fight has paid, the wave and how much of it is killed, the combo
+        h('div.pb-top', h('span.pb-ess', A.img('i_essence', 'ci'), r.pbEss = h('b')), r.pbWave = h('b.pb-wave')),
+        h('div.pb-bar', r.pbFill = h('i')),
+        r.pbCombo = h('div.pb-combo.hidden', h('div.pb-ct', t('hud.combo')), r.pbN = h('div.pb-n'), h('div.pb-cbar', r.pbCFill = h('i')), r.pbSkip = h('div.pb-skip'))) : null].filter(Boolean)); // append() would print a null as text
     if (!DH.save.data.tutorialDone) { r.tut = h('div.tutorial', h('div', h('span.hand', A.img('u_hand', 'bigic')), t('tutorial.move'), h('br'), h('span.small.muted', t('tutorial.auto')))); el.append(r.tut); }
     hud.sig = ''; el.classList.remove('hidden');
   };
@@ -248,15 +251,30 @@
     s.fxLevel -= 1; s.lowFx = s.fxLevel < 2; s.minFx = s.fxLevel === 0; DH.save.persist();
     ui.toast(t('settings.autoFxDown', { q: t('settings.fxLevel' + s.fxLevel) }));
   };
+  /** The Pit's panel, every frame (its bars run smoothly). */
+  const pitBar = (r, run) => {
+    const P = run.pit, K = P.combo, EP = E.PIT;
+    r.pbEss.textContent = U.fmt(Math.round((P.paid || 0) + P.cleared * (P.per || 0)));
+    r.pbWave.textContent = t('hud.pitWave', { n: P.need ? P.wave : (P.coming || P.wave) });
+    r.pbFill.style.width = (P.need ? Math.min(100, P.got / P.need * 100) : 0) + '%';
+    const on = K && K.n >= 2; r.pbCombo.classList.toggle('hidden', !on);
+    if (on) {
+      const skip = Math.min(EP.combo.max, Math.floor(K.n / EP.combo.per));
+      r.pbN.textContent = '×' + K.n; r.pbCFill.style.width = Math.max(0, K.t / EP.combo.window * 100) + '%';
+      r.pbSkip.textContent = skip ? t('hud.comboSkip', { n: skip }) : t('hud.comboNext', { n: EP.combo.per - K.n % EP.combo.per });
+      r.pbSkip.classList.toggle('on', skip > 0);
+    }
+  };
   hud.update = (run) => {
     const r = hud.refs; if (!r) return;
     autoQuality(run);
     if (DH.save.data.settings.showFps) fpsTick(r); else if (!r.fps.classList.contains('hidden')) r.fps.classList.add('hidden');
     r.xpFill.style.width = Math.min(100, run.xp / run.xpNext * 100) + '%';
     drawBossBar(r, run.bosses[0]); // every frame: the trail behind a blow eases down smoothly
+    if (run.pit && r.pitL) pitBar(r, run);
     const now = performance.now(); if (now - lastTxt < 120) return; lastTxt = now;
     r.lvl.textContent = t('common.lv') + ' ' + run.level;
-    if (run.pit) { const left = Math.max(0, (run.pit.secs || E.PIT.secs) - run.time); r.timer.textContent = U.fmtTime(left); r.timer.classList.toggle('boss', left <= 30); r.pitT.textContent = t('hud.pitLine', { n: run.pit.wave, c: run.pit.cleared }); }
+    if (run.pit) { const left = Math.max(0, (run.pit.secs || E.PIT.secs) - run.time); r.timer.textContent = U.fmtTime(left); r.timer.classList.toggle('boss', left <= 30); }
     else { r.timer.textContent = U.fmtTime(run.time); r.timer.classList.toggle('boss', run.time >= run.runLength); }
     r.kills.textContent = U.fmt(run.kills); r.gold.textContent = U.fmt(run.gold);
     r.bagN.textContent = run.bag.length ? run.bag.length + '/' + C.BAG_SIZE : ''; r.bagN.classList.toggle('full', run.bag.length >= C.BAG_SIZE);

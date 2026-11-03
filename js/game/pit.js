@@ -41,7 +41,8 @@
     const P = this.pit, from = P.from | 0;
     // none of the hall's own business: no secret, no prisoner, no Hex, no Well, no puzzle
     this.sec = null; this.rescue = null; this.hex = null; this.disso = null; this.wellOpen = false; this.lordKills = 0;
-    P.wave = from; P.cleared = 0; P.base = Math.floor(from / E.PIT.every) * E.PIT.every; P.next = 2; P.alive = 0; P.fx = {};
+    P.wave = from; P.cleared = 0; P.base = Math.floor(from / E.PIT.every) * E.PIT.every; P.next = 2; P.need = 0; P.got = 0; P.left = 0; P.coming = from + 1; P.fx = {};
+    P.combo = { n: 0, t: 0, best: 0 };
     // the strength of the waves skipped: their levels and their tomes, chosen at the start
     const lv = Math.min(45, Math.round(from * 0.8)), tomes = Math.min(5, Math.floor(from / E.PIT.every));
     for (let i = 0; i < lv; i++) { this.level++; this.xpNext = C.xpToNext(this.level, this.stageId); this.pendingLevels++; }
@@ -50,37 +51,74 @@
     this.revives = 0;
   };
 
-  /** Each frame in place of the hall's spawning: the clock, the waves, the hazards. */
+  /** Each frame in place of the hall's spawning: the clock, the wave's batches, the combo, the pause between waves,
+   *  the hazards. A wave is E.PIT.quota(n) kills; its foes come in batches (never more than E.PIT.alive at once) until
+   *  the quota is out. The combo (pitKill) counts kills that follow within combo.window seconds; when the wave falls
+   *  the next one is max(1, combo / combo.per) waves on (up to combo.max), and the combo starts again. */
   R.updatePit = function (dt) {
-    const P = this.pit;
-    if (this.time >= (P.secs || E.PIT.secs)) { this.pitOver(); return; }
-    let alive = 0; for (const e of this.enemies) if (e.pitW && !e.dead) alive++;
-    if (P.alive > 0 && alive === 0) { // a wave falls: the next one comes at once
-      P.cleared++; P.next = this.time + 0.6;
-      this.text(this.player.x, this.player.y - 26, t('hud.pitCleared', { n: P.wave }), '#ffd35a', true); DH.audio.play('reward');
+    const P = this.pit, EP = E.PIT;
+    if (this.time >= (P.secs || EP.secs)) { this.pitOver(); return; }
+    const K = P.combo;
+    if (K.n > 0 && (K.t -= dt) <= 0) { // the combo ran out: its waves are lost
+      if (K.n >= EP.combo.per) this.text(this.player.x, this.player.y - 30, t('hud.comboLost'), '#c06050', true);
+      K.n = 0; K.t = 0;
     }
-    P.alive = alive;
-    if (alive === 0 && this.time >= P.next) this.pitWave(P.wave + 1);
+    if (P.left > 0) { // the wave's next batch
+      if ((P.bt -= dt) <= 0) {
+        P.bt = EP.batchEvery;
+        let alive = 0; for (const e of this.enemies) if (e.pitW && !e.dead) alive++;
+        const n = Math.min(P.left, EP.batch, EP.alive - alive);
+        if (n > 0) { this.pitBatch(n); P.left -= n; }
+      }
+    } else if (P.need > 0) this.pitStragglers(dt);
+    if (P.need > 0 && P.left <= 0 && (P.got >= P.need || !this.enemies.some((e) => e.pitW === P.wave && !e.dead))) { // the wave has fallen (all of it spawned and dead)
+      const skip = Math.max(1, Math.min(EP.combo.max, Math.floor(K.n / EP.combo.per)));
+      P.cleared += skip; P.need = 0; P.next = this.time + EP.pause; P.coming = P.wave + skip; K.n = 0; K.t = 0;
+      this.text(this.player.x, this.player.y - 26, skip > 1 ? t('hud.pitSkip', { n: skip }) : t('hud.pitCleared', { n: P.wave }), '#ffd35a', true); DH.audio.play('reward');
+      DH.events.emit('run:warning', t('hud.pitStarting', { n: P.coming }));
+    }
+    if (!P.need && this.time >= P.next) this.pitWave(P.coming || P.wave + 1);
     for (const k of P.affixes) if (FX[k]) FX[k].call(this, dt);
   };
 
-  /** Wave n: more foes with every wave, elites every fifth, stronger by E.PIT.hpGrow / dmgGrow each. */
+  /** The last of a wave never hides: every 2 s the ones left far from the hero come down off the wall near him. */
+  R.pitStragglers = function (dt) {
+    const P = this.pit; if ((P.st = (P.st || 0) - dt) > 0) return; P.st = 2;
+    const p = this.player, v = DH.view, Rr = Math.hypot(v.w || 270, v.h || 480) / 2;
+    for (const e of this.enemies) {
+      if (e.dead || e.def.prop || e.pitW !== P.wave || U.dist2(e.x, e.y, p.x, p.y) < (Rr * 0.8) ** 2) continue;
+      const a = Math.random() * TAU, pt = this.pitEntry({ x: p.x + Math.cos(a) * Rr * 0.7, y: p.y + Math.sin(a) * Rr * 0.7 });
+      this.burst(e.x, e.y, 6, ['#2a1a20', '#6a3a40'], 30); e.x = pt.x; e.y = pt.y; e.kx = e.ky = 0;
+    }
+  };
+
+  /** A foe of the Pit fell (run.killEnemy): the wave's count and the combo. */
+  R.pitKill = function (e) {
+    const P = this.pit, K = P.combo;
+    if (e.pitW === P.wave || !e.pitW) P.got++; // what the wave's foes call up counts too
+    K.n++; K.t = E.PIT.combo.window; K.best = Math.max(K.best, K.n);
+  };
+
+  /** Wave n: its quota of kills, stronger by E.PIT.hpGrow / dmgGrow each wave on from the checkpoint; an elite in every
+   *  25 of it. Its first batch comes at once, the rest in updatePit. */
   R.pitWave = function (n) {
-    const P = this.pit, EP = E.PIT; P.wave = n; P.next = Infinity;
-    const k = n - P.base - 1, hpK = Math.pow(EP.hpGrow, k), dmgK = Math.pow(EP.dmgGrow, k);
-    const real = this.time; this.time = ((n - 1) % EP.every) * 55 + 30; const { mix } = this.spawnRate(); this.time = real; // the hall's mix of that moment
-    const count = Math.min(40, 10 + Math.round(n * 0.5)), elites = n % 5 === 0 ? Math.min(5, 1 + Math.floor(n / 15)) : 0;
-    const p = this.player, v = DH.view, Rr = Math.hypot(v.w || 270, v.h || 480) / 2 + 14, a0 = Math.random() * TAU;
-    const one = (type, i, all, o) => {
-      const pt = this.pitEntry({ x: p.x + Math.cos(a0 + i / all * TAU) * Rr * U.rand(0.95, 1.1), y: p.y + Math.sin(a0 + i / all * TAU) * Rr * U.rand(0.95, 1.1) });
-      const e = this.spawnEnemy(type, pt.x, pt.y, o); if (!e) return;
-      e.pitW = n; e.hp *= hpK; e.maxHp *= hpK; e.dmg *= dmgK;
+    const P = this.pit, EP = E.PIT; P.wave = n; P.coming = 0;
+    P.need = EP.quota(n); P.got = 0; P.left = P.need; P.bt = 0; P.next = Infinity;
+    const k = n - P.base - 1; P.hpK = Math.pow(EP.hpGrow, k); P.dmgK = Math.pow(EP.dmgGrow, k);
+    const real = this.time; this.time = ((n - 1) % EP.every) * 55 + 30; P.mix = this.spawnRate().mix; this.time = real; // the hall's mix of that moment
+    P.elites = Math.floor(P.need / 25);
+    if (!P.cleared) DH.events.emit('run:warning', t('hud.pitWave', { n }));
+  };
+  /** n foes of the wave, round the edge of the screen (or down off the wall). */
+  R.pitBatch = function (n) {
+    const P = this.pit, p = this.player, v = DH.view, Rr = Math.hypot(v.w || 270, v.h || 480) / 2 + 14, a0 = Math.random() * TAU;
+    for (let i = 0; i < n; i++) {
+      const pt = this.pitEntry({ x: p.x + Math.cos(a0 + i / n * TAU) * Rr * U.rand(0.95, 1.1), y: p.y + Math.sin(a0 + i / n * TAU) * Rr * U.rand(0.95, 1.1) });
+      const elite = P.elites > 0 && Math.random() < P.elites / Math.max(1, P.left - i) ? (P.elites--, true) : false;
+      const e = this.spawnEnemy(U.weighted(P.mix), pt.x, pt.y, elite ? { elite: true } : undefined); if (!e) continue;
+      e.pitW = P.wave; e.hp *= P.hpK; e.maxHp *= P.hpK; e.dmg *= P.dmgK;
       if (P.affixes.includes('stone')) e.armor = Math.min(0.75, e.armor + PF.stone);
-    };
-    for (let i = 0; i < count; i++) one(U.weighted(mix), i, count + elites);
-    for (let i = 0; i < elites; i++) one(U.weighted(mix), count + i, count + elites, { elite: true });
-    P.alive = count + elites;
-    DH.events.emit('run:warning', t('hud.pitWave', { n }));
+    }
   };
 
   /** Where a foe of the wave comes in: round the screen's edge, or, past the wall, down off the wall at the rim

@@ -1854,3 +1854,16 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .cp-b.off { filter: grayscale(.8) brightness(.55); }
 .cp-r { min-width: 34px; text-align: center; font-weight: 800; font-size: 15px; color: #f4e6d0; }
 .cp-cost { margin-left: auto; display: flex; align-items: center; gap: 3px; font-size: 14px; } .cp-cost b { color: #f4e6d0; } .cp-cost b.bad { color: #e06a5a; } .cp-cost .ci { width: 16px; height: 16px; }
+
+/* the Pit's panel, top right under the counters: Essence, the wave and its kills, the combo */
+#hud .pitbar { position: absolute; top: calc(var(--safe-t) + 54px); right: 8px; width: 156px; pointer-events: none; text-shadow: 0 1px 0 #000, 0 0 4px #000; }
+#hud .pb-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; font: 700 12px var(--num); color: #f4e6d0; }
+#hud .pb-ess { display: flex; align-items: center; gap: 3px; } #hud .pb-ess .ci { width: 15px; height: 15px; } #hud .pb-ess b { color: #ffb070; }
+#hud .pb-bar { height: 7px; margin-top: 3px; background: rgba(10,6,8,.8); border: 1px solid #050308; box-shadow: inset 0 0 0 1px #4a3a30; }
+#hud .pb-bar i { display: block; height: 100%; background: linear-gradient(180deg, #ffd890, #e08a2a 60%, #a04a10); transition: width .15s; }
+#hud .pb-combo { margin-top: 6px; text-align: right; }
+#hud .pb-ct { font: italic 800 14px var(--title, serif); color: #f4e6d0; letter-spacing: .5px; }
+#hud .pb-n { font: italic 900 24px var(--num); line-height: 1; color: #fff; text-shadow: 0 2px 0 #000, 0 0 8px rgba(200,40,30,.8); }
+#hud .pb-cbar { height: 5px; width: 74px; margin: 3px 0 2px auto; background: rgba(10,6,8,.8); border: 1px solid #050308; }
+#hud .pb-cbar i { display: block; height: 100%; background: linear-gradient(90deg, #8a1a10, #ff5a30); box-shadow: 0 0 5px #ff5a30; }
+#hud .pb-skip { font: 800 12px var(--num); color: #c8b8a0; } #hud .pb-skip.on { color: #7ee89a; }

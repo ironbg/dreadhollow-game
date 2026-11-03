@@ -396,6 +396,11 @@
     hallStats: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'discord', 'blightmire', 'reliquary'], // and the strength of its foes
     hpGrow: 1.12, dmgGrow: 1.05,                             // per wave, from the first of its ten
     sweep: 0.5,                                              // a sweep pays half the best wave; the Mastery's Sweep card raises it to all
+    // a wave is a number of kills (quota), its foes coming in batches while the quota lasts; kills that follow each other
+    // within combo.window seconds make a combo, every combo.per kills of it one wave more skipped when the wave falls
+    // (up to combo.max); the combo ends with the wave, or is lost when its time runs out
+    quota: (n) => Math.min(150, 30 + n), alive: 110, batch: 18, batchEvery: 0.6, pause: 1.6,
+    combo: { window: 2.5, per: 12, max: 15 },
     // the week's board pays its top 50 when the week is over (functions/pitpay.js): [up to rank, reward]
     weekly: [[1, { essence: 3000, gems: 500 }], [2, { essence: 2000, gems: 300 }], [3, { essence: 1500, gems: 200 }],
       [10, { essence: 1000, gems: 100 }], [25, { essence: 600, gems: 50 }], [50, { essence: 300, gems: 20 }]],

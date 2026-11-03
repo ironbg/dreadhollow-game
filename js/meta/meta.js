@@ -200,12 +200,12 @@
     meta.track('pit', 1); changed();
     return { from, affixes, paid };
   };
-  /** The fight is over: the waves cleared after the checkpoint, as many as the time could allow. { waves, paid, best, record } */
+  /** The fight is over: the waves passed after the checkpoint (skipped ones too), as many as the time could allow. { waves, paid, best, record } */
   meta.pitEnd = (waves) => {
     const p = pitS(), a = p.active; if (!a) return null;
     p.active = null;
     const secs = Math.max(0, (U.now() - a.at) / 1000);
-    waves = Math.max(0, Math.min(waves | 0, Math.floor(Math.min(secs, meta.pitSecs() + 30) / E.PIT.minWaveSecs)));
+    waves = Math.max(0, Math.min(waves | 0, Math.floor(Math.min(secs, meta.pitSecs() + 30) / E.PIT.minWaveSecs) * E.PIT.combo.max)); // a wave fallen can skip up to combo.max
     const reached = a.from + waves, record = reached > p.best;
     if (record) p.best = reached;
     if (reached > 0) meta.boardRecord({ pitWave: reached, hero: S().selectedHero, stage: null, victory: false }, {}); // the Pit's boards (a sweep never counts)

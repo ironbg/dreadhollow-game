@@ -878,6 +878,7 @@
         return;
       }
       this.kills++;
+      if (this.pit) this.pitKill(e); // the Pit's wave and combo (pit.js)
       if (this.agonyOn) this.agony = Math.min(C.AGONY_MAX, this.agony + C.AGONY.kill * (e.elite || e.champion ? C.AGONY.eliteKill : 1) * (this.fx_.agonyGain || 1));
       if (this.fx_.regret && this.kills % 100 === 0) this.recompute(); // Mask of Regret grows heavier
       if (e.ttl != null) return; // vengeful ghosts leave nothing behind
