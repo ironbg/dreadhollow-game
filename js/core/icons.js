@@ -2194,10 +2194,24 @@
     },
   };
 
+  // The Constellation's stars by the stat they give: a trait's sign where there is one, else a glyph or an icon
+  const CS_TRAIT = { dmgPct: 'strength', as: 'quickhands', critPct: 'precision', critBonus: 'brutality', area: 'reach', ms: 'multistrike', addBase: 'honed',
+    addCrit: 'keenedge', duration: 'persistence', summonPct: 'summoner', effectPct: 'afflictor', maxHpPct: 'vitality', regen: 'metabolism', block: 'parry',
+    defense: 'thickhide', speedPct: 'swiftfeet', pickup: 'magnetism', magicPct: 'arcana' };
+  const CS_GLYPH = { firePct: 'fireball', icePct: 'ice', lightningPct: 'bolt', physPct: 'sword', greed: 'i_gold', growth: 'book',
+    tomeDrop: 'scroll', essencePct: 'i_essence', chestDrop: 'c_red' };
   function draw(name) {
     const c = G.canvas(SIZE, SIZE), g = c.getContext('2d');
     g.scale(U2, U2); g.lineJoin = 'round'; g.lineCap = 'round';
     const [pre, ...rest] = name.split('_'); const id = rest.join('_');
+    if (pre === 'cs') { // a star of the Constellation: only the sign of what it gives (the star itself is its frame)
+      const tr = CS_TRAIT[id], gl = CS_GLYPH[id];
+      if (tr && TRA[tr]) { g.save(); g.beginPath(); g.arc(16, 16, 13, 0, Math.PI * 2); g.clip(); TRA[tr][1](g); g.restore(); }
+      else if (gl && MISC[gl]) MISC[gl](g);
+      else if (gl && CHEST[gl]) CHEST[gl](g);
+      else if (gl && GL[gl]) { g.save(); g.translate(16, 16); g.scale(0.82, 0.82); g.translate(-16, -16); GL[gl](g); g.restore(); }
+      return G.classicize(c, ICON_STYLE, 2).toDataURL();
+    }
     if (MISC[name]) MISC[name](g);
     else if (name === 'i_gold') GL.coin(g);
     else if (name === 'i_gem') GL.gem(g);

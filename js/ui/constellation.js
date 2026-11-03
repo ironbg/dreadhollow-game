@@ -5,7 +5,10 @@
   const U = DH.util, h = U.h, E = DH.economy, A = DH.art, ui = DH.ui, M = DH.meta;
   const click = () => DH.audio.play('click');
   const TAU = Math.PI * 2;
-  const SIZE = { heart: 18, hub: 12, notable: 10, minor: 6.5 };
+  const SIZE = { heart: 18, hub: 13, notable: 11, minor: 8 };
+  /** Each star shows the sign of what it gives (icons.js, cs_<stat>). */
+  const ICONS = {};
+  const iconOf = (stat) => { let im = ICONS[stat]; if (!im) { im = ICONS[stat] = new Image(); im.src = DH.icons.url('cs_' + stat); } return im; };
   const BRANCHES = ['fury', 'bastion', 'plunder'];
 
   ui.openConstellation = () => {
@@ -69,12 +72,17 @@
         const [x, y] = toScreen(n.x, n.y); if (x < -30 || y < -30 || x > W + 30 || y > H + 30) continue;
         const col = n.b ? CS.branches[n.b].color : '#ffffff', st = state(n), R = Math.max(3, SIZE[n.kind] * Math.max(0.55, view.z * 2.2));
         if (st === 'full' || st === 'part') { g.drawImage(A.glow(col), x - R * 2.2, y - R * 2.2, R * 4.4, R * 4.4); }
-        g.fillStyle = st === 'locked' ? '#1a1820' : '#120c14'; g.beginPath(); g.arc(x, y, R, 0, TAU); g.fill();
-        if (st === 'full') { g.fillStyle = col; g.beginPath(); g.arc(x, y, R * 0.78, 0, TAU); g.fill(); }
-        else if (st === 'part') { const r = M.consRank(n.id) / n.max; g.fillStyle = col; g.beginPath(); g.moveTo(x, y); g.arc(x, y, R * 0.78, -Math.PI / 2, -Math.PI / 2 + TAU * r); g.closePath(); g.fill(); }
-        g.lineWidth = n.kind === 'minor' ? 1.2 : 2;
-        g.strokeStyle = st === 'locked' ? 'rgba(120,110,100,0.5)' : st === 'open' ? 'rgba(255,240,200,' + (0.6 + 0.4 * Math.sin(now * 4)) + ')' : col;
+        g.fillStyle = st === 'locked' ? '#15131a' : '#1c1220'; g.beginPath(); g.arc(x, y, R, 0, TAU); g.fill();
+        if (n.kind === 'heart') { g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x, y, R * 0.7, 0, TAU); g.fill(); }
+        else { // the sign of what it gives, faint while it is out of reach
+          const im = iconOf(n.st[0]);
+          if (im.complete && im.naturalWidth) { g.globalAlpha = st === 'locked' ? 0.35 : 1; g.imageSmoothingEnabled = false; g.drawImage(im, x - R * 0.82, y - R * 0.82, R * 1.64, R * 1.64); g.globalAlpha = 1; }
+        }
+        // the rim: dim when locked, pulsing when it can be raised, filling round in the branch's colour as ranks are bought
+        const thick = n.kind === 'minor' ? 2 : 2.6;
+        g.lineWidth = thick; g.strokeStyle = st === 'locked' ? 'rgba(120,110,100,0.5)' : st === 'open' ? 'rgba(255,240,200,' + (0.55 + 0.45 * Math.sin(now * 4)) + ')' : 'rgba(255,255,255,0.18)';
         g.beginPath(); g.arc(x, y, R, 0, TAU); g.stroke();
+        if (st === 'full' || st === 'part') { const r = st === 'full' ? 1 : M.consRank(n.id) / n.max; g.strokeStyle = col; g.lineWidth = thick + 0.6; g.beginPath(); g.arc(x, y, R, -Math.PI / 2, -Math.PI / 2 + TAU * r); g.stroke(); }
         if (n.kind === 'hub' || n.kind === 'notable') { g.strokeStyle = 'rgba(200,170,110,0.7)'; g.lineWidth = 1; g.beginPath(); g.arc(x, y, R + 3, 0, TAU); g.stroke(); }
         if (n.b && view.z > 0.42) { g.fillStyle = st === 'locked' ? 'rgba(200,190,180,0.55)' : '#f4e6d0'; g.font = '700 ' + Math.round(8 + view.z * 4) + 'px sans-serif'; g.textAlign = 'center'; g.fillText(M.consRank(n.id) + '/' + n.max, x, y + R + 10); }
       }
@@ -116,6 +124,7 @@
         const r = M.consRank(n.id), open = M.consOpen(n.id), cost = M.consNext(n.b), full = r >= n.max;
         const buy = async (cnt) => { const got = await ui.act('consBuy', { id: n.id, n: cnt }); if (got) { DH.audio.play('buy'); body(); } else if (got === null) ui.toast(t('cons.cant'), 'bad'); };
         sm.set(h('div',
+          h('div.cons-ico.' + n.b, A.img('cs_' + k)),
           h('div.cons-kind.' + n.b, t('cons.kind.' + n.kind) + ' · ' + t('cons.br.' + n.b)),
           h('div.cons-line', t('cons.perRank'), h('b', ui.fmtStat(k, v))),
           h('div.cons-line', t('cons.now'), h('b', r ? ui.fmtStat(k, v * r) : '—')),
@@ -131,7 +140,7 @@
     const openBonuses = () => {
       const st = M.consStats(), keys = Object.keys(st);
       ui.modal({ title: t('cons.bonuses'), cls: 'consbon', body: (bm) => h('div',
-        keys.length ? h('div.cons-bon', keys.map((k) => h('div', ui.fmtStat(k, st[k])))) : h('div.small.muted.center', t('cons.noBonus')),
+        keys.length ? h('div.cons-bon', keys.map((k) => h('div', A.img('cs_' + k, 'ci'), ' ', ui.fmtStat(k, st[k])))) : h('div.small.muted.center', t('cons.noBonus')),
         h('div.btns', h('button.btn.gold', { onclick: () => bm.close() }, t('common.close')))) });
     };
     const openSpecials = () => {

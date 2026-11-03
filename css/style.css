@@ -1769,3 +1769,6 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .cons-need { text-align: center; font-weight: 800; color: var(--gold); border: 1px solid var(--line); padding: 4px 0; }
 .cons-spec.on .cons-need { color: #6ae08a; border-color: #4a8a5a; }
 .modal.consspec .tabs button.fury.on { color: #ff6a5a; } .modal.consspec .tabs button.bastion.on { color: #6ae08a; } .modal.consspec .tabs button.plunder.on { color: #f0c040; }
+.cons-ico { width: 56px; height: 56px; margin: 0 auto 6px; border-radius: 50% !important; border: 3px solid #3a3040; background: #1c1220; display: flex; align-items: center; justify-content: center; }
+.cons-ico.fury { border-color: #ff4a3a; } .cons-ico.bastion { border-color: #4ad86a; } .cons-ico.plunder { border-color: #f0c040; }
+.cons-ico img { width: 44px; height: 44px; }
