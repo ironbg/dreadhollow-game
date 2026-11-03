@@ -22,7 +22,10 @@ const { makeDb, FieldValue } = require('./fakedb');
     await db.collection('boards').doc(key).collection('scores').doc(uid).set({ name: uid, score: scores[uid] });
     if (uid !== 'ghost') await db.collection('players').doc(uid).set({ save: JSON.stringify(Object.assign(freshProfile(live), { essence: 0, gems: 0 })), rev: 1 });
   }
-  const pay = makePitPay({ db, FieldValue, onProfile, withProfile, boot });
+  // while the weekly rewards are off (E.PIT.weeklyOn), nothing is claimed or paid
+  assert.strictEqual(await makePitPay({ db, FieldValue, onProfile, withProfile, boot }).payIfDue(live, now), 0, 'off: nothing paid');
+  assert.strictEqual((await db.collection('payouts').doc(key).get()).exists, false, 'off: nothing claimed');
+  const pay = makePitPay({ db, FieldValue, onProfile, withProfile, boot, force: true });
   assert.strictEqual(await pay.payIfDue(live, now), 3, 'three profiles paid');
   const P = async (uid) => JSON.parse((await db.collection('players').doc(uid).get()).data().save);
   const a = await P('a'), b = await P('b'), c = await P('c');
@@ -32,7 +35,7 @@ const { makeDb, FieldValue } = require('./fakedb');
   assert.ok(a.inbox.length === 1 && a.inbox[0].kind === 'gift' && a.inbox[0].msg.en.includes('Place 1'), 'a message comes with it');
   // once only: this server, and another one that never saw it
   assert.strictEqual(await pay.payIfDue(live, now), 0);
-  const other = makePitPay({ db, FieldValue, onProfile, withProfile, boot });
+  const other = makePitPay({ db, FieldValue, onProfile, withProfile, boot, force: true });
   assert.strictEqual(await other.payIfDue(live, now), 0, 'another server does not pay again');
   assert.strictEqual((await P('a')).essence, 3000);
   console.log('pit payout tests: all passed');

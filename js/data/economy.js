@@ -401,7 +401,9 @@
     // (up to combo.max); the combo ends with the wave, or is lost when its time runs out
     quota: (n) => Math.min(150, 30 + n), alive: 110, batch: 18, batchEvery: 0.6, pause: 1.6,
     combo: { window: 2.5, per: 12, max: 15 },
-    // the week's board pays its top 50 when the week is over (functions/pitpay.js): [up to rank, reward]
+    // the week's board pays its top 50 when the week is over (functions/pitpay.js): [up to rank, reward]. Off for now
+    // (weeklyOn): the boards will get a shop of their own, with a currency of their own, first.
+    weeklyOn: false,
     weekly: [[1, { essence: 3000, gems: 500 }], [2, { essence: 2000, gems: 300 }], [3, { essence: 1500, gems: 200 }],
       [10, { essence: 1000, gems: 100 }], [25, { essence: 600, gems: 50 }], [50, { essence: 300, gems: 20 }]],
   };

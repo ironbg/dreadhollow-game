@@ -2010,3 +2010,11 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .cons-spec:not(.on) > img.ci { filter: grayscale(.8) brightness(.6); }
 .cons-spent img.ci, .modal.consspec .tabs img.ci { width: 18px; height: 18px; vertical-align: -4px; }
 .cons-brt img.ci { width: 16px; height: 16px; vertical-align: -3px; margin-right: 3px; }
+
+/* the boards' tabs as the game's buttons: black outline, cut corners, banded faces; the chosen one gold */
+.lbtabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.lbtabs .chip { min-height: 34px; padding: 4px 6px; font: 800 12px var(--body); line-height: 1.15; color: #f4e6d0; text-shadow: 1px 1px 0 rgba(0,0,0,.7);
+  border: 2px solid #050308 !important; clip-path: var(--notch); background: linear-gradient(180deg, #6a5872 0 8%, #4e3e58 8% 50%, #3a2c42 50% 86%, #281e2e 86%);
+  box-shadow: inset 2px 2px 0 0 rgba(255,255,255,.18), inset -2px -2px 0 0 rgba(0,0,0,.35); }
+.lbtabs .chip.on { color: #2a1604; text-shadow: 1px 1px 0 rgba(255,240,190,.5); background: linear-gradient(180deg, #fff0b8 0 8%, #ffd76a 8% 42%, #eab044 42% 72%, #c08428 72% 88%, #8a5a18 88%); }
+.lbtabs .chip:active { transform: translateY(2px); }

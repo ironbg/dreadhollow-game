@@ -823,9 +823,9 @@
       boards.length > 1 ? h('div.lbtabs', boards.map((b) => h('button.chip' + (b === cur ? '.on' : ''), { onclick: () => { click(); cur = b; m.set(body()); load(); } }, title(b)))) : null,
       h('div.lbhead', h('div.lbt', title(cur)),
         h('div.small.muted', [period(cur), cur.stage ? t('stage.' + cur.stage + '.name') : null, cur.hero ? t('hero.' + cur.hero + '.name') : null, cur.win ? t('lb.onlyWins') : null].filter(Boolean).join(' · '))),
-      cur.id === 'pit' && cur.period === 'week' ? h('div.lbprize', h('div.small.muted', t('lb.pitPrize')),
+      cur.id === 'pit' && cur.period === 'week' && E.PIT.weeklyOn ? h('div.lbprize', h('div.small.muted', t('lb.pitPrize')),
         h('div.lbprize-grid', E.PIT.weekly.map(([n, rw], i) => { const from = i ? E.PIT.weekly[i - 1][0] + 1 : 1;
-          return h('div', h('b', from === n ? '#' + n : '#' + from + '–' + n), h('span', A.img('i_essence', 'ci'), U.fmt(rw.essence), ' ', A.img('i_gem', 'ci'), U.fmt(rw.gems))); }))) : null,
+          return h('div', h('b', from === n ? '#' + n : '#' + from + '–' + n), h('span', A.img('i_essence', 'ci'), U.fmt(rw.essence), ' ', A.img('i_gem', 'ci'), U.fmt(rw.gems))); }))) : null, // the prizes, while the weekly rewards are on
       !C.user ? h('div.lbsign', h('div.small', t('lb.signIn')), h('button.btn.small.gold', { onclick: () => { m.close(); ui.openAccount(); } }, t('title.signIn'))) : null,
       list);
     m = ui.modal({ title: t('lb.title'), cls: 'boards', body: () => body() });

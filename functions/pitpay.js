@@ -12,12 +12,14 @@ function weekKey(ms) {
   return t.getUTCFullYear() + '-w' + String(w).padStart(2, '0');
 }
 
-function makePitPay({ db, FieldValue, onProfile, withProfile, boot }) {
+function makePitPay({ db, FieldValue, onProfile, withProfile, boot, force }) {
   const done = new Set(); // the weeks this server already knows are paid (one read a week per server)
   /** Pay last week's board if nobody has. Returns how many were paid (0 if it was already done). */
   async function payIfDue(cfg, now) {
     const key = 'pit__' + weekKey((now || Date.now()) - 7 * 86400000);
     if (done.has(key)) return 0;
+    const E = boot(cfg).economy;
+    if (!E.PIT.weeklyOn && !force) { done.add(key); return 0; } // the weekly rewards are off: nothing is claimed or paid
     const ref = db.collection('payouts').doc(key);
     const mine = await db.runTransaction(async (tx) => {
       const s = await tx.get(ref);
@@ -27,7 +29,6 @@ function makePitPay({ db, FieldValue, onProfile, withProfile, boot }) {
     });
     done.add(key);
     if (!mine) return 0;
-    const E = boot(cfg).economy;
     const top = await db.collection('boards').doc(key).collection('scores').orderBy('score', 'desc').limit(50).get();
     let rank = 0, paid = 0;
     for (const d of top.docs) {

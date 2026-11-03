@@ -15,7 +15,7 @@
 
   /** The Pit's picture, painted small and shown in big pixels like the rest of the game: a sky of smoke over black
    *  spires; the pit, a round shaft of stone courses sinking to a floor of fire; chains hanging into it; an iron fence of
-   *  spikes on its far rim; braziers burning to either side; skulls on the stones; embers rising. */
+   *  spikes on its far rim; braziers burning to either side; embers rising. */
   const pitArt = () => {
     const G = DH.gfx, P = G.P, W = 120, H = 180, c = G.canvas(W, H), g = c.getContext('2d');
     let sd = 777; const r = () => { sd = (sd * 16807) % 2147483647; return (sd - 1) / 2147483646; };
@@ -63,11 +63,6 @@
       g.fillStyle = '#ffd890'; g.beginPath(); g.moveTo(bx - 3, by - 4); g.quadraticCurveTo(bx, by - 13, bx + 3, by - 4); g.fill();
     }
     // skulls and bones on the stones
-    for (const [x2, y2] of [[34, 142], [86, 146], [62, 160], [26, 166], [98, 168]]) { // a skull: brow, eye holes, jaw; a bone beside it
-      g.fillStyle = '#0a0608'; g.fillRect(x2 - 3, y2 - 3, 7, 7); g.fillStyle = '#c8bca8'; g.fillRect(x2 - 2, y2 - 3, 5, 4); g.fillRect(x2 - 1, y2 + 1, 3, 2);
-      g.fillStyle = '#1a0a0e'; g.fillRect(x2 - 1, y2 - 1, 1, 1); g.fillRect(x2 + 1, y2 - 1, 1, 1);
-      g.fillStyle = '#9a8e7a'; g.fillRect(x2 + 4, y2 + 2, 5, 1); g.fillRect(x2 + 4, y2 + 1, 1, 3); g.fillRect(x2 + 8, y2 + 1, 1, 3);
-    }
     // embers rising out of the pit
     for (let i = 0; i < 40; i++) { const x2 = cx + (r() - 0.5) * rx * 1.6, y2 = 30 + r() * 90; g.fillStyle = r() < 0.5 ? '#ffb050' : '#ff6a30'; g.fillRect(x2, y2, 1, 1); }
     // the dark at the edges
