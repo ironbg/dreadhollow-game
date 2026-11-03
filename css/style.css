@@ -1772,3 +1772,6 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .cons-ico { width: 56px; height: 56px; margin: 0 auto 6px; border-radius: 50% !important; border: 3px solid #3a3040; background: #1c1220; display: flex; align-items: center; justify-content: center; }
 .cons-ico.fury { border-color: #ff4a3a; } .cons-ico.bastion { border-color: #4ad86a; } .cons-ico.plunder { border-color: #f0c040; }
 .cons-ico img { width: 44px; height: 44px; }
+.pit-pass { position: absolute; right: 8px; bottom: 6px; display: flex; align-items: center; gap: 4px; background: rgba(0,0,0,.65); padding: 3px 8px; border: 1px solid #3a6a3a; color: #7ee89a; font-weight: 800; font-size: 13px; }
+.pit-passcard { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 7px 9px; cursor: pointer; background: linear-gradient(90deg, rgba(120,20,30,.55), rgba(40,10,20,.6)); border: 1px solid #8a4a3a; }
+.pit-passcard b { color: #ffd0a0; } .pit-passcard .small { color: var(--muted); }

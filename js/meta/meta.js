@@ -157,6 +157,7 @@
 
   /* ---------------- The Pit (Trials) ---------------- */
   const pitS = () => { const s = S(); s.pit = s.pit || { best: 0, day: null, used: 0, active: null, pass: false }; const d = U.dayKey(); if (s.pit.day !== d) { s.pit.day = d; s.pit.used = 0; } return s.pit; };
+  meta.pitPass = () => !!pitS().pass;
   meta.pitEntries = () => E.PIT.entries + (pitS().pass ? 1 : 0) + (meta.consSpecials().plunder >= 3 ? 1 : 0); // the third Plunder Specialty: one more a day
   meta.pitLeft = () => Math.max(0, meta.pitEntries() - pitS().used);
   meta.pitCheckpoint = () => Math.floor(pitS().best / E.PIT.every) * E.PIT.every;
@@ -182,6 +183,7 @@
     waves = Math.max(0, Math.min(waves | 0, Math.floor(Math.min(secs, E.PIT.secs + 30) / E.PIT.minWaveSecs)));
     const reached = a.from + waves, record = reached > p.best;
     if (record) p.best = reached;
+    if (reached > 0) meta.boardRecord({ pitWave: reached, hero: S().selectedHero, stage: null, victory: false }, {}); // the Pit's boards (a sweep never counts)
     const paid = waves * meta.pitPerWave(); if (paid) addEssence(paid);
     changed();
     return { waves, reached, paid, best: p.best, record, from: a.from };
@@ -897,6 +899,7 @@
       out = meta.grant({ gems: n });
     } else if (p.type === 'bundle') { out = meta.grant(p.grant); }
     else if (p.type === 'noads') { s.purchases.noAds = true; out = [{ icon: 'n_ad', text: t('product.noads') }]; }
+    else if (p.type === 'pitpass') { pitS().pass = true; out = [{ icon: 'n_skull', text: t('product.pitpass') }]; }
     else if (p.type === 'pass') { meta.ensureSeason(); S().pass.premium = true; // premium for the season it is bought in
       out = [{ icon: 'n_pass', text: t('pass.premiumOn') }]; }
     else if (p.type === 'sub') {
@@ -1073,7 +1076,14 @@
     kills: (r) => r.kills, time: (r) => Math.floor(r.time), level: (r) => r.level, bosses: (r) => r.bossKills,
     gold: (r, res) => res.goldRun, wins: (r) => (r.victory ? 1 : 0), agony: (r) => (r.victory && r.agonyOn ? r.agony : 0),
     tokens: (r, res, b) => ((res.events || []).find((e) => e.id === b.event) || {}).n || 0,
+    pit: (r) => r.pitWave || 0,
   };
+  /** The Pit's own boards: always open, the week's and all time, by the farthest wave reached in a fight. */
+  const PIT_BOARDS = [
+    { id: 'pit', metric: 'pit', mode: 'best', period: 'week', name: { bg: 'Ямата · седмица', en: 'The Pit · week' } },
+    { id: 'pit', metric: 'pit', mode: 'best', period: 'all', name: { bg: 'Ямата · всички времена', en: 'The Pit · all time' } },
+  ];
+  meta.pitBoards = () => PIT_BOARDS;
   meta.BOARD_METRICS = Object.keys(METRICS);
   meta.boardPeriodKey = (b) => {
     const d = new Date(U.now());
@@ -1091,7 +1101,7 @@
   /** The boards open now. An event board is open while its event is collecting. */
   meta.boards = () => {
     const cfg = DH.live && DH.live.config, now = U.now();
-    return ((cfg && cfg.boards) || []).filter((b) => b && b.id && METRICS[b.metric]
+    return ((cfg && cfg.boards) || []).concat(PIT_BOARDS).filter((b) => b && b.id && METRICS[b.metric]
       && !(b.start && now < Date.parse(b.start)) && !(b.end && now >= Date.parse(b.end))
       && (b.period !== 'event' || meta.liveEvents().some((ev) => ev.id === b.event && meta.eventCollecting(ev))));
   };

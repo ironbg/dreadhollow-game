@@ -45,7 +45,10 @@
     const draw = () => {
       const s = DH.save.data, best = (s.pit && s.pit.best) || 0, cp = M.pitCheckpoint(), per = M.pitPerWave(), left = M.pitLeft(), all = M.pitEntries();
       m.set(h('div',
-        h('div.pit-art', h('img', { src: art(MODES[0]), alt: '' }), h('div.pit-ess', A.img('i_essence', 'ci'), h('b', U.fmt(M.essence())))),
+        h('div.pit-art', h('img', { src: art(MODES[0]), alt: '' }), h('div.pit-ess', A.img('i_essence', 'ci'), h('b', U.fmt(M.essence()))),
+          M.pitPass() ? h('div.pit-pass.on', A.img('n_skull', 'ci'), t('pit.passOn')) : null),
+        M.pitPass() ? null : h('div.pit-passcard', { onclick: async () => { click(); if (await DH.iap.buy('pitpass')) draw(); } },
+          A.img('n_skull', 'ci'), h('div.grow', h('b', t('product.pitpass')), h('div.small', t('pit.passDesc'))), h('span.btn.small.gold', DH.iap.price('pitpass'))),
         h('div.pit-card',
           row('n_trophy', t('pit.best'), U.fmt(best)),
           row('u_pin', t('pit.checkpoint'), U.fmt(cp)),
@@ -55,7 +58,7 @@
           h('button.pit-fx', { onclick: () => { click(); fxInfo(); } }, A.img('u_agony', 'ci'), t('pit.randomFx', { n: E.PIT.roll }), h('span.pit-i', 'i'))),
         h('div.pit-more',
           h('button.btn.small.gold', { onclick: () => { click(); ui.openConstellation(); } }, A.img('u_star', 'ci'), ' ', t('pit.constellation')),
-          h('button.btn.small.ghost.off', { onclick: () => ui.toast(t('trials.soon')) }, A.img('n_trophy', 'ci'), ' ', t('lb.short'))),
+          h('button.btn.small.gold', { onclick: () => { click(); ui.openBoards(M.boardKey(M.pitBoards()[0])); } }, A.img('n_trophy', 'ci'), ' ', t('lb.short'))),
         h('div.mact', h('div.small.center.pit-left' + (left ? '' : '.bad'), t('pit.entries', { n: all - left, m: all })),
         h('div.pit-btns',
           h('button.btn.blue' + (left && best ? '' : '.off'), { onclick: sweep }, t('pit.sweep'), best ? h('span.small', ' +' + U.fmt(best * per)) : null),

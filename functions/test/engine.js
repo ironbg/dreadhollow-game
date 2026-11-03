@@ -135,5 +135,11 @@ const live = require('../game/live.json');
   assert.ok(r.profile.essence < 1000 && r.profile.cons.spent === 1000 - r.profile.essence);
   r = await withProfile(r.profile, live, (DH) => DH.actions.list.consReset.run({}));
   assert.strictEqual(r.profile.essence, 1000); assert.deepStrictEqual(r.profile.cons.r, {});
+  // the Pit Pass: +50% Essence a wave and a fourth entry; a Pit fight goes on the Pit's boards
+  r = await withProfile(Object.assign({}, p0, { pit: { best: 0, day: null, used: 0, active: null, pass: false } }), live, (DH) => { DH.meta.fulfillProduct('pitpass', true); return [DH.meta.pitEntries(), DH.meta.pitPerWave()]; });
+  assert.deepStrictEqual(r.result, [4, 15]); assert.strictEqual(r.profile.pit.pass, true);
+  r.profile.pit.active = { at: Date.now() - 90000, from: 0, affixes: [] };
+  r = await withProfile(r.profile, live, (DH) => { DH.actions.list.pitEnd.run({ waves: 17 }); return DH.meta.boardPending().map((b) => b.key.split('__')[0] + ':' + b.entry.score); });
+  assert.deepStrictEqual(r.result, ['pit:17', 'pit:17']);
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });

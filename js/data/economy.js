@@ -423,6 +423,7 @@
     gems_6: { type: 'gems', gems: 13500, price: 99.99, icon: 'gems_xl', bonus: 70, tag: 'best' },
     starter:  { type: 'bundle', price: 1.99, once: true, grant: { gems: 300, gold: 10000, gear: { rarity: 3 }, energy: 30, mats: { iron: 60, silver: 20 } }, value: 800 },
     noads:    { type: 'noads', price: 4.99, once: true },
+    pitpass:  { type: 'pitpass', price: 4.99, once: true }, // the Pit's pass: +50% Essence and one more entry a day, for good
     soulcard: { type: 'sub', price: 4.99, grant: { gems: 300 }, daily: { gems: 100, energy: 10, mats: { iron: 5 } }, days: 30 },
     pass:     { type: 'pass', price: 9.99 },
     reaper:   { type: 'bundle', price: 4.99, once: true, grant: { hero: 'reaper', gems: 500, chest: 'gold' }, value: 400 },
