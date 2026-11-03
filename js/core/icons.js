@@ -5,7 +5,7 @@
 (function (DH) {
   'use strict';
   const G = DH.gfx, P = G.P, sh = G.shade, C = DH.content;
-  const SIZE = 64, U2 = SIZE / 32; // 2 icon pixels per unit of the 32x32 design box (same density as sprites)
+  let SIZE = 64, U2 = SIZE / 32; // 2 icon pixels per unit of the 32x32 design box (same density as sprites); DH.icons.hi draws larger
   const cache = {};
 
   const ELEM = { fire: '#e8602a', lightning: '#e8c020', ice: '#3aa8e8', magic: '#9a50e0', physical: '#8a92a6', summon: '#40b080', area: '#c07030' };
@@ -2278,8 +2278,8 @@
     const c = G.canvas(SIZE, SIZE), g = c.getContext('2d');
     g.scale(U2, U2); g.lineJoin = 'round'; g.lineCap = 'round';
     const [pre, ...rest] = name.split('_'); const id = rest.join('_');
-    if (pre === 'cs') return DH.icons.url('bl_' + (CS_MEDAL[id] || 'strength'));
-    if (pre === 'pm' && PM_ICON[id]) { const [col, elev, fn] = PM_ICON[id]; medal(g, col, elev); g.save(); g.beginPath(); g.arc(16, 16, 11.6, 0, Math.PI * 2); g.clip(); fn(g); g.restore(); return G.classicize(c, ICON_STYLE, 2).toDataURL(); }
+    if (pre === 'cs') return draw('bl_' + (CS_MEDAL[id] || 'strength'));
+    if (pre === 'pm' && PM_ICON[id]) { const [col, elev, fn] = PM_ICON[id]; medal(g, col, elev); g.save(); g.beginPath(); g.arc(16, 16, 11.6, 0, Math.PI * 2); g.clip(); fn(g); g.restore(); return G.classicize(c, ICON_STYLE, U2).toDataURL(); }
     if (MISC[name]) MISC[name](g);
     else if (name === 'i_gold') GL.coin(g);
     else if (name === 'i_gem') GL.gem(g);
@@ -2339,12 +2339,19 @@
     else if (pre === 'a' && ARTIFACT[id]) { badge(g, ARTIFACT[id][1], true); g.save(); g.translate(16, 16); g.scale(0.7, 0.7); g.translate(-16, -16); GL[ARTIFACT[id][0]](g); g.restore(); }
     else if (DH.gfx.painters[name]) spriteIcon(g, name, 30);
     else if (GL[name]) GL[name](g);
-    return G.classicize(c, ICON_STYLE, 2).toDataURL();
+    return G.classicize(c, ICON_STYLE, U2).toDataURL();
   }
   GL.starSmallAt = (g, x, y) => { const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 1.4 : 3.2; pts.push(x + Math.cos(a) * r, y + Math.sin(a) * r); } P.path(g, pts); P.fill(g, '#fff8e0'); };
 
   DH.icons = {
     url(name) { return cache[name] || (cache[name] = draw(name)); },
+    /** The same icon drawn at `size` pixels (the same shapes, finer): for icons shown large, as the Constellation's stars when zoomed in. */
+    hi(name, size) {
+      const key = name + '@' + size; if (cache[key]) return cache[key];
+      const s0 = SIZE, u0 = U2; SIZE = size; U2 = size / 32;
+      try { cache[key] = draw(name); } finally { SIZE = s0; U2 = u0; }
+      return cache[key];
+    },
     img(name, cls) { const el = document.createElement('img'); el.src = this.url(name); el.className = 'ic ' + (cls || ''); el.alt = ''; el.draggable = false; return el; },
   };
   // UI modules call DH.art.img / DH.art.icon — route them to the vector icons.

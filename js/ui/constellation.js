@@ -7,7 +7,7 @@
   const TAU = Math.PI * 2;
   /** Each star is the medal of what it gives (icons.js, cs_<stat>: the Blessing's own medal); the heart the Constellation's. */
   const ICONS = {};
-  const iconOf = (name) => { let im = ICONS[name]; if (!im) { im = ICONS[name] = new Image(); im.src = DH.icons.url(name); } return im; };
+  const iconOf = (name) => { let im = ICONS[name]; if (!im) { im = ICONS[name] = new Image(); im.src = DH.icons.hi(name, name === 'u_cons' ? 256 : 160); } return im; }; // drawn large: sharp at any zoom
   const ZMIN = 0.15, ZMAX = 1.6;
   const radius = (n, z) => Math.max(4, n.r * z); // stars keep their size in the world, so the spacing holds at every zoom
   const BRANCHES = ['fury', 'bastion', 'plunder'];
