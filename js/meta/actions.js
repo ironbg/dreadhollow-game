@@ -45,7 +45,6 @@
     pitPerkDown: { run: (a) => M().pitPerkDown(str(a.id, 12)) },
     claimPitFree: { run: () => M().claimPitFree() },
     adPit: { run: () => M().adPit(), ad: () => (!M().pitFreeReady() && M().pitAdsLeft() > 0 ? 'pit_shop' : null) },
-    buyPitPack: { run: (a) => M().buyPitPack(int(a.i)) },
     pitPerkReset: { run: () => M().pitPerkReset() },
     consBuy: { run: (a) => M().consBuy(str(a.id, 40), int(a.n)) },
     consLower: { run: (a) => M().consLower(str(a.id, 40)) },

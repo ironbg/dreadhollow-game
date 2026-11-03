@@ -47,16 +47,16 @@
       m.set(h('div',
         h('div.pit-art', h('img', { src: art(MODES[0]), alt: '' }), h('div.pit-ess', A.img('i_essence', 'ci'), h('b', U.fmt(M.essence()))),
           M.pitPass() ? h('div.pit-pass.on', A.img('n_skull', 'ci'), t('pit.passOn')) : null,
-          h('button.pit-shopbtn', { 'aria-label': t('pitshop.title'), onclick: () => { click(); ui.openPitShop(); } }, A.img('c_gold'), h('span', t('pit.shop')), M.pitFreeReady() ? h('span.badge', '!') : null)),
+          h('button.pit-shopbtn', { 'aria-label': t('pitshop.title'), onclick: () => { click(); ui.openPitShop(); } }, A.img('i_essence'), h('span', t('pit.shop')), M.pitFreeReady() ? h('span.badge', '!') : null)),
         M.pitPass() ? null : h('div.pit-passcard', { onclick: async () => { click(); if (await DH.iap.buy('pitpass')) draw(); } },
           A.img('n_skull', 'ci'), h('div.grow', h('b', t('product.pitpass')), h('div.small', t('pit.passDesc'))), h('span.btn.small.gold', DH.iap.price('pitpass'))),
         h('div.pit-card',
           row('n_trophy', t('pit.best'), U.fmt(best)),
-          row('u_pin', t('pit.checkpoint'), U.fmt(cp)),
+          row('n_pass', t('pit.checkpoint'), U.fmt(cp)),
           h('div.pit-gap'),
           row('i_essence', t('pit.entryPay'), U.fmt(Math.round(cp * per))),
           row('i_essence', t('pit.perWave'), per % 1 ? per.toFixed(1) : U.fmt(per)),
-          h('button.pit-fx', { onclick: () => { click(); fxInfo(); } }, A.img('u_agony', 'ci'), t('pit.randomFx', { n: E.PIT.roll }), h('span.pit-i', 'i'))),
+          h('div.pit-fx', A.img('u_agony', 'ci'), h('span', t('pit.randomFx', { n: E.PIT.roll })), h('button.btn.small.ghost.infob', { 'aria-label': t('pit.fxTitle'), onclick: () => { click(); fxInfo(); } }, 'i'))),
         h('div.pit-more',
           h('button.btn.small.gold', { onclick: () => { click(); ui.openPitMastery(); } }, A.img('u_star', 'ci'), ' ', t('pit.mastery'), M.pitPointsFree() > 0 ? h('span.badge', M.pitPointsFree()) : null),
           h('button.btn.small.gold', { onclick: () => { click(); ui.openConstellation(); } }, A.img('i_essence', 'ci'), ' ', t('pit.constellation')),
@@ -138,8 +138,8 @@
       root = h('div.pm-root', { onclick: (e) => { if (openId && !e.target.closest('.pm-pop') && !e.target.closest('.pm-card')) { openId = null; const o = root.querySelector('.pm-pop'); if (o) o.remove(); } } },
         h('div.pm-head', h('div.pm-lv', h('b', ms.lv), h('span.small', ' / ' + PM.max)),
           h('div.grow', h('div.pm-bar', h('i', { style: { width: (ms.next ? Math.round(ms.xp / ms.next * 100) : 100) + '%' } })), h('div.small.muted', ms.next ? t('pit.masteryXp', { x: U.fmt(ms.xp), m: U.fmt(ms.next) }) : t('common.max'))),
-          h('div.pm-free', h('span.small', t('pit.points')), h('b', free))),
-        h('div.small.muted.center', t('pit.masteryDesc', { n: PM.xpPerWave }) + (M.masteryPass() ? ' ' + t('pit.masteryPass') : '')),
+          h('div.pm-free', h('span.small', t('pit.points')), h('b', free)),
+          h('button.btn.small.ghost.infob', { 'aria-label': t('pit.mastery'), onclick: (e) => { e.stopPropagation(); click(); ui.modal({ title: t('pit.mastery'), cls: 'altarinfo', body: (im) => h('div', h('p.center', t('pit.masteryDesc', { n: PM.xpPerWave }) + (M.masteryPass() ? ' ' + t('pit.masteryPass') : '')), h('div.btns', h('button.btn.gold', { onclick: () => im.close() }, t('common.close')))) }); } }, 'i')),
         h('div.pm-grid', ids.map((id) => {
           const d = PM.perks[id], lv = M.pitPerk(id), full = lv >= d.max, can = !full && free >= d.cost;
           const el = h('div.pm-card.t-' + d.tier + (full ? '.full' : can ? '.can' : '') + (lv ? '' : '.zero') + (openId === id ? '.sel' : ''), { 'data-id': id, onclick: () => { click(); openId = id; draw(); } },
@@ -195,10 +195,11 @@
     draw();
   };
 
-  /** The Pit's shop: today's free handful, then a few for an ad each (one card that turns over), and Essence for gems. */
+  /** The Pit's shop, as the Armory's Resource Store: today's free handful, then a few for an ad each (one card that turns
+   *  over), and Essence packs for real money, bought as often as wanted. */
   ui.openPitShop = () => {
-    const S = E.PIT_SHOP;
-    const m = ui.modal({ title: t('pitshop.title'), cls: 'resshop pitshop', body: () => h('div'), onClose: () => DH.events.off('meta', redraw) });
+    const S = E.PIT_SHOP; let timer = 0;
+    const m = ui.modal({ title: t('pitshop.title'), cls: 'resshop pitshop', body: () => h('div'), onClose: () => { clearInterval(timer); DH.events.off('meta', redraw); } });
     const redraw = () => { if (!m.closed) draw(); };
     DH.events.on('meta', redraw);
     const ess = (n) => h('div.rs-items', h('div.rs-it', A.img('i_essence'), h('b', U.fmt(n))));
@@ -209,16 +210,16 @@
         all ? h('button.btn.small.ghost.off', A.img('u_check', 'ci'), t('resshop.taken'))
           : free ? h('button.btn.small.gold', { onclick: async () => { const r = await ui.act('claimPitFree'); if (r) { DH.audio.play('reward'); ui.rewardPopup(t('pitshop.title'), r); } } }, t('common.claim'))
             : h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('adPit'); if (r) ui.rewardPopup(t('pitshop.title'), r); } }, h('span.adtag', 'AD'), t('common.watch') + ' (' + left + ')'));
-      const packs = S.packs.map((k, i) => {
-        const n = M.pitPackLeft(i);
-        return h('div.panel.rs-pack' + (n ? '' : '.done'),
-          h('div.slot.rs-pico', A.img('i_essence')),
-          h('div.grow', h('div.rs-t', t('product.' + k.id)), ess(k.essence), h('div.small.muted', t('pitshop.left', { n }))),
-          n ? h('button.btn.small.gem', { onclick: async () => {
-            const r = await ui.act('buyPitPack', { i }); if (r) { DH.audio.play('buy'); ui.rewardPopup(t('pitshop.title'), r); } else if (r === false) { ui.toast(t('common.notEnough'), 'bad'); }
-          } }, A.img('i_gem'), k.gems) : h('button.btn.small.ghost.off', t('shop.soldOut')));
+      const tm = h('div.small.muted.center.rs-timer'), upd = () => { tm.textContent = t('resshop.daily', { t: U.fmtDuration(U.msToMidnight()) }); };
+      upd(); clearInterval(timer); timer = setInterval(upd, 1000);
+      const packs = E.essPackOrder.map((id) => {
+        const p = E.products[id];
+        return h('div.panel.rs-pack' + (p.tag ? '.tagged' : ''), { onclick: () => DH.iap.buy(id) },
+          h('div.slot.rs-pico', A.img(p.icon)),
+          h('div.grow', h('div.rs-t', t('product.' + id), p.tag ? h('span.tag', t('shop.tag.' + p.tag)) : null), ess(p.grant.essence), p.value ? h('div.bonus', t('shop.bonus', { v: p.value })) : null),
+          h('button.btn.small.green', DH.iap.price(id)));
       });
-      m.set(h('div', card, h('div.small.muted.center.rs-timer', t('resshop.daily', { t: U.fmtDuration(U.msToMidnight()) })), h('h3.sect.rs-sect', t('pitshop.packs')), packs));
+      m.set(h('div', card, tm, h('h3.sect.rs-sect', t('pitshop.packs')), packs));
     };
     draw();
   };

@@ -423,15 +423,9 @@
       entry:   { icon: 'pm_entry',   tier: 'red',    max: 1,  cost: 10, per: 1 },    // one more entry a day
     },
   };
-  /** The Pit's shop: a free handful of Essence a day, a few more for an ad each, and packs for gems (so many a day). */
-  E.PIT_SHOP = {
-    free: { essence: 150 }, ad: { essence: 250 }, ads: 3,
-    packs: [
-      { id: 'ess_s', gems: 60,  essence: 700,  daily: 3 },
-      { id: 'ess_m', gems: 250, essence: 3200, daily: 2 },
-      { id: 'ess_l', gems: 600, essence: 8500, daily: 1 },
-    ],
-  };
+  /** The Pit's shop (as the Armory's Resource Store): a free handful of Essence a day, a few more for an ad each, and
+   *  packs of Essence for real money (E.products ess_1..ess_5, bought as often as wanted). */
+  E.PIT_SHOP = { free: { essence: 150 }, ad: { essence: 250 }, ads: 3 };
   E.pitWeeklyReward = (rank) => { const r = E.PIT.weekly.find(([n]) => rank <= n); return r ? r[1] : null; };
   /** The account's reward track: a bigger reward every 5 levels, for ever. Each milestone pays gems, the metal of its
    *  level, and in turn a Silver chest (x5), a Gold chest (x10) or a sure relic (x20: Epic, Legendary from 60);
@@ -473,8 +467,15 @@
     res_3: { type: 'bundle', price: 9.99,  icon: 'mat_gold',      grant: { gold: 40000, mats: { silver: 80, gold: 40 } }, value: 35, tag: 'popular' },
     res_4: { type: 'bundle', price: 19.99, icon: 'mat_starsteel', grant: { gold: 90000, mats: { silver: 120, gold: 80, starsteel: 30 } }, value: 40 },
     res_5: { type: 'bundle', price: 49.99, icon: 'c_gold',        grant: { gold: 250000, mats: { iron: 300, silver: 300, gold: 200, starsteel: 100 } }, value: 50, tag: 'best' },
+    // Essence packs (the Pit's shop); value: how much more Essence a dollar than the smallest pack
+    ess_1: { type: 'bundle', price: 0.99,  icon: 'i_essence', grant: { essence: 2000 } },
+    ess_2: { type: 'bundle', price: 4.99,  icon: 'i_essence', grant: { essence: 12000 }, value: 20 },
+    ess_3: { type: 'bundle', price: 9.99,  icon: 'i_essence', grant: { essence: 27000 }, value: 35, tag: 'popular' },
+    ess_4: { type: 'bundle', price: 19.99, icon: 'i_essence', grant: { essence: 60000 }, value: 50 },
+    ess_5: { type: 'bundle', price: 49.99, icon: 'i_essence', grant: { essence: 170000 }, value: 70, tag: 'best' },
   };
   E.resPackOrder = ['res_1', 'res_2', 'res_3', 'res_4', 'res_5'];
+  E.essPackOrder = ['ess_1', 'ess_2', 'ess_3', 'ess_4', 'ess_5'];
   E.gemPackOrder = ['gems_1', 'gems_2', 'gems_3', 'gems_4', 'gems_5', 'gems_6'];
 
   /* Gold for gems */

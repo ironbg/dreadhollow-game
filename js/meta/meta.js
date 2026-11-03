@@ -226,22 +226,16 @@
     meta.track('pit', n); changed();
     return { paid, n, mastery: meta.pitMastery().lv - lv0 };
   };
-  /* the Pit's shop (E.PIT_SHOP): a free handful a day, then a few for an ad each; packs for gems */
+  /* the Pit's shop (E.PIT_SHOP): a free handful a day, then a few for an ad each; the packs are bought with real money (E.products ess_*) */
   meta.pitFreeReady = () => !meta.ensureDaily().pitFree;
   meta.pitAdsLeft = () => Math.max(0, E.PIT_SHOP.ads - (meta.ensureDaily().ads.pit || 0));
-  meta.pitPackLeft = (i) => { const k = E.PIT_SHOP.packs[i]; return k ? Math.max(0, k.daily - ((meta.ensureDaily().pitPacks || {})[k.id] || 0)) : 0; };
   meta.claimPitFree = () => { const d = meta.ensureDaily(); if (d.pitFree) return null; d.pitFree = true; return meta.grant(E.PIT_SHOP.free); };
   meta.adPit = async () => {
     const d = meta.ensureDaily(); if (!d.pitFree || meta.pitAdsLeft() <= 0) return null; // the ads open once the free one is taken
     if (!(await DH.ads.rewarded('pit_shop'))) return null;
     d.ads.pit = (d.ads.pit || 0) + 1; return meta.grant(E.PIT_SHOP.ad);
   };
-  meta.buyPitPack = (i) => {
-    const k = E.PIT_SHOP.packs[i], d = meta.ensureDaily(); if (!k || meta.pitPackLeft(i) <= 0) return null;
-    if (!meta.spend({ gems: k.gems })) return false;
-    d.pitPacks = d.pitPacks || {}; d.pitPacks[k.id] = (d.pitPacks[k.id] || 0) + 1;
-    return meta.grant({ essence: k.essence });
-  };
+
 
   /* ---------------- The Constellation (E.CONST) ---------------- */
   const consS = () => {

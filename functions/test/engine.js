@@ -183,8 +183,10 @@ const live = require('../game/live.json');
   r = await withProfile(r.profile, live, (DH) => { DH.meta.fulfillProduct('masterypass', true); DH.actions.list.pitSweep.run({}); return DH.save.data.pit.mxp; });
   assert.strictEqual(r.result, 450); assert.strictEqual(r.profile.masteryPass, true);
   // the Pit's shop: a free handful once a day, the ads only after it, Essence for gems so many times a day
-  r = await withProfile(Object.assign({}, p0, { essence: 0, gems: 1000 }), live, (DH) => [DH.actions.list.claimPitFree.run({}), DH.actions.list.claimPitFree.run({}), DH.actions.list.buyPitPack.run({ i: 2 }), DH.actions.list.buyPitPack.run({ i: 2 }), DH.actions.list.buyPitPack.run({ i: 9 })]);
-  assert.ok(r.result[0] && r.result[1] === null && r.result[2] && r.result[3] === null && r.result[4] === null);
-  assert.strictEqual(r.profile.essence, 150 + 8500); assert.strictEqual(r.profile.gems, 400);
+  r = await withProfile(Object.assign({}, p0, { essence: 0 }), live, (DH) => [DH.actions.list.claimPitFree.run({}), DH.actions.list.claimPitFree.run({}), DH.meta.pitAdsLeft()]);
+  assert.ok(r.result[0] && r.result[1] === null); assert.strictEqual(r.result[2], 3); assert.strictEqual(r.profile.essence, 150);
+  // an Essence pack bought with real money
+  r = await withProfile(r.profile, live, (DH) => { DH.meta.fulfillProduct('ess_3', true); return DH.meta.essence(); });
+  assert.strictEqual(r.result, 150 + 27000);
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });
