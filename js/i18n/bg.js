@@ -408,7 +408,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'gear.stillhunter_garb': 'Одежда на дебнещия', 'gear.stalker_grips': 'Ръкавици на преследвача', 'gear.spark_gauntlets': 'Искрящи ръкавици', 'gear.duelist_ember': 'Жарта на дуелиста',
   'gear.tempo_treads': 'Ботуши на ритъма', 'gear.striders': 'Скороходи', 'gear.grave_walkers': 'Гробоходи', 'gear.oak_band': 'Дъбов пръстен', 'gear.bronze_loop': 'Бронзова халка',
   'gear.steel_signet': 'Стоманен перстен', 'gear.infernal_pact': 'Адски пакт', 'gear.greed_signet': 'Перстен на алчността', 'gear.aegis_ring': 'Пръстен на егидата',
-  'gear.twinRing': 'Не можеш да носиш два еднакви пръстена.',
+  'gear.canLevel': 'Можеш да я вдигнеш с {n} нива сега', 'gear.twinRing': 'Не можеш да носиш два еднакви пръстена.',
   'mail.gift': 'Подарък',
   'mail.note': 'Съобщение',
   'mail.news': 'Новини',

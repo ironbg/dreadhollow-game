@@ -231,8 +231,10 @@
   }
   function gearSlot(g, hideEq, onTap) {
     const eq = M.isEquipped(g.id);
+    const ups = eq && hideEq ? M.levelGearAllPreview(g).n : 0; // a worn piece: how many levels gold and metals reach now
     return h('div.slot.rar' + g.rarity, { onclick: () => { click(); if (onTap) onTap(); else ui.openGear(g.id); } },
-      A.img('g_' + g.type), h('span.lv', t('common.lv') + ' ' + g.level), eq && !hideEq ? h('span.eq', 'E') : null, g.isNew ? h('span.newdot') : null,
+      A.img('g_' + g.type), h('span.lv', t('common.lv') + ' ' + g.level), eq && !hideEq ? h('span.eq', 'E') : null,
+      ups > 0 ? h('span.upb', { title: t('gear.canLevel', { n: ups }) }, '+' + ups) : g.isNew ? h('span.newdot') : null,
       !hideEq && M.mergeCandidates(g.id).length >= 2 ? h('span.mergeb', '▲') : null); // three alike: ready to merge
   }
   ui.gearSlot = gearSlot;

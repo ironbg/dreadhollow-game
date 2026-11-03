@@ -7,9 +7,11 @@
       v: '1.61.57',
       bg: [
         'Всички характеристики на реликвите (и бонусите на нивата им) са четири пъти по-малки: с рядкостта и нивата един предмет стигаше до +96% скорост на атака, +268% Многоудар, +339% критични щети или +230% огнени щети. Специалните ефекти на реликвите, чертите, уменията и благословиите дават колкото досега.',
+        'Всяка екипирана реликва в Оръжейната показва червена значка с броя нива, с които можеш да я вдигнеш сега.',
       ],
       en: [
         'Every stat on relics (and their level bonuses) is a quarter of what it was: with rarity and levels one piece reached +96% attack speed, +268% Multistrike, +339% crit damage or +230% fire damage. Relic specials, traits, abilities and blessings give as much as before.',
+        'Every worn relic in the Armory shows a red badge with how many levels you can raise it right now.',
       ],
     },
     {

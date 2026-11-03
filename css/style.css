@@ -156,6 +156,7 @@ h3.sect .timer { font: 8px var(--num); color: var(--muted); letter-spacing: 0; }
 .slot img { width: 62%; height: 62%; filter: drop-shadow(0 2px 0 rgba(0,0,0,.6)); }
 .slot .lv { position: absolute; bottom: 3px; right: 4px; font: 7px var(--num); color: #fff; text-shadow: 0 1px 0 #000, 0 0 3px #000; }
 .slot .eq { position: absolute; top: 3px; left: 4px; font: 800 9px var(--body); color: var(--gold); text-shadow: 0 1px 0 #000; }
+.slot .upb { position: absolute; top: 2px; right: 2px; z-index: 2; min-width: 18px; height: 16px; padding: 0 3px; background: var(--blood-hi); color: #fff; font: 800 10px/16px var(--body); text-align: center; box-shadow: 0 0 0 2px #050308; pointer-events: none; }
 .slot .newdot { position: absolute; top: 3px; right: 3px; width: 8px; height: 8px; border-radius: 50%; background: var(--blood-hi); box-shadow: 0 0 0 2px #000; }
 .slot.empty { border-style: dashed; border-color: #3a2c40; background: rgba(0,0,0,.35); }
 .slot.empty img { opacity: .2; filter: grayscale(1); }

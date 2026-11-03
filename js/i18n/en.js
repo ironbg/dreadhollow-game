@@ -408,7 +408,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'gear.stillhunter_garb': 'Stillhunter Garb', 'gear.stalker_grips': 'Stalker\'s Grips', 'gear.spark_gauntlets': 'Sparkfinger Gauntlets', 'gear.duelist_ember': 'Duelist\'s Ember',
   'gear.tempo_treads': 'Tempo Treads', 'gear.striders': 'Striders', 'gear.grave_walkers': 'Gravewalkers', 'gear.oak_band': 'Oak Band', 'gear.bronze_loop': 'Bronze Loop',
   'gear.steel_signet': 'Steel Signet', 'gear.infernal_pact': 'Infernal Pact', 'gear.greed_signet': 'Signet of Greed', 'gear.aegis_ring': 'Aegis Ring',
-  'gear.twinRing': "You can't wear two rings of the same kind.",
+  'gear.canLevel': 'You can raise it {n} levels now', 'gear.twinRing': "You can't wear two rings of the same kind.",
   'mail.gift': 'A gift',
   'mail.note': 'A message',
   'mail.news': 'News',
