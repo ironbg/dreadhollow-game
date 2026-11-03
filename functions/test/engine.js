@@ -166,6 +166,12 @@ const live = require('../game/live.json');
   assert.deepStrictEqual(r.result, [3, 225, null], 'a card level back');
   r = await withProfile(r.profile, live, (DH) => { DH.actions.list.pitPerkReset.run({}); return DH.meta.pitSecs(); });
   assert.strictEqual(r.result, 180);
+  // Combo Master: three levels, and the top Mastery level pays for every card
+  r = await withProfile(r.profile, live, (DH) => { const PM = DH.economy.PIT_MASTERY; let all = 0; for (const k in PM.perks) all += PM.perks[k].max * PM.perks[k].cost;
+    for (let i = 0; i < 4; i++) DH.actions.list.pitPerkUp.run({ id: 'combo' }); DH.save.data.pit.mxp = 1e7; return [DH.meta.pitPerk('combo'), DH.meta.pitPerkVal('combo'), all, PM.max, DH.meta.pitMastery().lv]; });
+  assert.strictEqual(r.result[0], 3, 'no more than three levels'); assert.ok(Math.abs(r.result[1] - 0.3) < 1e-9);
+  assert.strictEqual(r.result[2], r.result[3], 'the top level gives the points of every card'); assert.strictEqual(r.result[4], 135);
+  r = await withProfile(r.profile, live, (DH) => { DH.actions.list.pitPerkReset.run({}); return 0; });
   // the Full Sweep card: all of the best wave at its top; a sweep of several entries at once
   r.profile.pit = Object.assign(r.profile.pit, { best: 40, used: 0, day: null }); r.profile.essence = 0;
   r = await withProfile(r.profile, live, (DH) => { for (let i = 0; i < 5; i++) DH.actions.list.pitPerkUp.run({ id: 'sweep' }); return [DH.meta.pitSweepShare(), DH.actions.list.pitSweep.run({ n: 2 }), DH.actions.list.pitSweep.run({ n: 9 })]; });

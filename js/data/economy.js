@@ -408,7 +408,7 @@
   /** The Pit's Mastery: experience from every Pit fight (and sweep), a level up to E.PIT_MASTERY.max, a point a level
    *  to put in its cards (they work in the Pit only, except Essence and the entry). Freely reset. */
   E.PIT_MASTERY = {
-    max: 100, xpPerWave: 5,                                   // a fight or a sweep: 5 experience per wave reached
+    max: 135, xpPerWave: 5,                                   // the top level gives exactly the points every card needs                                   // a fight or a sweep: 5 experience per wave reached
     next: (lv) => 60 + 15 * lv,                               // experience from level lv to lv + 1
     // tier: the colour of the card (blue, purple, gold, red: from the plain to the rarest)
     perks: {
@@ -418,6 +418,7 @@
       execute: { icon: 'pm_execute', tier: 'purple', max: 5,  cost: 3, per: 0.1 },   // +10% damage a level on foes under 30% health
       time:    { icon: 'pm_time',    tier: 'gold',   max: 4,  cost: 4, per: 15 },    // +15 s a level
       essence: { icon: 'pm_essence', tier: 'gold',   max: 4,  cost: 3, per: 0.1 },   // +10% Essence a level
+      combo:   { icon: 'pm_combo',   tier: 'gold',   max: 3,  cost: 4, per: 0.1 },   // the combo's timer runs 10% longer a level
       sweep:   { icon: 'pm_sweep',   tier: 'red',    max: 5,  cost: 3, per: 0.1 },   // a sweep pays 10% more of the best wave a level (all of it at 5)
       entry:   { icon: 'pm_entry',   tier: 'red',    max: 1,  cost: 10, per: 1 },    // one more entry a day
     },

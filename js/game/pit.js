@@ -92,11 +92,14 @@
     }
   };
 
+  /** How long the combo waits for the next kill: longer with the Mastery's Combo Master card. */
+  R.pitComboWindow = function () { return E.PIT.combo.window * (1 + ((this.pit.perks && this.pit.perks.combo) || 0)); };
+
   /** A foe of the Pit fell (run.killEnemy): the wave's count and the combo. */
   R.pitKill = function (e) {
     const P = this.pit, K = P.combo;
     if (e.pitW === P.wave || !e.pitW) P.got++; // what the wave's foes call up counts too
-    K.n++; K.t = E.PIT.combo.window; K.best = Math.max(K.best, K.n);
+    K.n++; K.t = this.pitComboWindow(); K.best = Math.max(K.best, K.n);
   };
 
   /** Wave n: its quota of kills, stronger by E.PIT.hpGrow / dmgGrow each wave on from the checkpoint; an elite in every

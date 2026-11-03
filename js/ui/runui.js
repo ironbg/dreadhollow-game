@@ -260,7 +260,7 @@
     const on = K && K.n >= 2; r.pbCombo.classList.toggle('hidden', !on);
     if (on) {
       const skip = Math.min(EP.combo.max, Math.floor(K.n / EP.combo.per));
-      r.pbN.textContent = '×' + K.n; r.pbCFill.style.width = Math.max(0, K.t / EP.combo.window * 100) + '%';
+      r.pbN.textContent = '×' + K.n; r.pbCFill.style.width = Math.max(0, K.t / run.pitComboWindow() * 100) + '%';
       r.pbSkip.textContent = skip ? t('hud.comboSkip', { n: skip }) : t('hud.comboNext', { n: EP.combo.per - K.n % EP.combo.per });
       r.pbSkip.classList.toggle('on', skip > 0);
     }

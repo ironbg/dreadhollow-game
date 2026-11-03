@@ -2257,6 +2257,12 @@
       P.line(g, 16, 15, 16, 23, 0.5, '#e8c070');
     }],
     essence: ['#6a1626', false, (g) => inMedal(g, 0.74, () => MISC.i_essence(g))],
+    combo: ['#7a4a14', false, (g) => { // a chain of three links, kill after kill, its last link afire
+      const link = (x, y, a) => { g.save(); g.translate(x, y); g.rotate(a); g.lineWidth = 3.4; g.strokeStyle = INK; g.beginPath(); g.ellipse(0, 0, 4.6, 2.8, 0, 0, Math.PI * 2); g.stroke(); g.lineWidth = 2; g.strokeStyle = P.lg(g, 0, -3, 0, 3, ['#e8e2d6', '#8a8478', '#3e3a36']); g.stroke(); g.restore(); };
+      link(9.6, 23, -0.8); link(14.4, 18, -0.8); link(19.2, 13, -0.8);
+      P.glow(g, 21.6, 10, 7, '#ff8a30', 0.7);
+      inkPath(g, () => { g.beginPath(); g.moveTo(21.4, 3.6); g.quadraticCurveTo(26.6, 8.6, 24.4, 12.6); g.quadraticCurveTo(22, 14.6, 19.2, 12.6); g.quadraticCurveTo(17.6, 9.6, 20.4, 7.4); g.quadraticCurveTo(20.8, 9.4, 22, 9.6); g.quadraticCurveTo(21, 6.4, 21.4, 3.6); g.closePath(); }, P.lg(g, 0, 4, 0, 14, ['#ffe0a0', '#ff8a30', '#a02810']), 0.9);
+    }],
     sweep: ['#7a1a1c', false, (g) => { // a scythe drawn through the air in one long stroke
       for (const [r, a] of [[11.6, 0.25], [9.2, 0.4], [6.8, 0.55]]) { g.strokeStyle = 'rgba(232,206,150,' + a + ')'; g.lineWidth = 1; g.beginPath(); g.arc(16, 20, r, Math.PI * 1.08, Math.PI * 1.75); g.stroke(); }
       inkLine(g, 9.4, 27, 21.4, 6.6, 1.3, '#4a3020');
