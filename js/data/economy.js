@@ -312,7 +312,10 @@
   /* ---------- Season pass ---------- */
   E.PASS_TIERS = 60;
   E.PASS_XP_PER_TIER = 500;
-  E.PASS_TIER_GEM_COST = 90;
+  E.PASS_TIER_GEM_COST = 500; // the first level bought with gems; each level after it 20 more (E.passTierCost)
+  /** What buying level n of the pass costs in gems: 500 for level 1, 20 more for every level after it (level 13: 740). */
+  E.passTierCost = (n) => E.PASS_TIER_GEM_COST + 20 * (Math.max(1, n) - 1);
+  E.PASS_PIT_ENTRY = 1; // the premium pass: one more Pit entry a day, for its season
   // the premium Battle Pass's perks, for the season it is bought in (besides its row of rewards and the premium sign-in)
   E.PASS_PERKS = { goldPct: 0.2, xpPct: 0.25, noAds: true };
   // past the last level, every 1000 XP more brings a bonus reward (larger with the premium pass)
@@ -324,6 +327,7 @@
       // free track
       if (i % 10 === 0) free.push({ chest: 'gold' });
       else if (i % 5 === 0) free.push({ chest: 'silver' });
+      else if (i % 7 === 0) free.push({ essence: 300 + i * 20 }); // Essence for the Pit's Constellation
       else if (i % 3 === 0) free.push({ gems: 20 + Math.round(i * 1.5) });
       else if (i % 4 === 0) free.push({ mats: { [metal(i, ['iron', 'silver', 'gold'])]: i <= 20 ? 15 : 10 } });
       else if (i % 2 === 0) free.push({ energy: 10 });
@@ -333,6 +337,7 @@
       else if (i === 60) prem.push({ gear: { rarity: 5 } });
       else if (i % 10 === 0) prem.push({ gear: { rarity: 4 } });
       else if (i % 5 === 0) prem.push({ chest: 'gold' });
+      else if (i % 7 === 0) prem.push({ essence: 800 + i * 40 });
       else if (i % 3 === 0) prem.push({ gems: 60 + i * 3 });
       else if (i % 2 === 0) prem.push({ chest: 'silver' });
       else if (i % 4 === 3) prem.push({ mats: { [metal(i, ['silver', 'gold', 'starsteel'])]: i <= 40 ? 15 : 10 } });

@@ -198,5 +198,10 @@ const live = require('../game/live.json');
   // an Essence pack bought with real money
   r = await withProfile(r.profile, live, (DH) => { DH.meta.fulfillProduct('ess_3', true); return DH.meta.essence(); });
   assert.strictEqual(r.result, 150 + 27000);
+  // the pass: a level for gems (500 for the first, 20 more each), the premium pass gives a Pit entry a day, Essence on the tracks
+  r = await withProfile(Object.assign({}, p0, { gems: 2000 }), live, (DH) => { const L = DH.actions.list, M = DH.meta; M.ensureSeason();
+    const e0 = M.pitEntries(), a = L.buyPassTier.run({}), t1 = M.passTier(), g1 = DH.save.data.gems; L.buyPassTier.run({}); const g2 = DH.save.data.gems;
+    DH.save.data.pass.premium = true; return [a, t1, 2000 - g1, g1 - g2, M.pitEntries() - e0, DH.economy.passTierCost(13), DH.economy.passRewards.free[6].essence > 0, DH.economy.passRewards.prem[6].essence > 0]; });
+  assert.deepStrictEqual(r.result, [true, 1, 500, 520, 1, 740, true, true]);
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });

@@ -183,7 +183,7 @@
   };
   /** Every point back (free). */
   meta.pitPerkReset = () => { pitS().perks = {}; changed(); return true; };
-  meta.pitEntries = () => E.PIT.entries + (pitS().pass ? 1 : 0) + meta.pitPerkVal('entry') + (meta.consSpecials().plunder >= 3 ? 1 : 0); // the third Plunder Specialty: one more a day
+  meta.pitEntries = () => E.PIT.entries + (pitS().pass ? 1 : 0) + (meta.passPremium() ? E.PASS_PIT_ENTRY : 0) + meta.pitPerkVal('entry') + (meta.consSpecials().plunder >= 3 ? 1 : 0); // the third Plunder Specialty: one more a day
   meta.pitLeft = () => Math.max(0, meta.pitEntries() - pitS().used);
   meta.pitCheckpoint = () => Math.floor(pitS().best / E.PIT.every) * E.PIT.every;
   meta.pitPerWave = () => Math.round(E.PIT.perWave * (pitS().pass ? 1.5 : 1) * (1 + (meta.consStats().essencePct || 0) + (meta.consSpecials().plunder >= 1 ? 0.2 : 0) + meta.pitPerkVal('essence')) * 100) / 100; // to the hundredth: the sums are rounded, not each wave
@@ -891,7 +891,7 @@
   };
   meta.buyPassTier = () => {
     if (meta.passTier() >= E.PASS_TIERS) return false;
-    if (!meta.spend({ gems: E.PASS_TIER_GEM_COST })) return false;
+    if (!meta.spend({ gems: E.passTierCost(meta.passTier() + 1) })) return false;
     const p = S().pass; p.xp = (meta.passTier() + 1) * E.PASS_XP_PER_TIER; changed();
     return true;
   };

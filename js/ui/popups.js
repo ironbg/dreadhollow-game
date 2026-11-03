@@ -486,7 +486,8 @@
         perk('n_calendar', t('pass.perk.signin'), t('pass.perk.signinSub')),
         P.noAds ? perk('n_ad', t('pass.perk.noads'), t('pass.perk.noadsSub')) : null,
         perk('i_gold', t('pass.perk.gold', { v: Math.round(P.goldPct * 100) }), t('pass.perk.goldSub')),
-        perk('n_pass', t('pass.perk.xp', { v: Math.round(P.xpPct * 100) }), t('pass.perk.xpSub'))),
+        perk('n_pass', t('pass.perk.xp', { v: Math.round(P.xpPct * 100) }), t('pass.perk.xpSub')),
+        perk('n_skull', t('pass.perk.pit', { n: E.PASS_PIT_ENTRY }), t('pass.perk.pitSub'))),
       h('div.small.muted.center', { style: { margin: '8px 0' } }, t('pass.premiumNote')),
       prem ? h('div.si-premon', A.img('u_check', 'ci'), t('pass.premiumOn'))
         : h('button.btn.gold.block.big.shine', { onclick: async () => { if (await DH.iap.buy('pass')) { m.close(); ui.refresh(); } } }, t('pass.unlock', { price: DH.iap.price('pass') }))) });

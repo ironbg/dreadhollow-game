@@ -475,9 +475,7 @@
           p.premium ? h('span.ph-on', A.img('u_check', 'ci'), t('pass.premiumOn'))
             : h('button.btn.small.gold.shine', { onclick: () => ui.openPassPerks() }, t('pass.unlock', { price: DH.iap.price('pass') })),
           h('button.btn.small.ghost', { onclick: () => { click(); ui.openPassPerks(); } }, t('pass.perksBtn')),
-          h('span.grow'),
-          !max ? h('button.btn.tiny.gem', { onclick: async () => { const ok = await ui.act('buyPassTier'); if (ok) DH.audio.play('buy'); else if (ok === false) ui.toast(t('common.notEnough'), 'bad'); ui.refresh(); } }, t('pass.buyTier'), A.img('i_gem'), E.PASS_TIER_GEM_COST) : null,
-          M.badges().pass ? h('button.btn.tiny.green', { onclick: async () => { const r = await ui.act('claimAllPass'); if (r) ui.rewardPopup(t('pass.rewards'), r); ui.refresh(); } }, t('pass.claimAll')) : null)));
+          M.badges().pass ? h('button.btn.small.green', { onclick: async () => { const r = await ui.act('claimAllPass'); if (r) ui.rewardPopup(t('pass.rewards'), r); ui.refresh(); } }, t('pass.claimAll')) : null)));
       box.append(h('div.pass-row.pass-headrow', h('div.center.small.muted', t('pass.free')), h('div.center.small.muted', t('pass.level')), h('div.center.small.goldtxt', { style: { fontWeight: 800 } }, t('pass.premium'))));
       // the levels: a track down the middle filled up to where the XP has reached, a node for each level
       const list = h('div.pass-list');
@@ -495,8 +493,15 @@
             got ? h('span.lockic', A.img('u_check', 'ci')) : track === 'prem' && !p.premium ? h('span.lockic', A.img('u_lock', 'ci')) : null);
         };
         const fill = i <= tier ? 1 : i === tier + 1 ? inTier / E.PASS_XP_PER_TIER : 0; // the track up to this level's node
+        // the next level can be bought with gems: its price stands on its node (500, then 20 more each level)
+        const buy = i === tier + 1 ? h('button.pass-buy', { 'aria-label': t('pass.buyTier'), onclick: async (e) => {
+          e.stopPropagation(); click();
+          const cost = E.passTierCost(i);
+          if (!(await ui.confirm({ title: t('pass.buyTierTitle', { n: i }), body: t('pass.buyTierBody', { n: i, c: U.fmt(cost) }), ok: t('pass.buyIt') }))) return;
+          const ok = await ui.act('buyPassTier'); if (ok) DH.audio.play('buy'); else if (ok === false) ui.toast(t('common.notEnough'), 'bad'); ui.refresh();
+        } }, A.img('i_gem', 'ci'), h('span.pb-c', U.fmt(E.passTierCost(i)))) : null;
         list.append(h('div.pass-row' + (i <= tier ? '.reached' : '') + (i === tier + 1 ? '.next' : ''), cell('free'),
-          h('div.tier', h('div.trk', h('i', { style: { height: (fill * 100) + '%' } })), h('b', i)), cell('prem')));
+          h('div.tier', h('div.trk', h('i', { style: { height: (fill * 100) + '%' } })), h('b', i), buy), cell('prem')));
       }
       box.append(list);
       // past the last level: a bonus reward for every 1000 XP more
