@@ -97,6 +97,7 @@
     for (let gy = Math.floor((cy - 60) / SHAFT); gy <= Math.floor((cy + H + 60) / SHAFT); gy++) for (let gx = Math.floor((cx - 60) / SHAFT); gx <= Math.floor((cx + W + 60) / SHAFT); gx++) {
       if (U.hash2(gx, gy, 77) > 0.2) continue;
       const x = (gx + 0.2 + U.hash2(gx, gy, 5) * 0.6) * SHAFT, y = (gy + 0.2 + U.hash2(gx, gy, 9) * 0.6) * SHAFT, w = 14 + U.hash2(gx, gy, 3) * 16;
+      if (this.pit && x * x + y * y > (DH.content.PIT_ARENA.R - 40) ** 2) continue; // no moonlight beyond the Pit's floor
       out.push({ x, y, w, ph: U.hash2(gx, gy, 11) * TAU });
       lights.push({ x, y, r: w * 1.6, kind: 'shaft' });
     }

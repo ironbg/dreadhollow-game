@@ -1062,6 +1062,31 @@
       P.path(g, [23, 17.8, 21.4, 20.6, 22.8, 20.6, 21.8, 23, 23.6, 20, 22.2, 20]); P.fill(g, '#ffffff');
       g.strokeStyle = '#ffffff'; g.lineWidth = 0.6; for (let i = 0; i < 3; i++) { const a = i * Math.PI / 3; g.beginPath(); g.moveTo(9.6 - Math.cos(a) * 2.2, 20.4 - Math.sin(a) * 2.2); g.lineTo(9.6 + Math.cos(a) * 2.2, 20.4 + Math.sin(a) * 2.2); g.stroke(); }
     }],
+    // the Constellation's own stars (the elements one by one, and Essence): drawn in the same dark manner as the rest
+    pyre: ['#8a3418', (g) => { // a flame rising out of an iron brazier
+      P.glow(g, 16, 13, 9, '#c84a18', 0.55);
+      inkPath(g, () => { g.beginPath(); g.moveTo(16, 4); g.quadraticCurveTo(22.6, 10.6, 21.4, 16.4); g.quadraticCurveTo(20.4, 19.6, 16, 20); g.quadraticCurveTo(11.6, 19.6, 10.6, 16.4); g.quadraticCurveTo(9.8, 12.6, 13.4, 9.4); g.quadraticCurveTo(13.6, 12.4, 15.2, 13); g.quadraticCurveTo(14.2, 8.4, 16, 4); g.closePath(); },
+        P.lg(g, 0, 4, 0, 20, ['#ffe0a0', '#e07428', '#9a2410', '#3a0806']), 1.1);
+      P.path(g, [16, 10, 18.4, 14.6, 16, 18.6, 13.8, 15.4]); P.fill(g, 'rgba(255,230,170,0.55)');
+      inkPath(g, () => { g.beginPath(); g.moveTo(8.6, 18.6); g.lineTo(23.4, 18.6); g.lineTo(21.4, 22.6); g.lineTo(10.6, 22.6); g.closePath(); }, P.lg(g, 0, 18, 0, 23, ['#8a8478', '#3e3a36', '#16130f']), 1);
+      for (const [x0, x1] of [[12, 10.4], [20, 21.6]]) inkLine(g, x0, 22.6, x1, 27, 1, '#3e3a36');
+      inkLine(g, 16, 22.6, 16, 27, 1, '#3e3a36');
+      P.line(g, 9.6, 19.6, 22.4, 19.6, 0.5, 'rgba(255,200,140,0.5)');
+    }],
+    rime: ['#3a5a7a', (g) => { // three shards of black ice
+      const shard = (x, y, a, L, w) => { g.save(); g.translate(x, y); g.rotate(a); sil(g, [0, -L, w, -L * 0.35, w * 0.7, 0, -w * 0.7, 0, -w, -L * 0.4], P.lg(g, -w, -L, w, 0, ['#eef6ff', '#9ab8d0', '#3a5670', '#141e2a']), 1); P.path(g, [0, -L, w * 0.2, -L * 0.3, 0, -1, -w * 0.5, -L * 0.4]); P.fill(g, 'rgba(255,255,255,0.35)'); g.restore(); };
+      shard(10.4, 26, -0.42, 13, 2.8); shard(21.6, 26, 0.42, 13, 2.8); shard(16, 27, 0, 20, 3.6);
+      P.ell(g, 16, 27, 9, 1.4, 'rgba(10,20,30,0.6)');
+      glint(g, 15, 9.4, 1.6, '#e8f4ff');
+    }],
+    storm: ['#5a4a7a', (g) => { // a bolt out of a black cloud
+      inkPath(g, () => { g.beginPath(); g.moveTo(17.4, 12); g.lineTo(11.4, 21); g.lineTo(15.4, 21); g.lineTo(12.6, 28.6); g.lineTo(21.4, 17.6); g.lineTo(17, 17.6); g.lineTo(20.4, 12); g.closePath(); }, P.lg(g, 10, 12, 22, 28, ['#fff4c8', '#d8b050', '#7a5418']), 1);
+      P.glow(g, 16, 20, 6, '#e0c060', 0.45);
+      for (const [x, y, r] of [[10.4, 10.4, 4.6], [16, 8, 5.6], [22, 10.6, 4.4], [16, 12, 4.6]]) inkCircle(g, x, y, r, P.lg(g, 0, y - r, 0, y + r, ['#8a8496', '#46404f', '#1c1922']));
+      P.path(g, [7, 11, 25.6, 11, 25, 13.6, 7.6, 13.6]); P.fill(g, '#2a2632');
+      P.line(g, 12.6, 5.4, 18, 4.4, 0.6, 'rgba(255,255,255,0.3)');
+    }],
+    essence: ['#7a1a2a', (g) => inMedal(g, 0.78, () => MISC.i_essence(g))],
   };
 
   /* ---------- gear, redrawn: inked outlines, worn metal, dark details ---------- */
@@ -2154,6 +2179,14 @@
       inkPath(g, () => { g.beginPath(); g.arc(16, 20.4, 1.8, 0, Math.PI * 2); g.moveTo(15.2, 21.6); g.lineTo(16.8, 21.6); g.lineTo(17.2, 25.2); g.lineTo(14.8, 25.2); g.closePath(); }, INK, 0.4);
       P.glow(g, 16, 21, 7, '#a0ff80', 0.35);
     },
+    u_cons(g) { // the Constellation: seven stars and their lines, in a gilded medal
+      medal(g, '#3a3a6a', true);
+      const st = [[9.6, 20.4], [12.4, 13.6], [16.6, 15.8], [20.6, 10.4], [22.4, 18.6], [17.4, 22.6], [12.6, 24.4]];
+      g.strokeStyle = 'rgba(232,214,170,0.75)'; g.lineWidth = 0.7; g.beginPath();
+      for (const [a, b] of [[0, 1], [1, 2], [2, 3], [2, 4], [4, 5], [5, 6], [6, 0]]) { g.moveTo(st[a][0], st[a][1]); g.lineTo(st[b][0], st[b][1]); }
+      g.stroke();
+      st.forEach(([x, y], i) => { const big = i === 2 || i === 3; P.glow(g, x, y, big ? 3.6 : 2.4, '#ffe6a0', 0.7); GL.starSmallAt(g, x, y); if (!big) { P.circle(g, x, y, 0.9, '#fff8e0'); } });
+    },
     u_check(g) { P.glow(g, 14, 18, 10, '#70e050', 0.35); sil(g, [4, 16, 8.4, 12, 13, 17.4, 24.6, 4.6, 28.6, 8.4, 13, 25.4], P.lg(g, 4, 5, 28, 25, ['#d0ff90', '#5aa030', '#1e4a10']), 1.4); P.line(g, 5.6, 16, 13, 23.6, 0.5, 'rgba(255,255,255,0.5)'); },
     u_secret(g) { P.glow(g, 16, 16, 13, '#c070ff', 0.6); sil(g, [16, 2.6, 18.6, 13.4, 29.4, 16, 18.6, 18.6, 16, 29.4, 13.4, 18.6, 2.6, 16, 13.4, 13.4], P.lg(g, 3, 3, 29, 29, ['#ffffff', '#d0a0ff', '#6a2ab0']), 1.2); inkCircle(g, 16, 16, 2.2, '#ffffff'); },
     u_star(g) { const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 5.6 : 13; pts.push(16 + Math.cos(a) * r, 16.6 + Math.sin(a) * r); } P.glow(g, 16, 16, 12, '#ffd040', 0.4); sil(g, pts, mfill(g, 3, 3, 29, 29, MAT.gold), 1.4); P.path(g, [16, 3.6, 18, 12, 16, 16.6, 14, 12]); P.fill(g, 'rgba(255,255,255,0.4)'); },
@@ -2194,24 +2227,59 @@
     },
   };
 
-  // The Constellation's stars by the stat they give: a trait's sign where there is one, else a glyph or an icon
-  const CS_TRAIT = { dmgPct: 'strength', as: 'quickhands', critPct: 'precision', critBonus: 'brutality', area: 'reach', ms: 'multistrike', addBase: 'honed',
-    addCrit: 'keenedge', duration: 'persistence', summonPct: 'summoner', effectPct: 'afflictor', maxHpPct: 'vitality', regen: 'metabolism', block: 'parry',
-    defense: 'thickhide', speedPct: 'swiftfeet', pickup: 'magnetism', magicPct: 'arcana' };
-  const CS_GLYPH = { firePct: 'fireball', icePct: 'ice', lightningPct: 'bolt', physPct: 'sword', greed: 'i_gold', growth: 'book',
-    tomeDrop: 'scroll', essencePct: 'i_essence', chestDrop: 'c_red' };
+  // The Constellation's stars by the stat they give: the very medal of the Blessing or the Archive upgrade that gives it;
+  // the stats neither has (one element alone, summons, duration, base damage, Essence) get a medal in the same manner
+  const CS_MEDAL = { dmgPct: 'strength', maxHpPct: 'vitality', defense: 'thickhide', block: 'parry', regen: 'metabolism', speedPct: 'swiftfeet',
+    as: 'quickhands', area: 'reach', pickup: 'magnetism', greed: 'greed', growth: 'wisdom', critPct: 'precision', ms: 'multistrike',
+    critBonus: 'brutality', effectPct: 'afflictor', physPct: 'honed', magicPct: 'arcana', chestDrop: 'plunder', tomeDrop: 'scholar',
+    summonPct: 'summoner', duration: 'persistence', addBase: 'keenedge', addCrit: 'keenedge', firePct: 'pyre', icePct: 'rime', lightningPct: 'storm', essencePct: 'essence' };
+  // The Mastery's cards: one dark medal each, a glyph in the manner of the Blessings
+  const IRONS = ['#d8d4cc', '#8a8478', '#4a453e', '#1c1915'];
+  const PM_ICON = {
+    power: ['#a02a1e', false, (g) => TRA.strength[1](g)],
+    guard: ['#6a5a44', false, (g) => TRA.thickhide[1](g)],
+    fort: ['#56627e', false, (g) => TRA.parry[1](g)],
+    execute: ['#5a1622', false, (g) => { // a headsman's axe over a cracked skull
+      inkPath(g, () => { g.beginPath(); g.arc(16, 19, 6.4, Math.PI * 0.9, Math.PI * 0.1); g.lineTo(21, 24); g.lineTo(11, 24); g.closePath(); }, P.lg(g, 9, 13, 23, 25, ['#ece2c8', '#a89a78', '#4a4232']), 1.1);
+      P.ell(g, 13.6, 19.4, 1.7, 2, '#1a0a0e'); P.ell(g, 18.4, 19.4, 1.7, 2, '#1a0a0e'); P.path(g, [16, 21, 15.2, 22.6, 16.8, 22.6]); P.fill(g, '#1a0a0e');
+      g.strokeStyle = '#1a0a0e'; g.lineWidth = 0.6; g.beginPath(); g.moveTo(16, 12.8); g.lineTo(16.8, 15); g.lineTo(15.8, 16.6); g.stroke();
+      g.save(); g.translate(18, 11); g.rotate(-0.6);
+      inkLine(g, -9, 0, 7, 0, 1.4, '#4a3020');
+      inkPath(g, () => { g.beginPath(); g.moveTo(-6, -1); g.quadraticCurveTo(-8, -6.6, -3.4, -8); g.lineTo(-2.4, -1); g.closePath(); }, P.lg(g, -8, -8, -2, 0, IRONS), 0.9);
+      P.line(g, -7, -4, -6.4, -6.4, 0.5, 'rgba(160,20,30,0.9)');
+      g.restore();
+    }],
+    time: ['#7a5a1c', false, (g) => { // an hourglass of black iron, its sand running
+      for (const y of [6, 24.6]) inkPath(g, () => { P.rrect(g, 9, y, 14, 2.6, 0.8); }, P.lg(g, 0, y, 0, y + 2.6, IRONS), 0.9);
+      for (const x of [10, 22]) inkLine(g, x, 8.6, x, 24.6, 0.8, '#4a453e');
+      inkPath(g, () => { g.beginPath(); g.moveTo(11, 8.6); g.lineTo(21, 8.6); g.quadraticCurveTo(21, 13, 17, 16.6); g.quadraticCurveTo(21, 20, 21, 24.6); g.lineTo(11, 24.6); g.quadraticCurveTo(11, 20, 15, 16.6); g.quadraticCurveTo(11, 13, 11, 8.6); g.closePath(); }, 'rgba(170,190,200,0.28)', 0.8);
+      P.path(g, [12.4, 10.6, 19.6, 10.6, 16, 15]); P.fill(g, '#c8963a'); P.path(g, [16, 18, 20, 24, 12, 24]); P.fill(g, '#c8963a');
+      P.line(g, 16, 15, 16, 23, 0.5, '#e8c070');
+    }],
+    essence: ['#6a1626', false, (g) => inMedal(g, 0.74, () => MISC.i_essence(g))],
+    sweep: ['#7a1a1c', false, (g) => { // a scythe drawn through the air in one long stroke
+      for (const [r, a] of [[11.6, 0.25], [9.2, 0.4], [6.8, 0.55]]) { g.strokeStyle = 'rgba(232,206,150,' + a + ')'; g.lineWidth = 1; g.beginPath(); g.arc(16, 20, r, Math.PI * 1.08, Math.PI * 1.75); g.stroke(); }
+      inkLine(g, 9.4, 27, 21.4, 6.6, 1.3, '#4a3020');
+      inkPath(g, () => { g.beginPath(); g.moveTo(21.4, 6.6); g.quadraticCurveTo(13.4, 2.6, 6.6, 9.6); g.quadraticCurveTo(13.4, 6.8, 20.4, 9.8); g.closePath(); }, P.lg(g, 6, 4, 21, 10, IRONS), 0.9);
+      P.line(g, 8.6, 8.6, 14, 6, 0.5, 'rgba(255,255,255,0.5)');
+    }],
+    entry: ['#6a1416', false, (g) => { // a gate of stone with its portcullis raised
+      inkPath(g, () => { g.beginPath(); g.moveTo(7, 27); g.lineTo(7, 14); g.arc(16, 14, 9, Math.PI, 0); g.lineTo(25, 27); g.lineTo(21, 27); g.lineTo(21, 14.6); g.arc(16, 14.6, 5, 0, Math.PI, true); g.lineTo(11, 27); g.closePath(); }, P.lg(g, 0, 5, 0, 27, ['#9a948a', '#5a554e', '#2a2722']), 1);
+      P.rect(g, 11, 15, 10, 12, '#0c0608'); P.glow(g, 16, 22, 5, '#c03020', 0.5);
+      g.strokeStyle = '#4a453e'; g.lineWidth = 0.7; g.beginPath(); for (const x of [12.6, 15, 17.4, 19.8]) { g.moveTo(x, 12); g.lineTo(x, 17); } g.moveTo(11.2, 14.4); g.lineTo(20.8, 14.4); g.stroke();
+      for (const y of [17.6, 21, 24.4]) { P.line(g, 7.4, y, 10.6, y, 0.5, 'rgba(0,0,0,0.5)'); P.line(g, 21.4, y, 24.6, y, 0.5, 'rgba(0,0,0,0.5)'); }
+    }],
+    pass: ['#6a4a14', true, (g) => { // two stars in a laurel: twice the experience
+      for (const s2 of [-1, 1]) for (let i = 0; i < 5; i++) { const a = Math.PI / 2 + s2 * (0.5 + i * 0.4), x = 16 + Math.cos(a) * 8.6, y = 16.6 + Math.sin(a) * 8.6; P.ell(g, x, y, 2.2, 1, '#8aa060', a + s2 * 0.8); }
+      for (const [x, y, k] of [[13, 13.6, 1.4], [19.4, 18, 1.2]]) { P.glow(g, x, y, 4, '#ffd070', 0.6); g.save(); g.translate(x, y); g.scale(k, k); GL.starSmallAt(g, 0, 0); g.restore(); }
+    }],
+  };
   function draw(name) {
     const c = G.canvas(SIZE, SIZE), g = c.getContext('2d');
     g.scale(U2, U2); g.lineJoin = 'round'; g.lineCap = 'round';
     const [pre, ...rest] = name.split('_'); const id = rest.join('_');
-    if (pre === 'cs') { // a star of the Constellation: only the sign of what it gives (the star itself is its frame)
-      const tr = CS_TRAIT[id], gl = CS_GLYPH[id];
-      if (tr && TRA[tr]) { g.save(); g.beginPath(); g.arc(16, 16, 13, 0, Math.PI * 2); g.clip(); TRA[tr][1](g); g.restore(); }
-      else if (gl && MISC[gl]) MISC[gl](g);
-      else if (gl && CHEST[gl]) CHEST[gl](g);
-      else if (gl && GL[gl]) { g.save(); g.translate(16, 16); g.scale(0.82, 0.82); g.translate(-16, -16); GL[gl](g); g.restore(); }
-      return G.classicize(c, ICON_STYLE, 2).toDataURL();
-    }
+    if (pre === 'cs') return DH.icons.url('bl_' + (CS_MEDAL[id] || 'strength'));
+    if (pre === 'pm' && PM_ICON[id]) { const [col, elev, fn] = PM_ICON[id]; medal(g, col, elev); g.save(); g.beginPath(); g.arc(16, 16, 11.6, 0, Math.PI * 2); g.clip(); fn(g); g.restore(); return G.classicize(c, ICON_STYLE, 2).toDataURL(); }
     if (MISC[name]) MISC[name](g);
     else if (name === 'i_gold') GL.coin(g);
     else if (name === 'i_gem') GL.gem(g);

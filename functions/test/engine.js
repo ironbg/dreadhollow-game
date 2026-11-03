@@ -126,13 +126,18 @@ const live = require('../game/live.json');
   r = await withProfile(r.profile, live, (DH) => DH.actions.list.pitEnd.run({ waves: 12 }));
   assert.strictEqual(r.result.reached, 42); assert.strictEqual(r.profile.pit.best, 42); assert.strictEqual(r.profile.essence, 420);
   r = await withProfile(r.profile, live, (DH) => DH.actions.list.pitSweep.run({}));
-  assert.strictEqual(r.result.paid, 420); assert.strictEqual(r.profile.pit.used, 2);
+  assert.strictEqual(r.result.paid, 210, 'a sweep pays half the best wave'); assert.strictEqual(r.profile.pit.used, 2);
   r = await withProfile(r.profile, live, (DH) => [DH.actions.list.pitStart.run({}), DH.actions.list.pitSweep.run({})]);
   assert.ok(r.result[0] && r.result[1] === null, 'three entries a day');
   // the Constellation: a star opens only next to a full one, Essence pays, the reset gives every Essence back
   r = await withProfile(Object.assign({}, p0, { essence: 1000 }), live, (DH) => [DH.actions.list.consBuy.run({ id: 'fury_h3', n: 1 }), DH.actions.list.consBuy.run({ id: 'fury_0_0_1', n: 10 })]);
   assert.strictEqual(r.result[0], null, 'a star far from the heart is locked'); assert.strictEqual(r.result[1], 3);
   assert.ok(r.profile.essence < 1000 && r.profile.cons.spent === 1000 - r.profile.essence);
+  r = await withProfile(r.profile, live, (DH) => [DH.actions.list.consBuy.run({ id: 'fury_0_0_2', n: 1 }), DH.actions.list.consLower.run({ id: 'fury_0_0_1' }), DH.meta.consCanLower('fury_0_0_2')]);
+  assert.strictEqual(r.result[0], 1); assert.strictEqual(r.result[1], null, 'a star another one needs cannot be lowered'); assert.strictEqual(r.result[2], true);
+  const ess0 = r.profile.essence, spent0 = r.profile.cons.spent;
+  r = await withProfile(r.profile, live, (DH) => DH.actions.list.consLower.run({ id: 'fury_0_0_2' }));
+  assert.ok(r.result.back > 0 && r.profile.essence === ess0 + r.result.back && r.profile.cons.spent === spent0 - r.result.back && !r.profile.cons.r.fury_0_0_2, 'a rank back returns its Essence');
   r = await withProfile(r.profile, live, (DH) => DH.actions.list.consReset.run({}));
   assert.strictEqual(r.profile.essence, 1000); assert.deepStrictEqual(r.profile.cons.r, {});
   // the Pit Pass: +50% Essence a wave and a fourth entry; a Pit fight goes on the Pit's boards
@@ -147,7 +152,23 @@ const live = require('../game/live.json');
   r.profile.pit.mxp = 99999;
   r = await withProfile(r.profile, live, (DH) => { const M = DH.meta; for (let i = 0; i < 4; i++) DH.actions.list.pitPerkUp.run({ id: 'time' }); DH.actions.list.pitPerkUp.run({ id: 'essence' }); return [M.pitSecs(), M.pitPerWave(), M.pitPerk('time'), DH.actions.list.pitPerkUp.run({ id: 'time' })]; });
   assert.deepStrictEqual(r.result, [240, 11, 4, null]);
+  r = await withProfile(r.profile, live, (DH) => [DH.actions.list.pitPerkDown.run({ id: 'time' }), DH.meta.pitSecs(), DH.actions.list.pitPerkDown.run({ id: 'power' })]);
+  assert.deepStrictEqual(r.result, [3, 225, null], 'a card level back');
   r = await withProfile(r.profile, live, (DH) => { DH.actions.list.pitPerkReset.run({}); return DH.meta.pitSecs(); });
   assert.strictEqual(r.result, 180);
+  // the Full Sweep card: all of the best wave at its top; a sweep of several entries at once
+  r.profile.pit = Object.assign(r.profile.pit, { best: 40, used: 0, day: null }); r.profile.essence = 0;
+  r = await withProfile(r.profile, live, (DH) => { for (let i = 0; i < 5; i++) DH.actions.list.pitPerkUp.run({ id: 'sweep' }); return [DH.meta.pitSweepShare(), DH.actions.list.pitSweep.run({ n: 2 }), DH.actions.list.pitSweep.run({ n: 9 })]; });
+  assert.strictEqual(r.result[0], 1); assert.strictEqual(r.result[1].paid, 800); assert.strictEqual(r.result[1].n, 2); assert.strictEqual(r.result[2].n, 1, 'no more than the entries left');
+  assert.strictEqual(r.profile.essence, 1200); assert.strictEqual(r.profile.pit.used, 3);
+  // the Mastery Pass (on its own, not the Pit Pass): twice the experience
+  r = await withProfile(Object.assign({}, p0, { pit: { best: 30, day: null, used: 0, active: null, pass: true } }), live, (DH) => { DH.actions.list.pitSweep.run({}); return DH.save.data.pit.mxp; });
+  assert.strictEqual(r.result, 150, 'the Pit Pass does not double the Mastery');
+  r = await withProfile(r.profile, live, (DH) => { DH.meta.fulfillProduct('masterypass', true); DH.actions.list.pitSweep.run({}); return DH.save.data.pit.mxp; });
+  assert.strictEqual(r.result, 450); assert.strictEqual(r.profile.masteryPass, true);
+  // the Pit's shop: a free handful once a day, the ads only after it, Essence for gems so many times a day
+  r = await withProfile(Object.assign({}, p0, { essence: 0, gems: 1000 }), live, (DH) => [DH.actions.list.claimPitFree.run({}), DH.actions.list.claimPitFree.run({}), DH.actions.list.buyPitPack.run({ i: 2 }), DH.actions.list.buyPitPack.run({ i: 2 }), DH.actions.list.buyPitPack.run({ i: 9 })]);
+  assert.ok(r.result[0] && r.result[1] === null && r.result[2] && r.result[3] === null && r.result[4] === null);
+  assert.strictEqual(r.profile.essence, 150 + 8500); assert.strictEqual(r.profile.gems, 400);
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });

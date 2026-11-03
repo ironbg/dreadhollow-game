@@ -24,13 +24,16 @@
     mist: { n: 3, R: 24, life: 18, gap: 2.5, dist: 140, pull: 0.4, max: 70, tick: 0.75, dmg: 0.18 },
   };
   C.PIT_FX = PF;
+  /** The Pit's own ground: a round, deep pit with high stone walls (a closed arena around the start). R: the floor's
+   *  radius; wall: how tall the far wall stands on screen; torches along it. */
+  const AR = C.PIT_ARENA = { R: 340, wall: 116, torches: 9 };
 
   /** A copy of the hall the Pit's waves come from: its floor and foes from E.PIT.halls, its strength from
    *  E.PIT.hallStats, and none of its own rules (no Lords, puzzles, seals or kill count). */
   R.constructor.pitStage = function (from) {
     const P = E.PIT, tier = Math.min(P.halls.length - 1, Math.floor(from / P.every)), floor = P.halls[tier], st = C.stages[P.hallStats[tier]];
     const def = Object.assign({}, C.stages[floor], { hpMult: st.hpMult, dmgMult: st.dmgMult, dmgGrow: st.dmgGrow, index: st.index, bossHp: st.bossHp,
-      bosses: [], dissonator: false, vault: false, lordKills: 0, goldMult: 0 });
+      bosses: [], dissonator: false, vault: false, lordKills: 0, goldMult: 0, bridge: 0 }); // the Pit's own round arena, even on the viaduct's floor
     return { id: floor, def, tier };
   };
 
@@ -69,7 +72,7 @@
     const count = Math.min(40, 10 + Math.round(n * 0.5)), elites = n % 5 === 0 ? Math.min(5, 1 + Math.floor(n / 15)) : 0;
     const p = this.player, v = DH.view, Rr = Math.hypot(v.w || 270, v.h || 480) / 2 + 14, a0 = Math.random() * TAU;
     const one = (type, i, all, o) => {
-      const pt = this.bridge ? this.hallEdgePoint() : { x: p.x + Math.cos(a0 + i / all * TAU) * Rr * U.rand(0.95, 1.1), y: p.y + Math.sin(a0 + i / all * TAU) * Rr * U.rand(0.95, 1.1) };
+      const pt = this.pitEntry({ x: p.x + Math.cos(a0 + i / all * TAU) * Rr * U.rand(0.95, 1.1), y: p.y + Math.sin(a0 + i / all * TAU) * Rr * U.rand(0.95, 1.1) });
       const e = this.spawnEnemy(type, pt.x, pt.y, o); if (!e) return;
       e.pitW = n; e.hp *= hpK; e.maxHp *= hpK; e.dmg *= dmgK;
       if (P.affixes.includes('stone')) e.armor = Math.min(0.75, e.armor + PF.stone);
@@ -78,6 +81,25 @@
     for (let i = 0; i < elites; i++) one(U.weighted(mix), count + i, count + elites, { elite: true });
     P.alive = count + elites;
     DH.events.emit('run:warning', t('hud.pitWave', { n }));
+  };
+
+  /** Where a foe of the wave comes in: round the screen's edge, or, past the wall, down off the wall at the rim
+   *  (never right on top of the hero: then from across the pit). */
+  R.pitEntry = function (pt) {
+    const A = AR.R - 14, d = Math.hypot(pt.x, pt.y), p = this.player;
+    if (d <= A) return pt;
+    let x = pt.x / d * A, y = pt.y / d * A;
+    if (U.dist2(x, y, p.x, p.y) < 130 * 130) { x = -x; y = -y; }
+    return { x, y };
+  };
+  /** Nothing leaves the pit: the hero, the horde, their summons, the loot, the Stalker. */
+  R.pitClamp = function () {
+    const keep = (o, pad) => { if (!o) return; const A = AR.R - pad, d = Math.hypot(o.x, o.y); if (d > A) { o.x *= A / d; o.y *= A / d; } };
+    keep(this.player, 6);
+    for (const e of this.enemies) keep(e, Math.min(14, (e.r || 6) * 0.6));
+    for (const a of this.allies || []) keep(a, 6);
+    for (const k of this.pickups) keep(k, 6);
+    const S = this.pit.fx.stalker; if (S && S.s) keep(S.s, 4);
   };
 
   /** The Pit is over (time or death): the game settles it (main.js). */
@@ -172,6 +194,76 @@
   };
 
   /** The hazards on the ground and the Stalker (render.js, under the foes). */
+  /** The pit itself, drawn right after the floor: the dark creeping in from the walls, a sigil cut in the floor, the far
+   *  wall's inner face rising in courses of stone (a cylinder seen from above: each course a circle raised a little),
+   *  torches on it, the coping at the top, the night of the rock beyond, and the near rim's lip. */
+  R.drawPitArena = function (g, cx, cy, W, H, now, lights) {
+    const Rr = AR.R, Hw = AR.wall, ox = -cx, oy = -cy;
+    if (ox + Rr + 20 > 0 && ox - Rr - 20 < W && oy + Rr + 20 > 0 && oy - Rr - Hw - 40 < H) {
+      g.save();
+      // the sigil: two rings, ticks and runes, cut into the floor and filled with old blood
+      g.strokeStyle = 'rgba(150,30,32,0.5)'; g.lineWidth = 2.6;
+      for (const r of [58, 66, 158, 166]) { g.beginPath(); g.arc(ox, oy, r, 0, TAU); g.stroke(); }
+      g.lineWidth = 2;
+      for (let i = 0; i < 5; i++) { // a five-pointed star between the rings
+        const a = -Math.PI / 2 + i * TAU * 2 / 5, b = -Math.PI / 2 + (i + 1) * TAU * 2 / 5;
+        g.beginPath(); g.moveTo(ox + Math.cos(a) * 158, oy + Math.sin(a) * 158); g.lineTo(ox + Math.cos(b) * 158, oy + Math.sin(b) * 158); g.stroke();
+      }
+      g.fillStyle = 'rgba(150,30,32,0.55)';
+      for (let i = 0; i < 24; i++) { const a = i / 24 * TAU, x = ox + Math.cos(a) * 162, y = oy + Math.sin(a) * 162; g.save(); g.translate(x, y); g.rotate(a + Math.PI / 2); g.fillRect(-1, -3, 2, 6); if (i % 2) g.fillRect(-3, -1, 6, 1.4); g.restore(); }
+      // the dark creeping in from the foot of the walls
+      const vg = g.createRadialGradient(ox, oy, Rr * 0.55, ox, oy, Rr); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(0.75, 'rgba(4,2,4,0.35)'); vg.addColorStop(1, 'rgba(4,2,4,0.8)');
+      g.fillStyle = vg; g.beginPath(); g.arc(ox, oy, Rr + 1, 0, TAU); g.fill();
+      // beyond the floor: everything outside its circle
+      g.beginPath(); g.rect(0, 0, W, H); g.arc(ox, oy, Rr, 0, TAU, true); g.clip('evenodd');
+      g.fillStyle = '#070506'; g.fillRect(0, 0, W, H);
+      // the far wall's face: the courses between the floor's circle and the same circle raised by the wall's height
+      const rows = 12;
+      for (let i = 0; i < rows; i++) {
+        const f0 = i / rows, f1 = (i + 1) / rows, k = 1 - f0;
+        g.beginPath(); g.arc(ox, oy - Hw * f1, Rr, 0, TAU); g.arc(ox, oy - Hw * f0, Rr, 0, TAU, true);
+        const l = Math.round(24 + 34 * (1 - k * k)); // dark at the foot, lighter up where the moon reaches
+        g.fillStyle = 'rgb(' + (l + 6) + ',' + l + ',' + (l + 2) + ')'; g.fill('evenodd');
+        g.strokeStyle = 'rgba(0,0,0,0.55)'; g.lineWidth = 1; g.beginPath(); g.arc(ox, oy - Hw * f0, Rr, Math.PI, TAU); g.stroke();
+        // the joints between the stones, staggered course by course
+        g.strokeStyle = 'rgba(0,0,0,0.45)'; g.beginPath();
+        for (let j = 0; j < 40; j++) {
+          const a = Math.PI + (j + (i % 2) * 0.5) / 40 * Math.PI; if (a > TAU) continue;
+          const x = ox + Math.cos(a) * Rr, y = oy + Math.sin(a) * Rr;
+          g.moveTo(x, y - Hw * f0); g.lineTo(x, y - Hw * f1);
+        }
+        g.stroke();
+      }
+      // cracks and seeping dark down the face
+      g.strokeStyle = 'rgba(0,0,0,0.6)'; g.lineWidth = 1.2;
+      for (let j = 0; j < 7; j++) { const a = Math.PI + (0.12 + j * 0.13) * Math.PI, x = ox + Math.cos(a) * Rr, y = oy + Math.sin(a) * Rr - Hw * 0.95; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 3, y + Hw * 0.3); g.lineTo(x - 2, y + Hw * 0.55); g.stroke(); }
+      // the torches on the face
+      for (let j = 0; j < AR.torches; j++) {
+        const a = Math.PI + (j + 0.5) / AR.torches * Math.PI, x = ox + Math.cos(a) * Rr, y = oy + Math.sin(a) * Rr - Hw * 0.55;
+        if (x < -40 || x > W + 40 || y < -40 || y > H + 40) continue;
+        const fl = 0.8 + 0.2 * Math.sin(now * 9 + j * 1.7);
+        const gl = g.createRadialGradient(x, y - 4, 1, x, y - 4, 34 * fl); gl.addColorStop(0, 'rgba(255,170,80,0.55)'); gl.addColorStop(1, 'rgba(255,120,40,0)');
+        g.fillStyle = gl; g.fillRect(x - 40, y - 44, 80, 80);
+        g.fillStyle = '#1a1210'; g.fillRect(x - 1.5, y - 2, 3, 9); g.fillStyle = '#4a3a2e'; g.fillRect(x - 3, y - 3, 6, 2);
+        g.fillStyle = '#ff9a3a'; g.beginPath(); g.moveTo(x - 3, y - 3); g.quadraticCurveTo(x, y - 12 * fl, x + 3, y - 3); g.fill();
+        g.fillStyle = '#ffe0a0'; g.beginPath(); g.moveTo(x - 1.4, y - 3); g.quadraticCurveTo(x, y - 7 * fl, x + 1.4, y - 3); g.fill();
+        if (lights) lights.push({ x: x + cx, y: y + cy, r: 46, kind: 'brazier' });
+      }
+      // the coping along the top of the wall, and the rock of the world above, out of reach
+      g.lineWidth = 6; g.strokeStyle = '#1c1618'; g.beginPath(); g.arc(ox, oy - Hw, Rr + 2, 0, TAU); g.stroke();
+      g.lineWidth = 3; g.strokeStyle = '#6e6264'; g.beginPath(); g.arc(ox, oy - Hw, Rr, Math.PI, TAU); g.stroke();
+      g.strokeStyle = 'rgba(0,0,0,0.6)'; g.lineWidth = 1; g.beginPath();
+      for (let j = 0; j < 48; j++) { const a = Math.PI + j / 48 * Math.PI, x = ox + Math.cos(a) * Rr, y = oy + Math.sin(a) * Rr - Hw; g.moveTo(x - Math.sin(a) * 2, y - 2); g.lineTo(x + Math.sin(a) * 2, y + 2); }
+      g.stroke();
+      g.restore();
+      // the near rim: the top of the wall beneath us, a lip of coping stones over the drop
+      g.save();
+      g.lineWidth = 7; g.strokeStyle = '#140e10'; g.beginPath(); g.arc(ox, oy, Rr + 3, 0.02, Math.PI - 0.02); g.stroke();
+      g.lineWidth = 3; g.strokeStyle = '#5a4e50'; g.beginPath(); g.arc(ox, oy, Rr + 1, 0.05, Math.PI - 0.05); g.stroke();
+      g.restore();
+    }
+  };
+
   R.drawPit = function (g, cx, cy, now, lights) {
     const F = this.pit.fx, v = DH.view;
     const B = F.blades;

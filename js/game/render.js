@@ -27,7 +27,7 @@
     for (let ky = Math.floor(cy / CH); ky <= Math.floor((cy + H) / CH); ky++) for (let kx = Math.floor(cx / CH); kx <= Math.floor((cx + W) / CH); kx++) {
       const ch = this.floor.chunk(kx, ky);
       g.drawImage(ch.canvas, kx * CH - cx, ky * CH - cy, CH, CH);
-      for (const l of ch.lights) if (!this.bridge || Math.abs(l.y) < this.bridge + 10) lights.push(l);
+      for (const l of ch.lights) if ((!this.bridge || Math.abs(l.y) < this.bridge + 10) && (!this.pit || l.x * l.x + l.y * l.y < C.PIT_ARENA.R * C.PIT_ARENA.R)) lights.push(l);
     }
     { // the ring of chunks just off screen is painted ahead, a little each frame, nearest to where the hero is heading first
       const kx0 = Math.floor(cx / CH) - 1, kx1 = Math.floor((cx + W) / CH) + 1, ky0 = Math.floor(cy / CH) - 1, ky1 = Math.floor((cy + H) / CH) + 1;
@@ -40,7 +40,7 @@
         const w = this.warmQ.pop(); if (w) G.sprite(w[0], w[1]);
       }
     }
-    this.drawHall(g, cx, cy, W, H, now);
+    this.drawHall(g, cx, cy, W, H, now, lights);
     this.drawLandmarksFlat(g, cx, cy, W, H, lights);
     this.vfxShafts(cx, cy, W, H, lights);
     // decals

@@ -395,6 +395,7 @@
     halls: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'blightmire', 'blightmire', 'blightmire'], // the floor of each ten (no hall rules)
     hallStats: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'discord', 'blightmire', 'reliquary'], // and the strength of its foes
     hpGrow: 1.12, dmgGrow: 1.05,                             // per wave, from the first of its ten
+    sweep: 0.5,                                              // a sweep pays half the best wave; the Mastery's Sweep card raises it to all
     // the week's board pays its top 50 when the week is over (functions/pitpay.js): [up to rank, reward]
     weekly: [[1, { essence: 3000, gems: 500 }], [2, { essence: 2000, gems: 300 }], [3, { essence: 1500, gems: 200 }],
       [10, { essence: 1000, gems: 100 }], [25, { essence: 600, gems: 50 }], [50, { essence: 300, gems: 20 }]],
@@ -404,15 +405,26 @@
   E.PIT_MASTERY = {
     max: 100, xpPerWave: 5,                                   // a fight or a sweep: 5 experience per wave reached
     next: (lv) => 60 + 15 * lv,                               // experience from level lv to lv + 1
+    // tier: the colour of the card (blue, purple, gold, red: from the plain to the rarest)
     perks: {
-      power:   { icon: 'tr_strength',    max: 10, cost: 2, per: 0.15 },  // +15% damage a level
-      guard:   { icon: 'tr_thickhide',   max: 10, cost: 2, per: 0.05 },  // +5 Defense a level
-      fort:    { icon: 'tr_parry',       max: 5,  cost: 3, per: 0.03 },  // 3% less damage taken a level
-      execute: { icon: 'u_kill',         max: 5,  cost: 3, per: 0.1 },   // +10% damage a level on foes under 30% health
-      time:    { icon: 'tr_persistence', max: 4,  cost: 4, per: 15 },    // +15 s a level
-      essence: { icon: 'i_essence',      max: 4,  cost: 3, per: 0.1 },   // +10% Essence a level
-      entry:   { icon: 'n_skull',        max: 1,  cost: 10, per: 1 },    // one more entry a day
+      power:   { icon: 'pm_power',   tier: 'blue',   max: 10, cost: 2, per: 0.15 },  // +15% damage a level
+      guard:   { icon: 'pm_guard',   tier: 'blue',   max: 10, cost: 2, per: 0.05 },  // +5 Defense a level
+      fort:    { icon: 'pm_fort',    tier: 'purple', max: 5,  cost: 3, per: 0.03 },  // 3% less damage taken a level
+      execute: { icon: 'pm_execute', tier: 'purple', max: 5,  cost: 3, per: 0.1 },   // +10% damage a level on foes under 30% health
+      time:    { icon: 'pm_time',    tier: 'gold',   max: 4,  cost: 4, per: 15 },    // +15 s a level
+      essence: { icon: 'pm_essence', tier: 'gold',   max: 4,  cost: 3, per: 0.1 },   // +10% Essence a level
+      sweep:   { icon: 'pm_sweep',   tier: 'red',    max: 5,  cost: 3, per: 0.1 },   // a sweep pays 10% more of the best wave a level (all of it at 5)
+      entry:   { icon: 'pm_entry',   tier: 'red',    max: 1,  cost: 10, per: 1 },    // one more entry a day
     },
+  };
+  /** The Pit's shop: a free handful of Essence a day, a few more for an ad each, and packs for gems (so many a day). */
+  E.PIT_SHOP = {
+    free: { essence: 150 }, ad: { essence: 250 }, ads: 3,
+    packs: [
+      { id: 'ess_s', gems: 60,  essence: 700,  daily: 3 },
+      { id: 'ess_m', gems: 250, essence: 3200, daily: 2 },
+      { id: 'ess_l', gems: 600, essence: 8500, daily: 1 },
+    ],
   };
   E.pitWeeklyReward = (rank) => { const r = E.PIT.weekly.find(([n]) => rank <= n); return r ? r[1] : null; };
   /** The account's reward track: a bigger reward every 5 levels, for ever. Each milestone pays gems, the metal of its
@@ -443,6 +455,7 @@
     starter:  { type: 'bundle', price: 1.99, once: true, grant: { gems: 300, gold: 10000, gear: { rarity: 3 }, energy: 30, mats: { iron: 60, silver: 20 } }, value: 800 },
     noads:    { type: 'noads', price: 4.99, once: true },
     pitpass:  { type: 'pitpass', price: 4.99, once: true }, // the Pit's pass: +50% Essence and one more entry a day, for good
+    masterypass: { type: 'masterypass', price: 4.99, once: true }, // twice the Mastery experience in every Trial, for good
     soulcard: { type: 'sub', price: 4.99, grant: { gems: 300 }, daily: { gems: 100, energy: 10, mats: { iron: 5 } }, days: 30 },
     pass:     { type: 'pass', price: 9.99 },
     reaper:   { type: 'bundle', price: 4.99, once: true, grant: { hero: 'reaper', gems: 500, chest: 'gold' }, value: 400 },

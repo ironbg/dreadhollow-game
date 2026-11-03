@@ -168,11 +168,18 @@
   meta.pitPointsUsed = () => { const pk = pitS().perks || {}; let n = 0; for (const id in pk) if (PM().perks[id]) n += pk[id] * PM().perks[id].cost; return n; };
   meta.pitPointsFree = () => meta.pitMastery().lv - meta.pitPointsUsed();
   meta.pitSecs = () => E.PIT.secs + meta.pitPerkVal('time');
-  const addMastery = (waves) => { const p = pitS(); p.mxp = (p.mxp || 0) + Math.round(waves * PM().xpPerWave * (p.pass ? 2 : 1)); };
+  /** The Mastery Pass (bought on its own): twice the Mastery experience in every Trial. */
+  meta.masteryPass = () => !!S().masteryPass;
+  const addMastery = (waves) => { const p = pitS(); p.mxp = (p.mxp || 0) + Math.round(waves * PM().xpPerWave * (meta.masteryPass() ? 2 : 1)); };
   /** A level of a Mastery card: one if the points reach. */
   meta.pitPerkUp = (id) => {
     const d = PM().perks[id], p = pitS(); if (!d || meta.pitPerk(id) >= d.max || meta.pitPointsFree() < d.cost) return null;
     p.perks = p.perks || {}; p.perks[id] = meta.pitPerk(id) + 1; changed(); return p.perks[id];
+  };
+  /** A level of a card back (its points are free again). */
+  meta.pitPerkDown = (id) => {
+    const p = pitS(), lv = meta.pitPerk(id); if (!PM().perks[id] || lv <= 0) return null;
+    p.perks[id] = lv - 1; if (!p.perks[id]) delete p.perks[id]; changed(); return lv - 1;
   };
   /** Every point back (free). */
   meta.pitPerkReset = () => { pitS().perks = {}; changed(); return true; };
@@ -207,12 +214,33 @@
     changed();
     return { waves, reached, paid, best: p.best, record, from: a.from, mastery: meta.pitMastery().lv - lv0 };
   };
-  /** Sweep: an entry paid as your best wave, without fighting (no record). */
-  meta.pitSweep = () => {
+  /** What one sweep pays: a share of the best wave (E.PIT.sweep, more with the Mastery's Sweep card, all of it at its top). */
+  meta.pitSweepShare = () => Math.min(1, E.PIT.sweep + meta.pitPerkVal('sweep'));
+  meta.pitSweepPay = () => Math.round(pitS().best * meta.pitPerWave() * meta.pitSweepShare());
+  /** Sweep n of today's entries at once, without fighting (no record; the Mastery's experience as for the best wave). */
+  meta.pitSweep = (n) => {
     const p = pitS(); if (meta.pitLeft() <= 0 || p.best <= 0) return null;
-    p.used++; const paid = p.best * meta.pitPerWave(); addEssence(paid); addMastery(p.best);
-    meta.track('pit', 1); changed();
-    return { paid };
+    n = Math.max(1, Math.min(meta.pitLeft(), n | 0 || 1));
+    const lv0 = meta.pitMastery().lv, paid = meta.pitSweepPay() * n;
+    p.used += n; addEssence(paid); for (let i = 0; i < n; i++) addMastery(p.best);
+    meta.track('pit', n); changed();
+    return { paid, n, mastery: meta.pitMastery().lv - lv0 };
+  };
+  /* the Pit's shop (E.PIT_SHOP): a free handful a day, then a few for an ad each; packs for gems */
+  meta.pitFreeReady = () => !meta.ensureDaily().pitFree;
+  meta.pitAdsLeft = () => Math.max(0, E.PIT_SHOP.ads - (meta.ensureDaily().ads.pit || 0));
+  meta.pitPackLeft = (i) => { const k = E.PIT_SHOP.packs[i]; return k ? Math.max(0, k.daily - ((meta.ensureDaily().pitPacks || {})[k.id] || 0)) : 0; };
+  meta.claimPitFree = () => { const d = meta.ensureDaily(); if (d.pitFree) return null; d.pitFree = true; return meta.grant(E.PIT_SHOP.free); };
+  meta.adPit = async () => {
+    const d = meta.ensureDaily(); if (!d.pitFree || meta.pitAdsLeft() <= 0) return null; // the ads open once the free one is taken
+    if (!(await DH.ads.rewarded('pit_shop'))) return null;
+    d.ads.pit = (d.ads.pit || 0) + 1; return meta.grant(E.PIT_SHOP.ad);
+  };
+  meta.buyPitPack = (i) => {
+    const k = E.PIT_SHOP.packs[i], d = meta.ensureDaily(); if (!k || meta.pitPackLeft(i) <= 0) return null;
+    if (!meta.spend({ gems: k.gems })) return false;
+    d.pitPacks = d.pitPacks || {}; d.pitPacks[k.id] = (d.pitPacks[k.id] || 0) + 1;
+    return meta.grant({ essence: k.essence });
   };
 
   /* ---------------- The Constellation (E.CONST) ---------------- */
@@ -232,6 +260,25 @@
     }
     if (got) changed();
     return got || null;
+  };
+  /** What taking one rank back returns: the price of the branch's last point. */
+  meta.consRefund = (b) => { const p = meta.consPoints(b); return p > 0 ? E.CONST.cost(p - 1) : 0; };
+  /** A rank can be taken back unless a star further out still needs this one full to stay reachable from the heart. */
+  meta.consCanLower = (id) => {
+    const x = E.CONST.byId[id], r = consS().r; if (!x || !x.b || !(r[id] > 0)) return false;
+    const rank = (k) => (k === id ? r[k] - 1 : r[k] || 0), full = (k) => k === 'heart' || rank(k) >= E.CONST.byId[k].max;
+    const seen = new Set(['heart']), q = ['heart']; // the full stars still joined to the heart
+    while (q.length) { const k = q.pop(); for (const a of E.CONST.byId[k].adj) if (!seen.has(a) && full(a)) { seen.add(a); q.push(a); } }
+    for (const k in r) if (rank(k) > 0 && E.CONST.byId[k] && !E.CONST.byId[k].adj.some((a) => seen.has(a))) return false;
+    return true;
+  };
+  /** Take one rank back: its Essence returns. */
+  meta.consLower = (id) => {
+    if (!meta.consCanLower(id)) return null;
+    const x = E.CONST.byId[id], c = consS(), back = meta.consRefund(x.b);
+    c.r[id]--; if (!c.r[id]) delete c.r[id];
+    c.spent = Math.max(0, (c.spent || 0) - back); S().essence = meta.essence() + back; changed();
+    return { back };
   };
   /** Free reset: every star back to nothing, every Essence back. */
   meta.consReset = () => { const c = consS(); const back = c.spent || 0; S().essence = meta.essence() + back; c.r = {}; c.spent = 0; changed(); return { back }; };
@@ -919,6 +966,7 @@
     } else if (p.type === 'bundle') { out = meta.grant(p.grant); }
     else if (p.type === 'noads') { s.purchases.noAds = true; out = [{ icon: 'n_ad', text: t('product.noads') }]; }
     else if (p.type === 'pitpass') { pitS().pass = true; out = [{ icon: 'n_skull', text: t('product.pitpass') }]; }
+    else if (p.type === 'masterypass') { s.masteryPass = true; out = [{ icon: 'pm_pass', text: t('product.masterypass') }]; }
     else if (p.type === 'pass') { meta.ensureSeason(); S().pass.premium = true; // premium for the season it is bought in
       out = [{ icon: 'n_pass', text: t('pass.premiumOn') }]; }
     else if (p.type === 'sub') {

@@ -60,6 +60,7 @@
   R.lmCell = function (cx, cy) {
     const M = this.lmCache || (this.lmCache = new Map()), key = cx + ',' + cy;
     if (M.has(key)) return M.get(key);
+    if (this.pit) { M.set(key, null); return null; } // the Pit's floor is bare: nothing stands in the arena
     const L = C.LANDMARKS, v = this.stage.variant, seed = this.lmSeed || (this.lmSeed = (Math.random() * 2e9) | 0), out = { pieces: [], lights: [] };
     let cell = null;
     if (this.bridge) { // the viaduct: one piece on each parapet

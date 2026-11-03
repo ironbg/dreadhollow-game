@@ -31,9 +31,9 @@
   };
   // the branches: direction, width of their sector, tiers, chains per tier, stars per chain
   const BR = {
-    fury: { ang: -Math.PI / 2, spread: 0.95, tiers: 8, chains: 3, len: 3, color: '#ff4a3a' },
-    bastion: { ang: Math.PI * 5 / 6, spread: 0.8, tiers: 6, chains: 2, len: 3, color: '#4ad86a' },
-    plunder: { ang: Math.PI / 6, spread: 0.8, tiers: 5, chains: 2, len: 2, color: '#f0c040' },
+    fury: { ang: -Math.PI / 2, spread: 0.95, tiers: 8, chains: 3, len: 3, color: '#a8352c' },     // old blood
+    bastion: { ang: Math.PI * 5 / 6, spread: 0.8, tiers: 6, chains: 2, len: 3, color: '#5f8a5a' }, // verdigris
+    plunder: { ang: Math.PI / 6, spread: 0.8, tiers: 5, chains: 2, len: 2, color: '#b8913e' },     // tarnished gold
   };
   const nodes = [{ id: 'heart', b: null, x: 0, y: 0, max: 0, kind: 'heart', st: null }], edges = [];
   const link = (a, b) => edges.push([a, b]);
@@ -72,6 +72,32 @@
   }
   const byId = {}; nodes.forEach((x) => { byId[x.id] = x; x.adj = []; });
   edges.forEach(([a, b]) => { byId[a].adj.push(b); byId[b].adj.push(a); });
+  // Where the stars sit, laid out again by rule so every gap is about the same (the shape above only gives which star
+  // touches which): each branch a straight spine of hubs; the chains between two hubs run beside it, one step of LINE
+  // between stars, the outer ones bowing out; side stars stand out level with their hub. Only the drawing uses this.
+  const RAD = { heart: 34, hub: 22, notable: 18, minor: 14 }, LINE = 66;
+  nodes.forEach((x) => { x.r = RAD[x.kind]; });
+  const put = (x, ang, r, lat) => { const a = ang + (r > 0 ? lat / r : 0); x.x = Math.round(Math.cos(a) * r); x.y = Math.round(Math.sin(a) * r); };
+  for (const b in BR) {
+    const D = BR[b], step = (D.len + 1) * LINE * 0.9, ring = (t) => 26 + step * (t + 1);
+    for (let t = 0; t < D.tiers; t++) {
+      put(byId[b + '_h' + t], D.ang, ring(t), 0);
+      const chains = t === 0 ? 1 : D.chains, spread = D.chains === 3 ? 1.3 * LINE : 0.8 * LINE;
+      for (let c = 0; c < chains; c++) {
+        const off = chains === 1 ? 0 : (c - (chains - 1) / 2) * spread * (chains === 3 ? 1 : 2);
+        for (let k = 1; k <= D.len; k++) {
+          const f = k / (D.len + 1), r0 = t ? ring(t - 1) : 26;
+          put(byId[b + '_' + t + '_' + c + '_' + k], D.ang, r0 + (ring(t) - r0) * f, off * Math.sin(f * Math.PI));
+        }
+      }
+      for (let s2 = 0; s2 < 2; s2++) {
+        const a1 = byId[b + '_s' + t + '_' + s2], a2 = byId[b + '_n' + t + '_' + s2], dir = s2 === 0 ? 1 : -1;
+        if (!a1) continue;
+        const out = (D.chains === 3 ? 1.3 : 0.8) * LINE + LINE * 0.42;
+        put(a1, D.ang, ring(t), dir * out); put(a2, D.ang, ring(t) + LINE * 0.35, dir * (out + LINE * 1.05));
+      }
+    }
+  }
   const total = {}; nodes.forEach((x) => { if (x.b) total[x.b] = (total[x.b] || 0) + x.max; });
 
   E.CONST = {

@@ -46,7 +46,8 @@
       const s = DH.save.data, best = (s.pit && s.pit.best) || 0, cp = M.pitCheckpoint(), per = M.pitPerWave(), left = M.pitLeft(), all = M.pitEntries();
       m.set(h('div',
         h('div.pit-art', h('img', { src: art(MODES[0]), alt: '' }), h('div.pit-ess', A.img('i_essence', 'ci'), h('b', U.fmt(M.essence()))),
-          M.pitPass() ? h('div.pit-pass.on', A.img('n_skull', 'ci'), t('pit.passOn')) : null),
+          M.pitPass() ? h('div.pit-pass.on', A.img('n_skull', 'ci'), t('pit.passOn')) : null,
+          h('button.pit-shopbtn', { 'aria-label': t('pitshop.title'), onclick: () => { click(); ui.openPitShop(); } }, A.img('c_gold'), h('span', t('pit.shop')), M.pitFreeReady() ? h('span.badge', '!') : null)),
         M.pitPass() ? null : h('div.pit-passcard', { onclick: async () => { click(); if (await DH.iap.buy('pitpass')) draw(); } },
           A.img('n_skull', 'ci'), h('div.grow', h('b', t('product.pitpass')), h('div.small', t('pit.passDesc'))), h('span.btn.small.gold', DH.iap.price('pitpass'))),
         h('div.pit-card',
@@ -62,51 +63,79 @@
           h('button.btn.small.gold', { onclick: () => { click(); ui.openBoards(M.boardKey(M.pitBoards()[0])); } }, A.img('n_trophy', 'ci'), ' ', t('lb.short'))),
         h('div.mact', h('div.small.center.pit-left' + (left ? '' : '.bad'), t('pit.entries', { n: all - left, m: all })),
         h('div.pit-btns',
-          h('button.btn.blue' + (left && best ? '' : '.off'), { onclick: sweep }, t('pit.sweep'), best ? h('span.small', ' +' + U.fmt(best * per)) : null),
-          h('button.btn.green' + (left ? '' : '.off'), { onclick: () => { if (!left) { ui.toast(t('pit.noEntries'), 'bad'); return; } m.close(); DH.game.startPit(); } }, t('pit.enter'))))));
+          h('div.pit-sweep',
+            h('button.btn.blue' + (left && best ? '' : '.off'), { onclick: sweep }, sweepN > 1 ? t('pit.sweepN', { n: sweepN }) : t('pit.sweep')),
+            left > 1 && best ? h('div.pit-slide', h('input', { type: 'range', min: 1, max: left, step: 1, value: sweepN, 'aria-label': t('pit.sweep'),
+              oninput: (e) => { sweepN = +e.target.value; const b = e.target.closest('.pit-sweep').querySelector('.btn'); b.textContent = sweepN > 1 ? t('pit.sweepN', { n: sweepN }) : t('pit.sweep'); } }), h('b', null)) : null),
+          h('button.btn.green' + (left ? '' : '.off'), { onclick: () => { if (!left) { ui.toast(t('pit.noEntries'), 'bad'); return; } m.close(); DH.game.startPit(); } }, t('pit.enter'))),
+        best ? h('div.small.muted.center.pit-share', t('pit.sweepShare', { v: Math.round(M.pitSweepShare() * 100) })) : null)));
+      const sl = m.el && m.el.querySelector('.pit-slide input'); if (sl) { const upd = () => { sl.nextSibling.textContent = sl.value; sl.style.setProperty('--f', ((sl.value - 1) / Math.max(1, sl.max - 1) * 100) + '%'); }; sl.addEventListener('input', upd); upd(); }
     };
+    let sweepN = 1;
     const sweep = async () => {
       const best = (DH.save.data.pit && DH.save.data.pit.best) || 0;
       if (!best) { ui.toast(t('pit.sweepNone'), 'bad'); return; }
       if (!M.pitLeft()) { ui.toast(t('pit.noEntries'), 'bad'); return; }
       click();
-      const r = await ui.act('pitSweep'); if (!r) return;
-      DH.audio.play('coin'); ui.rewardPopup(t('pit.sweep'), [{ icon: 'i_essence', text: '+' + U.fmt(r.paid) }]); draw();
+      const n = Math.max(1, Math.min(M.pitLeft(), sweepN));
+      const r = await ui.act('pitSweep', { n }); if (!r) return;
+      sweepN = 1;
+      DH.audio.play('coin'); ui.rewardPopup(r.n > 1 ? t('pit.sweepN', { n: r.n }) : t('pit.sweep'), [{ icon: 'i_essence', text: '+' + U.fmt(r.paid) }]); draw();
     };
     draw();
   };
 
-  /** The Pit's Mastery: its level from the Pit's fights, the points it gives and the cards they buy. */
+  /** The Pit's Mastery: its level from the Pit's fights, the points it gives and the cards they buy (blue, purple, gold,
+   *  red: from the plain to the rarest; a full card's name turns green). The Mastery Pass at the bottom (every Trial). */
   ui.openPitMastery = () => {
     const PM = E.PIT_MASTERY, ids = Object.keys(PM.perks);
-    const m = ui.modal({ title: t('pit.mastery'), cls: 'pitmast', body: () => h('div') });
+    const m = ui.modal({ title: t('pit.mastery'), cls: 'pitmast', body: () => h('div'), onClose: () => DH.events.off('meta', redraw) });
+    const redraw = () => { if (!m.closed) draw(); };
+    DH.events.on('meta', redraw);
     const draw = () => {
       const ms = M.pitMastery(), free = M.pitPointsFree();
       m.set(h('div',
         h('div.pm-head', h('div.pm-lv', h('b', ms.lv), h('span.small', ' / ' + PM.max)),
           h('div.grow', h('div.pm-bar', h('i', { style: { width: (ms.next ? Math.round(ms.xp / ms.next * 100) : 100) + '%' } })), h('div.small.muted', ms.next ? t('pit.masteryXp', { x: U.fmt(ms.xp), m: U.fmt(ms.next) }) : t('common.max'))),
           h('div.pm-free', h('span.small', t('pit.points')), h('b', free))),
-        h('div.small.muted.center', t('pit.masteryDesc', { n: PM.xpPerWave }) + (M.pitPass() ? ' ' + t('pit.masteryPass') : '')),
+        h('div.small.muted.center', t('pit.masteryDesc', { n: PM.xpPerWave }) + (M.masteryPass() ? ' ' + t('pit.masteryPass') : '')),
         h('div.pm-grid', ids.map((id) => {
           const d = PM.perks[id], lv = M.pitPerk(id), full = lv >= d.max, can = !full && free >= d.cost;
-          return h('div.pm-card' + (full ? '.full' : can ? '.can' : ''), { onclick: () => { click(); card(id); } },
-            h('div.pm-n', t('pit.pk.' + id)), A.img(d.icon, 'pm-ic'), h('div.pm-cost', t('pit.cost', { n: d.cost })), h('div.pm-lvl', lv + '/' + d.max));
+          return h('div.pm-card.t-' + d.tier + (full ? '.full' : can ? '.can' : '') + (lv ? '' : '.zero'), { onclick: () => { click(); card(id); } },
+            h('div.pm-n', t('pit.pk.' + id)), h('div.pm-icw', A.img(d.icon, 'pm-ic')), h('div.pm-cost', d.cost), h('div.pm-lvl', lv + '/' + d.max));
         })),
-        h('div.btns', h('button.btn.ghost', { onclick: reset }, t('cons.reset')), h('button.btn.gold', { onclick: () => m.close() }, t('common.close')))));
+        h('div.mact',
+          M.masteryPass() ? h('div.pm-pass.on', A.img('pm_pass', 'ci'), h('b', t('mpass.on')))
+            : h('div.pm-pass', { onclick: async () => { click(); if (await DH.iap.buy('masterypass')) draw(); } },
+              A.img('pm_pass'), h('div.grow', h('b', t('product.masterypass')), h('div.small', t('mpass.desc'))), h('span.btn.small.green', DH.iap.price('masterypass'))),
+          h('div.btns', h('button.btn.ghost', { onclick: reset }, t('cons.reset')), h('button.btn.gold', { onclick: () => m.close() }, t('common.close'))))));
     };
-    const val = (id, n) => { const d = PM.perks[id]; return t('pit.pkd.' + id, { v: id === 'time' || id === 'entry' ? d.per * n : Math.round(d.per * n * 100) }); };
+    const val = (id, n) => {
+      const d = PM.perks[id];
+      const v = id === 'time' || id === 'entry' ? d.per * n : id === 'sweep' ? Math.round(Math.min(1, E.PIT.sweep + d.per * n) * 100) : Math.round(d.per * n * 100);
+      return t('pit.pkd.' + id, { v });
+    };
     const card = (id) => {
-      const d = PM.perks[id], lv = M.pitPerk(id);
-      const cm = ui.modal({ title: t('pit.pk.' + id), cls: 'pmcard', body: (c) => h('div',
-        h('div.cons-ico', A.img(d.icon)),
-        h('div.cons-line', t('cons.ranks'), h('b', lv + ' / ' + d.max)),
-        h('div.cons-line', t('cons.now'), h('b', lv ? val(id, lv) : '—')),
-        lv < d.max ? h('div.cons-line', t('pit.nextLv'), h('b', val(id, lv + 1))) : h('div.good.center', t('cons.full')),
-        lv < d.max ? h('div.cons-line', t('pit.cost', { n: '' }).trim(), h('b', t('pit.costPts', { n: d.cost }))) : null,
-        h('div.btns', lv < d.max ? h('button.btn.gold' + (M.pitPointsFree() >= d.cost ? '' : '.off'), { onclick: async () => {
-          if (M.pitPointsFree() < d.cost) { ui.toast(t('pit.noPoints'), 'bad'); return; }
-          const r = await ui.act('pitPerkUp', { id }); if (r) { DH.audio.play('buy'); c.close(); draw(); card(id); }
-        } }, t('cons.buy1')) : h('button.btn.gold', { onclick: () => c.close() }, t('common.close')))) });
+      const d = PM.perks[id];
+      const cm = ui.modal({ title: t('pit.pk.' + id), cls: 'pmcard t-' + d.tier, body: () => h('div') });
+      const body = () => {
+        const lv = M.pitPerk(id), full = lv >= d.max, can = !full && M.pitPointsFree() >= d.cost;
+        cm.set(h('div',
+          h('div.cons-ico.pm-big.t-' + d.tier, A.img(d.icon)),
+          h('div.cons-line', t('cons.ranks'), h('b' + (full ? '.good' : ''), lv + ' / ' + d.max)),
+          h('div.cons-line', t('cons.now'), h('b', lv || id === 'sweep' ? val(id, lv) : '—')),
+          !full ? h('div.cons-line', t('pit.nextLv'), h('b', val(id, lv + 1))) : h('div.good.center', t('cons.full')),
+          !full ? h('div.cons-line', t('pit.cost', { n: '' }).trim(), h('b', t('pit.costPts', { n: d.cost }))) : null,
+          h('div.btns.cons-btns',
+            h('button.btn.red' + (lv ? '' : '.off'), { onclick: async () => { if (!lv) return; const r = await ui.act('pitPerkDown', { id }); if (r != null) { DH.audio.play('coin'); body(); } } }, t('cons.sell1')),
+            h('button.btn.gold' + (can ? '' : '.off'), { onclick: async () => {
+              if (full) return;
+              if (M.pitPointsFree() < d.cost) { ui.toast(t('pit.noPoints'), 'bad'); return; }
+              const r = await ui.act('pitPerkUp', { id }); if (r) { DH.audio.play('buy'); body(); }
+            } }, t('cons.buy1'))),
+          h('div.btns', h('button.btn.ghost', { onclick: () => cm.close() }, t('common.close')))));
+      };
+      body();
       return cm;
     };
     async function reset() {
@@ -115,6 +144,34 @@
       if (!(await ui.confirm({ title: t('cons.reset'), body: t('pit.resetBody'), ok: t('cons.reset'), okCls: 'red' }))) return;
       if (await ui.act('pitPerkReset')) { DH.audio.play('coin'); draw(); }
     }
+    draw();
+  };
+
+  /** The Pit's shop: today's free handful, then a few for an ad each (one card that turns over), and Essence for gems. */
+  ui.openPitShop = () => {
+    const S = E.PIT_SHOP;
+    const m = ui.modal({ title: t('pitshop.title'), cls: 'resshop pitshop', body: () => h('div'), onClose: () => DH.events.off('meta', redraw) });
+    const redraw = () => { if (!m.closed) draw(); };
+    DH.events.on('meta', redraw);
+    const ess = (n) => h('div.rs-items', h('div.rs-it', A.img('i_essence'), h('b', U.fmt(n))));
+    const draw = () => {
+      const free = M.pitFreeReady(), left = M.pitAdsLeft(), all = !free && left <= 0;
+      const card = h('div.panel.rs-row' + (all ? '.done' : ''),
+        h('div.grow', h('div.rs-t', all ? t('resshop.allTaken') : free ? t('pitshop.free') : t('pitshop.ad')), ess(free ? S.free.essence : S.ad.essence)),
+        all ? h('button.btn.small.ghost.off', A.img('u_check', 'ci'), t('resshop.taken'))
+          : free ? h('button.btn.small.gold', { onclick: async () => { const r = await ui.act('claimPitFree'); if (r) { DH.audio.play('reward'); ui.rewardPopup(t('pitshop.title'), r); } } }, t('common.claim'))
+            : h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('adPit'); if (r) ui.rewardPopup(t('pitshop.title'), r); } }, h('span.adtag', 'AD'), t('common.watch') + ' (' + left + ')'));
+      const packs = S.packs.map((k, i) => {
+        const n = M.pitPackLeft(i);
+        return h('div.panel.rs-pack' + (n ? '' : '.done'),
+          h('div.slot.rs-pico', A.img('i_essence')),
+          h('div.grow', h('div.rs-t', t('product.' + k.id)), ess(k.essence), h('div.small.muted', t('pitshop.left', { n }))),
+          n ? h('button.btn.small.gem', { onclick: async () => {
+            const r = await ui.act('buyPitPack', { i }); if (r) { DH.audio.play('buy'); ui.rewardPopup(t('pitshop.title'), r); } else if (r === false) { ui.toast(t('common.notEnough'), 'bad'); }
+          } }, A.img('i_gem'), k.gems) : h('button.btn.small.ghost.off', t('shop.soldOut')));
+      });
+      m.set(h('div', card, h('div.small.muted.center.rs-timer', t('resshop.daily', { t: U.fmtDuration(U.msToMidnight()) })), h('h3.sect.rs-sect', t('pitshop.packs')), packs));
+    };
     draw();
   };
 
