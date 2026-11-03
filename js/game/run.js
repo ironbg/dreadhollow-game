@@ -29,6 +29,7 @@
       this.heroId = opts.hero; this.stageId = opts.stage;
       this.hero = C.heroes[this.heroId]; this.stage = opts.stageDef || C.stages[this.stageId]; // the Pit brings its own copy of a hall
       this.pit = opts.pit || null;
+      this.cs = DH.meta.consSpecials ? DH.meta.consSpecials() : {}; // the Constellation's Specialties unlocked (js/game/constellation.js)
       this.settings = S.settings;
       this.artifacts = DH.meta.activeArtifacts();
       this.dread = DH.meta.dreadRank();
@@ -146,6 +147,7 @@
       for (const a of this.abilities) this.updateAbility(a, dt);
       this.updateAllies(dt);
       this.updateItems(dt);
+      this.updateCons(dt);
       this.updateEnemies(dt);
       this.updateHall(dt);
       this.updateLandmarks(dt);
@@ -265,7 +267,7 @@
         DH.events.emit('run:boss', { name: t('enemy.' + b.id), final: !!b.final });
       }
       if (this.time >= this.oozeT && !this.bosses.some((b) => b.def.lord)) {
-        this.oozeT = this.time + U.rand(C.OOZE_EVERY[0], C.OOZE_EVERY[1]);
+        this.oozeT = this.time + U.rand(C.OOZE_EVERY[0], C.OOZE_EVERY[1]) * (this.cs.plunder >= 5 ? 0.5 : 1); // Plunder: the Gilded Ooze twice as often
         const pt = this.edgePoint(0.8), e = this.spawnEnemy('gildedooze', pt.x, pt.y);
         if (e) { e.hp = e.maxHp = e.def.hits; e.life = e.def.life; DH.events.emit('run:warning', t('hud.ooze')); }
       }
@@ -770,9 +772,10 @@
         const chance = Math.min(0.5 * ratio, 0.5 * Math.sqrt(ratio), 1);
         if (Math.random() < chance) { p.inv = 0.25; this.text(p.x, p.y - 12, t('hud.block'), '#9ad0ff'); DH.audio.play('block'); return; }
       }
-      const defense = C.defenseDR(P.defense + (this.defStacks || 0) * P.hitDefense); // Defiant Plate: defense after each hit (3 stacks, 4s)
+      const ward = this.consWard > this.time; // the Bastion's pulse: a moment of armour (js/game/constellation.js)
+      const defense = C.defenseDR(P.defense + (this.defStacks || 0) * P.hitDefense + (ward && this.cs.bastion >= 3 ? C.CONS_FX.ward.def : 0)); // Defiant Plate: defense after each hit (3 stacks, 4s)
       if (P.hitDefense) { this.defStacks = Math.min(3, (this.defStacks || 0) + 1); this.defT = 4; }
-      let d = Math.max(1, Math.round(dmg * (1 - defense) * P.taken * (1 + 0.04 * ((this.art && this.art.pFragile) || 0))));
+      let d = Math.max(1, Math.round(dmg * (1 - defense) * P.taken * (1 + 0.04 * ((this.art && this.art.pFragile) || 0)) * (ward && this.cs.bastion >= 2 ? 1 - C.CONS_FX.ward.cut : 1)));
       if (this.fx_.plate && this.gold >= d * 0.5) { this.gold -= d * 0.5; d = Math.max(1, Math.round(d * 0.5)); this.text(p.x + 6, p.y - 18, '-' + Math.round(d) + 'g', '#ffd35a'); } // Miser's Plate
       if (this.fx_.scorch && src && Math.random() < this.fx_.scorch) this.art.pburn = { t: 3, dps: d * 0.1 }; // Scorched Palm
       p.hp -= d; p.inv = 0.45;
@@ -908,6 +911,7 @@
       const gm = this.stage.goldMult;
       if (Math.random() < 0.08) this.drop('coin', e.x, e.y, Math.ceil(U.randi(1, 3) * gm));
       if (e.elite || e.champion || e.boss) { if (this.P.eliteHeal) this.heal(this.P.maxHp * this.P.eliteHeal); }
+      if (e.elite && this.cs.plunder >= 2) for (let i = 0; i < C.CONS_FX.pouch.n; i++) this.drop('coin', e.x, e.y, Math.ceil(C.CONS_FX.pouch.v * gm)); // Plunder: an elite's purse
       if (e.elite) { this.eliteKills++; this.shake = 3; this.scrollDrop(e.x, e.y); if (Math.random() < (this.P.chestDrop || 0)) this.drop('chest_red', e.x - 10, e.y); /* Plunder (Blessing) */ if (Math.random() < (this.trib.eliteChest || 0)) this.drop('chest_red', e.x + 10, e.y); /* the tribute of Plunder */ if (Math.random() < 0.5) this.drop('herb', e.x, e.y, 0, this.stage.herb === 'dust' ? U.pick(E.herbs) : this.stage.herb); for (let i = 0; i < 4; i++) this.drop('coin', e.x, e.y, Math.ceil(3 * gm)); if (Math.random() < Math.min(0.8, 0.4 + 0.05 * this.dread)) this.matDrop(e.x, e.y, 1); }
       if (e.champion) {
         this.championKills++; this.shake = 4;
@@ -1019,7 +1023,7 @@
           DH.audio.play('chest'); this.levelUpVfx && this.levelUpVfx();
           DH.events.emit('run:boss', { name: t('artifact.' + k.sub + '.name'), final: false, artifact: true }); break;
         case 'ulcer': { const p = this.player; DH.audio.play('hurt'); this.gainXp(this.xpNext * 0.3); p.hp = Math.max(1, p.hp - this.P.maxHp * 0.12); this.text(p.x, p.y - 14, t('hud.ulcer'), '#b060ff'); break; }
-        case 'mat': DH.audio.play('coin'); this.mats[k.sub] = Math.min(E.MAT_RUN_MAX, (this.mats[k.sub] || 0) + 1); this.text(this.player.x, this.player.y - 14, '+1 ' + t('mat.' + k.sub), E.MAT_COLOR[k.sub]); break;
+        case 'mat': DH.audio.play('coin'); this.mats[k.sub] = Math.min(E.MAT_RUN_MAX, (this.mats[k.sub] || 0) + 1 + (this.cs.plunder >= 4 && Math.random() < C.CONS_FX.metal ? 1 : 0)); // Plunder: now and then a second piece this.text(this.player.x, this.player.y - 14, '+1 ' + t('mat.' + k.sub), E.MAT_COLOR[k.sub]); break;
         case 'herb': DH.audio.play('herb'); this.herbs[k.sub] = (this.herbs[k.sub] || 0) + 1; this.text(this.player.x, this.player.y - 14, '+1 ' + t('herb.' + k.sub), '#b0ff80'); break;
         case 'potion': DH.audio.play('heal'); this.itemsOnPotion(); if (this.hero.potionBrew) { this.brews = (this.brews || 0) + 1; this.recompute(); this.text(this.player.x, this.player.y - 18, t('hud.brew'), '#b0ff80', true); } this.heal(C.POTION_HEAL[0] + this.P.maxHp * C.POTION_HEAL[1]); break; // 25 + 5% of max HP; the Alchemist's brews grow stronger
         case 'bucket': DH.audio.play('reward'); if (this.well && this.well.used) this.well.used = false; else this.buckets++; this.text(this.player.x, this.player.y - 14, t('hud.bucket'), '#5ab8ff', true); break;

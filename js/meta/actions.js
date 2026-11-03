@@ -41,6 +41,8 @@
     pitStart: { run: () => M().pitStart() },
     pitEnd: { run: (a) => M().pitEnd(int(a.waves)) },
     pitSweep: { run: () => M().pitSweep() },
+    consBuy: { run: (a) => M().consBuy(str(a.id, 40), int(a.n)) },
+    consReset: { run: () => M().consReset() },
     buyPassTier: { run: () => M().buyPassTier() },
     claimMainQuest: { run: () => M().claimMainQuest() },
     trackDeed: { run: (a) => M().trackDeed(a.id == null ? null : str(a.id)) },

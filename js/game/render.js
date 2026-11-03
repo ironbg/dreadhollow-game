@@ -746,6 +746,17 @@
         g.globalAlpha = (1 - k) * 0.6; g.strokeStyle = '#ffe8b0'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, f.R * (0.6 + k * 0.4), f.ang - 1.1, f.ang + 1.1); g.stroke(); g.globalAlpha = 1;
         break;
       }
+      case 'starfall': { // the Constellation's Wrath Star: a red-gold column of light and a star flashing where it lands
+        const a = 1 - k, R = 22;
+        g.save(); g.globalCompositeOperation = 'lighter';
+        const grd = g.createLinearGradient(0, y - 140, 0, y); grd.addColorStop(0, 'rgba(255,90,40,0)'); grd.addColorStop(1, 'rgba(255,200,120,' + 0.65 * a + ')');
+        g.fillStyle = grd; g.fillRect(x - 6 - 4 * a, y - 140, 12 + 8 * a, 140);
+        g.translate(x, y); g.rotate(k * 3); g.fillStyle = 'rgba(255,240,190,' + a + ')';
+        g.beginPath(); for (let i = 0; i < 10; i++) { const rr = i % 2 ? R * 0.35 * (1 + k) : R * (0.6 + k); g.lineTo(Math.cos(i * Math.PI / 5) * rr, Math.sin(i * Math.PI / 5) * rr * 0.7); } g.closePath(); g.fill();
+        g.restore();
+        lights.push({ x: f.x, y: f.y, r: 60 * a, kind: 'fire' });
+        break;
+      }
       case 'smite': { // a column of holy light, the hammer falling down it, a ring of light where it lands
         const drop = Math.max(0, 1 - k / 0.4), a = 1 - k;
         g.save(); g.globalCompositeOperation = 'lighter';

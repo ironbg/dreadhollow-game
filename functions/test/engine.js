@@ -129,5 +129,11 @@ const live = require('../game/live.json');
   assert.strictEqual(r.result.paid, 420); assert.strictEqual(r.profile.pit.used, 2);
   r = await withProfile(r.profile, live, (DH) => [DH.actions.list.pitStart.run({}), DH.actions.list.pitSweep.run({})]);
   assert.ok(r.result[0] && r.result[1] === null, 'three entries a day');
+  // the Constellation: a star opens only next to a full one, Essence pays, the reset gives every Essence back
+  r = await withProfile(Object.assign({}, p0, { essence: 1000 }), live, (DH) => [DH.actions.list.consBuy.run({ id: 'fury_h3', n: 1 }), DH.actions.list.consBuy.run({ id: 'fury_0_0_1', n: 10 })]);
+  assert.strictEqual(r.result[0], null, 'a star far from the heart is locked'); assert.strictEqual(r.result[1], 3);
+  assert.ok(r.profile.essence < 1000 && r.profile.cons.spent === 1000 - r.profile.essence);
+  r = await withProfile(r.profile, live, (DH) => DH.actions.list.consReset.run({}));
+  assert.strictEqual(r.profile.essence, 1000); assert.deepStrictEqual(r.profile.cons.r, {});
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });

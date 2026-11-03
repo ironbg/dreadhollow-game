@@ -54,7 +54,7 @@
           row('i_essence', t('pit.perWave'), U.fmt(per)),
           h('button.pit-fx', { onclick: () => { click(); fxInfo(); } }, A.img('u_agony', 'ci'), t('pit.randomFx', { n: E.PIT.roll }), h('span.pit-i', 'i'))),
         h('div.pit-more',
-          h('button.btn.small.ghost.off', { onclick: () => ui.toast(t('trials.soon')) }, A.img('u_star', 'ci'), ' ', t('pit.constellation')),
+          h('button.btn.small.gold', { onclick: () => { click(); ui.openConstellation(); } }, A.img('u_star', 'ci'), ' ', t('pit.constellation')),
           h('button.btn.small.ghost.off', { onclick: () => ui.toast(t('trials.soon')) }, A.img('n_trophy', 'ci'), ' ', t('lb.short'))),
         h('div.mact', h('div.small.center.pit-left' + (left ? '' : '.bad'), t('pit.entries', { n: all - left, m: all })),
         h('div.pit-btns',

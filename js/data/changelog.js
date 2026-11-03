@@ -12,6 +12,7 @@
         'Профилът е с еднаква височина във всеки раздел; аватарите са по пет на ред.',
         'Нов бутон „Изпитания“ в главното меню (на мястото на „Безплатно“ – безплатните камъни остават в Магазина) с прозорец за игрови режими.',
         'Първото изпитание – Ямата: вълни врагове за 3 минути, без бос и без плячка. Всяка изчистена вълна дава Есенция, а при влизане веднага получаваш Есенцията до точката си за продължаване. Три влизания на ден, бързо минаване и две случайни опасности всеки път (Дъжд от остриета, Преследвач, Падащи звезди, Лъчи на олтара, Окована плът, Каменна кожа, Отровна мъгла).',
+        'Съзвездието: голямо дърво от звезди, които се купуват с Есенция и дават сила на всички герои, в три клона – Ярост (атака), Бастион (защита) и Плячка (награди). Всеки клон отключва пет специални умения според вложените точки (Звезда на гнева, Пулс на бастиона, повече Есенция и влизания и др.). Нулирането е безплатно и връща цялата Есенция.',
       ],
       en: [
         'Every stat on relics (and their level bonuses) is a quarter of what it was: with rarity and levels one piece reached +96% attack speed, +268% Multistrike, +339% crit damage or +230% fire damage. Relic specials, traits, abilities and blessings give as much as before.',
@@ -20,6 +21,7 @@
         'The profile window keeps one height on every tab; avatars sit five to a row.',
         'A new Trials button on the main menu (in place of Free – the free gems are still in the Shop) opens the game modes.',
         'The first trial – the Pit: waves of foes for 3 minutes, no boss and no loot. Every wave cleared pays Essence, and entering pays at once the Essence up to your checkpoint. Three entries a day, Sweep, and two random hazards each time (Rain of Blades, Stalker, Falling Stars, Altar Beams, Chained Flesh, Stoneskin, Poison Mist).',
+        'The Constellation: a great tree of stars bought with Essence that strengthen every hero, in three branches – Fury (attack), Bastion (defence) and Plunder (rewards). Each branch unlocks five Specialties by the points put in it (the Wrath Star, the Bastion Pulse, more Essence and entries, and more). Resetting is free and gives all the Essence back.',
       ],
     },
     {

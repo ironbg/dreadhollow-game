@@ -157,10 +157,10 @@
 
   /* ---------------- The Pit (Trials) ---------------- */
   const pitS = () => { const s = S(); s.pit = s.pit || { best: 0, day: null, used: 0, active: null, pass: false }; const d = U.dayKey(); if (s.pit.day !== d) { s.pit.day = d; s.pit.used = 0; } return s.pit; };
-  meta.pitEntries = () => E.PIT.entries + (pitS().pass ? 1 : 0);
+  meta.pitEntries = () => E.PIT.entries + (pitS().pass ? 1 : 0) + (meta.consSpecials().plunder >= 3 ? 1 : 0); // the third Plunder Specialty: one more a day
   meta.pitLeft = () => Math.max(0, meta.pitEntries() - pitS().used);
   meta.pitCheckpoint = () => Math.floor(pitS().best / E.PIT.every) * E.PIT.every;
-  meta.pitPerWave = () => Math.round(E.PIT.perWave * (pitS().pass ? 1.5 : 1));
+  meta.pitPerWave = () => Math.round(E.PIT.perWave * (pitS().pass ? 1.5 : 1) * (1 + (meta.consStats().essencePct || 0) + (meta.consSpecials().plunder >= 1 ? 0.2 : 0)));
   meta.essence = () => S().essence || 0;
   const addEssence = (n) => { const s = S(); s.essence = (s.essence || 0) + n; s.stats.essence = (s.stats.essence || 0) + n; };
   /** Enter: one of today's entries, two hazards rolled, the checkpoint paid at once. { from, affixes, paid } */
@@ -194,6 +194,31 @@
     return { paid };
   };
 
+  /* ---------------- The Constellation (E.CONST) ---------------- */
+  const consS = () => { const s = S(); if (!s.cons || typeof s.cons !== 'object') s.cons = { r: {}, spent: 0 }; s.cons.r = s.cons.r || {}; return s.cons; };
+  meta.consRank = (id) => consS().r[id] || 0;
+  meta.consPoints = (b) => { const r = consS().r; let n = 0; for (const id in r) { const x = E.CONST.byId[id]; if (x && x.b === b) n += r[id]; } return n; };
+  /** A star can be raised when it is not full and a star next to it is (the heart always is). */
+  meta.consOpen = (id) => { const x = E.CONST.byId[id]; return !!x && !!x.b && meta.consRank(id) < x.max && x.adj.some((a) => a === 'heart' || meta.consRank(a) >= E.CONST.byId[a].max); };
+  meta.consNext = (b) => E.CONST.cost(meta.consPoints(b));
+  /** Raise a star by up to n ranks, as far as Essence reaches: the ranks bought. */
+  meta.consBuy = (id, n) => {
+    const x = E.CONST.byId[id], c = consS(); let got = 0;
+    n = Math.max(1, Math.min(10, n | 0));
+    while (got < n && meta.consOpen(id)) {
+      const cost = meta.consNext(x.b); if (meta.essence() < cost) break;
+      S().essence -= cost; c.spent = (c.spent || 0) + cost; c.r[id] = (c.r[id] || 0) + 1; got++;
+    }
+    if (got) changed();
+    return got || null;
+  };
+  /** Free reset: every star back to nothing, every Essence back. */
+  meta.consReset = () => { const c = consS(); const back = c.spent || 0; S().essence = meta.essence() + back; c.r = {}; c.spent = 0; changed(); return { back }; };
+  /** What the stars give, summed. */
+  meta.consStats = () => { const out = {}, r = consS().r; for (const id in r) { const x = E.CONST.byId[id]; if (x && x.st) out[x.st[0]] = (out[x.st[0]] || 0) + x.st[1] * Math.min(r[id], x.max); } return out; };
+  /** How many Specialties each branch has unlocked. */
+  meta.consSpecials = () => { const out = {}; for (const b in E.CONST.specials) { const p = meta.consPoints(b); out[b] = E.CONST.specials[b].filter((v) => p >= v).length; } return out; };
+
   /* ---------------- Player stats for a run ---------------- */
   meta.addStats = (acc, mods, mult) => {
     for (const k in mods) acc[k] = (acc[k] || 0) + mods[k] * (mult == null ? 1 : mult);
@@ -219,6 +244,7 @@
     }
     const mk = eqp.mark;
     if (mk && C.heroes[mk] && meta.markUnlocked(mk)) meta.addStats(st, C.heroes[mk].mark);
+    if (E.CONST) meta.addStats(st, meta.consStats()); // the Constellation, for every hero
     st.growth = (st.growth || 0) + meta.deedCount() * DH.deeds.XP_PER_DEED;
     st.deedXp = meta.deedCount() * DH.deeds.XP_PER_DEED; // Veil of Forgetting halves this part
     return st;
