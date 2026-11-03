@@ -109,5 +109,13 @@ const live = require('../game/live.json');
   assert.deepStrictEqual(dm.result, [true, true]);
   dm = await withProfile(p0, live, (DHp) => DHp.meta.ensureDaily().missions.some((m) => m.id === 'agony'));
   assert.strictEqual(dm.result, false);
+  // the account's reward track: once per milestone, only when reached
+  r = await withProfile(Object.assign({}, p0, { accountLevel: 22 }), live, (DH) => DH.actions.list.claimAcct.run({ lvl: 20 }));
+  assert.ok(Array.isArray(r.result) && r.result.some((x) => x.kind === 'gear'), 'level 20 gives a sure relic');
+  assert.strictEqual(r.profile.acctTrack[20], true);
+  r = await withProfile(r.profile, live, (DH) => DH.actions.list.claimAcct.run({ lvl: 20 }));
+  assert.strictEqual(r.result, null, 'a milestone is taken once');
+  r = await withProfile(r.profile, live, (DH) => DH.actions.list.claimAcct.run({ lvl: 25 }));
+  assert.strictEqual(r.result, null, 'not before its level');
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });

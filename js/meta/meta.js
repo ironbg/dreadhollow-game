@@ -146,6 +146,15 @@
     persist();
   };
 
+  /** The account's reward track (E.accountMilestone): reached and not yet taken. */
+  meta.acctClaimable = (lvl) => { const s = S(); lvl = lvl | 0; return !!E.accountMilestone(lvl) && lvl <= s.accountLevel && !(s.acctTrack || {})[lvl]; };
+  meta.acctClaimableList = () => { const out = []; for (let l = E.ACCT_TRACK_EVERY; l <= S().accountLevel; l += E.ACCT_TRACK_EVERY) if (meta.acctClaimable(l)) out.push(l); return out; };
+  meta.claimAcct = (lvl) => {
+    if (!meta.acctClaimable(lvl)) return null;
+    const s = S(); s.acctTrack = s.acctTrack || {}; s.acctTrack[lvl] = true;
+    return meta.grant(E.accountMilestone(lvl));
+  };
+
   /* ---------------- Player stats for a run ---------------- */
   meta.addStats = (acc, mods, mult) => {
     for (const k in mods) acc[k] = (acc[k] || 0) + mods[k] * (mult == null ? 1 : mult);
@@ -1143,7 +1152,7 @@
     E.shrineOrder.forEach((id) => { const l = meta.shrineLevel(id); if (l < E.shrine[id].max && meta.shrineUnlocked(id) && S().gold >= E.shrineCost(id, l)) shrineAff++; });
     const well = S().wellkeeper.length;
     if (meta.archiveAffordable()) shrineAff++;
-    return { missions, ach, pass, quests: missions + ach + pass, login: meta.signinPending() ? 1 : 0, shop, gear: gearUp, gearNew: newGear, gearDot: newGear + well, well, shrine: shrineAff, nights: meta.nbActive() ? meta.nbClaimable() : 0 };
+    return { missions, ach, pass, quests: missions + ach + pass, login: meta.signinPending() ? 1 : 0, shop, gear: gearUp, gearNew: newGear, gearDot: newGear + well, well, shrine: shrineAff, nights: meta.nbActive() ? meta.nbClaimable() : 0, acct: meta.acctClaimableList().length };
   };
 
   DH.meta = meta;

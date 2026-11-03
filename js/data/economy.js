@@ -385,6 +385,19 @@
 
   /* ---------- Account level ---------- */
   E.accountXpNext = (lvl) => 100 + (lvl - 1) * 60;
+  /** The account's reward track: a bigger reward every 5 levels, for ever. Each milestone pays gems, the metal of its
+   *  level, and in turn a Silver chest (x5), a Gold chest (x10) or a sure relic (x20: Epic, Legendary from 60);
+   *  every 25 levels torches too. Claimed by the player in the profile (late joiners claim the ones they passed). */
+  E.ACCT_TRACK_EVERY = 5;
+  E.accountMilestone = (lvl) => {
+    if (!(lvl > 0) || lvl % E.ACCT_TRACK_EVERY) return null;
+    const rw = { gems: 50 + lvl * 3, mats: { [E.materials[Math.min(3, Math.floor(lvl / 15))]]: 10 + Math.floor(lvl / 5) } };
+    if (lvl % 20 === 0) rw.gear = { rarity: lvl >= 60 ? 4 : 3 };
+    else if (lvl % 10 === 0) rw.chest = 'gold';
+    else rw.chest = 'silver';
+    if (lvl % 25 === 0) rw.energy = 30;
+    return rw;
+  };
   E.accountLevelReward = (lvl) => ({ gems: 20 + lvl * 2, gold: 300 * lvl, mats: { [E.materials[Math.min(3, Math.floor(lvl / 10))]]: lvl % 5 === 0 ? 15 : 5 } }); // metal: finer every ten levels, more every fifth
 
   /* ---------- Store catalogue (real money) ----------

@@ -46,6 +46,7 @@
       seen: {},
       inbox: [], // messages and gifts from the developer (the admin panel, gifts to everyone): shown once, then read
       giftsTaken: {}, // gifts to everyone (live: gifts) already given to this profile, by id
+      acctTrack: {}, // the account's reward track: milestones claimed, by level
     };
   }
 

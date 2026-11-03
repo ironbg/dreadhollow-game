@@ -1694,3 +1694,15 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .ss-tip { text-align: center; }
 .charsheet .ssheet { margin-top: 4px; }
 .modal.altarinfo p { margin: 4px 0 10px; line-height: 1.45; }
+
+/* The account's reward track (profile → Path) */
+.acct-track { display: flex; flex-direction: column; gap: 6px; }
+.acct-next { text-align: center; font-weight: 800; color: var(--gold); margin: 2px 0 4px; }
+.acct-row { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 8px; padding: 6px 8px; background: rgba(0,0,0,.35); border: 1px solid var(--line); }
+.acct-row.can { border-color: var(--gold); box-shadow: inset 0 0 12px rgba(240,200,90,.18); }
+.acct-row.ahead { opacity: .72; }
+.acct-lv { font-weight: 800; color: var(--gold); font-size: 13px; }
+.acct-rw { display: flex; flex-wrap: wrap; gap: 4px 8px; }
+.acct-it { display: flex; align-items: center; gap: 3px; font-size: 11px; }
+.acct-it img { width: 20px; height: 20px; }
+.topbar .avatar .acctb { top: -6px; right: -6px; }

@@ -8,7 +8,7 @@
   /* ---------------- Profile / stats ---------------- */
   /** The profile: the avatar, the name and the player's id above three tabs (the records, the avatars, the account). */
   ui.openProfile = (tab) => {
-    tab = tab || 'avatar';
+    tab = tab || (M.acctClaimableList().length ? 'track' : 'avatar'); // a reward waiting on the track: open there
     let pick = M.avatar();
     const m = ui.modal({ title: t('profile.title'), cls: 'profile', body: () => h('div'), onClose: () => DH.events.off('cloud', onCloud) });
     const onCloud = () => { if (!m.closed && tab === 'account') draw(); };
@@ -22,6 +22,28 @@
         ['profile.chests', U.fmt(st.chestsOpened)],
       ];
       return h('div.statgrid', rows.map(([k, v]) => h('div', h('span', t(k)), h('b', v))));
+    };
+    /** The account's reward track: the milestones passed and not taken, then the next ones ahead. */
+    const track = () => {
+      const s = S(), lv = s.accountLevel, every = E.ACCT_TRACK_EVERY, list = [];
+      const open = M.acctClaimableList();
+      const first = open.length ? open[0] : (Math.floor(lv / every) + 1) * every;
+      for (let l = Math.min(first, (Math.floor(lv / every) + 1) * every), n = 0; n < 8; l += every) {
+        if ((s.acctTrack || {})[l]) continue;
+        list.push(l); n++;
+      }
+      const row = (l) => {
+        const can = M.acctClaimable(l), ahead = l > lv;
+        return h('div.acct-row' + (can ? '.can' : ahead ? '.ahead' : ''),
+          h('div.acct-lv', t('common.lv') + ' ' + l),
+          h('div.acct-rw', M.rewardPreview(E.accountMilestone(l)).map((r) => h('div.acct-it' + (r.rarity != null ? '.rar' + r.rarity : ''), A.img(r.icon), h('b', r.text)))),
+          can ? h('button.btn.small.gold', { onclick: async () => { click(); const got = await ui.act('claimAcct', { lvl: l }); if (got) { DH.audio.play('buy'); ui.rewardPopup(t('account.trackGot', { n: l }), got); ui.refresh(); draw(); } } }, t('account.claim'))
+            : h('div.small.muted', t('account.needLv', { n: l })));
+      };
+      return h('div.acct-track',
+        h('div.small.muted.center', t('account.trackDesc', { n: every })),
+        h('div.acct-next', t('account.progress', { n: lv, x: U.fmt(Math.floor(s.accountXp)), m: U.fmt(E.accountXpNext(lv)) })),
+        list.map(row));
     };
     const avName = (a) => (a.hero ? t('hero.' + a.hero + '.name') : t(a.name));
     const avNeed = (a) => (a.hero ? t('avatar.needHero', { name: t('hero.' + a.hero + '.name') }) : a.npc ? t('resc.lost.' + a.npc) : ui.deedText(DH.deeds.byId[a.deed]));
@@ -64,8 +86,9 @@
             h('div.small.muted', t('profile.id')),
             h('div.prof-id', h('span', id), h('button.btn.tiny.ghost', { onclick: () => { click(); copy(); } }, t('settings.copy'))),
             h('div.small.' + (u ? 'good' : 'muted'), u ? t('profile.linked', { who: u.email || u.name || '—' }) : t('profile.guest')))),
-        h('div.tabs.prof-tabs', ['stats', 'avatar', 'account'].map((k) => h('button' + (tab === k ? '.on' : ''), { onclick: () => { click(); tab = k; draw(); } }, t('profile.tab.' + k)))),
-        h('div.prof-body', tab === 'stats' ? stats() : tab === 'avatar' ? avatars() : account())));
+        h('div.tabs.prof-tabs', ['track', 'stats', 'avatar', 'account'].map((k) => h('button' + (tab === k ? '.on' : ''), { onclick: () => { click(); tab = k; draw(); } }, t('profile.tab.' + k),
+          k === 'track' && M.acctClaimableList().length ? h('span.badge', M.acctClaimableList().length) : null))),
+        h('div.prof-body', tab === 'track' ? track() : tab === 'stats' ? stats() : tab === 'avatar' ? avatars() : account())));
     };
     draw();
   };
@@ -832,12 +855,13 @@
       return [{ icon: 'i_gem', text: '+' + rws.reduce((n, rw) => n + rw.gems, 0) }, { icon: 'i_gold', text: '+' + U.fmt(rws.reduce((n, rw) => n + rw.gold, 0)) }]
         .concat(E.materials.filter((k) => mats[k]).map((k) => ({ icon: 'mat_' + k, text: '+' + mats[k] + ' ' + t('mat.' + k) })));
     };
+    const mile = (ls) => (ls.some((l) => E.accountMilestone(l.level)) ? [{ icon: 'u_star', text: t('account.trackReady') }] : []); // a milestone reached: its reward waits in the profile
     if (q.length > 3) { // a long climb: one window for all of it
-      ui.rewardPopup(t('account.levelsUp', { a: q[0].level - 1, b: q[q.length - 1].level }), pay(q.map((l) => l.reward)));
+      ui.rewardPopup(t('account.levelsUp', { a: q[0].level - 1, b: q[q.length - 1].level }), pay(q.map((l) => l.reward)).concat(mile(q)));
       return;
     }
     // one level at a time, lowest first: the next window opens when this one is collected
-    const next = () => { const l = q.shift(); if (l) ui.rewardPopup(t('account.levelUp', { n: l.level }), pay([l.reward]), null, () => setTimeout(next, 180)); };
+    const next = () => { const l = q.shift(); if (l) ui.rewardPopup(t('account.levelUp', { n: l.level }), pay([l.reward]).concat(mile([l])), null, () => setTimeout(next, 180)); };
     next();
   };
 })(window.DH);
