@@ -70,33 +70,80 @@
       prev = hub; r0 = r;
     }
   }
+  // paths out to the sides (added later, on their own seed, so the stars above keep their names and gifts): from each
+  // side star a path of two lesser stars to another bright one
+  let seed2 = 5531;
+  const rnd2 = () => { seed2 = (seed2 * 16807) % 2147483647; return (seed2 - 1) / 2147483646; };
+  const pick2 = (a) => a[Math.floor(rnd2() * a.length)];
+  for (const b in BR) {
+    const S = STATS[b];
+    for (let t = 1; t < BR[b].tiers; t++) for (let s2 = 0; s2 < 2; s2++) {
+      const from = b + '_n' + t + '_' + s2; if (!nodes.some((x) => x.id === from)) continue;
+      let last = from;
+      for (let k = 1; k <= 3; k++) {
+        const id = add({ id: b + '_x' + t + '_' + s2 + '_' + k, b, kind: k === 3 ? 'notable' : 'minor', max: k === 2 ? 5 : 3, st: pick2(k === 3 ? S.notable : S.minor), x: 0, y: 0 });
+        link(last, id); last = id;
+      }
+    }
+  }
   const byId = {}; nodes.forEach((x) => { byId[x.id] = x; x.adj = []; });
   edges.forEach(([a, b]) => { byId[a].adj.push(b); byId[b].adj.push(a); });
-  // Where the stars sit, laid out again by rule so every gap is about the same (the shape above only gives which star
-  // touches which): each branch a straight spine of hubs; the chains between two hubs run beside it, one step of LINE
-  // between stars, the outer ones bowing out; side stars stand out level with their hub. Only the drawing uses this.
+  // Where the stars sit (only the drawing uses this): each branch a spine of hubs that winds as it goes (a slow wave
+  // across its way); between two hubs its chains run beside the spine, bowing out; from a hub the side stars go out and a
+  // little forward, and their paths bend on outward and forward again, so each branch gathers into a broad, ragged crown.
   const RAD = { heart: 34, hub: 22, notable: 18, minor: 14 }, LINE = 66;
   nodes.forEach((x) => { x.r = RAD[x.kind]; });
-  const put = (x, ang, r, lat) => { const a = ang + (r > 0 ? lat / r : 0); x.x = Math.round(Math.cos(a) * r); x.y = Math.round(Math.sin(a) * r); };
+  const at = (x, X, Y) => { if (x) { x.x = Math.round(X); x.y = Math.round(Y); } };
+  const norm = (x, y) => { const d = Math.hypot(x, y) || 1; return [x / d, y / d]; };
+  const PH = { fury: 0.4, bastion: 2.1, plunder: 4.0 };
   for (const b in BR) {
-    const D = BR[b], step = (D.len + 1) * LINE * 0.9, ring = (t) => 26 + step * (t + 1);
+    const D = BR[b], step = (D.len + 1) * LINE * 0.9;
+    let px = 0, py = 0;
     for (let t = 0; t < D.tiers; t++) {
-      put(byId[b + '_h' + t], D.ang, ring(t), 0);
+      const th = D.ang + 0.34 * Math.sin(t * 1.15 + PH[b]), len = step + (t ? 0 : 26);
+      const qx = px + Math.cos(th) * len, qy = py + Math.sin(th) * len;
+      at(byId[b + '_h' + t], qx, qy);
+      const [ux, uy] = norm(qx - px, qy - py), nx = -uy, ny = ux;
       const chains = t === 0 ? 1 : D.chains, spread = D.chains === 3 ? 1.3 * LINE : 0.8 * LINE;
       for (let c = 0; c < chains; c++) {
         const off = chains === 1 ? 0 : (c - (chains - 1) / 2) * spread * (chains === 3 ? 1 : 2);
         for (let k = 1; k <= D.len; k++) {
-          const f = k / (D.len + 1), r0 = t ? ring(t - 1) : 26;
-          put(byId[b + '_' + t + '_' + c + '_' + k], D.ang, r0 + (ring(t) - r0) * f, off * Math.sin(f * Math.PI));
+          const f = k / (D.len + 1), sx = t ? px : px + ux * 26, sy = t ? py : py + uy * 26;
+          at(byId[b + '_' + t + '_' + c + '_' + k], sx + (qx - sx) * f + nx * off * Math.sin(f * Math.PI), sy + (qy - sy) * f + ny * off * Math.sin(f * Math.PI));
         }
       }
       for (let s2 = 0; s2 < 2; s2++) {
-        const a1 = byId[b + '_s' + t + '_' + s2], a2 = byId[b + '_n' + t + '_' + s2], dir = s2 === 0 ? 1 : -1;
-        if (!a1) continue;
-        const out = (D.chains === 3 ? 1.3 : 0.8) * LINE + LINE * 0.42;
-        put(a1, D.ang, ring(t), dir * out); put(a2, D.ang, ring(t) + LINE * 0.35, dir * (out + LINE * 1.05));
+        const dir = s2 === 0 ? 1 : -1, a1 = byId[b + '_s' + t + '_' + s2]; if (!a1) continue;
+        const out = spread + LINE * 0.45;
+        let [dx, dy] = norm(nx * dir + ux * 0.3, ny * dir + uy * 0.3);
+        let x = qx + dx * out, y = qy + dy * out; at(a1, x, y);
+        [dx, dy] = norm(dx + ux * 0.25, dy + uy * 0.25); x += dx * LINE * 1.05; y += dy * LINE * 1.05; at(byId[b + '_n' + t + '_' + s2], x, y);
+        for (let k = 1; k <= 3; k++) { // its path bends on, outward and forward
+          [dx, dy] = norm(dx + ux * 0.3 - nx * dir * 0.05, dy + uy * 0.3 - ny * dir * 0.05); x += dx * LINE * (k === 3 ? 1.1 : 0.95); y += dy * LINE * (k === 3 ? 1.1 : 0.95);
+          at(byId[b + '_x' + t + '_' + s2 + '_' + k], x, y);
+        }
+      }
+      px = qx; py = qy;
+    }
+  }
+  // then a few rounds of easing: stars closer than their sizes allow push apart, lines pull gently towards LINE (the
+  // heart stays put), so the winding shape keeps but nothing overlaps
+  {
+    const N = nodes.length, idx = {}; nodes.forEach((x, i) => { idx[x.id] = i; });
+    const ed = edges.map(([a2, b2]) => [idx[a2], idx[b2]]);
+    for (let it = 0; it < 160; it++) {
+      for (let i = 1; i < N; i++) for (let j = i + 1; j < N; j++) {
+        const A2 = nodes[i], B2 = nodes[j], dx = B2.x - A2.x, dy = B2.y - A2.y, min = A2.r + B2.r + 24, d2 = dx * dx + dy * dy;
+        if (d2 >= min * min) continue;
+        const d = Math.sqrt(d2) || 0.01, f = (min - d) / d * 0.5;
+        A2.x -= dx * f; A2.y -= dy * f; B2.x += dx * f; B2.y += dy * f;
+      }
+      for (const [i, j] of ed) {
+        const A2 = nodes[i], B2 = nodes[j], dx = B2.x - A2.x, dy = B2.y - A2.y, d = Math.hypot(dx, dy) || 0.01, want = Math.max(LINE, A2.r + B2.r + 24), f = (d - want) / d * 0.08;
+        if (i) { A2.x += dx * f; A2.y += dy * f; } if (j) { B2.x -= dx * f; B2.y -= dy * f; }
       }
     }
+    nodes.forEach((x) => { x.x = Math.round(x.x); x.y = Math.round(x.y); });
   }
   const total = {}; nodes.forEach((x) => { if (x.b) total[x.b] = (total[x.b] || 0) + x.max; });
 

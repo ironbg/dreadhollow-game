@@ -252,15 +252,43 @@
   /** A star can be raised when it is not full and a star next to it is (the heart always is). */
   meta.consOpen = (id) => { const x = E.CONST.byId[id]; return !!x && !!x.b && meta.consRank(id) < x.max && x.adj.some((a) => a === 'heart' || meta.consRank(a) >= E.CONST.byId[a].max); };
   meta.consNext = (b) => E.CONST.cost(meta.consPoints(b));
-  /** Raise a star by up to n ranks, as far as Essence reaches: the ranks bought. */
-  meta.consBuy = (id, n) => {
+  const consRaise = (id, n) => {
     const x = E.CONST.byId[id], c = consS(); let got = 0;
-    n = Math.max(1, Math.min(10, n | 0));
     while (got < n && meta.consOpen(id)) {
       const cost = meta.consNext(x.b); if (meta.essence() < cost) break;
       S().essence -= cost; c.spent = (c.spent || 0) + cost; c.r[id] = (c.r[id] || 0) + 1; got++;
     }
-    if (got) changed();
+    return got;
+  };
+  const consEmpty = () => { const c = consS(); const back = c.spent || 0; S().essence = meta.essence() + back; c.r = {}; c.spent = 0; return back; };
+  /* Loadouts: a few saved trees (c.ps, the one in use c.pi). The one in use follows every change; choosing another empties
+   * the tree (all Essence back, as a reset) and raises its stars again, as far as the Essence reaches. */
+  const consLoads = () => { const c = consS(); if (!Array.isArray(c.ps) || !c.ps.length) { c.ps = [{ n: null, r: Object.assign({}, c.r) }]; c.pi = 0; } if (!(c.pi >= 0 && c.pi < c.ps.length)) c.pi = 0; return c; };
+  const consKeep = () => { const c = consLoads(); c.ps[c.pi].r = Object.assign({}, c.r); };
+  const consApply = (i) => {
+    const c = consLoads(), want = Object.assign({}, c.ps[i].r); c.pi = i; consEmpty();
+    let moved = true;
+    while (moved) { moved = false; for (const id in want) { const need = want[id] - meta.consRank(id); if (need > 0 && E.CONST.byId[id] && meta.consOpen(id) && consRaise(id, need) > 0) moved = true; } }
+    changed();
+    let full = true; for (const id in want) if (meta.consRank(id) < want[id]) full = false;
+    return { i, full };
+  };
+  meta.consLoadouts = () => { const c = consLoads(); return { list: c.ps.map((p) => p.n), cur: c.pi }; };
+  meta.CONS_LOADOUTS = 5;
+  meta.consLoadNew = () => { const c = consLoads(); if (c.ps.length >= meta.CONS_LOADOUTS) return null; c.ps.push({ n: null, r: {} }); return consApply(c.ps.length - 1); };
+  meta.consLoadPick = (i) => { const c = consLoads(); if (!(i >= 0 && i < c.ps.length)) return null; return consApply(i); };
+  meta.consLoadAgain = () => consApply(consLoads().pi);
+  meta.consLoadName = (i, name) => { const c = consLoads(); if (!(i >= 0 && i < c.ps.length)) return null; c.ps[i].n = String(name || '').replace(/[<>]/g, '').trim().slice(0, 20) || null; changed(); return true; };
+  meta.consLoadDelete = (i) => {
+    const c = consLoads(); if (c.ps.length <= 1 || !(i >= 0 && i < c.ps.length)) return null;
+    const cur = c.pi === i; c.ps.splice(i, 1);
+    if (cur) return consApply(0);
+    if (c.pi > i) c.pi--; changed(); return { i: c.pi, full: true };
+  };
+  /** Raise a star by up to n ranks, as far as Essence reaches: the ranks bought. */
+  meta.consBuy = (id, n) => {
+    const got = consRaise(id, Math.max(1, Math.min(10, n | 0)));
+    if (got) { consKeep(); changed(); }
     return got || null;
   };
   /** What taking one rank back returns: the price of the branch's last point. */
@@ -281,11 +309,11 @@
     if (!meta.consCanLower(id)) return null;
     const x = E.CONST.byId[id], c = consS(), back = meta.consRefund(x.b);
     c.r[id]--; if (!c.r[id]) delete c.r[id];
-    c.spent = Math.max(0, (c.spent || 0) - back); S().essence = meta.essence() + back; changed();
+    c.spent = Math.max(0, (c.spent || 0) - back); S().essence = meta.essence() + back; consKeep(); changed();
     return { back };
   };
   /** Free reset: every star back to nothing, every Essence back. */
-  meta.consReset = () => { const c = consS(); const back = c.spent || 0; S().essence = meta.essence() + back; c.r = {}; c.spent = 0; changed(); return { back }; };
+  meta.consReset = () => { const back = consEmpty(); consKeep(); changed(); return { back }; };
   /** What the stars give, summed. */
   meta.consStats = () => { const out = {}, r = consS().r; for (const id in r) { const x = E.CONST.byId[id]; if (x && x.st) out[x.st[0]] = (out[x.st[0]] || 0) + x.st[1] * Math.min(r[id], x.max); } return out; };
   /** How many Specialties each branch has unlocked. */

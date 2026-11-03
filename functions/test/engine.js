@@ -140,6 +140,16 @@ const live = require('../game/live.json');
   assert.ok(r.result.back > 0 && r.profile.essence === ess0 + r.result.back && r.profile.cons.spent === spent0 - r.result.back && !r.profile.cons.r.fury_0_0_2, 'a rank back returns its Essence');
   r = await withProfile(r.profile, live, (DH) => DH.actions.list.consReset.run({}));
   assert.strictEqual(r.profile.essence, 1000); assert.deepStrictEqual(r.profile.cons.r, {});
+  // Loadouts: the one in use follows each change; a new one starts empty (all Essence back); picking one raises its stars again
+  r = await withProfile(Object.assign({}, p0, { essence: 5000 }), live, (DH) => { const L = DH.actions.list;
+    L.consBuy.run({ id: 'fury_0_0_1', n: 3 }); const e1 = DH.meta.essence();
+    const nw = L.consLoadNew.run({}); const e2 = DH.meta.essence(); L.consBuy.run({ id: 'bastion_0_0_1', n: 2 });
+    const back = L.consLoadPick.run({ i: 0 }); return [e1, nw.i, e2, back.full, DH.meta.consRank('fury_0_0_1'), DH.meta.consRank('bastion_0_0_1'), DH.meta.consLoadouts().cur, DH.meta.essence()]; });
+  assert.deepStrictEqual(r.result, [4400, 1, 5000, true, 3, 0, 0, 4400]);
+  r = await withProfile(r.profile, live, (DH) => { const L = DH.actions.list; return [L.consLoadName.run({ i: 1, name: 'Defence' }), L.consLoadPick.run({ i: 1 }).full, DH.meta.consRank('bastion_0_0_1'), L.consLoadDelete.run({ i: 1 }).i, DH.meta.consRank('fury_0_0_1'), DH.meta.consLoadouts().list.length]; });
+  assert.deepStrictEqual(r.result, [true, true, 2, 0, 3, 1]); assert.strictEqual(r.profile.cons.ps.length, 1);
+  r = await withProfile(Object.assign({}, r.profile, { essence: 0 }), live, (DH) => { const L = DH.actions.list; L.consReset.run({}); const e = DH.meta.essence(); DH.save.data.essence = 150; return [e, L.consLoadAgain.run({}).full]; });
+  assert.strictEqual(r.result[0], 600); assert.strictEqual(r.result[1], true, 'the reset emptied the loadout too');
   // 100 more Essence with every point, each branch counting from its own start; stars bought at the old prices come back as Essence
   r = await withProfile(Object.assign({}, p0, { essence: 5000 }), live, (DH) => { const L = DH.actions.list; L.consBuy.run({ id: 'fury_0_0_1', n: 3 }); L.consBuy.run({ id: 'bastion_0_0_1', n: 1 }); return [DH.meta.consNext('fury'), DH.meta.consNext('bastion'), DH.meta.consSpentIn('fury')]; });
   assert.deepStrictEqual(r.result, [400, 200, 600]); assert.strictEqual(r.profile.essence, 5000 - 600 - 100);

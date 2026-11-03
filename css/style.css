@@ -1955,3 +1955,13 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .pit-shopbtn { width: 62px; height: 62px; padding: 4px 2px 3px; justify-content: center; gap: 1px; box-sizing: border-box; }
 .pit-shopbtn .ic { width: 32px; height: 32px; }
 .pit-shopbtn span { font-size: 11px; line-height: 1; }
+
+/* the Constellation: its loadouts row and the full-width buttons below */
+.cons-load { display: flex; align-items: center; gap: 5px; margin: 6px 0; }
+.cons-ll { font: 800 11px var(--title, serif); letter-spacing: .06em; text-transform: uppercase; color: var(--gold); flex: none; }
+.cons-sel { flex: 1; min-width: 0; height: 32px; padding: 0 6px; border: 2px solid #050308; background: var(--tex-dark, none) 0 0 / 64px 64px, #120c16; color: #f4e6d0;
+  box-shadow: inset 0 0 0 1px var(--ring); font-weight: 800; font-size: 13px; }
+.cl-b.btn { width: 32px; min-width: 32px; min-height: 32px; padding: 0; font-size: 16px; line-height: 1; flex: none; }
+.cons-foot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.cons-foot .btn { width: 100%; min-width: 0; }
+.consren .field { margin-bottom: 10px; }
