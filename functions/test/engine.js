@@ -198,6 +198,33 @@ const live = require('../game/live.json');
   // an Essence pack bought with real money
   r = await withProfile(r.profile, live, (DH) => { DH.meta.fulfillProduct('ess_3', true); return DH.meta.essence(); });
   assert.strictEqual(r.result, 150 + 27000);
+  // the Constellation, shaken: a thousand random raises and lowerings (some with all that hangs on them), and after each
+  // the tree holds together, every point is paid for at its price and no Essence is made or lost
+  r = await withProfile(Object.assign({}, p0, { essence: 3e7 }), live, (DH) => {
+    const M = DH.meta, L = DH.actions.list, CS = DH.economy.CONST, B = CS.byId, start = 3e7; let sd = 99; const rnd = () => { sd = (sd * 16807) % 2147483647; return (sd - 1) / 2147483646; };
+    const bad = [];
+    const check = (k) => {
+      const c = DH.save.data.cons, r = c.r, full = (x) => x === 'heart' || (r[x] || 0) >= B[x].max, seen = new Set(['heart']), q = ['heart'];
+      while (q.length) { const x = q.pop(); for (const a of B[x].adj) if (!seen.has(a) && full(a)) { seen.add(a); q.push(a); } }
+      for (const x in r) { if (!(r[x] > 0) || r[x] > B[x].max) bad.push(k + ' rank ' + x); if (!B[x].adj.some((a) => seen.has(a))) bad.push(k + ' cut off ' + x); }
+      let paid = 0; for (const b in CS.branches) paid += CS.spentIn(M.consPoints(b));
+      if (paid !== c.spent) bad.push(k + ' spent ' + c.spent + ' vs ' + paid);
+      if (M.essence() + c.spent !== start) bad.push(k + ' essence ' + (M.essence() + c.spent));
+    };
+    let ups = 0, downs = 0, cascades = 0, refused = 0;
+    for (let k = 0; k < 1000; k++) {
+      if (rnd() < 0.6) { const open = CS.nodes.filter((x) => x.b && M.consOpen(x.id)); if (open.length) { L.consBuy.run({ id: open[rnd() * open.length | 0].id, n: 1 + (rnd() * 5 | 0) }); ups++; } }
+      else {
+        const has = Object.keys(DH.save.data.cons.r); if (!has.length) continue;
+        const id = has[rnd() * has.length | 0], n = M.consLowerCost(id), all = rnd() < 0.7;
+        const res = L.consLower.run({ id, all });
+        if (n > 1 && !all) { if (res !== null) bad.push(k + ' lowered without asking'); refused++; } else { downs++; if (n > 1) cascades++; if (!res || res.n !== n) bad.push(k + ' lowered ' + (res && res.n) + ' of ' + n); }
+      }
+      check(k); if (bad.length) break;
+    }
+    return { bad: bad.slice(0, 5), ups, downs, cascades, refused };
+  });
+  assert.deepStrictEqual(r.result.bad, [], 'the Constellation holds together'); console.log('constellation shaken:', JSON.stringify(r.result)); assert.ok(r.result.cascades > 5 && r.result.refused > 0, JSON.stringify(r.result));
   // the pass: a level for gems (500 for the first, 20 more each), the premium pass gives a Pit entry a day, Essence on the tracks
   r = await withProfile(Object.assign({}, p0, { gems: 2000 }), live, (DH) => { const L = DH.actions.list, M = DH.meta; M.ensureSeason();
     const e0 = M.pitEntries(), a = L.buyPassTier.run({}), t1 = M.passTier(), g1 = DH.save.data.gems; L.buyPassTier.run({}); const g2 = DH.save.data.gems;

@@ -47,7 +47,7 @@
     adPit: { run: () => M().adPit(), ad: () => (!M().pitFreeReady() && M().pitAdsLeft() > 0 ? 'pit_shop' : null) },
     pitPerkReset: { run: () => M().pitPerkReset() },
     consBuy: { run: (a) => M().consBuy(str(a.id, 40), int(a.n)) },
-    consLower: { run: (a) => M().consLower(str(a.id, 40)) },
+    consLower: { run: (a) => M().consLower(str(a.id, 40), a.all === true) },
     consReset: { run: () => M().consReset() },
     consLoadNew: { run: () => M().consLoadNew() },
     consLoadPick: { run: (a) => M().consLoadPick(int(a.i)) },

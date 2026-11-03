@@ -296,21 +296,40 @@
   /** The Essence a branch holds. */
   meta.consSpentIn = (b) => E.CONST.spentIn(meta.consPoints(b));
   /** A rank can be taken back unless a star further out still needs this one full to stay reachable from the heart. */
+  /** The tree after one rank of a star is taken back: every star no longer joined to the heart (through full stars) is
+   *  emptied too, round after round, as a star emptied may have held others up. A new map of ranks. */
+  const consAfterLower = (id) => {
+    const B = E.CONST.byId, r = Object.assign({}, consS().r);
+    r[id] = (r[id] || 0) - 1; if (r[id] <= 0) delete r[id];
+    for (let cut = true; cut;) {
+      cut = false;
+      const full = (k) => k === 'heart' || (r[k] || 0) >= B[k].max, seen = new Set(['heart']), q = ['heart'];
+      while (q.length) { const k = q.pop(); for (const a of B[k].adj) if (!seen.has(a) && full(a)) { seen.add(a); q.push(a); } }
+      for (const k in r) if (!B[k] || !B[k].adj.some((a) => seen.has(a))) { delete r[k]; cut = true; }
+    }
+    return r;
+  };
+  const consPointsOf = (r, b) => { let n = 0; for (const k in r) if (E.CONST.byId[k] && E.CONST.byId[k].b === b) n += r[k]; return n; };
+  /** A rank can be taken back on its own unless a star further out still needs this one full to stay reachable. */
   meta.consCanLower = (id) => {
     const x = E.CONST.byId[id], r = consS().r; if (!x || !x.b || !(r[id] > 0)) return false;
-    const rank = (k) => (k === id ? r[k] - 1 : r[k] || 0), full = (k) => k === 'heart' || rank(k) >= E.CONST.byId[k].max;
-    const seen = new Set(['heart']), q = ['heart']; // the full stars still joined to the heart
-    while (q.length) { const k = q.pop(); for (const a of E.CONST.byId[k].adj) if (!seen.has(a) && full(a)) { seen.add(a); q.push(a); } }
-    for (const k in r) if (rank(k) > 0 && E.CONST.byId[k] && !E.CONST.byId[k].adj.some((a) => seen.has(a))) return false;
-    return true;
+    return meta.consLowerCost(id) === 1;
   };
-  /** Take one rank back: its Essence returns. */
-  meta.consLower = (id) => {
-    if (!meta.consCanLower(id)) return null;
-    const x = E.CONST.byId[id], c = consS(), back = meta.consRefund(x.b);
-    c.r[id]--; if (!c.r[id]) delete c.r[id];
-    c.spent = Math.max(0, (c.spent || 0) - back); S().essence = meta.essence() + back; consKeep(); changed();
-    return { back };
+  /** How many ranks taking one back from this star would take in all (it, and every star that hangs on it). */
+  meta.consLowerCost = (id) => {
+    const r = consS().r; if (!(r[id] > 0)) return 0;
+    const after = consAfterLower(id); let n = 0; for (const k in r) n += r[k] - (after[k] || 0); return n;
+  };
+  /** Take one rank back (and with `all`, every rank that hangs on it): the Essence of each point comes back, each
+   *  branch's dearest points first, as they were the last bought. */
+  meta.consLower = (id, all) => {
+    const x = E.CONST.byId[id], c = consS(); if (!x || !x.b || !(c.r[id] > 0)) return null;
+    const n = meta.consLowerCost(id); if (n > 1 && !all) return null;
+    const after = consAfterLower(id); let back = 0;
+    for (const b in E.CONST.branches) back += E.CONST.spentIn(consPointsOf(c.r, b)) - E.CONST.spentIn(consPointsOf(after, b));
+    back = Math.min(back, c.spent || 0);
+    c.r = after; c.spent = Math.max(0, (c.spent || 0) - back); S().essence = meta.essence() + back; consKeep(); changed();
+    return { back, n };
   };
   /** Free reset: every star back to nothing, every Essence back. */
   meta.consReset = () => { const back = consEmpty(); consKeep(); changed(); return { back }; };

@@ -234,8 +234,9 @@
       const buy = async (cnt) => { const got = await ui.act('consBuy', { id: n.id, n: cnt }); if (got) { DH.audio.play('buy'); renderPop(); } else if (got === null) ui.toast(open ? t('common.notEnough') : t('cons.locked'), 'bad'); };
       const down = async () => {
         if (!r) return;
-        if (!M.consCanLower(n.id)) { ui.toast(t('cons.holds'), 'bad'); return; }
-        const got = await ui.act('consLower', { id: n.id }); if (got) { DH.audio.play('coin'); renderPop(); }
+        const cnt = M.consLowerCost(n.id), all = cnt > 1; // stars further out hang on this one: they go too, once asked
+        if (all && !(await ui.confirm({ title: t('cons.lowerTitle'), body: t('cons.lowerBody', { n: cnt }), ok: t('common.yes'), okCls: 'green', cancel: t('common.no') }))) return;
+        const got = await ui.act('consLower', { id: n.id, all }); if (got) { DH.audio.play('coin'); if (got.n > 1) ui.toast(t('cons.lowered', { n: got.n, e: U.fmt(got.back) }), 'good'); renderPop(); }
       };
       pop.className = 'cons-pop ' + n.b + (full ? ' full' : '');
       pop.replaceChildren(
