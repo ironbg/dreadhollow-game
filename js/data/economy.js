@@ -141,10 +141,10 @@
   E.tributesCost = (n) => { let c = 0; for (let k = 0; k < n; k++) c += E.tributeCost(k); return c; };
   E.gearOrder = Object.keys(E.gear);
   E.STARTER_GEAR = ['wrath_amulet', 'striders', 'oak_band', 'warden_helm', 'gore_tunic', 'tempo_treads'];
-  /** Attack speed on relics counts a quarter: it multiplies every other stat, and with rarity and levels (x38 at a
-   *  Mythic 50) it made abilities fire four times as often. */
-  E.GEAR_AS = 0.25;
-  const asK = (k) => (k === 'as' ? E.GEAR_AS : 1);
+  /** On relics, the stats that multiply all the others count a quarter: with rarity and levels (x38 at a Mythic 50)
+   *  attack speed made abilities fire four times as often, and Multistrike, crit chance and crit damage piled on top. */
+  E.GEAR_DAMPEN = { as: 0.25, critPct: 0.25, addCrit: 0.25, critBonus: 0.25, ms: 0.25, msProj: 0.25 };
+  const asK = (k) => E.GEAR_DAMPEN[k] || 1;
   E.gearStat = (type, rarity, level) => {
     const out = {}; const g = E.gear[type];
     for (const k in g.stats) out[k] = g.stats[k] * asK(k) * E.rarityMult[rarity] * (1 + 0.1 * (level - 1));

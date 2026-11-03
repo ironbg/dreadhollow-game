@@ -6,10 +6,10 @@
     {
       v: '1.61.57',
       bg: [
-        'Скоростта на атака от реликвите е четири пъти по-малка: с рядкостта и нивата тя стигаше до +96% на един предмет и уменията стреляха почти четири пъти по-често. Чертите, уменията и благословиите дават колкото досега.',
+        'Скоростта на атака, Многоударът, шансът за крит и критичните щети от реликвите са четири пъти по-малки: с рядкостта и нивата един предмет стигаше до +96% скорост на атака, +268% Многоудар или +339% критични щети. Чертите, уменията и благословиите дават колкото досега.',
       ],
       en: [
-        'Attack speed from relics is a quarter of what it was: with rarity and levels it reached +96% on one piece and abilities fired almost four times as often. Traits, abilities and blessings give as much as before.',
+        'Attack speed, Multistrike, crit chance and crit damage from relics are a quarter of what they were: with rarity and levels one piece reached +96% attack speed, +268% Multistrike or +339% crit damage. Traits, abilities and blessings give as much as before.',
       ],
     },
     {
