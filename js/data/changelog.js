@@ -10,12 +10,16 @@
         'Всяка екипирана реликва в Оръжейната показва червена значка с броя нива, с които можеш да я вдигнеш сега.',
         'Нов Път на нивата в профила: на всеки 5 нива на профила те чака голяма награда – сребърен или златен сандък, сигурна епична (от ниво 60 легендарна) реликва, скъпоценни камъни, метали и на всеки 25 нива факли. Наградите за вече минатите нива също могат да се вземат.',
         'Профилът е с еднаква височина във всеки раздел; аватарите са по пет на ред.',
+        'Нов бутон „Изпитания“ в главното меню (на мястото на „Безплатно“ – безплатните камъни остават в Магазина) с прозорец за игрови режими.',
+        'Първото изпитание – Ямата: вълни врагове за 3 минути, без бос и без плячка. Всяка изчистена вълна дава Есенция, а при влизане веднага получаваш Есенцията до точката си за продължаване. Три влизания на ден, бързо минаване и две случайни опасности всеки път (Дъжд от остриета, Преследвач, Падащи звезди, Лъчи на олтара, Окована плът, Каменна кожа, Отровна мъгла).',
       ],
       en: [
         'Every stat on relics (and their level bonuses) is a quarter of what it was: with rarity and levels one piece reached +96% attack speed, +268% Multistrike, +339% crit damage or +230% fire damage. Relic specials, traits, abilities and blessings give as much as before.',
         'Every worn relic in the Armory shows a red badge with how many levels you can raise it right now.',
         'A new Path in the profile: every 5 profile levels a big reward awaits – a Silver or Gold chest, a sure Epic (Legendary from level 60) relic, gems, metals and, every 25 levels, torches. Rewards for levels already passed can be claimed too.',
         'The profile window keeps one height on every tab; avatars sit five to a row.',
+        'A new Trials button on the main menu (in place of Free – the free gems are still in the Shop) opens the game modes.',
+        'The first trial – the Pit: waves of foes for 3 minutes, no boss and no loot. Every wave cleared pays Essence, and entering pays at once the Essence up to your checkpoint. Three entries a day, Sweep, and two random hazards each time (Rain of Blades, Stalker, Falling Stars, Altar Beams, Chained Flesh, Stoneskin, Poison Mist).',
       ],
     },
     {

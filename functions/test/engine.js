@@ -117,5 +117,17 @@ const live = require('../game/live.json');
   assert.strictEqual(r.result, null, 'a milestone is taken once');
   r = await withProfile(r.profile, live, (DH) => DH.actions.list.claimAcct.run({ lvl: 25 }));
   assert.strictEqual(r.result, null, 'not before its level');
+  // the Pit: three entries a day, the checkpoint paid on entry, waves no faster than the clock allows, sweep pays the best
+  r = await withProfile(Object.assign({}, p0, { pit: { best: 34, day: null, used: 0, active: null, pass: false } }), live, (DH) => DH.actions.list.pitStart.run({}));
+  assert.strictEqual(r.result.from, 30); assert.strictEqual(r.result.paid, 300); assert.strictEqual(r.profile.essence, 300); assert.strictEqual(r.result.affixes.length, 2);
+  r = await withProfile(r.profile, live, (DH) => DH.actions.list.pitEnd.run({ waves: 400 }));
+  assert.strictEqual(r.result.waves, 0, 'no waves can fall in no time');
+  r.profile.pit.active = { at: Date.now() - 60000, from: 30, affixes: [] };
+  r = await withProfile(r.profile, live, (DH) => DH.actions.list.pitEnd.run({ waves: 12 }));
+  assert.strictEqual(r.result.reached, 42); assert.strictEqual(r.profile.pit.best, 42); assert.strictEqual(r.profile.essence, 420);
+  r = await withProfile(r.profile, live, (DH) => DH.actions.list.pitSweep.run({}));
+  assert.strictEqual(r.result.paid, 420); assert.strictEqual(r.profile.pit.used, 2);
+  r = await withProfile(r.profile, live, (DH) => [DH.actions.list.pitStart.run({}), DH.actions.list.pitSweep.run({})]);
+  assert.ok(r.result[0] && r.result[1] === null, 'three entries a day');
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });

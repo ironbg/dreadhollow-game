@@ -20,13 +20,15 @@
   }
   const tmp = [];
 
+  const PIT_DROPS = ['xp', 'tome', 'food', 'magnet'];
   const URN = { painter: 'urn', hp: 1, spd: 0, dmg: 0, xp: 0, r: 5, mass: 99, ai: 'static', prop: true, touch: true };
 
   class Run {
     constructor(opts) {
       const S = DH.save.data;
       this.heroId = opts.hero; this.stageId = opts.stage;
-      this.hero = C.heroes[this.heroId]; this.stage = C.stages[this.stageId];
+      this.hero = C.heroes[this.heroId]; this.stage = opts.stageDef || C.stages[this.stageId]; // the Pit brings its own copy of a hall
+      this.pit = opts.pit || null;
       this.settings = S.settings;
       this.artifacts = DH.meta.activeArtifacts();
       this.dread = DH.meta.dreadRank();
@@ -62,9 +64,9 @@
       this.oozeT = U.rand(C.OOZE_EVERY[0], C.OOZE_EVERY[1]);
       this.initHall();
       // Starting Ability: once the hall's quest is done, an Arcane Tome waits next to the hero
-      if (C.START_TOME_DEED[this.stageId] && DH.meta.deedDone(C.START_TOME_DEED[this.stageId])) this.drop('tome', 34, -10);
+      if (!this.pit && C.START_TOME_DEED[this.stageId] && DH.meta.deedDone(C.START_TOME_DEED[this.stageId])) this.drop('tome', 34, -10);
       { // the hall's starting items, spread around the spawn
-        const items = C.STAGE_START[this.stageId] || [], a0 = Math.random() * TAU, DR = (C.START_DIST_HALL || {})[this.stageId] || C.START_DIST;
+        const items = this.pit ? [] : C.STAGE_START[this.stageId] || [], a0 = Math.random() * TAU, DR = (C.START_DIST_HALL || {})[this.stageId] || C.START_DIST;
         items.forEach((type, i) => {
           const a = a0 + (i / items.length) * TAU + U.rand(-0.25, 0.25), d = U.rand(DR[0], DR[1]);
           const x = this.bridge ? (i % 2 ? 1 : -1) * d * (1 + Math.floor(i / 2) * 0.12) : Math.cos(a) * d, y = this.bridge ? U.rand(-this.bridge * 0.5, this.bridge * 0.5) : Math.sin(a) * d;
@@ -81,6 +83,7 @@
       this.revives = this.P.revives; this.rerolls = this.P.rerolls;
       this.addAbility(this.hero.weapon);
       this.cam = { x: 0, y: 0 };
+      if (this.pit) this.initPit();
     }
 
     /* ---------------- level & xp ---------------- */
@@ -206,6 +209,7 @@
       return { rate: rate * (1 + this.stage.index * 0.1) * (1 + this.agony * 0.35) * agonyDense * (this.fx_.spawn || 1) * (this.fx_.giants ? 0.6 : 1), mix };
     }
     updateSpawns(dt) {
+      if (this.pit) { this.updatePit(dt); return; } // the Pit: its waves (js/game/pit.js)
       if (this.victoryT > 0 || this.won) return; // the hall is cleared once the Lord falls; nothing new pours in while the hero gathers spoils
       const { rate, mix } = this.spawnRate();
       // a squad in ranks every minute and a bit, from the third minute
@@ -781,6 +785,7 @@
     /** Out of life (or the Curse ran out): an auto-revive if one is left, else the run ends. */
     playerDies() {
       this.player.hp = 0;
+      if (this.pit) { this.pitOver(); return; } // the Pit: no coming back
       if (this.revives > 0) { this.revives--; this.revive(true); }
       else { this.state = 'dead'; DH.audio.play('defeat'); DH.events.emit('run:dead', this); }
     }
@@ -969,6 +974,7 @@
     matDrop(x, y, n) { for (let i = 0; i < n; i++) this.drop('mat', x + U.rand(-8, 8), y + U.rand(-5, 5), 1, E.rollMat(this.stageId, this.dread)); }
     drop(type, x, y, val, sub, cluster) {
       const k = { type, x, y, val: val || 1, sub, cluster: !!cluster, vx: U.rand(-40, 40), vy: U.rand(-60, -10), z: 0, vz: type === 'xp' ? 0 : 60, mag: false, t: 0 };
+      if (this.pit && !PIT_DROPS.includes(type)) return k; // the Pit: no loot (experience, tomes, food and magnets only)
       if (type === 'xp') k.xm = this.xpMult();
       this.pickups.push(k);
       return k;

@@ -385,6 +385,17 @@
 
   /* ---------- Account level ---------- */
   E.accountXpNext = (lvl) => 100 + (lvl - 1) * 60;
+  /** The Pit (Trials): three minutes of waves, no boss and no loot, paid in Essence (spent in the Constellation).
+   *  You enter at your checkpoint (the last ten your best wave passed) and that much is paid as you enter; every wave
+   *  cleared after it pays too. Two random hazards each time. A few entries a day; Sweep pays your best without playing. */
+  E.PIT = {
+    secs: 180, entries: 3, perWave: 10, every: 10,          // checkpoint: the best wave rounded down to ten
+    minWaveSecs: 1.5,                                        // the server's check: a wave cannot fall faster than this
+    affixes: ['blades', 'stalker', 'stars', 'beams', 'chains', 'stone', 'mist'], roll: 2,
+    halls: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'blightmire', 'blightmire', 'blightmire'], // the floor of each ten (no hall rules)
+    hallStats: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'discord', 'blightmire', 'reliquary'], // and the strength of its foes
+    hpGrow: 1.12, dmgGrow: 1.05,                             // per wave, from the first of its ten
+  };
   /** The account's reward track: a bigger reward every 5 levels, for ever. Each milestone pays gems, the metal of its
    *  level, and in turn a Silver chest (x5), a Gold chest (x10) or a sure relic (x20: Epic, Legendary from 60);
    *  every 25 levels torches too. Claimed by the player in the profile (late joiners claim the ones they passed). */

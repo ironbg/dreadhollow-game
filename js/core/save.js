@@ -47,6 +47,8 @@
       inbox: [], // messages and gifts from the developer (the admin panel, gifts to everyone): shown once, then read
       giftsTaken: {}, // gifts to everyone (live: gifts) already given to this profile, by id
       acctTrack: {}, // the account's reward track: milestones claimed, by level
+      essence: 0, // the Pit's currency (spent in the Constellation)
+      pit: { best: 0, day: null, used: 0, active: null, pass: false }, // the Pit: best wave, today's entries, the fight under way
     };
   }
 

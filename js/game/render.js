@@ -181,6 +181,7 @@
       g.fillStyle = 'rgba(255,90,30,' + (0.12 + 0.2 * k) + ')'; g.beginPath(); g.ellipse(x, y, w.R, w.R * 0.6, 0, 0, TAU); g.fill();
       g.strokeStyle = 'rgba(255,170,60,0.85)'; g.lineWidth = 1; g.beginPath(); g.ellipse(x, y, w.R * k, w.R * 0.6 * k, 0, 0, TAU); g.stroke();
     }
+    if (this.pit) this.drawPit(g, cx, cy, now, lights); // the Pit's hazards
     // a Bloater's fuse: the ground it will tear apart glows, filling as it burns
     for (const e of this.enemies) if (e.fuse != null && !e.dead) {
       const B = e.def.boom, R = B.R * (e.scale > 1 ? 1.4 : 1), k = 1 - Math.max(0, e.fuse) / B.fuse, x = e.x - cx, y = e.y - cy;

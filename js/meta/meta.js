@@ -155,6 +155,45 @@
     return meta.grant(E.accountMilestone(lvl));
   };
 
+  /* ---------------- The Pit (Trials) ---------------- */
+  const pitS = () => { const s = S(); s.pit = s.pit || { best: 0, day: null, used: 0, active: null, pass: false }; const d = U.dayKey(); if (s.pit.day !== d) { s.pit.day = d; s.pit.used = 0; } return s.pit; };
+  meta.pitEntries = () => E.PIT.entries + (pitS().pass ? 1 : 0);
+  meta.pitLeft = () => Math.max(0, meta.pitEntries() - pitS().used);
+  meta.pitCheckpoint = () => Math.floor(pitS().best / E.PIT.every) * E.PIT.every;
+  meta.pitPerWave = () => Math.round(E.PIT.perWave * (pitS().pass ? 1.5 : 1));
+  meta.essence = () => S().essence || 0;
+  const addEssence = (n) => { const s = S(); s.essence = (s.essence || 0) + n; s.stats.essence = (s.stats.essence || 0) + n; };
+  /** Enter: one of today's entries, two hazards rolled, the checkpoint paid at once. { from, affixes, paid } */
+  meta.pitStart = () => {
+    const p = pitS(); if (meta.pitLeft() <= 0) return null;
+    p.used++;
+    const from = meta.pitCheckpoint(), paid = from * meta.pitPerWave();
+    const affixes = U.shuffle(E.PIT.affixes.slice()).slice(0, E.PIT.roll);
+    p.active = { at: U.now(), from, affixes };
+    if (paid) addEssence(paid);
+    meta.track('pit', 1); changed();
+    return { from, affixes, paid };
+  };
+  /** The fight is over: the waves cleared after the checkpoint, as many as the time could allow. { waves, paid, best, record } */
+  meta.pitEnd = (waves) => {
+    const p = pitS(), a = p.active; if (!a) return null;
+    p.active = null;
+    const secs = Math.max(0, (U.now() - a.at) / 1000);
+    waves = Math.max(0, Math.min(waves | 0, Math.floor(Math.min(secs, E.PIT.secs + 30) / E.PIT.minWaveSecs)));
+    const reached = a.from + waves, record = reached > p.best;
+    if (record) p.best = reached;
+    const paid = waves * meta.pitPerWave(); if (paid) addEssence(paid);
+    changed();
+    return { waves, reached, paid, best: p.best, record, from: a.from };
+  };
+  /** Sweep: an entry paid as your best wave, without fighting (no record). */
+  meta.pitSweep = () => {
+    const p = pitS(); if (meta.pitLeft() <= 0 || p.best <= 0) return null;
+    p.used++; const paid = p.best * meta.pitPerWave(); addEssence(paid);
+    meta.track('pit', 1); changed();
+    return { paid };
+  };
+
   /* ---------------- Player stats for a run ---------------- */
   meta.addStats = (acc, mods, mult) => {
     for (const k in mods) acc[k] = (acc[k] || 0) + mods[k] * (mult == null ? 1 : mult);

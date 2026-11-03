@@ -25,6 +25,7 @@
     const lv = this.level - 1;
     let taken = 1;
     if (this.hero.perLevel) for (const k in this.hero.perLevel) { const v = this.hero.perLevel[k] * lv; if (k === 'taken') taken += v; else st[k] = (st[k] || 0) + v; } // Level Up Bonuses
+    if (this.pit && this.pit.affixes.includes('chains')) taken *= C.PIT_FX.chains; // the Pit's Chained Flesh
     if (st.killAs) st.as = (st.as || 0) + Math.min(st.killAsMax || 0.1, this.killAsStacks * st.killAs);
     if (this.fx_.swapCrit) { const a = st.critPct || 0; st.critPct = st.critBonus - 0.5; st.critBonus = 0.5 + a; }
     // Artifacts that shape the hero's stats

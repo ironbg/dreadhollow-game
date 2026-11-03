@@ -2042,6 +2042,14 @@
       star(6.4, 2, '#8a5410'); star(5, 1.3, '#ffe890'); g.restore();
       glint(g, 9.6, 8.6, 2.2, '#ffffff');
     },
+    i_essence(g) { // the Pit's Essence: a soul's ember, a flame of crimson crystal
+      P.glow(g, 16, 18, 13, '#ff4a2a', 0.5);
+      sil(g, [16, 3, 21, 11, 25, 17, 23.5, 24, 16, 29.5, 8.5, 24, 7, 17, 11, 11], P.lg(g, 8, 4, 24, 29, ['#ffe0a0', '#ff6a2a', '#a0102a', '#3a0418']), 1.3);
+      P.path(g, [16, 3, 19, 13, 16, 22, 13, 13]); P.fill(g, 'rgba(255,240,200,0.45)');
+      P.path(g, [16, 22, 23.5, 24, 16, 29.5, 8.5, 24]); P.fill(g, 'rgba(60,0,20,0.35)');
+      g.strokeStyle = 'rgba(80,0,20,0.55)'; g.lineWidth = 0.5; g.beginPath(); g.moveTo(16, 3); g.lineTo(16, 29.5); g.moveTo(7, 17); g.lineTo(25, 17); g.stroke();
+      glint(g, 14, 9, 2, '#ffffff');
+    },
     i_gem(g) {
       P.glow(g, 16, 16, 13, '#ff5ad8', 0.45);
       sil(g, [9, 6.6, 23, 6.6, 29, 13, 16, 28.4, 3, 13], P.lg(g, 3, 6, 29, 28, ['#ffc0f0', '#ff5ad8', '#6a0a5a']), 1.3);

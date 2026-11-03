@@ -95,7 +95,8 @@
         h('button.pause.bagbtn', { onclick: () => DH.game.openBag(), title: t('inv.title') + (desk ? ' [I]' : '') }, A.img('u_bag'), r.bagN = h('i'), desk ? h('b.key', 'I') : null),
         desk && DH.input.fullscreenAvailable() ? r.fsBtn = h('button.pause.fsbtn', { onclick: () => { DH.input.toggleFullscreen(); }, title: t('settings.fullscreen') + ' [F]' }, A.img(DH.input.isFullscreen() ? 'u_unfull' : 'u_full'), h('b.key', 'F')) : null), r.timer,
         h('div.stats', h('div', r.kills, A.img('n_skull')), h('div', r.gold, A.img('i_gold')))),
-      r.fps, r.build, r.buffs, r.curse, r.boss, r.agony, r.track = hud.tracker(run), r.lordK = run.lordKills ? h('div.lordk', A.img('u_agony', 'ci'), r.lordKT = h('span')) : null].filter(Boolean)); // append() would print a null as text
+      r.fps, r.build, r.buffs, r.curse, r.boss, r.agony, r.track = hud.tracker(run), r.lordK = run.lordKills ? h('div.lordk', A.img('u_agony', 'ci'), r.lordKT = h('span')) : null,
+      r.pitL = run.pit ? h('div.lordk.pitw', A.img('n_skull', 'ci'), r.pitT = h('span')) : null].filter(Boolean)); // append() would print a null as text
     if (!DH.save.data.tutorialDone) { r.tut = h('div.tutorial', h('div', h('span.hand', A.img('u_hand', 'bigic')), t('tutorial.move'), h('br'), h('span.small.muted', t('tutorial.auto')))); el.append(r.tut); }
     hud.sig = ''; el.classList.remove('hidden');
   };
@@ -255,7 +256,8 @@
     drawBossBar(r, run.bosses[0]); // every frame: the trail behind a blow eases down smoothly
     const now = performance.now(); if (now - lastTxt < 120) return; lastTxt = now;
     r.lvl.textContent = t('common.lv') + ' ' + run.level;
-    r.timer.textContent = U.fmtTime(run.time); r.timer.classList.toggle('boss', run.time >= run.runLength);
+    if (run.pit) { const left = Math.max(0, E.PIT.secs - run.time); r.timer.textContent = U.fmtTime(left); r.timer.classList.toggle('boss', left <= 30); r.pitT.textContent = t('hud.pitLine', { n: run.pit.wave, c: run.pit.cleared }); }
+    else { r.timer.textContent = U.fmtTime(run.time); r.timer.classList.toggle('boss', run.time >= run.runLength); }
     r.kills.textContent = U.fmt(run.kills); r.gold.textContent = U.fmt(run.gold);
     r.bagN.textContent = run.bag.length ? run.bag.length + '/' + C.BAG_SIZE : ''; r.bagN.classList.toggle('full', run.bag.length >= C.BAG_SIZE);
     if (r.lordK) { r.lordKT.textContent = run.lordUp ? '' : t('hud.lordKills', { n: U.fmt(Math.min(run.kills, run.lordKills)), m: U.fmt(run.lordKills) }); r.lordK.classList.toggle('hidden', !!run.lordUp); }

@@ -31,6 +31,32 @@
       const run = this.run; // the adventurer's reward: offered as the fight begins (not in the first, taught fight)
       if (s.tutorialDone && s.stats.runs > 0) setTimeout(() => { if (this.run === run && run.state === 'playing' && run.time < 5) { run.queue.unshift({ state: 'startbonus', ev: 'run:startbonus' }); run.pump(); } }, 2000);
     },
+    /** The Pit (Trials): an entry paid where the profile lives, two hazards rolled there, then three minutes of waves. */
+    async startPit() {
+      if (this.starting) return;
+      const s = DH.save.data;
+      this.starting = true;
+      let r = null; try { r = await ui.act('pitStart'); } finally { this.starting = false; }
+      if (r === undefined) return; // the call failed: already said
+      if (!r) { ui.toast(t('pit.noEntries'), 'bad'); return; }
+      DH.audio.play('click');
+      ui.closeAll(); ui.show(false);
+      const st = DH.Run.pitStage(r.from);
+      this.run = new DH.Run({ hero: s.selectedHero, stage: st.id, stageDef: st.def, pit: { from: r.from, affixes: r.affixes, paid: r.paid } });
+      this.mode = 'run';
+      ui.hud.build(this.run);
+      DH.input.enable(true);
+      DH.audio.music('battle'); DH.audio.ambience(st.id);
+      setTimeout(() => ui.hud.banner(t('pit.name'), r.affixes.map((k) => t('pit.fx.' + k)).join(' · '), true), 300);
+    },
+    /** The Pit is over: the waves cleared are paid on the server, then the results. */
+    finishPit(run) {
+      if (!run || run.finished) return;
+      run.finished = true; run.state = 'over';
+      DH.input.enable(false);
+      const P = run.pit;
+      ui.act('pitEnd', { waves: P.cleared }).then((res) => ui.openPitResults(run, res || { waves: P.cleared, reached: P.from + P.cleared, paid: 0, best: DH.meta.pitCheckpoint(), record: false, from: P.from, failed: true }));
+    },
     pause() {
       const r = this.run; if (!r || r.state !== 'playing') return;
       r.state = 'paused'; DH.input.enable(false); ui.openPause(r);
@@ -47,6 +73,7 @@
     },
     resume() { const r = this.run; if (r && r.state === 'paused') { r.state = 'playing'; DH.input.enable(true); r.pump(); } },
     finishRun(run) {
+      if (run && run.pit) { this.finishPit(run); return; } // left from the pause menu
       if (!run || run.finished) return;
       run.finished = true;
       if (run.won && run.state !== 'victory') { run.portal = null; run.lateLoot(); run.state = 'victory'; } // left from the pause menu after the Lord fell: still a victory
@@ -94,6 +121,7 @@
   DH.events.on('run:well', (run) => ui.openWell(run));
   DH.events.on('run:dead', (run) => ui.openRevive(run));
   DH.events.on('run:victory', (run) => game.finishRun(run));
+  DH.events.on('run:pitEnd', (run) => game.finishPit(run));
   DH.events.on('run:boss', (b) => ui.hud.banner(b.name, b.sub ? b.sub : b.artifact ? t('hud.artifactSub') : b.hex ? t('hud.hexSub') : b.final ? t('hud.finalBoss') : t('hud.boss')));
   DH.events.on('run:warning', (txt) => ui.hud.banner(txt, null, true));
   DH.events.on('pauseKey', () => {

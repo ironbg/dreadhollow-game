@@ -39,7 +39,7 @@
       });
       left.append(sideBtn('n_calendar', t('home.login'), () => ui.openLogin(), b.login ? '!' : 0, { hot: b.login }));
       if (!s.purchases.once.starter) left.append(sideBtn('c_gold', t('home.offer'), () => ui.openStarter(), 0, { hot: true, timer: U.fmtDuration(U.msToMidnight()) }));
-      left.append(sideBtn('n_ad', t('home.freeGems'), () => ui.go('shop', 'free')));
+      left.append(sideBtn('n_skull', t('home.trials'), () => ui.openTrials(), M.pitLeft() > 0 ? M.pitLeft() : 0, { hot: M.pitLeft() > 0 })); // the game modes (the free gems are still in the Shop)
       right.append(sideBtn('u_cog', t('home.settings'), () => ui.openSettings()));
       right.append(sideBtn('n_pass', t('home.pass'), () => ui.go('quests', 'pass'), b.pass));
       right.append(sideBtn('n_book', t('home.deeds'), () => ui.go('quests', 'deeds')));
