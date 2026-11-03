@@ -140,6 +140,11 @@ const live = require('../game/live.json');
   assert.ok(r.result.back > 0 && r.profile.essence === ess0 + r.result.back && r.profile.cons.spent === spent0 - r.result.back && !r.profile.cons.r.fury_0_0_2, 'a rank back returns its Essence');
   r = await withProfile(r.profile, live, (DH) => DH.actions.list.consReset.run({}));
   assert.strictEqual(r.profile.essence, 1000); assert.deepStrictEqual(r.profile.cons.r, {});
+  // 100 more Essence with every point, each branch counting from its own start; stars bought at the old prices come back as Essence
+  r = await withProfile(Object.assign({}, p0, { essence: 5000 }), live, (DH) => { const L = DH.actions.list; L.consBuy.run({ id: 'fury_0_0_1', n: 3 }); L.consBuy.run({ id: 'bastion_0_0_1', n: 1 }); return [DH.meta.consNext('fury'), DH.meta.consNext('bastion'), DH.meta.consSpentIn('fury')]; });
+  assert.deepStrictEqual(r.result, [400, 200, 600]); assert.strictEqual(r.profile.essence, 5000 - 600 - 100);
+  r = await withProfile(Object.assign({}, p0, { essence: 10, cons: { r: { fury_0_0_1: 3 }, spent: 72 } }), live, (DH) => DH.meta.consRank('fury_0_0_1'));
+  assert.strictEqual(r.result, 0); assert.strictEqual(r.profile.essence, 82); assert.strictEqual(r.profile.cons.pv, 2);
   // the Pit Pass: +50% Essence a wave and a fourth entry; a Pit fight goes on the Pit's boards
   r = await withProfile(Object.assign({}, p0, { pit: { best: 0, day: null, used: 0, active: null, pass: false } }), live, (DH) => { DH.meta.fulfillProduct('pitpass', true); return [DH.meta.pitEntries(), DH.meta.pitPerWave()]; });
   assert.deepStrictEqual(r.result, [4, 15]); assert.strictEqual(r.profile.pit.pass, true);

@@ -244,7 +244,15 @@
   };
 
   /* ---------------- The Constellation (E.CONST) ---------------- */
-  const consS = () => { const s = S(); if (!s.cons || typeof s.cons !== 'object') s.cons = { r: {}, spent: 0 }; s.cons.r = s.cons.r || {}; return s.cons; };
+  const consS = () => {
+    const s = S(); if (!s.cons || typeof s.cons !== 'object') s.cons = { r: {}, spent: 0 };
+    const c = s.cons; c.r = c.r || {};
+    if (c.pv !== 2) { // (pv: the prices' version; never in the save's defaults, so an old save cannot get it by a merge) // the prices changed (100 more a point): stars bought before are emptied and every Essence given back
+      if (c.spent) s.essence = (s.essence || 0) + c.spent;
+      c.r = {}; c.spent = 0; c.pv = 2;
+    }
+    return c;
+  };
   meta.consRank = (id) => consS().r[id] || 0;
   meta.consPoints = (b) => { const r = consS().r; let n = 0; for (const id in r) { const x = E.CONST.byId[id]; if (x && x.b === b) n += r[id]; } return n; };
   /** A star can be raised when it is not full and a star next to it is (the heart always is). */
@@ -262,7 +270,9 @@
     return got || null;
   };
   /** What taking one rank back returns: the price of the branch's last point. */
-  meta.consRefund = (b) => { const p = meta.consPoints(b); return p > 0 ? E.CONST.cost(p - 1) : 0; };
+  meta.consRefund = (b) => { const p = meta.consPoints(b); return p > 0 ? Math.min(E.CONST.cost(p - 1), consS().spent || 0) : 0; };
+  /** The Essence a branch holds. */
+  meta.consSpentIn = (b) => E.CONST.spentIn(meta.consPoints(b));
   /** A rank can be taken back unless a star further out still needs this one full to stay reachable from the heart. */
   meta.consCanLower = (id) => {
     const x = E.CONST.byId[id], r = consS().r; if (!x || !x.b || !(r[id] > 0)) return false;

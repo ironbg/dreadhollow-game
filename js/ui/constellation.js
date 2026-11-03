@@ -21,7 +21,7 @@
     let alive = true;
     // the view: world point at the centre of the canvas, and the zoom
     const view = { x: 0, y: -120, z: 0.42 };
-    const redrawAll = () => { if (!alive) return; drawHead(); draw(); };
+    const redrawAll = () => { if (!alive) return; drawHead(); draw(); renderPop(); };
     DH.events.on('meta', redrawAll);
 
     const drawHead = () => {
@@ -87,6 +87,8 @@
         if (n.kind === 'hub' || n.kind === 'notable') { g.strokeStyle = st === 'locked' ? 'rgba(120,100,70,0.45)' : 'rgba(201,162,90,0.8)'; g.lineWidth = 1; g.beginPath(); g.arc(x, y, R + thick + 3, 0, TAU); g.stroke(); }
         if (view.z > 0.55) { g.fillStyle = st === 'locked' ? 'rgba(170,160,150,0.55)' : st === 'full' ? '#cfe0b8' : '#e8dcc4'; g.font = '700 ' + Math.round(7 + view.z * 6) + 'px sans-serif'; g.textAlign = 'center'; g.fillText(M.consRank(n.id) + '/' + n.max, x, y + R + thick + Math.round(7 + view.z * 6)); }
       }
+      if (sel) { const [x, y] = toScreen(sel.x, sel.y), R = radius(sel, view.z); g.strokeStyle = 'rgba(236,217,168,' + (0.6 + 0.4 * Math.sin(now * 5)) + ')'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, R + 9, 0, TAU); g.stroke(); }
+      placePop();
       // under the heart: all the Essence the stars hold
       const hz = CS.byId.heart, [hx, hy] = toScreen(hz.x, hz.y), HR = radius(hz, view.z) + 64 * view.z, fs = Math.round(U.clamp(22 * view.z, 10, 18)); // in the gap below the heart, between the two lower branches
       const spent = (DH.save.data.cons && DH.save.data.cons.spent) || 0, txt = U.fmt(spent), ess = iconOf('i_essence');
@@ -94,6 +96,7 @@
       g.fillStyle = 'rgba(10,8,14,0.82)'; g.strokeStyle = 'rgba(201,162,90,0.7)'; g.lineWidth = 1; g.beginPath(); g.rect(hx - bw / 2, by, bw, fs + 8); g.fill(); g.stroke();
       if (ess.complete && ess.naturalWidth) g.drawImage(ess, hx - bw / 2 + 5, by + 3, fs + 2, fs + 2);
       g.fillStyle = '#ecd9a8'; g.textAlign = 'left'; g.fillText(txt, hx - bw / 2 + fs + 10, by + fs + 2);
+      g.font = '700 ' + Math.max(9, Math.round(fs * 0.7)) + 'px sans-serif'; g.textAlign = 'center'; g.fillStyle = 'rgba(232,216,184,0.8)'; g.fillText(t('cons.spentAll'), hx, by - 4);
     };
     let raf = 0; const loop = () => { if (!alive) return; draw(); raf = requestAnimationFrame(loop); }; // the open stars pulse
 
@@ -133,36 +136,47 @@
       const wx = (sx - W / 2) / view.z + view.x, wy = (sy - H / 2) / view.z + view.y;
       let best = null, bd = Infinity;
       for (const n of CS.nodes) { if (!n.b) continue; const d = Math.hypot(n.x - wx, n.y - wy); if (d < bd) { bd = d; best = n; } }
-      if (best && bd * view.z < radius(best, view.z) + 12) { click(); openStar(best); }
+      if (best && bd * view.z < radius(best, view.z) + 12) { click(); openStar(best); } else closeStar();
     };
 
-    // ---- a star's window
-    const openStar = (n) => {
-      const [k, v] = n.st;
-      const sm = ui.modal({ title: t('stat.' + k), cls: 'consstar', body: () => h('div') });
-      const body = () => {
-        const r = M.consRank(n.id), open = M.consOpen(n.id), cost = M.consNext(n.b), full = r >= n.max, back = M.consRefund(n.b);
-        const buy = async (cnt) => { const got = await ui.act('consBuy', { id: n.id, n: cnt }); if (got) { DH.audio.play('buy'); body(); } else if (got === null) ui.toast(t('cons.cant'), 'bad'); };
-        const down = async () => {
-          if (!r) return;
-          if (!M.consCanLower(n.id)) { ui.toast(t('cons.holds'), 'bad'); return; }
-          const got = await ui.act('consLower', { id: n.id }); if (got) { DH.audio.play('coin'); body(); }
-        };
-        sm.set(h('div',
-          h('div.cons-ico.' + n.b, A.img('cs_' + k)),
-          h('div.cons-kind.' + n.b, t('cons.kind.' + n.kind) + ' · ' + t('cons.br.' + n.b)),
-          h('div.cons-line', t('cons.perRank'), h('b', ui.fmtStat(k, v))),
-          h('div.cons-line', t('cons.now'), h('b', r ? ui.fmtStat(k, v * r) : '—')),
-          h('div.cons-line', t('cons.ranks'), h('b', r + ' / ' + n.max)),
-          full ? h('div.good.center', t('cons.full')) : open ? h('div.cons-line', t('cons.cost'), h('b', A.img('i_essence', 'ci'), ' ' + U.fmt(cost))) : h('div.small.muted.center', t('cons.locked')),
-          r ? h('div.cons-line.small', t('cons.back'), h('b', A.img('i_essence', 'ci'), ' ' + U.fmt(back))) : null,
-          h('div.btns.cons-btns',
-            h('button.btn.red' + (r ? '' : '.off'), { onclick: down }, t('cons.sell1')),
-            h('button.btn.gold' + (!full && open && M.essence() >= cost ? '' : '.off'), { onclick: () => { if (!full && open) buy(1); } }, t('cons.buy1'))),
-          !full && open ? h('div.btns', h('button.btn.green' + (M.essence() >= cost ? '' : '.off'), { onclick: () => buy(n.max - r) }, t('cons.buyMax'))) : null,
-          h('div.btns', h('button.btn.ghost', { onclick: () => sm.close() }, t('common.close')))));
+    // ---- a star's panel: it stands over the star itself (under it when the star is high), in the branch's colour,
+    // with what a rank gives, the total now and after the next, −, the ranks, +, all the way, and the price of the next
+    let sel = null;
+    const pop = h('div.cons-pop'); pop.style.display = 'none'; wrap.append(pop);
+    ['pointerdown', 'pointerup', 'wheel'].forEach((ev) => pop.addEventListener(ev, (e) => e.stopPropagation()));
+    const openStar = (n) => { sel = n; renderPop(); placePop(); };
+    const closeStar = () => { sel = null; pop.style.display = 'none'; };
+    const renderPop = () => {
+      const n = sel; if (!n) return;
+      const [k, v] = n.st, r = M.consRank(n.id), open = M.consOpen(n.id), cost = M.consNext(n.b), full = r >= n.max;
+      const tot = M.consStats()[k] || 0;
+      const buy = async (cnt) => { const got = await ui.act('consBuy', { id: n.id, n: cnt }); if (got) { DH.audio.play('buy'); renderPop(); } else if (got === null) ui.toast(open ? t('common.notEnough') : t('cons.locked'), 'bad'); };
+      const down = async () => {
+        if (!r) return;
+        if (!M.consCanLower(n.id)) { ui.toast(t('cons.holds'), 'bad'); return; }
+        const got = await ui.act('consLower', { id: n.id }); if (got) { DH.audio.play('coin'); renderPop(); }
       };
-      body();
+      pop.className = 'cons-pop ' + n.b + (full ? ' full' : '');
+      pop.replaceChildren(
+        h('div.cp-head', A.img('cs_' + k, 'ci'), h('b', t('cons.kind.' + n.kind) + ': ' + t('stat.' + k)), h('button.cp-x', { onclick: () => { click(); closeStar(); }, 'aria-label': t('common.close') }, '×')),
+        h('div.cp-stat', A.img('u_star', 'ci'), ' ', ui.fmtStat(k, v), h('span.muted', ' ' + t('cons.perRankShort'))),
+        h('div.cp-tot', '(' + ui.fmtStat(k, tot) + (full ? '' : ' → ') , full ? null : h('span.good', ui.fmtStat(k, tot + v)), ')'),
+        h('div.cp-row',
+          h('button.cp-b.minus' + (r ? '' : '.off'), { onclick: down, 'aria-label': t('cons.sell1') }, '−'),
+          h('span.cp-r', r + '/' + n.max),
+          h('button.cp-b.plus' + (!full && open && M.essence() >= cost ? '' : '.off'), { onclick: () => { if (!full) buy(1); }, 'aria-label': t('cons.buy1') }, '+'),
+          h('button.cp-b.max' + (!full && open && M.essence() >= cost ? '' : '.off'), { onclick: () => { if (!full) buy(n.max - r); }, 'aria-label': t('cons.buyMax') }, '⇈'),
+          h('span.cp-cost', full ? h('span.good', t('cons.maxed')) : !open ? h('span.muted', t('cons.lockedShort')) : [A.img('i_essence', 'ci'), h('b' + (M.essence() >= cost ? '' : '.bad'), U.fmt(cost))])));
+      pop.style.display = '';
+    };
+    const placePop = () => {
+      if (!sel) return;
+      const [x, y] = toScreen(sel.x, sel.y), R = radius(sel, view.z) + 8, pw = pop.offsetWidth || 260, ph = pop.offsetHeight || 110;
+      if (x < -R || x > W + R || y < -R || y > H + R) { pop.style.visibility = 'hidden'; return; }
+      pop.style.visibility = '';
+      const above = y - R - ph - 6 > 4;
+      pop.style.left = Math.round(U.clamp(x - pw / 2, 6, W - pw - 40)) + 'px';
+      pop.style.top = Math.round(above ? y - R - ph - 6 : Math.min(H - ph - 4, y + R + 6)) + 'px';
     };
 
     // ---- what it all gives, the Specialties, the reset

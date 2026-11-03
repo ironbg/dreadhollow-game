@@ -4,7 +4,7 @@
  *   plunder  (yellow, low right) rewards
  * Each branch is a run of tiers: a hub star, then two or three chains of lesser stars that meet again at the next hub,
  * with side stars hanging off the hubs. A star can be raised once a star next to it is full (the heart is always full).
- * A point costs more the more points its branch already holds (E.CONST.cost). Points spent in a branch unlock its
+ * A point costs 100 more than the one before in its branch, each branch counting from its own start (E.CONST.cost). Points spent in a branch unlock its
  * five Specialties (passives, js/game/constellation.js). Resetting is free and gives every Essence back.
  * Built here from a fixed seed, so the server (functions/) and the game draw and check the very same tree. */
 (function (DH) {
@@ -102,8 +102,11 @@
 
   E.CONST = {
     nodes, edges, byId, branches: BR, total,
-    /** The price of the next point of a branch that already holds p points. */
-    cost: (p) => Math.min(3000, Math.round(20 + 4 * Math.pow(p + 1, 1.5))),
+    /** The price of the next point of a branch that already holds p points: 100 more with every point, and every branch
+     *  counts its own from the start (a branch with p points has cost step * p * (p + 1) / 2 in all). */
+    step: 100,
+    cost: (p) => 100 * (p + 1),
+    spentIn: (p) => 100 * p * (p + 1) / 2,
     /** Specialties: the points a branch needs for each of its five. */
     specials: { fury: [30, 60, 90, 150, 200], bastion: [25, 50, 75, 100, 140], plunder: [15, 30, 50, 75, 95] },
   };
