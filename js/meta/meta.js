@@ -186,14 +186,14 @@
   meta.pitEntries = () => E.PIT.entries + (pitS().pass ? 1 : 0) + meta.pitPerkVal('entry') + (meta.consSpecials().plunder >= 3 ? 1 : 0); // the third Plunder Specialty: one more a day
   meta.pitLeft = () => Math.max(0, meta.pitEntries() - pitS().used);
   meta.pitCheckpoint = () => Math.floor(pitS().best / E.PIT.every) * E.PIT.every;
-  meta.pitPerWave = () => Math.round(E.PIT.perWave * (pitS().pass ? 1.5 : 1) * (1 + (meta.consStats().essencePct || 0) + (meta.consSpecials().plunder >= 1 ? 0.2 : 0) + meta.pitPerkVal('essence')));
+  meta.pitPerWave = () => Math.round(E.PIT.perWave * (pitS().pass ? 1.5 : 1) * (1 + (meta.consStats().essencePct || 0) + (meta.consSpecials().plunder >= 1 ? 0.2 : 0) + meta.pitPerkVal('essence')) * 100) / 100; // to the hundredth: the sums are rounded, not each wave
   meta.essence = () => S().essence || 0;
   const addEssence = (n) => { const s = S(); s.essence = (s.essence || 0) + n; s.stats.essence = (s.stats.essence || 0) + n; };
   /** Enter: one of today's entries, two hazards rolled, the checkpoint paid at once. { from, affixes, paid } */
   meta.pitStart = () => {
     const p = pitS(); if (meta.pitLeft() <= 0) return null;
     p.used++;
-    const from = meta.pitCheckpoint(), paid = from * meta.pitPerWave();
+    const from = meta.pitCheckpoint(), paid = Math.round(from * meta.pitPerWave());
     const affixes = U.shuffle(E.PIT.affixes.slice()).slice(0, E.PIT.roll);
     p.active = { at: U.now(), from, affixes };
     if (paid) addEssence(paid);
@@ -209,7 +209,7 @@
     const reached = a.from + waves, record = reached > p.best;
     if (record) p.best = reached;
     if (reached > 0) meta.boardRecord({ pitWave: reached, hero: S().selectedHero, stage: null, victory: false }, {}); // the Pit's boards (a sweep never counts)
-    const paid = waves * meta.pitPerWave(); if (paid) addEssence(paid);
+    const paid = Math.round(waves * meta.pitPerWave()); if (paid) addEssence(paid);
     const lv0 = meta.pitMastery().lv; addMastery(reached);
     changed();
     return { waves, reached, paid, best: p.best, record, from: a.from, mastery: meta.pitMastery().lv - lv0 };

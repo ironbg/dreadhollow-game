@@ -389,7 +389,7 @@
    *  You enter at your checkpoint (the last ten your best wave passed) and that much is paid as you enter; every wave
    *  cleared after it pays too. Two random hazards each time. A few entries a day; Sweep pays your best without playing. */
   E.PIT = {
-    secs: 180, entries: 3, perWave: 10, every: 10,          // checkpoint: the best wave rounded down to ten
+    secs: 180, entries: 3, perWave: 14.4, every: 10,          // checkpoint: the best wave rounded down to ten
     minWaveSecs: 1.5,                                        // the server's check: a wave cannot fall faster than this
     affixes: ['blades', 'stalker', 'stars', 'beams', 'chains', 'stone', 'mist'], roll: 2,
     halls: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'blightmire', 'blightmire', 'blightmire'], // the floor of each ten (no hall rules)
