@@ -48,7 +48,7 @@
       ui.hud.build(this.run);
       DH.input.enable(true);
       DH.audio.music('battle'); DH.audio.ambience(st.id);
-      setTimeout(() => ui.hud.banner(t('pit.name'), r.affixes.map((k) => t('pit.fx.' + k)).join(' · '), true), 300);
+      this.run.state = 'intro'; ui.openPitIntro(this.run); // the start screen: the wave, the hazards; Ready begins it
     },
     /** The Pit is over: the waves cleared are paid on the server, then the results. */
     finishPit(run) {

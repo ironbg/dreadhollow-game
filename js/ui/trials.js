@@ -11,7 +11,97 @@
     { id: 'soon2', art: 'discord', open: false },
   ];
   const arts = {};
-  const art = (m) => arts[m.id] || (arts[m.id] = A.stageArt(m.art, 240, 360).toDataURL('image/jpeg', 0.85));
+  const art = (m) => arts[m.id] || (arts[m.id] = m.id === 'pit' ? pitArt() : A.stageArt(m.art, 240, 360).toDataURL('image/jpeg', 0.85));
+
+  /** The Pit's picture, painted small and shown in big pixels like the rest of the game: a sky of smoke over black
+   *  spires; the pit, a round shaft of stone courses sinking to a floor of fire; chains hanging into it; an iron fence of
+   *  spikes on its far rim; braziers burning to either side; skulls on the stones; embers rising. */
+  const pitArt = () => {
+    const G = DH.gfx, P = G.P, W = 120, H = 180, c = G.canvas(W, H), g = c.getContext('2d');
+    let sd = 777; const r = () => { sd = (sd * 16807) % 2147483647; return (sd - 1) / 2147483646; };
+    // the sky and the black city on the horizon
+    g.fillStyle = P.lg(g, 0, 0, 0, 70, ['#160610', '#2a0a10', '#3a1010']); g.fillRect(0, 0, W, 70);
+    for (let i = 0; i < 6; i++) { g.fillStyle = 'rgba(80,30,30,' + (0.12 + r() * 0.12) + ')'; g.beginPath(); g.ellipse(r() * W, 15 + r() * 40, 20 + r() * 25, 5 + r() * 6, 0, 0, Math.PI * 2); g.fill(); }
+    g.fillStyle = '#07030a';
+    for (let x = -4; x < W + 4;) { const w = 6 + r() * 10, hh = 6 + r() * 18; g.fillRect(x, 58 - hh, w, hh + 14); if (r() < 0.6) { g.beginPath(); g.moveTo(x, 58 - hh); g.lineTo(x + w / 2, 58 - hh - 8 - r() * 10); g.lineTo(x + w, 58 - hh); g.fill(); } x += w + r() * 4; }
+    P.circle(g, 92, 18, 7, 'rgba(230,120,90,0.55)'); P.circle(g, 92, 18, 5, '#e8a080'); // a blood moon
+    // the ground: dark flagstones running away
+    g.fillStyle = P.lg(g, 0, 60, 0, H, ['#24161a', '#1a1014', '#0c0709']); g.fillRect(0, 60, W, H - 60);
+    g.strokeStyle = 'rgba(0,0,0,0.6)'; g.lineWidth = 1;
+    for (let y = 64, k = 0; y < H; y += 4 + k, k += 0.6) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+    for (let i = -8; i <= 8; i++) { g.beginPath(); g.moveTo(W / 2 + i * 6, 60); g.lineTo(W / 2 + i * 26, H); g.stroke(); }
+    // the pit: seen from above and in front, its far wall shows inside the rim as courses of stone, each smaller, lower
+    // and darker going down (their near edges hide behind the lip), to a floor of fire far below
+    const cx = W / 2, cy = 104, rx = 46, ry = 18, N = 16;
+    for (let k = 0; k <= N; k++) {
+      const s2 = Math.pow(0.86, k), y = cy + ry * (1 - s2) * 0.92, l = Math.max(4, 58 - k * 4.2), warm = Math.min(1, k / N) * 26;
+      g.fillStyle = 'rgb(' + (l + 10 + warm | 0) + ',' + (l * 0.72 + 4 | 0) + ',' + (l * 0.72 + 6 | 0) + ')'; g.beginPath(); g.ellipse(cx, y, rx * s2, ry * s2, 0, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = 'rgba(0,0,0,0.6)'; g.beginPath(); g.ellipse(cx, y, rx * s2, ry * s2, 0, Math.PI * 1.02, Math.PI * 1.98); g.stroke();
+      for (let j = 0; j < 12; j++) { const a2 = Math.PI * 1.05 + (j + (k % 2) * 0.5) / 12 * Math.PI * 0.9, x2 = cx + Math.cos(a2) * rx * s2, y2 = y + Math.sin(a2) * ry * s2; g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(x2, y2, 1, Math.max(1, 2.4 * s2 + 0.6)); }
+    }
+    const fs = Math.pow(0.86, N), fy = cy + ry * (1 - fs) * 0.92, fire = g.createRadialGradient(cx, fy, 0.5, cx, fy, rx * fs * 1.3);
+    fire.addColorStop(0, '#fff0b0'); fire.addColorStop(0.3, '#ff9a30'); fire.addColorStop(0.7, '#b02010'); fire.addColorStop(1, 'rgba(60,0,0,0)');
+    g.fillStyle = fire; g.beginPath(); g.ellipse(cx, fy, rx * fs * 1.3, ry * fs * 1.3, 0, 0, Math.PI * 2); g.fill();
+    g.save(); g.globalCompositeOperation = 'lighter'; const up = g.createRadialGradient(cx, fy, 1, cx, fy, rx * 0.9);
+    up.addColorStop(0, 'rgba(255,110,40,0.4)'); up.addColorStop(1, 'rgba(255,60,20,0)'); g.fillStyle = up; g.beginPath(); g.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); g.fill(); g.restore();
+    // the rim: coping stones, the near lip lit red from below
+    g.lineWidth = 3; g.strokeStyle = '#0a0608'; g.beginPath(); g.ellipse(cx, cy, rx + 2, ry + 1, 0, 0, Math.PI * 2); g.stroke();
+    g.lineWidth = 2; g.strokeStyle = '#6a5a5a'; g.beginPath(); g.ellipse(cx, cy, rx, ry, 0, Math.PI, Math.PI * 2); g.stroke();
+    g.strokeStyle = '#c0502a'; g.beginPath(); g.ellipse(cx, cy, rx, ry, 0, 0.1, Math.PI - 0.1); g.stroke();
+    // the iron fence on the far rim
+    for (let j = 1; j < 16; j++) { const a = Math.PI + j / 16 * Math.PI, x2 = cx + Math.cos(a) * (rx + 3), y2 = cy + Math.sin(a) * (ry + 2); g.fillStyle = '#050305'; g.fillRect(x2 - 0.5, y2 - 9, 1.4, 9); g.beginPath(); g.moveTo(x2 - 1.5, y2 - 9); g.lineTo(x2 + 0.2, y2 - 13); g.lineTo(x2 + 1.8, y2 - 9); g.fill(); }
+    g.fillStyle = '#050305'; for (let j = 0; j <= 16; j++) { const a = Math.PI + j / 16 * Math.PI; if (j) { const a0 = Math.PI + (j - 1) / 16 * Math.PI; g.beginPath(); g.moveTo(cx + Math.cos(a0) * (rx + 3), cy + Math.sin(a0) * (ry + 2) - 6); g.lineTo(cx + Math.cos(a) * (rx + 3), cy + Math.sin(a) * (ry + 2) - 6); g.lineWidth = 1; g.strokeStyle = '#050305'; g.stroke(); } }
+    // chains hanging into the pit from above
+    for (const [x0, len] of [[cx - 22, 70], [cx + 6, 88], [cx + 26, 62]]) for (let y = 0; y < len; y += 3) { g.fillStyle = (y / 3) % 2 ? '#4a4044' : '#2a2226'; g.fillRect(x0 + Math.sin(y * 0.05) * 1.5, y, 2, 3); }
+    // braziers to either side, burning
+    for (const bx of [14, W - 14]) {
+      const by = 132;
+      g.fillStyle = '#0a0608'; g.fillRect(bx - 1, by, 2, 22); g.fillRect(bx - 6, by + 20, 12, 2);
+      g.fillStyle = '#3a3034'; g.beginPath(); g.moveTo(bx - 8, by - 4); g.lineTo(bx + 8, by - 4); g.lineTo(bx + 5, by + 2); g.lineTo(bx - 5, by + 2); g.fill();
+      g.save(); g.globalCompositeOperation = 'lighter'; const gl = g.createRadialGradient(bx, by - 10, 1, bx, by - 10, 26); gl.addColorStop(0, 'rgba(255,150,60,0.7)'); gl.addColorStop(1, 'rgba(255,80,20,0)'); g.fillStyle = gl; g.fillRect(bx - 28, by - 38, 56, 56); g.restore();
+      g.fillStyle = '#ff7a20'; g.beginPath(); g.moveTo(bx - 6, by - 4); g.quadraticCurveTo(bx - 4, by - 16, bx, by - 22); g.quadraticCurveTo(bx + 4, by - 14, bx + 6, by - 4); g.fill();
+      g.fillStyle = '#ffd890'; g.beginPath(); g.moveTo(bx - 3, by - 4); g.quadraticCurveTo(bx, by - 13, bx + 3, by - 4); g.fill();
+    }
+    // skulls and bones on the stones
+    for (const [x2, y2] of [[34, 142], [86, 146], [62, 160], [26, 166], [98, 168]]) { // a skull: brow, eye holes, jaw; a bone beside it
+      g.fillStyle = '#0a0608'; g.fillRect(x2 - 3, y2 - 3, 7, 7); g.fillStyle = '#c8bca8'; g.fillRect(x2 - 2, y2 - 3, 5, 4); g.fillRect(x2 - 1, y2 + 1, 3, 2);
+      g.fillStyle = '#1a0a0e'; g.fillRect(x2 - 1, y2 - 1, 1, 1); g.fillRect(x2 + 1, y2 - 1, 1, 1);
+      g.fillStyle = '#9a8e7a'; g.fillRect(x2 + 4, y2 + 2, 5, 1); g.fillRect(x2 + 4, y2 + 1, 1, 3); g.fillRect(x2 + 8, y2 + 1, 1, 3);
+    }
+    // embers rising out of the pit
+    for (let i = 0; i < 40; i++) { const x2 = cx + (r() - 0.5) * rx * 1.6, y2 = 30 + r() * 90; g.fillStyle = r() < 0.5 ? '#ffb050' : '#ff6a30'; g.fillRect(x2, y2, 1, 1); }
+    // the dark at the edges
+    const v = g.createRadialGradient(cx, 100, 30, cx, 100, 120); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.7)'); g.fillStyle = v; g.fillRect(0, 0, W, H);
+    const id = g.getImageData(0, 0, W, H); G.quantize(id, { dither: 6, sat: 0.95, contrast: 1.08 }); g.putImageData(id, 0, 0);
+    return c.toDataURL();
+  };
+  /** A gothic window's frame for the arches: a lancet of carved stone with a keystone and a finial, the outside dark. */
+  let archFrame = null;
+  const gothicFrame = () => {
+    if (archFrame) return archFrame;
+    const G = DH.gfx, P = G.P, W = 80, H = 120, c = G.canvas(W, H), g = c.getContext('2d');
+    const sl = 70, path = (inset) => { // an equilateral pointed arch over straight sides
+      const w = W - inset * 2, R2 = w, x0 = inset, x1 = W - inset;
+      g.beginPath(); g.moveTo(x0, H); g.lineTo(x0, sl);
+      g.arc(x1, sl, R2, Math.PI, Math.PI + Math.PI / 3, false);
+      g.arc(x0, sl, R2, -Math.PI / 3, 0, false);
+      g.lineTo(x1, H);
+    };
+    g.fillStyle = '#0b080d'; g.fillRect(0, 0, W, H); // outside the window: the wall
+    g.save(); g.globalCompositeOperation = 'destination-out'; path(7); g.closePath(); g.fill(); g.restore();
+    g.lineJoin = 'round';
+    g.lineWidth = 8; g.strokeStyle = '#050308'; path(4); g.stroke();
+    g.lineWidth = 6; g.strokeStyle = P.lg(g, 0, 0, W, H, ['#a89c94', '#6a5e5a', '#3a3236']); path(4); g.stroke();
+    g.lineWidth = 1; g.strokeStyle = 'rgba(255,240,220,0.35)'; path(2); g.stroke();
+    g.strokeStyle = 'rgba(0,0,0,0.6)'; path(7); g.stroke();
+    // the joints of the voussoirs
+    for (let i = 1; i < 6; i++) { g.strokeStyle = 'rgba(0,0,0,0.6)'; g.beginPath(); const y = sl + i * 12; g.moveTo(1, y); g.lineTo(7, y); g.moveTo(W - 7, y); g.lineTo(W - 1, y); g.stroke(); }
+    // keystone and a finial at the apex
+    const ay = sl - Math.sqrt(3) / 2 * (W - 8);
+    P.rect(g, W / 2 - 4, ay - 3, 8, 8, '#050308'); P.rect(g, W / 2 - 3, ay - 2, 6, 6, '#8a7e78'); P.rect(g, W / 2 - 3, ay - 2, 6, 1, '#c8bcb0');
+    const id = g.getImageData(0, 0, W, H); G.quantize(id, { dither: 6, sat: 0.9, contrast: 1.05 }); g.putImageData(id, 0, 0);
+    return (archFrame = c.toDataURL());
+  };
 
   /** The Trials: three arches side by side, the chosen one in the middle, its name under them, and Enter. */
   ui.openTrials = (start) => {
@@ -21,7 +111,7 @@
     const arch = (k, side) => {
       const md = MODES[(i + k + MODES.length) % MODES.length];
       return h('div.tr-arch' + (side ? '.side' : '.mid') + (md.open ? '' : '.soon'), { onclick: () => { if (side) go(k); } },
-        h('img', { src: art(md), alt: '' }), md.open ? null : h('div.tr-soon', A.img('u_lock', 'ci'), h('span', t('trials.soon'))));
+        h('img', { src: art(md), alt: '' }), h('img.tr-frame', { src: gothicFrame(), alt: '' }), md.open ? null : h('div.tr-soon', A.img('u_lock', 'ci'), h('span', t('trials.soon'))));
     };
     const draw = () => {
       const md = MODES[i];
@@ -224,10 +314,31 @@
     draw();
   };
 
+  /** Each hazard's sign. */
+  const FX_ICON = { blades: 'bl_multistrike', stalker: 'n_skull', stars: 'bl_storm', beams: 'bl_pyre', chains: 'pm_combo', stone: 'bl_thickhide', mist: 'bl_afflictor' };
+  const fxOne = (k) => ui.modal({ title: t('pit.fx.' + k), cls: 'pitfx', body: (m) => h('div',
+    h('div.cons-ico', A.img(FX_ICON[k] || 'u_agony')), h('p.center', t('pit.fxd.' + k)),
+    h('div.btns', h('button.btn.gold', { onclick: () => m.close() }, t('common.close')))) });
+
+  /** The Pit's start screen: its picture in the lancet, the wave it begins at, the two hazards rolled (tap one to read
+   *  it), and Ready. The fight waits under it (run.state 'intro'); Ready gives the tomes of the start (pit.js pitBegin). */
+  ui.openPitIntro = (run) => {
+    DH.input.enable(false);
+    const P = run.pit;
+    ui.modal({ closable: false, cls: 'pitintro', body: (m) => h('div',
+      h('div.pi-art', h('div.tr-arch.mid', h('img', { src: art(MODES[0]), alt: '' }), h('img.tr-frame', { src: gothicFrame(), alt: '' }))),
+      h('div.pi-t', t('pit.name')),
+      h('div.pi-wave', t('hud.pitWave', { n: U.fmt((P.from || 0) + 1) })),
+      h('div.pi-sub', t('pit.affixes')),
+      h('div.pi-fx', P.affixes.map((k) => h('button.pi-f', { 'aria-label': t('pit.fx.' + k), onclick: () => { click(); fxOne(k); } }, A.img(FX_ICON[k] || 'u_agony'), h('span', t('pit.fx.' + k))))),
+      h('div.small.muted.center', t('pit.affixTap')),
+      h('button.btn.green.block.big.pi-go', { onclick: () => { click(); m.close(); DH.input.enable(true); run.pitBegin(); } }, t('pit.ready'))) });
+  };
+
   /** The seven hazards and what each does. */
   const fxInfo = () => ui.modal({ title: t('pit.fxTitle'), cls: 'pitfx', body: (m) => h('div',
     h('div.small.muted.center', t('pit.fxSub', { n: E.PIT.roll })),
-    E.PIT.affixes.map((k) => h('div.pitfx-row', h('b', t('pit.fx.' + k)), h('div.small', t('pit.fxd.' + k)))),
+    E.PIT.affixes.map((k) => h('div.pitfx-row', A.img(FX_ICON[k] || 'u_agony', 'ci'), h('div', h('b', t('pit.fx.' + k)), h('div.small', t('pit.fxd.' + k))))),
     h('div.btns', h('button.btn.gold', { onclick: () => m.close() }, t('common.close')))) });
 
   /** The Pit is over: the wave reached, what was paid, a new record. */

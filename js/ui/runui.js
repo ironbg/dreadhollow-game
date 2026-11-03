@@ -423,13 +423,13 @@
   /* ---------------- The adventurer's reward: a chest or an ability, for an ad, as the fight begins ---------------- */
   ui.openStartBonus = (run) => {
     DH.input.enable(false);
-    let pick = 'chest', busy = false;
+    let pick = run.pit ? 'ability' : 'chest', busy = false; // in the Pit: a tome only (it has no loot)
     const done = (m) => { m.close(); DH.input.enable(true); run.resume(); };
     const card = (kind, icon) => h('div.sb-card' + (pick === kind ? '.on' : ''), { onclick: () => { click(); pick = kind; draw(); } },
       h('div.sb-art', h('i.sb-ray'), A.img(icon)), h('div.sb-t', t('startBonus.' + kind)));
     let m = null;
     const draw = () => m && m.set(h('div',
-      h('div.sb-row', card('chest', 'c_wood'), card('ability', 'tome')),
+      h('div.sb-row', run.pit ? null : card('chest', 'c_wood'), card('ability', 'tome')),
       h('div.center.small.muted', { style: { margin: '8px 0' } }, t('startBonus.sub')),
       h('button.btn.red.block.shine', { onclick: async () => {
         if (busy) return; busy = true; click();

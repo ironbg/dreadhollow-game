@@ -106,6 +106,7 @@
       if (this.state !== 'playing' || this.victoryT > 0) return;
       if (this.queue.length) {
         const q = this.queue.shift();
+        if (q.make) q.data = q.make(); // made as it opens (a tome's choices after the tome before was read)
         if (q.ev === 'run:tome' && this.fx_.randomTomes) { const c = U.pick(q.data.choices); this.chooseTome(c); this.text(this.player.x, this.player.y - 20, c.kind === 'ability' ? t('ab.' + c.id + '.name') : t('tome.title'), '#c8b8ff', true); return; }
         this.state = q.state; DH.events.emit(q.ev, q.data); return;
       }

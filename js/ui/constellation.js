@@ -68,7 +68,11 @@
   ui.openConstellation = () => {
     const CS = E.CONST;
     const knob = h('i'), slider = h('div.cons-slide', { 'aria-label': 'zoom' }, h('b.btn.small', '+'), h('div.cons-track', knob), h('b.btn.small', '−'));
-    const cv = h('canvas.cons-cv'), wrap = h('div.cons-map', cv, slider);
+    const corner = h('div.cons-corner', // bottom right, in the sky: the Pit's shop and the hero's stats
+      h('button.cons-cb', { 'aria-label': t('pitshop.title'), onclick: (e) => { e.stopPropagation(); click(); ui.openPitShop(); } }, A.img('i_essence'), h('span', t('pit.shop')), M.pitFreeReady() ? h('span.badge', '!') : null),
+      h('button.cons-cb', { 'aria-label': t('cons.stats'), onclick: (e) => { e.stopPropagation(); click(); ui.openHeroStats(DH.save.data.selectedHero); } }, A.img('n_scroll'), h('span', t('cons.stats'))));
+    ['pointerdown', 'pointerup', 'wheel'].forEach((ev) => corner.addEventListener(ev, (e) => e.stopPropagation()));
+    const cv = h('canvas.cons-cv'), wrap = h('div.cons-map', cv, slider, corner);
     const head = h('div.cons-head'), loads = h('div.cons-load'), foot = h('div.cons-foot');
     const m = ui.modal({ title: t('cons.title'), cls: 'consw', body: () => h('div.cons-body', head, loads, wrap, foot), dock: false, onClose: () => { alive = false; DH.events.off('meta', redrawAll); } });
     let alive = true;

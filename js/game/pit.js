@@ -47,8 +47,18 @@
     const lv = Math.min(45, Math.round(from * 0.8)), tomes = Math.min(5, Math.floor(from / E.PIT.every));
     for (let i = 0; i < lv; i++) { this.level++; this.xpNext = C.xpToNext(this.level, this.stageId); this.pendingLevels++; }
     if (lv) this.recompute(true);
-    for (let i = 0; i < tomes; i++) this.collect({ type: 'tome' });
+    P.startTomes = 1 + tomes; // one Arcane Tome always, and one more for every ten waves skipped (given when the fight begins: pitBegin)
     this.revives = 0;
+  };
+
+  /** The fight begins (the start screen's Ready): the Arcane Tomes of the start, one after another (each offered when
+   *  the one before is chosen, so no ability comes twice), then a tome more for an ad (the adventurer's reward). */
+  R.pitBegin = function () {
+    const P = this.pit;
+    for (let i = 0; i < (P.startTomes || 0); i++) this.queue.push({ state: 'tome', ev: 'run:tome', make: () => { this.tomes++; return Object.assign(this.tomeChoices(3), { mastery: false }); } });
+    P.startTomes = 0;
+    if (!this.startBonus) this.queue.push({ state: 'startbonus', ev: 'run:startbonus' });
+    this.resume();
   };
 
   /** Each frame in place of the hall's spawning: the clock, the wave's batches, the combo, the pause between waves,
