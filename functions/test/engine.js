@@ -143,6 +143,8 @@ const live = require('../game/live.json');
   // 100 more Essence with every point, each branch counting from its own start; stars bought at the old prices come back as Essence
   r = await withProfile(Object.assign({}, p0, { essence: 5000 }), live, (DH) => { const L = DH.actions.list; L.consBuy.run({ id: 'fury_0_0_1', n: 3 }); L.consBuy.run({ id: 'bastion_0_0_1', n: 1 }); return [DH.meta.consNext('fury'), DH.meta.consNext('bastion'), DH.meta.consSpentIn('fury')]; });
   assert.deepStrictEqual(r.result, [400, 200, 600]); assert.strictEqual(r.profile.essence, 5000 - 600 - 100);
+  r = await withProfile(p0, live, (DH) => { const C = DH.economy.CONST; let sum = 0; for (let p = 0; p < 300; p++) sum += C.cost(p); return [C.cost(248), C.cost(249), C.cost(299), sum === C.spentIn(300)]; });
+  assert.deepStrictEqual(r.result, [24900, 25000, 25000, true], 'a point never costs more than 25 000');
   r = await withProfile(Object.assign({}, p0, { essence: 10, cons: { r: { fury_0_0_1: 3 }, spent: 72 } }), live, (DH) => DH.meta.consRank('fury_0_0_1'));
   assert.strictEqual(r.result, 0); assert.strictEqual(r.profile.essence, 82); assert.strictEqual(r.profile.cons.pv, 2);
   // the Pit Pass: +50% Essence a wave and a fourth entry; a Pit fight goes on the Pit's boards

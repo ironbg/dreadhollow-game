@@ -102,11 +102,12 @@
 
   E.CONST = {
     nodes, edges, byId, branches: BR, total,
-    /** The price of the next point of a branch that already holds p points: 100 more with every point, and every branch
-     *  counts its own from the start (a branch with p points has cost step * p * (p + 1) / 2 in all). */
-    step: 100,
-    cost: (p) => 100 * (p + 1),
-    spentIn: (p) => 100 * p * (p + 1) / 2,
+    /** The price of the next point of a branch that already holds p points: 100 more with every point up to 25 000 a
+     *  point at most, and every branch counts its own from the start. */
+    step: 100, maxCost: 25000,
+    cost: (p) => Math.min(25000, 100 * (p + 1)),
+    /** All a branch with p points has cost. */
+    spentIn: (p) => { const k = Math.min(p, 250); return 50 * k * (k + 1) + Math.max(0, p - 250) * 25000; },
     /** Specialties: the points a branch needs for each of its five. */
     specials: { fury: [30, 60, 90, 150, 200], bastion: [25, 50, 75, 100, 140], plunder: [15, 30, 50, 75, 95] },
   };
