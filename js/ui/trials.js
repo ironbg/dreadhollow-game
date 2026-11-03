@@ -85,6 +85,44 @@
     draw();
   };
 
+  /** A Mastery card's ground, drawn small and shown in big pixels like the rest of the game: courses of dark stone tinted
+   *  to the card's tier, a pointed-arch niche in the middle (where the icon stands) lit from within in the tier's colour,
+   *  two columns at its sides, a rose window above, a plinth below for the cost and the level. One per tier, kept. */
+  const TIER_COL = { blue: ['#1a2640', '#090d18', '#6a9ae8'], purple: ['#2a1840', '#0e0716', '#b07ae8'], gold: ['#34260e', '#110b04', '#f0b850'], red: ['#3c1216', '#140405', '#ff6a5a'] };
+  const cardArt = {};
+  ui.masteryCardArt = (tier) => {
+    if (cardArt[tier]) return cardArt[tier];
+    const G = DH.gfx, P = G.P, W = 56, H = 68, [c1, c2, glow] = TIER_COL[tier] || TIER_COL.blue;
+    const c = G.canvas(W, H), g = c.getContext('2d');
+    let seed = tier.length * 977 + tier.charCodeAt(0); const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+    g.fillStyle = P.lg(g, 0, 0, 0, H, [c1, c2]); g.fillRect(0, 0, W, H);
+    // the stone courses: each block a little lighter or darker, black mortar between
+    for (let y = 0, row = 0; y < H; y += 6, row++) for (let x = -(row % 2) * 5; x < W; x += 10) {
+      const k = rnd(); g.fillStyle = k < 0.5 ? 'rgba(255,240,220,' + (0.02 + k * 0.05) + ')' : 'rgba(0,0,0,' + (k - 0.5) * 0.35 + ')'; g.fillRect(x + 1, y + 1, 9, 5);
+      g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(x, y, 10, 1); g.fillRect(x, y, 1, 6);
+    }
+    // the niche: a pointed arch, dark inside, the tier's light rising in it
+    const ax = W / 2, top = 19, bot = 50, hw = 14;
+    const arch = () => { g.beginPath(); g.moveTo(ax - hw, bot); g.lineTo(ax - hw, top + 13); g.quadraticCurveTo(ax - hw, top + 2, ax, top - 2); g.quadraticCurveTo(ax + hw, top + 2, ax + hw, top + 13); g.lineTo(ax + hw, bot); g.closePath(); };
+    arch(); g.fillStyle = '#07040a'; g.fill();
+    g.save(); arch(); g.clip(); g.fillStyle = P.rg(g, ax, 36, 18, [G.rgba(glow, 0.5), 'rgba(0,0,0,0)']); g.fillRect(0, 0, W, H); g.restore();
+    g.lineWidth = 3; g.strokeStyle = '#050308'; arch(); g.stroke();
+    g.lineWidth = 2; g.strokeStyle = P.lg(g, 0, top, 0, bot, ['#9a8e88', '#5e5450', '#2e282c']); arch(); g.stroke();
+    g.lineWidth = 1; g.strokeStyle = G.rgba(glow, 0.6); g.beginPath(); g.moveTo(ax - hw + 2, bot); g.lineTo(ax - hw + 2, top + 13); g.quadraticCurveTo(ax - hw + 2, top + 4, ax, top + 1); g.quadraticCurveTo(ax + hw - 2, top + 4, ax + hw - 2, top + 13); g.lineTo(ax + hw - 2, bot); g.stroke();
+    P.rect(g, ax - 2, top - 4, 4, 4, '#8a7e78'); P.rect(g, ax - 1, top - 4, 2, 1, '#d8ccc0'); // the keystone
+    // two columns at its sides, capitals and bases
+    for (const x of [ax - hw - 6, ax + hw + 3]) {
+      P.rect(g, x - 1, 30, 5, 22, '#050308'); P.rect(g, x, 31, 3, 20, '#5e5450'); P.rect(g, x, 31, 1, 20, '#8a7e78');
+      P.rect(g, x - 2, 28, 7, 3, '#050308'); P.rect(g, x - 1, 29, 5, 1, '#9a8e88'); P.rect(g, x - 2, 50, 7, 3, '#050308'); P.rect(g, x - 1, 50, 5, 2, '#6e625e');
+    }
+    // the plinth below: a dark slab with a lit edge
+    P.rect(g, 0, 53, W, 15, 'rgba(0,0,0,0.55)'); P.rect(g, 0, 53, W, 1, 'rgba(255,230,200,0.18)');
+    // the frame's own shading: lit top-left, dark bottom-right
+    P.rect(g, 0, 0, W, 1, 'rgba(255,240,220,0.18)'); P.rect(g, 0, 0, 1, H, 'rgba(255,240,220,0.12)'); P.rect(g, 0, H - 1, W, 1, 'rgba(0,0,0,0.6)'); P.rect(g, W - 1, 0, 1, H, 'rgba(0,0,0,0.5)');
+    const id = g.getImageData(0, 0, W, H); G.quantize(id, { dither: 8, sat: 0.92, contrast: 1.05 }); g.putImageData(id, 0, 0);
+    return (cardArt[tier] = 'url(' + c.toDataURL() + ')');
+  };
+
   /** The Pit's Mastery: its level from the Pit's fights, the points it gives and the cards they buy (blue, purple, gold,
    *  red: from the plain to the rarest; a full card's name turns green). The Mastery Pass at the bottom (every Trial). */
   ui.openPitMastery = () => {
@@ -104,8 +142,10 @@
         h('div.small.muted.center', t('pit.masteryDesc', { n: PM.xpPerWave }) + (M.masteryPass() ? ' ' + t('pit.masteryPass') : '')),
         h('div.pm-grid', ids.map((id) => {
           const d = PM.perks[id], lv = M.pitPerk(id), full = lv >= d.max, can = !full && free >= d.cost;
-          return h('div.pm-card.t-' + d.tier + (full ? '.full' : can ? '.can' : '') + (lv ? '' : '.zero') + (openId === id ? '.sel' : ''), { 'data-id': id, onclick: () => { click(); openId = id; draw(); } },
+          const el = h('div.pm-card.t-' + d.tier + (full ? '.full' : can ? '.can' : '') + (lv ? '' : '.zero') + (openId === id ? '.sel' : ''), { 'data-id': id, onclick: () => { click(); openId = id; draw(); } },
             h('div.pm-n', t('pit.pk.' + id)), h('div.pm-icw', A.img(d.icon, 'pm-ic')), h('div.pm-cost', d.cost), h('div.pm-lvl', lv + '/' + d.max));
+          el.style.setProperty('--art', ui.masteryCardArt(d.tier)); // its gothic ground
+          return el;
         })),
         h('div.mact',
           M.masteryPass() ? h('div.pm-pass.on', A.img('pm_pass', 'ci'), h('b', t('mpass.on')))
@@ -130,15 +170,15 @@
       const down = async () => { if (!lv) return; const r = await ui.act('pitPerkDown', { id }); if (r != null) { DH.audio.play('coin'); draw(); } };
       const pop = h('div.pm-pop.t-' + d.tier,
         h('div.pp-panel',
-          h('button.pp-x', { onclick: () => { click(); openId = null; pop.remove(); draw(); }, 'aria-label': t('common.close') }, '×'),
+          h('button.x', { onclick: () => { click(); openId = null; pop.remove(); draw(); }, 'aria-label': t('common.close') }, A.img('u_close', 'ci')),
           h('div.pp-t', t('pit.pk.' + id)),
           h('div.pp-lv', t('pit.lvOf', { n: lv, m: d.max })),
           h('div.pp-d', desc(id, lv || 1), lv ? null : h('span.muted', ' ' + t('pit.atLv1'))),
           !full && lv ? h('div.pp-next', t('pit.nextLv') + ': ', desc(id, lv + 1)) : null,
           h('div.pp-cost', full ? h('span.good', t('cons.full')) : t('pit.costPer', { n: d.cost }))),
         h('div.pp-btns',
-          h('button.pp-b.minus' + (lv ? '' : '.off'), { onclick: down, 'aria-label': t('cons.sell1') }, '−'),
-          h('button.pp-b.plus' + (can ? '' : '.off'), { onclick: up, 'aria-label': t('cons.buy1') }, '+')));
+          h('button.btn.red.pp-b' + (lv ? '' : '.off'), { onclick: down, 'aria-label': t('cons.sell1') }, '−'),
+          h('button.btn.green.pp-b' + (can ? '' : '.off'), { onclick: up, 'aria-label': t('cons.buy1') }, '+')));
       root.append(pop);
       const rr = root.getBoundingClientRect(), cr = cardEl.getBoundingClientRect(), z = rr.width / root.offsetWidth || 1; // (the window may be scaled)
       const cl = (cr.left - rr.left) / z, ct = (cr.top - rr.top) / z, cw = cr.width / z, W = root.offsetWidth, pw = Math.min(W - 4, Math.round(cw * 2.1));

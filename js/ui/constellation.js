@@ -14,7 +14,7 @@
 
   ui.openConstellation = () => {
     const CS = E.CONST;
-    const knob = h('i'), slider = h('div.cons-slide', { 'aria-label': 'zoom' }, h('b', '+'), h('div.cons-track', knob), h('b', '−'));
+    const knob = h('i'), slider = h('div.cons-slide', { 'aria-label': 'zoom' }, h('b.btn.small', '+'), h('div.cons-track', knob), h('b.btn.small', '−'));
     const cv = h('canvas.cons-cv'), wrap = h('div.cons-map', cv, slider);
     const head = h('div.cons-head'), foot = h('div.cons-foot');
     const m = ui.modal({ title: t('cons.title'), cls: 'consw', body: () => h('div.cons-body', head, wrap, foot), dock: false, onClose: () => { alive = false; DH.events.off('meta', redrawAll); } });
@@ -158,14 +158,14 @@
       };
       pop.className = 'cons-pop ' + n.b + (full ? ' full' : '');
       pop.replaceChildren(
-        h('div.cp-head', A.img('cs_' + k, 'ci'), h('b', t('cons.kind.' + n.kind) + ': ' + t('stat.' + k)), h('button.cp-x', { onclick: () => { click(); closeStar(); }, 'aria-label': t('common.close') }, '×')),
+        h('div.cp-head', A.img('cs_' + k, 'ci'), h('b', t('cons.kind.' + n.kind) + ': ' + t('stat.' + k)), h('button.x', { onclick: () => { click(); closeStar(); }, 'aria-label': t('common.close') }, A.img('u_close', 'ci'))),
         h('div.cp-stat', A.img('u_star', 'ci'), ' ', ui.fmtStat(k, v), h('span.muted', ' ' + t('cons.perRankShort'))),
         h('div.cp-tot', '(' + ui.fmtStat(k, tot) + (full ? '' : ' → ') , full ? null : h('span.good', ui.fmtStat(k, tot + v)), ')'),
         h('div.cp-row',
-          h('button.cp-b.minus' + (r ? '' : '.off'), { onclick: down, 'aria-label': t('cons.sell1') }, '−'),
+          h('button.btn.small.red.cp-b' + (r ? '' : '.off'), { onclick: down, 'aria-label': t('cons.sell1') }, '−'),
           h('span.cp-r', r + '/' + n.max),
-          h('button.cp-b.plus' + (!full && open && M.essence() >= cost ? '' : '.off'), { onclick: () => { if (!full) buy(1); }, 'aria-label': t('cons.buy1') }, '+'),
-          h('button.cp-b.max' + (!full && open && M.essence() >= cost ? '' : '.off'), { onclick: () => { if (!full) buy(n.max - r); }, 'aria-label': t('cons.buyMax') }, '⇈'),
+          h('button.btn.small.green.cp-b' + (!full && open && M.essence() >= cost ? '' : '.off'), { onclick: () => { if (!full) buy(1); }, 'aria-label': t('cons.buy1') }, '+'),
+          h('button.btn.small.gold.cp-b' + (!full && open && M.essence() >= cost ? '' : '.off'), { onclick: () => { if (!full) buy(n.max - r); }, 'aria-label': t('cons.buyMax') }, '⇈'),
           h('span.cp-cost', full ? h('span.good', t('cons.maxed')) : !open ? h('span.muted', t('cons.lockedShort')) : [A.img('i_essence', 'ci'), h('b' + (M.essence() >= cost ? '' : '.bad'), U.fmt(cost))])));
       pop.style.display = '';
     };

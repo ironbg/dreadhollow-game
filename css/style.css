@@ -1885,3 +1885,63 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
   box-shadow: inset 0 1px 0 rgba(255,255,255,.3), inset 0 -3px 0 rgba(0,0,0,.35); text-shadow: 0 2px 0 rgba(0,0,0,.6); }
 .pp-b.minus { background: linear-gradient(180deg, #c03a3a, #7a1418); } .pp-b.plus { background: linear-gradient(180deg, #7ab83a, #3e6e18); }
 .pp-b.off { filter: grayscale(.85) brightness(.55); }
+
+/* ===== the Trials' own pieces in the game's gothic skin (stone texture, black outline, bronze ring, hard bevel, forged corners) ===== */
+.gframe, .pm-pop .pp-panel, .cons-pop, .pm-pass, .pit-passcard, .pm-lv, .pm-free, .pit-shopbtn {
+  border: 2px solid #050308; background: var(--tex-panel, none) 0 0 / 64px 64px, #1b1320;
+  box-shadow: inset 0 0 0 2px var(--ring), inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo), 0 3px 0 #000; }
+/* the Mastery's cards: their gothic ground (ui.masteryCardArt), a ring in the tier's colour, forged corners */
+.pm-card { background: var(--corner-tl) 0 0 / 14px 14px no-repeat, var(--corner-tr) 100% 0 / 14px 14px no-repeat, var(--corner-bl) 0 100% / 14px 14px no-repeat, var(--corner-br) 100% 100% / 14px 14px no-repeat, var(--art) 0 0 / 100% 100% no-repeat, var(--c2);
+  image-rendering: pixelated; border: 2px solid #050308; padding: 5px 4px 6px;
+  box-shadow: inset 0 0 0 2px var(--bd), inset 4px 4px 0 0 rgba(255,230,200,.08), inset -4px -4px 0 0 rgba(0,0,0,.45), 0 3px 0 #000; }
+.pm-card::before { display: none; }
+.pm-card.can { box-shadow: inset 0 0 0 2px var(--bd), inset 4px 4px 0 0 rgba(255,230,200,.08), inset -4px -4px 0 0 rgba(0,0,0,.45), 0 3px 0 #000, 0 0 0 2px rgba(126,232,154,.55); }
+.pm-card.can::after { top: 6px; right: 6px; width: 6px; height: 6px; box-shadow: 0 0 0 1px #050308; }
+.pm-card.sel { outline: 2px solid #e8c878; outline-offset: 0; }
+.pm-n { min-height: 24px; font-family: var(--title, serif); font-size: 11px; letter-spacing: .02em; }
+.pm-icw { margin-top: 4px; padding: 0; background: none; }
+.pm-ic { width: 44px; height: 44px; }
+.pm-cost { margin-top: -6px; min-width: 18px; font: 9px var(--num); line-height: 14px; background: #0c080e; border: 2px solid #050308; box-shadow: inset 0 0 0 1px var(--bd); }
+.pm-lvl { margin-top: 4px; font: 10px var(--num); }
+.pm-bar { height: 10px; border: 2px solid #050308; background: #0c080e; box-shadow: inset 0 0 0 1px var(--ring); }
+.pm-bar i { background: linear-gradient(180deg, #fff0b8 0 20%, #eab044 20% 60%, #a06a18 60%); }
+.pm-lv { border-color: #050308; } .pm-lv b { font-family: var(--num); font-size: 16px; }
+.pm-free b { font-family: var(--num); font-size: 14px; }
+/* a card's panel */
+.pm-pop .pp-panel { padding: 9px 10px 10px; box-shadow: inset 0 0 0 2px var(--bd), inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo), 0 3px 0 #000;
+  background: var(--corner-tl) 0 0 / 14px 14px no-repeat, var(--corner-bl) 0 100% / 14px 14px no-repeat, var(--corner-br) 100% 100% / 14px 14px no-repeat,
+    linear-gradient(180deg, color-mix(in srgb, var(--c1) 70%, transparent), color-mix(in srgb, var(--c2) 85%, transparent)), var(--tex-panel, none) 0 0 / 64px 64px, #1b1320; }
+.pm-pop .pp-panel .x { top: -14px; right: -12px; }
+.pp-t { font-family: var(--title, serif); font-size: 17px; letter-spacing: .02em; }
+.pp-lv { font: 10px var(--num); margin-top: 4px; }
+.pp-cost { color: #e8848a; }
+.pp-btns { gap: 6px; margin-top: 4px; }
+.pp-b.btn { min-height: 36px; padding: 0; font-size: 24px; line-height: 1; }
+/* the Mastery Pass */
+.pm-pass { box-shadow: inset 0 0 0 2px var(--ring-gold), inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo), 0 3px 0 #000; }
+.pm-pass.on { box-shadow: inset 0 0 0 2px #3a6a3a, inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo), 0 3px 0 #000; }
+.pit-passcard { box-shadow: inset 0 0 0 2px #8a3a3a, inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo), 0 3px 0 #000; }
+/* the Constellation's star panel and its zoom */
+.cons-pop { padding: 8px 9px 9px; box-shadow: inset 0 0 0 2px var(--bc), inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo), 0 3px 0 #000, 0 6px 14px rgba(0,0,0,.7);
+  background: var(--corner-tl) 0 0 / 14px 14px no-repeat, var(--corner-bl) 0 100% / 14px 14px no-repeat, var(--corner-br) 100% 100% / 14px 14px no-repeat, var(--tex-panel, none) 0 0 / 64px 64px, #1b1320; }
+.cons-pop .x { top: -14px; right: -12px; }
+.cp-head b { font-family: var(--title, serif); font-size: 14px; }
+.cp-b.btn { width: 34px; min-height: 30px; padding: 0; font-size: 19px; line-height: 1; }
+.cp-r { font: 11px var(--num); }
+.cons-slide b.btn { width: 28px; min-height: 26px; padding: 0; font-size: 16px; line-height: 1; }
+.cons-track { width: 10px; border: 2px solid #050308; background: var(--tex-dark, none) 0 0 / 64px 64px, #0c080e; box-shadow: inset 0 0 0 1px var(--ring); }
+.cons-track i { width: 24px; height: 12px; border: 2px solid #050308; box-shadow: inset 2px 2px 0 0 rgba(255,255,255,.3), inset -2px -2px 0 0 rgba(0,0,0,.35);
+  background: linear-gradient(180deg, #fff0b8 0 15%, #eab044 15% 60%, #a06a18 60%); }
+/* the Pit's shop door and its sweep slider */
+.pit-shopbtn { box-shadow: inset 0 0 0 2px var(--ring-gold), inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo), 0 3px 0 #000; padding: 4px 7px 3px; }
+.pit-slide input::-webkit-slider-runnable-track { height: 10px; border: 2px solid #050308; background: linear-gradient(90deg, #3066c0 var(--f), #0c080e var(--f)); box-shadow: inset 0 0 0 1px var(--ring); }
+.pit-slide input::-webkit-slider-thumb { width: 16px; height: 18px; margin-top: -6px; border: 2px solid #050308; background: linear-gradient(180deg, #fff0b8 0 15%, #eab044 15% 60%, #a06a18 60%); box-shadow: inset 2px 2px 0 0 rgba(255,255,255,.3); }
+/* the Pit's panel in a fight: hard-banded bars */
+#hud .pb-bar { height: 9px; border: 2px solid #050308; box-shadow: inset 0 0 0 1px #6a5030; }
+#hud .pb-bar i { background: linear-gradient(180deg, #ffe0a0 0 25%, #e08a2a 25% 65%, #a04a10 65%); transition: none; }
+#hud .pb-cbar { height: 6px; border: 2px solid #050308; }
+#hud .pb-cbar i { background: linear-gradient(180deg, #ff9a70 0 30%, #e0402a 30% 70%, #8a1a10 70%); box-shadow: none; }
+#hud .pb-ct, #hud .pb-n { font-family: var(--title, serif); font-style: normal; }
+.pm-n { text-shadow: 1px 1px 0 #000, -1px 0 0 #000, 0 -1px 0 #000, 0 0 4px #000; }
+.pm-icw { margin-top: 8px; }
+.pit-sweep .btn { font-size: 14px; padding: 0 6px; }
