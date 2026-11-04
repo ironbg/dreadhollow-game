@@ -127,8 +127,11 @@
     }
   }
   // then a few rounds of easing: stars closer than their sizes allow push apart, lines pull gently towards LINE (the
-  // heart stays put), so the winding shape keeps but nothing overlaps
-  {
+  // heart stays put), so the winding shape keeps but nothing overlaps. Only the screen needs the places (E.CONST.place,
+  // called when the Constellation opens): the server, which runs this file for every action, never pays for it.
+  let placed = false;
+  const place = () => {
+    if (placed) return; placed = true;
     const N = nodes.length, idx = {}; nodes.forEach((x, i) => { idx[x.id] = i; });
     const ed = edges.map(([a2, b2]) => [idx[a2], idx[b2]]);
     for (let it = 0; it < 160; it++) {
@@ -144,11 +147,11 @@
       }
     }
     nodes.forEach((x) => { x.x = Math.round(x.x); x.y = Math.round(x.y); });
-  }
+  };
   const total = {}; nodes.forEach((x) => { if (x.b) total[x.b] = (total[x.b] || 0) + x.max; });
 
   E.CONST = {
-    nodes, edges, byId, branches: BR, total,
+    nodes, edges, byId, branches: BR, total, place,
     /** The price of the next point of a branch that already holds p points: 100 more with every point up to 25 000 a
      *  point at most, and every branch counts its own from the start. */
     step: 100, maxCost: 25000,

@@ -68,7 +68,7 @@
   };
 
   ui.openConstellation = () => {
-    const CS = E.CONST;
+    const CS = E.CONST; CS.place(); // the stars' places, worked out the first time the sky opens
     const knob = h('i'), slider = h('div.cons-slide', { 'aria-label': 'zoom' }, h('b.btn.small', '+'), h('div.cons-track', knob), h('b.btn.small', '−'));
     const corner = h('div.cons-corner', // bottom right, in the sky: the Pit's shop and the hero's stats
       h('button.cons-cb', { 'aria-label': t('pitshop.title'), onclick: (e) => { e.stopPropagation(); click(); ui.openPitShop(); } }, A.img('i_essence'), h('span', t('pit.shop')), M.pitFreeReady() ? h('span.badge', '!') : null),

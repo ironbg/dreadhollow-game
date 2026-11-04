@@ -58,8 +58,15 @@
   /* ---------------- toasts ---------------- */
   /** A player action (DH.actions) through DH.server: resolves to its result (null or false: not enough, not allowed),
    *  or undefined after telling the player the call itself failed (no connection, the server refused). */
+  let busyN = 0;
   ui.act = async (name, args) => {
-    try { return await DH.server.act(name, args); } catch (e) { ui.serverErr(e); return undefined; }
+    // a call to the server that takes more than a moment shows it is on its way (a small turning ring, top centre)
+    let on = false;
+    const slow = setTimeout(() => { on = true; busyN++; document.body.classList.add('srvbusy'); }, 250);
+    try { return await DH.server.act(name, args); } catch (e) { ui.serverErr(e); return undefined; } finally {
+      clearTimeout(slow);
+      if (on && --busyN <= 0) { busyN = 0; document.body.classList.remove('srvbusy'); }
+    }
   };
   /** What a failed call to the game's server means for the player. */
   ui.serverErr = (e) => {

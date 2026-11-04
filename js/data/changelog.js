@@ -4,6 +4,17 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.59',
+      bg: [
+        'По-бързи бутони: сървърът отговаря на всяко действие (купуване, вдигане, награди) няколко пъти по-бързо, а играта тръгва по-бързо.',
+        'Ако сървърът все пак се бави, горе в средата се върти малък знак, за да се вижда, че действието е в ход.',
+      ],
+      en: [
+        'Faster buttons: the server answers every action (buying, upgrading, rewards) several times faster, and the game starts faster.',
+        'If the server is still slow, a small ring turns at the top centre so you can see the action is on its way.',
+      ],
+    },
+    {
       v: '1.61.58',
       bg: [
         'Пет нови трофея за Изпитанията (по 4–5 звезди, с камъни): Дълбините на Ямата (вълна), Боец от Ямата (битки), Майстор на Изпитанията (ниво на Майсторството), Пазител на Есенцията и Звездоброец (рангове в Съзвездието).',
