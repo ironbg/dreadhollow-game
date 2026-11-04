@@ -22,6 +22,9 @@
     beams: { every: [11, 15], warnA: 1.1, warnB: 0.8, width: 30, dmg: 0.45 },
     stone: 0.15, chains: 1.25,
     mist: { n: 3, R: 24, life: 18, gap: 2.5, dist: 140, pull: 0.4, max: 70, tick: 0.75, dmg: 0.18 },
+    // always (not a rolled hazard): stones break off the rim and fall into the pit, mostly near the hero; a shadow marks
+    // where each lands; it hits for a share of the hero's health, and the foes it lands on too
+    rockfall: { first: 6, every: [4, 6.5], warn: 1.25, R: 15, dmg: 0.2, foe: 3, near: 0.7 },
   };
   C.PIT_FX = PF;
   /** The Pit's own ground, as in its picture: a deep shaft of rough dark rock around the start (the far and side walls
@@ -97,6 +100,31 @@
     }
     if (!P.need && this.time >= P.next) this.pitWave(P.coming || P.wave + 1);
     for (const k of P.affixes) if (FX[k]) FX[k].call(this, dt);
+    this.pitRockfall(dt);
+  };
+
+  /** Falling stones (C.PIT_FX.rockfall): a shadow where one will land, then the stone, a blow to whoever stands there. */
+  R.pitRockfall = function (dt) {
+    const Q = PF.rockfall, F = this.pit.fx, p = this.player;
+    const S = F.rocks || (F.rocks = { t: Q.first, list: [] });
+    if ((S.t -= dt) <= 0) {
+      S.t = U.rand(Q.every[0], Q.every[1]);
+      let x, y;
+      if (Math.random() < Q.near) { const a = Math.random() * TAU, d = U.rand(0, 45); x = p.x + Math.cos(a) * d; y = p.y + Math.sin(a) * d; }
+      else { const a = Math.random() * TAU, d = Math.sqrt(Math.random()) * AR.R * 0.85; x = Math.cos(a) * d; y = Math.sin(a) * d; }
+      const d0 = Math.hypot(x, y), A = AR.rAt(Math.atan2(y, x)) - 14; if (d0 > A) { x *= A / d0; y *= A / d0; }
+      S.list.push({ x, y, t: -Q.warn, s: 2.6 + Math.random() * 1.8, spin: Math.random() * 6, hit: false });
+    }
+    for (let i = S.list.length - 1; i >= 0; i--) {
+      const X = S.list[i]; X.t += dt;
+      if (!X.hit && X.t >= 0) {
+        X.hit = true;
+        if (U.dist2(X.x, X.y, p.x, p.y) < (Q.R + p.r) ** 2) hit(this, Q.dmg);
+        for (const e of this.enemies) if (!e.dead && !e.def.prop && U.dist2(X.x, X.y, e.x, e.y) < Q.R * Q.R) { this.rawDamage(e, this.consBase() * Q.foe, '#c8b8a8', 'rock'); if (e.hp <= 0 && !e.dead) this.killEnemy(e); }
+        this.burst(X.x, X.y, 14, ['#5a4c4a', '#8a7a74', '#2a2020'], 70); this.shake = Math.max(this.shake, 3); DH.audio.play('boom');
+      }
+      if (X.t > 0.6) S.list.splice(i, 1);
+    }
   };
 
   /** The last of a wave never hides: every 2 s the ones left far from the hero come down off the wall near him. */
@@ -253,13 +281,16 @@
   };
 
   /** The hazards on the ground and the Stalker (render.js, under the foes). */
-  /** The pit's walls, painted once (at the floor's pixel density, then graded to the game's palette like every sprite):
-   *  scorched ground above, the faces of broken dark rock (lit red from below, darker at the foot) veined with glowing
-   *  cracks, the lava falls' channels and their pools of fire, rubble along the foot, an iron fence of spikes on the far
-   *  rim, the near rim as a lip over the floor, the floor reddening and darkening towards the walls. What moves (the lava
-   *  flowing, the fire's glow, the torches, the falling stones): drawPitArena. */
+  /** The pit's walls, painted once at the floor's pixel density and graded to the game's palette like every sprite.
+   *  The faces are cliffs: columns of rock split by black fissures, each column broken into ledged slabs (a lit top, a
+   *  face, a shadow under the ledge, lit from the top left and warmed red from the fire below), cut by glowing cracks;
+   *  the rim a row of rugged lumps overhanging the drop; rubble of every size at the foot; pools of molten rock under a
+   *  floating crust; the ground above scorched and fissured; iron spikes and chains as in the Pit's picture. The lava's
+   *  running and the glows: drawPitArena. */
   const PX = 2, AE = AR.R * 1.08 + AR.wall + 60;
   let ART = null;
+  const mix = (a, b, k) => [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * k));
+  const rgb = (c, m) => 'rgb(' + Math.max(0, Math.min(255, Math.round(c[0] * (m || 1)))) + ',' + Math.max(0, Math.min(255, Math.round(c[1] * (m || 1)))) + ',' + Math.max(0, Math.min(255, Math.round(c[2] * (m || 1)))) + ')';
   const pitArt = () => {
     if (ART) return ART;
     const G = DH.gfx, P = G.P, S = Math.round(AE * 2 * PX), c = G.canvas(S, S), g = c.getContext('2d');
@@ -268,84 +299,169 @@
     const N = 240, pts = [];
     for (let i = 0; i < N; i++) { const a = -Math.PI + i / N * Math.PI * 2, rr = AR.rAt(a), x = Math.cos(a) * rr, y = Math.sin(a) * rr; pts.push({ a, x, y, h: AR.hAt(a) }); }
     const top = pts.map((q) => ({ x: q.x, y: q.y - q.h }));
-    const floorPath = () => { g.beginPath(); pts.forEach((q, i) => (i ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y))); g.closePath(); };
-    const facePath = () => { g.beginPath(); pts.forEach((q, i) => (i ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y))); for (let i = N - 1; i >= 0; i--) g.lineTo(top[i].x, top[i].y); g.closePath(); };
+    const poly = (pp) => { g.beginPath(); pp.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.closePath(); };
+    const floorPath = () => poly(pts.map((q) => [q.x, q.y]));
+    const facePath = () => { const pp = pts.map((q) => [q.x, q.y]); for (let i = N - 1; i >= 0; i--) pp.push([top[i].x, top[i].y]); poly(pp); };
     const at = (a2) => { const rr = AR.rAt(a2); return { x: Math.cos(a2) * rr, y: Math.sin(a2) * rr, h: AR.hAt(a2) }; };
-    // the ground above: scorched dark stone, cracked, with ash
-    g.fillStyle = '#1e1716'; g.fillRect(-AE, -AE, AE * 2, AE * 2);
-    for (let i = 0; i < 700; i++) { const x = (r() - 0.5) * 2 * AE, y = (r() - 0.5) * 2 * AE, k = r(); g.fillStyle = k < 0.5 ? 'rgba(48,38,36,0.6)' : k < 0.8 ? 'rgba(12,8,8,0.55)' : 'rgba(90,80,76,0.25)'; g.beginPath(); g.ellipse(x, y, 3 + r() * 10, 2 + r() * 6, r() * 3, 0, Math.PI * 2); g.fill(); }
-    g.strokeStyle = 'rgba(0,0,0,0.6)'; g.lineWidth = 1;
-    for (let i = 0; i < 160; i++) { let x = (r() - 0.5) * 2 * AE, y = (r() - 0.5) * 2 * AE; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 3; k++) { x += (r() - 0.5) * 16; y += (r() - 0.5) * 16; g.lineTo(x, y); } g.stroke(); }
-    // the floor: cut out (the hall's floor shows), then darkened and reddened towards the walls
+    const ROCK_TOP = [122, 106, 100], ROCK_MID = [70, 56, 58], ROCK_LOW = [44, 30, 32], WARM = [150, 52, 30];
+    const rockAt = (k) => (k < 0.5 ? mix(ROCK_TOP, ROCK_MID, k * 2) : mix(ROCK_MID, ROCK_LOW, (k - 0.5) * 2)); // k: 0 at the rim, 1 at the foot
+
+    // ---- the ground above: scorched stone slabs, fissured, ash in the cracks, a faint ember here and there
+    g.fillStyle = '#211918'; g.fillRect(-AE, -AE, AE * 2, AE * 2);
+    for (let i = 0; i < 520; i++) {
+      const x = (r() - 0.5) * 2 * AE, y = (r() - 0.5) * 2 * AE, w = 8 + r() * 18, hh = 6 + r() * 12, l = 30 + r() * 16;
+      const pp = []; for (let j = 0; j < 6; j++) { const t = j / 6 * Math.PI * 2; pp.push([x + Math.cos(t) * w * (0.7 + r() * 0.35), y + Math.sin(t) * hh * (0.7 + r() * 0.35)]); }
+      poly(pp); g.fillStyle = 'rgb(' + (l + 4 | 0) + ',' + (l - 4 | 0) + ',' + (l - 5 | 0) + ')'; g.fill(); g.strokeStyle = 'rgba(0,0,0,0.55)'; g.lineWidth = 1; g.stroke();
+      g.strokeStyle = 'rgba(255,230,210,0.07)'; g.beginPath(); g.moveTo(pp[3][0], pp[3][1]); g.lineTo(pp[4][0], pp[4][1]); g.stroke();
+    }
+    for (let i = 0; i < 40; i++) { let x = (r() - 0.5) * 2 * AE, y = (r() - 0.5) * 2 * AE; const v = [[x, y]]; for (let k = 0; k < 4; k++) { x += (r() - 0.5) * 18; y += (r() - 0.5) * 18; v.push([x, y]); }
+      g.strokeStyle = 'rgba(0,0,0,0.8)'; g.lineWidth = 2; g.beginPath(); v.forEach(([a2, b2], j) => (j ? g.lineTo(a2, b2) : g.moveTo(a2, b2))); g.stroke();
+      if (r() < 0.35) { g.strokeStyle = 'rgba(200,60,20,0.55)'; g.lineWidth = 0.8; g.stroke(); } }
+
+    // ---- the floor: cut out (the hall's floor shows), darkened and reddened towards the walls
     g.save(); floorPath(); g.globalCompositeOperation = 'destination-out'; g.fill(); g.restore();
     g.save(); floorPath(); g.clip();
-    const sh = g.createRadialGradient(0, 0, AR.R * 0.5, 0, 0, AR.R * 1.1); sh.addColorStop(0, 'rgba(30,4,2,0)'); sh.addColorStop(0.7, 'rgba(30,4,2,0.35)'); sh.addColorStop(1, 'rgba(14,2,2,0.75)');
+    const sh = g.createRadialGradient(0, 0, AR.R * 0.45, 0, 0, AR.R * 1.1); sh.addColorStop(0, 'rgba(30,4,2,0)'); sh.addColorStop(0.65, 'rgba(34,6,3,0.3)'); sh.addColorStop(1, 'rgba(12,2,2,0.8)');
     g.fillStyle = sh; g.fillRect(-AE, -AE, AE * 2, AE * 2);
     g.restore();
-    // the faces: broken dark rock, lit red from the fire below and darker in the middle
+
+    // ---- the cliffs
     g.save(); facePath(); g.clip();
-    const fg = g.createLinearGradient(0, -AR.R * 1.1 - AR.wall, 0, AR.R * 0.4); fg.addColorStop(0, '#5a4a48'); fg.addColorStop(0.5, '#3a2c2e'); fg.addColorStop(1, '#2a1616');
-    g.fillStyle = fg; g.fillRect(-AE, -AE, AE * 2, AE * 2);
-    for (let i = 0; i < N; i += 2) {
-      const q = pts[i]; if (q.h < 4) continue;
-      for (let y = q.y - q.h - 2; y < q.y + 4; y += 8 + r() * 5) {
-        const k = (y - (q.y - q.h)) / Math.max(1, q.h), x = q.x + (r() - 0.5) * 8, rad = 5 + r() * 5, pp = [];
-        for (let j = 0; j < 7; j++) { const t = j / 7 * Math.PI * 2; pp.push([x + Math.cos(t) * rad * (0.7 + r() * 0.5), y + Math.sin(t) * rad * 0.7 * (0.7 + r() * 0.5)]); }
-        const l = Math.round(104 - Math.sin(k * Math.PI) * 50 - k * 10 + (r() - 0.5) * 18), red = Math.round(k * k * 40); // the foot warmed by the fire
-        g.beginPath(); pp.forEach(([a2, b2], j) => (j ? g.lineTo(a2, b2) : g.moveTo(a2, b2))); g.closePath();
-        g.fillStyle = 'rgb(' + (l + 4 + red) + ',' + (l - 6) + ',' + (l - 8) + ')'; g.fill();
-        g.strokeStyle = 'rgba(0,0,0,0.7)'; g.lineWidth = 1; g.stroke();
-        g.strokeStyle = 'rgba(255,230,210,' + (0.2 * (1 - k)) + ')'; g.beginPath(); g.moveTo(pp[3][0], pp[3][1]); g.lineTo(pp[4][0], pp[4][1]); g.lineTo(pp[5][0], pp[5][1]); g.stroke();
-        if (k > 0.6) { g.strokeStyle = 'rgba(255,90,30,' + ((k - 0.6) * 0.8) + ')'; g.beginPath(); g.moveTo(pp[0][0], pp[0][1]); g.lineTo(pp[1][0], pp[1][1]); g.lineTo(pp[2][0], pp[2][1]); g.stroke(); } // fire-lit undersides
-      }
-    }
-    // glowing cracks: veins of fire running through the rock
+    g.fillStyle = '#120a0b'; g.fillRect(-AE, -AE, AE * 2, AE * 2); // the fissures' dark shows between the slabs
+    const pAt = (i, f) => { const q = pts[((Math.round(i) % N) + N) % N]; return [q.x, q.y - q.h * f]; };
     const veins = [];
-    for (let i = 0; i < 26; i++) {
-      const q = pts[r() * N | 0]; if (q.h < 25) continue;
-      let x = q.x + (r() - 0.5) * 6, y = q.y - q.h * (0.15 + r() * 0.5); const v = [[x, y]];
-      for (let k = 0; k < 4; k++) { x += (r() - 0.5) * 10; y += 6 + r() * 8; v.push([x, y]); }
-      veins.push(v);
-      for (const [w2, col] of [[3.2, 'rgba(120,20,8,0.8)'], [1.6, '#ff6a20'], [0.7, '#ffd070']]) { g.strokeStyle = col; g.lineWidth = w2; g.beginPath(); v.forEach(([a2, b2], j) => (j ? g.lineTo(a2, b2) : g.moveTo(a2, b2))); g.stroke(); }
+    for (let i0 = 0; i0 < N;) {
+      const w = 2 + (r() * 7 | 0), i1 = Math.min(N, i0 + w), mid = pts[(i0 + (w >> 1)) % N];
+      if (mid.h < 3) { i0 = i1; continue; }
+      // the column's slabs, from the rim (f = 1) down to the foot (f = 0); each ledge a little uneven
+      let f1 = 1;
+      while (f1 > 0.001) {
+        const f0 = Math.max(0, f1 - (0.16 + r() * 0.2) * (f1 > 0.6 ? 1.2 : 0.9)), jt = () => (r() - 0.5) * 0.04;
+        const topE = [], botE = [];
+        for (let i = i0; i <= i1; i++) { topE.push(pAt(i, Math.min(1, f1 + jt()))); botE.push(pAt(i, Math.max(0, f0 + jt()))); }
+        const inset = 0.6, k = 1 - (f0 + f1) / 2, base = rockAt(k), warm = Math.max(0, (k - 0.55) / 0.45);
+        const sx = (r() - 0.5) * 3, col = mix(base, WARM, warm * 0.35), slab = topE.map(([x, y]) => [x + sx, y + inset]).concat(botE.reverse().map(([x, y]) => [x + sx, y - inset])); // some slabs stand out, some sit back
+        for (const q2 of slab) q2[0] += (r() - 0.5) * 1.6;
+        slab[0][0] += inset; slab[topE.length - 1][0] -= inset; slab[topE.length][0] -= inset; slab[slab.length - 1][0] += inset;
+        poly(slab); g.fillStyle = rgb(col, 0.92 + r() * 0.16); g.fill();
+        // its lit top (the ledge's upper plane), a highlight down its left, shade down its right, dark under it
+        const tH = Math.min(3.2, (f1 - f0) * mid.h * 0.3);
+        g.fillStyle = rgb(mix(col, [200, 186, 176], 0.35)); g.beginPath(); topE.forEach(([x, y], j) => (j ? g.lineTo(x, y + inset) : g.moveTo(x + inset, y + inset))); for (let j = topE.length - 1; j >= 0; j--) g.lineTo(topE[j][0], topE[j][1] + inset + tH); g.closePath(); g.fill();
+        g.strokeStyle = 'rgba(255,236,220,0.18)'; g.lineWidth = 1; g.beginPath(); g.moveTo(slab[0][0] + 0.4, slab[0][1] + tH); g.lineTo(slab[slab.length - 1][0] + 0.4, slab[slab.length - 1][1] - 0.5); g.stroke();
+        g.strokeStyle = 'rgba(0,0,0,0.35)'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(slab[topE.length - 1][0] - 0.6, slab[topE.length - 1][1] + tH); g.lineTo(slab[topE.length][0] - 0.6, slab[topE.length][1]); g.stroke();
+        const bot = slab.slice(topE.length); g.strokeStyle = 'rgba(0,0,0,0.55)'; g.lineWidth = 2; g.beginPath(); bot.forEach(([x, y], j) => (j ? g.lineTo(x, y - 0.6) : g.moveTo(x, y - 0.6))); g.stroke();
+        if (warm > 0.2) { g.strokeStyle = 'rgba(255,110,40,' + (warm * 0.45) + ')'; g.lineWidth = 1; g.beginPath(); bot.forEach(([x, y], j) => (j ? g.lineTo(x, y - 1.8) : g.moveTo(x, y - 1.8))); g.stroke(); } // the fire's glow on its underside
+        // pits and grit on its face
+        const area = Math.abs((f1 - f0) * mid.h * w * 6);
+        for (let j = 0; j < area / 28; j++) { const u = r(), v = r(), [x, y] = pAt(i0 + u * (i1 - i0), f0 + (f1 - f0) * (0.15 + v * 0.7)); g.fillStyle = r() < 0.5 ? 'rgba(0,0,0,0.3)' : 'rgba(255,230,210,0.08)'; g.fillRect(x, y, 1 + r(), 1); }
+        // a crack across it now and then
+        if (r() < 0.22) { const [x, y] = pAt(i0 + r() * (i1 - i0), f0 + (f1 - f0) * (0.3 + r() * 0.5)); g.strokeStyle = 'rgba(0,0,0,0.6)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (r() - 0.5) * 6, y + 3 + r() * 4); g.lineTo(x + (r() - 0.5) * 8, y + 6 + r() * 4); g.stroke(); }
+        f1 = f0;
+      }
+      // now and then a glowing vein runs down the column's fissure
+      if (mid.h > 30 && r() < 0.22) {
+        const v = []; let f = 0.25 + r() * 0.35; const ii = i1;
+        while (f > 0) { const [x, y] = pAt(ii, f); v.push([x + (r() - 0.5) * 2, y]); f -= 0.07 + r() * 0.06; }
+        v.push(pAt(ii, 0)); veins.push(v);
+        for (const [w2, cc] of [[3.4, 'rgba(110,14,6,0.9)'], [1.8, '#ff5a18'], [0.8, '#ffd27a']]) { g.strokeStyle = cc; g.lineWidth = w2; g.beginPath(); v.forEach(([a2, b2], j) => (j ? g.lineTo(a2, b2) : g.moveTo(a2, b2))); g.stroke(); }
+      }
+      i0 = i1;
     }
-    // the lava falls' channels, scorched dark
-    for (const fa of AR.falls) { const q = at(fa); g.fillStyle = 'rgba(20,6,4,0.8)'; g.fillRect(q.x - 10, q.y - q.h, 20, q.h + 4); }
+    // great boulders bedded in the cliffs, breaking up the columns
+    for (let j = 0; j < 46; j++) {
+      const i = r() * N | 0, q = pts[i]; if (q.h < 30) continue;
+      const f = 0.15 + r() * 0.7, [x, y] = pAt(i, f), w = 6 + r() * 9, hh = w * (0.6 + r() * 0.25), k = 1 - f, base = mix(rockAt(k), WARM, Math.max(0, (k - 0.55) / 0.45) * 0.3), pp = [];
+      for (let m = 0; m < 8; m++) { const t = m / 8 * Math.PI * 2; pp.push([x + Math.cos(t) * w * (0.75 + r() * 0.3), y + Math.sin(t) * hh * (0.75 + r() * 0.3)]); }
+      P.ell(g, x + 1.5, y + hh * 0.9, w * 0.95, hh * 0.35, 'rgba(0,0,0,0.6)');
+      poly(pp); g.fillStyle = rgb(base, 1.05); g.fill(); g.strokeStyle = '#0a0606'; g.lineWidth = 1.2; g.stroke();
+      g.fillStyle = rgb(mix(base, [210, 196, 186], 0.32)); g.beginPath(); g.ellipse(x - w * 0.25, y - hh * 0.35, w * 0.55, hh * 0.32, -0.25, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(0,0,0,0.32)'; g.beginPath(); g.ellipse(x + w * 0.3, y + hh * 0.35, w * 0.5, hh * 0.3, 0.2, 0, Math.PI * 2); g.fill();
+      if (r() < 0.4) { g.strokeStyle = 'rgba(0,0,0,0.6)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(x - w * 0.2, y - hh * 0.6); g.lineTo(x, y); g.lineTo(x + w * 0.1, y + hh * 0.6); g.stroke(); }
+    }
+    // the lava falls' channels: worn smooth and scorched, the rock beside them glowing
+    for (const fa of AR.falls) { const q = at(fa); const gl = g.createLinearGradient(q.x - 18, 0, q.x + 18, 0); gl.addColorStop(0, 'rgba(255,80,20,0)'); gl.addColorStop(0.3, 'rgba(255,90,30,0.35)'); gl.addColorStop(0.5, 'rgba(20,4,2,0.95)'); gl.addColorStop(0.7, 'rgba(255,90,30,0.35)'); gl.addColorStop(1, 'rgba(255,80,20,0)'); g.fillStyle = gl; g.fillRect(q.x - 18, q.y - q.h - 2, 36, q.h + 6); }
     g.restore();
-    // the rim along the faces' top: a dark lip with a lit edge
-    g.strokeStyle = '#0a0606'; g.lineWidth = 4; g.beginPath(); top.forEach((q, i) => (i ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y))); g.closePath(); g.stroke();
-    g.strokeStyle = '#6a5a56'; g.lineWidth = 1.4; g.beginPath(); top.forEach((q, i) => { if (pts[i].h > 3) { if (i && pts[i - 1].h > 3) g.lineTo(q.x, q.y - 1.8); else g.moveTo(q.x, q.y - 1.8); } }); g.stroke();
-    // an iron fence of spikes along the far rim, a rail across them
+
+    // ---- the rim: rugged lumps of rock overhanging the drop, lit on top, dark beneath
+    for (let i = 0; i < N; i += 2) {
+      const q = pts[i], t2 = top[i]; if (q.h < 3) continue;
+      const w = 4 + r() * 5, hh = 2.5 + r() * 3, x = t2.x + (r() - 0.5) * 3, y = t2.y - 1 - r() * 2;
+      P.ell(g, x, y + hh * 0.9, w * 1.05, hh * 0.6, 'rgba(0,0,0,0.55)'); // its shadow on the face below
+      const pp = []; for (let j = 0; j < 7; j++) { const t = j / 7 * Math.PI * 2; pp.push([x + Math.cos(t) * w * (0.75 + r() * 0.3), y + Math.sin(t) * hh * (0.75 + r() * 0.3)]); }
+      poly(pp); g.fillStyle = rgb(mix(ROCK_TOP, ROCK_MID, 0.35 + r() * 0.3)); g.fill(); g.strokeStyle = '#0a0606'; g.lineWidth = 1; g.stroke();
+      g.fillStyle = 'rgba(255,236,220,0.22)'; g.beginPath(); g.ellipse(x - w * 0.2, y - hh * 0.35, w * 0.55, hh * 0.35, 0, 0, Math.PI * 2); g.fill();
+    }
+    // iron spikes along the far rim, a rail across them (as in the Pit's picture)
     let prev = null;
     for (let i = 0; i < N; i += 3) {
-      const q = top[i]; if (pts[i].h < AR.wall * 0.45) { prev = null; continue; }
-      const x = q.x, y = q.y - 3;
-      g.fillStyle = '#0a0708'; g.fillRect(x - 0.8, y - 11, 1.6, 11); g.beginPath(); g.moveTo(x - 2, y - 11); g.lineTo(x, y - 16); g.lineTo(x + 2, y - 11); g.fill();
-      g.fillStyle = '#4a4246'; g.fillRect(x - 0.3, y - 10, 0.6, 9);
-      if (prev) { g.strokeStyle = '#0a0708'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(prev.x, prev.y - 7); g.lineTo(x, y - 7); g.stroke(); }
+      const q = top[i]; if (pts[i].h < AR.wall * 0.5) { prev = null; continue; }
+      const x = q.x, y = q.y - 6;
+      if (prev) { g.strokeStyle = '#080506'; g.lineWidth = 1.8; g.beginPath(); g.moveTo(prev.x, prev.y - 6); g.lineTo(x, y - 6); g.stroke(); g.strokeStyle = '#5a5054'; g.lineWidth = 0.6; g.stroke(); }
+      g.fillStyle = '#080506'; g.fillRect(x - 1, y - 11, 2, 12); g.beginPath(); g.moveTo(x - 2.4, y - 11); g.lineTo(x, y - 17); g.lineTo(x + 2.4, y - 11); g.fill();
+      g.fillStyle = '#6a6064'; g.fillRect(x - 0.4, y - 10, 0.8, 9); g.fillRect(x - 0.4, y - 15, 0.8, 3);
       prev = { x, y };
     }
-    // chains hanging from the rim down the faces
+    // chains hanging from staples in the rim, sagging down the faces
     for (const ca of AR.chains) {
-      const q = at(ca), len = q.h * 0.75;
-      for (let y = 0; y < len; y += 3) { const sx = Math.sin(y * 0.05) * 1.5; g.fillStyle = (y / 3) % 2 ? '#5a5054' : '#2a2226'; g.fillRect(q.x + sx - 1, q.y - q.h + y, 2, 3); }
-      g.fillStyle = '#1a1416'; g.fillRect(q.x - 3, q.y - q.h - 2, 6, 3); // its staple in the rim
+      const q = at(ca), len = q.h * (0.6 + r() * 0.25);
+      for (let y = 0, n = 0; y < len; y += 2.6, n++) { const sx = Math.sin(y * 0.06) * 1.6, x = q.x + sx, yy = q.y - q.h + y; g.fillStyle = '#0a0708'; g.fillRect(x - (n % 2 ? 1.3 : 0.7), yy - 0.3, n % 2 ? 2.6 : 1.4, 3.2); g.fillStyle = n % 2 ? '#7a7074' : '#4a4246'; g.fillRect(x - (n % 2 ? 0.8 : 0.3), yy + 0.2, n % 2 ? 1.6 : 0.6, 2.2); }
+      g.fillStyle = '#080506'; g.fillRect(q.x - 3.5, q.y - q.h - 3, 7, 3.5); g.fillStyle = '#5a5054'; g.fillRect(q.x - 3, q.y - q.h - 2.6, 6, 1);
     }
-    // the near rim (no face seen): a dark lip of broken stones over the floor
-    g.strokeStyle = '#080505'; g.lineWidth = 3; g.beginPath(); let on = false;
-    pts.forEach((q) => { if (q.h < 3) { if (on) g.lineTo(q.x, q.y); else { g.moveTo(q.x, q.y); on = true; } } else on = false; }); g.stroke();
-    // rubble at the walls' foot, and the lava pools under the falls
-    const stone = (x, y, s2) => { P.ell(g, x, y + 1.5 * s2, 4 * s2, 1.6 * s2, 'rgba(0,0,0,0.5)'); g.fillStyle = '#0c0808'; g.beginPath(); g.ellipse(x, y, 4.2 * s2, 3.4 * s2, 0, 0, Math.PI * 2); g.fill(); g.fillStyle = '#4a3e3e'; g.beginPath(); g.ellipse(x, y - 0.3 * s2, 3.4 * s2, 2.6 * s2, 0, 0, Math.PI * 2); g.fill(); g.fillStyle = '#7a6a66'; g.fillRect(x - 2 * s2, y - 2 * s2, 1.6 * s2, 1 * s2); };
-    for (let i = 0; i < N; i += 2) { const q = pts[i]; if (r() < 0.45) continue; const k = 0.93 + r() * 0.05; stone(q.x * k + (r() - 0.5) * 4, q.y * k, 0.6 + r() * 0.8); }
+    // the near rim (no face seen): an overhang of dark stones over the floor
+    for (let i = 0; i < N; i += 2) {
+      const q = pts[i]; if (q.h >= 3) continue;
+      const k = 1.02 + r() * 0.03, x = q.x * k, y = q.y * k, w = 5 + r() * 5, hh = 3 + r() * 3;
+      P.ell(g, x - Math.cos(q.a) * 3, y - Math.sin(q.a) * 3, w, hh * 0.6, 'rgba(0,0,0,0.5)');
+      const pp = []; for (let j = 0; j < 7; j++) { const t = j / 7 * Math.PI * 2; pp.push([x + Math.cos(t) * w * (0.75 + r() * 0.3), y + Math.sin(t) * hh * (0.75 + r() * 0.3)]); }
+      poly(pp); g.fillStyle = rgb(mix([52, 40, 40], [80, 66, 64], r())); g.fill(); g.strokeStyle = '#080505'; g.lineWidth = 1; g.stroke();
+      g.fillStyle = 'rgba(255,236,220,0.14)'; g.beginPath(); g.ellipse(x - w * 0.2, y - hh * 0.3, w * 0.5, hh * 0.3, 0, 0, Math.PI * 2); g.fill();
+    }
+
+    // ---- rubble at the foot of the walls: boulders, stones and gravel, each lit from the top left
+    const stone = (x, y, s2, hot) => {
+      P.ell(g, x + s2 * 0.6, y + s2 * 0.9, s2 * 1.3, s2 * 0.55, 'rgba(0,0,0,0.55)');
+      const pp = []; for (let j = 0; j < 6; j++) { const t = j / 6 * Math.PI * 2 + r() * 0.4; pp.push([x + Math.cos(t) * s2 * (0.8 + r() * 0.35), y + Math.sin(t) * s2 * 0.75 * (0.8 + r() * 0.35)]); }
+      poly(pp); g.fillStyle = '#0a0606'; g.fill(); g.strokeStyle = '#0a0606'; g.lineWidth = 1.2; g.stroke();
+      const base = mix(ROCK_MID, ROCK_TOP, r() * 0.5); g.fillStyle = rgb(base); g.fill();
+      g.fillStyle = rgb(mix(base, [210, 196, 186], 0.35)); g.beginPath(); g.ellipse(x - s2 * 0.25, y - s2 * 0.3, s2 * 0.5, s2 * 0.3, -0.3, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(0,0,0,0.35)'; g.beginPath(); g.ellipse(x + s2 * 0.3, y + s2 * 0.3, s2 * 0.45, s2 * 0.25, 0.3, 0, Math.PI * 2); g.fill();
+      if (hot) { g.strokeStyle = 'rgba(255,100,30,0.6)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(pp[0][0], pp[0][1]); g.lineTo(pp[1][0], pp[1][1]); g.lineTo(pp[2][0], pp[2][1]); g.stroke(); }
+    };
+    for (let i = 0; i < N; i++) {
+      const q = pts[i]; if (q.h < 3) continue;
+      if (r() < 0.3) stone(q.x * (0.955 + r() * 0.03), q.y * (0.955 + r() * 0.03), 2.6 + r() * 3.6, r() < 0.2);
+      for (let j = 0; j < 3; j++) { const k = 0.9 + r() * 0.08; g.fillStyle = r() < 0.5 ? '#3a2e2e' : '#5a4c4a'; g.fillRect(q.x * k + (r() - 0.5) * 4, q.y * k + (r() - 0.5) * 3, 1 + r(), 1); } // gravel
+    }
+    // ---- the lava pools under the falls: molten rock under a floating crust, rimmed with rocks
+    const pools = [];
     for (const fa of AR.falls) {
-      const q = at(fa);
-      P.ell(g, q.x, q.y + 8, 26, 10, '#140404'); P.ell(g, q.x, q.y + 8, 23, 8.5, '#8a1a08'); P.ell(g, q.x, q.y + 8, 17, 6, '#e05010'); P.ell(g, q.x - 3, q.y + 7, 9, 3, '#ffb040');
-      for (const sx of [-25, -13, 15, 24]) stone(q.x + sx, q.y + 9 + (sx % 3), 0.9);
-      // its source: a glowing mouth on the ground above
-      g.strokeStyle = '#3a0a04'; g.lineWidth = 12; g.beginPath(); g.moveTo(q.x, q.y - q.h + 2); g.bezierCurveTo(q.x + 14, q.y - q.h - 14, q.x - 18, q.y - q.h - 26, q.x - 6, q.y - q.h - 44); g.stroke();
-      g.strokeStyle = '#c03a10'; g.lineWidth = 7; g.stroke(); g.strokeStyle = '#ffb040'; g.lineWidth = 2; g.stroke();
+      const q = at(fa), px = q.x * 0.97, py = q.y * 0.97 + 6, pp = [];
+      for (let j = 0; j < 14; j++) { const t = j / 14 * Math.PI * 2; pp.push([px + Math.cos(t) * (20 + r() * 6), py + Math.sin(t) * (8 + r() * 3)]); }
+      poly(pp); g.fillStyle = '#1a0604'; g.fill(); g.strokeStyle = '#080404'; g.lineWidth = 3; g.stroke();
+      g.save(); poly(pp); g.clip();
+      const lg = g.createRadialGradient(px - 4, py - 2, 1, px, py, 26); lg.addColorStop(0, '#fff0a0'); lg.addColorStop(0.3, '#ffa030'); lg.addColorStop(0.7, '#e04010'); lg.addColorStop(1, '#801808');
+      g.fillStyle = lg; g.fillRect(px - 30, py - 14, 60, 28);
+      for (let j = 0; j < 9; j++) { // crust plates drifting on it, glowing at their edges
+        const cx2 = px + (r() - 0.5) * 34, cy2 = py + (r() - 0.5) * 12, w = 3 + r() * 5, hh = 1.6 + r() * 2.2, cp = [];
+        for (let k = 0; k < 5; k++) { const t = k / 5 * Math.PI * 2 + r(); cp.push([cx2 + Math.cos(t) * w, cy2 + Math.sin(t) * hh]); }
+        poly(cp); g.fillStyle = '#2a1210'; g.fill(); g.strokeStyle = '#ffb040'; g.lineWidth = 0.6; g.stroke();
+      }
+      g.restore();
+      for (let j = 0; j < 7; j++) { const t = Math.PI * (0.05 + j / 6 * 0.9); stone(px + Math.cos(t) * 24, py + Math.sin(t) * 10, 2.2 + r() * 2, true); }
+      pools.push({ x: px, y: py });
+      // its source on the ground above: a molten channel winding to the rim
+      const sx = q.x, sy = q.y - q.h;
+      const curve = () => { g.beginPath(); g.moveTo(sx, sy + 2); g.bezierCurveTo(sx + 8, sy - 8, sx - 12, sy - 14, sx - 22, sy - 24); };
+      curve(); g.strokeStyle = '#0a0404'; g.lineWidth = 13; g.stroke(); g.strokeStyle = '#7a1a08'; g.lineWidth = 9; g.stroke(); g.strokeStyle = '#ff7a20'; g.lineWidth = 5; g.stroke(); g.strokeStyle = '#ffd890'; g.lineWidth = 1.6; g.stroke();
     }
-    const id = g.getImageData(0, 0, S, S); G.quantize(id, { dither: 6, sat: 1, contrast: 1.05 }); g.putImageData(id, 0, 0);
-    c.veins = veins;
+    const id = g.getImageData(0, 0, S, S); G.quantize(id, { dither: 5, sat: 1, contrast: 1.06 }); g.putImageData(id, 0, 0);
+    c.veins = veins; c.pools = pools;
+    // the falling lava's texture: molten streaks that tile from top to bottom (scrolled to make it run)
+    const LW = 16, LH = 64, lt = G.canvas(LW * PX, LH * PX), lg2 = lt.getContext('2d'); lg2.scale(PX, PX);
+    const lgr = lg2.createLinearGradient(0, 0, LW, 0); lgr.addColorStop(0, '#9a2008'); lgr.addColorStop(0.25, '#ff6a18'); lgr.addColorStop(0.5, '#ffc050'); lgr.addColorStop(0.75, '#ff6a18'); lgr.addColorStop(1, '#9a2008');
+    lg2.fillStyle = lgr; lg2.fillRect(0, 0, LW, LH);
+    for (let j = 0; j < 40; j++) { const x = r() * LW, y = r() * LH, l = 4 + r() * 12; lg2.fillStyle = r() < 0.55 ? 'rgba(255,240,170,0.8)' : 'rgba(90,14,4,0.7)'; lg2.fillRect(x, y, 1, l); if (y + l > LH) lg2.fillRect(x, y - LH, 1, l); }
+    c.lava = lt; c.lavaH = LH;
     return (ART = c);
   };
 
@@ -360,26 +476,44 @@
     if (ox - AE > 0) g.fillRect(0, 0, ox - AE, H); if (ox + AE < W) g.fillRect(ox + AE, 0, W - ox - AE, H);
     g.imageSmoothingEnabled = false; g.drawImage(art, ox - AE, oy - AE, AE * 2, AE * 2);
     const vis = (x, y, m) => x > -m && x < W + m && y > -m && y < H + m;
-    // the lava falls: molten streaks running down, a glowing foot, the pool's crust breathing
+    // the lava falls: the molten texture running down a wavering channel, bright at its heart, a crust at its edges;
+    // where it spills over the rim and where it plunges into its pool it flares
     for (const fa of AR.falls) {
       const rr = AR.rAt(fa), x = ox + Math.cos(fa) * rr, y = oy + Math.sin(fa) * rr, hh = AR.hAt(fa), top = y - hh;
       if (!vis(x, (y + top) / 2, hh)) continue;
-      const lg = g.createLinearGradient(0, top, 0, y); lg.addColorStop(0, '#ffb040'); lg.addColorStop(0.5, '#ff6a18'); lg.addColorStop(1, '#c02a08');
-      g.fillStyle = lg; g.fillRect(x - 7, top, 14, hh + 4);
-      g.fillStyle = '#ffd070'; g.beginPath(); g.ellipse(x, top + 1, 8, 3, 0, 0, Math.PI * 2); g.fill(); // where it spills over the rim
-      for (let k = 0; k < 8; k++) { const sx = x - 6 + (k * 5.3) % 12, sp = 22 + (k % 3) * 8, yy = top + ((now * sp + k * 19) % (hh + 8)); g.fillStyle = k % 3 ? 'rgba(255,230,150,0.85)' : 'rgba(120,20,4,0.7)'; g.fillRect(Math.round(sx), Math.round(yy), 1.5, 5 + (k % 4) * 2); }
-      const pulse = 0.5 + 0.5 * Math.sin(now * 2.2 + fa * 3);
-      g.save(); g.globalCompositeOperation = 'lighter'; const gl = g.createRadialGradient(x, y + 8, 2, x, y + 8, 34); gl.addColorStop(0, 'rgba(255,140,40,' + (0.35 + 0.2 * pulse) + ')'); gl.addColorStop(1, 'rgba(255,60,10,0)'); g.fillStyle = gl; g.fillRect(x - 36, y - 26, 72, 70); g.restore();
-      for (let k = 0; k < 3; k++) { const t2 = (now * 0.5 + k / 3) % 1, bx = x + Math.sin(k * 2.3 + fa) * 12, by = y + 8 + Math.cos(k * 1.7) * 3; g.fillStyle = 'rgba(255,220,120,' + (1 - t2) + ')'; g.beginPath(); g.arc(bx, by - t2 * 3, 1 + t2 * 2.5, 0, Math.PI * 2); g.fill(); } // bubbles
-      lights.push({ x: x + cx, y: y + 8 + cy, r: 60, kind: 'lava' });
-      lights.push({ x: x + cx, y: top + hh * 0.4 + cy, r: 40, kind: 'lava' });
+      const wv = (yy) => 6 + 1.6 * Math.sin(yy * 0.12 + now * 2 + fa) + 1.2 * Math.sin(yy * 0.31 - now * 3);
+      g.save(); g.beginPath();
+      for (let yy = 0; yy <= hh + 6; yy += 3) g.lineTo(x - wv(yy) + Math.sin(yy * 0.05 + fa) * 1.5, top + yy);
+      for (let yy = hh + 6; yy >= 0; yy -= 3) g.lineTo(x + wv(yy + 40) + Math.sin(yy * 0.05 + fa) * 1.5, top + yy);
+      g.closePath(); g.clip();
+      const lh = art.lavaH, off = (now * 34 + fa * 50) % lh;
+      g.imageSmoothingEnabled = false;
+      for (let yy = top - lh + off; yy < y + 8; yy += lh) g.drawImage(art.lava, x - 9, yy, 18, lh);
+      g.restore();
+      g.strokeStyle = 'rgba(60,8,4,0.85)'; g.lineWidth = 1.4; g.beginPath(); for (let yy = 0; yy <= hh + 4; yy += 3) g.lineTo(x - wv(yy) + Math.sin(yy * 0.05 + fa) * 1.5, top + yy); g.stroke();
+      g.beginPath(); for (let yy = 0; yy <= hh + 4; yy += 3) g.lineTo(x + wv(yy + 40) + Math.sin(yy * 0.05 + fa) * 1.5, top + yy); g.stroke();
+      g.save(); g.globalCompositeOperation = 'lighter';
+      const fl = 0.75 + 0.25 * Math.sin(now * 5 + fa * 2);
+      for (const [yy, rad] of [[top + 2, 12], [y + 4, 22]]) { const gl = g.createRadialGradient(x, yy, 1, x, yy, rad * fl + 6); gl.addColorStop(0, 'rgba(255,200,110,0.55)'); gl.addColorStop(1, 'rgba(255,80,20,0)'); g.fillStyle = gl; g.fillRect(x - rad - 8, yy - rad - 8, rad * 2 + 16, rad * 2 + 16); }
+      g.restore();
+      for (let k = 0; k < 5; k++) { const t2 = (now * 1.4 + k / 5) % 1, sx = x + Math.sin(k * 2.1 + fa) * 9 * t2, sy = y + 2 - Math.sin(t2 * Math.PI) * 9; g.fillStyle = 'rgba(255,' + (200 - t2 * 120 | 0) + ',80,' + (1 - t2) + ')'; g.fillRect(sx, sy, 1.6, 1.6); } // molten droplets thrown up
+      lights.push({ x: x + cx, y: y + cy, r: 64, kind: 'lava' });
+      lights.push({ x: x + cx, y: top + hh * 0.4 + cy, r: 42, kind: 'lava' });
+    }
+    // the pools' surface breathing, bubbles rising and bursting
+    for (let i = 0; i < art.pools.length; i++) {
+      const q = art.pools[i], x = ox + q.x, y = oy + q.y; if (!vis(x, y, 40)) continue;
+      g.save(); g.globalCompositeOperation = 'lighter';
+      const pl = g.createRadialGradient(x, y, 1, x, y, 24); pl.addColorStop(0, 'rgba(255,170,60,' + (0.22 + 0.12 * Math.sin(now * 2 + i)) + ')'); pl.addColorStop(1, 'rgba(255,60,10,0)'); g.fillStyle = pl; g.fillRect(x - 26, y - 14, 52, 28);
+      g.restore();
+      for (let k = 0; k < 3; k++) { const t2 = (now * 0.7 + k / 3 + i * 0.37) % 1, bx = x + Math.sin(k * 2.7 + i) * 13, by = y + Math.cos(k * 1.9 + i) * 4; g.strokeStyle = 'rgba(255,230,140,' + (1 - t2) + ')'; g.lineWidth = 0.8; g.beginPath(); g.arc(bx, by, 0.6 + t2 * 2.4, Math.PI, 0); g.stroke(); }
     }
     // the veins' glow breathing
     g.save(); g.globalCompositeOperation = 'lighter';
     for (let i = 0; i < art.veins.length; i++) {
       const v = art.veins[i], [x0, y0] = v[0], [x1, y1] = v[v.length - 1], mx = ox + (x0 + x1) / 2, my = oy + (y0 + y1) / 2; if (!vis(mx, my, 40)) continue;
-      const a2 = 0.12 + 0.12 * Math.sin(now * 1.6 + i * 1.3);
-      g.strokeStyle = 'rgba(255,110,40,' + a2 + ')'; g.lineWidth = 5; g.beginPath(); v.forEach(([a3, b3], j) => (j ? g.lineTo(ox + a3, oy + b3) : g.moveTo(ox + a3, oy + b3))); g.stroke();
+      const a2 = 0.1 + 0.12 * Math.sin(now * 1.6 + i * 1.3);
+      g.strokeStyle = 'rgba(255,100,40,' + a2 + ')'; g.lineWidth = 5; g.beginPath(); v.forEach(([a3, b3], j) => (j ? g.lineTo(ox + a3, oy + b3) : g.moveTo(ox + a3, oy + b3))); g.stroke();
     }
     g.restore();
     // torches on the walls
@@ -418,6 +552,30 @@
 
   R.drawPit = function (g, cx, cy, now, lights) {
     const F = this.pit.fx, v = DH.view;
+    const RF = F.rocks;
+    if (RF) for (const X of RF.list) { // the falling stones: their shadow and a ring before, the stone dropping, dust after
+      const Q = PF.rockfall, x = X.x - cx, y = X.y - cy;
+      if (X.t < 0) {
+        const k = 1 + X.t / Q.warn, R2 = Q.R * (0.35 + 0.65 * k);
+        g.fillStyle = 'rgba(0,0,0,' + (0.25 + 0.35 * k) + ')'; g.beginPath(); g.ellipse(x, y, R2, R2 * 0.6, 0, 0, TAU); g.fill();
+        g.strokeStyle = 'rgba(255,90,60,' + (0.4 + 0.5 * k) + ')'; g.lineWidth = 1.2; g.beginPath(); g.ellipse(x, y, Q.R, Q.R * 0.6, 0, 0, TAU); g.stroke();
+        const u = 1 + X.t / 0.5; // the last half second: the stone drops in from above
+        if (u > 0) {
+          const ry = y - 170 * (1 - u * u), s2 = X.s;
+          g.fillStyle = 'rgba(90,80,76,0.35)'; g.fillRect(x - 0.6, ry - 16, 1.2, 12);
+          g.save(); g.translate(x, ry); g.rotate(X.spin + u * 6);
+          g.fillStyle = '#0a0606'; g.beginPath(); g.moveTo(-s2 - 1, -s2 * 0.4); g.lineTo(-s2 * 0.3, -s2 - 1); g.lineTo(s2 + 1, -s2 * 0.5); g.lineTo(s2 * 0.6, s2 + 1); g.lineTo(-s2 * 0.8, s2 * 0.8); g.closePath(); g.fill();
+          g.fillStyle = '#5e504c'; g.beginPath(); g.moveTo(-s2, -s2 * 0.4); g.lineTo(-s2 * 0.3, -s2); g.lineTo(s2, -s2 * 0.5); g.lineTo(s2 * 0.6, s2); g.lineTo(-s2 * 0.8, s2 * 0.8); g.closePath(); g.fill();
+          g.fillStyle = '#9a8a84'; g.beginPath(); g.moveTo(-s2 * 0.8, -s2 * 0.3); g.lineTo(-s2 * 0.3, -s2 * 0.8); g.lineTo(s2 * 0.4, -s2 * 0.5); g.closePath(); g.fill();
+          g.restore();
+        }
+      } else {
+        const u = X.t / 0.6;
+        g.fillStyle = 'rgba(100,88,84,' + (0.45 * (1 - u)) + ')'; g.beginPath(); g.ellipse(x, y, Q.R * (0.6 + u * 0.9), Q.R * 0.6 * (0.6 + u * 0.9), 0, 0, TAU); g.fill();
+        for (let j = 0; j < 7; j++) { const a3 = j / 7 * TAU, d = u * Q.R * 1.1; g.fillStyle = 'rgba(70,60,58,' + (1 - u) + ')'; g.fillRect(x + Math.cos(a3) * d - 1, y + Math.sin(a3) * d * 0.6 - 1, 2, 2); }
+        if (u < 0.5) { g.fillStyle = '#4a3e3c'; g.beginPath(); g.ellipse(x, y, X.s, X.s * 0.7, 0, 0, TAU); g.fill(); } // the stone, shattering
+      }
+    }
     const B = F.blades;
     if (B) for (const X of B.list) {
       const L = PF.blades.len, warn = X.t < 0, k = warn ? 1 + X.t / PF.blades.warn : 1;
