@@ -24,9 +24,14 @@
     mist: { n: 3, R: 24, life: 18, gap: 2.5, dist: 140, pull: 0.4, max: 70, tick: 0.75, dmg: 0.18 },
   };
   C.PIT_FX = PF;
-  /** The Pit's own ground: a round, deep pit with high stone walls (a closed arena around the start). R: the floor's
-   *  radius; wall: how tall the far wall stands on screen; torches along it. */
-  const AR = C.PIT_ARENA = { R: 340, wall: 116, torches: 9 };
+  /** The Pit's own ground: a natural pit around the start, its floor ringed by rough rock walls (the far ones seen
+   *  rising, the near ones only as a lip), grown with moss, ferns and hanging vines, two waterfalls running down into
+   *  pools. R: the floor's mean radius (its edge wavers, rAt); wall: how tall the far wall stands on screen. */
+  const AR = C.PIT_ARENA = { R: 240, wall: 104 };
+  AR.rAt = (a) => AR.R * (1 + 0.055 * Math.sin(3 * a + 1.3) + 0.035 * Math.sin(5 * a + 0.4) + 0.02 * Math.sin(11 * a + 2.1));
+  AR.hAt = (a) => AR.wall * Math.pow(Math.max(0, (-Math.sin(a) + 0.55) / 1.55), 0.8) * (1 + 0.12 * Math.sin(7 * a + 0.9)); // the face seen: all of it far off, some at the sides, none near
+  AR.falls = [-1.95, -0.85]; // the waterfalls' angles (on the far side)
+  AR.torches = [-2.95, -2.3, -1.42, -0.62, -0.05];
 
   /** A copy of the hall the Pit's waves come from: its floor and foes from E.PIT.halls, its strength from
    *  E.PIT.hallStats, and none of its own rules (no Lords, puzzles, seals or kill count). */
@@ -47,7 +52,8 @@
     const lv = Math.min(45, Math.round(from * 0.8)), tomes = Math.min(5, Math.floor(from / E.PIT.every));
     for (let i = 0; i < lv; i++) { this.level++; this.xpNext = C.xpToNext(this.level, this.stageId); this.pendingLevels++; }
     if (lv) this.recompute(true);
-    P.startTomes = 1 + tomes; // one Arcane Tome always, and one more for every ten waves skipped (given when the fight begins: pitBegin)
+    P.startTomes = tomes; // one Arcane Tome for every ten waves skipped (given when the fight begins: pitBegin); one more for an ad
+    pitArt(); // the walls painted now, not on the first frame
     this.revives = 0;
   };
 
@@ -137,7 +143,7 @@
   /** Where a foe of the wave comes in: round the screen's edge, or, past the wall, down off the wall at the rim
    *  (never right on top of the hero: then from across the pit). */
   R.pitEntry = function (pt) {
-    const A = AR.R - 14, d = Math.hypot(pt.x, pt.y), p = this.player;
+    const d = Math.hypot(pt.x, pt.y), A = AR.rAt(Math.atan2(pt.y, pt.x)) - 14, p = this.player;
     if (d <= A) return pt;
     let x = pt.x / d * A, y = pt.y / d * A;
     if (U.dist2(x, y, p.x, p.y) < 130 * 130) { x = -x; y = -y; }
@@ -145,7 +151,7 @@
   };
   /** Nothing leaves the pit: the hero, the horde, their summons, the loot, the Stalker. */
   R.pitClamp = function () {
-    const keep = (o, pad) => { if (!o) return; const A = AR.R - pad, d = Math.hypot(o.x, o.y); if (d > A) { o.x *= A / d; o.y *= A / d; } };
+    const keep = (o, pad) => { if (!o) return; const d = Math.hypot(o.x, o.y); if (d < AR.R * 0.8) return; const A = AR.rAt(Math.atan2(o.y, o.x)) - pad; if (d > A) { o.x *= A / d; o.y *= A / d; } };
     keep(this.player, 6);
     for (const e of this.enemies) keep(e, Math.min(14, (e.r || 6) * 0.6));
     for (const a of this.allies || []) keep(a, 6);
@@ -245,74 +251,132 @@
   };
 
   /** The hazards on the ground and the Stalker (render.js, under the foes). */
-  /** The pit itself, drawn right after the floor: the dark creeping in from the walls, a sigil cut in the floor, the far
-   *  wall's inner face rising in courses of stone (a cylinder seen from above: each course a circle raised a little),
-   *  torches on it, the coping at the top, the night of the rock beyond, and the near rim's lip. */
-  R.drawPitArena = function (g, cx, cy, W, H, now, lights) {
-    const Rr = AR.R, Hw = AR.wall, ox = -cx, oy = -cy;
-    if (ox + Rr + 20 > 0 && ox - Rr - 20 < W && oy + Rr + 20 > 0 && oy - Rr - Hw - 40 < H) {
-      g.save();
-      // the sigil: two rings, ticks and runes, cut into the floor and filled with old blood
-      g.strokeStyle = 'rgba(150,30,32,0.5)'; g.lineWidth = 2.6;
-      for (const r of [58, 66, 158, 166]) { g.beginPath(); g.arc(ox, oy, r, 0, TAU); g.stroke(); }
-      g.lineWidth = 2;
-      for (let i = 0; i < 5; i++) { // a five-pointed star between the rings
-        const a = -Math.PI / 2 + i * TAU * 2 / 5, b = -Math.PI / 2 + (i + 1) * TAU * 2 / 5;
-        g.beginPath(); g.moveTo(ox + Math.cos(a) * 158, oy + Math.sin(a) * 158); g.lineTo(ox + Math.cos(b) * 158, oy + Math.sin(b) * 158); g.stroke();
+  /** The pit's walls, painted once (at the floor's pixel density, then graded to the game's palette like every sprite):
+   *  the ground above, the far walls' faces of broken rock (dark at the foot, lit at the top), moss and vines hanging
+   *  from the rim, ferns and bushes on it, the near rim as a lip over the floor, the floor darkening towards the walls,
+   *  and the waterfalls' still parts (stream, wet rock, pool). The moving water and the torches' flames: drawPitArena. */
+  const PX = 2, AE = AR.R * 1.08 + AR.wall + 60;
+  let ART = null;
+  const pitArt = () => {
+    if (ART) return ART;
+    const G = DH.gfx, P = G.P, S = Math.round(AE * 2 * PX), c = G.canvas(S, S), g = c.getContext('2d');
+    let sd = 4711; const r = () => { sd = (sd * 16807) % 2147483647; return (sd - 1) / 2147483646; };
+    g.setTransform(PX, 0, 0, PX, AE * PX, AE * PX); g.lineJoin = 'round'; g.lineCap = 'round';
+    const N = 240, pts = [], glows = [];
+    for (let i = 0; i < N; i++) { const a = -Math.PI + i / N * Math.PI * 2, rr = AR.rAt(a), x = Math.cos(a) * rr, y = Math.sin(a) * rr; pts.push({ a, x, y, h: AR.hAt(a) }); }
+    const floorPath = () => { g.beginPath(); pts.forEach((q, i) => (i ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y))); g.closePath(); };
+    // the ground above: dark earth with moss and stones
+    g.fillStyle = '#2a231a'; g.fillRect(-AE, -AE, AE * 2, AE * 2);
+    for (let i = 0; i < 900; i++) { const x = (r() - 0.5) * 2 * AE, y = (r() - 0.5) * 2 * AE, k = r(); g.fillStyle = k < 0.4 ? 'rgba(52,74,34,' + (0.25 + r() * 0.35) + ')' : k < 0.7 ? 'rgba(40,32,24,0.6)' : 'rgba(84,76,66,0.35)'; g.beginPath(); g.ellipse(x, y, 3 + r() * 9, 2 + r() * 5, r() * 3, 0, Math.PI * 2); g.fill(); }
+    for (let i = 0; i < 500; i++) { const x = (r() - 0.5) * 2 * AE, y = (r() - 0.5) * 2 * AE; g.strokeStyle = r() < 0.5 ? '#3a5a26' : '#4e6e2c'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (r() - 0.5) * 3, y - 3 - r() * 3); g.stroke(); }
+    // the floor: cut out (the hall's floor shows), then darkened towards the walls
+    g.save(); floorPath(); g.globalCompositeOperation = 'destination-out'; g.fill(); g.restore();
+    g.save(); floorPath(); g.clip();
+    const sh = g.createRadialGradient(0, 0, AR.R * 0.55, 0, 0, AR.R * 1.1); sh.addColorStop(0, 'rgba(6,4,6,0)'); sh.addColorStop(0.7, 'rgba(6,4,6,0.35)'); sh.addColorStop(1, 'rgba(6,4,6,0.75)');
+    g.fillStyle = sh; g.fillRect(-AE, -AE, AE * 2, AE * 2);
+    g.restore();
+    // the far walls' faces: one shape from the floor's edge up to the rim
+    const top = pts.map((q) => ({ x: q.x, y: q.y - q.h }));
+    const facePath = () => { g.beginPath(); pts.forEach((q, i) => (i ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y))); for (let i = N - 1; i >= 0; i--) g.lineTo(top[i].x, top[i].y); g.closePath(); };
+    g.save(); facePath(); g.clip();
+    const fy0 = -AR.R * 1.1 - AR.wall, fg = g.createLinearGradient(0, fy0, 0, AR.R * 0.2); fg.addColorStop(0, '#8a7c70'); fg.addColorStop(0.45, '#5a4e4c'); fg.addColorStop(1, '#2a2226');
+    g.fillStyle = fg; g.fillRect(-AE, -AE, AE * 2, AE * 2);
+    // broken rock: rows of boulders, lit from the top left, each row a little darker going down
+    for (let i = 0; i < N; i += 2) {
+      const q = pts[i]; if (q.h < 4) continue;
+      for (let y = q.y - q.h - 2; y < q.y + 4; y += 9 + r() * 5) {
+        const k = (y - (q.y - q.h)) / Math.max(1, q.h), x = q.x + (r() - 0.5) * 8, rad = 5 + r() * 5, pp = [];
+        for (let j = 0; j < 7; j++) { const t = j / 7 * Math.PI * 2; pp.push([x + Math.cos(t) * rad * (0.7 + r() * 0.5), y + Math.sin(t) * rad * 0.7 * (0.7 + r() * 0.5)]); }
+        const l = Math.round(128 - k * 62 + (r() - 0.5) * 18);
+        g.beginPath(); pp.forEach(([a2, b2], j) => (j ? g.lineTo(a2, b2) : g.moveTo(a2, b2))); g.closePath();
+        g.fillStyle = 'rgb(' + (l + 6) + ',' + (l - 2) + ',' + (l - 4) + ')'; g.fill();
+        g.strokeStyle = 'rgba(0,0,0,0.65)'; g.lineWidth = 1; g.stroke();
+        g.strokeStyle = 'rgba(255,240,220,' + (0.22 * (1 - k)) + ')'; g.beginPath(); g.moveTo(pp[3][0], pp[3][1]); g.lineTo(pp[4][0], pp[4][1]); g.lineTo(pp[5][0], pp[5][1]); g.stroke();
       }
-      g.fillStyle = 'rgba(150,30,32,0.55)';
-      for (let i = 0; i < 24; i++) { const a = i / 24 * TAU, x = ox + Math.cos(a) * 162, y = oy + Math.sin(a) * 162; g.save(); g.translate(x, y); g.rotate(a + Math.PI / 2); g.fillRect(-1, -3, 2, 6); if (i % 2) g.fillRect(-3, -1, 6, 1.4); g.restore(); }
-      // the dark creeping in from the foot of the walls
-      const vg = g.createRadialGradient(ox, oy, Rr * 0.55, ox, oy, Rr); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(0.75, 'rgba(4,2,4,0.35)'); vg.addColorStop(1, 'rgba(4,2,4,0.8)');
-      g.fillStyle = vg; g.beginPath(); g.arc(ox, oy, Rr + 1, 0, TAU); g.fill();
-      // beyond the floor: everything outside its circle
-      g.beginPath(); g.rect(0, 0, W, H); g.arc(ox, oy, Rr, 0, TAU, true); g.clip('evenodd');
-      g.fillStyle = '#070506'; g.fillRect(0, 0, W, H);
-      // the far wall's face: the courses between the floor's circle and the same circle raised by the wall's height
-      const rows = 12;
-      for (let i = 0; i < rows; i++) {
-        const f0 = i / rows, f1 = (i + 1) / rows, k = 1 - f0;
-        g.beginPath(); g.arc(ox, oy - Hw * f1, Rr, 0, TAU); g.arc(ox, oy - Hw * f0, Rr, 0, TAU, true);
-        const l = Math.round(24 + 34 * (1 - k * k)); // dark at the foot, lighter up where the moon reaches
-        g.fillStyle = 'rgb(' + (l + 6) + ',' + l + ',' + (l + 2) + ')'; g.fill('evenodd');
-        g.strokeStyle = 'rgba(0,0,0,0.55)'; g.lineWidth = 1; g.beginPath(); g.arc(ox, oy - Hw * f0, Rr, Math.PI, TAU); g.stroke();
-        // the joints between the stones, staggered course by course
-        g.strokeStyle = 'rgba(0,0,0,0.45)'; g.beginPath();
-        for (let j = 0; j < 40; j++) {
-          const a = Math.PI + (j + (i % 2) * 0.5) / 40 * Math.PI; if (a > TAU) continue;
-          const x = ox + Math.cos(a) * Rr, y = oy + Math.sin(a) * Rr;
-          g.moveTo(x, y - Hw * f0); g.lineTo(x, y - Hw * f1);
-        }
-        g.stroke();
-      }
-      // cracks and seeping dark down the face
-      g.strokeStyle = 'rgba(0,0,0,0.6)'; g.lineWidth = 1.2;
-      for (let j = 0; j < 7; j++) { const a = Math.PI + (0.12 + j * 0.13) * Math.PI, x = ox + Math.cos(a) * Rr, y = oy + Math.sin(a) * Rr - Hw * 0.95; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 3, y + Hw * 0.3); g.lineTo(x - 2, y + Hw * 0.55); g.stroke(); }
-      // the torches on the face
-      for (let j = 0; j < AR.torches; j++) {
-        const a = Math.PI + (j + 0.5) / AR.torches * Math.PI, x = ox + Math.cos(a) * Rr, y = oy + Math.sin(a) * Rr - Hw * 0.55;
-        if (x < -40 || x > W + 40 || y < -40 || y > H + 40) continue;
-        const fl = 0.8 + 0.2 * Math.sin(now * 9 + j * 1.7);
-        const gl = g.createRadialGradient(x, y - 4, 1, x, y - 4, 34 * fl); gl.addColorStop(0, 'rgba(255,170,80,0.55)'); gl.addColorStop(1, 'rgba(255,120,40,0)');
-        g.fillStyle = gl; g.fillRect(x - 40, y - 44, 80, 80);
-        g.fillStyle = '#1a1210'; g.fillRect(x - 1.5, y - 2, 3, 9); g.fillStyle = '#4a3a2e'; g.fillRect(x - 3, y - 3, 6, 2);
-        g.fillStyle = '#ff9a3a'; g.beginPath(); g.moveTo(x - 3, y - 3); g.quadraticCurveTo(x, y - 12 * fl, x + 3, y - 3); g.fill();
-        g.fillStyle = '#ffe0a0'; g.beginPath(); g.moveTo(x - 1.4, y - 3); g.quadraticCurveTo(x, y - 7 * fl, x + 1.4, y - 3); g.fill();
-        if (lights) lights.push({ x: x + cx, y: y + cy, r: 46, kind: 'brazier' });
-      }
-      // the coping along the top of the wall, and the rock of the world above, out of reach
-      g.lineWidth = 6; g.strokeStyle = '#1c1618'; g.beginPath(); g.arc(ox, oy - Hw, Rr + 2, 0, TAU); g.stroke();
-      g.lineWidth = 3; g.strokeStyle = '#6e6264'; g.beginPath(); g.arc(ox, oy - Hw, Rr, Math.PI, TAU); g.stroke();
-      g.strokeStyle = 'rgba(0,0,0,0.6)'; g.lineWidth = 1; g.beginPath();
-      for (let j = 0; j < 48; j++) { const a = Math.PI + j / 48 * Math.PI, x = ox + Math.cos(a) * Rr, y = oy + Math.sin(a) * Rr - Hw; g.moveTo(x - Math.sin(a) * 2, y - 2); g.lineTo(x + Math.sin(a) * 2, y + 2); }
-      g.stroke();
-      g.restore();
-      // the near rim: the top of the wall beneath us, a lip of coping stones over the drop
-      g.save();
-      g.lineWidth = 7; g.strokeStyle = '#140e10'; g.beginPath(); g.arc(ox, oy, Rr + 3, 0.02, Math.PI - 0.02); g.stroke();
-      g.lineWidth = 3; g.strokeStyle = '#5a4e50'; g.beginPath(); g.arc(ox, oy, Rr + 1, 0.05, Math.PI - 0.05); g.stroke();
-      g.restore();
     }
+    // ledges and cracks
+    for (let i = 0; i < 90; i++) { const q = pts[r() * N | 0]; if (q.h < 20) continue; const y = q.y - q.h * (0.2 + r() * 0.7); g.strokeStyle = 'rgba(0,0,0,0.55)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(q.x - 6, y); g.lineTo(q.x + (r() - 0.5) * 6, y + 6 + r() * 10); g.lineTo(q.x + 4, y + 14 + r() * 12); g.stroke(); }
+    // moss creeping down from the rim, darker and thinner going down
+    for (let i = 0; i < N; i++) {
+      const q = pts[i]; if (q.h < 6 || r() < 0.35) continue;
+      const len = q.h * (0.15 + r() * 0.5);
+      for (let j = 0; j < 4; j++) { const y = q.y - q.h + r() * len, k = (y - (q.y - q.h)) / q.h; g.fillStyle = 'rgba(' + (60 - k * 20 | 0) + ',' + (98 - k * 40 | 0) + ',' + (40 - k * 10 | 0) + ',' + (0.75 - k * 0.6) + ')'; g.beginPath(); g.ellipse(q.x + (r() - 0.5) * 6, y, 3 + r() * 4, 2 + r() * 3, 0, 0, Math.PI * 2); g.fill(); }
+    }
+    // the waterfalls' wet rock
+    for (const fa of AR.falls) { const rr = AR.rAt(fa), x = Math.cos(fa) * rr, y = Math.sin(fa) * rr, hh = AR.hAt(fa); g.fillStyle = 'rgba(20,40,50,0.55)'; g.fillRect(x - 9, y - hh, 18, hh + 4); }
+    g.restore();
+    // the rim along the faces' top: a lit lip of earth and grass
+    g.strokeStyle = '#0c0a08'; g.lineWidth = 4; g.beginPath(); top.forEach((q, i) => (i ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y))); g.closePath(); g.stroke();
+    g.strokeStyle = '#4a5e2a'; g.lineWidth = 1.6; g.beginPath(); top.forEach((q, i) => { if (pts[i].h > 3) { if (i && pts[i - 1].h > 3) g.lineTo(q.x, q.y - 1.5); else g.moveTo(q.x, q.y - 1.5); } }); g.stroke();
+    // the near rim (no face seen): a dark lip, its grass leaning over the floor
+    g.strokeStyle = '#0a0806'; g.lineWidth = 3; g.beginPath(); let on = false;
+    pts.forEach((q) => { if (q.h < 3) { if (on) g.lineTo(q.x, q.y); else { g.moveTo(q.x, q.y); on = true; } } else on = false; }); g.stroke();
+    for (let i = 0; i < N; i++) { const q = pts[i]; if (q.h >= 3) continue; const ux = -Math.cos(q.a), uy = -Math.sin(q.a); for (let j = 0; j < 3; j++) { const bx = q.x + (r() - 0.5) * 6, by = q.y + (r() - 0.5) * 3; g.strokeStyle = r() < 0.5 ? '#3e5a24' : '#557a2c'; g.lineWidth = 1; g.beginPath(); g.moveTo(bx, by); g.quadraticCurveTo(bx + ux * 3, by + uy * 3 - 2, bx + ux * (4 + r() * 4), by + uy * (4 + r() * 4)); g.stroke(); } }
+    // vines hanging from the rim over the faces, leaves along them
+    for (let i = 0; i < N; i += 3) {
+      const q = pts[i]; if (q.h < 20 || r() < 0.45) continue;
+      const len = q.h * (0.3 + r() * 0.65); let x = q.x + (r() - 0.5) * 4, y = q.y - q.h;
+      g.strokeStyle = '#2a4018'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x, y);
+      const sw = (r() - 0.5) * 6; for (let k = 1; k <= 6; k++) g.lineTo(x + Math.sin(k * 0.9) * sw * 0.3, y + len * k / 6); g.stroke();
+      for (let k = 1; k < 9; k++) { const yy = y + len * k / 9, xx = x + Math.sin(k * 0.6) * sw * 0.3; P.ell(g, xx + (k % 2 ? 2 : -2), yy, 2, 1.2, k % 3 ? '#4a7a2a' : '#3a6022', k % 2 ? 0.6 : -0.6); }
+    }
+    // bushes and ferns on the rim, and ferns, mushrooms and stones at the walls' foot
+    const bush = (x, y, s2) => { for (let j = 0; j < 5; j++) P.circle(g, x + (r() - 0.5) * 8 * s2, y - r() * 4 * s2, (3 + r() * 3) * s2, j % 2 ? '#2e4a1c' : '#3e6024'); P.circle(g, x - 2 * s2, y - 4 * s2, 2 * s2, '#5a8a32'); };
+    const fern = (x, y, s2, up) => { for (let j = -3; j <= 3; j++) { const a2 = (up ? -Math.PI / 2 : Math.PI / 2) + j * 0.32; g.strokeStyle = j % 2 ? '#3e6a26' : '#5a8a30'; g.lineWidth = 1.1; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + Math.cos(a2) * 5 * s2, y + Math.sin(a2) * 5 * s2 - 2, x + Math.cos(a2) * 9 * s2, y + Math.sin(a2) * 9 * s2 + (up ? 2 : 0)); g.stroke(); } };
+    for (let i = 0; i < N; i += 4) { const q = top[i]; if (r() < 0.5) bush(q.x + (r() - 0.5) * 6, q.y - 2 - r() * 10, 0.8 + r() * 0.6); else if (r() < 0.6) fern(q.x, q.y - 4, 0.9, true); }
+    for (let i = 0; i < N; i += 3) {
+      const q = pts[i], k = r(); if (k < 0.45) continue;
+      const x = q.x * 0.97 + (r() - 0.5) * 4, y = q.y * 0.97;
+      if (k < 0.7) fern(x, y, 0.8 + r() * 0.4, true);
+      else if (k < 0.85) { P.ell(g, x, y + 1, 4, 1.5, 'rgba(0,0,0,0.5)'); P.circle(g, x, y - 2, 3, '#4e4448'); P.circle(g, x - 1, y - 3, 1.2, '#7a6e70'); }
+      else { const glow = r() < 0.6; for (let j = 0; j < 3; j++) { const mx = x + j * 3 - 3; g.fillStyle = '#d8d0c0'; g.fillRect(mx, y - 3, 1, 3); P.ell(g, mx + 0.5, y - 3.5, 2, 1.2, glow ? '#7af0d0' : j === 1 ? '#a04a3a' : '#c8b8a0'); } if (glow) glows.push({ x, y: y - 3 }); } // glowing mushrooms light the walls' foot
+    }
+    // the waterfalls' streams on the ground above, and their pools at the foot
+    for (const fa of AR.falls) {
+      const rr = AR.rAt(fa), x = Math.cos(fa) * rr, y = Math.sin(fa) * rr, hh = AR.hAt(fa);
+      g.strokeStyle = '#1c3a48'; g.lineWidth = 12; g.beginPath(); g.moveTo(x, y - hh + 2); g.bezierCurveTo(x + 10, y - hh - 30, x - 14, y - hh - 60, x + 6, y - hh - 110); g.stroke();
+      g.strokeStyle = '#3a7a90'; g.lineWidth = 7; g.stroke(); g.strokeStyle = 'rgba(160,220,230,0.45)'; g.lineWidth = 1; g.stroke();
+      for (const sx of [-9, 9]) { P.circle(g, x + sx, y - hh + 1, 4, '#4e4448'); P.circle(g, x + sx - 1, y - hh, 1.6, '#8a7e78'); }
+      P.ell(g, x, y + 8, 24, 9, '#0e1e26'); P.ell(g, x, y + 8, 21, 7.5, '#2a6a80'); P.ell(g, x - 4, y + 6, 12, 3.5, 'rgba(150,220,230,0.35)');
+      for (const sx of [-22, -10, 14, 21]) { P.circle(g, x + sx, y + 9 + (sx % 3), 2.5, '#3e3438'); fern(x + sx * 1.1, y + 10, 0.6, true); }
+    }
+    const id = g.getImageData(0, 0, S, S); G.quantize(id, { dither: 6, sat: 0.95, contrast: 1.05 }); g.putImageData(id, 0, 0);
+    c.glows = glows;
+    return (ART = c);
+  };
+
+  /** The pit, drawn right after the floor: the painted walls (pitArt), the ground beyond them, then what moves: the water
+   *  falling, foaming and rippling, the torches' flames (their light on the fight). */
+  R.drawPitArena = function (g, cx, cy, W, H, now, lights) {
+    const art = pitArt(), ox = -cx, oy = -cy;
+    g.save();
+    g.fillStyle = '#251f17'; // beyond the painting: more of the ground
+    if (oy - AE > 0) g.fillRect(0, 0, W, oy - AE); if (oy + AE < H) g.fillRect(0, oy + AE, W, H - oy - AE);
+    if (ox - AE > 0) g.fillRect(0, 0, ox - AE, H); if (ox + AE < W) g.fillRect(ox + AE, 0, W - ox - AE, H);
+    g.imageSmoothingEnabled = false; g.drawImage(art, ox - AE, oy - AE, AE * 2, AE * 2);
+    // the falling water: streaks running down, a foaming foot, rings on the pool
+    for (const fa of AR.falls) {
+      const rr = AR.rAt(fa), x = ox + Math.cos(fa) * rr, y = oy + Math.sin(fa) * rr, hh = AR.hAt(fa), top = y - hh;
+      if (x < -40 || x > W + 40 || y + 30 < 0 || top - 120 > H) continue;
+      const wg = g.createLinearGradient(0, top, 0, y); wg.addColorStop(0, 'rgba(120,200,220,0.75)'); wg.addColorStop(1, 'rgba(60,140,170,0.55)');
+      g.fillStyle = wg; g.fillRect(x - 7, top, 14, hh + 4);
+      for (let k = 0; k < 9; k++) { const sx = x - 6 + (k * 5.3) % 12, sp = 46 + (k % 3) * 12, yy = top + ((now * sp + k * 23) % (hh + 10)); g.fillStyle = k % 3 ? 'rgba(220,245,250,0.7)' : 'rgba(255,255,255,0.9)'; g.fillRect(Math.round(sx), Math.round(yy), 1, 6 + (k % 4) * 2); }
+      for (let k = 0; k < 6; k++) { const a2 = now * 2 + k, fx = x + Math.sin(a2 * 1.7 + k) * 8, fy = y + 4 + Math.abs(Math.sin(a2)) * -5; g.fillStyle = 'rgba(235,250,255,0.8)'; g.beginPath(); g.arc(fx, fy, 1.6 + (k % 3), 0, Math.PI * 2); g.fill(); }
+      for (let k = 0; k < 2; k++) { const t2 = (now * 0.6 + k * 0.5) % 1; g.strokeStyle = 'rgba(180,230,240,' + (0.5 * (1 - t2)) + ')'; g.lineWidth = 1; g.beginPath(); g.ellipse(x, y + 8, 6 + t2 * 14, 2 + t2 * 5, 0, 0, Math.PI * 2); g.stroke(); }
+      lights.push({ x: x + cx, y: y + cy, r: 40, kind: 'tint', color: '#60c0e0', a: 0.12 });
+    }
+    for (const q of art.glows) { const x = ox + q.x, y = oy + q.y; if (x > -40 && x < W + 40 && y > -40 && y < H + 40) lights.push({ x: q.x, y: q.y, r: 30, kind: 'crystal', color: '#70e8c8' }); }
+    // torches on the far walls
+    for (const ta of AR.torches) {
+      const rr = AR.rAt(ta), x = ox + Math.cos(ta) * rr, y = oy + Math.sin(ta) * rr - AR.hAt(ta) * 0.5;
+      if (x < -40 || x > W + 40 || y < -40 || y > H + 40) continue;
+      const fl = 0.8 + 0.2 * Math.sin(now * 9 + ta * 3);
+      g.fillStyle = '#1a1210'; g.fillRect(x - 1.5, y - 2, 3, 9); g.fillStyle = '#4a3a2e'; g.fillRect(x - 3, y - 3, 6, 2);
+      g.fillStyle = '#ff9a3a'; g.beginPath(); g.moveTo(x - 3, y - 3); g.quadraticCurveTo(x, y - 12 * fl, x + 3, y - 3); g.fill();
+      g.fillStyle = '#ffe0a0'; g.beginPath(); g.moveTo(x - 1.4, y - 3); g.quadraticCurveTo(x, y - 7 * fl, x + 1.4, y - 3); g.fill();
+      if (lights) lights.push({ x: x + cx, y: y + cy, r: 50, kind: 'brazier' });
+    }
+    g.restore();
   };
 
   R.drawPit = function (g, cx, cy, now, lights) {
