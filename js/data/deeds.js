@@ -65,7 +65,7 @@
   [[100, 1500], [500, 4000], [1000, 8000]].forEach(([n, g]) => add('d_pit_wave_' + n, 'pit', { type: 'pitBest', n }, { args: { n }, gold: g }));
   add('d_pit_run_50', 'pit', { type: 'pitRun', n: 50 }, { args: { n: 50 }, gold: 2500 });
   [[25, 2000], [100, 6000]].forEach(([n, g]) => add('d_pit_mastery_' + n, 'pit', { type: 'pitMastery', n }, { args: { n }, gold: g }));
-  add('d_pit_essence', 'pit', { type: 'stat', stat: 'pitEssence', n: 100000 }, { args: { n: 100000 }, gold: 3000 });
+  add('d_pit_essence', 'pit', { type: 'stat', stat: 'essence', n: 100000 }, { args: { n: 100000 }, gold: 3000 });
 
   DH.deeds = { list: D, byId: Object.fromEntries(D.map((d) => [d.id, d])), XP_PER_DEED: 0.003 }; // +0.3% XP per completed quest
 })(window.DH);

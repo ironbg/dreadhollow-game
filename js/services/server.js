@@ -69,19 +69,22 @@
     /** Take the server's profile as this device's. */
     adopt(save, rev) {
       if (!save) return;
+      const was = JSON.stringify(DH.save.data);
       DH.save.adopt(save);
       if (rev != null) DH.save.meta.rev = rev;
       DH.save.meta.dirty = false; DH.save.meta.uid = DH.cloud.user && DH.cloud.user.uid;
       DH.save.persist(true); DH.save.writeMeta();
-      DH.events.emit('meta');
+      if (JSON.stringify(DH.save.data) !== was) DH.events.emit('meta'); // the same as the screen shows (a fast action confirmed): no redraw
     },
     /** Bring this device and the server together: the server's profile comes back with this device's free fields on it.
      *  The first time an account reaches the server, the profile on this device becomes its starting point. */
     async sync(inQueue) {
       if (!inQueue) await this.flushFast(); // quick taps still on their way go first, or their answer would undo them on screen
       const uid = await this.account();
+      const had = new Set(Object.keys(DH.save.data.deeds || {}));
       const r = await this.call('sync', { free: this.free(), local: DH.save.data, v: DH.VERSION });
       this.adopt(r.save, r.rev);
+      if (this.syncedUid === uid || had.size) this.toastDeeds(Object.keys(DH.save.data.deeds || {}).filter((k) => !had.has(k))); // Deeds the server found done
       this.syncedUid = uid;
       this.sendPending().catch(() => {}); // a fight that ended without a connection is settled now
       return r;
@@ -94,7 +97,7 @@
       const ad = def.ad && def.ad(args), remote = this.remote();
       if (ad && (remote || def.adOutside) && !(await DH.ads.rewarded(ad))) return null;
       if (!remote) return def.run(args);
-      if (def.fast && this.syncedUid) return this.actFast(name, args, def);
+      if (def.fast && this.syncedUid) { const f = this.actFast(name, args, def); if (f.ok) return f.result; } // else it needed chance: undone, it goes the slow way
       await this.flushFast(); // the quick taps before it reach the server first
       await this.ready();
       const r = await this.call('act', { name, args, free: this.free(), v: DH.VERSION });
@@ -107,8 +110,13 @@
      *  again (what it holds is the truth) and the player is told. */
     actFast(name, args, def) {
       const before = JSON.stringify(DH.save.data);
-      const result = def.run(args);
-      if (JSON.stringify(DH.save.data) === before) return result; // nothing changed (not enough, not allowed): nothing to send
+      // chance (a chest, a relic) must come from the server: if this run drew on it, it is undone here
+      const rnd = Math.random; let drew = false;
+      Math.random = function () { drew = true; return rnd.apply(Math, arguments); };
+      let result;
+      try { result = def.run(args); } finally { Math.random = rnd; }
+      if (drew) { DH.save.adopt(JSON.parse(before)); DH.events.emit('meta'); return { ok: false }; }
+      if (JSON.stringify(DH.save.data) === before) return { ok: true, result }; // nothing changed (not enough, not allowed): nothing to send
       this.fastN = (this.fastN || 0) + 1;
       this.fastQ = (this.fastQ || Promise.resolve()).then(async () => {
         let last = null;
@@ -118,7 +126,12 @@
         if (err) { try { await this.sync(true); } catch (e2) { /* no connection: the next call tries again */ } if (DH.ui && DH.ui.serverErr) DH.ui.serverErr(err); }
         else if (last) this.adopt(last.save, last.rev);
       });
-      return result;
+      return { ok: true, result };
+    },
+    /** Deeds completed away from a fight (found at a sync): named in toasts, a few at most. */
+    toastDeeds(ids) {
+      if (!ids.length || !DH.ui || !DH.ui.toast) return;
+      ids.slice(0, 3).forEach((id, i) => setTimeout(() => DH.ui.toast(t('pit.deedDone', { d: DH.ui.deedText(DH.deeds.byId[id]) }), 'good'), 800 + i * 1200));
     },
     /** Wait until every fast action sent so far has been answered. */
     async flushFast() { if (this.fastQ) await this.fastQ; },

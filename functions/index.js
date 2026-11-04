@@ -138,14 +138,17 @@ exports.sync = callable(async (req) => {
       from = bringIn(old.exists && old.data().data ? JSON.parse(old.data().data) : d.local || null);
       extra.broughtIn = old.exists ? 'cloud' : d.local ? 'device' : 'fresh';
     }
-    const r = await withProfile(from || freshProfile(cfg), cfg, (DH) => { DH.actions.overlayFree(DH.save.data, d.free); DH.meta.ensureDaily(); DH.meta.ensureSeason(); DH.meta.takeGifts(cfg.gifts); }); // gifts to everyone (the panel) come with a sync
+    const r = await withProfile(from || freshProfile(cfg), cfg, (DH) => { DH.actions.overlayFree(DH.save.data, d.free); DH.meta.ensureDaily(); DH.meta.ensureSeason(); DH.meta.takeGifts(cfg.gifts); DH.meta.checkDeeds(null); }); // and the Deeds already earned (a wave or a Mastery level reached before the Deed existed) // gifts to everyone (the panel) come with a sync
     return { profile: r.profile, extra: Object.assign(extra, { rate: rate(doc) }) };
   });
   await insights.note(db, uid, d, null); // played today
+  if (!isGuest(req)) { try { await sendBoards(uid, out.profile, cfg); } catch (e) { console.error('boards on sync', e); } } // a score left unsent (a call that failed) goes up with the next visit
   return { save: out.profile, rev: out.rev };
 });
 
 /* ---------- act ---------- */
+/** The actions that can change what a leaderboard shows: a Pit fight's end (its wave) and a new name (sent again). */
+const BOARD_ACTS = new Set(['pitEnd', 'rename']);
 exports.act = callable(async (req) => {
   const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
   checkVersion(d, cfg);
@@ -179,7 +182,7 @@ exports.act = callable(async (req) => {
     });
     return { profile: r.profile, result: r.result, extra: { rate: rate(doc) } };
   });
-  if (!isGuest(req)) await sendBoards(uid, out.profile, cfg);
+  if (!isGuest(req) && BOARD_ACTS.has(name)) await sendBoards(uid, out.profile, cfg); // only what can put a score on a board (a star or a card never does)
   return { save: out.profile, rev: out.rev, result: out.result };
 });
 

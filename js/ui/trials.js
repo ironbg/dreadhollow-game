@@ -11,7 +11,25 @@
     { id: 'soon2', art: 'discord', open: false },
   ];
   const arts = {};
-  const art = (m) => arts[m.id] || (arts[m.id] = m.id === 'pit' ? pitArt() : A.stageArt(m.art, 240, 360).toDataURL('image/jpeg', 0.85));
+  // each picture painted once and kept on the device (with the game's version: a new version may paint them anew), so the
+  // Trials open at once; ui.trialsWarm paints the missing ones while the menus are idle
+  const ART_KEY = (id) => 'dh_trart_' + id + '_' + DH.VERSION;
+  const stored = (id) => { try { return localStorage.getItem(ART_KEY(id)); } catch (e) { return null; } };
+  const art = (m) => {
+    if (arts[m.id]) return arts[m.id];
+    let url = stored(m.id);
+    if (!url) {
+      url = m.id === 'pit' ? pitArt() : A.stageArt(m.art, 240, 360).toDataURL('image/jpeg', 0.85);
+      try { localStorage.setItem(ART_KEY(m.id), url); } catch (e) { /* storage full or blocked: painted again next time */ }
+    }
+    return (arts[m.id] = url);
+  };
+  /** Paint the Trials' pictures one by one when the device has nothing else to do (the menus, a few seconds after start). */
+  ui.trialsWarm = () => {
+    const idle = window.requestIdleCallback || ((f) => setTimeout(() => f({ timeRemaining: () => 50 }), 200));
+    const next = (i) => { if (i >= MODES.length) return; idle(() => { if (DH.game && DH.game.mode === 'run') return setTimeout(() => next(i), 5000); art(MODES[i]); next(i + 1); }, { timeout: 8000 }); };
+    next(0);
+  };
 
   /** The Pit's picture, painted small and shown in big pixels like the rest of the game: a sky of smoke over black
    *  spires; the pit, a round shaft of stone courses sinking to a floor of fire; chains hanging into it; an iron fence of

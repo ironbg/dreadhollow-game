@@ -6,6 +6,12 @@
     {
       v: '1.61.59',
       bg: [
+        'Наградите също без чакане: мисии, трофеи, Пропуск, подвизи, сандъци за активност, Път на нивата и покупките за камъни се взимат веднага. Наградите със сандък или реликва все още чакат сървъра, за да е честно тегленето.',
+        'Изпитанията се отварят веднага: картините им се рисуват веднъж, докато си в менюто, и се пазят на телефона.',
+        'Екранът се преначертава веднъж след действие, а не два пъти, и сървърът не проверява класациите за действия, които не ги засягат.',
+        'Подвизите, които вече си изпълнил (вълна или ниво на Майсторството), се дават още при пускане на играта, без да чакаш следваща битка в Ямата.',
+        'Подвигът и трофеят за Есенция от Ямата броят всичко, спечелено в Ямата от самото начало, а не само от последната версия.',
+        'Ямата: бутонът „АВТО“ избира по-умно – умения със същия вид щети като оръжието, Елементалист за герои с огън, лед или мълния, Призоваване само ако имаш призовани.',
         'Без чакане при натискане: картите на Майсторството, звездите на Съзвездието, благословиите, Архивът, вдигането и слагането на реликви се променят веднага, а сървърът ги потвърждава зад тях. Ако откаже, играта се връща към неговата версия и казва това.',
         'Съзвездие: надписите „Магазин“ и „Статистики“ са под бутоните, защото не се събираха в рамката.',
         'Съзвездието е много по-леко: на по-слаби телефони се движеше на пресекулки и всяко натискане там (+, −, звезда) чакаше около 2 секунди. Сега реагира веднага.',
@@ -15,6 +21,12 @@
         'Ако сървърът все пак се бави, горе в средата се върти малък знак, за да се вижда, че действието е в ход.',
       ],
       en: [
+        'Rewards without waiting too: missions, trophies, the Battle Pass, Deeds, activity chests, the Level Road and gem purchases are taken at once. Rewards with a chest or a relic still wait for the server, to keep the draw fair.',
+        'The Trials open at once: their pictures are painted once while you are in the menus and kept on the phone.',
+        'The screen is redrawn once after an action, not twice, and the server no longer checks the leaderboards for actions that cannot change them.',
+        'Deeds you have already done (a wave or a Mastery level) are given when the game starts, without waiting for your next Pit fight.',
+        'The Pit Essence Deed and trophy count everything the Pit has paid from the very start, not only since the last version.',
+        'The Pit: the AUTO button chooses more wisely – abilities of the weapon\'s own kind of damage, Elementalist for fire, ice or lightning heroes, Summoner only with summons.',
         'No waiting on taps: Mastery cards, Constellation stars, Blessings, the Archive, levelling and equipping relics change at once, and the server confirms them behind you. If it refuses, the game goes back to its copy and says so.',
         'Constellation: the "Shop" and "Stats" labels sit under their buttons, as they did not fit inside the frame.',
         'The Constellation is far lighter: on weaker phones it stuttered and every tap there (+, −, a star) waited about 2 seconds. It now answers at once.',

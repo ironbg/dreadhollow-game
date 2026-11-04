@@ -5,8 +5,9 @@
  * (numbers, short strings), never as objects to trust.
  * ad: the rewarded ad this action pays for (on the server's side the player has already watched it on the device);
  * adOutside: the DH.meta code does not show that ad itself, so the device shows it first in every mode.
- * fast: no chance and no clock in it, so the device applies it at once and the server follows (DH.server.act): the
- * player never waits for a tap; the server runs the same code on its own copy and its answer is taken in the end. */
+ * fast: the device applies it at once and the server follows (DH.server.act): the player never waits for a tap; the
+ * server runs the same code on its own copy and its answer is taken in the end. One that turns out to need chance this
+ * time (a reward with a chest or a relic in it) is undone on the device and waits for the server like any other. */
 (function (DH) {
   'use strict';
   const M = () => DH.meta;
@@ -17,35 +18,35 @@
   const A = {
     // daily, login, vigil, energy
     claimLogin: { run: (a) => M().claimLogin(bool(a.double)) },
-    claimSignin: { run: (a) => M().claimSignin(a.kind === 'month' ? 'month' : 'week', a.track === 'prem' ? 'prem' : 'free', int(a.day)) },
+    claimSignin: { fast: true, run: (a) => M().claimSignin(a.kind === 'month' ? 'month' : 'week', a.track === 'prem' ? 'prem' : 'free', int(a.day)) },
     claimVigil: { run: (a) => M().claimVigil(bool(a.double)) },
     quickVigil: { run: (a) => M().quickVigil(str(a.mode, 8)), ad: (a) => (a.mode === 'ad' ? 'quick_vigil' : null) },
     adEnergy: { run: () => M().adEnergy(), ad: () => 'energy' },
-    gemEnergy: { run: () => M().gemEnergy() },
-    claimResFree: { run: () => M().claimResFree() },
+    gemEnergy: { fast: true, run: () => M().gemEnergy() },
+    claimResFree: { fast: true, run: () => M().claimResFree() },
     adRes: { run: () => M().adRes(), ad: () => (M().ensureDaily().resFree && M().resAdsLeft() > 0 ? 'res_shop' : null) },
     adGems: { run: () => M().adGems(), ad: () => 'free_gems' },
-    claimSoulCard: { run: () => M().claimSoulCard() },
+    claimSoulCard: { fast: true, run: () => M().claimSoulCard() },
     // shop
     buyChest: { run: (a) => M().buyChest(str(a.type, 12), bool(a.x10)) },
     freeChestAd: { run: () => M().freeChestAd(), ad: () => 'free_chest' },
     buyDeal: { run: (a) => M().buyDeal(int(a.idx)), ad: (a) => { const d = M().ensureDaily().deals[int(a.idx)]; return d && DH.economy.dealPool[d.i].cost.ad ? 'deal' : null; } },
-    buyGoldPack: { run: (a) => M().buyGoldPack(int(a.i)) },
+    buyGoldPack: { fast: true, run: (a) => M().buyGoldPack(int(a.i)) },
     // quests, pass, deeds
-    claimMission: { run: (a) => M().claimMission(int(a.i)) },
+    claimMission: { fast: true, run: (a) => M().claimMission(int(a.i)) },
     claimMissionBonus: { run: () => M().claimMissionBonus() },
-    claimActivity: { run: (a) => M().claimActivity(int(a.i)) },
-    claimAch: { run: (a) => M().claimAch(str(a.id)) },
-    claimPass: { run: (a) => M().claimPass(int(a.tier), a.track === 'prem' ? 'prem' : 'free') },
-    claimAllPass: { run: () => M().claimAllPass() },
-    claimPassBonus: { run: () => M().claimPassBonus() },
-    claimAcct: { run: (a) => M().claimAcct(int(a.lvl)) },
+    claimActivity: { fast: true, run: (a) => M().claimActivity(int(a.i)) },
+    claimAch: { fast: true, run: (a) => M().claimAch(str(a.id)) },
+    claimPass: { fast: true, run: (a) => M().claimPass(int(a.tier), a.track === 'prem' ? 'prem' : 'free') },
+    claimAllPass: { fast: true, run: () => M().claimAllPass() },
+    claimPassBonus: { fast: true, run: () => M().claimPassBonus() },
+    claimAcct: { fast: true, run: (a) => M().claimAcct(int(a.lvl)) },
     pitStart: { run: () => M().pitStart() },
     pitEnd: { run: (a) => M().pitEnd(int(a.waves)) },
     pitSweep: { run: (a) => M().pitSweep(int(a.n) || 1) },
     pitPerkUp: { fast: true, run: (a) => M().pitPerkUp(str(a.id, 12)) },
     pitPerkDown: { fast: true, run: (a) => M().pitPerkDown(str(a.id, 12)) },
-    claimPitFree: { run: () => M().claimPitFree() },
+    claimPitFree: { fast: true, run: () => M().claimPitFree() },
     adPit: { run: () => M().adPit(), ad: () => (!M().pitFreeReady() && M().pitAdsLeft() > 0 ? 'pit_shop' : null) },
     pitPerkReset: { fast: true, run: () => M().pitPerkReset() },
     consBuy: { fast: true, run: (a) => M().consBuy(str(a.id, 40), int(a.n)) },
@@ -56,11 +57,11 @@
     consLoadAgain: { fast: true, run: () => M().consLoadAgain() },
     consLoadName: { fast: true, run: (a) => M().consLoadName(int(a.i), str(a.name, 40)) },
     consLoadDelete: { fast: true, run: (a) => M().consLoadDelete(int(a.i)) },
-    buyPassTier: { run: () => M().buyPassTier() },
-    claimMainQuest: { run: () => M().claimMainQuest() },
+    buyPassTier: { fast: true, run: () => M().buyPassTier() },
+    claimMainQuest: { fast: true, run: () => M().claimMainQuest() },
     trackDeed: { fast: true, run: (a) => M().trackDeed(a.id == null ? null : str(a.id)) },
-    nbClaimTask: { run: (a) => M().nbClaimTask(int(a.night), int(a.i)) },
-    nbClaimMilestone: { run: (a) => M().nbClaimMilestone(int(a.i)) },
+    nbClaimTask: { fast: true, run: (a) => M().nbClaimTask(int(a.night), int(a.i)) },
+    nbClaimMilestone: { fast: true, run: (a) => M().nbClaimMilestone(int(a.i)) },
     // heroes, gear, shrine, archive, potions, artifacts, the well
     unlockHero: { run: (a) => M().unlockHero(str(a.id, 24)) },
     equip: { fast: true, run: (a) => M().equip(int(a.id), str(a.slot, 8)) },
@@ -68,7 +69,7 @@
     equipMark: { fast: true, run: (a) => M().equipMark(a.hero == null ? null : str(a.hero, 24)) },
     levelGear: { fast: true, run: (a) => M().levelGear(int(a.id)) },
     levelGearAll: { fast: true, run: (a) => M().levelGearAll(int(a.id)) },
-    buyPack: { run: (a) => M().buyPack(int(a.i)) },
+    buyPack: { fast: true, run: (a) => M().buyPack(int(a.i)) },
     merge: { run: (a) => M().merge(int(a.id)) },
     mergeAll: { run: () => M().mergeAll() },
     salvage: { run: (a) => M().salvage(int(a.id)) },

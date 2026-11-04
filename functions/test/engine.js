@@ -220,7 +220,7 @@ const live = require('../game/live.json');
   r = await withProfile(Object.assign({}, p0, { pit: { best: 0, day: null, used: 0, active: { at: Date.now() - 170000, from: 60, affixes: [] }, pass: false, mv: 3 } }), live, (DH) => {
     const res = DH.actions.list.pitEnd.run({ waves: 55 }); return [res.deeds.map((d) => d.id).sort(), DH.save.data.stats.pitFights]; });
   assert.deepStrictEqual(r.result, [['d_pit_first', 'd_pit_run_50', 'd_pit_wave_100'], 1]);
-  r = await withProfile(Object.assign({}, r.profile, { stats: Object.assign({}, r.profile.stats, { pitEssence: 99990 }) }), live, (DH) => DH.actions.list.pitSweep.run({}).deeds.map((d) => d.id));
+  r = await withProfile(Object.assign({}, r.profile, { stats: Object.assign({}, r.profile.stats, { essence: 99990 }) }), live, (DH) => DH.actions.list.pitSweep.run({}).deeds.map((d) => d.id));
   assert.deepStrictEqual(r.result, ['d_pit_essence']);
   // the Trials' trophies read the Pit and the Constellation
   r = await withProfile(r.profile, live, (DH) => { const A = DH.economy.achievements, v = (id) => DH.meta.achValue(A.find((a) => a.id === id)); return [v('pitdepth'), v('pitfights'), v('pitessence') >= 100000, v('stargazer'), DH.actions.list.claimAch.run({ id: 'pitdepth' }) ? DH.save.data.achievements.pitdepth : 0]; });

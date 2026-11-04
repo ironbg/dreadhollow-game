@@ -428,17 +428,26 @@
   };
   /** The Pit's AUTO button (remembered in the settings): level-ups and tomes are chosen without a window. */
   R.autoPickOn = function () { return !!(this.pit && DH.save.data.settings.autoPick); };
-  /** The card a sensible player would take: an evolution or a class trait first, then a new ability, then the hero's
-   *  own weapon's traits, the elevated traits and the base traits the hero is strong in; gold and healing last
-   *  (healing first when life is low). */
+  /** The card a sensible player would take: an evolution or a class trait first, then a new ability (of the weapon's own
+   *  kind of damage first), the elevated traits that suit the hero (Elementalist for an element, Summoner with summons),
+   *  the weapon's traits and the base traits the hero is strong in; gold and healing last (healing first when life is low). */
   R.autoChoice = function (list) {
-    const aff = this.hero.affinity || {}, weapon = this.abilities[0] && this.abilities[0].id, low = this.player.hp < this.P.maxHp * 0.4;
+    const aff = this.hero.affinity || {}, wa = this.abilities[0], weapon = wa && wa.id, low = this.player.hp < this.P.maxHp * 0.4;
+    // what the hero fights with: the weapon's kind of damage (fire, ice, ...) and what the hero already carries
+    const DMG = ['physical', 'magic', 'fire', 'lightning', 'ice'], tagsOf = (a) => a.tags || (C.abilities[a.id] && C.abilities[a.id].tags) || [];
+    const wt = wa ? tagsOf(wa) : [], elem = wt.some((x) => x === 'fire' || x === 'ice' || x === 'lightning');
+    const has = (tg) => this.abilities.some((a) => tagsOf(a).includes(tg));
+    const ELEV = { multistrike: 72, volley: 76, honed: 70, keenedge: 70 + (wa && wa.s && wa.s.crit > 0 ? 3 : 0), afflictor: 66,
+      elementalist: elem ? 78 : 62, summoner: has('summon') ? 80 : 40 };
     const score = (c) => {
       switch (c.kind) {
         case 'up': return 100 + (c.ab === weapon ? 5 : 0);
         case 'cls': return 90 + (c.sister ? 0 : 2);
-        case 'ability': return 85 + (C.abilities[c.id] && C.abilities[c.id].exclusive ? 5 : 0);
-        case 'elev': return 70;
+        case 'ability': { // a new ability: one of the weapon's own kind of damage first
+          const d = C.abilities[c.id] || { tags: [] };
+          return 85 + (d.exclusive ? 6 : 0) + 3 * d.tags.filter((x) => DMG.includes(x) && wt.includes(x)).length + (d.tags.includes('summon') && aff.summoner ? 2 : 0);
+        }
+        case 'elev': return ELEV[c.id] || 70;
         case 'ab': return 60 + (c.ab === weapon ? 8 : 0) + (c.rank || 0) * 0.1;
         case 'base': return 40 + 10 * (aff[c.id] == null ? 1 : aff[c.id]);
         case 'edge': return 50;
@@ -446,7 +455,7 @@
         default: return 1;
       }
     };
-    let best = list[0], bs = -1; for (const c of list) { const s = score(c) + Math.random() * 0.01; if (s > bs) { bs = s; best = c; } }
+    let best = list[0], bs = -1; for (const c of list) { const s2 = score(c) + Math.random() * 0.01; if (s2 > bs) { bs = s2; best = c; } }
     return best;
   };
   /** A card's name for the floating text of an auto choice. */

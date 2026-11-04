@@ -259,8 +259,10 @@
     ui.contentEl = h('div.content');
     ui.navEl = h('div.nav');
     menu.append(h('div.menu-bg'), ui.topEl, ui.contentEl, ui.navEl);
-    let pend = false;
-    const schedule = () => { if (pend) return; pend = true; requestAnimationFrame(() => { pend = false; if (!menu.classList.contains('hidden')) ui.refresh(); }); };
+    let pend = false, seen = 0;
+    // a change to the profile redraws the screen once, in the next frame, unless the screen was redrawn since (most
+    // buttons redraw it themselves right after their action: drawing it twice was half the wait on a slow phone)
+    const schedule = () => { if (pend) return; pend = true; seen = ui.refreshN; requestAnimationFrame(() => { pend = false; if (ui.refreshN === seen && !menu.classList.contains('hidden')) ui.refresh(); }); };
     DH.events.on('meta', schedule);
     DH.events.on('lang', () => { ui.renderNav(); ui.refresh(true); });
     setInterval(() => { if (!menu.classList.contains('hidden')) { ui.renderTop(); ui.tick && ui.tick(); } }, 1000);
@@ -308,8 +310,10 @@
     if (sub && ui.screens[screen] && ui.screens[screen].scrollTo) ui.screens[screen].scrollTo(sub);
   };
 
+  ui.refreshN = 0;
   ui.refresh = (resetScroll) => {
     const sc = ui.screens[ui.screen]; if (!sc) return;
+    ui.refreshN++;
     const y = ui.contentEl.scrollTop;
     ui.renderTop(); ui.renderNav();
     ui.contentEl.innerHTML = '';

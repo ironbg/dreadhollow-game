@@ -191,6 +191,8 @@
     DH.ads.init(); // the app: ad consent where the law asks for it, then the ads SDK
     DH.iap.init(); // the app: the store's products and any purchase not yet delivered
     DH.appUpdate.init(); // the app: Google Play has a newer build -> its update, before playing on
+    setTimeout(() => ui.trialsWarm && ui.trialsWarm(), 6000); // the Trials' pictures, painted while the menus wait
+    if (!DH.server.remote()) DH.server.toastDeeds(M.checkDeeds(null).map((d) => d.id)); // Deeds already earned away from a fight (on the server, its sync does this)
     // the title screen first; the daily calendar waits until the player has come through the window
     DH.title.show(() => {
       const calendar = () => { ui.flushSeason(); if (M.signinPending()) setTimeout(() => ui.openLogin(), 500); };

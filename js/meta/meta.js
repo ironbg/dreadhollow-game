@@ -225,7 +225,7 @@
     if (reached > 0) meta.boardRecord({ pitWave: reached, hero: S().selectedHero, stage: null, victory: false }, {}); // the Pit's boards (a sweep never counts)
     const paid = Math.round(waves * meta.pitPerWave()); if (paid) addEssence(paid);
     const lv0 = meta.pitMastery().lv; addMastery(reached);
-    const st = S().stats; st.pitFights = (st.pitFights || 0) + 1; st.pitEssence = (st.pitEssence || 0) + paid + Math.round(a.from * meta.pitPerWave());
+    const st = S().stats; st.pitFights = (st.pitFights || 0) + 1; // (stats.essence counts all the Pit has paid, from its start)
     const deeds = meta.checkDeeds(null, { pitWaves: waves });
     changed();
     return { waves, reached, paid, best: p.best, record, from: a.from, mastery: meta.pitMastery().lv - lv0, deeds };
@@ -239,7 +239,6 @@
     n = Math.max(1, Math.min(meta.pitLeft(), n | 0 || 1));
     const lv0 = meta.pitMastery().lv, paid = meta.pitSweepPay() * n;
     p.used += n; addEssence(paid); for (let i = 0; i < n; i++) addMastery(p.best);
-    S().stats.pitEssence = (S().stats.pitEssence || 0) + paid;
     meta.track('pit', n); const deeds = meta.checkDeeds(null); changed();
     return { paid, n, mastery: meta.pitMastery().lv - lv0, deeds };
   };
