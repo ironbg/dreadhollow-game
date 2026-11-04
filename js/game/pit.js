@@ -22,9 +22,6 @@
     beams: { every: [11, 15], warnA: 1.1, warnB: 0.8, width: 30, dmg: 0.45 },
     stone: 0.15, chains: 1.25,
     mist: { n: 3, R: 24, life: 18, gap: 2.5, dist: 140, pull: 0.4, max: 70, tick: 0.75, dmg: 0.18 },
-    // always (not a rolled hazard): stones break off the rim and fall into the pit, mostly near the hero; a shadow marks
-    // where each lands; it hits for a share of the hero's health, and the foes it lands on too
-    rockfall: { first: 6, every: [4, 6.5], warn: 1.25, R: 15, dmg: 0.2, foe: 3, near: 0.7 },
   };
   C.PIT_FX = PF;
   /** The Pit's own ground, as in its picture: a deep shaft of rough dark rock around the start (the far and side walls
@@ -100,31 +97,6 @@
     }
     if (!P.need && this.time >= P.next) this.pitWave(P.coming || P.wave + 1);
     for (const k of P.affixes) if (FX[k]) FX[k].call(this, dt);
-    this.pitRockfall(dt);
-  };
-
-  /** Falling stones (C.PIT_FX.rockfall): a shadow where one will land, then the stone, a blow to whoever stands there. */
-  R.pitRockfall = function (dt) {
-    const Q = PF.rockfall, F = this.pit.fx, p = this.player;
-    const S = F.rocks || (F.rocks = { t: Q.first, list: [] });
-    if ((S.t -= dt) <= 0) {
-      S.t = U.rand(Q.every[0], Q.every[1]);
-      let x, y;
-      if (Math.random() < Q.near) { const a = Math.random() * TAU, d = U.rand(0, 45); x = p.x + Math.cos(a) * d; y = p.y + Math.sin(a) * d; }
-      else { const a = Math.random() * TAU, d = Math.sqrt(Math.random()) * AR.R * 0.85; x = Math.cos(a) * d; y = Math.sin(a) * d; }
-      const d0 = Math.hypot(x, y), A = AR.rAt(Math.atan2(y, x)) - 14; if (d0 > A) { x *= A / d0; y *= A / d0; }
-      S.list.push({ x, y, t: -Q.warn, s: 2.6 + Math.random() * 1.8, spin: Math.random() * 6, hit: false });
-    }
-    for (let i = S.list.length - 1; i >= 0; i--) {
-      const X = S.list[i]; X.t += dt;
-      if (!X.hit && X.t >= 0) {
-        X.hit = true;
-        if (U.dist2(X.x, X.y, p.x, p.y) < (Q.R + p.r) ** 2) hit(this, Q.dmg);
-        for (const e of this.enemies) if (!e.dead && !e.def.prop && U.dist2(X.x, X.y, e.x, e.y) < Q.R * Q.R) { this.rawDamage(e, this.consBase() * Q.foe, '#c8b8a8', 'rock'); if (e.hp <= 0 && !e.dead) this.killEnemy(e); }
-        this.burst(X.x, X.y, 14, ['#5a4c4a', '#8a7a74', '#2a2020'], 70); this.shake = Math.max(this.shake, 3); DH.audio.play('boom');
-      }
-      if (X.t > 0.6) S.list.splice(i, 1);
-    }
   };
 
   /** The last of a wave never hides: every 2 s the ones left far from the hero come down off the wall near him. */
@@ -552,30 +524,6 @@
 
   R.drawPit = function (g, cx, cy, now, lights) {
     const F = this.pit.fx, v = DH.view;
-    const RF = F.rocks;
-    if (RF) for (const X of RF.list) { // the falling stones: their shadow and a ring before, the stone dropping, dust after
-      const Q = PF.rockfall, x = X.x - cx, y = X.y - cy;
-      if (X.t < 0) {
-        const k = 1 + X.t / Q.warn, R2 = Q.R * (0.35 + 0.65 * k);
-        g.fillStyle = 'rgba(0,0,0,' + (0.25 + 0.35 * k) + ')'; g.beginPath(); g.ellipse(x, y, R2, R2 * 0.6, 0, 0, TAU); g.fill();
-        g.strokeStyle = 'rgba(255,90,60,' + (0.4 + 0.5 * k) + ')'; g.lineWidth = 1.2; g.beginPath(); g.ellipse(x, y, Q.R, Q.R * 0.6, 0, 0, TAU); g.stroke();
-        const u = 1 + X.t / 0.5; // the last half second: the stone drops in from above
-        if (u > 0) {
-          const ry = y - 170 * (1 - u * u), s2 = X.s;
-          g.fillStyle = 'rgba(90,80,76,0.35)'; g.fillRect(x - 0.6, ry - 16, 1.2, 12);
-          g.save(); g.translate(x, ry); g.rotate(X.spin + u * 6);
-          g.fillStyle = '#0a0606'; g.beginPath(); g.moveTo(-s2 - 1, -s2 * 0.4); g.lineTo(-s2 * 0.3, -s2 - 1); g.lineTo(s2 + 1, -s2 * 0.5); g.lineTo(s2 * 0.6, s2 + 1); g.lineTo(-s2 * 0.8, s2 * 0.8); g.closePath(); g.fill();
-          g.fillStyle = '#5e504c'; g.beginPath(); g.moveTo(-s2, -s2 * 0.4); g.lineTo(-s2 * 0.3, -s2); g.lineTo(s2, -s2 * 0.5); g.lineTo(s2 * 0.6, s2); g.lineTo(-s2 * 0.8, s2 * 0.8); g.closePath(); g.fill();
-          g.fillStyle = '#9a8a84'; g.beginPath(); g.moveTo(-s2 * 0.8, -s2 * 0.3); g.lineTo(-s2 * 0.3, -s2 * 0.8); g.lineTo(s2 * 0.4, -s2 * 0.5); g.closePath(); g.fill();
-          g.restore();
-        }
-      } else {
-        const u = X.t / 0.6;
-        g.fillStyle = 'rgba(100,88,84,' + (0.45 * (1 - u)) + ')'; g.beginPath(); g.ellipse(x, y, Q.R * (0.6 + u * 0.9), Q.R * 0.6 * (0.6 + u * 0.9), 0, 0, TAU); g.fill();
-        for (let j = 0; j < 7; j++) { const a3 = j / 7 * TAU, d = u * Q.R * 1.1; g.fillStyle = 'rgba(70,60,58,' + (1 - u) + ')'; g.fillRect(x + Math.cos(a3) * d - 1, y + Math.sin(a3) * d * 0.6 - 1, 2, 2); }
-        if (u < 0.5) { g.fillStyle = '#4a3e3c'; g.beginPath(); g.ellipse(x, y, X.s, X.s * 0.7, 0, 0, TAU); g.fill(); } // the stone, shattering
-      }
-    }
     const B = F.blades;
     if (B) for (const X of B.list) {
       const L = PF.blades.len, warn = X.t < 0, k = warn ? 1 + X.t / PF.blades.warn : 1;
