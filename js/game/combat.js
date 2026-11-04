@@ -426,6 +426,31 @@
     if (this.remembered && ckey(this.remembered) === ckey(c)) this.remembered = null;
     this.recompute();
   };
+  /** The Pit's AUTO button (remembered in the settings): level-ups and tomes are chosen without a window. */
+  R.autoPickOn = function () { return !!(this.pit && DH.save.data.settings.autoPick); };
+  /** The card a sensible player would take: an evolution or a class trait first, then a new ability, then the hero's
+   *  own weapon's traits, the elevated traits and the base traits the hero is strong in; gold and healing last
+   *  (healing first when life is low). */
+  R.autoChoice = function (list) {
+    const aff = this.hero.affinity || {}, weapon = this.abilities[0] && this.abilities[0].id, low = this.player.hp < this.P.maxHp * 0.4;
+    const score = (c) => {
+      switch (c.kind) {
+        case 'up': return 100 + (c.ab === weapon ? 5 : 0);
+        case 'cls': return 90 + (c.sister ? 0 : 2);
+        case 'ability': return 85 + (C.abilities[c.id] && C.abilities[c.id].exclusive ? 5 : 0);
+        case 'elev': return 70;
+        case 'ab': return 60 + (c.ab === weapon ? 8 : 0) + (c.rank || 0) * 0.1;
+        case 'base': return 40 + 10 * (aff[c.id] == null ? 1 : aff[c.id]);
+        case 'edge': return 50;
+        case 'heal': return low ? 95 : 2;
+        default: return 1;
+      }
+    };
+    let best = list[0], bs = -1; for (const c of list) { const s = score(c) + Math.random() * 0.01; if (s > bs) { bs = s; best = c; } }
+    return best;
+  };
+  /** A card's name for the floating text of an auto choice. */
+  R.choiceName = function (c, dflt) { try { return (DH.ui.choiceInfo && DH.ui.choiceInfo(this, c).name) || dflt; } catch (e) { return dflt; } };
   R.choose = function (c, echo) {
     this.applyChoice(c, echo ? 2 : 1);
     this.pendingLevels = Math.max(0, this.pendingLevels - 1);

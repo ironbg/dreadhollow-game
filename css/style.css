@@ -2047,3 +2047,13 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .pit-count { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 40; background: radial-gradient(circle, rgba(0,0,0,0) 30%, rgba(0,0,0,.45) 100%); }
 .pit-count b { font-family: var(--title); font-size: clamp(90px, 34vw, 180px); color: var(--blood-hi); text-shadow: 0 5px 0 #000, 0 0 40px rgba(226,56,74,.9), 0 0 90px rgba(255,120,40,.5); animation: pitcount .8s ease-out forwards; }
 @keyframes pitcount { 0% { transform: scale(2.2); opacity: 0; } 25% { transform: scale(1); opacity: 1; } 75% { transform: scale(.92); opacity: 1; } 100% { transform: scale(.7); opacity: 0; } }
+/* the Pit's AUTO button (level-ups and tomes chosen by themselves), under the wave bar */
+.pb-autorow { display: flex; justify-content: flex-end; margin-top: 4px; }
+.autobtn { pointer-events: auto; display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 7px; border: 1px solid var(--bronze); background: rgba(10,6,12,.78); cursor: pointer; }
+.autobtn i { width: 8px; height: 8px; border-radius: 50%; background: #4a3a48; box-shadow: inset 0 1px 2px #000; }
+.autobtn b { font-family: var(--title); font-size: 12px; letter-spacing: .08em; color: #9a8aa8; }
+.autobtn.on { border-color: var(--gold); box-shadow: 0 0 10px rgba(240,200,96,.5); }
+.autobtn.on i { background: #7dff6a; box-shadow: 0 0 6px #7dff6a; }
+.autobtn.on b { color: var(--gold); }
+.autopick { gap: 6px; }
+.autotag { font-family: var(--title); font-size: 10px; letter-spacing: .06em; color: #1a1008; background: var(--gold); border-radius: 4px; padding: 1px 5px; margin-right: 6px; }

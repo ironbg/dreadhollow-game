@@ -99,6 +99,7 @@
       r.pitL = run.pit ? h('div.pitbar', // the Pit, top right: the Essence this fight has paid, the wave and how much of it is killed, the combo
         h('div.pb-top', h('span.pb-ess', A.img('i_essence', 'ci'), r.pbEss = h('b')), r.pbWave = h('b.pb-wave')),
         h('div.pb-bar', r.pbFill = h('i')),
+        h('div.pb-autorow', r.autoBtn = h('button.autobtn' + (DH.save.data.settings.autoPick ? '.on' : ''), { title: t('hud.autoHint'), onclick: () => { ui.setAutoPick(!DH.save.data.settings.autoPick); } }, h('i'), h('b', t('hud.auto')))), // AUTO: level-ups and tomes chosen by themselves
         r.pbCombo = h('div.pb-combo.hidden', h('div.pb-ct', t('hud.combo')), r.pbN = h('div.pb-n'), h('div.pb-cbar', r.pbCFill = h('i')), r.pbSkip = h('div.pb-skip'))) : null].filter(Boolean)); // append() would print a null as text
     if (!DH.save.data.tutorialDone) { r.tut = h('div.tutorial', h('div', h('span.hand', A.img('u_hand', 'bigic')), t('tutorial.move'), h('br'), h('span.small.muted', t('tutorial.auto')))); el.append(r.tut); }
     hud.sig = ''; el.classList.remove('hidden');
@@ -351,6 +352,15 @@
       h('div.ai-sect', t('abinfo.traits')), taken.length || ups.length ? h('div', taken, ups) : h('div.small.muted', t('abinfo.none'))) });
   };
 
+  /** The Pit's AUTO: level-ups and tomes chosen by themselves (remembered). Turned on from a window, it takes that
+   *  window's choice at once. */
+  ui.setAutoPick = (on) => {
+    click(); DH.save.data.settings.autoPick = !!on; DH.save.persist();
+    const b = hud.refs && hud.refs.autoBtn; if (b) b.classList.toggle('on', !!on);
+    ui.toast(t(on ? 'hud.autoOn' : 'hud.autoOff'));
+  };
+  const autoRow = (run, take) => run.pit ? h('div.center', { style: { marginTop: '8px' } }, h('button.btn.small.ghost.autopick', { onclick: () => { ui.setAutoPick(true); take(); } }, h('b.autotag', t('hud.auto')), t('levelup.auto'))) : null;
+
   /* ---------------- Level up ---------------- */
   ui.openLevelUp = (run) => {
     DH.input.enable(false);
@@ -391,7 +401,8 @@
         h('div', { style: { marginTop: '8px' } }, cards),
         h('div.lvfoot.mact', hasPot ? h('div.row.pots', LV.map(pot)) : null,
           h('div.lvacts', h('button.btn.small.ghost', { onclick: () => { click(); ui.openCharacter(run, {}); } }, t('levelup.stats')), // the hero's stats and gear while choosing
-            rerollBtn))));
+            rerollBtn)),
+        autoRow(run, () => { m.close(); run.choose(run.autoChoice(run.choices)); if (run.state === 'playing') DH.input.enable(true); })));
     };
     draw();
   };
@@ -412,7 +423,8 @@
       data.choices.some((c) => c.kind !== 'gold') ? h('div.tome-decline',
         h('span.small.muted', t('tome.decline')),
         h('button.btn.small.ghost', { onclick: () => { click(); m.close(); run.declineTome('gold'); if (run.state === 'playing') DH.input.enable(true); } }, A.img('i_gold'), t('tome.declineGold', { n: C.TOME_DECLINE_GOLD })),
-        h('button.btn.small.ghost', { onclick: () => { click(); m.close(); run.declineTome('xp'); if (run.state === 'playing') DH.input.enable(true); } }, t('tome.declineXp'))) : null) });
+        h('button.btn.small.ghost', { onclick: () => { click(); m.close(); run.declineTome('xp'); if (run.state === 'playing') DH.input.enable(true); } }, t('tome.declineXp'))) : null,
+      autoRow(run, () => { m.close(); run.chooseTome(run.autoChoice(data.choices)); if (run.state === 'playing') DH.input.enable(true); })) });
   };
   /** A flask that rolls a tome's or a chest's offer again: shown while the hero carries one. */
   ui.rerollPotion = (run, kind, ok, then) => {

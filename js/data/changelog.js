@@ -6,10 +6,14 @@
     {
       v: '1.61.58',
       bg: [
+        'Ямата: през първата минута опитът е тройно повече, за да стигнеш бързо силата си.',
+        'Ямата: бутон „АВТО“ под лентата на вълната (и в прозорците за ново ниво и том) избира новите умения и черти сам. Запомня се за следващите битки.',
         'Ямата: героят започва от ниво 1 с един Тайнствен том на земята до него (и още един за реклама). Вече няма наваксващи нива и томове при старт от по-далечна точка.',
         'Ямата: след „Готов“ и тома за реклама битката започва с отброяване 3, 2, 1.',
       ],
       en: [
+        'The Pit: experience is tripled in the first minute, so you reach your strength quickly.',
+        'The Pit: an AUTO button under the wave bar (and in the level-up and tome windows) chooses new abilities and traits for you. It is remembered for the next fights.',
         'The Pit: the hero starts at level 1 with one Arcane Tome on the ground beside them (and one more for an ad). No more catch-up levels and tomes when starting from a later checkpoint.',
         'The Pit: after Ready and the ad\'s tome, the fight begins with a 3, 2, 1 countdown.',
       ],

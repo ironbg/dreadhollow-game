@@ -91,7 +91,7 @@
     /** Experience multiplier now: Growth, Agony (per hall) and Torment. */
     // Agony's extra foes (+35% a rank) share the horde's usual XP between them: only the hall's Agony bonus raises it
     // Agony halves XP: the denser horde (below) hands out twice the kills, so leveling stays about the same pace.
-    xpMult() { return (1 + (this.trib.xp || 0)) * this.P.growth * (1 + this.agony * (this.stage.agonyXp || 0.15)) / (1 + this.agony * 0.35) * (this.tormentXp || 1) * (this.agonyOn ? 0.5 : 1); }
+    xpMult() { return (1 + (this.trib.xp || 0)) * this.P.growth * (1 + this.agony * (this.stage.agonyXp || 0.15)) / (1 + this.agony * 0.35) * (this.tormentXp || 1) * (this.agonyOn ? 0.5 : 1) * (this.pit && this.time < DH.economy.PIT.earlyXp.secs ? DH.economy.PIT.earlyXp.mult : 1); } // the Pit: the first minute counts triple
     gainXp(v, mult) {
       this.xp += v * (mult == null ? this.xpMult() : mult); // a gem's worth is fixed when it drops
       while (this.xp >= this.xpNext) {
@@ -107,12 +107,21 @@
       if (this.queue.length) {
         const q = this.queue.shift();
         if (q.make) q.data = q.make(); // made as it opens (a tome's choices after the tome before was read)
-        if (q.ev === 'run:tome' && this.fx_.randomTomes) { const c = U.pick(q.data.choices); this.chooseTome(c); this.text(this.player.x, this.player.y - 20, c.kind === 'ability' ? t('ab.' + c.id + '.name') : t('tome.title'), '#c8b8ff', true); return; }
+        if (q.ev === 'run:tome' && (this.fx_.randomTomes || this.autoPickOn())) { const c = this.fx_.randomTomes ? U.pick(q.data.choices) : this.autoChoice(q.data.choices); this.chooseTome(c); this.autoText(c, t('tome.title'), '#c8b8ff'); return; } // a random tome, or the auto choice
         this.state = q.state; DH.events.emit(q.ev, q.data); return;
       }
-      if (this.pendingLevels > 0) { this.state = 'levelup'; this.levelFor = this.level - this.pendingLevels + 1; this.choices = this.rollChoices(this.levelFor); DH.events.emit('run:levelup', this); }
+      if (this.pendingLevels > 0) {
+        this.state = 'levelup'; this.levelFor = this.level - this.pendingLevels + 1; this.choices = this.rollChoices(this.levelFor);
+        if (this.autoPickOn()) { const c = this.autoChoice(this.choices); this.autoText(c, t('levelup.title'), '#ffe08a'); this.choose(c); return; } // the Pit's AUTO button
+        DH.events.emit('run:levelup', this);
+      }
     }
     resume() { this.state = 'playing'; this.pump(); }
+    /** The name of a card chosen by itself, over the hero; several in one moment stack upwards (at most six shown). */
+    autoText(c, dflt, color) {
+      if (this.autoT !== this.time) { this.autoT = this.time; this.autoK = 0; } else this.autoK++;
+      if (this.autoK < 6) this.text(this.player.x, this.player.y - 30 - this.autoK * 12, this.choiceName(c, dflt), color, true);
+    }
 
     /* ---------------- main update ---------------- */
     update(dt) {
