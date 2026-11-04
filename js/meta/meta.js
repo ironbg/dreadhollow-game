@@ -160,7 +160,12 @@
   /* ---------------- The Pit (Trials) ---------------- */
   const pitS = () => {
     const s = S(); s.pit = s.pit || { best: 0, day: null, used: 0, active: null, pass: false }; const d = U.dayKey(); if (s.pit.day !== d) { s.pit.day = d; s.pit.used = 0; }
-    if (s.pit.mv !== 2) { s.pit.mv = 2; s.pit.perks = {}; } // the Mastery's cards were repriced (and the level starts at 1): every card back, once (its XP and level stay)
+    if (s.pit.mv !== 3) { // (mv: never in the save's defaults, so an old save cannot get it by a merge)
+      // the Mastery grows far slower now (1 experience a wave instead of 5, a steeper curve): the experience earned is what
+      // it would have been (a fifth), the level follows from it, and every card comes back (Extra Entry stays, as on a reset)
+      const keep = s.pit.mv === 2 && s.pit.perks && s.pit.perks.entry;
+      s.pit.mv = 3; s.pit.mxp = Math.round((s.pit.mxp || 0) / 5); s.pit.perks = keep ? { entry: keep } : {};
+    }
     return s.pit;
   };
   meta.pitPass = () => !!pitS().pass;
@@ -170,7 +175,7 @@
   meta.pitPerk = (id) => ((pitS().perks || {})[id] || 0);
   meta.pitPerkVal = (id) => meta.pitPerk(id) * ((PM().perks[id] || {}).per || 0);
   meta.pitPointsUsed = () => { const pk = pitS().perks || {}; let n = 0; for (const id in pk) if (PM().perks[id]) n += pk[id] * PM().perks[id].cost; return n; };
-  meta.pitPointsFree = () => meta.pitMastery().lv - meta.pitPointsUsed();
+  meta.pitPointsFree = () => Math.max(0, meta.pitMastery().lv - meta.pitPointsUsed()); // never below 0 (Extra Entry kept from a higher level)
   meta.pitSecs = () => E.PIT.secs + meta.pitPerkVal('time');
   /** The Mastery Pass (bought on its own): twice the Mastery experience in every Trial. */
   meta.masteryPass = () => !!S().masteryPass;

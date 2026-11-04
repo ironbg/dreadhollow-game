@@ -6,12 +6,14 @@
     {
       v: '1.61.58',
       bg: [
+        'Майсторството расте много по-бавно: 1 опит на вълна (досега 5) и по-стръмни нива (ниво 139 иска 7520 опит). Ниво 200 вече е цел за около година. Събраният опит е преизчислен по новите правила (една пета), а картите се връщат, за да разпределиш точките отново. „Още влизане“ остава.',
         'Ямата: през първата минута опитът е тройно повече, за да стигнеш бързо силата си.',
         'Ямата: бутон „АВТО“ под лентата на вълната (и в прозорците за ново ниво и том) избира новите умения и черти сам. Запомня се за следващите битки.',
         'Ямата: героят започва от ниво 1 с един Тайнствен том на земята до него (и още един за реклама). Вече няма наваксващи нива и томове при старт от по-далечна точка.',
         'Ямата: след „Готов“ и тома за реклама битката започва с отброяване 3, 2, 1.',
       ],
       en: [
+        'Mastery grows far slower: 1 experience per wave (was 5) and steeper levels (level 139 needs 7520). Level 200 is now a goal of about a year. Experience already earned is recalculated by the new rules (a fifth), and the cards come back so you can spend the points again. Extra Entry stays.',
         'The Pit: experience is tripled in the first minute, so you reach your strength quickly.',
         'The Pit: an AUTO button under the wave bar (and in the level-up and tome windows) chooses new abilities and traits for you. It is remembered for the next fights.',
         'The Pit: the hero starts at level 1 with one Arcane Tome on the ground beside them (and one more for an ad). No more catch-up levels and tomes when starting from a later checkpoint.',

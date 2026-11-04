@@ -416,8 +416,9 @@
   /** The Pit's Mastery: experience from every Pit fight (and sweep), a level up to E.PIT_MASTERY.max, a point a level
    *  to put in its cards (they work in the Pit only, except Essence and the entry). Freely reset. */
   E.PIT_MASTERY = {
-    max: 200, xpPerWave: 5, modeBonus: 0.3,                   // a fight or a sweep: 5 experience per wave reached, +30% in the Pit
-    next: (lv) => 60 + 15 * lv,                               // experience from level lv to lv + 1 (the Mastery starts at level 1)
+    max: 200, xpPerWave: 1, modeBonus: 0.3,                   // a fight or a sweep: 1 experience per wave reached, +30% in the Pit
+    next: (lv) => 54 * lv + 14,                               // experience from level lv to lv + 1 (the Mastery starts at level 1): 7520 at 139,
+                                                              // 1.08 million to 200 – about eleven months of daily Pit without the Mastery Pass
     // the cost of a rank by the card's tier (its colour): rare (blue) 1, epic (purple) 5, legendary (gold) 10, mythic (red) 35
     costs: { blue: 1, purple: 5, gold: 10, red: 35 },
     entryRefund: 100000,                                      // Extra Entry stays through a reset; taking it back costs gems
