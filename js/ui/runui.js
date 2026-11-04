@@ -346,7 +346,7 @@
         hit ? stat('dmg', U.fmt(hit)) : null, s.cd ? stat('cd', rnd(s.cd, 2) + ' ' + t('abinfo.sec')) : null,
         def.base.count != null || s.count > 1 ? stat('count', s.count) : null, def.base.area != null ? stat('area', Math.round(s.area * 100) + '%') : null,
         s.pierce ? stat('pierce', s.pierce) : null, s.chain ? stat('chain', s.chain) : null, s.duration ? stat('duration', rnd(s.duration, 1) + ' ' + t('abinfo.sec')) : null,
-        crit && !a.noCrit ? stat('crit', crit + '%') : null, s.ms ? stat('ms', Math.round(s.ms * 100) + '%') : null,
+        s.cd && !def.noAs ? stat('as', ((v) => (v >= 0 ? '+' : '') + v + '%')(Math.round(((P.as || 0) + (run.abilityMods(a).as || 0)) * 100))) : null, crit && !a.noCrit ? stat('crit', crit + '%') : null, s.ms ? stat('ms', Math.round(s.ms * 100) + '%') : null,
         stat('dps', U.fmt(Math.round(d / since))), stat('total', U.fmt(Math.round(d)))),
       h('div.ai-sect', t('abinfo.traits')), taken.length || ups.length ? h('div', taken, ups) : h('div.small.muted', t('abinfo.none'))) });
   };

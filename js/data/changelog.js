@@ -6,6 +6,8 @@
     {
       v: '1.61.57',
       bg: [
+        'Поправено: Сърцето на порока отнемаше повече от 1 максимален живот на ниво (с бонусите за живот ставаше към 3). Сега е точно по 1 на ниво.',
+        'Информацията за умение показва общата му скорост на атака (с бонусите само за оръжието, напр. от майсторството на героя), а шансът за крит се казва „Краен шанс за крит“, защото е собственият шанс на умението, вече умножен по Шанса за крит на героя.',
         'Всички характеристики на реликвите (и бонусите на нивата им) са четири пъти по-малки: с рядкостта и нивата един предмет стигаше до +96% скорост на атака, +268% Многоудар, +339% критични щети или +230% огнени щети. Специалните ефекти на реликвите, чертите, уменията и благословиите дават колкото досега.',
         'Всяка екипирана реликва в Оръжейната показва червена значка с броя нива, с които можеш да я вдигнеш сега.',
         'Нов Път на нивата в профила: на всеки 5 нива на профила те чака голяма награда – сребърен или златен сандък, сигурна епична (от ниво 60 легендарна) реликва, скъпоценни камъни, метали и на всеки 25 нива факли. Наградите за вече минатите нива също могат да се вземат.',
@@ -33,6 +35,8 @@
         'Ямата има своя арена, като на картината ѝ: по-малка дълбока яма с високи скални стени от колони и первази с вградени канари, прорязани от светещи пукнатини, три потока течаща лава, които падат в огнени езера с плаваща кора, камъни в основата, вериги и железни колове по ръба, факли и камъни, които от време на време падат от ръба. Враговете слизат от стените.',
       ],
       en: [
+        'Fixed: Heart of Vice took more than 1 max HP per level (with max-HP bonuses it was about 3). It is now exactly 1 per level.',
+        'An ability\'s details show its total attack speed (including weapon-only bonuses such as the hero\'s class traits), and its crit is now labelled "Final crit chance": the ability\'s own chance already multiplied by the hero\'s Crit Chance.',
         'Every stat on relics (and their level bonuses) is a quarter of what it was: with rarity and levels one piece reached +96% attack speed, +268% Multistrike, +339% crit damage or +230% fire damage. Relic specials, traits, abilities and blessings give as much as before.',
         'Every worn relic in the Armory shows a red badge with how many levels you can raise it right now.',
         'A new Path in the profile: every 5 profile levels a big reward awaits – a Silver or Gold chest, a sure Epic (Legendary from level 60) relic, gems, metals and, every 25 levels, torches. Rewards for levels already passed can be claimed too.',

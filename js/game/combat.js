@@ -34,7 +34,6 @@
     const fx = this.fx_ || {};
     if (fx.playerDmg) st.dmgPct = (st.dmgPct || 0) + fx.playerDmg;
     if (this.edge) for (const k in this.edge) st[k] = (st[k] || 0) + this.edge[k];
-    if (fx.vice) st.baseHp = Math.max(20, st.baseHp - (this.level - 1));
     if (fx.deedXp) st.growth = (st.growth || 0) - (st.deedXp || 0) * (1 - fx.deedXp);
     if (fx.regret) { const n = Math.floor(this.kills / 100) * fx.regret; st.as = (st.as || 0) - n; st.area = (st.area || 0) - n; }
     if (fx.ms) st.ms = (st.ms || 0) + fx.ms;
@@ -47,7 +46,7 @@
     const prevMax = this.P ? this.P.maxHp : 0;
     const tag = {}; TAGS.forEach((t) => { tag[t] = st[(t === 'physical' ? 'phys' : t) + 'Pct'] || 0; });
     this.P = {
-      maxHp: Math.max(10, Math.round(st.baseHp * (1 + (st.maxHpPct || 0)) * (this.fx_.maxHp || 1))),
+      maxHp: Math.max(10, Math.round(st.baseHp * (1 + (st.maxHpPct || 0)) * (this.fx_.maxHp || 1)) - (fx.vice ? this.level - 1 : 0)), // Heart of Vice: exactly 1 max HP per level, after every bonus
       speed: st.baseSpeed * (1 + (st.speedPct || 0)) * (this.artifactSpeed ? this.artifactSpeed() : 1),
       regen: this.hero.noRegen ? 0 : Math.max(0, st.regen || 0),
       defense: st.defense || 0, block: st.block || 0, taken,
