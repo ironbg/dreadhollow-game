@@ -348,9 +348,12 @@
       const fx = this.fx_ || {}, DEF = ['vitality', 'metabolism', 'parry', 'thickhide'];
       if (!fx.leash) for (const id in C.baseTraits) { if (fx.glass && DEF.includes(id)) continue; const r = this.traits.base[id] || 0; if (r < C.BASE_TRAIT_MAX) out.push({ kind: 'base', id, rank: r + 1, w: 1 }); }
       const tiers = C.ELEVATED_LEVELS.filter((l) => l <= level).length;
-      // a trait that works on one kind of ability comes only when the hero has one: Summoner (summons), Volley (projectiles)
-      const has = (tg) => this.abilities.some((a) => C.abilities[a.id] && C.abilities[a.id].tags.includes(tg));
-      for (const id in C.elevatedTraits) { const need = ELEV_NEEDS[id]; if (need && !has(need)) continue; const r = this.traits.elev[id] || 0; if (r < tiers) out.push({ kind: 'elev', id, rank: r + 1, w: 1.3 }); }
+      // a trait that works on one kind of ability comes only when it fits: Summoner when the hero has a summon,
+      // Volley (projectile Multistrike) only when the main weapon itself shoots projectiles
+      const tagsOf = (a) => a.tags || (C.abilities[a.id] && C.abilities[a.id].tags) || [];
+      const has = (tg) => this.abilities.some((a) => tagsOf(a).includes(tg));
+      const weaponHas = (tg) => !!this.abilities[0] && tagsOf(this.abilities[0]).includes(tg);
+      for (const id in C.elevatedTraits) { const need = ELEV_NEEDS[id]; if (need && !(id === 'volley' ? weaponHas(need) : has(need))) continue; const r = this.traits.elev[id] || 0; if (r < tiers) out.push({ kind: 'elev', id, rank: r + 1, w: 1.3 }); }
     }
     if (noCap || level >= C.ABILITY_TRAIT_EVERY) {
       // one ability-trait rank per ability per 8 levels; ranks a tome gave do not count (a tome is never held back by it)

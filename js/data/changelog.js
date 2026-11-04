@@ -6,6 +6,7 @@
     {
       v: '1.61.57',
       bg: [
+        'Издигнатата черта Залп (Многоудар за снаряди) се предлага само ако основното оръжие на героя е със снаряди. Досега идваше и при герои с оръжие за близък бой, щом имат друго умение със снаряди.',
         'Поправено: Сърцето на порока отнемаше повече от 1 максимален живот на ниво (с бонусите за живот ставаше към 3). Сега е точно по 1 на ниво.',
         'Информацията за умение показва общата му скорост на атака (с бонусите само за оръжието, напр. от майсторството на героя), а шансът за крит се казва „Краен шанс за крит“, защото е собственият шанс на умението, вече умножен по Шанса за крит на героя.',
         'Всички характеристики на реликвите (и бонусите на нивата им) са четири пъти по-малки: с рядкостта и нивата един предмет стигаше до +96% скорост на атака, +268% Многоудар, +339% критични щети или +230% огнени щети. Специалните ефекти на реликвите, чертите, уменията и благословиите дават колкото досега.',
@@ -35,6 +36,7 @@
         'Ямата има своя арена, като на картината ѝ: по-малка дълбока яма с високи скални стени от колони и первази с вградени канари, прорязани от светещи пукнатини, три потока течаща лава, които падат в огнени езера с плаваща кора, камъни в основата, вериги и железни колове по ръба, факли и камъни, които от време на време падат от ръба. Враговете слизат от стените.',
       ],
       en: [
+        'The elevated trait Volley (projectile Multistrike) is offered only when the hero\'s main weapon shoots projectiles. Before, melee heroes got it too as soon as they had another projectile ability.',
         'Fixed: Heart of Vice took more than 1 max HP per level (with max-HP bonuses it was about 3). It is now exactly 1 per level.',
         'An ability\'s details show its total attack speed (including weapon-only bonuses such as the hero\'s class traits), and its crit is now labelled "Final crit chance": the ability\'s own chance already multiplied by the hero\'s Crit Chance.',
         'Every stat on relics (and their level bonuses) is a quarter of what it was: with rarity and levels one piece reached +96% attack speed, +268% Multistrike, +339% crit damage or +230% fire damage. Relic specials, traits, abilities and blessings give as much as before.',
