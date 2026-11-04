@@ -60,6 +60,12 @@
   add('d_oracle', 'stage', { type: 'survive', stage: 'discord', t: 600, agony: true }, { args: { stage: 'discord' } });
   add('d_plants', 'general', { type: 'plantsAtOnce', n: 10, hero: 'crone' }, { args: { n: 10, hero: 'crone' } });
   [4, 8].forEach((n) => add('d_dread_' + n, 'general', { type: 'dread', n }, { args: { n } }));
+  // the Pit (Trials): checked when a Pit fight ends or a sweep is made (DH.meta.pitEnd / pitSweep)
+  add('d_pit_first', 'pit', { type: 'stat', stat: 'pitFights', n: 1 }, { args: { n: 1 }, gold: 500 });
+  [[100, 1500], [500, 4000], [1000, 8000]].forEach(([n, g]) => add('d_pit_wave_' + n, 'pit', { type: 'pitBest', n }, { args: { n }, gold: g }));
+  add('d_pit_run_50', 'pit', { type: 'pitRun', n: 50 }, { args: { n: 50 }, gold: 2500 });
+  [[25, 2000], [100, 6000]].forEach(([n, g]) => add('d_pit_mastery_' + n, 'pit', { type: 'pitMastery', n }, { args: { n }, gold: g }));
+  add('d_pit_essence', 'pit', { type: 'stat', stat: 'pitEssence', n: 100000 }, { args: { n: 100000 }, gold: 3000 });
 
   DH.deeds = { list: D, byId: Object.fromEntries(D.map((d) => [d.id, d])), XP_PER_DEED: 0.003 }; // +0.3% XP per completed quest
 })(window.DH);

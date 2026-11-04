@@ -6,6 +6,8 @@
     {
       v: '1.61.58',
       bg: [
+        'Нова дневна мисия всеки ден: влез в Ямата (битка или бързо минаване) за 10 точки активност, злато и опит за Пропуска.',
+        'Осем нови подвига в раздел „Яма“: първа битка, вълни 100, 500 и 1000, 50 вълни в една битка, ниво 25 и 100 на Майсторството и 100 000 Есенция от Ямата.',
         'Майсторството расте много по-бавно: 1 опит на вълна (досега 5) и по-стръмни нива (ниво 139 иска 7520 опит). Ниво 200 вече е цел за около година. Събраният опит е преизчислен по новите правила (една пета), а картите се връщат, за да разпределиш точките отново. „Още влизане“ остава.',
         'Ямата: през първата минута опитът е тройно повече, за да стигнеш бързо силата си.',
         'Ямата: бутон „АВТО“ под лентата на вълната (и в прозорците за ново ниво и том) избира новите умения и черти сам. Запомня се за следващите битки.',
@@ -13,6 +15,8 @@
         'Ямата: след „Готов“ и тома за реклама битката започва с отброяване 3, 2, 1.',
       ],
       en: [
+        'A new mission every day: enter the Pit (a fight or a sweep) for 10 activity points, gold and Battle Pass experience.',
+        'Eight new Deeds in a "Pit" tab: a first fight, waves 100, 500 and 1000, 50 waves in one fight, Mastery levels 25 and 100, and 100,000 Essence from the Pit.',
         'Mastery grows far slower: 1 experience per wave (was 5) and steeper levels (level 139 needs 7520). Level 200 is now a goal of about a year. Experience already earned is recalculated by the new rules (a fifth), and the cards come back so you can spend the points again. Extra Entry stays.',
         'The Pit: experience is tripled in the first minute, so you reach your strength quickly.',
         'The Pit: an AUTO button under the wave bar (and in the level-up and tome windows) chooses new abilities and traits for you. It is remembered for the next fights.',

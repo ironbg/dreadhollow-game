@@ -139,6 +139,7 @@
       const r = await ui.act('pitSweep', { n }); if (!r) return;
       sweepN = 1;
       DH.audio.play('coin'); ui.rewardPopup(r.n > 1 ? t('pit.sweepN', { n: r.n }) : t('pit.sweep'), [{ icon: 'i_essence', text: '+' + U.fmt(r.paid) }]); draw();
+      (r.deeds || []).forEach((d, i) => setTimeout(() => ui.toast(t('pit.deedDone', { d: ui.deedText(d) }), 'good'), 600 + i * 900)); // Deeds done by the sweep
     };
     draw();
   };
@@ -350,6 +351,7 @@
       h('div.goldline', h('span', t('pit.entryPay')), h('b', U.fmt(P.paid || 0))),
       h('div.goldline', h('span', t('pit.wavesPay')), h('b', U.fmt(res.paid || 0))),
       res.mastery ? h('div.center.goldtxt', { style: { fontWeight: 800, margin: '4px 0' } }, A.img('u_star', 'ci'), ' ' + t('pit.masteryUp', { n: M.pitMastery().lv })) : null,
+      res.deeds && res.deeds.length ? h('div.deedsdone', h('div.goldtxt', { style: { fontWeight: 800 } }, t('results.deeds', { n: res.deeds.length, x: Math.round(res.deeds.length * DH.deeds.XP_PER_DEED * 1000) / 10 })), res.deeds.map((d) => h('div.small.dd', A.img('u_check', 'ci'), h('span', ui.deedText(d))))) : null,
       h('div.goldtotal', A.img('i_essence'), h('b', U.fmt(total))),
       res.failed ? h('div.small.center.bad', t('pit.notSent')) : null,
       h('div.btns', h('button.btn.gold', { onclick: () => { click(); m.close(); DH.game.toMenu(false); } }, t('common.continue')))) });

@@ -405,7 +405,7 @@
       const all = DH.deeds.list, done = M.deedCount();
       box.append(h('div.panel.gold.item', h('div.ico', A.img('n_book')), h('div.grow', h('div.t', t('deeds.title', { n: done, max: all.length })), h('div.d', t('deeds.bonus', { v: Math.round(done * DH.deeds.XP_PER_DEED * 1000) / 10 })),
         h('div.prog', h('div.bar', h('i', { style: { width: (done / all.length * 100) + '%' } }))))));
-      box.append(h('div.tabs.small', ['stage', 'hero', 'ability', 'general'].map((c) => {
+      box.append(h('div.tabs.small', ['stage', 'hero', 'ability', 'general', 'pit'].map((c) => {
         const n = all.filter((d) => d.cat === c).length, dn = all.filter((d) => d.cat === c && M.deedDone(d.id)).length;
         return h('button' + (cat === c ? '.on' : ''), { onclick: () => { click(); ui.sub.deedCat = c; ui.refresh(); } }, t('deeds.cat.' + c) + ' ' + dn + '/' + n);
       })));
@@ -415,7 +415,7 @@
       list.slice(0, 80).forEach((d) => {
         const ok = M.deedDone(d.id), pr = M.deedProgress(d);
         box.append(h('div.panel.item.deed' + (ok ? '.claimed' : ''),
-          h('div.ico', A.img(ok ? 'n_trophy' : d.cat === 'ability' ? 'ab_' + d.args.ab : d.cat === 'hero' ? 'h_' + d.args.hero : d.cat === 'stage' ? 'n_skull' : 'n_scroll')),
+          h('div.ico', A.img(ok ? 'n_trophy' : d.cat === 'pit' ? 'i_essence' : d.cat === 'ability' ? 'ab_' + d.args.ab : d.cat === 'hero' ? 'h_' + d.args.hero : d.cat === 'stage' ? 'n_skull' : 'n_scroll')),
           h('div.grow', h('div.t', ui.deedText(d)), h('div.d.goldtxt', ui.deedReward(d)),
             pr && !ok ? h('div.prog', h('div.bar', h('i', { style: { width: Math.min(100, pr.v / pr.n * 100) + '%' } })), h('div.v', U.fmt(Math.min(pr.v, pr.n)) + ' / ' + U.fmt(pr.n))) : null),
           ok ? h('span.good', { style: { fontSize: '20px', fontWeight: 800 } }, A.img('u_check', 'bigic'))
@@ -551,13 +551,14 @@
         : h('button.btn.ghost.off', t('quests.needPts', { n: c.at - M.activityPts() })))) });
   }
   function missionIcon(id) {
-    return { forge: 'mat_iron', mats: 'mat_silver', herbs: 'herb_moss', agony: 'a_mirror', kills: 'n_skull', kills2: 'n_skull', runs: 'n_battle', survive: 't_haste', level: 't_wisdom', boss: 'n_trophy', gold: 'i_gold', chest: 'c_wood', ads: 'n_ad', upgrade: 'n_shrine', elites: 't_might', tomes: 'tome', champions: 'c_red' }[id] || 'n_scroll';
+    return { forge: 'mat_iron', mats: 'mat_silver', herbs: 'herb_moss', agony: 'a_mirror', kills: 'n_skull', kills2: 'n_skull', runs: 'n_battle', survive: 't_haste', level: 't_wisdom', boss: 'n_trophy', gold: 'i_gold', chest: 'c_wood', ads: 'n_ad', upgrade: 'n_shrine', elites: 't_might', tomes: 'tome', champions: 'c_red', pit: 'i_essence' }[id] || 'n_scroll';
   }
   function missionGo(id) {
     if (id === 'chest') ui.go('shop', 'chests');
     else if (id === 'ads') ui.go('shop', 'free');
     else if (id === 'upgrade') ui.go('shrine');
     else if (id === 'forge') ui.go('armory', 'gear');
+    else if (id === 'pit') { ui.go('home'); ui.openTrials(); }
     else ui.go('home');
   }
 

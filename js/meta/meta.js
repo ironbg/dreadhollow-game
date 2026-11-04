@@ -225,8 +225,10 @@
     if (reached > 0) meta.boardRecord({ pitWave: reached, hero: S().selectedHero, stage: null, victory: false }, {}); // the Pit's boards (a sweep never counts)
     const paid = Math.round(waves * meta.pitPerWave()); if (paid) addEssence(paid);
     const lv0 = meta.pitMastery().lv; addMastery(reached);
+    const st = S().stats; st.pitFights = (st.pitFights || 0) + 1; st.pitEssence = (st.pitEssence || 0) + paid + Math.round(a.from * meta.pitPerWave());
+    const deeds = meta.checkDeeds(null, { pitWaves: waves });
     changed();
-    return { waves, reached, paid, best: p.best, record, from: a.from, mastery: meta.pitMastery().lv - lv0 };
+    return { waves, reached, paid, best: p.best, record, from: a.from, mastery: meta.pitMastery().lv - lv0, deeds };
   };
   /** What one sweep pays: a share of the best wave (E.PIT.sweep, more with the Mastery's Sweep card, all of it at its top). */
   meta.pitSweepShare = () => Math.min(1, E.PIT.sweep + meta.pitPerkVal('sweep'));
@@ -237,8 +239,9 @@
     n = Math.max(1, Math.min(meta.pitLeft(), n | 0 || 1));
     const lv0 = meta.pitMastery().lv, paid = meta.pitSweepPay() * n;
     p.used += n; addEssence(paid); for (let i = 0; i < n; i++) addMastery(p.best);
-    meta.track('pit', n); changed();
-    return { paid, n, mastery: meta.pitMastery().lv - lv0 };
+    S().stats.pitEssence = (S().stats.pitEssence || 0) + paid;
+    meta.track('pit', n); const deeds = meta.checkDeeds(null); changed();
+    return { paid, n, mastery: meta.pitMastery().lv - lv0, deeds };
   };
   /* the Pit's shop (E.PIT_SHOP): a free handful a day, then a few for an ad each; the packs are bought with real money (E.products ess_*) */
   meta.pitFreeReady = () => !meta.ensureDaily().pitFree;
@@ -685,6 +688,8 @@
     const s = S(), c = d.cond;
     if (c.type === 'abDmg') return { v: s.stats.abDmg[c.ab] || 0, n: c.n };
     if (c.type === 'stat') return { v: s.stats[c.stat] || 0, n: c.n };
+    if (c.type === 'pitBest') return { v: (s.pit && s.pit.best) || 0, n: c.n };
+    if (c.type === 'pitMastery') return { v: meta.pitMastery().lv, n: c.n };
     return null;
   };
   /** Live progress of a deed during a run (the pinned quest on the HUD): { v, n, time, here }.
@@ -712,6 +717,9 @@
       case 'dmgStage': o = { v: dmgAll(), n: c.n }; break;
       case 'abilitiesBy': o = { v: R.abilities.length, n: c.n }; break;
       case 'shardsRun': o = { v: R.shards || 0, n: c.n }; break;
+      case 'pitBest': here = !!R.pit; o = { v: R.pit ? R.pit.from + R.pit.cleared : (s.pit && s.pit.best) || 0, n: c.n }; break;
+      case 'pitRun': here = !!R.pit; o = { v: R.pit ? R.pit.cleared : 0, n: c.n }; break;
+      case 'pitMastery': here = false; o = { v: meta.pitMastery().lv, n: c.n }; break;
       default: o = yes(false);
     }
     o.here = here; return o;
@@ -720,7 +728,7 @@
   meta.trackedDeed = () => { const id = S().trackedDeed, d = id && DH.deeds.byId[id]; return d && !S().deeds[id] ? d : null; };
   meta.trackDeed = (id) => { const s = S(); s.trackedDeed = s.trackedDeed === id ? null : id; changed(); return s.trackedDeed; };
   /** Evaluate deeds after a run (r = run summary). Returns newly completed deeds. */
-  meta.checkDeeds = (r) => {
+  meta.checkDeeds = (r, x) => { // x: what a Pit fight adds ({ pitWaves })
     const s = S(), done = [];
     for (const d of DH.deeds.list) {
       if (s.deeds[d.id]) continue;
@@ -754,6 +762,9 @@
         case 'heathen': ok = r && r.time >= c.t * (r.runLength / C.RUN_LENGTH) && !['fire', 'ice', 'lightning'].some((tg) => (r.dmgTags[tg] || 0) > 0); break;
         case 'direct': ok = r && r.time >= c.t * (r.runLength / C.RUN_LENGTH) && !r.elemApplied; break;
         case 'shardsRun': ok = r && r.stage === c.stage && (r.shards || 0) >= c.n; break;
+        case 'pitBest': ok = ((s.pit && s.pit.best) || 0) >= c.n; break;
+        case 'pitMastery': ok = meta.pitMastery().lv >= c.n; break;
+        case 'pitRun': ok = !!x && (x.pitWaves || 0) >= c.n; break;
         default: break;
       }
       if (ok && c.hero && (!r || r.hero !== c.hero)) ok = false; // done in that hero's run only
@@ -796,10 +807,15 @@
   /* ---------------- Daily state ---------------- */
   meta.ensureDaily = () => {
     const s = S(), today = U.dayKey();
-    if (s.daily && s.daily.day === today) return s.daily;
+    if (s.daily && s.daily.day === today) {
+      // a mission offered every day (the Pit) joins a day dealt before it existed
+      E.missionPool.forEach((m) => { if (m.always && !s.daily.missions.some((x) => x.id === m.id)) s.daily.missions.push({ id: m.id, p: 0, done: false, claimed: false }); });
+      return s.daily;
+    }
     const rng = U.seeded(U.strSeed(today + (s.created % 997)));
-    // the day's missions: those that can be done, enough of them that the last chest can be reached
-    const avail = U.shuffle(E.missionPool.filter((m) => meta.missionAvailable(m)), rng), pool = avail.slice(0, E.MISSIONS_PER_DAY);
+    // the day's missions: those offered every day, then those that can be done, enough that the last chest can be reached
+    const always = E.missionPool.filter((m) => m.always);
+    const avail = U.shuffle(E.missionPool.filter((m) => !m.always && meta.missionAvailable(m)), rng), pool = always.concat(avail.slice(0, E.MISSIONS_PER_DAY - always.length));
     for (let i = pool.length; i < avail.length && pool.reduce((n, m) => n + m.pts, 0) < E.MISSION_PTS_MIN; i++) pool.push(avail[i]);
     const all = E.dealPool.map((d, i) => i), adIdx = all.filter((i) => E.dealPool[i].cost.ad);
     const dealIdx = U.shuffle(all.filter((i) => !E.dealPool[i].cost.ad), rng).slice(0, 3);

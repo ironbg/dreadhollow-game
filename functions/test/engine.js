@@ -105,8 +105,12 @@ const live = require('../game/live.json');
   assert.strictEqual(dm.result.pts, dm.result.sum); assert.deepStrictEqual(dm.result.claimed, [true, true, true, true, true]);
   assert.strictEqual(dm.result.again, null, 'a chest opens once'); assert.strictEqual(dm.result.gems, dm.result.gems0 + 50);
   // a fresh player (no hall won) is never offered the Agony mission; a fight counts materials and herbs
-  dm = await withProfile(p0, live, (DHp) => { const d = DHp.meta.ensureDaily(); d.missions = [{ id: 'mats', p: 0 }, { id: 'herbs', p: 0 }]; DHp.meta.settleRun(Object.assign({}, sum, { mats: { iron: 12, silver: 9 }, herbs: { moss: 3 } })); return d.missions.map((m) => m.done); });
+  dm = await withProfile(p0, live, (DHp) => { const d = DHp.meta.ensureDaily(); d.missions = [{ id: 'mats', p: 0 }, { id: 'herbs', p: 0 }]; DHp.meta.settleRun(Object.assign({}, sum, { mats: { iron: 12, silver: 9 }, herbs: { moss: 3 } })); return d.missions.filter((m) => m.id !== 'pit').map((m) => m.done); });
   assert.deepStrictEqual(dm.result, [true, true]);
+  // the Pit's mission comes every day, and joins a day dealt before it existed; a sweep or a fight counts
+  dm = await withProfile(p0, live, (DHp) => { const d = DHp.meta.ensureDaily(), first = d.missions.some((m) => m.id === 'pit'); d.missions = d.missions.filter((m) => m.id !== 'pit');
+    const back = DHp.meta.ensureDaily().missions.some((m) => m.id === 'pit'); DHp.meta.pitStart(); return [first, back, DHp.meta.ensureDaily().missions.find((m) => m.id === 'pit').done]; });
+  assert.deepStrictEqual(dm.result, [true, true, true]);
   dm = await withProfile(p0, live, (DHp) => DHp.meta.ensureDaily().missions.some((m) => m.id === 'agony'));
   assert.strictEqual(dm.result, false);
   // the account's reward track: once per milestone, only when reached
@@ -212,6 +216,12 @@ const live = require('../game/live.json');
   assert.deepStrictEqual(r.result, [7520, 1077386, 10000, '{"entry":1}', 19, 0]);
   r = await withProfile(r.profile, live, (DH) => { DH.meta.pitMastery(); return DH.save.data.pit.mxp; });
   assert.strictEqual(r.result, 10000, 'the experience is cut once only');
+  // the Pit's Deeds: a first fight, 50 waves in one fight, wave 100 (from the best wave), the Essence it paid; a sweep checks too
+  r = await withProfile(Object.assign({}, p0, { pit: { best: 0, day: null, used: 0, active: { at: Date.now() - 170000, from: 60, affixes: [] }, pass: false, mv: 3 } }), live, (DH) => {
+    const res = DH.actions.list.pitEnd.run({ waves: 55 }); return [res.deeds.map((d) => d.id).sort(), DH.save.data.stats.pitFights]; });
+  assert.deepStrictEqual(r.result, [['d_pit_first', 'd_pit_run_50', 'd_pit_wave_100'], 1]);
+  r = await withProfile(Object.assign({}, r.profile, { stats: Object.assign({}, r.profile.stats, { pitEssence: 99990 }) }), live, (DH) => DH.actions.list.pitSweep.run({}).deeds.map((d) => d.id));
+  assert.deepStrictEqual(r.result, ['d_pit_essence']);
   // the Pit's shop: a free handful once a day, the ads only after it, Essence for gems so many times a day
   r = await withProfile(Object.assign({}, p0, { essence: 0 }), live, (DH) => [DH.actions.list.claimPitFree.run({}), DH.actions.list.claimPitFree.run({}), DH.meta.pitAdsLeft()]);
   assert.ok(r.result[0] && r.result[1] === null); assert.strictEqual(r.result[2], 3); assert.strictEqual(r.profile.essence, 150);

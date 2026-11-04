@@ -278,6 +278,7 @@
     { id: 'mats',      target: 20,   pts: 5,  reward: { gold: 300, passXp: 60 } },
     { id: 'herbs',     target: 3,    pts: 5,  reward: { gold: 200, passXp: 60 } },
     { id: 'agony',     target: 1,    pts: 10, reward: { gold: 500, passXp: 100 }, need: 'agony' },
+    { id: 'pit',       target: 1,    pts: 10, reward: { gold: 400, passXp: 80 }, always: true }, // every day: enter the Pit (a fight or a sweep)
   ];
   E.MISSIONS_PER_DAY = 8;
   E.MISSION_PTS_MIN = 55; // a day's missions always add up to at least this (the last chest asks for 50): one more is offered if not
