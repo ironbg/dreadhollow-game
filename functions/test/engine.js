@@ -222,6 +222,9 @@ const live = require('../game/live.json');
   assert.deepStrictEqual(r.result, [['d_pit_first', 'd_pit_run_50', 'd_pit_wave_100'], 1]);
   r = await withProfile(Object.assign({}, r.profile, { stats: Object.assign({}, r.profile.stats, { pitEssence: 99990 }) }), live, (DH) => DH.actions.list.pitSweep.run({}).deeds.map((d) => d.id));
   assert.deepStrictEqual(r.result, ['d_pit_essence']);
+  // the Trials' trophies read the Pit and the Constellation
+  r = await withProfile(r.profile, live, (DH) => { const A = DH.economy.achievements, v = (id) => DH.meta.achValue(A.find((a) => a.id === id)); return [v('pitdepth'), v('pitfights'), v('pitessence') >= 100000, v('stargazer'), DH.actions.list.claimAch.run({ id: 'pitdepth' }) ? DH.save.data.achievements.pitdepth : 0]; });
+  assert.deepStrictEqual(r.result, [115, 1, true, 0, 1]);
   // the Pit's shop: a free handful once a day, the ads only after it, Essence for gems so many times a day
   r = await withProfile(Object.assign({}, p0, { essence: 0 }), live, (DH) => [DH.actions.list.claimPitFree.run({}), DH.actions.list.claimPitFree.run({}), DH.meta.pitAdsLeft()]);
   assert.ok(r.result[0] && r.result[1] === null); assert.strictEqual(r.result[2], 3); assert.strictEqual(r.profile.essence, 150);

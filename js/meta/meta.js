@@ -874,6 +874,9 @@
       case 'heroesOwned': return C.heroOrder.filter((h) => meta.heroOwned(h)).length;
       case 'shrineLevels': return meta.shrineTotal();
       case 'stagesCleared': return Object.keys(s.cleared).length;
+      case 'pitBest': return (s.pit && s.pit.best) || 0;
+      case 'pitMastery': return meta.pitMastery().lv;
+      case 'consStars': return Object.keys(E.CONST.branches).reduce((n, b) => n + meta.consPoints(b), 0); // ranks bought in the Constellation
       default: return s.stats[a.stat] || 0;
     }
   };

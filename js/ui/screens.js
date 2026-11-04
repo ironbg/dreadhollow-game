@@ -405,9 +405,9 @@
       const all = DH.deeds.list, done = M.deedCount();
       box.append(h('div.panel.gold.item', h('div.ico', A.img('n_book')), h('div.grow', h('div.t', t('deeds.title', { n: done, max: all.length })), h('div.d', t('deeds.bonus', { v: Math.round(done * DH.deeds.XP_PER_DEED * 1000) / 10 })),
         h('div.prog', h('div.bar', h('i', { style: { width: (done / all.length * 100) + '%' } }))))));
-      box.append(h('div.tabs.small', ['stage', 'hero', 'ability', 'general', 'pit'].map((c) => {
+      box.append(h('div.tabs.small.dcat', ['stage', 'hero', 'ability', 'general', 'pit'].map((c) => {
         const n = all.filter((d) => d.cat === c).length, dn = all.filter((d) => d.cat === c && M.deedDone(d.id)).length;
-        return h('button' + (cat === c ? '.on' : ''), { onclick: () => { click(); ui.sub.deedCat = c; ui.refresh(); } }, t('deeds.cat.' + c) + ' ' + dn + '/' + n);
+        return h('button' + (cat === c ? '.on' : ''), { onclick: () => { click(); ui.sub.deedCat = c; ui.refresh(); } }, h('span', t('deeds.cat.' + c)), h('small', dn + '/' + n)); // the name, its count under it
       })));
       const pinned = DH.save.data.trackedDeed;
       const list = all.filter((d) => d.cat === cat).sort((a, b) => M.deedDone(a.id) - M.deedDone(b.id) || (b.id === pinned) - (a.id === pinned));
@@ -525,7 +525,7 @@
         const can = M.achClaimable(a);
         const stars = h('span', { style: { color: 'var(--gold)', letterSpacing: '1px' } }, a.tiers.map((x, i) => A.img(i < c ? 'u_star' : 'u_star0', 'ci')));
         box.append(h('div.panel.item' + (can ? '.done' : ''),
-          h('div.ico', A.img('n_trophy')),
+          h('div.ico', A.img(a.icon || 'n_trophy')),
           h('div.grow',
             h('div.t', t('ach.' + a.id + '.name'), ' ', stars),
             h('div.d', t('ach.' + a.id + '.desc', { n: U.fmt(target) })),

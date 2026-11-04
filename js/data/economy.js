@@ -308,6 +308,12 @@
     { id: 'patron',    stat: 'adsWatched',   tiers: [5, 25, 100, 300],                   gems: [15, 40, 80, 150] },
     { id: 'conqueror', stat: 'stagesCleared',tiers: [1, 2, 3],                           gems: [50, 150, 300] },
     { id: 'forger',    stat: 'forged',       tiers: [5, 30, 120, 400],                   gems: [15, 40, 90, 200] },
+    // the Trials (the Pit)
+    { id: 'pitdepth',  stat: 'pitBest',      tiers: [50, 200, 500, 1000, 1500],          gems: [20, 50, 100, 200, 400], icon: 'i_essence' },
+    { id: 'pitfights', stat: 'pitFights',    tiers: [5, 25, 100, 300, 1000],             gems: [15, 30, 60, 120, 250], icon: 'i_essence' },
+    { id: 'pitmastery',stat: 'pitMastery',   tiers: [10, 50, 100, 150, 200],             gems: [20, 50, 100, 200, 500], icon: 'i_essence' },
+    { id: 'pitessence',stat: 'pitEssence',   tiers: [10000, 100000, 500000, 2000000],    gems: [20, 50, 120, 300], icon: 'i_essence' },
+    { id: 'stargazer', stat: 'consStars',    tiers: [10, 50, 150, 400],                  gems: [20, 50, 120, 300], icon: 'i_essence' },
   ];
 
   /* ---------- Season pass ---------- */
