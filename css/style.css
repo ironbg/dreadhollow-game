@@ -2027,3 +2027,9 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
   border: 2px solid #050308; clip-path: var(--notch); color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,.7);
   background: linear-gradient(180deg, #f090f0 0 8%, #c050c8 8% 50%, #9a34a8 50% 86%, #62186e 86%); box-shadow: inset 2px 2px 0 0 rgba(255,255,255,.18), inset -2px -2px 0 0 rgba(0,0,0,.35); }
 .pass-buy img.ci { width: 13px; height: 13px; } .pass-buy .pb-c { font: 9px var(--num); line-height: 1; }
+/* badges always on top, never clipped: the Mastery button drops its cut corners (they clipped the badge), the Pit's
+   picture lets its shop door's badge out over its frame and corners */
+.pit-more .btn { clip-path: none; }
+.pit-more .btn .badge, .pit-shopbtn .badge, .cons-cb .badge { z-index: 5; }
+.pit-art { overflow: visible; }
+.pit-shopbtn { z-index: 3; }
