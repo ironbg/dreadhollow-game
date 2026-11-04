@@ -6,6 +6,8 @@
     {
       v: '1.61.59',
       bg: [
+        'Без чакане при натискане: картите на Майсторството, звездите на Съзвездието, благословиите, Архивът, вдигането и слагането на реликви се променят веднага, а сървърът ги потвърждава зад тях. Ако откаже, играта се връща към неговата версия и казва това.',
+        'Съзвездие: надписите „Магазин“ и „Статистики“ са под бутоните, защото не се събираха в рамката.',
         'Съзвездието е много по-леко: на по-слаби телефони се движеше на пресекулки и всяко натискане там (+, −, звезда) чакаше около 2 секунди. Сега реагира веднага.',
         'Сандъците за активност в дневните мисии показват наградата в същия прозорец, вместо да отварят втори със същото заглавие (изглеждаше като два пъти отваряне).',
         'Фонът на менюто се рисува по-пестеливо, така че бутоните отговарят по-бързо.',
@@ -13,6 +15,8 @@
         'Ако сървърът все пак се бави, горе в средата се върти малък знак, за да се вижда, че действието е в ход.',
       ],
       en: [
+        'No waiting on taps: Mastery cards, Constellation stars, Blessings, the Archive, levelling and equipping relics change at once, and the server confirms them behind you. If it refuses, the game goes back to its copy and says so.',
+        'Constellation: the "Shop" and "Stats" labels sit under their buttons, as they did not fit inside the frame.',
         'The Constellation is far lighter: on weaker phones it stuttered and every tap there (+, −, a star) waited about 2 seconds. It now answers at once.',
         'The daily activity chests show what they gave in the same window instead of opening a second one with the same title (it looked like opening twice).',
         'The menus\' backdrop is drawn more sparingly, so buttons answer sooner.',

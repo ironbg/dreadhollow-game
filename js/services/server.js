@@ -77,7 +77,8 @@
     },
     /** Bring this device and the server together: the server's profile comes back with this device's free fields on it.
      *  The first time an account reaches the server, the profile on this device becomes its starting point. */
-    async sync() {
+    async sync(inQueue) {
+      if (!inQueue) await this.flushFast(); // quick taps still on their way go first, or their answer would undo them on screen
       const uid = await this.account();
       const r = await this.call('sync', { free: this.free(), local: DH.save.data, v: DH.VERSION });
       this.adopt(r.save, r.rev);
@@ -93,13 +94,37 @@
       const ad = def.ad && def.ad(args), remote = this.remote();
       if (ad && (remote || def.adOutside) && !(await DH.ads.rewarded(ad))) return null;
       if (!remote) return def.run(args);
+      if (def.fast && this.syncedUid) return this.actFast(name, args, def);
+      await this.flushFast(); // the quick taps before it reach the server first
       await this.ready();
       const r = await this.call('act', { name, args, free: this.free(), v: DH.VERSION });
       this.adopt(r.save, r.rev);
       return r.result;
     },
+    /** A fast action (no chance, no clock in it: a Mastery card, a star, a Blessing, an item level): done here at once,
+     *  the screen answers the tap, and the same action goes to the server behind it, one after another in order. The
+     *  server's profile is taken when the last of them is answered; if the server refused one, its profile is fetched
+     *  again (what it holds is the truth) and the player is told. */
+    actFast(name, args, def) {
+      const before = JSON.stringify(DH.save.data);
+      const result = def.run(args);
+      if (JSON.stringify(DH.save.data) === before) return result; // nothing changed (not enough, not allowed): nothing to send
+      this.fastN = (this.fastN || 0) + 1;
+      this.fastQ = (this.fastQ || Promise.resolve()).then(async () => {
+        let last = null;
+        try { const r = await this.call('act', { name, args, free: this.free(), v: DH.VERSION }); last = r; } catch (e) { this.fastErr = this.fastErr || e; }
+        if (--this.fastN > 0) return; // more taps still on their way: the last answer is the one taken
+        const err = this.fastErr; this.fastErr = null;
+        if (err) { try { await this.sync(true); } catch (e2) { /* no connection: the next call tries again */ } if (DH.ui && DH.ui.serverErr) DH.ui.serverErr(err); }
+        else if (last) this.adopt(last.save, last.rev);
+      });
+      return result;
+    },
+    /** Wait until every fast action sent so far has been answered. */
+    async flushFast() { if (this.fastQ) await this.fastQ; },
     /** A store purchase (Google Play): the server checks the token with Google, delivers it once, and says what it gave. */
     async purchase(productId, token) {
+      await this.flushFast();
       await this.ready();
       const r = await this.call('purchase', { productId, token, v: DH.VERSION });
       this.adopt(r.save, r.rev);
@@ -108,6 +133,7 @@
     /** A fight starts: torches are paid (on the server, which also notes the time). */
     async runStart(cost) {
       if (!this.remote()) return DH.meta.beginRun(cost);
+      await this.flushFast();
       await this.ready();
       await this.sendPending(true); // the last fight first: a new start would close it unrewarded
       const s = DH.save.data;

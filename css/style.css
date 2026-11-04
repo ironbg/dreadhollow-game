@@ -1994,11 +1994,13 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .pitfx-row { display: flex; gap: 8px; align-items: flex-start; } .pitfx-row > img.ci { width: 28px; height: 28px; flex: none; }
 
 /* the Constellation's corner: the shop and the stats, square stone buttons in the sky */
-.cons-corner { position: absolute; right: 6px; bottom: 6px; display: flex; gap: 6px; z-index: 2; }
-.cons-cb { position: relative; width: 58px; height: 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 3px 2px; cursor: pointer;
+.cons-corner { position: absolute; right: 6px; bottom: 4px; display: flex; gap: 8px; z-index: 2; align-items: flex-start; }
+.cons-cbw { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.cons-cbl { color: #f4e6d0; font-weight: 800; font-size: 11px; line-height: 1.1; text-align: center; white-space: nowrap; text-shadow: 0 1px 0 #000, 0 0 4px #000, 0 0 8px #000; pointer-events: none; }
+.cons-cb { position: relative; width: 54px; height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 3px 2px; cursor: pointer;
   color: #f4e6d0; font-weight: 800; font-size: 10px; line-height: 1; border: 2px solid #050308; background: var(--tex-panel, none) 0 0 / 64px 64px, #1b1320;
   box-shadow: inset 0 0 0 2px var(--ring-gold), inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo), 0 3px 0 #000; }
-.cons-cb img { width: 30px; height: 30px; } .cons-cb .badge { top: -6px; right: -6px; }
+.cons-cb img { width: 36px; height: 36px; } .cons-cb .badge { top: -6px; right: -6px; }
 .cons-slide { top: 42%; height: 46%; }
 
 /* the Specialties: icons of the branches; every tab's list in one cell so the window keeps its height */
