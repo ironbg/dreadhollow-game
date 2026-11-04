@@ -4,6 +4,17 @@
   'use strict';
   DH.changelog = [
     {
+      v: '1.61.58',
+      bg: [
+        'Ямата: героят започва от ниво 1 с един Тайнствен том на земята до него (и още един за реклама). Вече няма наваксващи нива и томове при старт от по-далечна точка.',
+        'Ямата: след „Готов“ и тома за реклама битката започва с отброяване 3, 2, 1.',
+      ],
+      en: [
+        'The Pit: the hero starts at level 1 with one Arcane Tome on the ground beside them (and one more for an ad). No more catch-up levels and tomes when starting from a later checkpoint.',
+        'The Pit: after Ready and the ad\'s tome, the fight begins with a 3, 2, 1 countdown.',
+      ],
+    },
+    {
       v: '1.61.57',
       bg: [
         'Издигнатата черта Залп (Многоудар за снаряди) се предлага само ако основното оръжие на героя е със снаряди. Досега идваше и при герои с оръжие за близък бой, щом имат друго умение със снаряди.',

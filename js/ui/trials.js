@@ -300,7 +300,7 @@
     h('div.btns', h('button.btn.gold', { onclick: () => m.close() }, t('common.close')))) });
 
   /** The Pit's start screen: its picture in the lancet, the wave it begins at, the two hazards rolled (tap one to read
-   *  it), and Ready. The fight waits under it (run.state 'intro'); Ready gives the tomes of the start (pit.js pitBegin). */
+   *  it), and Ready. The fight waits under it (run.state 'intro'); Ready offers the ad's tome, counts 3, 2, 1 and begins (pit.js pitBegin). */
   ui.openPitIntro = (run) => {
     DH.input.enable(false);
     const P = run.pit;
@@ -311,7 +311,24 @@
       h('div.pi-sub', t('pit.affixes')),
       h('div.pi-fx', P.affixes.map((k) => h('button.pi-f', { 'aria-label': t('pit.fx.' + k), onclick: () => { click(); fxOne(k); } }, A.img(FX_ICON[k] || 'u_agony'), h('span', t('pit.fx.' + k))))),
       h('div.small.muted.center', t('pit.affixTap')),
-      h('button.btn.green.block.big.pi-go', { onclick: () => { click(); m.close(); DH.input.enable(true); run.pitBegin(); } }, t('pit.ready'))) });
+      h('button.btn.green.block.big.pi-go', { onclick: () => {
+        click(); m.close();
+        const go = () => ui.pitCountdown(run, () => { if (DH.game.run !== run) return; DH.input.enable(true); run.pitBegin(); });
+        if (run.startBonus) go(); else ui.openStartBonus(run, go); // the ad's tome first, then the countdown
+      } }, t('pit.ready'))) });
+  };
+  /** 3, 2, 1 over the waiting arena, then the fight. */
+  ui.pitCountdown = (run, then) => {
+    DH.input.enable(false);
+    const el = h('div.pit-count'), root = document.getElementById('hud') || document.body; root.appendChild(el);
+    let n = 3;
+    const tick = () => {
+      if (DH.game.run !== run) { el.remove(); return; }
+      if (n === 0) { el.remove(); then(); return; }
+      el.textContent = ''; el.appendChild(h('b', String(n))); DH.audio.play(n === 1 ? 'roar' : 'block');
+      n--; setTimeout(tick, 800);
+    };
+    tick();
   };
 
   /** The seven hazards and what each does. */

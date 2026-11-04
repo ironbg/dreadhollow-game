@@ -2043,3 +2043,7 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .pp-cost img.ci { width: 14px; height: 14px; vertical-align: -2px; }
 .pp-b .pp-gem { display: inline-flex; align-items: center; gap: 2px; margin-left: 6px; font: 9px var(--num); } .pp-b .pp-gem img.ci { width: 12px; height: 12px; }
 .pm-card.locked .pm-cost { visibility: hidden; }
+/* the Pit's 3-2-1 before the fight */
+.pit-count { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 40; background: radial-gradient(circle, rgba(0,0,0,0) 30%, rgba(0,0,0,.45) 100%); }
+.pit-count b { font-family: var(--title); font-size: clamp(90px, 34vw, 180px); color: var(--blood-hi); text-shadow: 0 5px 0 #000, 0 0 40px rgba(226,56,74,.9), 0 0 90px rgba(255,120,40,.5); animation: pitcount .8s ease-out forwards; }
+@keyframes pitcount { 0% { transform: scale(2.2); opacity: 0; } 25% { transform: scale(1); opacity: 1; } 75% { transform: scale(.92); opacity: 1; } 100% { transform: scale(.7); opacity: 0; } }

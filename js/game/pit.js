@@ -1,6 +1,6 @@
 /* The Pit (Trials), mixed into DH.Run.prototype. Three minutes of waves of a hall's foes, normal and elite, with no
  * boss, no loot and no coming back: a wave cleared calls the next at once, each one harder (E.PIT). The fight starts
- * at the player's checkpoint, with as many levels and tomes as the waves before it would have given. Two hazards
+ * at the player's checkpoint, the hero at level 1 with one tome on the ground (and one more for an ad). Two hazards
  * rolled by the server join each fight:
  *   blades   Rain of Blades   an X marked on the ground, then four blades sweep in along it, cross and fly on
  *   stalker  the Stalker      a slow shade that follows the hero; its touch is death
@@ -50,22 +50,14 @@
     this.sec = null; this.rescue = null; this.hex = null; this.disso = null; this.wellOpen = false; this.lordKills = 0;
     P.wave = from; P.cleared = 0; P.base = Math.floor(from / E.PIT.every) * E.PIT.every; P.next = 2; P.need = 0; P.got = 0; P.left = 0; P.coming = from + 1; P.fx = {};
     P.combo = { n: 0, t: 0, best: 0 };
-    // the strength of the waves skipped: their levels and their tomes, chosen at the start
-    const lv = Math.min(45, Math.round(from * 0.8)), tomes = Math.min(5, Math.floor(from / E.PIT.every));
-    for (let i = 0; i < lv; i++) { this.level++; this.xpNext = C.xpToNext(this.level, this.stageId); this.pendingLevels++; }
-    if (lv) this.recompute(true);
-    P.startTomes = tomes; // one Arcane Tome for every ten waves skipped (given when the fight begins: pitBegin); one more for an ad
     pitArt(); // the walls painted now, not on the first frame
     this.revives = 0;
   };
 
-  /** The fight begins (the start screen's Ready): the Arcane Tomes of the start, one after another (each offered when
-   *  the one before is chosen, so no ability comes twice), then a tome more for an ad (the adventurer's reward). */
+  /** The fight begins (after the start screen, the ad's tome and the 3-2-1 countdown): one Arcane Tome lies on the
+   *  ground beside the hero. The hero starts at level 1 whatever the checkpoint: no levels or tomes for waves skipped. */
   R.pitBegin = function () {
-    const P = this.pit;
-    for (let i = 0; i < (P.startTomes || 0); i++) this.queue.push({ state: 'tome', ev: 'run:tome', make: () => { this.tomes++; return Object.assign(this.tomeChoices(3), { mastery: false }); } });
-    P.startTomes = 0;
-    if (!this.startBonus) this.queue.push({ state: 'startbonus', ev: 'run:startbonus' });
+    const p = this.player; this.drop('tome', p.x + 34, p.y - 10);
     this.resume();
   };
 
