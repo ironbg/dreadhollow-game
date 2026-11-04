@@ -540,10 +540,22 @@
   /** An activity chest: what it holds, and claim it once the day's points reach it. */
   function openActivity(i) {
     const c = E.ACTIVITY_CHESTS[i], ready = M.activityReady(i), got = M.activityOpened(i);
-    // a chest that is ready opens however the window is left: the button, the X or a tap outside it
+    // a chest that is ready opens however the window is left: the button, the X or a tap outside it. Opened with the
+    // button, what it gave shows in this same window (no second window that looks like the chest opening again)
     let taken = !ready || got;
-    const claim = async () => { if (taken) return; taken = true; const r = await ui.act('claimActivity', { i }); m.close(); if (r) ui.rewardPopup(t('quests.chest', { n: c.at }), r); ui.refresh(); };
-    const m = ui.modal({ title: t('quests.chest', { n: c.at }), rays: ready, onClose: () => { claim(); }, body: () => h('div',
+    const title = t('quests.chest', { n: c.at });
+    const claim = async (ev) => {
+      if (taken) return; taken = true;
+      const btn = ev && ev.currentTarget; if (btn) { btn.disabled = true; btn.classList.add('off'); btn.textContent = '…'; }
+      const r = await ui.act('claimActivity', { i });
+      ui.refresh();
+      if (!r) { m.close(); return; }
+      if (m.closed) { ui.rewardPopup(title, r); return; } // left with the X or a tap outside: the rewards in their own window
+      DH.audio.play('reward');
+      m.set(h('div', h('div.center', A.img(c.icon, 'bigicon')), ui.rewardList(r),
+        h('div.btns', h('button.btn.gold', { onclick: () => { DH.audio.play('click'); m.close(); } }, t('common.collect')))));
+    };
+    const m = ui.modal({ title, rays: ready, onClose: () => { claim(); }, body: () => h('div',
       h('div.center', A.img(c.icon, 'bigicon')),
       h('div.reward-list', { style: { marginTop: '8px' } }, M.rewardPreview(c.reward).map((e) => h('div.reward', h('div.slot' + (e.rarity != null ? '.rar' + e.rarity : ''), A.img(e.icon)), h('div.n' + (ui.isWord(e.text) ? '.word' : ''), e.text)))),
       h('div.btns', got ? h('button.btn.ghost.off', A.img('u_check', 'ci'), t('nb.claimed'))

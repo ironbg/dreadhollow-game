@@ -152,6 +152,7 @@
 
   /* ---------------- loop ---------------- */
   let last = performance.now();
+  let menuAcc = 0;
   function frame(now) {
     requestAnimationFrame(frame);
     let dt = (now - last) / 1000; last = now;
@@ -162,7 +163,9 @@
         // a long frame is split in two steps; only a really long one: splitting at 40 fps doubled the work just when the phone was behind
         if (r.state === 'playing') { const n = dt > 1 / 24 ? 2 : 1; for (let i = 0; i < n; i++) r.update(dt / n); r.render(); ui.hud.update(r); r.idleFrames = 0; }
         else if ((r.idleFrames = (r.idleFrames || 0) + 1) <= 2) { r.render(); ui.hud.update(r); } // paused / dead / level-up / an ad on top: paint the frozen scene a couple of frames, then stop redrawing it. A rewarded video over a full battle scene was starving low-RAM phones of memory — the revive-ad crash.
-      } else DH.menuScene.render(dt);
+      } else if (!document.querySelector('.modal.consw')) { // the Constellation covers the whole screen: the crypt behind it rests
+        menuAcc += dt; if (menuAcc >= 1 / 32) { DH.menuScene.render(menuAcc); menuAcc = 0; } // the menus' backdrop at 30 fps: half the work, and taps answered sooner
+      }
     } catch (e) { console.error(e); }
   }
 

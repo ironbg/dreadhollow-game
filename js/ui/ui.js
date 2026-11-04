@@ -161,19 +161,21 @@
     });
   });
 
+  /** The rewards given, one slot each (with their rarity), appearing one after another. */
+  ui.rewardList = (entries) => h('div.reward-list', entries.map((e, i) => {
+    const r = e.rarity != null ? e.rarity : null;
+    return h('div.reward', { style: { animationDelay: (i * 0.08) + 's' } },
+      h('div.slot' + (r != null ? '.rar' + r : ''), A.img(e.icon)),
+      r != null ? h('div.rn.rar' + r, h('span.rtxt', t('rarity.' + E.rarities[r]))) : null,
+      h('div.n' + (ui.isWord(e.text) ? '.word' : ''), e.text));
+  }));
   ui.rewardPopup = (title, entries, extra, onClose) => {
     if (!entries || !entries.length) return null;
     DH.audio.play('reward');
     return ui.modal({
       title, rays: true, onClose,
       body: (m) => h('div',
-        h('div.reward-list', entries.map((e, i) => {
-          const r = e.rarity != null ? e.rarity : null;
-          return h('div.reward', { style: { animationDelay: (i * 0.08) + 's' } },
-            h('div.slot' + (r != null ? '.rar' + r : ''), A.img(e.icon)),
-            r != null ? h('div.rn.rar' + r, h('span.rtxt', t('rarity.' + E.rarities[r]))) : null,
-            h('div.n' + (ui.isWord(e.text) ? '.word' : ''), e.text));
-        })),
+        ui.rewardList(entries),
         extra || null,
         h('div.btns', h('button.btn.gold', { onclick: () => { DH.audio.play('click'); m.close(); } }, t('common.collect')))),
     });

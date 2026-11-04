@@ -6,10 +6,16 @@
     {
       v: '1.61.59',
       bg: [
+        'Съзвездието е много по-леко: на по-слаби телефони се движеше на пресекулки и всяко натискане там (+, −, звезда) чакаше около 2 секунди. Сега реагира веднага.',
+        'Сандъците за активност в дневните мисии показват наградата в същия прозорец, вместо да отварят втори със същото заглавие (изглеждаше като два пъти отваряне).',
+        'Фонът на менюто се рисува по-пестеливо, така че бутоните отговарят по-бързо.',
         'По-бързи бутони: сървърът отговаря на всяко действие (купуване, вдигане, награди) няколко пъти по-бързо, а играта тръгва по-бързо.',
         'Ако сървърът все пак се бави, горе в средата се върти малък знак, за да се вижда, че действието е в ход.',
       ],
       en: [
+        'The Constellation is far lighter: on weaker phones it stuttered and every tap there (+, −, a star) waited about 2 seconds. It now answers at once.',
+        'The daily activity chests show what they gave in the same window instead of opening a second one with the same title (it looked like opening twice).',
+        'The menus\' backdrop is drawn more sparingly, so buttons answer sooner.',
         'Faster buttons: the server answers every action (buying, upgrading, rewards) several times faster, and the game starts faster.',
         'If the server is still slow, a small ring turns at the top centre so you can see the action is on its way.',
       ],

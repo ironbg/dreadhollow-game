@@ -8,6 +8,19 @@
   /** Each star is the medal of what it gives (icons.js, cs_<stat>: the Blessing's own medal); the heart the Constellation's. */
   const ICONS = {};
   const iconOf = (name) => { let im = ICONS[name]; if (!im) { im = ICONS[name] = new Image(); im.src = DH.icons.hi(name, name === 'u_cons' ? 256 : 160); } return im; }; // drawn large: sharp at any zoom
+  /** A star's icon greyed (locked) or dimmed (open), made once: a canvas filter on every star in every frame cost a
+   *  slow phone seconds a frame (and every tap waited for the frame). */
+  const SHADE = { locked: 'grayscale(0.85) brightness(0.45)', open: 'grayscale(0.3) brightness(0.8)' }, SHADED = {};
+  const shadedOf = (name, st) => {
+    const im = iconOf(name); if (!SHADE[st]) return im;
+    if (!(im.complete && im.naturalWidth)) return im;
+    const k = name + '|' + st; let c = SHADED[k];
+    if (!c) {
+      c = SHADED[k] = DH.gfx.canvas(im.naturalWidth, im.naturalHeight); const g = c.getContext('2d');
+      if ('filter' in g) { g.filter = SHADE[st]; g.drawImage(im, 0, 0); g.filter = 'none'; } else { g.drawImage(im, 0, 0); g.globalCompositeOperation = 'source-atop'; g.fillStyle = st === 'locked' ? 'rgba(20,18,24,0.6)' : 'rgba(20,18,24,0.25)'; g.fillRect(0, 0, c.width, c.height); }
+    }
+    return c;
+  };
   const ZMIN = 0.15, ZMAX = 1.6;
   const radius = (n, z) => Math.max(4, n.r * z); // stars keep their size in the world, so the spacing holds at every zoom
   const BRANCHES = ['fury', 'bastion', 'plunder'];
@@ -155,11 +168,8 @@
         const [x, y] = toScreen(n.x, n.y), R = radius(n, view.z); if (x < -R - 20 || y < -R - 20 || x > W + R + 20 || y > H + R + 40) continue;
         const col = n.b ? CS.branches[n.b].color : '#c9a25a', st = state(n);
         if (n.kind !== 'heart' && (st === 'full' || st === 'part')) { g.globalAlpha = st === 'full' ? 0.55 : 0.3; g.drawImage(A.glow(col), x - R * 2, y - R * 2, R * 4, R * 4); g.globalAlpha = 1; }
-        const im = iconOf(n.kind === 'heart' ? 'u_cons' : 'cs_' + n.st[0]);
-        if (im.complete && im.naturalWidth) {
-          if (st === 'locked') g.filter = 'grayscale(0.85) brightness(0.45)'; else if (st === 'open') g.filter = 'grayscale(0.3) brightness(0.8)';
-          g.drawImage(im, x - R, y - R, R * 2, R * 2); g.filter = 'none';
-        }
+        const iname = n.kind === 'heart' ? 'u_cons' : 'cs_' + n.st[0], im = iconOf(iname);
+        if (im.complete && im.naturalWidth) g.drawImage(shadedOf(iname, st), x - R, y - R, R * 2, R * 2); // greyed / dimmed once, not every frame
         if (n.kind === 'heart') continue;
         // the rim: dim when locked, breathing when it can be raised, filling round in the branch's colour as ranks are bought
         const thick = Math.max(1.6, (n.kind === 'minor' ? 3 : 4) * view.z);
