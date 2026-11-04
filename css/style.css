@@ -2033,3 +2033,13 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .pit-more .btn .badge, .pit-shopbtn .badge, .cons-cb .badge { z-index: 5; }
 .pit-art { overflow: visible; }
 .pit-shopbtn { z-index: 3; }
+
+/* a Mastery card the level has not reached: grey, a lock over it, the level it needs under the lock */
+.pm-card.locked { filter: grayscale(1) brightness(.62); }
+.pm-card.locked .pm-ic { filter: none; }
+.pm-lock { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; pointer-events: none; background: rgba(0,0,0,.35); }
+.pm-lock img { width: 34px; height: 34px; filter: drop-shadow(0 2px 0 #000); }
+.pm-lock b { font: 800 13px var(--title, serif); color: #f4e6d0; text-shadow: 0 1px 0 #000, 0 0 4px #000; background: rgba(0,0,0,.65); padding: 1px 6px; border: 1px solid #050308; }
+.pp-cost img.ci { width: 14px; height: 14px; vertical-align: -2px; }
+.pp-b .pp-gem { display: inline-flex; align-items: center; gap: 2px; margin-left: 6px; font: 9px var(--num); } .pp-b .pp-gem img.ci { width: 12px; height: 12px; }
+.pm-card.locked .pm-cost { visibility: hidden; }

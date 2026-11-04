@@ -158,11 +158,15 @@
   };
 
   /* ---------------- The Pit (Trials) ---------------- */
-  const pitS = () => { const s = S(); s.pit = s.pit || { best: 0, day: null, used: 0, active: null, pass: false }; const d = U.dayKey(); if (s.pit.day !== d) { s.pit.day = d; s.pit.used = 0; } return s.pit; };
+  const pitS = () => {
+    const s = S(); s.pit = s.pit || { best: 0, day: null, used: 0, active: null, pass: false }; const d = U.dayKey(); if (s.pit.day !== d) { s.pit.day = d; s.pit.used = 0; }
+    if (s.pit.mv !== 2) { s.pit.mv = 2; s.pit.perks = {}; } // the Mastery's cards were repriced (and the level starts at 1): every card back, once (its XP and level stay)
+    return s.pit;
+  };
   meta.pitPass = () => !!pitS().pass;
   /* the Pit's Mastery (E.PIT_MASTERY) */
   const PM = () => E.PIT_MASTERY;
-  meta.pitMastery = () => { const p = pitS(); let lv = 0, xp = p.mxp || 0; while (lv < PM().max && xp >= PM().next(lv)) { xp -= PM().next(lv); lv++; } return { lv, xp, next: lv < PM().max ? PM().next(lv) : 0 }; };
+  meta.pitMastery = () => { const p = pitS(); let lv = 1, xp = p.mxp || 0; while (lv < PM().max && xp >= PM().next(lv)) { xp -= PM().next(lv); lv++; } return { lv, xp, next: lv < PM().max ? PM().next(lv) : 0 }; };
   meta.pitPerk = (id) => ((pitS().perks || {})[id] || 0);
   meta.pitPerkVal = (id) => meta.pitPerk(id) * ((PM().perks[id] || {}).per || 0);
   meta.pitPointsUsed = () => { const pk = pitS().perks || {}; let n = 0; for (const id in pk) if (PM().perks[id]) n += pk[id] * PM().perks[id].cost; return n; };
@@ -170,19 +174,24 @@
   meta.pitSecs = () => E.PIT.secs + meta.pitPerkVal('time');
   /** The Mastery Pass (bought on its own): twice the Mastery experience in every Trial. */
   meta.masteryPass = () => !!S().masteryPass;
-  const addMastery = (waves) => { const p = pitS(); p.mxp = (p.mxp || 0) + Math.round(waves * PM().xpPerWave * (meta.masteryPass() ? 2 : 1)); };
-  /** A level of a Mastery card: one if the points reach. */
+  const addMastery = (waves) => { const p = pitS(); p.mxp = (p.mxp || 0) + Math.round(waves * PM().xpPerWave * (1 + PM().modeBonus) * (meta.masteryPass() ? 2 : 1)); };
+  /** Is a card open (the Mastery level it needs reached)? */
+  meta.pitPerkOpen = (id) => { const d = PM().perks[id]; return !!d && meta.pitMastery().lv >= (d.lv || 1); };
+  /** Can any card be raised now (open, not full, its price within the free points)? The Mastery button's badge. */
+  meta.pitCanRaise = () => { const f = meta.pitPointsFree(); return Object.keys(PM().perks).some((id) => meta.pitPerkOpen(id) && meta.pitPerk(id) < PM().perks[id].max && f >= PM().perks[id].cost); };
+  /** A level of a Mastery card: one if it is open and the points reach. */
   meta.pitPerkUp = (id) => {
-    const d = PM().perks[id], p = pitS(); if (!d || meta.pitPerk(id) >= d.max || meta.pitPointsFree() < d.cost) return null;
+    const d = PM().perks[id], p = pitS(); if (!d || !meta.pitPerkOpen(id) || meta.pitPerk(id) >= d.max || meta.pitPointsFree() < d.cost) return null;
     p.perks = p.perks || {}; p.perks[id] = meta.pitPerk(id) + 1; changed(); return p.perks[id];
   };
   /** A level of a card back (its points are free again). */
   meta.pitPerkDown = (id) => {
     const p = pitS(), lv = meta.pitPerk(id); if (!PM().perks[id] || lv <= 0) return null;
+    if (id === 'entry' && !meta.spend({ gems: PM().entryRefund })) return false; // Extra Entry: taken back for gems only
     p.perks[id] = lv - 1; if (!p.perks[id]) delete p.perks[id]; changed(); return lv - 1;
   };
-  /** Every point back (free). */
-  meta.pitPerkReset = () => { pitS().perks = {}; changed(); return true; };
+  /** Every point back (free), except Extra Entry, which stays. */
+  meta.pitPerkReset = () => { const p = pitS(), keep = (p.perks || {}).entry; p.perks = keep ? { entry: keep } : {}; changed(); return true; };
   meta.pitEntries = () => E.PIT.entries + (pitS().pass ? 1 : 0) + (meta.passPremium() ? E.PASS_PIT_ENTRY : 0) + meta.pitPerkVal('entry') + (meta.consSpecials().plunder >= 3 ? 1 : 0); // the third Plunder Specialty: one more a day
   meta.pitLeft = () => Math.max(0, meta.pitEntries() - pitS().used);
   meta.pitCheckpoint = () => Math.floor(pitS().best / E.PIT.every) * E.PIT.every;

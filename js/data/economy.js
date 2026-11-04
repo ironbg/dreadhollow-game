@@ -415,21 +415,25 @@
   /** The Pit's Mastery: experience from every Pit fight (and sweep), a level up to E.PIT_MASTERY.max, a point a level
    *  to put in its cards (they work in the Pit only, except Essence and the entry). Freely reset. */
   E.PIT_MASTERY = {
-    max: 135, xpPerWave: 5,                                   // the top level gives exactly the points every card needs                                   // a fight or a sweep: 5 experience per wave reached
-    next: (lv) => 60 + 15 * lv,                               // experience from level lv to lv + 1
-    // tier: the colour of the card (blue, purple, gold, red: from the plain to the rarest)
+    max: 200, xpPerWave: 5, modeBonus: 0.3,                   // a fight or a sweep: 5 experience per wave reached, +30% in the Pit
+    next: (lv) => 60 + 15 * lv,                               // experience from level lv to lv + 1 (the Mastery starts at level 1)
+    // the cost of a rank by the card's tier (its colour): rare (blue) 1, epic (purple) 5, legendary (gold) 10, mythic (red) 35
+    costs: { blue: 1, purple: 5, gold: 10, red: 35 },
+    entryRefund: 100000,                                      // Extra Entry stays through a reset; taking it back costs gems
+    // lv: the Mastery level that unlocks the card
     perks: {
-      power:   { icon: 'pm_power',   tier: 'blue',   max: 10, cost: 2, per: 0.15 },  // +15% damage a level
-      guard:   { icon: 'pm_guard',   tier: 'blue',   max: 10, cost: 2, per: 0.05 },  // +5 Defense a level
-      fort:    { icon: 'pm_fort',    tier: 'purple', max: 5,  cost: 3, per: 0.03 },  // 3% less damage taken a level
-      execute: { icon: 'pm_execute', tier: 'purple', max: 5,  cost: 3, per: 0.1 },   // +10% damage a level on foes under 30% health
-      time:    { icon: 'pm_time',    tier: 'gold',   max: 4,  cost: 4, per: 15 },    // +15 s a level
-      essence: { icon: 'pm_essence', tier: 'gold',   max: 4,  cost: 3, per: 0.1 },   // +10% Essence a level
-      combo:   { icon: 'pm_combo',   tier: 'gold',   max: 3,  cost: 4, per: 0.1 },   // the combo's timer runs 10% longer a level
-      sweep:   { icon: 'pm_sweep',   tier: 'red',    max: 5,  cost: 3, per: 0.1 },   // a sweep pays 10% more of the best wave a level (all of it at 5)
-      entry:   { icon: 'pm_entry',   tier: 'red',    max: 1,  cost: 10, per: 1 },    // one more entry a day
+      power:   { icon: 'pm_power',   tier: 'blue',   lv: 1,  max: 10, per: 0.15 },  // +15% damage a rank
+      guard:   { icon: 'pm_guard',   tier: 'blue',   lv: 1,  max: 10, per: 0.05 },  // +5 Defense a rank
+      fort:    { icon: 'pm_fort',    tier: 'purple', lv: 15, max: 5,  per: 0.03 },  // 3% less damage taken a rank
+      execute: { icon: 'pm_execute', tier: 'purple', lv: 30, max: 5,  per: 0.1 },   // +10% damage a rank on foes under 30% health
+      time:    { icon: 'pm_time',    tier: 'gold',   lv: 50, max: 5,  per: 15 },    // +15 s a rank
+      essence: { icon: 'pm_essence', tier: 'gold',   lv: 60, max: 4,  per: 0.1 },   // +10% Essence a rank
+      combo:   { icon: 'pm_combo',   tier: 'red',    lv: 75, max: 3,  per: 0.1 },   // the combo's timer runs 10% longer a rank
+      sweep:   { icon: 'pm_sweep',   tier: 'gold',   lv: 85, max: 5,  per: 0.1 },   // a sweep pays 10% more of the best wave a rank (all of it at 5)
+      entry:   { icon: 'pm_entry',   tier: 'red',    lv: 85, max: 1,  per: 1 },     // one more entry a day (kept through a reset)
     },
   };
+  Object.values(E.PIT_MASTERY.perks).forEach((d) => { d.cost = E.PIT_MASTERY.costs[d.tier]; });
   /** The Pit's shop (as the Armory's Resource Store): a free handful of Essence a day, a few more for an ad each, and
    *  packs of Essence for real money (E.products ess_1..ess_5, bought as often as wanted). */
   E.PIT_SHOP = { free: { essence: 150 }, ad: { essence: 250 }, ads: 3 };

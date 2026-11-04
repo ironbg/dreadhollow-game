@@ -166,21 +166,33 @@ const live = require('../game/live.json');
   r.profile.pit.active = { at: Date.now() - 90000, from: 0, affixes: [] };
   r = await withProfile(r.profile, live, (DH) => { DH.actions.list.pitEnd.run({ waves: 17 }); return DH.meta.boardPending().map((b) => b.key.split('__')[0] + ':' + b.entry.score); });
   assert.deepStrictEqual(r.result, ['pit:17', 'pit:17']);
+  // the Mastery's rules: level 1 with 1 point at the start; a card opens at its level; cost by tier; Extra Entry stays through
+  // a reset and costs 100 000 gems to take back; cards bought at the old prices come back once
+  r = await withProfile(Object.assign({}, p0, { gems: 150000, pit: { best: 0, day: null, used: 0, active: null, pass: false, mxp: 0, perks: { power: 3, entry: 1 } } }), live, (DH) => {
+    const M = DH.meta, L = DH.actions.list; M.pitMastery(); const mig = JSON.stringify(DH.save.data.pit.perks || {});
+    const a = [M.pitMastery().lv, M.pitPointsFree(), L.pitPerkUp.run({ id: 'fort' }), L.pitPerkUp.run({ id: 'power' }), M.pitPointsFree()];
+    DH.save.data.pit.mxp = 1e6; L.pitPerkUp.run({ id: 'entry' }); L.pitPerkUp.run({ id: 'fort' }); const used = M.pitPointsUsed(); L.pitPerkReset.run({});
+    const kept = [M.pitPerk('entry'), M.pitPerk('fort'), M.pitPointsUsed()];
+    const g0 = DH.save.data.gems, down = L.pitPerkDown.run({ id: 'entry' });
+    return [mig, a, used, kept, down, g0 - DH.save.data.gems]; });
+  assert.deepStrictEqual(r.result, ['{}', [1, 1, null, 1, 0], 1 + 35 + 5, [1, 0, 35], 0, 100000]);
+  r = await withProfile(Object.assign({}, r.profile, { gems: 10 }), live, (DH) => { DH.actions.list.pitPerkUp.run({ id: 'entry' }); return DH.actions.list.pitPerkDown.run({ id: 'entry' }); });
+  assert.strictEqual(r.result, false, 'no gems, no refund'); assert.strictEqual(r.profile.pit.perks.entry, 1);
   // the Pit's Mastery: experience from a fight, points per level, a card bought, the time and Essence it adds, a free reset
   r = await withProfile(Object.assign({}, p0, { pit: { best: 0, day: null, used: 0, active: { at: Date.now() - 120000, from: 40, affixes: [] }, pass: false } }), live, (DH) => { DH.actions.list.pitEnd.run({ waves: 20 }); return DH.meta.pitMastery(); });
   assert.ok(r.result.lv >= 3, 'wave 60 gives some levels');
   r.profile.pit.mxp = 99999;
   r = await withProfile(r.profile, live, (DH) => { const M = DH.meta; for (let i = 0; i < 4; i++) DH.actions.list.pitPerkUp.run({ id: 'time' }); DH.actions.list.pitPerkUp.run({ id: 'essence' }); return [M.pitSecs(), M.pitPerWave(), M.pitPerk('time'), DH.actions.list.pitPerkUp.run({ id: 'time' })]; });
-  assert.deepStrictEqual(r.result, [240, 15.84, 4, null]);
+  assert.deepStrictEqual(r.result, [240, 15.84, 4, 5]);
   r = await withProfile(r.profile, live, (DH) => [DH.actions.list.pitPerkDown.run({ id: 'time' }), DH.meta.pitSecs(), DH.actions.list.pitPerkDown.run({ id: 'power' })]);
-  assert.deepStrictEqual(r.result, [3, 225, null], 'a card level back');
+  assert.deepStrictEqual(r.result, [4, 240, null], 'a card level back');
   r = await withProfile(r.profile, live, (DH) => { DH.actions.list.pitPerkReset.run({}); return DH.meta.pitSecs(); });
   assert.strictEqual(r.result, 180);
   // Combo Master: three levels, and the top Mastery level pays for every card
   r = await withProfile(r.profile, live, (DH) => { const PM = DH.economy.PIT_MASTERY; let all = 0; for (const k in PM.perks) all += PM.perks[k].max * PM.perks[k].cost;
     for (let i = 0; i < 4; i++) DH.actions.list.pitPerkUp.run({ id: 'combo' }); DH.save.data.pit.mxp = 1e7; return [DH.meta.pitPerk('combo'), DH.meta.pitPerkVal('combo'), all, PM.max, DH.meta.pitMastery().lv]; });
   assert.strictEqual(r.result[0], 3, 'no more than three levels'); assert.ok(Math.abs(r.result[1] - 0.3) < 1e-9);
-  assert.strictEqual(r.result[2], r.result[3], 'the top level gives the points of every card'); assert.strictEqual(r.result[4], 135);
+  assert.strictEqual(r.result[3], 200); assert.strictEqual(r.result[4], 200, 'the Mastery stops at level 200');
   r = await withProfile(r.profile, live, (DH) => { DH.actions.list.pitPerkReset.run({}); return 0; });
   // the Full Sweep card: all of the best wave at its top; a sweep of several entries at once
   r.profile.pit = Object.assign(r.profile.pit, { best: 40, used: 0, day: null }); r.profile.essence = 0;
@@ -189,9 +201,9 @@ const live = require('../game/live.json');
   assert.strictEqual(r.profile.essence, 1728); assert.strictEqual(r.profile.pit.used, 3);
   // the Mastery Pass (on its own, not the Pit Pass): twice the experience
   r = await withProfile(Object.assign({}, p0, { pit: { best: 30, day: null, used: 0, active: null, pass: true } }), live, (DH) => { DH.actions.list.pitSweep.run({}); return DH.save.data.pit.mxp; });
-  assert.strictEqual(r.result, 150, 'the Pit Pass does not double the Mastery');
+  assert.strictEqual(r.result, 195, 'the Pit Pass does not double the Mastery (+30% in the Pit)');
   r = await withProfile(r.profile, live, (DH) => { DH.meta.fulfillProduct('masterypass', true); DH.actions.list.pitSweep.run({}); return DH.save.data.pit.mxp; });
-  assert.strictEqual(r.result, 450); assert.strictEqual(r.profile.masteryPass, true);
+  assert.strictEqual(r.result, 585); assert.strictEqual(r.profile.masteryPass, true);
   // the Pit's shop: a free handful once a day, the ads only after it, Essence for gems so many times a day
   r = await withProfile(Object.assign({}, p0, { essence: 0 }), live, (DH) => [DH.actions.list.claimPitFree.run({}), DH.actions.list.claimPitFree.run({}), DH.meta.pitAdsLeft()]);
   assert.ok(r.result[0] && r.result[1] === null); assert.strictEqual(r.result[2], 3); assert.strictEqual(r.profile.essence, 150);

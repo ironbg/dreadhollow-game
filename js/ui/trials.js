@@ -116,7 +116,7 @@
           row('i_essence', t('pit.perWave'), per % 1 ? per.toFixed(1) : U.fmt(per)),
           h('div.pit-fx', A.img('u_agony', 'ci'), h('span', t('pit.randomFx', { n: E.PIT.roll })), h('button.btn.small.ghost.infob', { 'aria-label': t('pit.fxTitle'), onclick: () => { click(); fxInfo(); } }, 'i'))),
         h('div.pit-more',
-          h('button.btn.small.gold', { onclick: () => { click(); ui.openPitMastery(); } }, A.img('u_star', 'ci'), ' ', t('pit.mastery'), M.pitPointsFree() > 0 ? h('span.badge', M.pitPointsFree()) : null),
+          h('button.btn.small.gold', { onclick: () => { click(); ui.openPitMastery(); } }, A.img('u_star', 'ci'), ' ', t('pit.mastery'), M.pitCanRaise() ? h('span.badge', M.pitPointsFree()) : null),
           h('button.btn.small.gold', { onclick: () => { click(); ui.openConstellation(); } }, A.img('i_essence', 'ci'), ' ', t('pit.constellation')),
           h('button.btn.small.gold', { onclick: () => { click(); ui.openBoards(M.boardKey(M.pitBoards()[0])); } }, A.img('n_trophy', 'ci'), ' ', t('lb.short'))),
         h('div.mact', h('div.small.center.pit-left' + (left ? '' : '.bad'), t('pit.entries', { n: all - left, m: all })),
@@ -197,11 +197,13 @@
         h('div.pm-head', h('div.pm-lv', h('b', ms.lv), h('span.small', ' / ' + PM.max)),
           h('div.grow', h('div.pm-bar', h('i', { style: { width: (ms.next ? Math.round(ms.xp / ms.next * 100) : 100) + '%' } })), h('div.small.muted', ms.next ? t('pit.masteryXp', { x: U.fmt(ms.xp), m: U.fmt(ms.next) }) : t('common.max'))),
           h('div.pm-free', h('span.small', t('pit.points')), h('b', free)),
-          h('button.btn.small.ghost.infob', { 'aria-label': t('pit.mastery'), onclick: (e) => { e.stopPropagation(); click(); ui.modal({ title: t('pit.mastery'), cls: 'altarinfo', body: (im) => h('div', h('p.center', t('pit.masteryDesc', { n: PM.xpPerWave }) + (M.masteryPass() ? ' ' + t('pit.masteryPass') : '')), h('div.btns', h('button.btn.gold', { onclick: () => im.close() }, t('common.close')))) }); } }, 'i')),
+          h('button.btn.small.ghost.infob', { 'aria-label': t('pit.mastery'), onclick: (e) => { e.stopPropagation(); click(); ui.modal({ title: t('pit.mastery'), cls: 'altarinfo', body: (im) => h('div', h('p.center', t('pit.masteryDesc', { n: PM.xpPerWave, b: Math.round(PM.modeBonus * 100) }) + (M.masteryPass() ? ' ' + t('pit.masteryPass') : '')), h('div.btns', h('button.btn.gold', { onclick: () => im.close() }, t('common.close')))) }); } }, 'i')),
         h('div.pm-grid', ids.map((id) => {
-          const d = PM.perks[id], lv = M.pitPerk(id), full = lv >= d.max, can = !full && free >= d.cost;
-          const el = h('div.pm-card.t-' + d.tier + (full ? '.full' : can ? '.can' : '') + (lv ? '' : '.zero') + (openId === id ? '.sel' : ''), { 'data-id': id, onclick: () => { click(); openId = id; draw(); } },
-            h('div.pm-n', t('pit.pk.' + id)), h('div.pm-icw', A.img(d.icon, 'pm-ic')), h('div.pm-cost', d.cost), h('div.pm-lvl', lv + '/' + d.max));
+          const d = PM.perks[id], lv = M.pitPerk(id), full = lv >= d.max, open = M.pitPerkOpen(id), can = open && !full && free >= d.cost;
+          // a card the Mastery has not reached: in grey, a lock over it and the level it needs under the lock
+          const el = h('div.pm-card.t-' + d.tier + (full ? '.full' : can ? '.can' : '') + (lv ? '' : '.zero') + (open ? '' : '.locked') + (openId === id ? '.sel' : ''), { 'data-id': id, onclick: () => { click(); openId = id; draw(); } },
+            h('div.pm-n', t('pit.pk.' + id)), h('div.pm-icw', A.img(d.icon, 'pm-ic')), h('div.pm-cost', d.cost), h('div.pm-lvl', lv + '/' + d.max),
+            open ? null : h('div.pm-lock', A.img('u_lock'), h('b', t('pit.lvNeed', { n: d.lv }))));
           el.style.setProperty('--art', ui.masteryCardArt(d.tier)); // its gothic ground
           return el;
         })),
@@ -219,13 +221,21 @@
     const showPop = (id) => {
       const old = root.querySelector('.pm-pop'); if (old) old.remove();
       const cardEl = root.querySelector('.pm-card[data-id="' + id + '"]'); if (!cardEl) return;
-      const d = PM.perks[id], lv = M.pitPerk(id), full = lv >= d.max, can = !full && M.pitPointsFree() >= d.cost;
+      const d = PM.perks[id], lv = M.pitPerk(id), full = lv >= d.max, open = M.pitPerkOpen(id), can = open && !full && M.pitPointsFree() >= d.cost;
       const up = async () => {
         if (full) return;
+        if (!open) { ui.toast(t('pit.lockedAt', { n: d.lv }), 'bad'); return; }
         if (M.pitPointsFree() < d.cost) { ui.toast(t('pit.noPoints'), 'bad'); return; }
         const r = await ui.act('pitPerkUp', { id }); if (r) { DH.audio.play('buy'); draw(); }
       };
-      const down = async () => { if (!lv) return; const r = await ui.act('pitPerkDown', { id }); if (r != null) { DH.audio.play('coin'); draw(); } };
+      const down = async () => {
+        if (!lv) return;
+        if (id === 'entry') { // Extra Entry is taken back for gems only
+          if (!(await ui.confirm({ title: t('pit.pk.entry'), body: t('pit.entryRefund', { n: U.fmt(PM.entryRefund) }), ok: t('cons.sell1'), okCls: 'red' }))) return;
+        }
+        const r = await ui.act('pitPerkDown', { id });
+        if (r === false) ui.toast(t('common.notEnough'), 'bad'); else if (r != null) { DH.audio.play('coin'); draw(); }
+      };
       const pop = h('div.pm-pop.t-' + d.tier,
         h('div.pp-panel',
           h('button.x', { onclick: () => { click(); openId = null; pop.remove(); draw(); }, 'aria-label': t('common.close') }, A.img('u_close', 'ci')),
@@ -233,9 +243,10 @@
           h('div.pp-lv', t('pit.lvOf', { n: lv, m: d.max })),
           h('div.pp-d', desc(id, lv || 1), lv ? null : h('span.muted', ' ' + t('pit.atLv1'))),
           !full && lv ? h('div.pp-next', t('pit.nextLv') + ': ', desc(id, lv + 1)) : null,
-          h('div.pp-cost', full ? h('span.good', t('cons.full')) : t('pit.costPer', { n: d.cost }))),
+          !open ? h('div.pp-cost', A.img('u_lock', 'ci'), ' ', t('pit.lockedAt', { n: d.lv })) : h('div.pp-cost', full ? h('span.good', t('cons.full')) : t('pit.costPer', { n: d.cost })),
+          id === 'entry' ? h('div.small.muted', t('pit.entryKeep', { n: U.fmt(PM.entryRefund) })) : null),
         h('div.pp-btns',
-          h('button.btn.red.pp-b' + (lv ? '' : '.off'), { onclick: down, 'aria-label': t('cons.sell1') }, '−'),
+          h('button.btn.red.pp-b' + (lv ? '' : '.off'), { onclick: down, 'aria-label': t('cons.sell1') }, '−', id === 'entry' && lv ? h('span.pp-gem', A.img('i_gem', 'ci'), U.fmt(PM.entryRefund)) : null),
           h('button.btn.green.pp-b' + (can ? '' : '.off'), { onclick: up, 'aria-label': t('cons.buy1') }, '+')));
       root.append(pop);
       const rr = root.getBoundingClientRect(), cr = cardEl.getBoundingClientRect(), z = rr.width / root.offsetWidth || 1; // (the window may be scaled)
@@ -246,7 +257,7 @@
     };
     async function reset() {
       click();
-      if (!M.pitPointsUsed()) { ui.toast(t('cons.nothing')); return; }
+      if (M.pitPointsUsed() - M.pitPerk('entry') * PM.perks.entry.cost <= 0) { ui.toast(t('cons.nothing')); return; }
       if (!(await ui.confirm({ title: t('cons.reset'), body: t('pit.resetBody'), ok: t('cons.reset'), okCls: 'red' }))) return;
       if (await ui.act('pitPerkReset')) { DH.audio.play('coin'); draw(); }
     }
