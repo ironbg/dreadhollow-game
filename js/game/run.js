@@ -986,7 +986,10 @@
       const p = this.player; this.drop(kind === 'chest' ? 'chest_wood' : 'tome', p.x, p.y); // the chest is the plainest one: common pieces
     }
     /** Forging materials: n pieces, each the hall's metal (or one finer or coarser). */
-    matDrop(x, y, n) { for (let i = 0; i < n; i++) this.drop('mat', x + U.rand(-8, 8), y + U.rand(-5, 5), 1, E.rollMat(this.stageId, this.dread)); }
+    matDrop(x, y, n) {
+      const k = n * C.MAT_DROP; n = Math.floor(k) + (Math.random() < k % 1 ? 1 : 0); // half as many as before (C.MAT_DROP): 3 gives 1 or 2
+      for (let i = 0; i < n; i++) this.drop('mat', x + U.rand(-8, 8), y + U.rand(-5, 5), 1, E.rollMat(this.stageId, this.dread));
+    }
     drop(type, x, y, val, sub, cluster) {
       const k = { type, x, y, val: val || 1, sub, cluster: !!cluster, vx: U.rand(-40, 40), vy: U.rand(-60, -10), z: 0, vz: type === 'xp' ? 0 : 60, mag: false, t: 0 };
       if (this.pit && !PIT_DROPS.includes(type)) return k; // the Pit: no loot (experience, tomes, food and magnets only)

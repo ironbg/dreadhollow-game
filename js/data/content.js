@@ -594,8 +594,9 @@
   /* Power-up runes smashed out of urns (duration in seconds) */
   /* Urns: one roll per urn, top to bottom; nothing special -> a single coin */
   C.BAG_SIZE = 4; // the bag holds 4 spare items found in the run; more and you must discard one
-  C.URN_DROPS = [{ k: 'food', p: 0.25 }, { k: 'coins', p: 0.30 }, { k: 'herb', p: 0.10 }, { k: 'potion', p: 0.05 }, { k: 'magnet', p: 0.015 },
+  C.URN_DROPS = [{ k: 'food', p: 0.25 }, { k: 'coins', p: 0.30 }, { k: 'herb', p: 0.05 }, { k: 'potion', p: 0.05 }, { k: 'magnet', p: 0.015 },
     { k: 'coinbag', p: 0.014 }, { k: 'ooze', p: 0.01 }, { k: 'rune_fury', p: 0.02 }, { k: 'rune_haste', p: 0.02 }, { k: 'rune_wraith', p: 0.01 }];
+  C.MAT_DROP = 0.5; // forging materials from champions and bosses: half the pieces they used to drop (there were too many)
   C.COIN_VALUE = { coin: 2, coins: 10, coinbag: 50 }; // x the hall's gold multiplier
   C.FOOD_HEAL = 5; C.POTION_HEAL = [25, 0.05];     // food: 5 HP; Health Potion: 25 + 5% of max HP
   C.BUFFS = { fury: { dur: 15, color: '#ff3a30' }, haste: { dur: 15, color: '#ffd040' }, wraith: { dur: 10, color: '#80e8ff' } };

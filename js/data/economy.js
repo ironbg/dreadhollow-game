@@ -275,7 +275,7 @@
     { id: 'elites',    target: 3,    pts: 5,  reward: { mats: { iron: 6 }, passXp: 70 } },
     { id: 'tomes',     target: 3,    pts: 5,  reward: { gold: 300, passXp: 60 } },
     { id: 'champions', target: 1,    pts: 10, reward: { gold: 400, passXp: 80 } },
-    { id: 'mats',      target: 20,   pts: 5,  reward: { gold: 300, passXp: 60 } },
+    { id: 'mats',      target: 10,   pts: 5,  reward: { gold: 300, passXp: 60 } },
     { id: 'herbs',     target: 3,    pts: 5,  reward: { gold: 200, passXp: 60 } },
     { id: 'agony',     target: 1,    pts: 10, reward: { gold: 500, passXp: 100 }, need: 'agony' },
     { id: 'pit',       target: 1,    pts: 10, reward: { gold: 400, passXp: 80 }, always: true }, // every day: enter the Pit (a fight or a sweep)
