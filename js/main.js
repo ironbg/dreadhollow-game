@@ -93,6 +93,7 @@
       });
     },
     async toMenu(win, pit) { // pit: back from the Pit (its window opens again; no offer on top of it)
+      DH.blackbox.clear(); // the fight ended as fights do
       ui.hud.hide();
       this.run = null; this.mode = 'menu';
       ui.show(true);
@@ -152,6 +153,40 @@
 
   /* ---------------- loop ---------------- */
   let last = performance.now();
+  /* The black box: twice a second during a fight, what the fight holds is written down (abilities, relics, artifacts,
+   * foes, effects). A fight that stops answering (a frozen screen the player has to close the app on) leaves it behind,
+   * not marked as left (pagehide / hidden never ran); at the next start the player is asked whether to send it. */
+  const BB = 'dh_blackbox';
+  const bb = {
+    t: 0,
+    note(r) {
+      if ((this.t += 1) % 30) return; // about twice a second
+      try {
+        const P = r.P || {};
+        localStorage.setItem(BB, JSON.stringify({ v: DH.VERSION, at: Date.now(), hidden: false, stage: r.stageId, hero: r.heroId, pit: !!r.pit,
+          time: Math.round(r.time), lv: r.level, kills: r.kills, foes: r.enemies.length, fx: r.fx.length, pick: r.pickups.length, haz: (r.hazards || []).length,
+          allies: (r.allies || []).length, ab: r.abilities.map((a) => a.id).join(','), arts: Object.keys(r.fx_ || {}).join(','),
+          gear: Object.values(r.runGear || {}).concat(Object.values(DH.meta.eq(r.heroId) || {}).map((id) => DH.meta.gearById && DH.meta.gearById(id)).filter(Boolean)).map((g) => g.type).join(','),
+          agony: r.agonyOn ? Math.round((r.agony || 0) * 10) / 10 : -1, dread: r.dread || 0, ms: Math.round((P.ms || 0) * 100), as: Math.round((P.as || 0) * 100) }));
+      } catch (e) { /* storage full or blocked */ }
+    },
+    left() { try { const o = JSON.parse(localStorage.getItem(BB) || 'null'); if (o) { o.hidden = true; localStorage.setItem(BB, JSON.stringify(o)); } } catch (e) { } },
+    clear() { try { localStorage.removeItem(BB); } catch (e) { } },
+    /** At start: a fight that froze last time (the box neither cleared nor marked as left) -> ask to send it. */
+    check() {
+      let o = null; try { o = JSON.parse(localStorage.getItem(BB) || 'null'); } catch (e) { }
+      this.clear();
+      if (!o || o.hidden || Date.now() - o.at > 3 * 864e5 || !DH.server.remote()) return;
+      setTimeout(async () => {
+        if (!(await ui.confirm({ title: t('bb.title'), body: t('bb.body'), ok: t('bb.send'), cancel: t('common.no') }))) return;
+        const text = '[auto] ' + t('bb.report') + ' ' + JSON.stringify(o);
+        try { await DH.server.call('feedback', { text: text.slice(0, 990), kind: 'bug', v: o.v, lang: DH.i18n.current, hero: o.hero, level: DH.save.data.accountLevel || 0 }); ui.toast(t('bb.sent'), 'good'); } catch (e) { ui.serverErr(e); }
+      }, 1500);
+    },
+  };
+  DH.blackbox = bb;
+  document.addEventListener('visibilitychange', () => { if (document.hidden) bb.left(); });
+  window.addEventListener('pagehide', () => bb.left());
   let menuAcc = 0;
   function frame(now) {
     requestAnimationFrame(frame);
@@ -161,7 +196,7 @@
       if (game.mode === 'run' && game.run) {
         const r = game.run;
         // a long frame is split in two steps; only a really long one: splitting at 40 fps doubled the work just when the phone was behind
-        if (r.state === 'playing') { const n = dt > 1 / 24 ? 2 : 1; for (let i = 0; i < n; i++) r.update(dt / n); r.render(); ui.hud.update(r); r.idleFrames = 0; }
+        if (r.state === 'playing') { const n = dt > 1 / 24 ? 2 : 1; for (let i = 0; i < n; i++) r.update(dt / n); r.render(); ui.hud.update(r); r.idleFrames = 0; bb.note(r); }
         else if ((r.idleFrames = (r.idleFrames || 0) + 1) <= 2) { r.render(); ui.hud.update(r); } // paused / dead / level-up / an ad on top: paint the frozen scene a couple of frames, then stop redrawing it. A rewarded video over a full battle scene was starving low-RAM phones of memory — the revive-ad crash.
       } else if (!document.querySelector('.modal.consw')) { // the Constellation covers the whole screen: the crypt behind it rests
         menuAcc += dt; if (menuAcc >= 1 / 32) { DH.menuScene.render(menuAcc); menuAcc = 0; } // the menus' backdrop at 30 fps: half the work, and taps answered sooner
@@ -198,6 +233,7 @@
       const calendar = () => { ui.flushSeason(); if (M.signinPending()) setTimeout(() => ui.openLogin(), 500); };
       if (!DH.save.data.playerName) setTimeout(() => ui.openName(true, calendar), 700); else calendar();
       ui.checkWhatsNew(); // after an update: what changed, once the menu is free
+      DH.blackbox.check(); // the last fight froze? offer to send what it held
     });
     DH.events.on('live', () => { if (game.mode !== 'run') ui.refresh(); DH.cloud.submitBoards(); }); // an event started or ended: the home buttons follow
     // daily rollover while the app stays open

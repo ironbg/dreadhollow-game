@@ -731,7 +731,7 @@
   R.keepAllies = function (kind, a, n) {
     let have = 0; for (const al of this.allies) if (al.kind === kind && al.a === a) have++;
     const p = this.player;
-    while (have < n) { this.allies.push({ kind, a, x: p.x + U.rand(-10, 10), y: p.y + U.rand(-10, 10), t: 0, life: Infinity, face: 1 }); have++; }
+    for (let guard = 0; have < n && guard < 60; guard++) { this.allies.push({ kind, a, x: p.x + U.rand(-10, 10), y: p.y + U.rand(-10, 10), t: 0, life: Infinity, face: 1 }); have++; }
   };
   R.updateAllies = function (dt) {
     if (this.timers) for (let i = this.timers.length - 1; i >= 0; i--) { const tm = this.timers[i]; tm.t -= dt; if (tm.t <= 0) { this.timers.splice(i, 1); tm.fn(); } }

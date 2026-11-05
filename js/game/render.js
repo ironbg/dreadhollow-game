@@ -901,7 +901,7 @@
         if (!f.flashed) { f.flashed = true; this.flashLight(f.k === 'bolt' ? 0.55 : 0.18); }
         const rng = U.seeded(f.seed | 0);
         g.globalAlpha = 1 - k; g.strokeStyle = '#ffffff'; g.lineWidth = f.k === 'spark' ? 1 : 2;
-        if (f.k === 'bolt') { g.beginPath(); let px = x + (rng() - 0.5) * 20, py = y - 160; g.moveTo(px, py); while (py < y) { py += 10 + rng() * 10; px += (rng() - 0.5) * 14; if (py > y) { py = y; px = x; } g.lineTo(px, py); } g.stroke(); g.strokeStyle = 'rgba(120,200,255,0.6)'; g.lineWidth = 5; g.stroke(); }
+        if (f.k === 'bolt') { g.beginPath(); let px = x + (rng() - 0.5) * 20, py = y - 160; g.moveTo(px, py); for (let guard = 0; py < y && guard < 40; guard++) { py += 10 + rng() * 10; px += (rng() - 0.5) * 14; if (py > y) { py = y; px = x; } g.lineTo(px, py); } g.stroke(); g.strokeStyle = 'rgba(120,200,255,0.6)'; g.lineWidth = 5; g.stroke(); }
         else { g.beginPath(); for (let i = 0; i < 6; i++) { const a = rng() * TAU, l = 10 + rng() * 16; g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l * 0.5 + (rng() - 0.5) * 6, y + Math.sin(a) * l * 0.5); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); } g.stroke(); }
         g.globalAlpha = 1; g.lineWidth = 1;
         g.drawImage(A.glow('rgba(160,220,255,0.9)'), x - 16, y - 10, 32, 20);

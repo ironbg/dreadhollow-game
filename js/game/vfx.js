@@ -72,7 +72,7 @@
     const want = Math.round(at.n * (W * H) / (270 * 480) * (this.settings.minFx ? 0 : this.settings.lowFx ? 0.4 : 1));
     this.atmo = this.atmo || [];
     const list = this.atmo, left = p.x - W / 2 - 20, top = p.y - H / 2 - 20;
-    while (list.length < want) {
+    for (let guard = 0; list.length < want && guard < 600; guard++) {
       const m = { x: left + Math.random() * (W + 40), y: top + Math.random() * (H + 40), t: 0, life: U.rand(4, 9), ph: Math.random() * TAU, c: U.pick(at.cols), s: Math.random() < 0.25 ? 1.5 : 1 };
       if (at.mote === 'ember') { m.vx = U.rand(-6, 6); m.vy = U.rand(-22, -8); }
       else if (at.mote === 'snow') { m.vx = U.rand(4, 12); m.vy = U.rand(10, 20); }

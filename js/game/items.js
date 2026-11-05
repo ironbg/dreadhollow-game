@@ -95,7 +95,7 @@
   R.keepItemAllies = function (kind, n, base, s) {
     const a = this.itemAb(kind, base, s), p = this.player;
     let have = 0; for (const al of this.allies) if (al.kind === kind) have++;
-    while (have < n) { this.allies.push({ kind, a, x: p.x + U.rand(-14, 14), y: p.y + U.rand(-14, 14), t: 0, life: Infinity, face: 1, item: true }); have++; }
+    for (let guard = 0; have < n && guard < 60; guard++) { this.allies.push({ kind, a, x: p.x + U.rand(-14, 14), y: p.y + U.rand(-14, 14), t: 0, life: Infinity, face: 1, item: true }); have++; }
   };
 
   /** Damage bonuses that change slowly (foes about, life missing, grown charges), refreshed twice a second. */

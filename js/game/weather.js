@@ -50,7 +50,7 @@
     const wind = this.windNow();
     // falling particles (rain, snow, ash, arcane motes)
     const want = Math.round((w.rain || w.snow || w.ash || w.arcane || 0) * mult * (1 + S.gust * (w.whiteout ? 1.2 : 0.3)));
-    while (S.parts.length < want) {
+    for (let guard = 0; S.parts.length < want && guard < 2000; guard++) {
       const q = { x: rand(box.l, box.r), y: rand(box.t, box.b), ph: Math.random() * TAU, s: Math.random() };
       if (w.rain) { q.vy = rand(260, 340); q.len = rand(7, 12); q.land = q.y + rand(40, 260); }
       else if (w.snow) { q.vy = rand(18, 34); q.sz = Math.random() < 0.3 ? 1.5 : 1; }

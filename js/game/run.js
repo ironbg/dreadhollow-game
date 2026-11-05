@@ -94,7 +94,8 @@
     xpMult() { return (1 + (this.trib.xp || 0)) * this.P.growth * (1 + this.agony * (this.stage.agonyXp || 0.15)) / (1 + this.agony * 0.35) * (this.tormentXp || 1) * (this.agonyOn ? 0.5 : 1) * (this.pit && this.time < DH.economy.PIT.earlyXp.secs ? DH.economy.PIT.earlyXp.mult : 1); } // the Pit: the first minute counts triple
     gainXp(v, mult) {
       this.xp += v * (mult == null ? this.xpMult() : mult); // a gem's worth is fixed when it drops
-      while (this.xp >= this.xpNext) {
+      if (!Number.isFinite(this.xp)) this.xp = 0; // never an endless climb on a broken number
+      for (let guard = 0; this.xp >= this.xpNext && guard < 400; guard++) {
         this.xp -= this.xpNext; this.level++; this.xpNext = C.xpToNext(this.level, this.stageId); this.pendingLevels++;
         DH.audio.play('levelup'); this.levelUpVfx();
         this.recompute(); // every hero grows a little with each level
@@ -238,11 +239,13 @@
       }
       this.spawnAcc += rate * dt;
       const cap = this.settings.lowFx ? 220 : 330;
-      while (this.spawnAcc >= 1) {
+      if (!Number.isFinite(this.spawnAcc)) this.spawnAcc = 0;
+      this.spawnAcc = Math.min(this.spawnAcc, 60); // never more than a frame's worth of foes owed: no endless loop at the cap
+      for (let guard = 0; this.spawnAcc >= 1 && guard < 120; guard++) {
         this.spawnAcc -= 1;
         if (this.enemies.length >= cap) continue;
         const pt = this.edgePoint(), type = U.weighted(mix), ud = C.enemies[this.remap(type)], pk = ud && ud.pack;
-        if (pk) this.spawnAcc -= this.spawnPack(type, pt, U.randi(pk[0], pk[1])) - 1; // hounds come as a pack
+        if (pk) this.spawnAcc -= Math.max(0, this.spawnPack(type, pt, U.randi(pk[0], pk[1])) - 1); // hounds come as a pack (a pack that could not come owes nothing back)
         else this.spawnEnemy(type, pt.x, pt.y);
       }
       const scale = this.runLength / C.RUN_LENGTH;
@@ -906,9 +909,10 @@
       if (this.decals.length > 120) this.decals.shift();
       this.decals.push({ x: e.x, y: e.y + e.r * 0.5, r: e.r * (0.6 + Math.random() * 0.5) * e.scale, life: 14, kind: e.painter === 'skeleton' || e.painter === 'golem' ? 'bone' : 'blood' });
       let xp = e.final && !this.bosses.some((b) => b.final && !b.dead && b !== e) ? 0 : e.xp; // the last Lord ends the hall: no pointless level-ups after victory
-      for (const [v] of C.GEM_TIERS) { while (xp >= v) { this.drop('xp', e.x + U.rand(-5, 5), e.y + U.rand(-5, 5), v); xp -= v; } }
+      if (!Number.isFinite(xp)) xp = 0;
+      for (const [v] of C.GEM_TIERS) { for (let guard = 0; xp >= v && guard < 60; guard++) { this.drop('xp', e.x + U.rand(-5, 5), e.y + U.rand(-5, 5), v); xp -= v; } }
       this.mergeGems();
-      if (e.loot) { for (let v = e.loot; v > 0; v -= 20) this.drop('coin', e.x + U.rand(-6, 6), e.y + U.rand(-6, 6), Math.min(20, v)); } // a scarab gives back what it stole
+      if (e.loot && Number.isFinite(e.loot)) { for (let v = Math.min(e.loot, 2000); v > 0; v -= 20) this.drop('coin', e.x + U.rand(-6, 6), e.y + U.rand(-6, 6), Math.min(20, v)); } // a scarab gives back what it stole
       if (e.hXp) this.drop('xp', e.x, e.y, e.hXp); if (e.hGold) this.drop('coin', e.x, e.y, e.hGold, 'bag'); // a coin wraith's hoard spills out
       if (e.def.chest && Math.random() < 0.3) this.drop('coin', e.x, e.y, Math.ceil(C.COIN_VALUE.coins * this.stage.goldMult), 'stack'); // a mimic's hoard (now and then: the Reliquary is full of mimics, and paid twice the hall before it)
       if (e.def.gas) this.hazard({ kind: 'circle', x: e.x, y: e.y, r: 22, delay: 0.2, dur: 3, dmg: e.dmg * 0.3, color: '#90b030', src: e }); // a bog corpse bursts in a cloud of foul gas
@@ -1056,7 +1060,7 @@
       let n = 0;
       for (const k of this.pickups) if (k.type === 'tome' || k.type === 'chest_wood' || k.type === 'chest_red' || k.type === 'chest_gold' || k.type === 'chest_new') n++;
       this.lateLevels = 0;
-      for (let i = 0; i < n; i++) { this.xp += this.xpNext * 0.5; while (this.xp >= this.xpNext) { this.xp -= this.xpNext; this.level++; this.lateLevels++; this.xpNext = C.xpToNext(this.level, this.stageId); } }
+      for (let i = 0; i < n; i++) { this.xp += this.xpNext * 0.5; for (let guard = 0; this.xp >= this.xpNext && guard < 400; guard++) { this.xp -= this.xpNext; this.level++; this.lateLevels++; this.xpNext = C.xpToNext(this.level, this.stageId); } }
     }
 
     /* ---------------- tomes ---------------- */
