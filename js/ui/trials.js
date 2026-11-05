@@ -372,6 +372,6 @@
       res.deeds && res.deeds.length ? h('div.deedsdone', h('div.goldtxt', { style: { fontWeight: 800 } }, t('results.deeds', { n: res.deeds.length, x: Math.round(res.deeds.length * DH.deeds.XP_PER_DEED * 1000) / 10 })), res.deeds.map((d) => h('div.small.dd', A.img('u_check', 'ci'), h('span', ui.deedText(d))))) : null,
       h('div.goldtotal', A.img('i_essence'), h('b', U.fmt(total))),
       res.failed ? h('div.small.center.bad', t('pit.notSent')) : null,
-      h('div.btns', h('button.btn.gold', { onclick: () => { click(); m.close(); DH.game.toMenu(false); } }, t('common.continue')))) });
+      h('div.btns', h('button.btn.gold', { onclick: () => { click(); m.close(); DH.game.toMenu(false, true); ui.openPit(); } }, t('common.continue')))) }); // back to the Pit's window, ready for the next entry
   };
 })(window.DH);

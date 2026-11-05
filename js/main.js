@@ -92,7 +92,7 @@
         DH.server.sendPending(true, true).then((res) => (res ? ui.openResults(run, res) : this.toMenu(false)), (err) => this.unsettled(run, err));
       });
     },
-    async toMenu(win) {
+    async toMenu(win, pit) { // pit: back from the Pit (its window opens again; no offer on top of it)
       ui.hud.hide();
       this.run = null; this.mode = 'menu';
       ui.show(true);
@@ -106,7 +106,7 @@
       if (win) setTimeout(() => DH.review.afterWin(), 1200); // the store's rating sheet, after a victory (app only)
       // gentle upsell after a defeat, at most once a day
       const today = DH.util.dayKey();
-      if (!win && !s.purchases.once.starter && s.stats.runs >= 2 && s.seen.starterDay !== today) {
+      if (!win && !pit && !s.purchases.once.starter && s.stats.runs >= 2 && s.seen.starterDay !== today) {
         s.seen.starterDay = today; DH.save.persist();
         setTimeout(() => ui.openStarter(), 400);
       }
