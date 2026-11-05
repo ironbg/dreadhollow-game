@@ -216,7 +216,7 @@
         h('div.pm-head', h('div.pm-lv', h('b', ms.lv), h('span.small', ' / ' + PM.max)),
           h('div.grow', h('div.pm-bar', h('i', { style: { width: (ms.next ? Math.round(ms.xp / ms.next * 100) : 100) + '%' } })), h('div.small.muted', ms.next ? t('pit.masteryXp', { x: U.fmt(ms.xp), m: U.fmt(ms.next) }) : t('common.max'))),
           h('div.pm-free', h('span.small', t('pit.points')), h('b', free)),
-          h('button.btn.small.ghost.infob', { 'aria-label': t('pit.mastery'), onclick: (e) => { e.stopPropagation(); click(); ui.modal({ title: t('pit.mastery'), cls: 'altarinfo', body: (im) => h('div', h('p.center', t('pit.masteryDesc', { n: PM.xpPerWave, b: Math.round(PM.modeBonus * 100) }) + (M.masteryPass() ? ' ' + t('pit.masteryPass') : '')), h('div.btns', h('button.btn.gold', { onclick: () => im.close() }, t('common.close')))) }); } }, 'i')),
+          h('button.btn.small.ghost.infob', { 'aria-label': t('pit.mastery'), onclick: (e) => { e.stopPropagation(); click(); ui.modal({ title: t('pit.mastery'), cls: 'altarinfo', body: (im) => h('div', h('p.center', t('pit.masteryDesc', { n: String(PM.xpPerWave).replace('.', DH.i18n.current === 'bg' ? ',' : '.'), b: Math.round(PM.modeBonus * 100) }) + (M.masteryPass() ? ' ' + t('pit.masteryPass') : '')), h('div.btns', h('button.btn.gold', { onclick: () => im.close() }, t('common.close')))) }); } }, 'i')),
         h('div.pm-grid', ids.map((id) => {
           const d = PM.perks[id], lv = M.pitPerk(id), full = lv >= d.max, open = M.pitPerkOpen(id), can = open && !full && free >= d.cost;
           // a card the Mastery has not reached: in grey, a lock over it and the level it needs under the lock

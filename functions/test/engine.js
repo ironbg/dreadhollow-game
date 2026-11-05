@@ -184,7 +184,7 @@ const live = require('../game/live.json');
   assert.strictEqual(r.result, false, 'no gems, no refund'); assert.strictEqual(r.profile.pit.perks.entry, 1);
   // the Pit's Mastery: experience from a fight, points per level, a card bought, the time and Essence it adds, a free reset
   r = await withProfile(Object.assign({}, p0, { pit: { best: 0, day: null, used: 0, active: { at: Date.now() - 120000, from: 40, affixes: [] }, pass: false } }), live, (DH) => { DH.actions.list.pitEnd.run({ waves: 20 }); return DH.meta.pitMastery(); });
-  assert.strictEqual(r.result.lv, 2, 'wave 60 gives a level (78 experience, 68 for level 2)');
+  assert.strictEqual(r.result.lv, 1, 'wave 60 gives 62 experience: not yet the 68 of level 2');
   r.profile.pit.mxp = 300000;
   r = await withProfile(r.profile, live, (DH) => { const M = DH.meta; for (let i = 0; i < 4; i++) DH.actions.list.pitPerkUp.run({ id: 'time' }); DH.actions.list.pitPerkUp.run({ id: 'essence' }); return [M.pitSecs(), M.pitPerWave(), M.pitPerk('time'), DH.actions.list.pitPerkUp.run({ id: 'time' })]; });
   assert.deepStrictEqual(r.result, [240, 15.84, 4, 5]);
@@ -205,9 +205,9 @@ const live = require('../game/live.json');
   assert.strictEqual(r.profile.essence, 1728); assert.strictEqual(r.profile.pit.used, 3);
   // the Mastery Pass (on its own, not the Pit Pass): twice the experience
   r = await withProfile(Object.assign({}, p0, { pit: { best: 30, day: null, used: 0, active: null, pass: true } }), live, (DH) => { DH.actions.list.pitSweep.run({}); return DH.save.data.pit.mxp; });
-  assert.strictEqual(r.result, 39, 'the Pit Pass does not double the Mastery (+30% in the Pit)');
+  assert.strictEqual(r.result, 31, 'the Pit Pass does not double the Mastery (+30% in the Pit): 30 waves x 0.8 x 1.3');
   r = await withProfile(r.profile, live, (DH) => { DH.meta.fulfillProduct('masterypass', true); DH.actions.list.pitSweep.run({}); return DH.save.data.pit.mxp; });
-  assert.strictEqual(r.result, 117); assert.strictEqual(r.profile.masteryPass, true);
+  assert.strictEqual(r.result, 93); assert.strictEqual(r.profile.masteryPass, true);
   // the slower Mastery: 7520 experience for level 139 -> 140, 1 077 386 in all to level 200; an older save keeps a fifth of
   // its experience (what the new rules would have given), its cards come back and Extra Entry stays
   r = await withProfile(Object.assign({}, p0, { pit: { best: 0, day: null, used: 0, active: null, pass: false, mv: 2, mxp: 50000, perks: { power: 3, entry: 1 } } }), live, (DH) => {

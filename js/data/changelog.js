@@ -6,6 +6,7 @@
     {
       v: '1.61.60',
       bg: [
+        'Майсторството расте с 20% по-бавно: 0,8 опит на вълна вместо 1. Събраният опит и нивата остават.',
         'Съзвездие, клон Плячка – специалностите са подредени наново: 1) кесия злато от елитите (5 монети вместо 6), 2) Позлатената слуз по-често (около 1,5 пъти, вместо 2), 3) металите по два (20% вместо 30%), 4) +10% Есенция от Ямата (вместо 20%), 5) +1 влизане в Ямата на ден.',
         'Настройки: слайдерът за качество е центриран в полето, а нивото му е вдясно от него.',
         'Металите и билките от битките са наполовина: шампионите и босовете пускат половината материали, а урните – билка два пъти по-рядко. Дневната мисия за материали иска 10 вместо 20.',
@@ -15,6 +16,7 @@
         'След битка в Ямата „Продължи“ те връща в прозореца на Ямата, готов за следващото влизане, а не на началния екран.',
       ],
       en: [
+        'Mastery grows 20% slower: 0.8 experience per wave instead of 1. Experience and levels already earned stay.',
         'Constellation, Plunder branch – its Specialties in a new order: 1) elites drop a purse of gold (5 coins, was 6), 2) the Gilded Ooze more often (about 1.5x, was 2x), 3) metals in pairs (20%, was 30%), 4) +10% Essence from the Pit (was 20%), 5) +1 Pit entry a day.',
         'Settings: the quality slider is centred in its band, with its level to its right.',
         'Metals and herbs from fights are halved: champions and bosses drop half the materials, and urns give a herb half as often. The daily materials mission asks for 10 instead of 20.',
