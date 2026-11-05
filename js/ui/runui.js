@@ -285,8 +285,23 @@
       hud.sig = sig; r.build.innerHTML = '';
       r.build.append(h('div.r', run.abilities.map((a) => { const n = Object.values(run.traits.ab[a.id] || {}).reduce((x, y) => x + y, 0); return h('div.b', { onclick: () => DH.game.abilityInfo(a) }, A.img('ab_' + a.id), n ? h('i', n) : null); }))); // tap: what it does, how far it has grown
     }
-    const bs = Object.keys(run.buffs).filter((k) => run.buffs[k] > 0).map((k) => k + Math.ceil(run.buffs[k])).join();
-    if (bs !== r.bsig) { r.bsig = bs; r.buffs.innerHTML = ''; Object.keys(run.buffs).forEach((k) => { if (run.buffs[k] > 0) r.buffs.append(h('div.bf.' + k, A.img('rune_' + k), h('b', Math.ceil(run.buffs[k])))); }); }
+    // the runes' buffs: an icon as big as the abilities', in a row under them; the seconds inside it and a frame round it
+    // that runs out with the time (a conic sweep, --p)
+    const live = Object.keys(run.buffs).filter((k) => run.buffs[k] > 0), bs = live.join();
+    if (bs !== r.bsig) {
+      r.bsig = bs; r.buffs.innerHTML = ''; r.bfEl = {};
+      live.forEach((k) => { const tx = h('b'); const el = h('div.bf.' + k, h('div.bfi', A.img('rune_' + k), tx)); r.bfEl[k] = { el, tx, s: -1 }; r.buffs.append(el); });
+    }
+    live.forEach((k) => {
+      const o = r.bfEl[k], left = run.buffs[k], p = U.clamp(left / ((C.BUFFS[k] && C.BUFFS[k].dur) || left || 1), 0, 1), s = Math.ceil(left);
+      o.el.style.setProperty('--p', (p * 360).toFixed(1) + 'deg');
+      if (o.s !== s) { o.s = s; o.tx.textContent = s; }
+    });
+    // under the abilities, wherever their rows end; the curse's line under the buffs
+    const bTop = r.build.offsetTop + r.build.offsetHeight + 6;
+    if (r.buffsTop !== bTop) { r.buffsTop = bTop; r.buffs.style.top = bTop + 'px'; }
+    const cTop = live.length ? bTop + r.buffs.offsetHeight + 6 : bTop;
+    if (r.curseTop !== cTop) { r.curseTop = cTop; r.curse.style.top = cTop + 'px'; }
     r.curse.classList.toggle('hidden', !(run.curse > 0)); if (run.curse > 0) r.curseT.textContent = t('hud.curse', { n: Math.ceil(run.curse) });
     const b = run.bosses[0];
     r.boss.classList.toggle('hidden', !b);
