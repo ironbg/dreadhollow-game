@@ -172,16 +172,19 @@
     },
     left() { try { const o = JSON.parse(localStorage.getItem(BB) || 'null'); if (o) { o.hidden = true; localStorage.setItem(BB, JSON.stringify(o)); } } catch (e) { } },
     clear() { try { localStorage.removeItem(BB); } catch (e) { } },
-    /** At start: a fight that froze last time (the box neither cleared nor marked as left) -> ask to send it. */
-    check() {
+    /** At start: a fight that froze last time (the box neither cleared nor marked as left) -> ask to send it. The
+     *  connection to the server comes a few seconds after the start: wait for it; the box is cleared only once
+     *  answered (or stale), so a start without a connection asks again next time. */
+    async check() {
       let o = null; try { o = JSON.parse(localStorage.getItem(BB) || 'null'); } catch (e) { }
+      if (!o) return;
+      if (o.hidden || Date.now() - o.at > 3 * 864e5 || (DH.game.run && DH.game.mode === 'run')) { if (!(DH.game.run && DH.game.mode === 'run')) this.clear(); return; }
+      for (let i = 0; i < 60 && !(DH.server.remote() && DH.cloud.authUser); i++) await new Promise((r) => setTimeout(r, 500));
+      if (!(DH.server.remote() && DH.cloud.authUser) || DH.game.mode === 'run') return; // no connection yet: asked at the next start
       this.clear();
-      if (!o || o.hidden || Date.now() - o.at > 3 * 864e5 || !DH.server.remote()) return;
-      setTimeout(async () => {
-        if (!(await ui.confirm({ title: t('bb.title'), body: t('bb.body'), ok: t('bb.send'), cancel: t('common.no') }))) return;
-        const text = '[auto] ' + t('bb.report') + ' ' + JSON.stringify(o);
-        try { await DH.server.call('feedback', { text: text.slice(0, 990), kind: 'bug', v: o.v, lang: DH.i18n.current, hero: o.hero, level: DH.save.data.accountLevel || 0 }); ui.toast(t('bb.sent'), 'good'); } catch (e) { ui.serverErr(e); }
-      }, 1500);
+      if (!(await ui.confirm({ title: t('bb.title'), body: t('bb.body'), ok: t('bb.send'), cancel: t('common.no') }))) return;
+      const text = '[auto] ' + t('bb.report') + ' ' + JSON.stringify(o);
+      try { await DH.server.call('feedback', { text: text.slice(0, 990), kind: 'bug', v: o.v, lang: DH.i18n.current, hero: o.hero, level: DH.save.data.accountLevel || 0 }); ui.toast(t('bb.sent'), 'good'); } catch (e) { ui.serverErr(e); }
     },
   };
   DH.blackbox = bb;
@@ -233,7 +236,7 @@
       const calendar = () => { ui.flushSeason(); if (M.signinPending()) setTimeout(() => ui.openLogin(), 500); };
       if (!DH.save.data.playerName) setTimeout(() => ui.openName(true, calendar), 700); else calendar();
       ui.checkWhatsNew(); // after an update: what changed, once the menu is free
-      DH.blackbox.check(); // the last fight froze? offer to send what it held
+      setTimeout(() => DH.blackbox.check(), 1500); // the last fight froze? offer to send what it held
     });
     DH.events.on('live', () => { if (game.mode !== 'run') ui.refresh(); DH.cloud.submitBoards(); }); // an event started or ended: the home buttons follow
     // daily rollover while the app stays open
