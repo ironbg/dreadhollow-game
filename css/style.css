@@ -2065,3 +2065,8 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 /* a call to the server on its way (ui.act, after a quarter of a second) */
 body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inset-top, 0px) + 8px); left: 50%; width: 22px; height: 22px; margin-left: -11px; border-radius: 50%; border: 3px solid rgba(240,200,96,.25); border-top-color: var(--gold); box-shadow: 0 0 8px rgba(0,0,0,.8); animation: srvspin .7s linear infinite; z-index: 9999; pointer-events: none; }
 @keyframes srvspin { to { transform: rotate(360deg); } }
+/* the sign-in calendar: a day's whole row takes what it has ready; a tab with something to take carries a red dot */
+.si-row.can { cursor: pointer; box-shadow: inset 0 0 0 2px #ffd060, 0 0 10px rgba(255,200,80,.45); }
+.si-row.can:active { filter: brightness(1.15); }
+.modal.signin .si-tabs button { position: relative; }
+.modal.signin .si-tabs button .badge { top: 5px; right: 10px; }

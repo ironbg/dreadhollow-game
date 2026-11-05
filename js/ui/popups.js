@@ -499,13 +499,23 @@
     const WD = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
     const tile = (kind2, track, day) => {
       const st = M.signinState(kind2, track, day), pv = M.rewardPreview(M.signinReward(kind2, track, day))[0];
-      return h('div.si-rw.' + track + '.' + st, { onclick: async () => {
-        if (st === 'locked') { ui.toast(t('signin.needPrem'), 'bad'); return; }
-        if (st !== 'ready') return;
-        const r = await ui.act('claimSignin', { kind: kind2, track, day }); if (!r) { if (r === null) ui.toast(t('login.already'), 'bad'); draw(); return; }
-        DH.audio.play('reward'); ui.rewardPopup(t('signin.title'), r); draw();
-      } }, A.img(pv.icon), h('b' + (ui.isWord(pv.text) ? '.word' : ''), pv.text),
+      return h('div.si-rw.' + track + '.' + st, { onclick: (e) => { if (st === 'locked') { e.stopPropagation(); ui.toast(t('signin.needPrem'), 'bad'); } } }, // a tap anywhere else on the row takes the day
+        A.img(pv.icon), h('b' + (ui.isWord(pv.text) ? '.word' : ''), pv.text),
         st === 'got' ? h('i.si-ok', A.img('u_check', 'ci')) : st === 'locked' ? h('i.si-lock', A.img('u_lock', 'ci')) : null);
+    };
+    // what a day's row has ready: the free reward, the premium one, or both
+    const readyOf = (kind2, day) => ['free', 'prem'].filter((tr) => M.signinState(kind2, tr, day) === 'ready');
+    const kindReady = (kind2) => { const { per } = M.signin(kind2); for (let d = 0; d < per.days; d++) if (readyOf(kind2, d).length) return true; return false; };
+    let busy = false;
+    /** A tap on a day's row: everything ready on it (free and premium) in one go, shown in one window. */
+    const takeDay = async (kind2, day) => {
+      const tracks = readyOf(kind2, day); if (!tracks.length || busy) return;
+      busy = true; const got = [];
+      try {
+        for (const track of tracks) { const r = await ui.act('claimSignin', { kind: kind2, track, day }); if (r) got.push(...r); }
+      } finally { busy = false; }
+      if (!got.length) { ui.toast(t('login.already'), 'bad'); draw(); return; }
+      DH.audio.play('reward'); ui.rewardPopup(t('signin.title'), got); draw();
     };
     const draw = () => {
       if (m.closed) return;
@@ -513,8 +523,8 @@
       const { per, r } = M.signin(tab), prem = M.signinPremium();
       const rows = [];
       for (let d = 0; d < per.days; d++) {
-        const fs = M.signinState(tab, 'free', d), today = d === per.today;
-        rows.push(h('div.si-row' + (today ? '.today' : '') + (fs === 'missed' ? '.missedrow' : ''),
+        const fs = M.signinState(tab, 'free', d), today = d === per.today, can = readyOf(tab, d).length > 0;
+        rows.push(h('div.si-row' + (today ? '.today' : '') + (can ? '.can' : '') + (fs === 'missed' ? '.missedrow' : ''), { onclick: () => takeDay(tab, d) },
           h('div.si-day', h('b', tab === 'week' ? t('signin.wd.' + WD[d]) : String(d + 1)),
             fs === 'got' ? h('span.si-stamp.ok', t('signin.signed')) : fs === 'missed' ? h('span.si-stamp.miss', t('signin.missed')) : today ? h('span.si-stamp.now', t('signin.today')) : null),
           tile(tab, 'free', d), tile(tab, 'prem', d)));
@@ -524,7 +534,7 @@
       upd(); clearInterval(timer); timer = setInterval(upd, 1000);
       const got = r.free.length;
       m.set(h('div',
-        h('div.tabs.si-tabs', ['week', 'month'].map((k) => h('button' + (k === tab ? '.on' : ''), { onclick: () => { if (k === tab) return; DH.audio.play('click'); tab = k; draw(); } }, t('signin.' + k)))),
+        h('div.tabs.si-tabs', ['week', 'month'].map((k) => h('button' + (k === tab ? '.on' : ''), { onclick: () => { if (k === tab) return; DH.audio.play('click'); tab = k; draw(); } }, t('signin.' + k), kindReady(k) ? h('span.badge.dot') : null))), // a red dot: something to take there
         h('div.center.small.muted', t('signin.desc')),
         h('div.si-prog', h('span', t('signin.count', { n: got, m: per.days })), h('div.bar', h('i', { style: { width: (got / per.days * 100) + '%' } }))),
         h('div.si-head', h('span', t('signin.day')), h('span', t('signin.free')), h('span.prem', t('signin.prem'))),

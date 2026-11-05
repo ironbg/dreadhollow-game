@@ -6,10 +6,12 @@
     {
       v: '1.61.60',
       bg: [
+        'Календар за вход: натисни реда на деня, за да вземеш наградите му – безплатната и премиум наведнъж, в един прозорец. Разделите „Седмичен“ и „Месечен“ имат червена точка, когато там чака награда.',
         'Бутонът „Подвизи“ в началния екран показва червена значка с трофеите, готови за взимане, и ги отваря направо. „Пропуск“ и „Календар“ светват, когато има награда.',
         'След битка в Ямата „Продължи“ те връща в прозореца на Ямата, готов за следващото влизане, а не на началния екран.',
       ],
       en: [
+        'Sign-in calendar: tap a day\'s row to take its rewards – the free one and the premium one together, in one window. The "Weekly" and "Monthly" tabs carry a red dot when a reward waits there.',
         'The "Deeds" button on the main screen shows a red badge with the trophies ready to claim and opens them directly. "Pass" and "Calendar" glow when a reward waits.',
         'After a Pit fight, "Continue" takes you back to the Pit\'s window, ready for the next entry, not to the main screen.',
       ],
