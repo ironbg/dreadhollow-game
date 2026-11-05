@@ -41,8 +41,8 @@
       if (!s.purchases.once.starter) left.append(sideBtn('c_gold', t('home.offer'), () => ui.openStarter(), 0, { hot: true, timer: U.fmtDuration(U.msToMidnight()) }));
       left.append(sideBtn('n_skull', t('home.trials'), () => ui.openTrials(), M.pitLeft() > 0 ? M.pitLeft() : 0, { hot: M.pitLeft() > 0 })); // the game modes (the free gems are still in the Shop)
       right.append(sideBtn('u_cog', t('home.settings'), () => ui.openSettings()));
-      right.append(sideBtn('n_pass', t('home.pass'), () => ui.go('quests', 'pass'), b.pass));
-      right.append(sideBtn('n_book', t('home.deeds'), () => ui.go('quests', 'deeds')));
+      right.append(sideBtn('n_pass', t('home.pass'), () => ui.go('quests', 'pass'), b.pass, { hot: b.pass > 0 }));
+      right.append(sideBtn('n_book', t('home.deeds'), () => ui.go('quests', b.ach ? 'ach' : 'deeds'), b.ach, { hot: b.ach > 0 })); // Deeds complete by themselves; the trophies beside them are what waits to be taken
       if (M.boards().length) right.append(sideBtn('n_trophy', t('lb.short'), () => ui.openBoards())); // only while live.json runs a leaderboard
       if (DH.input.desktop && DH.input.fullscreenAvailable()) right.append(sideBtn(DH.input.isFullscreen() ? 'u_unfull' : 'u_full', t('settings.fullscreen'), () => { DH.input.toggleFullscreen(); setTimeout(() => ui.refresh(), 300); }));
       // the two columns stay within one button of each other, so their rows line up side by side

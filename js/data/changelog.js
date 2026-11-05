@@ -6,9 +6,11 @@
     {
       v: '1.61.60',
       bg: [
+        'Бутонът „Подвизи“ в началния екран показва червена значка с трофеите, готови за взимане, и ги отваря направо. „Пропуск“ и „Календар“ светват, когато има награда.',
         'След битка в Ямата „Продължи“ те връща в прозореца на Ямата, готов за следващото влизане, а не на началния екран.',
       ],
       en: [
+        'The "Deeds" button on the main screen shows a red badge with the trophies ready to claim and opens them directly. "Pass" and "Calendar" glow when a reward waits.',
         'After a Pit fight, "Continue" takes you back to the Pit\'s window, ready for the next entry, not to the main screen.',
       ],
     },
