@@ -1402,7 +1402,9 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 /* the quality tile: one full-width band (icon and name, then the three-stop slider), so the tiles stay one short row */
 .set-tile.wide { flex-basis: 100%; flex-direction: row; justify-content: flex-start; gap: 10px; padding: 6px 12px; }
 .set-tile.wide .st-l { white-space: nowrap; }
-.set-tile.wide .fxstep { flex: 1; }
+.set-tile.wide .fxstep { flex: 1; flex-direction: row; align-items: center; gap: 10px; } /* the slider in the band's middle, its step named at its right */
+.set-tile.wide .fxstep input { flex: 1; width: auto; margin: 0; }
+.set-tile.wide .fxname { min-width: 48px; text-align: right; }
 .set-tile img.sti { width: 26px; height: 26px; }
 .set-tile .st-l { font: 800 12px var(--body); color: #f4d07a; text-shadow: 0 1px 0 #000; text-align: center; line-height: 1.1; }
 .set-tile .fxstep { display: flex; flex-direction: column; align-items: center; gap: 1px; width: 100%; }

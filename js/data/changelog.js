@@ -6,6 +6,7 @@
     {
       v: '1.61.60',
       bg: [
+        'Настройки: слайдерът за качество е центриран в полето, а нивото му е вдясно от него.',
         'Металите и билките от битките са наполовина: шампионите и босовете пускат половината материали, а урните – билка два пъти по-рядко. Дневната мисия за материали иска 10 вместо 20.',
         'Сандъците за активност в дневните мисии: готов сандък се взима с едно докосване и излиза само прозорецът с наградите (вместо прозорец със сандъка и после втори с наградите).',
         'Календар за вход: натисни реда на деня, за да вземеш наградите му – безплатната и премиум наведнъж, в един прозорец. Разделите „Седмичен“ и „Месечен“ имат червена значка в ъгъла с броя на чакащите награди.',
@@ -13,6 +14,7 @@
         'След битка в Ямата „Продължи“ те връща в прозореца на Ямата, готов за следващото влизане, а не на началния екран.',
       ],
       en: [
+        'Settings: the quality slider is centred in its band, with its level to its right.',
         'Metals and herbs from fights are halved: champions and bosses drop half the materials, and urns give a herb half as often. The daily materials mission asks for 10 instead of 20.',
         'Daily activity chests: a ready chest is taken with one tap and only the window with its rewards shows (instead of a chest window and then a second one with the rewards).',
         'Sign-in calendar: tap a day\'s row to take its rewards – the free one and the premium one together, in one window. The "Weekly" and "Monthly" tabs carry a red badge in the corner with the rewards waiting.',
