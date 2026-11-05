@@ -6,7 +6,7 @@
     {
       v: '1.61.60',
       bg: [
-        'Лечението в битка е по-силно: храната (супа, морков, сирене) пълни 5% от живота, новият хляб – 10%, а лековитата отвара – 15%. Хлябът пада от урните.',
+        'Лечението в битка е по-силно: храната (супа, морков, сирене) пълни 5% от живота, новият хляб – 8%, а лековитата отвара – 15%. Хлябът пада от урните.',
         'Бъфовете от руните в битка са големи колкото иконите на уменията, подредени в ред под тях. Оставащите секунди са в иконата, а цветна рамка около нея се топи с времето.',
         'Майсторството расте с 20% по-бавно: 0,8 опит на вълна вместо 1. Събраният опит и нивата остават.',
         'Съзвездие, клон Плячка – специалностите са подредени наново: 1) кесия злато от елитите (5 монети вместо 6), 2) Позлатената слуз по-често (около 1,5 пъти, вместо 2), 3) металите по два (20% вместо 30%), 4) +10% Есенция от Ямата (вместо 20%), 5) +1 влизане в Ямата на ден.',
@@ -18,7 +18,7 @@
         'След битка в Ямата „Продължи“ те връща в прозореца на Ямата, готов за следващото влизане, а не на началния екран.',
       ],
       en: [
-        'Healing in a fight is stronger: food (soup, carrot, cheese) restores 5% of your life, the new bread 10%, and a Health Potion 15%. Bread drops from urns.',
+        'Healing in a fight is stronger: food (soup, carrot, cheese) restores 5% of your life, the new bread 8%, and a Health Potion 15%. Bread drops from urns.',
         'Rune buffs in a fight are as big as the ability icons, in a row under them. The seconds left are inside the icon, and a coloured frame round it runs out with the time.',
         'Mastery grows 20% slower: 0.8 experience per wave instead of 1. Experience and levels already earned stay.',
         'Constellation, Plunder branch – its Specialties in a new order: 1) elites drop a purse of gold (5 coins, was 6), 2) the Gilded Ooze more often (about 1.5x, was 2x), 3) metals in pairs (20%, was 30%), 4) +10% Essence from the Pit (was 20%), 5) +1 Pit entry a day.',

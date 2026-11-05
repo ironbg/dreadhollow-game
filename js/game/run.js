@@ -1003,7 +1003,7 @@
       for (const d of C.URN_DROPS) { acc += d.p; if (r < acc) { k = d.k; break; } }
       if (k === 'herb') this.drop('herb', e.x, e.y, 0, this.stage.herb === 'dust' ? U.pick(E.herbs) : this.stage.herb);
       else if (k === 'food') this.drop('food', e.x, e.y, 1, U.pick(['soup', 'carrot', 'cheese']));
-      else if (k === 'bread') this.drop('food', e.x, e.y, 1, 'bread'); // the bigger meal: twice a mouthful
+      else if (k === 'bread') this.drop('food', e.x, e.y, 1, 'bread'); // the bigger meal (C.FOOD_HEAL.bread)
       else if (k === 'coins') this.drop('coin', e.x, e.y, Math.ceil(V.coins * gm), 'stack');
       else if (k === 'coinbag') this.drop('coin', e.x, e.y, Math.ceil(V.coinbag * gm), 'bag');
       else if (k === 'ooze') { const o = this.spawnEnemy('gildedooze', e.x, e.y); if (o) { o.hp = o.maxHp = o.def.hits; o.life = o.def.life; DH.events.emit('run:warning', t('hud.ooze')); } }

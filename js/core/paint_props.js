@@ -102,7 +102,7 @@
     P.line(g, 3.2, 3, 6.8, 3, 0.6, '#c8a878'); P.line(g, 6.6, 3, 7.8, 4.6, 0.4, '#c8a878'); // the cord
     coinFace(g, 5, 6.4, 1.6); P.ell(g, 8.6, 9.4, 1, 0.45, '#e0a020'); P.ell(g, 1.6, 9.6, 0.9, 0.4, '#c89020');
   } });
-  // food: soup, carrot, cheese (a mouthful of health), and bread (a meal: twice as much)
+  // food: soup, carrot, cheese (a mouthful of health), and bread (a bigger meal)
   def('food_soup', { w: 9, h: 8, draw(g) { // a wooden bowl of stew: meat and roots in it, steam rising
     g.beginPath(); g.moveTo(0.6, 3.6); g.quadraticCurveTo(1, 7.6, 4.5, 7.6); g.quadraticCurveTo(8, 7.6, 8.4, 3.6); g.closePath(); P.fill(g, P.lg(g, 0, 3, 9, 8, ['#a8784a', '#6a4424', '#3a2210']));
     g.strokeStyle = 'rgba(40,20,8,.5)'; g.lineWidth = 0.3; g.beginPath(); g.moveTo(1.4, 5.4); g.quadraticCurveTo(4.5, 6.2, 7.6, 5.4); g.stroke();

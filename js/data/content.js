@@ -598,7 +598,7 @@
     { k: 'coinbag', p: 0.014 }, { k: 'ooze', p: 0.01 }, { k: 'rune_fury', p: 0.02 }, { k: 'rune_haste', p: 0.02 }, { k: 'rune_wraith', p: 0.01 }];
   C.MAT_DROP = 0.5; // forging materials from champions and bosses: half the pieces they used to drop (there were too many)
   C.COIN_VALUE = { coin: 2, coins: 10, coinbag: 50 }; // x the hall's gold multiplier
-  C.FOOD_HEAL = { soup: 0.05, carrot: 0.05, cheese: 0.05, bread: 0.10 }; // of max HP: a mouthful 5%, a loaf of bread 10%
+  C.FOOD_HEAL = { soup: 0.05, carrot: 0.05, cheese: 0.05, bread: 0.08 }; // of max HP: a mouthful 5%, a loaf of bread 8%
   C.POTION_HEAL = 0.15;                             // a Health Potion: 15% of max HP
   C.BUFFS = { fury: { dur: 15, color: '#ff3a30' }, haste: { dur: 15, color: '#ffd040' }, wraith: { dur: 10, color: '#80e8ff' } };
   /* Lord's Hex: a hidden obelisk in every hall. Touching it weakens that hall's Lord. */
