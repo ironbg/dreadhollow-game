@@ -538,28 +538,22 @@
     scrollTo() { },
   };
   /** An activity chest: what it holds, and claim it once the day's points reach it. */
-  function openActivity(i) {
-    const c = E.ACTIVITY_CHESTS[i], ready = M.activityReady(i), got = M.activityOpened(i);
-    // a chest that is ready opens however the window is left: the button, the X or a tap outside it. Opened with the
-    // button, what it gave shows in this same window (no second window that looks like the chest opening again)
-    let taken = !ready || got;
-    const title = t('quests.chest', { n: c.at });
-    const claim = async (ev) => {
-      if (taken) return; taken = true;
-      const btn = ev && ev.currentTarget; if (btn) { btn.disabled = true; btn.classList.add('off'); btn.textContent = '…'; }
-      const r = await ui.act('claimActivity', { i });
+  /** An activity chest. Ready: a tap takes it at once and only its rewards show (one window). Not ready yet, or already
+   *  taken: a window with what it holds. */
+  let activityBusy = false;
+  async function openActivity(i) {
+    const c = E.ACTIVITY_CHESTS[i], ready = M.activityReady(i), got = M.activityOpened(i), title = t('quests.chest', { n: c.at });
+    if (ready) {
+      if (activityBusy) return; activityBusy = true;
+      let r; try { r = await ui.act('claimActivity', { i }); } finally { activityBusy = false; }
       ui.refresh();
-      if (!r) { m.close(); return; }
-      if (m.closed) { ui.rewardPopup(title, r); return; } // left with the X or a tap outside: the rewards in their own window
-      DH.audio.play('reward');
-      m.set(h('div', h('div.center', A.img(c.icon, 'bigicon')), ui.rewardList(r),
-        h('div.btns', h('button.btn.gold', { onclick: () => { DH.audio.play('click'); m.close(); } }, t('common.collect')))));
-    };
-    const m = ui.modal({ title, rays: ready, onClose: () => { claim(); }, body: () => h('div',
+      if (r) ui.rewardPopup(title, r);
+      return;
+    }
+    ui.modal({ title, body: (m) => h('div',
       h('div.center', A.img(c.icon, 'bigicon')),
-      h('div.reward-list', { style: { marginTop: '8px' } }, M.rewardPreview(c.reward).map((e) => h('div.reward', h('div.slot' + (e.rarity != null ? '.rar' + e.rarity : ''), A.img(e.icon)), h('div.n' + (ui.isWord(e.text) ? '.word' : ''), e.text)))),
+      ui.rewardList(M.rewardPreview(c.reward)),
       h('div.btns', got ? h('button.btn.ghost.off', A.img('u_check', 'ci'), t('nb.claimed'))
-        : ready ? h('button.btn.red.shine', { onclick: claim }, t('common.claim'))
         : h('button.btn.ghost.off', t('quests.needPts', { n: c.at - M.activityPts() })))) });
   }
   function missionIcon(id) {

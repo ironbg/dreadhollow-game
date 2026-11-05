@@ -6,11 +6,13 @@
     {
       v: '1.61.60',
       bg: [
+        'Сандъците за активност в дневните мисии: готов сандък се взима с едно докосване и излиза само прозорецът с наградите (вместо прозорец със сандъка и после втори с наградите).',
         'Календар за вход: натисни реда на деня, за да вземеш наградите му – безплатната и премиум наведнъж, в един прозорец. Разделите „Седмичен“ и „Месечен“ имат червена значка в ъгъла с броя на чакащите награди.',
         'Бутонът „Подвизи“ в началния екран показва червена значка с трофеите, готови за взимане, и ги отваря направо. „Пропуск“ и „Календар“ светват, когато има награда.',
         'След битка в Ямата „Продължи“ те връща в прозореца на Ямата, готов за следващото влизане, а не на началния екран.',
       ],
       en: [
+        'Daily activity chests: a ready chest is taken with one tap and only the window with its rewards shows (instead of a chest window and then a second one with the rewards).',
         'Sign-in calendar: tap a day\'s row to take its rewards – the free one and the premium one together, in one window. The "Weekly" and "Monthly" tabs carry a red badge in the corner with the rewards waiting.',
         'The "Deeds" button on the main screen shows a red badge with the trophies ready to claim and opens them directly. "Pass" and "Calendar" glow when a reward waits.',
         'After a Pit fight, "Continue" takes you back to the Pit\'s window, ready for the next entry, not to the main screen.',
