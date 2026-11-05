@@ -2077,3 +2077,5 @@ body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inse
 #hud .buffs .bf .bfi img { width: 20px; height: 20px; margin-top: -5px; filter: brightness(1.35) saturate(1.2); }
 #hud .buffs .bf .bfi b { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; font: 9px/1 var(--num); color: #fff; text-shadow: 0 0 2px #000, 0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 -1px 0 #000; }
 #hud .buffs .bf.fury { --bfc: #ff3a30; } #hud .buffs .bf.haste { --bfc: #ffd040; } #hud .buffs .bf.wraith { --bfc: #80e8ff; }
+.modal.startbonus .sb-no { margin-top: 8px; }
+.sb-art img { image-rendering: auto; }

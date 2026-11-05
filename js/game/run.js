@@ -987,7 +987,8 @@
      *  laid at the hero's feet so it opens as any found one does. */
     takeStartBonus(kind) {
       if (this.startBonus) return; this.startBonus = kind;
-      const p = this.player; this.drop(kind === 'chest' ? 'chest_wood' : 'tome', p.x, p.y); // the chest is the plainest one: common pieces
+      const p = this.player, k = this.drop(kind === 'chest' ? 'chest_wood' : 'tome', p.x, p.y); // the chest is the plainest one: common pieces
+      if (this.pit && !this.pickups.includes(k)) this.pickups.push(k); // the Pit lets this one chest in (its relic serves this fight)
     }
     /** Forging materials: n pieces, each the hall's metal (or one finer or coarser). */
     matDrop(x, y, n) {

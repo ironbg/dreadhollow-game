@@ -450,20 +450,21 @@
   /* ---------------- The adventurer's reward: a chest or an ability, for an ad, as the fight begins ---------------- */
   ui.openStartBonus = (run, then) => { // then: what follows instead of the fight resuming (the Pit's countdown)
     DH.input.enable(false);
-    let pick = run.pit ? 'ability' : 'chest', busy = false; // in the Pit: a tome only (it has no loot)
+    let pick = 'chest', busy = false; // the Pit offers the chest too (its relic serves that fight)
     const done = (m) => { m.close(); if (then) { then(); return; } DH.input.enable(true); run.resume(); };
     const card = (kind, icon) => h('div.sb-card' + (pick === kind ? '.on' : ''), { onclick: () => { click(); pick = kind; draw(); } },
-      h('div.sb-art', h('i.sb-ray'), A.img(icon)), h('div.sb-t', t('startBonus.' + kind)));
+      h('div.sb-art', h('i.sb-ray'), h('img', { src: DH.icons.hi(icon, 144), alt: '' })), h('div.sb-t', t('startBonus.' + kind))); // painted large: sharp, not a 32 px icon blown up
     let m = null;
     const draw = () => m && m.set(h('div',
-      h('div.sb-row', run.pit ? null : card('chest', 'c_wood'), card('ability', 'tome')),
+      h('div.sb-row', card('chest', 'c_wood'), card('ability', 'tome')),
       h('div.center.small.muted', { style: { margin: '8px 0' } }, t('startBonus.sub')),
-      h('button.btn.red.block.shine', { onclick: async () => {
+      h('button.btn.green.block.shine', { onclick: async () => {
         if (busy) return; busy = true; click();
         const ok = await DH.ads.rewarded('start_bonus'); busy = false;
         if (!ok || DH.game.run !== run) return;
         run.takeStartBonus(pick); DH.audio.play('reward'); done(m);
-      } }, DH.meta.noAds() ? null : h('span.adtag', 'AD'), t('startBonus.claim'))));
+      } }, DH.meta.noAds() ? null : h('span.adtag', 'AD'), t('startBonus.claim')),
+      h('button.btn.red.block.sb-no', { onclick: () => { click(); done(m); } }, t('startBonus.decline')))); // no, thanks: the fight begins
     m = ui.modal({ title: t('startBonus.title'), rays: true, cls: 'levelup startbonus', onX: () => { click(); done(m); }, body: () => h('div') });
     draw();
   };

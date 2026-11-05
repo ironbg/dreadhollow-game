@@ -6,6 +6,7 @@
     {
       v: '1.61.60',
       bg: [
+        'Наградата на приключенеца: иконите са ясни (вече не са размазани), „Вземи“ е зелен, а под него има червен „Откажи“. В Ямата също може да избереш дървен сандък (предметът от него е само за тази битка). Предложението идва във всяка битка след първата; ако тогава е отворен друг прозорец (ниво, сандък), изчаква да се затвори.',
         'Поправено: след избор на предмет от сандък (на боса, шампиона или дървен) битката понякога оставаше спряна и екранът изглеждаше замръзнал. Грешката идваше от 1.61.58.',
         'Защита срещу замръзване на битката: всички цикли, които при рядко стечение могат да не спрат (поява на врагове и глутници, опит, плячка, мълнии, призовани, частици), имат граница. Ако битка все пак спре да отговаря, при следващото пускане играта предлага да изпрати кратък отчет на разработчика.',
         'Всички бутони за информация („i“) изглеждат еднакво – като този в Ямата: квадрат с ръкописно златно „i“ (Олтарът, героите, реликвите, Майсторството).',
@@ -23,6 +24,7 @@
         'След битка в Ямата „Продължи“ те връща в прозореца на Ямата, готов за следващото влизане, а не на началния екран.',
       ],
       en: [
+        'The adventurer\'s reward: sharp icons (no longer blurry), a green Claim and a red No, thanks below it. In the Pit you may take the wooden chest too (its piece serves that fight only). It is offered in every fight after the first; if another window (a level, a chest) is open then, it waits for it to close.',
         'Fixed: after taking an item from a chest (a boss\'s, a champion\'s or a wooden one) the fight could stay stopped and the screen looked frozen. The bug came with 1.61.58.',
         'Guards against a frozen fight: every loop that could fail to end in a rare case (foes and packs arriving, experience, loot, lightning, summons, particles) has a limit. If a fight still stops responding, the game offers to send the developer a short report at the next start.',
         'Every info button ("i") looks the same – like the Pit\'s: a square with a handwritten gold "i" (the Altar, heroes, relics, Mastery).',

@@ -29,7 +29,12 @@
       DH.audio.music('battle'); DH.audio.ambience(s.selectedStage);
       setTimeout(() => ui.hud.banner(t('stage.' + s.selectedStage + '.name'), t('hud.survive', { t: DH.util.fmtTime(C.RUN_LENGTH) }), true), 300);
       const run = this.run; // the adventurer's reward: offered as the fight begins (not in the first, taught fight)
-      if (s.tutorialDone && s.stats.runs > 0) setTimeout(() => { if (this.run === run && run.state === 'playing' && run.time < 5) { run.queue.unshift({ state: 'startbonus', ev: 'run:startbonus' }); run.pump(); } }, 2000);
+      const offer = () => { // every fight; if another window (a level, a chest) is open then, it waits for it to close
+        if (this.run !== run || run.startBonus || run.finished || run.state === 'over' || run.time > 12) return;
+        if (run.state !== 'playing') { setTimeout(offer, 400); return; }
+        run.queue.unshift({ state: 'startbonus', ev: 'run:startbonus' }); run.pump();
+      };
+      if (s.tutorialDone && s.stats.runs > 0) setTimeout(offer, 2000);
     },
     /** The Pit (Trials): an entry paid where the profile lives, two hazards rolled there, then three minutes of waves. */
     async startPit() {
