@@ -582,7 +582,6 @@ img.ic { image-rendering: auto; }
 #hud .buffs .bf { display: flex; align-items: center; gap: 2px; background: rgba(0,0,0,.65); border: 1px solid #3a2c40; border-radius: 6px; padding: 2px 4px 2px 2px; }
 #hud .buffs .bf img { width: 18px; height: 18px; }
 #hud .buffs .bf b { font: 8px/1 var(--num); color: #fff; }
-#hud .buffs .bf.fury { border-color: #ff3a30; } #hud .buffs .bf.haste { border-color: #ffd040; } #hud .buffs .bf.wraith { border-color: #80e8ff; }
 .mainq { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 7px 10px; font-size: 12px; cursor: pointer; }
 .mainq .mqt { color: var(--gold); font-weight: 800; white-space: nowrap; }
 .mainq .mqd { color: #e8dcc8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -2071,10 +2070,11 @@ body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inse
 .si-row.can { cursor: pointer; box-shadow: inset 0 0 0 2px #ffd060, 0 0 10px rgba(255,200,80,.45); }
 .si-row.can:active { filter: brightness(1.15); }
 .modal.signin .si-tabs button { position: relative; }
-/* the runes' buffs: as big as the ability icons, in a row under them; the seconds inside, a frame that runs out with them */
-#hud .buffs { top: calc(118px + var(--safe-t)); gap: 6px; }
-#hud .buffs .bf { position: relative; width: 36px; height: 36px; padding: 2px; border: 0; border-radius: 0; box-shadow: none; background: conic-gradient(var(--bfc, #e8c870) var(--p, 360deg), rgba(0,0,0,.55) 0); }
-#hud .buffs .bf .bfi { position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: #120c16; border: 2px solid #050308; box-shadow: inset 0 0 0 1px var(--ring); }
-#hud .buffs .bf .bfi img { width: 26px; height: 26px; margin-top: -6px; filter: brightness(1.35) saturate(1.2); }
-#hud .buffs .bf .bfi b { position: absolute; left: 0; right: 0; bottom: 1px; display: flex; justify-content: center; font: 10px/1 var(--num); color: #fff; text-shadow: 0 0 2px #000, 0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 -1px 0 #000; }
+/* the runes' buffs: exactly the ability icons' box (32 x 32, 4 apart); the frame that runs out with the time takes the place
+   of their thin gold ring, inside the same black 2 px border, so both rows show the same size; the seconds inside */
+#hud .buffs { top: calc(118px + var(--safe-t)); gap: 4px; }
+#hud .buffs .bf { position: relative; box-sizing: border-box; width: 32px; height: 32px; padding: 2px; border: 2px solid #050308; border-radius: 0; box-shadow: none; background: conic-gradient(var(--bfc, #e8c870) var(--p, 360deg), rgba(0,0,0,.6) 0); }
+#hud .buffs .bf .bfi { position: relative; box-sizing: border-box; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: #120c16; border: 0; }
+#hud .buffs .bf .bfi img { width: 20px; height: 20px; margin-top: -5px; filter: brightness(1.35) saturate(1.2); }
+#hud .buffs .bf .bfi b { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; font: 9px/1 var(--num); color: #fff; text-shadow: 0 0 2px #000, 0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 -1px 0 #000; }
 #hud .buffs .bf.fury { --bfc: #ff3a30; } #hud .buffs .bf.haste { --bfc: #ffd040; } #hud .buffs .bf.wraith { --bfc: #80e8ff; }
