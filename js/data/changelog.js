@@ -11,7 +11,7 @@
         'След битка в Ямата „Продължи“ те връща в прозореца на Ямата, готов за следващото влизане, а не на началния екран.',
       ],
       en: [
-        'Sign-in calendar: tap a day\'s row to take its rewards – the free one and the premium one together, in one window. The "Weekly" and "Monthly" tabs carry a red dot when a reward waits there.',
+        'Sign-in calendar: tap a day\'s row to take its rewards – the free one and the premium one together, in one window. The "Weekly" and "Monthly" tabs carry a red badge in the corner with the rewards waiting.',
         'The "Deeds" button on the main screen shows a red badge with the trophies ready to claim and opens them directly. "Pass" and "Calendar" glow when a reward waits.',
         'After a Pit fight, "Continue" takes you back to the Pit\'s window, ready for the next entry, not to the main screen.',
       ],
