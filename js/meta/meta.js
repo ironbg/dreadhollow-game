@@ -197,10 +197,10 @@
   };
   /** Every point back (free), except Extra Entry, which stays. */
   meta.pitPerkReset = () => { const p = pitS(), keep = (p.perks || {}).entry; p.perks = keep ? { entry: keep } : {}; changed(); return true; };
-  meta.pitEntries = () => E.PIT.entries + (pitS().pass ? 1 : 0) + (meta.passPremium() ? E.PASS_PIT_ENTRY : 0) + meta.pitPerkVal('entry') + (meta.consSpecials().plunder >= 3 ? 1 : 0); // the third Plunder Specialty: one more a day
+  meta.pitEntries = () => E.PIT.entries + (pitS().pass ? 1 : 0) + (meta.passPremium() ? E.PASS_PIT_ENTRY : 0) + meta.pitPerkVal('entry') + (meta.consSpecials().plunder >= 5 ? 1 : 0); // the fifth Plunder Specialty: one more a day
   meta.pitLeft = () => Math.max(0, meta.pitEntries() - pitS().used);
   meta.pitCheckpoint = () => Math.floor(pitS().best / E.PIT.every) * E.PIT.every;
-  meta.pitPerWave = () => Math.round(E.PIT.perWave * (pitS().pass ? 1.5 : 1) * (1 + (meta.consStats().essencePct || 0) + (meta.consSpecials().plunder >= 1 ? 0.2 : 0) + meta.pitPerkVal('essence')) * 100) / 100; // to the hundredth: the sums are rounded, not each wave
+  meta.pitPerWave = () => Math.round(E.PIT.perWave * (pitS().pass ? 1.5 : 1) * (1 + (meta.consStats().essencePct || 0) + (meta.consSpecials().plunder >= 4 ? E.CONST.plunderEssence : 0) + meta.pitPerkVal('essence')) * 100) / 100; // to the hundredth: the sums are rounded, not each wave
   meta.essence = () => S().essence || 0;
   const addEssence = (n) => { const s = S(); s.essence = (s.essence || 0) + n; s.stats.essence = (s.stats.essence || 0) + n; };
   /** Enter: one of today's entries, two hazards rolled, the checkpoint paid at once. { from, affixes, paid } */

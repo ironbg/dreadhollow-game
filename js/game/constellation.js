@@ -10,8 +10,8 @@
  *            3 and have +20 Defense (run.js hurtPlayer)
  *            4 the pulse heals 4% of your health
  *            5 +2% pulse damage per point of Defense
- *   Plunder  1 +20% Essence in the Pit, 3 one more Pit entry a day (meta.js); 2 elites drop a purse (run.js),
- *            4 metals now and then come in twos (run.js), 5 the Gilded Ooze twice as often (run.js) */
+ *   Plunder  1 elites drop a purse, 2 the Gilded Ooze more often, 3 metals now and then come in twos (run.js);
+ *            4 +10% Essence in the Pit, 5 one more Pit entry a day (meta.js) */
 (function (DH) {
   'use strict';
   const U = DH.util, C = DH.content;
@@ -21,7 +21,7 @@
     star: { every: 15, fast: 8, mult: 10, reach: 220, R: 42, splash: 0.35, exec: 1, stacks: 3 },
     pulse: { every: 10, mult: 3, R: 72, heal: 0.04, perDef: 0.02 },
     ward: { secs: 4, cut: 0.15, def: 0.2 },
-    pouch: { n: 6, v: 4 }, metal: 0.3,
+    pouch: { n: 5, v: 4 }, metal: 0.2, ooze: 0.65, // Plunder: an elite's purse (1st), the Ooze sooner (2nd), metals in pairs (3rd)
   };
   /** The weapon's base damage, with the hero's damage bonus: what the Specialties scale with. */
   R.consBase = function () { const w = this.abilities[0]; return w && w.s ? (w.s.dmg + this.P.addBase) * (1 + this.P.dmgPct) : 10; };

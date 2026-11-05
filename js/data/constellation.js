@@ -160,5 +160,6 @@
     spentIn: (p) => { const k = Math.min(p, 250); return 50 * k * (k + 1) + Math.max(0, p - 250) * 25000; },
     /** Specialties: the points a branch needs for each of its five. */
     specials: { fury: [30, 60, 90, 150, 200], bastion: [25, 50, 75, 100, 140], plunder: [15, 30, 50, 75, 95] },
+    plunderEssence: 0.1, // the fourth Plunder Specialty: +10% Essence from the Pit
   };
 })(window.DH);
