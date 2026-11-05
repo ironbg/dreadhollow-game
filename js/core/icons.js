@@ -2152,6 +2152,25 @@
       sil(g, [9, 24, 23, 24, 24.4, 28.4, 7.6, 28.4], P.lg(g, 0, 24, 0, 28.4, ['#6a4a2a', '#2a1a0a']), 1.2);
     },
     n_skull(g) { skull2(g, 16, 16.6, 1.05, null); },
+    n_trials(g) { // the game's own sign: a stone lancet arch round a red stained-glass window, a rose in it, a skull with burning eyes, two spires with crosses
+      const stone = (x0, y0, x1, y1) => P.lg(g, x0, y0, x1, y1, ['#b4aeb8', '#7c7684', '#45404c']);
+      for (const x of [5.6, 26.4]) { // the spires
+        inkLine(g, x, 1.6, x, 4.6, 0.8, '#a8a2ac'); inkLine(g, x - 1.2, 2.6, x + 1.2, 2.6, 0.8, '#a8a2ac'); // a cross
+        sil(g, [x - 2.4, 11, x, 4.6, x + 2.4, 11], stone(x - 2, 5, x + 2, 11), 1);
+        inkPath(g, () => { g.beginPath(); g.rect(x - 2.4, 11, 4.8, 17); }, stone(x - 2.4, 11, x + 2.4, 28), 1);
+        P.rect(g, x - 0.9, 14.6, 1.8, 4, '#c8202a'); P.rect(g, x - 0.9, 14.6, 1.8, 1.2, '#ff6050');
+      }
+      // the arch: stone, then the red window inside it
+      inkPath(g, () => { g.beginPath(); g.moveTo(8.6, 28); g.lineTo(8.6, 13); g.quadraticCurveTo(8.8, 5.4, 16, 2.4); g.quadraticCurveTo(23.2, 5.4, 23.4, 13); g.lineTo(23.4, 28); g.closePath(); }, stone(9, 3, 23, 28), 1.2);
+      inkPath(g, () => { g.beginPath(); g.moveTo(11, 28); g.lineTo(11, 13.6); g.quadraticCurveTo(11.2, 7.8, 16, 5.6); g.quadraticCurveTo(20.8, 7.8, 21, 13.6); g.lineTo(21, 28); g.closePath(); }, P.lg(g, 11, 6, 21, 28, ['#ff4a40', '#c8141e', '#6a060c']), 0.9);
+      P.glow(g, 16, 18, 7, '#ff3020', 0.35);
+      // the rose window: a dark ring with four lobes
+      inkCircle(g, 16, 10.6, 2.6, '#2a0608'); for (const [dx, dy] of [[0, -1.1], [1.1, 0], [0, 1.1], [-1.1, 0]]) P.circle(g, 16 + dx, 10.6 + dy, 0.9, '#ff5a48');
+      skull2(g, 16, 19.6, 0.5, '#ff3040'); // the skull, its eyes burning
+      // the plinth with its little arches
+      inkPath(g, () => { g.beginPath(); g.rect(3, 27, 26, 3); }, stone(3, 27, 29, 30), 1);
+      for (const x of [6, 11, 16, 21, 26]) P.ell(g, x, 29.2, 1.1, 1, '#1a141e');
+    },
     n_book(g) { tome(g, '#3a4a8a', () => { P.glow(g, 16, 16, 6, '#80c0ff', 0.6); inkPath(g, () => { g.beginPath(); g.moveTo(10.4, 16); g.quadraticCurveTo(16, 10.6, 21.6, 16); g.quadraticCurveTo(16, 21.4, 10.4, 16); }, '#e8f0ff', 0.8); inkCircle(g, 16, 16, 2.2, P.rg(g, 15.4, 15.4, 3, ['#c0e8ff', '#3a8ad0'])); P.circle(g, 16, 16, 0.9, INK); }); },
     t_wisdom(g) { MISC.n_book(g); },
     t_haste(g) { TRA.quickhands[1](g); },
@@ -2301,6 +2320,7 @@
     else if (name === 'n_pass') GL.banner(g);
     else if (name === 'n_ad') GL.tv(g);
     else if (name === 'n_skull') GL.skull(g);
+    else if (name === 'n_trials') GL.skull(g);
     else if (name === 'n_book') GL.book(g);
     else if (name === 't_wisdom') GL.book(g);
     else if (name === 't_haste') GL.hourglass(g);
