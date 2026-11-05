@@ -1003,6 +1003,7 @@
       for (const d of C.URN_DROPS) { acc += d.p; if (r < acc) { k = d.k; break; } }
       if (k === 'herb') this.drop('herb', e.x, e.y, 0, this.stage.herb === 'dust' ? U.pick(E.herbs) : this.stage.herb);
       else if (k === 'food') this.drop('food', e.x, e.y, 1, U.pick(['soup', 'carrot', 'cheese']));
+      else if (k === 'bread') this.drop('food', e.x, e.y, 1, 'bread'); // the bigger meal: twice a mouthful
       else if (k === 'coins') this.drop('coin', e.x, e.y, Math.ceil(V.coins * gm), 'stack');
       else if (k === 'coinbag') this.drop('coin', e.x, e.y, Math.ceil(V.coinbag * gm), 'bag');
       else if (k === 'ooze') { const o = this.spawnEnemy('gildedooze', e.x, e.y); if (o) { o.hp = o.maxHp = o.def.hits; o.life = o.def.life; DH.events.emit('run:warning', t('hud.ooze')); } }
@@ -1030,7 +1031,7 @@
     collect(k) {
       switch (k.type) {
         case 'xp': DH.audio.play('xp'); this.gainXp(k.val, k.xm); break;
-        case 'food': DH.audio.play('eat'); this.heal(C.FOOD_HEAL); break;
+        case 'food': DH.audio.play('eat'); this.heal(this.P.maxHp * (C.FOOD_HEAL[k.sub] || C.FOOD_HEAL.soup)); break; // a share of max HP
         case 'coin': DH.audio.play('coin'); this.gold += k.val * this.P.greed; if (this.fx_.scarab) this.player.hp = Math.max(1, this.player.hp - k.val); break;
         case 'artifact':
           if (!this.artifactsFound.includes(k.sub)) this.artifactsFound.push(k.sub);
@@ -1039,7 +1040,7 @@
         case 'ulcer': { const p = this.player; DH.audio.play('hurt'); this.gainXp(this.xpNext * 0.3); p.hp = Math.max(1, p.hp - this.P.maxHp * 0.12); this.text(p.x, p.y - 14, t('hud.ulcer'), '#b060ff'); break; }
         case 'mat': DH.audio.play('coin'); this.mats[k.sub] = Math.min(E.MAT_RUN_MAX, (this.mats[k.sub] || 0) + 1 + (this.cs.plunder >= 3 && Math.random() < C.CONS_FX.metal ? 1 : 0)); // Plunder: now and then a second piece this.text(this.player.x, this.player.y - 14, '+1 ' + t('mat.' + k.sub), E.MAT_COLOR[k.sub]); break;
         case 'herb': DH.audio.play('herb'); this.herbs[k.sub] = (this.herbs[k.sub] || 0) + 1; this.text(this.player.x, this.player.y - 14, '+1 ' + t('herb.' + k.sub), '#b0ff80'); break;
-        case 'potion': DH.audio.play('heal'); this.itemsOnPotion(); if (this.hero.potionBrew) { this.brews = (this.brews || 0) + 1; this.recompute(); this.text(this.player.x, this.player.y - 18, t('hud.brew'), '#b0ff80', true); } this.heal(C.POTION_HEAL[0] + this.P.maxHp * C.POTION_HEAL[1]); break; // 25 + 5% of max HP; the Alchemist's brews grow stronger
+        case 'potion': DH.audio.play('heal'); this.itemsOnPotion(); if (this.hero.potionBrew) { this.brews = (this.brews || 0) + 1; this.recompute(); this.text(this.player.x, this.player.y - 18, t('hud.brew'), '#b0ff80', true); } this.heal(this.P.maxHp * C.POTION_HEAL); break; // 25 + 5% of max HP; the Alchemist's brews grow stronger
         case 'bucket': DH.audio.play('reward'); if (this.well && this.well.used) this.well.used = false; else this.buckets++; this.text(this.player.x, this.player.y - 14, t('hud.bucket'), '#5ab8ff', true); break;
         case 'rune_fury': case 'rune_haste': case 'rune_wraith': this.buff(k.type.slice(5)); break;
         case 'shard': DH.audio.play('reward'); this.shards++; this.text(this.player.x, this.player.y - 16, t('hud.shard'), '#ff70c0', true); break;

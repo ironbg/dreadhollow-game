@@ -102,7 +102,7 @@
     P.line(g, 3.2, 3, 6.8, 3, 0.6, '#c8a878'); P.line(g, 6.6, 3, 7.8, 4.6, 0.4, '#c8a878'); // the cord
     coinFace(g, 5, 6.4, 1.6); P.ell(g, 8.6, 9.4, 1, 0.45, '#e0a020'); P.ell(g, 1.6, 9.6, 0.9, 0.4, '#c89020');
   } });
-  // food: soup, carrot, cheese (a mouthful of health)
+  // food: soup, carrot, cheese (a mouthful of health), and bread (a meal: twice as much)
   def('food_soup', { w: 9, h: 8, draw(g) { // a wooden bowl of stew: meat and roots in it, steam rising
     g.beginPath(); g.moveTo(0.6, 3.6); g.quadraticCurveTo(1, 7.6, 4.5, 7.6); g.quadraticCurveTo(8, 7.6, 8.4, 3.6); g.closePath(); P.fill(g, P.lg(g, 0, 3, 9, 8, ['#a8784a', '#6a4424', '#3a2210']));
     g.strokeStyle = 'rgba(40,20,8,.5)'; g.lineWidth = 0.3; g.beginPath(); g.moveTo(1.4, 5.4); g.quadraticCurveTo(4.5, 6.2, 7.6, 5.4); g.stroke();
@@ -119,6 +119,17 @@
     P.path(g, [0.8, 5, 8.2, 3.2, 6, 1.8]); P.fill(g, P.lg(g, 1, 2, 8, 5, ['#fff4b0', '#f0d060']));
     P.path(g, [8.2, 3.2, 8.2, 6.8, 8.9, 6.4, 8.9, 3.1]); P.fill(g, '#a01818'); // the waxed rind
     for (const [x, y, r] of [[3, 5.8, 0.6], [6, 5.3, 0.8], [7.2, 6.3, 0.4], [4.6, 3.6, 0.4]]) { P.circle(g, x, y, r, '#b88018'); P.circle(g, x + r * 0.2, y + r * 0.2, r * 0.6, '#9a6810'); }
+  } });
+  def('food_bread', { w: 11, h: 8, draw(g) { // a round loaf: a deep golden crust, three scored cuts, a dusting of flour
+    g.beginPath(); g.moveTo(0.6, 6.6); g.quadraticCurveTo(0.4, 1.4, 5.5, 1); g.quadraticCurveTo(10.6, 1.4, 10.4, 6.6); g.closePath();
+    P.fill(g, P.lg(g, 2, 1, 8, 7, ['#f0b860', '#c87a2a', '#7a4214']));
+    g.beginPath(); g.moveTo(0.6, 6.6); g.quadraticCurveTo(5.5, 7.6, 10.4, 6.6); g.lineTo(10.2, 5.6); g.quadraticCurveTo(5.5, 6.6, 0.8, 5.6); g.closePath(); P.fill(g, '#6a3810'); // the dark bottom crust
+    for (const [x, y] of [[3.2, 3.6], [5.4, 3], [7.6, 3.6]]) { // the scored cuts, pale bread showing in them
+      g.beginPath(); g.moveTo(x - 1.1, y + 1.2); g.quadraticCurveTo(x, y - 0.6, x + 1.1, y - 0.4); g.lineWidth = 0.9; g.strokeStyle = '#fff0c8'; g.stroke();
+      g.lineWidth = 0.3; g.strokeStyle = '#8a4a18'; g.beginPath(); g.moveTo(x - 1.1, y + 1.5); g.quadraticCurveTo(x, y - 0.3, x + 1.1, y - 0.1); g.stroke();
+    }
+    P.ell(g, 3.8, 2.2, 1.6, 0.6, 'rgba(255,240,210,0.45)'); // the light on its top
+    for (const [x, y] of [[2.2, 4.6], [4.4, 1.9], [8.6, 4.4], [6.6, 2], [9.2, 3]]) P.circle(g, x, y, 0.25, 'rgba(255,250,235,0.85)'); // flour
   } });
   def('tome', { w: 12, h: 11, draw(g) { // a leather tome: iron corners, a clasp, a sigil burning on its cover
     P.glow(g, 6, 5.8, 5, '#6a8aff', 0.35);
