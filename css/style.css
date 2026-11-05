@@ -1592,7 +1592,8 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .pass-headrow { margin: 10px 0 4px; }
 .pass-list .pass-row { margin-bottom: 0; padding: 3px 0; }
 .pass-list .pass-row .tier { position: relative; width: 44px; height: 100%; min-height: 58px; border: 0; border-radius: 0; background: none; box-shadow: none; }
-.pass-list .pass-row .tier .trk { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 6px; margin-left: -3px; background: #120c16; border: 1px solid #050308; }
+.pass-list .pass-row .tier .trk { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 6px; margin-left: -3px; background: #120c16; border: 1px solid #050308; border-top: 0; border-bottom: 0; } /* no edge at its ends: one unbroken track down the rows */
+.pass-list .pass-row .tier { align-self: stretch; height: auto; } /* as tall as its row, however tall the rewards make it */
 .pass-list .pass-row .tier .trk i { display: block; width: 100%; background: linear-gradient(90deg, #ffe08a, #d09030); box-shadow: 0 0 6px rgba(255,200,90,.6); }
 .pass-list .pass-row .tier b { position: relative; z-index: 1; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #1c1420; border: 2px solid var(--line); font: 9px var(--num); color: var(--muted); }
 .pass-list .pass-row.reached .tier b { border-color: var(--gold); color: #1a1008; background: radial-gradient(circle at 40% 35%, #ffe8a0, #d09030); box-shadow: 0 0 8px rgba(240,200,96,.55); }

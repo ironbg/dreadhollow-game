@@ -307,7 +307,8 @@
     const changedScreen = ui.screen !== screen;
     ui.screen = screen;
     ui.refresh(changedScreen);
-    if (sub && ui.screens[screen] && ui.screens[screen].scrollTo) ui.screens[screen].scrollTo(sub);
+    const to = sub || (changedScreen && ui.sub[screen]); // a screen opened again on its last tab scrolls there too (the Pass: to its level)
+    if (to && ui.screens[screen] && ui.screens[screen].scrollTo) ui.screens[screen].scrollTo(to);
   };
 
   ui.refreshN = 0;

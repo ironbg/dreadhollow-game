@@ -6,6 +6,7 @@
     {
       v: '1.61.60',
       bg: [
+        'Боен пропуск: отваря се превъртян до сегашното ти ниво, а линията между нивата в средата е непрекъсната.',
         'Лечението в битка е по-силно: храната (супа, морков, сирене) пълни 5% от живота, новият хляб – 8%, а лековитата отвара – 15%. Хлябът пада от урните.',
         'Бъфовете от руните в битка са големи колкото иконите на уменията, подредени в ред под тях. Оставащите секунди са в иконата, а цветна рамка около нея се топи с времето.',
         'Майсторството расте с 20% по-бавно: 0,8 опит на вълна вместо 1. Събраният опит и нивата остават.',
@@ -18,6 +19,7 @@
         'След битка в Ямата „Продължи“ те връща в прозореца на Ямата, готов за следващото влизане, а не на началния екран.',
       ],
       en: [
+        'Battle Pass: it opens scrolled to your current level, and the track between the levels in the middle is unbroken.',
         'Healing in a fight is stronger: food (soup, carrot, cheese) restores 5% of your life, the new bread 8%, and a Health Potion 15%. Bread drops from urns.',
         'Rune buffs in a fight are as big as the ability icons, in a row under them. The seconds left are inside the icon, and a coloured frame round it runs out with the time.',
         'Mastery grows 20% slower: 0.8 experience per wave instead of 1. Experience and levels already earned stay.',

@@ -535,7 +535,16 @@
       });
       return box;
     },
-    scrollTo() { },
+    /** The Battle Pass opens on the level being earned now (the next one, or the last reached), in the middle. */
+    scrollTo(sub) {
+      if (sub !== 'pass') return;
+      requestAnimationFrame(() => {
+        const box = ui.contentEl, row = box && (box.querySelector('.pass-row.next') || [...box.querySelectorAll('.pass-row.reached')].pop());
+        if (!row) return;
+        const top = row.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop;
+        box.scrollTop = Math.max(0, top - box.clientHeight / 2 + row.offsetHeight / 2);
+      });
+    },
   };
   /** An activity chest: what it holds, and claim it once the day's points reach it. */
   /** An activity chest. Ready: a tap takes it at once and only its rewards show (one window). Not ready yet, or already
