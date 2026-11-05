@@ -6,6 +6,7 @@
     {
       v: '1.61.60',
       bg: [
+        'Поправено: след избор на предмет от сандък (на боса, шампиона или дървен) битката понякога оставаше спряна и екранът изглеждаше замръзнал. Грешката идваше от 1.61.58.',
         'Защита срещу замръзване на битката: всички цикли, които при рядко стечение могат да не спрат (поява на врагове и глутници, опит, плячка, мълнии, призовани, частици), имат граница. Ако битка все пак спре да отговаря, при следващото пускане играта предлага да изпрати кратък отчет на разработчика.',
         'Всички бутони за информация („i“) изглеждат еднакво – като този в Ямата: квадрат с ръкописно златно „i“ (Олтарът, героите, реликвите, Майсторството).',
         'Нова икона на „Изпитания“ в началния екран, като иконата на играта: готическа арка с червен витраж, череп с горящи очи и кулички.',
@@ -22,6 +23,7 @@
         'След битка в Ямата „Продължи“ те връща в прозореца на Ямата, готов за следващото влизане, а не на началния екран.',
       ],
       en: [
+        'Fixed: after taking an item from a chest (a boss\'s, a champion\'s or a wooden one) the fight could stay stopped and the screen looked frozen. The bug came with 1.61.58.',
         'Guards against a frozen fight: every loop that could fail to end in a rare case (foes and packs arriving, experience, loot, lightning, summons, particles) has a limit. If a fight still stops responding, the game offers to send the developer a short report at the next start.',
         'Every info button ("i") looks the same – like the Pit\'s: a square with a handwritten gold "i" (the Altar, heroes, relics, Mastery).',
         'A new "Trials" icon on the main screen, like the game\'s own icon: a gothic arch with a red window, a skull with burning eyes and spires.',

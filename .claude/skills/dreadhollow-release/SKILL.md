@@ -18,6 +18,8 @@ model names in commits or files. Changes to `live.json` server flags need the us
    ```bash
    for f in <changed .js files>; do node --check "$f"; done
    node tools/check-i18n.js            # every t('...') key in both languages
+   npx --yes eslint@8 --no-eslintrc --env browser,es2022 --parser-options=ecmaVersion:2022 --rule 'no-undef: error' \
+     --global DH,t,click js/ui js/game js/meta js/services js/core js/data js/main.js   # no name used that is not there
    node tools/build-functions.js       # the server's copy of the game code
    node functions/test/engine.js && node functions/test/admin.js && node functions/test/pitpay.js
    ```

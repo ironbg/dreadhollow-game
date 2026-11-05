@@ -471,7 +471,7 @@
   /* ---------------- Loot (champion / boss chest) ---------------- */
   ui.openLoot = (run, d) => {
     DH.input.enable(false);
-    const done = (m) => { m.close(); if (then) { then(); return; } DH.input.enable(true); run.resume(); };
+    const done = (m) => { m.close(); DH.input.enable(true); run.resume(); };
     const gearLine = (it) => {
       const def = E.gear[it.type], st = E.gearStat(it.type, it.rarity, 1), sp = E.gearSpecial(it.type, it.rarity);
       const slot = DH.meta.slotForRun(it.type, run.runGear), cur = run.runGear[slot] || DH.meta.equippedItem(slot);
