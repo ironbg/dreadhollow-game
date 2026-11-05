@@ -6,6 +6,7 @@
     {
       v: '1.61.60',
       bg: [
+        'Всички бутони за информация („i“) изглеждат еднакво – като този в Ямата: квадрат с ръкописно златно „i“ (Олтарът, героите, реликвите, Майсторството).',
         'Нова икона на „Изпитания“ в началния екран, като иконата на играта: готическа арка с червен витраж, череп с горящи очи и кулички.',
         'Боен пропуск: отваря се превъртян до сегашното ти ниво, а линията между нивата в средата е непрекъсната.',
         'Лечението в битка е по-силно: храната (супа, морков, сирене) пълни 5% от живота, новият хляб – 8%, а лековитата отвара – 15%. Хлябът пада от урните.',
@@ -20,6 +21,7 @@
         'След битка в Ямата „Продължи“ те връща в прозореца на Ямата, готов за следващото влизане, а не на началния екран.',
       ],
       en: [
+        'Every info button ("i") looks the same – like the Pit\'s: a square with a handwritten gold "i" (the Altar, heroes, relics, Mastery).',
         'A new "Trials" icon on the main screen, like the game\'s own icon: a gothic arch with a red window, a skull with burning eyes and spires.',
         'Battle Pass: it opens scrolled to your current level, and the track between the levels in the middle is unbroken.',
         'Healing in a fight is stronger: food (soup, carrot, cheese) restores 5% of your life, the new bread 8%, and a Health Potion 15%. Bread drops from urns.',

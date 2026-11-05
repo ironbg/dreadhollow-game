@@ -789,7 +789,7 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .panel.item.pick:active { transform: scale(0.985); }
 .panel.item.pick .d { font-size: 12px; }
 .picklist { gap: 0; }
-.btn.infob { width: 34px; min-width: 34px; padding: 6px 0; font-weight: 900; font-style: italic; flex: none; }
+button.btn.infob, .btn.small.infob { width: 30px; min-width: 30px; height: 30px; min-height: 30px; padding: 0; flex: none; align-self: center; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; font-weight: 900; font-style: italic; color: var(--gold); } /* every info button: the Pit's square with a handwritten gold i */
 .wornpill { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; padding: 1px 8px 1px 5px; border-radius: 6px; font-size: 12px; font-weight: 800; color: var(--gold-hi); background: rgba(240,200,96,.1); border: 1px solid rgba(240,200,96,.45); }
 .wornpill img.ci { width: 14px; height: 14px; }
 .slot .mergeb { position: absolute; bottom: 3px; left: 4px; font-size: 11px; line-height: 1; color: #f0a8ff; text-shadow: 0 0 4px #c040ff, 0 1px 0 #000; }
@@ -1377,7 +1377,6 @@ button.x img.ic.ci, .ad-close img.ic.ci { width: 16px; height: 16px; margin: 0; 
 .abtypes .dt.notype { --dc: #9a9088; text-transform: none; letter-spacing: .01em; font-weight: 700; }
 /* the hero card: its action on top, the "i" (details) in the bottom-right corner */
 .hero-card .hc-side { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 8px; flex: none; }
-.hero-card .hc-side .infob { min-height: 30px; width: 30px; min-width: 30px; padding: 0; font-family: Georgia, serif; font-size: 16px; }
 /* the hero details window */
 .modal.heroinfo .hi-top { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
 .modal.heroinfo .hi-top .pic { width: 56px; height: 56px; flex: none; display: flex; align-items: center; justify-content: center; }
@@ -1949,7 +1948,6 @@ textarea.ap-in { resize: vertical; font-family: ui-monospace, Menlo, Consolas, m
 .pit-sweep .btn { font-size: 14px; padding: 0 6px; }
 
 .pit-fx { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin: 6px 0 0 auto; color: #ff6a5a; font-weight: 800; font-size: 14px; }
-.pit-fx .infob, .pm-head .infob { min-height: 30px; width: 30px; min-width: 30px; padding: 0; font-family: Georgia, serif; font-size: 16px; color: var(--gold); }
 .pit-more .btn { gap: 3px; padding: 4px 3px; font-size: 11px; letter-spacing: 0; }
 .pit-more .btn img.ic.ci { width: 14px; height: 14px; }
 .pm-head .infob { align-self: center; }
