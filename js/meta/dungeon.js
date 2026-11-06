@@ -57,7 +57,9 @@
   M.dunLeapMax = (lv) => (lv > dunS().best ? 1 + M.dunPerk('leap') : 1);
   /** A level's metals (E.DUNGEON.mats), times k. */
   M.dunMats = (lv, k) => { const m = D().mats(lv), out = {}; for (const id in m) out[id] = Math.round(m[id] * (k || 1)); return out; };
-  /** What a cleared level pays (first: the first time it is cleared). */
+  /** Dark Quartz of a level: 1 to E.DUNGEON.quartz(lv), at random (a share of it for a sweep, at least 1). */
+  M.dunQuartzRoll = (lv, share) => Math.max(1, Math.round(U.randi(1, D().quartz(lv)) * (share || 1)));
+  /** What a cleared level pays (first: the first time it is cleared); quartz: the most it can be (dunQuartzRoll). */
   M.dunReward = (lv, first) => ({
     gold: D().gold(lv), mats: M.dunMats(lv, 1 + M.dunPerkVal('share')), quartz: D().quartz(lv), accountXp: D().acctXp(lv),
     chests: D().chests(lv, first),
@@ -114,7 +116,7 @@
     if (won) {
       for (let i = 0; i < a.n; i++) {
         const lv = a.lv + i, f = lv > best0, rw = M.dunReward(lv, f); if (f) first = true;
-        items.push(...M.grant({ gold: rw.gold, mats: rw.mats, quartz: rw.quartz, accountXp: rw.accountXp }));
+        items.push(...M.grant({ gold: rw.gold, mats: rw.mats, quartz: M.dunQuartzRoll(lv), accountXp: rw.accountXp }));
         for (const k in rw.chests) gear.push(...M.openChestContents(k, rw.chests[k]));
         xp += lv * DM().xpLevel;
       }
@@ -127,18 +129,19 @@
     const deeds = M.checkDeeds(null); changed();
     return { lv: a.lv, n: a.n, floors, won, record: d.best > best0, first, items, gear, best: d.best, mastery: M.dunMastery().lv - lv0, deeds };
   };
-  /* the sweep: a share of the best level's gold and Dark Quartz, without fighting (no chests, no relics, no vaults), and
-   * half the Mastery experience of clearing it */
+  /* the sweep: a share of a cleared level's gold and Dark Quartz (the chosen one, the best if none), without fighting (no
+   * chests, no relics, no vaults), and half the Mastery experience of clearing it */
   M.dunSweepShare = () => Math.min(1, D().sweep + M.dunPerkVal('guide'));
-  M.dunSweepPay = () => { const b = dunS().best, sh = M.dunSweepShare(); return b > 0 ? { gold: Math.round(D().gold(b) * sh), quartz: Math.round(D().quartz(b) * sh) } : null; };
-  M.dunSweep = (n) => {
-    const d = dunS(), pay = M.dunSweepPay(); if (!M.dunUnlocked() || !pay || M.dunLeft() <= 0) return null;
+  M.dunSweepPay = (lv) => { const b = dunS().best, sh = M.dunSweepShare(); lv = lv | 0 || b; return b > 0 && lv >= 1 && lv <= b ? { lv, gold: Math.round(D().gold(lv) * sh), quartz: Math.max(1, Math.round(D().quartz(lv) * sh)) } : null; };
+  M.dunSweep = (n, lv) => {
+    const d = dunS(), pay = M.dunSweepPay(lv); if (!M.dunUnlocked() || !pay || M.dunLeft() <= 0) return null; // only a level already cleared
     n = Math.max(1, Math.min(M.dunLeft(), n | 0 || 1));
     const lv0 = M.dunMastery().lv;
     d.used += n;
-    const items = M.grant({ gold: pay.gold * n, quartz: pay.quartz * n });
-    addXp(n * ((D().floors + 1) * DM().xpFloor + d.best * DM().xpLevel) * DM().sweepXp);
+    let quartz = 0; for (let i = 0; i < n; i++) quartz += M.dunQuartzRoll(pay.lv, M.dunSweepShare());
+    const items = M.grant({ gold: pay.gold * n, quartz });
+    addXp(n * ((D().floors + 1) * DM().xpFloor + pay.lv * DM().xpLevel) * DM().sweepXp);
     M.track('dungeon', n); const deeds = M.checkDeeds(null); changed();
-    return { items, n, mastery: M.dunMastery().lv - lv0, deeds };
+    return { items, n, lv: pay.lv, mastery: M.dunMastery().lv - lv0, deeds };
   };
 })(window.DH);

@@ -465,9 +465,9 @@
     affixAt: [[100, 3], [50, 2], [20, 1]],                     // from level 100 three hazards, from 50 two, from 20 one
     halls: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'discord', 'blightmire', 'reliquary'], // the catacombs of level n: halls[(n - 1) % 7]
     hpPerLv: 0.12, dmgPerLv: 0.05,                             // the foes: +12% health and +5% damage a level over the first (even growth)
-    quota: (lv, floor) => Math.min(120, 40 + Math.floor(lv / 4)) + floor * 4, // foes to slay on a floor (floor 0..4)
+    quota: (lv, floor) => 2 * (Math.min(120, 40 + Math.floor(lv / 4)) + floor * 4), // foes to slay on a floor (floor 0..4), in its three waves
     // what a cleared level pays (a level takes 1.5-3 minutes; a hall's ten minutes pay some 3 000-25 000 gold by the hall)
-    gold: (lv) => Math.round(600 + 120 * lv),                  // level 10: 1 800, 50: 6 600, 100: 12 600
+    gold: (lv) => 490 + 10 * lv,                               // level 1: 500, then +10 a level (level 100: 1 490)
     // the metals of a cleared level: iron only at first, then silver joins (30), gold (80), starsteel (150); the rarer the
     // metal, the fewer: level 100 gives 24 iron, 9 silver, 2 gold; level 300, 64 / 29 / 15 / 7
     mats: (lv) => {
@@ -477,7 +477,7 @@
       if (lv >= 150) m.starsteel = 1 + Math.floor((lv - 150) / 25);
       return m;
     },
-    quartz: (lv) => 12 + 3 * lv,
+    quartz: (lv) => 9 + lv,                                    // Dark Quartz: 1 to this many, at random (level 1: 1-10, level 2: 1-11)
     acctXp: (lv) => 40 + 4 * lv,                               // the account's experience
     // the chests of a cleared level, by its depth: Wooden at first, a Silver from level 30, a Gold from 80 (first: the first clear)
     chests: (lv, first) => (first ? (lv >= 80 ? { gold: 1, wood: 2 } : lv >= 30 ? { silver: 1, wood: 1 } : { wood: 2 }) : lv >= 10 ? { wood: 1 } : {}),

@@ -106,7 +106,7 @@
     const m = ui.modal({ title: t('dun.name'), cls: 'dunwin', body: () => h('div'), onClose: () => { clearInterval(timer); DH.events.off('meta', redraw); } });
     const redraw = () => { if (!m.closed) draw(); };
     DH.events.on('meta', redraw);
-    const row = (icon, label, val, cls) => h('div.pit-row' + (cls || ''), A.img(icon, 'ci'), h('span', label), h('b', val));
+    const cell = (icon, label, val, cls) => h('div.dun-cell' + (cls || ''), A.img(icon, 'ci'), h('span', label), h('b', val));
     const pick = (v) => { click(); lv = Math.max(1, Math.min(M.dunBest() + 1, v)); n = 1; draw(); };
     const tile = (k) => {
       const best = M.dunBest(), open = k <= best + 1, done = k <= best;
@@ -119,7 +119,7 @@
       n = Math.max(1, Math.min(n, lmax, Math.max(1, left)));
       const xp = (E.DUNGEON.floors + 1) * E.DUNGEON_MASTERY.xpFloor + lv * E.DUNGEON_MASTERY.xpLevel;
       const rewards = [{ icon: 'u_star', text: '×' + U.fmt(Math.round(xp * (M.masteryPass() ? 2 : 1))), tip: t('dun.rw.mastery') }, { icon: 'n_pass', text: '×' + U.fmt(rw.accountXp), tip: t('dun.rw.acct') },
-        { icon: 'i_gold', text: U.fmt(rw.gold) }].concat(Object.keys(rw.mats).map((k) => ({ icon: 'mat_' + k, text: U.fmt(rw.mats[k]) })), [{ icon: 'i_quartz', text: U.fmt(rw.quartz) }])
+        { icon: 'i_gold', text: U.fmt(rw.gold) }].concat(Object.keys(rw.mats).map((k) => ({ icon: 'mat_' + k, text: U.fmt(rw.mats[k]) })), [{ icon: 'i_quartz', text: '1–' + U.fmt(rw.quartz), tip: t('res.quartz') }])
         .concat(Object.keys(rw.chests).map((k) => ({ icon: E.chests[k].icon, text: '×' + rw.chests[k], first: first })))
         .concat(M.dunBossLoot(lv) ? [{ icon: 'c_gold', text: t('dun.rw.lord'), tip: t('dun.rw.lordTip') }] : []);
       const lo = Math.max(1, Math.min(lv - 2, best + 1 - 4)), tiles = []; for (let k = lo; k < lo + 5; k++) tiles.push(tile(k));
@@ -129,23 +129,21 @@
           h('button.dun-far', { 'aria-label': t('dun.toBest'), onclick: () => pick(best + 1) }, A.img('u_right', 'ci'), A.img('u_right', 'ci'))),
         h('div.dun-strip', h('button.dun-arr', { onclick: () => pick(lv - 1), 'aria-label': '<' }, A.img('u_left', 'ci')), h('div.dun-tiles', tiles), h('button.dun-arr', { onclick: () => pick(lv + 1), 'aria-label': '>' }, A.img('u_right', 'ci'))),
         h('div.pit-card.dun-card',
-          row('n_trophy', t('dun.best'), U.fmt(best)),
-          row('n_dungeon', t('dun.today'), (all - left) + ' / ' + all, left ? '' : '.bad'),
-          row('hourglass', t('dun.refresh'), h('span.dun-clock', U.fmtDuration(U.msToMidnight()))),
-          row('c_gold', t('dun.vaultsRow'), M.dunVaultsToday() + ' / ' + E.DUNGEON.vaultsPerDay),
-          row('u_agony', t('dun.map'), h('span.dun-map.m-' + hall, t('stage.' + hall + '.name'))),
-          row('n_skull', t('dun.lord'), t('enemy.' + (C.stages[hall].bosses.find((x) => x.final) || {}).id)),
-          h('div.pit-row', A.img('u_star', 'ci'), h('span', first ? t('dun.rewardsFirst') : t('dun.rewards')), h('b')),
+          // the day in four small cells, the level's catacombs and Lord on one line, its rewards in one row: no scrolling
+          h('div.dun-stats', cell('n_trophy', t('dun.best'), U.fmt(best)), cell('n_dungeon', t('dun.today'), (all - left) + ' / ' + all, left ? '' : '.bad'),
+            cell('hourglass', t('dun.refresh'), h('span.dun-clock', U.fmtDuration(U.msToMidnight()))), cell('c_gold', t('dun.vaultsRow'), M.dunVaultsToday() + ' / ' + E.DUNGEON.vaultsPerDay)),
+          h('div.dun-where', h('span.dw', A.img('u_agony', 'ci'), h('span.dun-map.m-' + hall, t('stage.' + hall + '.name'))), h('span.dw', A.img('n_skull', 'ci'), h('span', t('enemy.' + (C.stages[hall].bosses.find((x) => x.final) || {}).id)))),
+          h('div.dun-rwh', A.img('u_star', 'ci'), h('span', first ? t('dun.rewardsFirst') : t('dun.rewards'))),
           h('div.dun-rw', rewards.map((e) => h('div.dun-rwi' + (e.first ? '.first' : ''), { title: e.tip || '' }, h('div.slot', A.img(e.icon)), h('div.n', e.text))))),
         lmax > 1 ? h('div.dun-leap', h('span.small', t('dun.leap')), [1, 2, 3, 4, 5].filter((k) => k <= lmax).map((k) => h('button.btn.small' + (k === n ? '.gold' : '.ghost') + (k > left ? '.off' : ''), { onclick: () => { if (k <= left) { click(); n = k; draw(); } } }, '×' + k))) : null,
         h('div.mact',
           h('div.pit-btns',
             h('div.pit-sweep',
-              h('button.btn.blue' + (left && best ? '' : '.off'), { onclick: sweep }, sweepN > 1 ? t('pit.sweepN', { n: sweepN }) : t('pit.sweep')),
-              left > 1 && best ? h('div.pit-slide', h('input', { type: 'range', min: 1, max: left, step: 1, value: Math.min(sweepN, left), 'aria-label': t('pit.sweep'),
+              h('button.btn.blue' + (left && lv <= best ? '' : '.off'), { onclick: sweep }, sweepN > 1 ? t('pit.sweepN', { n: sweepN }) : t('pit.sweep')),
+              left > 1 && lv <= best ? h('div.pit-slide', h('input', { type: 'range', min: 1, max: left, step: 1, value: Math.min(sweepN, left), 'aria-label': t('pit.sweep'),
                 oninput: (e) => { sweepN = +e.target.value; const b = e.target.closest('.pit-sweep').querySelector('.btn'); b.textContent = sweepN > 1 ? t('pit.sweepN', { n: sweepN }) : t('pit.sweep'); } }), h('b', null)) : null),
             h('button.btn.green' + (left ? '' : '.off'), { onclick: () => { if (!left) { ui.toast(t('dun.noEntries'), 'bad'); return; } click(); m.close(); DH.game.startDungeon(lv, n); } }, n > 1 ? t('dun.enterN', { n }) : t('dun.enter'))),
-          best ? h('div.small.muted.center.pit-share', t('dun.sweepShare', { v: Math.round(M.dunSweepShare() * 100), n: U.fmt(best) })) : null,
+          h('div.small.muted.center.pit-share', lv <= best ? t('dun.sweepShare', { v: Math.round(M.dunSweepShare() * 100), n: U.fmt(lv) }) : best ? t('dun.sweepOnly') : t('dun.sweepNone')),
           h('div.pit-more',
             h('button.btn.small.gold', { onclick: () => { click(); ui.openDunMastery(); } }, A.img('u_star', 'ci'), ' ', t('dun.masteryLv', { n: mst.lv }), M.dunCanRaise() ? h('span.badge', M.dunPointsFree()) : null),
             h('button.btn.small.gold', { onclick: () => { click(); ui.openBoards(M.boardKey(M.dunBoards()[0])); } }, A.img('n_trophy', 'ci'), ' ', t('lb.short'))))));
@@ -153,10 +151,11 @@
     };
     const sweep = async () => {
       if (!M.dunBest()) { ui.toast(t('dun.sweepNone'), 'bad'); return; }
+      if (lv > M.dunBest()) { ui.toast(t('dun.sweepOnly'), 'bad'); return; } // only a level already cleared
       if (!M.dunLeft()) { ui.toast(t('dun.noEntries'), 'bad'); return; }
       click();
       const k = Math.max(1, Math.min(M.dunLeft(), sweepN));
-      const r = await ui.act('dunSweep', { n: k }); if (!r) return;
+      const r = await ui.act('dunSweep', { n: k, lv }); if (!r) return;
       sweepN = 1;
       DH.audio.play('coin'); ui.rewardPopup(r.n > 1 ? t('pit.sweepN', { n: r.n }) : t('pit.sweep'), r.items); draw();
       if (r.mastery) ui.toast(t('dun.masteryUp', { n: M.dunMastery().lv }), 'good');

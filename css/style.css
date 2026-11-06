@@ -2144,3 +2144,32 @@ body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inse
 #hud .dunbar .pb-autorow { align-items: center; justify-content: space-between; }
 #hud .db-wave { font-family: var(--title); font-size: 12px; color: #e8d8c0; letter-spacing: .04em; }
 #hud .autohall { position: absolute; top: calc(var(--safe-t) + 110px); right: 8px; z-index: 3; }
+/* the Dungeon's window in one screen, no scrolling: a lower picture, the day in a 2×2 grid, the catacombs and Lord on one
+   line, the rewards in one row of small slots */
+.dunwin .dun-art { height: 84px; }
+.dunwin .dun-strip { margin-top: 6px; padding: 6px 6px 5px; }
+.dunwin .dun-tile { height: 50px; }
+.dunwin .dun-tile b { padding-top: 15px; font-size: 18px; }
+.dunwin .dun-card { margin-top: 6px; padding: 6px 8px; }
+.dun-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 10px; }
+.dun-cell { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 5px; font-size: 12px; min-width: 0; }
+.dun-cell span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #c8b898; }
+.dun-cell b { color: #f4e6d0; font-size: 13px; }
+.dun-cell img.ic.ci, .dun-where img.ic.ci, .dun-rwh img.ic.ci { width: 16px; height: 16px; }
+.dun-cell.bad b { color: var(--blood-hi); }
+.dun-where { display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,230,200,.08); font-size: 13px; font-weight: 800; color: #f4e6d0; flex-wrap: wrap; }
+.dun-where i { font-style: normal; color: #6a5a50; margin: 0 2px; }
+.dun-rwh { display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 5px; font-size: 12px; color: #c8b898; }
+.dunwin .dun-rw { gap: 3px; margin: 3px 0 0; flex-wrap: wrap; }
+.dunwin .dun-rwi { width: 40px; }
+.dunwin .dun-rwi .slot { width: 36px; height: 36px; }
+.dunwin .dun-rwi .n { font-size: 11px; white-space: nowrap; }
+.dunwin .dun-leap { margin-top: 5px; }
+.dunwin .mact { margin-top: 6px; }
+.dunwin .pit-btns .btn { min-height: 42px; }
+.dunwin .pit-more { margin-top: 6px; }
+.dunwin .pit-share { margin-top: 2px; font-size: 11px; }
+.dun-where .dw { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.dun-where { gap: 4px 14px; }
+.dunwin .dun-far { left: 8px; right: auto; }
+.dunwin .dun-fxi button { width: 26px; height: 26px; }
