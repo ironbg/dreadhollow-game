@@ -26,7 +26,7 @@
       } }, t('pit.ready'))) });
   };
 
-  /** The level is over: won or lost, floors cleared, what it paid (gold, iron, quartz, chests opened, vaults), the best. */
+  /** The level is over: won or lost, floors cleared, what it paid (gold, metals, quartz, chests opened, vaults), the best. */
   ui.openDunResults = (run, res) => {
     const hudEl = document.getElementById('hud'); if (hudEl) hudEl.classList.add('hidden');
     const Q = run.dun, won = !!res.won;
@@ -118,7 +118,7 @@
       n = Math.max(1, Math.min(n, lmax, Math.max(1, left)));
       const xp = (E.DUNGEON.floors + 1) * E.DUNGEON_MASTERY.xpFloor + lv * E.DUNGEON_MASTERY.xpLevel;
       const rewards = [{ icon: 'u_star', text: '×' + U.fmt(Math.round(xp * (M.masteryPass() ? 2 : 1))), tip: t('dun.rw.mastery') }, { icon: 'n_pass', text: '×' + U.fmt(rw.accountXp), tip: t('dun.rw.acct') },
-        { icon: 'i_gold', text: U.fmt(rw.gold) }, { icon: 'mat_iron', text: U.fmt(rw.mats.iron) }, { icon: 'i_quartz', text: U.fmt(rw.quartz) }]
+        { icon: 'i_gold', text: U.fmt(rw.gold) }].concat(Object.keys(rw.mats).map((k) => ({ icon: 'mat_' + k, text: U.fmt(rw.mats[k]) })), [{ icon: 'i_quartz', text: U.fmt(rw.quartz) }])
         .concat(Object.keys(rw.chests).map((k) => ({ icon: E.chests[k].icon, text: '×' + rw.chests[k], first: first })))
         .concat(M.dunBossLoot(lv) ? [{ icon: 'c_gold', text: t('dun.rw.lord'), tip: t('dun.rw.lordTip') }] : []);
       const lo = Math.max(1, Math.min(lv - 2, best + 1 - 4)), tiles = []; for (let k = lo; k < lo + 5; k++) tiles.push(tile(k));

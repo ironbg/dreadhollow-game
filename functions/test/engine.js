@@ -335,6 +335,9 @@ const live = require('../game/live.json');
     r = await withProfile(Object.assign({}, r.profile, { gems: 100, dungeon: Object.assign({}, r.profile.dungeon, { best: 200, perks: { key: 1, fury: 3 } }) }), live, (DH) => {
       const M = DH.meta, a = [M.dunBossLoot(79), M.dunBossLoot(80), M.dunEntries()]; M.dunPerkReset(); a.push(JSON.stringify(DH.save.data.dungeon.perks), M.dunPerkDown('key')); return a; });
     assert.deepStrictEqual(r.result, [false, true, 12, '{"key":1}', false]);
+    // the metals by level: iron only, then silver (30), gold (80), starsteel (150); the rarer the fewer; a metal vault x2.5
+    r = await withProfile(r.profile, live, (DH) => [29, 30, 80, 150, 300].map((l) => JSON.stringify(DH.economy.DUNGEON.mats(l))).concat(JSON.stringify(DH.meta.dunMats(100, 2.5))));
+    assert.deepStrictEqual(r.result, ['{"iron":9}', '{"iron":10,"silver":2}', '{"iron":20,"silver":7,"gold":1}', '{"iron":34,"silver":14,"gold":5,"starsteel":1}', '{"iron":64,"silver":29,"gold":15,"starsteel":7}', '{"iron":60,"silver":23,"gold":5}']);
     // the gold picked up on the floors is capped by the level and the time
     r = await withProfile(r.profile, live, (DH) => DH.meta.dunRunGoldCap(10, 300));
     assert.strictEqual(r.result, 7000);

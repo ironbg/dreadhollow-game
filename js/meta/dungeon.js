@@ -55,9 +55,11 @@
   };
   /** How many levels one fight can clear at once (the Leap: 2-5 entries for as many levels, uncleared levels only). */
   M.dunLeapMax = (lv) => (lv > dunS().best ? 1 + M.dunPerk('leap') : 1);
+  /** A level's metals (E.DUNGEON.mats), times k. */
+  M.dunMats = (lv, k) => { const m = D().mats(lv), out = {}; for (const id in m) out[id] = Math.round(m[id] * (k || 1)); return out; };
   /** What a cleared level pays (first: the first time it is cleared). */
   M.dunReward = (lv, first) => ({
-    gold: D().gold(lv), mats: { iron: Math.round(D().iron(lv) * (1 + M.dunPerkVal('share'))) }, quartz: D().quartz(lv), accountXp: D().acctXp(lv),
+    gold: D().gold(lv), mats: M.dunMats(lv, 1 + M.dunPerkVal('share')), quartz: D().quartz(lv), accountXp: D().acctXp(lv),
     chests: first ? D().chestsFirst : D().chestsAgain,
   });
   /** Does the boss of a level drop its chest? Only within E.DUNGEON.bossLootWithin levels of the best cleared. */
@@ -67,7 +69,7 @@
   M.dunRunGoldCap = (lv, secs) => Math.round((300 + 30 * lv) * Math.max(1, secs) / 60) + 4000;
 
   /** Enter a level (n entries at once with the Leap). The vaults are rolled here, on the server: on which floors, and of
-   *  what kind (gold or iron; iron always with the Iron Bargain). { lv, n, hall, affixes, vaults, kinds, loot } */
+   *  what kind (gold or metal: 'iron'; metal always with the Iron Bargain). { lv, n, hall, affixes, vaults, kinds, loot } */
   M.dunStart = (lv, n) => {
     const d = dunS(); lv = lv | 0; n = Math.max(1, Math.min(M.dunLeapMax(lv), n | 0 || 1));
     if (!M.dunUnlocked() || lv < 1 || lv > d.best + 1 || M.dunLeft() < n) return null;
@@ -85,7 +87,7 @@
     if (!a || !a.vaults.includes(floor) || a.paid.includes(floor) || d.vaults >= D().vaultsPerDay) return null;
     if ((U.now() - a.at) / 1000 < floor * D().minFloorSecs) return null; // that floor cannot have been reached yet
     a.paid.push(floor); d.vaults++;
-    const kind = a.kinds[a.vaults.indexOf(floor)], rw = kind === 'iron' ? { mats: { iron: D().vaultIron(a.lv) } } : { gold: D().vaultGold(a.lv) };
+    const kind = a.kinds[a.vaults.indexOf(floor)], rw = kind === 'iron' ? { mats: M.dunMats(a.lv, D().vaultMats) } : { gold: D().vaultGold(a.lv) };
     const items = M.grant(rw); changed();
     return { kind, items };
   };

@@ -452,9 +452,9 @@
    *  the clock. A floor falls when its quota of foes is slain; stairs open down to the next one, and after the boss a portal
    *  leads out. Levels grow evenly harder; from level 20 the Pit's hazards join them (affixAt). Any level up to the best
    *  cleared + 1 can be entered (so the ones between round numbers can be skipped). A few entries a day.
-   *  Rewards (a cleared level): gold, iron, Dark Quartz (the stone that will strengthen relics), the Mastery's
+   *  Rewards (a cleared level): gold, metals (E.DUNGEON.mats), Dark Quartz (the stone that will strengthen relics), the Mastery's
    *  experience, and chests: a Gold and two Wooden the first time, a Wooden after. A vault (a bonus floor of 30 s, the
-   *  clock stopped) now and then, at most vaultsPerDay a day: gold or iron, kept even if the level is lost. Sweep pays a
+   *  clock stopped) now and then, at most vaultsPerDay a day: gold or metal, kept even if the level is lost. Sweep pays a
    *  share of the best level's gold and quartz, without fighting (no relics, no chests, no vaults). */
   E.DUNGEON = {
     unlock: 'aqueduct',                                        // open once the third hall is cleared
@@ -467,14 +467,22 @@
     quota: (lv, floor) => Math.min(120, 40 + Math.floor(lv / 4)) + floor * 4, // foes to slay on a floor (floor 0..4)
     // what a cleared level pays (a level takes 1.5-3 minutes; a hall's ten minutes pay some 3 000-25 000 gold by the hall)
     gold: (lv) => Math.round(600 + 120 * lv),                  // level 10: 1 800, 50: 6 600, 100: 12 600
-    iron: (lv) => 4 + Math.floor(lv / 5),
+    // the metals of a cleared level: iron only at first, then silver joins (30), gold (80), starsteel (150); the rarer the
+    // metal, the fewer: level 100 gives 24 iron, 9 silver, 2 gold; level 300, 64 / 29 / 15 / 7
+    mats: (lv) => {
+      const m = { iron: 4 + Math.floor(lv / 5) };
+      if (lv >= 30) m.silver = 2 + Math.floor((lv - 30) / 10);
+      if (lv >= 80) m.gold = 1 + Math.floor((lv - 80) / 15);
+      if (lv >= 150) m.starsteel = 1 + Math.floor((lv - 150) / 25);
+      return m;
+    },
     quartz: (lv) => 12 + 3 * lv,
     acctXp: (lv) => 40 + 4 * lv,                               // the account's experience
     chestsFirst: { gold: 1, wood: 2 }, chestsAgain: { wood: 1 },
     bossLootWithin: 120,                                        // the boss drops its chest only within 120 levels of the best cleared
     bossHp: 0.35,                                               // the Lord's health against a hall's own (met at the tenth minute; here after a few)
     vaultChance: 0.10, vaultsPerDay: 5, vaultSecs: 30,          // a floor's chance to hide a vault (the boss floor too)
-    vaultGold: (lv) => Math.round(1000 + 150 * lv), vaultIron: (lv) => 10 + Math.floor(lv / 4),
+    vaultGold: (lv) => Math.round(1000 + 150 * lv), vaultMats: 2.5,  // a vault of metal: the level's metals x2.5
     sweep: 0.5,                                                 // a sweep pays half the best level (the Guide card raises it to all)
     minFloorSecs: 8,                                            // the server's check: a floor cannot fall faster than this
   };
@@ -495,8 +503,8 @@
       leap:   { icon: 'dm_leap',   tier: 'gold',   lv: 60,  max: 4,  per: 1 },     // 2-5 entries at once clear as many levels (uncleared only)
       nose:   { icon: 'dm_nose',   tier: 'gold',   lv: 65,  max: 5,  per: 0.05 },  // a vault's chance: 15/20/25/30/35%
       step:   { icon: 'dm_step',   tier: 'red',    lv: 65,  max: 1,  per: 1 },     // down the stairs by itself once a floor is cleared
-      share:  { icon: 'dm_share',  tier: 'gold',   lv: 75,  max: 5,  per: 0.03 },  // +3% iron from a cleared level a rank (15%)
-      deal:   { icon: 'dm_deal',   tier: 'red',    lv: 85,  max: 1,  per: 1 },     // every vault holds iron
+      share:  { icon: 'dm_share',  tier: 'gold',   lv: 75,  max: 5,  per: 0.03 },  // +3% metals from a cleared level a rank (15%)
+      deal:   { icon: 'dm_deal',   tier: 'red',    lv: 85,  max: 1,  per: 1 },     // every vault holds metal
       key:    { icon: 'dm_key',    tier: 'red',    lv: 100, max: 1,  per: 2 },     // two more entries a day (kept through a reset)
       seal:   { icon: 'dm_seal',   tier: 'red',    lv: 110, max: 1,  per: 1 },     // the Stalker never comes
     },
