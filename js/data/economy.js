@@ -410,6 +410,7 @@
     hallStats: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'discord', 'blightmire', 'reliquary'], // and the strength of its foes
     hpGrow: 1.12, dmgGrow: 1.05,                             // per wave, from the first of its ten
     sweep: 0.5,                                              // a sweep pays half the best wave; the Mastery's Sweep card raises it to all
+    sweepXp: 0.5,                                            // and gives half the Mastery experience of a fight
     // a wave is a number of kills (quota), its foes coming in batches while the quota lasts; kills that follow each other
     // within combo.window seconds make a combo, every combo.per kills of it one wave more skipped when the wave falls
     // (up to combo.max); the combo ends with the wave, or is lost when its time runs out
@@ -447,6 +448,58 @@
   /** The Pit's shop (as the Armory's Resource Store): a free handful of Essence a day, a few more for an ad each, and
    *  packs of Essence for real money (E.products ess_1..ess_5, bought as often as wanted). */
   E.PIT_SHOP = { free: { essence: 150 }, ad: { essence: 250 }, ads: 3 };
+  /** The Dungeon (Trials): a level is five floors and a boss floor, in the catacombs of one of the halls (in turn), against
+   *  the clock. A floor falls when its quota of foes is slain; stairs open down to the next one, and after the boss a portal
+   *  leads out. Levels grow evenly harder; from level 20 the Pit's hazards join them (affixAt). Any level up to the best
+   *  cleared + 1 can be entered (so the ones between round numbers can be skipped). A few entries a day.
+   *  Rewards (a cleared level): gold, iron, Dark Quartz (the stone that will strengthen relics), the Mastery's
+   *  experience, and chests: a Gold and two Wooden the first time, a Wooden after. A vault (a bonus floor of 30 s, the
+   *  clock stopped) now and then, at most vaultsPerDay a day: gold or iron, kept even if the level is lost. Sweep pays a
+   *  share of the best level's gold and quartz, without fighting (no relics, no chests, no vaults). */
+  E.DUNGEON = {
+    unlock: 'aqueduct',                                        // open once the third hall is cleared
+    entries: 10, floors: 5,                                    // floors before the boss floor
+    secs: 120, floorSecs: 18, bonusSecs: 10, bonusPerFloor: 2, // the clock: 2 min, +18 s a floor cleared, +10 s pickups on the floor
+    buySecs: 60, buyGems: 500, reviveGems: 500,                // out of time: +60 s for gems once; a revive for an ad and one for gems (one gem buy a fight)
+    affixAt: [[100, 3], [50, 2], [20, 1]],                     // from level 100 three hazards, from 50 two, from 20 one
+    halls: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'discord', 'blightmire', 'reliquary'], // the catacombs of level n: halls[(n - 1) % 7]
+    hpPerLv: 0.12, dmgPerLv: 0.05,                             // the foes: +12% health and +5% damage a level over the first (even growth)
+    quota: (lv, floor) => Math.min(120, 40 + Math.floor(lv / 4)) + floor * 4, // foes to slay on a floor (floor 0..4)
+    gold: (lv) => Math.round(800 + 160 * lv),                  // a cleared level
+    iron: (lv) => 6 + Math.floor(lv / 3),
+    quartz: (lv) => 12 + 3 * lv,
+    acctXp: (lv) => 40 + 4 * lv,                               // the account's experience
+    chestsFirst: { gold: 1, wood: 2 }, chestsAgain: { wood: 1 },
+    bossLootWithin: 120,                                        // the boss drops its chest only within 120 levels of the best cleared
+    vaultChance: 0.10, vaultsPerDay: 5, vaultSecs: 30,          // a floor's chance to hide a vault (the boss floor too)
+    vaultGold: (lv) => Math.round(1500 + 200 * lv), vaultIron: (lv) => 15 + Math.floor(lv / 2),
+    sweep: 0.5,                                                 // a sweep pays half the best level (the Guide card raises it to all)
+    minFloorSecs: 8,                                            // the server's check: a floor cannot fall faster than this
+  };
+  /** The Dungeon's own Mastery (apart from the Pit's): experience from every fight (and sweep, at half), a point a level up
+   *  to E.DUNGEON_MASTERY.max, spent in its thirteen cards (they work in the Dungeon only). Freely reset, but the Jailer's Key. */
+  E.DUNGEON_MASTERY = {
+    max: 250, xpFloor: 2, xpLevel: 0.5, sweepXp: 0.5,          // a floor cleared, and half the level's number when it is cleared; a sweep: half
+    next: (lv) => 36 * lv + 14,
+    costs: { blue: 1, purple: 5, gold: 10, red: 35 },
+    keyRefund: 100000,                                           // the Jailer's Key stays through a reset; taking it back costs gems
+    perks: {
+      fury:   { icon: 'dm_fury',   tier: 'blue',   lv: 1,   max: 10, per: 0.30 },  // +30% damage a rank (+300%)
+      lords:  { icon: 'dm_lords',  tier: 'blue',   lv: 1,   max: 10, per: 0.01 },  // +1% damage to bosses and champions a rank
+      crush:  { icon: 'dm_crush',  tier: 'blue',   lv: 1,   max: 10, per: 0.15 },  // +15% critical damage a rank (+150%)
+      seeker: { icon: 'dm_seeker', tier: 'purple', lv: 10,  max: 5,  per: 0.006, n: 15 }, // a foe's chance to drop Dark Quartz (n pieces): up to 3%
+      stone:  { icon: 'dm_stone',  tier: 'purple', lv: 25,  max: 5,  per: 0.016 }, // 1.6% less damage taken a rank (8%)
+      guide:  { icon: 'dm_guide',  tier: 'purple', lv: 50,  max: 5,  per: 0.1 },   // a sweep pays 60/70/80/90/100%
+      leap:   { icon: 'dm_leap',   tier: 'gold',   lv: 60,  max: 4,  per: 1 },     // 2-5 entries at once clear as many levels (uncleared only)
+      nose:   { icon: 'dm_nose',   tier: 'gold',   lv: 65,  max: 5,  per: 0.05 },  // a vault's chance: 15/20/25/30/35%
+      step:   { icon: 'dm_step',   tier: 'red',    lv: 65,  max: 1,  per: 1 },     // down the stairs by itself once a floor is cleared
+      share:  { icon: 'dm_share',  tier: 'gold',   lv: 75,  max: 5,  per: 0.03 },  // +3% iron from a cleared level a rank (15%)
+      deal:   { icon: 'dm_deal',   tier: 'red',    lv: 85,  max: 1,  per: 1 },     // every vault holds iron
+      key:    { icon: 'dm_key',    tier: 'red',    lv: 100, max: 1,  per: 2 },     // two more entries a day (kept through a reset)
+      seal:   { icon: 'dm_seal',   tier: 'red',    lv: 110, max: 1,  per: 1 },     // the Stalker never comes
+    },
+  };
+  Object.values(E.DUNGEON_MASTERY.perks).forEach((d) => { d.cost = E.DUNGEON_MASTERY.costs[d.tier]; });
   E.pitWeeklyReward = (rank) => { const r = E.PIT.weekly.find(([n]) => rank <= n); return r ? r[1] : null; };
   /** The account's reward track: a bigger reward every 5 levels, for ever. Each milestone pays gems, the metal of its
    *  level, and in turn a Silver chest (x5), a Gold chest (x10) or a sure relic (x20: Epic, Legendary from 60);

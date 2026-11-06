@@ -205,9 +205,9 @@ const live = require('../game/live.json');
   assert.strictEqual(r.profile.essence, 1728); assert.strictEqual(r.profile.pit.used, 3);
   // the Mastery Pass (on its own, not the Pit Pass): twice the experience
   r = await withProfile(Object.assign({}, p0, { pit: { best: 30, day: null, used: 0, active: null, pass: true } }), live, (DH) => { DH.actions.list.pitSweep.run({}); return DH.save.data.pit.mxp; });
-  assert.strictEqual(r.result, 31, 'the Pit Pass does not double the Mastery (+30% in the Pit): 30 waves x 0.8 x 1.3');
+  assert.strictEqual(r.result, 16, 'the Pit Pass does not double the Mastery (+30% in the Pit); a sweep gives half: 30 waves x 0.8 x 1.3 x 0.5');
   r = await withProfile(r.profile, live, (DH) => { DH.meta.fulfillProduct('masterypass', true); DH.actions.list.pitSweep.run({}); return DH.save.data.pit.mxp; });
-  assert.strictEqual(r.result, 93); assert.strictEqual(r.profile.masteryPass, true);
+  assert.strictEqual(r.result, 47); assert.strictEqual(r.profile.masteryPass, true);
   // the slower Mastery: 7520 experience for level 139 -> 140, 1 077 386 in all to level 200; an older save keeps a fifth of
   // its experience (what the new rules would have given), its cards come back and Extra Entry stays
   r = await withProfile(Object.assign({}, p0, { pit: { best: 0, day: null, used: 0, active: null, pass: false, mv: 2, mxp: 50000, perks: { power: 3, entry: 1 } } }), live, (DH) => {
@@ -277,5 +277,67 @@ const live = require('../game/live.json');
   r = await withProfile(p0, live, async (DH) => { const d = DH.meta.ensureDaily(); d.deals = [{ i: 0, bought: false }, { i: 3, bought: false }, { i: 5, bought: false }, { i: 13, bought: false }];
     const n = DH.meta.ensureDaily().deals.length, n2 = DH.meta.ensureDaily().deals.length; return [n, n2, await DH.actions.list.buyDeal.run({ idx: 0 })]; });
   assert.deepStrictEqual(r.result, [7, 7, null], 'old day gets the second row');
+  // ---- the Dungeon (js/meta/dungeon.js)
+  {
+    const L = (DH) => DH.actions.list, back = (prof, ms) => { prof.dungeon.active.at -= ms; return prof; };
+    // shut until the third hall is cleared
+    r = await withProfile(p0, live, (DH) => L(DH).dunStart.run({ lv: 1 }));
+    assert.strictEqual(r.result, null, 'dungeon locked');
+    const p1 = Object.assign({}, p0, { cleared: { crypt: true, abyss: true, aqueduct: true }, gems: 2000 });
+    r = await withProfile(p1, live, (DH) => [DH.meta.dunEntries(), L(DH).dunStart.run({ lv: 3 }), L(DH).dunStart.run({ lv: 1 })]);
+    assert.strictEqual(r.result[0], 10); assert.strictEqual(r.result[1], null, 'no further than the best + 1');
+    assert.strictEqual(r.result[2].lv, 1); assert.strictEqual(r.result[2].hall, 'crypt'); assert.deepStrictEqual(r.result[2].affixes, []);
+    // a level cannot be won faster than its floors allow
+    r = await withProfile(r.profile, live, (DH) => L(DH).dunEnd.run({ floors: 6, won: true, gold: 999999 }));
+    assert.strictEqual(r.result.won, false, 'too fast: not won'); assert.strictEqual(r.result.floors, 0); assert.strictEqual(r.profile.dungeon.best, 0);
+    // won the first time: gold, iron, quartz, a Gold chest and two Wooden, the best level, the board, the Mastery
+    r = await withProfile(r.profile, live, (DH) => L(DH).dunStart.run({ lv: 1 }));
+    const g0 = r.profile.gold, gear0 = r.profile.gear.length;
+    r = await withProfile(back(r.profile, 300e3), live, (DH) => L(DH).dunEnd.run({ floors: 6, won: true, gold: 500 }));
+    assert.strictEqual(r.result.won, true); assert.strictEqual(r.result.first, true); assert.strictEqual(r.result.record, true);
+    assert.strictEqual(r.profile.dungeon.best, 1); assert.strictEqual(r.result.gear.length, 3, 'a Gold chest and two Wooden');
+    assert.strictEqual(r.profile.gear.length - gear0, 3); assert.strictEqual(r.profile.gold - g0, 960 + 500);
+    assert.strictEqual(r.profile.quartz, 15); assert.strictEqual(r.profile.mats.iron - p1.mats.iron, 6);
+    assert.strictEqual(r.profile.dungeon.mxp, 13, '6 floors x 2 + level 1 x 0.5');
+    assert.ok(r.profile.boards.best.dungeon__all && r.profile.boards.best.dungeon__all.score === 1, 'the Dungeon board');
+    // again: one Wooden chest
+    r = await withProfile(r.profile, live, (DH) => L(DH).dunStart.run({ lv: 1 }));
+    r = await withProfile(back(r.profile, 300e3), live, (DH) => L(DH).dunEnd.run({ floors: 6, won: true, gold: 0 }));
+    assert.strictEqual(r.result.first, false); assert.strictEqual(r.result.gear.length, 1); assert.strictEqual(r.profile.dungeon.used, 3);
+    // the hazards: none below 20, one to 49, two to 99, three from 100; the same every time; the Seal keeps the Stalker out
+    r = await withProfile(r.profile, live, (DH) => { const M = DH.meta; const a = [19, 20, 49, 50, 99, 100, 250].map((l) => M.dunAffixes(l).length);
+      let stalker = 0; for (let l = 100; l < 400; l++) if (M.dunAffixes(l).includes('stalker')) stalker++;
+      DH.save.data.dungeon.perks.seal = 1; let after = 0; for (let l = 100; l < 400; l++) if (M.dunAffixes(l).includes('stalker')) after++;
+      return [a, M.dunAffixes(77).join() === M.dunAffixes(77).join(), stalker > 0, after, M.dunHall(8), M.dunHall(7)]; });
+    assert.deepStrictEqual(r.result, [[0, 1, 1, 2, 2, 3, 3], true, true, 0, 'crypt', 'reliquary']);
+    // vaults: rolled at the start, paid once each, five a day at most, kept even if the level is lost
+    r = await withProfile(Object.assign({}, r.profile, { dungeon: Object.assign({}, r.profile.dungeon, { perks: {} }) }), live, (DH) => { DH.economy.DUNGEON.vaultChance = 1; return L(DH).dunStart.run({ lv: 2 }); });
+    assert.strictEqual(r.result.vaults.length, 5, 'five a day'); assert.ok(r.result.kinds.every((k) => k === 'gold' || k === 'iron'));
+    r = await withProfile(back(r.profile, 300e3), live, (DH) => { const out = []; for (const f of [0, 0, 1, 2, 3, 4, 5]) out.push(L(DH).dunVault.run({ floor: f })); return out.map((x) => (x ? x.kind : null)); });
+    assert.strictEqual(r.result.filter(Boolean).length, 5); assert.strictEqual(r.result[1], null, 'once each'); assert.strictEqual(r.profile.dungeon.vaults, 5);
+    r = await withProfile(r.profile, live, (DH) => [L(DH).dunEnd.run({ floors: 2, won: false, gold: 0 }), DH.economy.DUNGEON.vaultChance = 1, L(DH).dunStart.run({ lv: 2 })]);
+    assert.strictEqual(r.result[0].won, false); assert.strictEqual(r.result[2].vaults.length, 0, 'no more vaults today');
+    // one gem purchase a fight: a revive, or more time
+    r = await withProfile(r.profile, live, (DH) => [L(DH).dunBuy.run({ what: 'revive' }), L(DH).dunBuy.run({ what: 'time' })]);
+    assert.deepStrictEqual(r.result, [true, null]); assert.strictEqual(r.profile.gems, 1500);
+    r = await withProfile(Object.assign({}, r.profile, { gems: 100 }), live, (DH) => { L(DH).dunEnd.run({ floors: 0 }); L(DH).dunStart.run({ lv: 1 }); return L(DH).dunBuy.run({ what: 'time' }); });
+    assert.strictEqual(r.result, false, 'not enough gems'); assert.strictEqual(r.profile.gems, 100);
+    // the sweep: half the best level's gold and quartz, half the experience, no chests
+    r = await withProfile(r.profile, live, (DH) => { L(DH).dunEnd.run({ floors: 0 }); const q0 = DH.save.data.quartz, g = DH.save.data.gold, x = DH.save.data.dungeon.mxp, gear = DH.save.data.gear.length;
+      const w = L(DH).dunSweep.run({ n: 2 }); return [w.n, DH.save.data.gold - g, DH.save.data.quartz - q0, DH.save.data.dungeon.mxp - x, DH.save.data.gear.length - gear]; });
+    assert.deepStrictEqual(r.result, [2, 960, 16, 13, 0], 'sweep x2: 480 gold, 8 quartz, 2 x (12 + 0.5) x 0.5 experience');
+    // the Leap: three entries clear three new levels at once (uncleared levels only)
+    r = await withProfile(Object.assign({}, r.profile, { dungeon: Object.assign({}, r.profile.dungeon, { used: 0, perks: { leap: 2 } }) }), live, (DH) => [DH.meta.dunLeapMax(1), DH.meta.dunLeapMax(2), L(DH).dunStart.run({ lv: 2, n: 3 })]);
+    assert.strictEqual(r.result[0], 1); assert.strictEqual(r.result[1], 3); assert.strictEqual(r.result[2].n, 3); assert.strictEqual(r.profile.dungeon.used, 3);
+    r = await withProfile(back(r.profile, 600e3), live, (DH) => L(DH).dunEnd.run({ floors: 6, won: true }));
+    assert.strictEqual(r.profile.dungeon.best, 4); assert.strictEqual(r.result.gear.length, 9, 'three first clears');
+    // the boss's chest only within 120 levels of the best; the Jailer's Key: two more entries, kept through a reset, taken back for gems
+    r = await withProfile(Object.assign({}, r.profile, { gems: 100, dungeon: Object.assign({}, r.profile.dungeon, { best: 200, perks: { key: 1, fury: 3 } }) }), live, (DH) => {
+      const M = DH.meta, a = [M.dunBossLoot(79), M.dunBossLoot(80), M.dunEntries()]; M.dunPerkReset(); a.push(JSON.stringify(DH.save.data.dungeon.perks), M.dunPerkDown('key')); return a; });
+    assert.deepStrictEqual(r.result, [false, true, 12, '{"key":1}', false]);
+    // the gold picked up on the floors is capped by the level and the time
+    r = await withProfile(r.profile, live, (DH) => DH.meta.dunRunGoldCap(10, 300));
+    assert.strictEqual(r.result, 7000);
+  }
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });

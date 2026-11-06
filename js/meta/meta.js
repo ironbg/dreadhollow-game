@@ -74,6 +74,7 @@
     if (rw.gold) { const g = Math.floor(rw.gold); s.gold += g; out.push({ icon: 'i_gold', text: '+' + U.fmt(g), kind: 'gold' }); }
     if (rw.gems) { s.gems += rw.gems; out.push({ icon: 'i_gem', text: '+' + U.fmt(rw.gems), kind: 'gems' }); }
     if (rw.essence) { s.essence = (s.essence || 0) + rw.essence; out.push({ icon: 'i_essence', text: '+' + U.fmt(rw.essence), kind: 'essence' }); }
+    if (rw.quartz) { const q = Math.floor(rw.quartz); s.quartz = (s.quartz || 0) + q; out.push({ icon: 'i_quartz', text: '+' + U.fmt(q), kind: 'quartz' }); } // Dark Quartz (the Dungeon's)
     if (rw.energy) { meta.energy(); s.energy += rw.energy; out.push({ icon: 'i_energy', text: '+' + rw.energy, kind: 'energy' }); }
     for (const [key, list, store, pre, tk] of STOCK) for (const k in rw[key] || {}) { // forging materials, herbs, potions: { id: count }
       const n = Math.floor(rw[key][k]); if (!(n > 0) || !list().includes(k)) continue;
@@ -122,6 +123,7 @@
     if (rw.gold) out.push({ icon: 'i_gold', text: U.fmt(rw.gold) });
     if (rw.gems) out.push({ icon: 'i_gem', text: U.fmt(rw.gems) });
     if (rw.essence) out.push({ icon: 'i_essence', text: U.fmt(rw.essence) });
+    if (rw.quartz) out.push({ icon: 'i_quartz', text: U.fmt(rw.quartz) });
     if (rw.energy) out.push({ icon: 'i_energy', text: rw.energy });
     for (const [key, list, , pre, tk] of STOCK) for (const k in rw[key] || {}) if (list().includes(k)) out.push({ icon: pre + k, text: U.fmt(rw[key][k]), name: t(tk(k)) });
     if (rw.passXp) out.push({ icon: 'n_pass', text: rw.passXp });
@@ -238,7 +240,7 @@
     const p = pitS(); if (meta.pitLeft() <= 0 || p.best <= 0) return null;
     n = Math.max(1, Math.min(meta.pitLeft(), n | 0 || 1));
     const lv0 = meta.pitMastery().lv, paid = meta.pitSweepPay() * n;
-    p.used += n; addEssence(paid); for (let i = 0; i < n; i++) addMastery(p.best);
+    p.used += n; addEssence(paid); for (let i = 0; i < n; i++) addMastery(p.best * E.PIT.sweepXp); // a sweep: half the experience of a fight
     meta.track('pit', n); const deeds = meta.checkDeeds(null); changed();
     return { paid, n, mastery: meta.pitMastery().lv - lv0, deeds };
   };
@@ -1250,6 +1252,7 @@
     gold: (r, res) => res.goldRun, wins: (r) => (r.victory ? 1 : 0), agony: (r) => (r.victory && r.agonyOn ? r.agony : 0),
     tokens: (r, res, b) => ((res.events || []).find((e) => e.id === b.event) || {}).n || 0,
     pit: (r) => r.pitWave || 0,
+    dungeon: (r) => r.dunLevel || 0,
   };
   /** The Pit's own boards: always open, the week's and all time, by the farthest wave reached in a fight. */
   const PIT_BOARDS = [
@@ -1257,6 +1260,12 @@
     { id: 'pit', metric: 'pit', mode: 'best', period: 'all', name: { bg: 'Ямата · всички времена', en: 'The Pit · all time' } },
   ];
   meta.pitBoards = () => PIT_BOARDS;
+  /** The Dungeon's boards: the highest level cleared, the week's and all time. */
+  const DUN_BOARDS = [
+    { id: 'dungeon', metric: 'dungeon', mode: 'best', period: 'week', name: { bg: 'Тъмницата · седмица', en: 'The Dungeon · week' } },
+    { id: 'dungeon', metric: 'dungeon', mode: 'best', period: 'all', name: { bg: 'Тъмницата · всички времена', en: 'The Dungeon · all time' } },
+  ];
+  meta.dunBoards = () => DUN_BOARDS;
   meta.BOARD_METRICS = Object.keys(METRICS);
   meta.boardPeriodKey = (b) => {
     const d = new Date(U.now());
@@ -1274,7 +1283,7 @@
   /** The boards open now. An event board is open while its event is collecting. */
   meta.boards = () => {
     const cfg = DH.live && DH.live.config, now = U.now();
-    return ((cfg && cfg.boards) || []).concat(PIT_BOARDS).filter((b) => b && b.id && METRICS[b.metric]
+    return ((cfg && cfg.boards) || []).concat(PIT_BOARDS, DUN_BOARDS).filter((b) => b && b.id && METRICS[b.metric]
       && !(b.start && now < Date.parse(b.start)) && !(b.end && now >= Date.parse(b.end))
       && (b.period !== 'event' || meta.liveEvents().some((ev) => ev.id === b.event && meta.eventCollecting(ev))));
   };

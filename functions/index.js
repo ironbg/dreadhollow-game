@@ -148,7 +148,7 @@ exports.sync = callable(async (req) => {
 
 /* ---------- act ---------- */
 /** The actions that can change what a leaderboard shows: a Pit fight's end (its wave) and a new name (sent again). */
-const BOARD_ACTS = new Set(['pitEnd', 'rename']);
+const BOARD_ACTS = new Set(['pitEnd', 'dunEnd', 'rename']);
 exports.act = callable(async (req) => {
   const uid = uidOf(req), d = req.data || {}, cfg = await liveConfig();
   checkVersion(d, cfg);

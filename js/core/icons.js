@@ -2075,6 +2075,17 @@
       g.strokeStyle = 'rgba(80,0,20,0.55)'; g.lineWidth = 0.5; g.beginPath(); g.moveTo(16, 3); g.lineTo(16, 29.5); g.moveTo(7, 17); g.lineTo(25, 17); g.stroke();
       glint(g, 14, 9, 2, '#ffffff');
     },
+    i_quartz(g) { // Dark Quartz (the Dungeon's): a cluster of dark violet crystal, lit from within
+      P.glow(g, 16, 19, 13, '#a04aff', 0.45);
+      const shard = (pts, lit) => sil(g, pts, P.lg(g, pts[0], pts[1], pts[4], pts[5], lit ? ['#f0d8ff', '#a060f0', '#3a1070', '#14052a'] : ['#c8a0f8', '#6a30b8', '#22084a']), 1.1);
+      shard([6, 27, 8.5, 14, 12, 11, 14.5, 26], false);                // the left one, leaning out
+      shard([19, 27, 21.5, 12, 25, 10, 26.5, 26.5], false);            // the right one
+      shard([11, 28, 13.5, 8, 16, 3, 18.5, 8, 21, 28], true);          // the tall middle one
+      P.path(g, [16, 3, 18.5, 8, 16.6, 26, 14.6, 8.4]); P.fill(g, 'rgba(255,240,255,0.42)');
+      P.path(g, [5, 26.6, 27, 26.6, 25.5, 29.4, 6.5, 29.4]); P.fill(g, '#1a0a26'); // the rock it grows from
+      g.strokeStyle = 'rgba(40,0,70,0.55)'; g.lineWidth = 0.5; g.beginPath(); g.moveTo(16, 3); g.lineTo(16.4, 28); g.stroke();
+      glint(g, 14.6, 9.4, 2, '#ffffff');
+    },
     i_gem(g) {
       P.glow(g, 16, 16, 13, '#ff5ad8', 0.45);
       sil(g, [9, 6.6, 23, 6.6, 29, 13, 16, 28.4, 3, 13], P.lg(g, 3, 6, 29, 28, ['#ffc0f0', '#ff5ad8', '#6a0a5a']), 1.3);

@@ -6,7 +6,7 @@ const vm = require('vm');
 const fs = require('fs');
 const path = require('path');
 
-const FILES = ['core/ns.js', 'i18n/i18n.js', 'i18n/en.js', 'data/content.js', 'data/economy.js', 'data/artifacts.js', 'data/deeds.js', 'data/constellation.js', 'core/save.js', 'meta/meta.js', 'meta/actions.js'];
+const FILES = ['core/ns.js', 'i18n/i18n.js', 'i18n/en.js', 'data/content.js', 'data/economy.js', 'data/artifacts.js', 'data/deeds.js', 'data/constellation.js', 'core/save.js', 'meta/meta.js', 'meta/dungeon.js', 'meta/actions.js'];
 const DIR = path.join(__dirname, 'game');
 const scripts = FILES.map((f) => new vm.Script(fs.readFileSync(path.join(DIR, f), 'utf8'), { filename: 'game/' + f }));
 
