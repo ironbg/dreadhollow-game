@@ -148,7 +148,7 @@
       h('div.center.small.muted', t('energy.desc', { n: C.RUN_ENERGY, m: Math.round(E.ENERGY_REGEN_MS / 60000) })),
       h('div.col', { style: { marginTop: '12px' } },
         h('button.btn.ad.block' + (left > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('adEnergy'); if (r) { m.close(); ui.rewardPopup(t('energy.title'), r); } } },
-          h('span.adtag', 'AD'), t('energy.ad', { n: E.ENERGY_AD_AMOUNT }), h('span.small', '(' + left + ')')),
+          ui.adTag(), t('energy.ad', { n: E.ENERGY_AD_AMOUNT }), h('span.small', '(' + left + ')')),
         h('button.btn.gem.block', { onclick: async () => { const r = await ui.act('gemEnergy'); if (r) { m.close(); ui.rewardPopup(t('energy.title'), r); } else ui.toast(t('common.notEnough'), 'bad'); } },
           t('energy.gems', { n: E.ENERGY_GEM_AMOUNT }), A.img('i_gem'), E.ENERGY_GEM_COST))) });
     m.el.querySelector('.bigicon').style.cssText = 'width:64px;height:64px';
@@ -560,12 +560,12 @@
       h('div.center.small.muted', t('home.vigilTime', { t: U.fmtDuration(v.ms), max: 12 })),
       h('div.btns',
         h('button.btn.gold' + (v.gold > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('claimVigil', { double: false }); m.close(); if (r) ui.rewardPopup(t('vigil.title'), r); } }, t('common.claim')),
-        h('button.btn.ad' + (v.gold > 0 ? '.shine' : '.off'), { onclick: async () => { if (await DH.ads.rewarded('vigil_x2')) { const r = await ui.act('claimVigil', { double: true }); m.close(); if (r) ui.rewardPopup(t('vigil.title'), r); } } }, h('span.adtag', 'AD'), t('common.claimX2'))),
+        h('button.btn.ad' + (v.gold > 0 ? '.shine' : '.off'), { onclick: async () => { if (await DH.ads.rewarded('vigil_x2')) { const r = await ui.act('claimVigil', { double: true }); m.close(); if (r) ui.rewardPopup(t('vigil.title'), r); } } }, ui.adTag(), t('common.claimX2'))),
       h('h3.sect', t('vigil.quick')),
       h('div.small.muted', t('vigil.quickDesc', { h: E.QUICK_VIGIL_MS / 3600e3 })),
       h('div.col', { style: { marginTop: '8px' } },
         d.quickVigilFree ? h('button.btn.green.block', { onclick: async () => { const r = await ui.act('quickVigil', { mode: 'free' }); m.close(); if (r) ui.rewardPopup(t('vigil.quick'), r); } }, t('common.free'))
-          : h('button.btn.ad.block' + (adsLeft > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('quickVigil', { mode: 'ad' }); if (r) { m.close(); ui.rewardPopup(t('vigil.quick'), r); } } }, h('span.adtag', 'AD'), t('common.watch'), h('span.small', '(' + adsLeft + ')')),
+          : h('button.btn.ad.block' + (adsLeft > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('quickVigil', { mode: 'ad' }); if (r) { m.close(); ui.rewardPopup(t('vigil.quick'), r); } } }, ui.adTag(), ui.watchT(), h('span.small', '(' + adsLeft + ')')),
         h('button.btn.gem.block', { onclick: async () => { const r = await ui.act('quickVigil', { mode: 'gems' }); if (r) { m.close(); ui.rewardPopup(t('vigil.quick'), r); } else ui.toast(t('common.notEnough'), 'bad'); } }, A.img('i_gem'), E.QUICK_VIGIL_GEMS))) })
       .el.querySelector('.bigicon').style.cssText = 'width:64px;height:64px';
   };
@@ -680,7 +680,7 @@
         h('div.grow', h('div.rs-t', all ? t('resshop.allTaken') : free ? t('resshop.free') : t('resshop.ad')), items(free ? E.RES_FREE : E.RES_AD)),
         all ? h('button.btn.small.ghost.off', A.img('u_check', 'ci'), t('resshop.taken'))
           : free ? h('button.btn.small.gold', { onclick: async () => { const r = await ui.act('claimResFree'); if (r) { DH.audio.play('reward'); ui.rewardPopup(t('resshop.title'), r); } draw(); } }, t('common.claim'))
-            : h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('adRes'); if (r) ui.rewardPopup(t('resshop.title'), r); draw(); } }, h('span.adtag', 'AD'), t('common.watch') + ' (' + left + ')'));
+            : h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('adRes'); if (r) ui.rewardPopup(t('resshop.title'), r); draw(); } }, ui.adTag(), ui.watchT() + ' (' + left + ')'));
       const tm = h('div.small.muted.center.rs-timer'), upd = () => { tm.textContent = t('resshop.daily', { t: U.fmtDuration(U.msToMidnight()) }); };
       upd(); clearInterval(timer); timer = setInterval(upd, 1000);
       // the paid packs: gold and every metal, bought as often as wanted

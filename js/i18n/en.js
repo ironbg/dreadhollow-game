@@ -73,7 +73,7 @@ DH.i18n.register('en', { name: 'English', native: 'English' }, {
   'shop.legendDesc': 'A Legendary relic, a Golden Chest, 2500 gems and 50K gold.', 'shop.noadsDesc': 'Remove all ads forever. Ad rewards are granted instantly.',
   'shop.deals': 'Daily deals', 'shop.soldOut': 'Sold out', 'shop.chests': 'Chests', 'shop.epicChance': 'Epic or better {v}%', 'shop.pity': 'Legendary in {n}',
   'shop.rates': 'Drop rates', 'shop.gems': 'Soul Gems', 'shop.x2': 'x2 FIRST', 'shop.tag.popular': 'POPULAR', 'shop.tag.best': 'BEST VALUE',
-  'shop.bonus': '+{v}% bonus', 'shop.gold': 'Gold', 'shop.free': 'Free rewards', 'shop.freeGems': '{n} free gems', 'shop.leftToday': '{n} left today',
+  'shop.bonus': '+{v}% bonus', 'shop.gold': 'Gold', 'shop.free': 'Free rewards', 'shop.freeGold': '{n} free gold', 'shop.freeGems': '{n} free gems', 'shop.leftToday': '{n} left today',
   'shop.freeEnergy': '{n} free torches', 'shop.restore': 'Restore purchases', 'shop.testMode': 'Store is in test mode — no real payments.',
   'shop.perDay': '/day', 'shop.chestOpened': 'Chest opened!', 'shop.pityRule': 'A Legendary or better relic is guaranteed at least once every {n} chests.',
 

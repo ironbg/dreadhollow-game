@@ -611,7 +611,7 @@
         const def = E.dealPool[deal.i], pv = M.rewardPreview(def.grant)[0];
         let btn;
         if (deal.bought) btn = h('button.btn.small.ghost.off', t('shop.soldOut'));
-        else if (def.cost.ad) btn = h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('buyDeal', { idx: i }); if (r) ui.rewardPopup(t('shop.deals'), r); ui.refresh(); } }, h('span.adtag', 'AD'), t('common.free'));
+        else if (def.cost.ad) btn = h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('buyDeal', { idx: i }); if (r) ui.rewardPopup(t('shop.deals'), r); ui.refresh(); } }, ui.adTag(), t('common.free'));
         else btn = h('button.btn.small.' + (def.cost.gems ? 'gem' : 'gold'), { onclick: async () => { const r = await ui.act('buyDeal', { idx: i }); if (r) ui.rewardPopup(t('shop.deals'), r); else if (r !== undefined) ui.toast(t('common.notEnough'), 'bad'); ui.refresh(); } },
           A.img(def.cost.gems ? 'i_gem' : 'i_gold'), U.fmt(def.cost.gems || def.cost.gold));
         deals.append(h('div.panel.chest', h('div.slot' + (pv.rarity != null ? '.rar' + pv.rarity : ''), { style: { width: '56px' } }, A.img(pv.icon)), h('div.small', { style: { fontWeight: 800 } }, pv.text), btn));
@@ -644,7 +644,7 @@
       ch.append(h('div.panel.chest',
         A.img('c_wood'), h('div.t', t('chest.wood')),
         h('div.cbtns',
-          freeIn <= 0 ? h('button.btn.small.ad.shine', { onclick: async () => { const r = await ui.act('freeChestAd'); if (r) chestResult(r); ui.refresh(); } }, h('span.adtag', 'AD'), t('common.free'))
+          freeIn <= 0 ? h('button.btn.small.ad.shine', { onclick: async () => { const r = await ui.act('freeChestAd'); if (r) chestResult(r); ui.refresh(); } }, ui.adTag(), t('common.free'))
             : h('button.btn.small.ghost.off', chestTimer),
           h('button.btn.small.gold', { onclick: () => buyChest('wood') }, A.img('i_gold'), U.fmt(E.chests.wood.price.gold)))));
       ch.append(h('div.panel.chest',
@@ -688,19 +688,22 @@
       // ---- free
       root = sec.free = h('div.shop-sec');
       root.append(h('h3.sect', { id: 'shop-free' }, t('shop.free')));
-      const gemsLeft = E.FREE_GEM_ADS - d.ads.gems, enLeft = E.ENERGY_AD_LIMIT - d.ads.energy;
-      root.append(h('div.panel.item', h('div.ico', A.img('i_gem')),
-        h('div.grow', h('div.t', t('shop.freeGems', { n: E.FREE_GEM_AMOUNT })), h('div.d', t('shop.leftToday', { n: gemsLeft }))),
-        h('button.btn.small.ad' + (gemsLeft > 0 ? '.shine' : '.off'), { onclick: async () => { const r = await ui.act('adGems'); if (r) ui.rewardPopup(t('shop.free'), r); ui.refresh(); } }, h('span.adtag', 'AD'), t('common.watch'))));
+      const gemsLeft = E.FREE_GEM_ADS - d.ads.gems, enLeft = E.ENERGY_AD_LIMIT - d.ads.energy, goldN = d.ads.gold || 0, goldLeft = E.GOLD_ADS.length - goldN;
+      root.append(h('div.panel.item', h('div.ico', A.img('i_gold')),
+        h('div.grow', h('div.t', t('shop.freeGold', { n: U.fmt(E.GOLD_ADS[Math.min(goldN, E.GOLD_ADS.length - 1)]) })), h('div.d', t('shop.leftToday', { n: goldLeft }))),
+        h('button.btn.small.ad' + (goldLeft > 0 ? '.shine' : '.off'), { onclick: async () => { const r = await ui.act('adGold'); if (r) ui.rewardPopup(t('shop.free'), r); ui.refresh(); } }, ui.adTag(), ui.watchT())));
       root.append(h('div.panel.item', h('div.ico', A.img('i_energy')),
         h('div.grow', h('div.t', t('shop.freeEnergy', { n: E.ENERGY_AD_AMOUNT })), h('div.d', t('shop.leftToday', { n: enLeft }))),
-        h('button.btn.small.ad' + (enLeft > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('adEnergy'); if (r) ui.rewardPopup(t('shop.free'), r); ui.refresh(); } }, h('span.adtag', 'AD'), t('common.watch'))));
+        h('button.btn.small.ad' + (enLeft > 0 ? '' : '.off'), { onclick: async () => { const r = await ui.act('adEnergy'); if (r) ui.rewardPopup(t('shop.free'), r); ui.refresh(); } }, ui.adTag(), ui.watchT())));
+      root.append(h('div.panel.item', h('div.ico', A.img('i_gem')),
+        h('div.grow', h('div.t', t('shop.freeGems', { n: E.FREE_GEM_AMOUNT })), h('div.d', t('shop.leftToday', { n: gemsLeft }))),
+        h('button.btn.small.ad' + (gemsLeft > 0 ? '.shine' : '.off'), { onclick: async () => { const r = await ui.act('adGems'); if (r) ui.rewardPopup(t('shop.free'), r); ui.refresh(); } }, ui.adTag(), ui.watchT())));
 
       // the tab bar, the chosen section, then what belongs under every section
       const TABS = { offers: 'n_pass', deals: 'hourglass', forge: 'mat_silver', chests: 'c_gold', gems: 'i_gem', gold: 'i_gold', free: 'n_ad' };
       const dot = { // something free waits in that section
         offers: M.soulCardClaimable(), deals: d.deals.some((x) => !x.bought && E.dealPool[x.i].cost.ad), chests: M.freeChestReadyIn() <= 0,
-        free: E.FREE_GEM_ADS - d.ads.gems > 0 || E.ENERGY_AD_LIMIT - d.ads.energy > 0,
+        free: E.FREE_GEM_ADS - d.ads.gems > 0 || E.ENERGY_AD_LIMIT - d.ads.energy > 0 || (d.ads.gold || 0) < E.GOLD_ADS.length,
       };
       const cur = TABS[ui.sub.shop] ? ui.sub.shop : 'offers';
       page.append(h('div.shop-tabs', Object.keys(TABS).map((k) => h('button.stab' + (k === cur ? '.on' : ''), { onclick: () => { if (k === cur) return; click(); ui.sub.shop = k; ui.refresh(true); } },

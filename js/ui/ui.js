@@ -68,6 +68,10 @@
       if (on && --busyN <= 0) { busyN = 0; document.body.classList.remove('srvbusy'); }
     }
   };
+  /** An ad button's AD tag and its "Watch": with No Ads (bought, or the season's premium pass) the reward comes without
+   *  an ad, so no tag and the button reads "Claim". */
+  ui.adTag = () => (DH.meta.noAds() ? null : h('span.adtag', 'AD'));
+  ui.watchT = () => t(DH.meta.noAds() ? 'common.claim' : 'common.watch');
   /** What a failed call to the game's server means for the player. */
   ui.serverErr = (e) => {
     const c = e && e.code;

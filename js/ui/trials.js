@@ -297,7 +297,7 @@
         h('div.grow', h('div.rs-t', all ? t('resshop.allTaken') : free ? t('pitshop.free') : t('pitshop.ad')), ess(free ? S.free.essence : S.ad.essence)),
         all ? h('button.btn.small.ghost.off', A.img('u_check', 'ci'), t('resshop.taken'))
           : free ? h('button.btn.small.gold', { onclick: async () => { const r = await ui.act('claimPitFree'); if (r) { DH.audio.play('reward'); ui.rewardPopup(t('pitshop.title'), r); } } }, t('common.claim'))
-            : h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('adPit'); if (r) ui.rewardPopup(t('pitshop.title'), r); } }, h('span.adtag', 'AD'), t('common.watch') + ' (' + left + ')'));
+            : h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('adPit'); if (r) ui.rewardPopup(t('pitshop.title'), r); } }, ui.adTag(), ui.watchT() + ' (' + left + ')'));
       const tm = h('div.small.muted.center.rs-timer'), upd = () => { tm.textContent = t('resshop.daily', { t: U.fmtDuration(U.msToMidnight()) }); };
       upd(); clearInterval(timer); timer = setInterval(upd, 1000);
       const packs = E.essPackOrder.map((id) => {

@@ -407,7 +407,7 @@
       const hasPot = LV.some((k) => (run.potions[k] || 0) > 0);
       const rerollBtn = run.rerolls > 0
         ? h('button.btn.small.blue', { onclick: () => { click(); run.reroll(); draw(); } }, A.img('i_reroll'), t('levelup.reroll', { n: run.rerolls }))
-        : !run.usedAdReroll ? h('button.btn.small.ad', { onclick: async () => { if (await DH.ads.rewarded('reroll')) { run.usedAdReroll = true; run.reroll(true); draw(); } } }, h('span.adtag', 'AD'), t('levelup.rerollAd')) : null;
+        : !run.usedAdReroll ? h('button.btn.small.ad', { onclick: async () => { if (await DH.ads.rewarded('reroll')) { run.usedAdReroll = true; run.reroll(true); draw(); } } }, ui.adTag(), t('levelup.rerollAd')) : null;
       m.set(h('div',
         h('div.lvl-title', isClass ? t('levelup.classTitle') : run.choices.some((c) => c.kind === 'up') ? t('levelup.upTitle') : t('levelup.title')),
         h('div.center.small.muted', t('levelup.sub', { n: run.levelFor })),
@@ -463,7 +463,7 @@
         const ok = await DH.ads.rewarded('start_bonus'); busy = false;
         if (!ok || DH.game.run !== run) return;
         run.takeStartBonus(pick); DH.audio.play('reward'); done(m);
-      } }, DH.meta.noAds() ? null : h('span.adtag', 'AD'), t('startBonus.claim')),
+      } }, ui.adTag(), t('startBonus.claim')),
       h('button.btn.red.block.sb-no', { onclick: () => { click(); done(m); } }, t('startBonus.decline')))); // no, thanks: the fight begins
     m = ui.modal({ title: t('startBonus.title'), rays: true, cls: 'levelup startbonus', onX: () => { click(); done(m); }, body: () => h('div') });
     draw();
@@ -711,7 +711,7 @@
     const m = ui.modal({ title: t('revive.title'), closable: false, body: h('div',
       h('div.center.muted', t('revive.desc')), cnt,
       h('div.col',
-        !run.usedAdRevive ? h('button.btn.ad.block.shine', { onclick: async () => { clearInterval(iv); if (await DH.ads.rewarded('revive')) { run.usedAdRevive = true; revived(); } else startTimer(); } }, h('span.adtag', 'AD'), t('revive.free')) : null,
+        !run.usedAdRevive ? h('button.btn.ad.block.shine', { onclick: async () => { clearInterval(iv); if (await DH.ads.rewarded('revive')) { run.usedAdRevive = true; revived(); } else startTimer(); } }, ui.adTag(), t('revive.free')) : null,
         cost == null ? h('div.center.small.muted', t('revive.noMore')) : h('button.btn.gem.block', { onclick: async () => { clearInterval(iv); const ok = await ui.act('reviveGems', { n: run.usedGemRevive }); if (ok) { run.usedGemRevive++; DH.audio.play('buy'); revived(); } else { if (ok === false) ui.toast(t('common.notEnough'), 'bad'); startTimer(); } } }, t('revive.gems'), A.img('i_gem'), cost, h('small', { style: { opacity: 0.75, marginLeft: '6px' } }, t('revive.left', { n: gemsLeft }))),
         h('button.btn.ghost.block', { onclick: () => { click(); giveUp(); } }, t('revive.giveUp')))) });
     startTimer();
@@ -739,7 +739,7 @@
       const g = await ui.act('doubleRunGold');
       if (g) { goldEl.textContent = U.fmt(res.gold * 2); dblBtn.classList.add('off'); DH.audio.play('coin'); }
       else doubled = false; // the ad was skipped or failed: let them try once more
-    } }, h('span.adtag', 'AD'), t('results.double'));
+    } }, ui.adTag(), t('results.double'));
     const hudEl = document.getElementById('hud'); if (hudEl) hudEl.classList.add('hidden'); // the run is over: its bars do not peek over the results
     ui.modal({ closable: false, cls: 'results wide', rays: win, body: (m) => h('div',
       h('div.big.' + (win ? 'win' : 'lose'), win ? t('results.victory') : t('results.defeat')),

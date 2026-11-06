@@ -822,7 +822,7 @@
       day: today,
       missions: pool.map((m) => ({ id: m.id, p: 0, done: false, claimed: false })),
       bonusClaimed: false, chests: {}, // the activity chests opened today
-      ads: { energy: 0, vigil: 0, gems: 0 },
+      ads: { energy: 0, vigil: 0, gems: 0, gold: 0 },
       quickVigilFree: true,
       deals: [adIdx[Math.floor(rng() * adIdx.length)]].concat(dealIdx).map((i) => ({ i, bought: false })),
       packs: {}, // the Forge: bought today, by pack
@@ -1094,6 +1094,11 @@
     const d = meta.ensureDaily(); if (d.ads.gems >= E.FREE_GEM_ADS) return null;
     if (!(await DH.ads.rewarded('free_gems'))) return null;
     d.ads.gems++; return meta.grant({ gems: E.FREE_GEM_AMOUNT });
+  };
+  meta.adGold = async () => { // 1000, then 2000, then 3000 (E.GOLD_ADS)
+    const d = meta.ensureDaily(), n = d.ads.gold || 0; if (n >= E.GOLD_ADS.length) return null;
+    if (!(await DH.ads.rewarded('free_gold'))) return null;
+    d.ads.gold = n + 1; return meta.grant({ gold: E.GOLD_ADS[n] });
   };
   meta.adEnergy = async () => {
     const d = meta.ensureDaily(); if (d.ads.energy >= E.ENERGY_AD_LIMIT) return null;

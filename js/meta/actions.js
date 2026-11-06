@@ -26,6 +26,7 @@
     claimResFree: { fast: true, run: () => M().claimResFree() },
     adRes: { run: () => M().adRes(), ad: () => (M().ensureDaily().resFree && M().resAdsLeft() > 0 ? 'res_shop' : null) },
     adGems: { run: () => M().adGems(), ad: () => 'free_gems' },
+    adGold: { run: () => M().adGold(), ad: () => 'free_gold' },
     claimSoulCard: { fast: true, run: () => M().claimSoulCard() },
     // shop
     buyChest: { run: (a) => M().buyChest(str(a.type, 12), bool(a.x10)) },
