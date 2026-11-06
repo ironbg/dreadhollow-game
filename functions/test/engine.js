@@ -296,9 +296,9 @@ const live = require('../game/live.json');
     r = await withProfile(back(r.profile, 300e3), live, (DH) => L(DH).dunEnd.run({ floors: 6, won: true, gold: 500 }));
     assert.strictEqual(r.result.won, true); assert.strictEqual(r.result.first, true); assert.strictEqual(r.result.record, true);
     assert.strictEqual(r.profile.dungeon.best, 1); assert.strictEqual(r.result.gear.length, 3, 'a Gold chest and two Wooden');
-    assert.strictEqual(r.profile.gear.length - gear0, 3); assert.strictEqual(r.profile.gold - g0, 960 + 500);
-    assert.strictEqual(r.profile.quartz, 15); assert.strictEqual(r.profile.mats.iron - p1.mats.iron, 6);
-    assert.strictEqual(r.profile.dungeon.mxp, 13, '6 floors x 2 + level 1 x 0.5');
+    assert.strictEqual(r.profile.gear.length - gear0, 3); assert.strictEqual(r.profile.gold - g0, 720 + 500);
+    assert.strictEqual(r.profile.quartz, 15); assert.strictEqual(r.profile.mats.iron - p1.mats.iron, 4);
+    assert.strictEqual(r.profile.dungeon.mxp, 25, '6 floors x 4 + level 1 x 1');
     assert.ok(r.profile.boards.best.dungeon__all && r.profile.boards.best.dungeon__all.score === 1, 'the Dungeon board');
     // again: one Wooden chest
     r = await withProfile(r.profile, live, (DH) => L(DH).dunStart.run({ lv: 1 }));
@@ -325,7 +325,7 @@ const live = require('../game/live.json');
     // the sweep: half the best level's gold and quartz, half the experience, no chests
     r = await withProfile(r.profile, live, (DH) => { L(DH).dunEnd.run({ floors: 0 }); const q0 = DH.save.data.quartz, g = DH.save.data.gold, x = DH.save.data.dungeon.mxp, gear = DH.save.data.gear.length;
       const w = L(DH).dunSweep.run({ n: 2 }); return [w.n, DH.save.data.gold - g, DH.save.data.quartz - q0, DH.save.data.dungeon.mxp - x, DH.save.data.gear.length - gear]; });
-    assert.deepStrictEqual(r.result, [2, 960, 16, 13, 0], 'sweep x2: 480 gold, 8 quartz, 2 x (12 + 0.5) x 0.5 experience');
+    assert.deepStrictEqual(r.result, [2, 720, 16, 25, 0], 'sweep x2: 360 gold, 8 quartz, 2 x (24 + 1) x 0.5 experience');
     // the Leap: three entries clear three new levels at once (uncleared levels only)
     r = await withProfile(Object.assign({}, r.profile, { dungeon: Object.assign({}, r.profile.dungeon, { used: 0, perks: { leap: 2 } }) }), live, (DH) => [DH.meta.dunLeapMax(1), DH.meta.dunLeapMax(2), L(DH).dunStart.run({ lv: 2, n: 3 })]);
     assert.strictEqual(r.result[0], 1); assert.strictEqual(r.result[1], 3); assert.strictEqual(r.result[2].n, 3); assert.strictEqual(r.profile.dungeon.used, 3);

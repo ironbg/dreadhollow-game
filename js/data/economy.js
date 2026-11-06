@@ -465,22 +465,23 @@
     halls: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'discord', 'blightmire', 'reliquary'], // the catacombs of level n: halls[(n - 1) % 7]
     hpPerLv: 0.12, dmgPerLv: 0.05,                             // the foes: +12% health and +5% damage a level over the first (even growth)
     quota: (lv, floor) => Math.min(120, 40 + Math.floor(lv / 4)) + floor * 4, // foes to slay on a floor (floor 0..4)
-    gold: (lv) => Math.round(800 + 160 * lv),                  // a cleared level
-    iron: (lv) => 6 + Math.floor(lv / 3),
+    // what a cleared level pays (a level takes 1.5-3 minutes; a hall's ten minutes pay some 3 000-25 000 gold by the hall)
+    gold: (lv) => Math.round(600 + 120 * lv),                  // level 10: 1 800, 50: 6 600, 100: 12 600
+    iron: (lv) => 4 + Math.floor(lv / 5),
     quartz: (lv) => 12 + 3 * lv,
     acctXp: (lv) => 40 + 4 * lv,                               // the account's experience
     chestsFirst: { gold: 1, wood: 2 }, chestsAgain: { wood: 1 },
     bossLootWithin: 120,                                        // the boss drops its chest only within 120 levels of the best cleared
     bossHp: 0.35,                                               // the Lord's health against a hall's own (met at the tenth minute; here after a few)
     vaultChance: 0.10, vaultsPerDay: 5, vaultSecs: 30,          // a floor's chance to hide a vault (the boss floor too)
-    vaultGold: (lv) => Math.round(1500 + 200 * lv), vaultIron: (lv) => 15 + Math.floor(lv / 2),
+    vaultGold: (lv) => Math.round(1000 + 150 * lv), vaultIron: (lv) => 10 + Math.floor(lv / 4),
     sweep: 0.5,                                                 // a sweep pays half the best level (the Guide card raises it to all)
     minFloorSecs: 8,                                            // the server's check: a floor cannot fall faster than this
   };
   /** The Dungeon's own Mastery (apart from the Pit's): experience from every fight (and sweep, at half), a point a level up
    *  to E.DUNGEON_MASTERY.max, spent in its thirteen cards (they work in the Dungeon only). Freely reset, but the Jailer's Key. */
   E.DUNGEON_MASTERY = {
-    max: 250, xpFloor: 2, xpLevel: 0.5, sweepXp: 0.5,          // a floor cleared, and half the level's number when it is cleared; a sweep: half
+    max: 250, xpFloor: 4, xpLevel: 1, sweepXp: 0.5,            // a floor cleared, and the level's number when it is cleared; a sweep: half (level 60 in some 3 months)
     next: (lv) => 36 * lv + 14,
     costs: { blue: 1, purple: 5, gold: 10, red: 35 },
     keyRefund: 100000,                                           // the Jailer's Key stays through a reset; taking it back costs gems

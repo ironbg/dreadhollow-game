@@ -6,6 +6,13 @@
     {
       v: '1.61.61',
       bg: [
+        'Ново Изпитание: Тъмницата (отключва се след третата зала). Всяко ниво е 5 етажа катакомби и етаж с Владетеля, срещу часовника: 2 минути, +18 сек за изчистен етаж и пясъчни часовници по пода. Стълбите надолу се отварят, щом етажът е изчистен; след Владетеля – портал за изход.',
+        'Тъмницата: всяко ниво е в катакомбите на една от залите, с нейните врагове и Владетел. Нивата стават все по-трудни, а от ниво 20 идват и опасностите на Ямата (1, от 50 – 2, от 100 – 3). Може да прескачаш нива до най-доброто +1.',
+        'Тъмницата: минато ниво дава злато, желязо, Тъмен кварц (нов ресурс за бъдещото усилване на предметите) и сандъци – първия път златен и два дървени, после дървен. Владетелят пуска сандък до 120 нива под рекорда. 10 влизания на ден и бързо минаване.',
+        'Тъмницата: трезори – бонус етажи от 30 секунди със злато или желязо (часовникът стои), до 5 на ден; наградата остава, дори ако загубиш нивото. Едно съживяване с реклама и едно за 500 диаманта; +60 сек за 500 диаманта при изтекло време.',
+        'Тъмницата: собствено Майсторство до ниво 250 с 13 карти (Яростта на дълбините, Сломител на владетели, Скок в мрака, Нюх за съкровища, Ключът на тъмничаря и др.) и класация за най-високо ниво.',
+        'Ямата: бързото минаване дава половината опит за Майсторството.',
+        'Поправено рядко замръзване, когато удар в последния момент убие Владетеля, докато летят вражески снаряди.',
         'Магазин → Дневни: златото за реклама е махнато (вече е в „Безплатно“). Офертата за реклама е отделен ред отгоре, а под нея има 6 оферти вместо 3 – поне една за злато и две за диаманти, всеки ден различни. Нови: желязо, билки, злато за диаманти, сребърен и златен сандък за диаманти, звездна стомана, пакет метали. Цените са с около 15–25% под тези в Ковачницата и при сандъците.',
         'Магазин → Безплатно: ново безплатно злато за реклама – 1000, после 2000, после 3000 злато на ден. Редът е злато, факли, диаманти.',
         'С „Без реклами“ или премиум Бойния пропуск бутоните за реклама пишат „Вземи“ (без знака AD) – наградата се взима направо.',
@@ -13,6 +20,13 @@
         'По-ясно име: „Шанс за свитък“ вече е „Шанс за Тайнствен том от елитите“ – благословията „Учен“, Съзвездието, статистиките и Данъкът на учения. Това е томът, от който избираш ново умение.',
       ],
       en: [
+        'New Trial: the Dungeon (opens after the third hall). Each level is 5 floors of catacombs and the Lord\'s floor, against the clock: 2 minutes, +18 s a floor cleared and hourglasses on the floor. The stairs down open once a floor is cleared; after the Lord, a portal out.',
+        'The Dungeon: each level lies in the catacombs of one of the halls, with its foes and its Lord. Levels grow harder, and from level 20 the Pit\'s hazards join them (1, from 50 two, from 100 three). Levels can be skipped up to your best + 1.',
+        'The Dungeon: a cleared level pays gold, iron, Dark Quartz (a new resource for strengthening relics, coming later) and chests – a Gold and two Wooden the first time, a Wooden after. The Lord drops a chest within 120 levels of your record. 10 entries a day, and sweeps.',
+        'The Dungeon: vaults – 30-second bonus floors of gold or iron (the clock stops), up to 5 a day; the reward is kept even if the level is lost. One revive for an ad and one for 500 gems; +60 s for 500 gems when time runs out.',
+        'The Dungeon: its own Mastery to level 250 with 13 cards (Fury of the Depths, Breaker of Lords, Leap into the Dark, Nose for Treasure, the Jailer\'s Key and more) and a board of the highest level.',
+        'The Pit: a sweep gives half the Mastery experience.',
+        'Fixed a rare freeze when a last-moment blow killed the Lord while enemy shots were in the air.',
         'Shop → Daily: the gold for an ad is gone (it lives in Free now). The ad deal is a row of its own on top, with 6 deals under it instead of 3 – at least one for gold and two for gems, different every day. New ones: iron, herbs, gold for gems, the silver and gold chests for gems, starsteel and a pack of metals, priced some 15–25% under the Forge and the chests.',
         'Shop → Free: new free gold for an ad – 1000, then 2000, then 3000 gold a day. The order is gold, torches, gems.',
         'With No Ads or the premium Battle Pass the ad buttons read “Claim” (no AD tag): the reward comes straight away.',

@@ -870,7 +870,7 @@
   R.updateProjectiles = function (dt) {
     const list = this.proj, p = this.player;
     for (let i = list.length - 1; i >= 0; i--) {
-      const b = list[i];
+      const b = list[i]; if (!b) continue; // (a blow inside the loop can empty the list: the Lord falls, the floor is cleared)
       b.life -= dt;
       // where the shot was before this step: it hits whatever lies along the way, not only where it lands (a fast shot
       // at a low frame rate jumped over a foe right in front of it); a shot born ahead of the hero starts at the hero
@@ -963,7 +963,7 @@
     }
     // enemy projectiles
     for (let i = this.eproj.length - 1; i >= 0; i--) {
-      const b = this.eproj[i];
+      const b = this.eproj[i]; if (!b) continue; // (as above: a hit taken can end the Lord and clear the shots)
       b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
       if (b.acc) { b.vx *= 1 + b.acc * dt; b.vy *= 1 + b.acc * dt; }
       if (b.home) { // a homing orb turns toward you, slowly

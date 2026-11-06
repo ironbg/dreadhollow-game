@@ -45,7 +45,7 @@
   };
   /** Floor f (0-based; the boss floor last): a fresh chamber, the hero at its south end, the quota, two hourglasses. */
   R.dunFloor = function (f) {
-    const Q = this.dun; Q.floor = f; Q.tm = f * 60; Q.exit = null; Q.got = 0; Q.bt = 0.6; Q.bossT = f === BOSS_FLOOR() ? 2.5 : -1;
+    const Q = this.dun; Q.floor = f; Q.tm = f * 60; Q.exit = null; Q.got = 0; Q.bt = 0.6; Q.idle = 0; Q.st = 4; Q.bossT = f === BOSS_FLOOR() ? 2.5 : -1;
     Q.need = f === BOSS_FLOOR() ? 0 : D().quota(Q.lv, f); Q.left = Q.need; Q.art = (Q.lv + f) % 3;
     dunArt(this.stage, Q.art);
     this.clearChamber();
@@ -78,6 +78,7 @@
       const n = Math.min(Q.left, 12, 70 - alive);
       if (n > 0) { this.dunBatch(n); Q.left -= n; }
     }
+    if (Q.need > 0 && Q.left <= 0 && !Q.exit) this.dunStragglers(dt);
     if (Q.need > 0 && Q.left <= 0 && !Q.exit && (Q.got >= Q.need || !this.enemies.some((e) => !e.dead && !e.def.prop))) this.dunCleared();
     if (Q.bossT > 0 && (Q.bossT -= dt) <= 0) this.dunBoss();
     if (Q.floor === BOSS_FLOOR() && !this.won && Q.bossUp && (Q.bt -= dt) <= 0) { // a trickle of the hall's foes beside the Lord
@@ -86,6 +87,25 @@
     }
     if (Q.exit) this.updateExits(dt);
     if (Q.affixes.length) this.hazardsTick(dt, Q.affixes);
+  };
+  /** The floor's last foes never hold it up: every 4 s the ones keeping their distance are drawn out of the dark close to
+   *  the hero; and if nothing has fallen for 20 s, what is left of the floor crumbles away (a caster kiting a melee hero
+   *  round a closed room could otherwise stall it for good). */
+  R.dunStragglers = function (dt) {
+    const Q = this.dun, p = this.player;
+    Q.idle = (Q.idle || 0) + dt;
+    if ((Q.st = (Q.st || 0) - dt) <= 0) {
+      Q.st = 4;
+      for (const e of this.enemies) {
+        if (e.dead || e.def.prop || e.boss || U.dist2(e.x, e.y, p.x, p.y) < 90 * 90) continue;
+        const a = Math.random() * TAU; this.burst(e.x, e.y, 6, ['#0a0608', '#3a1a20'], 30);
+        e.x = p.x + Math.cos(a) * 55; e.y = p.y + Math.sin(a) * 40; e.kx = e.ky = 0;
+      }
+    }
+    if (Q.idle >= 20) {
+      for (const e of this.enemies) if (!e.dead && !e.def.prop && !e.boss) { e.dead = true; Q.got++; this.burst(e.x, e.y, 8, ['#000', '#2a1a20', '#6a4a50'], 40); }
+      Q.idle = 0;
+    }
   };
   /** n of the floor's foes, from the walls and the dark corners, never on top of the hero. */
   R.dunBatch = function (n) {
@@ -112,7 +132,7 @@
   /** A foe of the Dungeon fell (run.killEnemy): the floor's count; the Treasure Hunter's quartz now and then. */
   R.dunKill = function (e) {
     const Q = this.dun;
-    if (!e.def.prop) Q.got++;
+    if (!e.def.prop) { Q.got++; Q.idle = 0; }
     const sk = Q.perks.seeker; if (sk && !e.def.prop && Math.random() < sk) this.drop('quartz', e.x, e.y, Q.perks.seekerN || 15);
   };
   /** The floor is cleared: time won, the grate over the stairs rises (and the vault's door opens on its floor). */
