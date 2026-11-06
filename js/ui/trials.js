@@ -4,11 +4,11 @@
   const U = DH.util, h = U.h, E = DH.economy, A = DH.art, ui = DH.ui, M = DH.meta;
   const click = () => DH.audio.play('click');
 
-  /** The modes, in their arches. Only the Pit is open for now; the rest are announced. */
+  /** The modes, in their arches: the Pit, the Dungeon (open once the third hall is cleared), and one announced. */
   const MODES = [
-    { id: 'pit', art: 'abyss', open: true },
-    { id: 'soon1', art: 'catacombs', open: false },
-    { id: 'soon2', art: 'discord', open: false },
+    { id: 'pit', art: 'abyss', open: () => true },
+    { id: 'dungeon', art: 'catacombs', open: () => M.dunUnlocked(), lock: () => t('trials.dungeon.lock', { hall: t('stage.' + E.DUNGEON.unlock + '.name') }), go: () => ui.openDungeon() },
+    { id: 'soon2', art: 'discord', open: () => false },
   ];
   const arts = {};
   // each picture painted once and kept on the device (with the game's version: a new version may paint them anew), so the
@@ -19,7 +19,7 @@
     if (arts[m.id]) return arts[m.id];
     let url = stored(m.id);
     if (!url) {
-      url = m.id === 'pit' ? pitArt() : A.stageArt(m.art, 240, 360).toDataURL('image/jpeg', 0.85);
+      url = m.id === 'pit' ? pitArt() : m.id === 'dungeon' ? ui.dunArt() : A.stageArt(m.art, 240, 360).toDataURL('image/jpeg', 0.85);
       try { localStorage.setItem(ART_KEY(m.id), url); } catch (e) { /* storage full or blocked: painted again next time */ }
     }
     return (arts[m.id] = url);
@@ -96,8 +96,9 @@
     const go = (d) => { click(); i = (i + d + MODES.length) % MODES.length; draw(); };
     const arch = (k, side) => {
       const md = MODES[(i + k + MODES.length) % MODES.length];
-      return h('div.tr-arch' + (side ? '.side' : '.mid') + (md.open ? '' : '.soon'), { onclick: () => { if (side) go(k); } },
-        h('img', { src: art(md), alt: '' }), md.open ? null : h('div.tr-soon', A.img('u_lock', 'ci'), h('span', t('trials.soon'))));
+      const open = md.open();
+      return h('div.tr-arch' + (side ? '.side' : '.mid') + (open ? '' : '.soon'), { onclick: () => { if (side) go(k); } },
+        h('img', { src: art(md), alt: '' }), open ? null : h('div.tr-soon', A.img('u_lock', 'ci'), h('span', md.lock ? md.lock() : t('trials.soon'))));
     };
     const draw = () => {
       const md = MODES[i];
@@ -106,8 +107,8 @@
         h('div.tr-hall', arch(-1, true), arch(0, false), arch(1, true)),
         h('div.tr-name', h('button.tr-arrow', { onclick: () => go(-1), 'aria-label': '<' }, '◀'), h('span', t('trials.' + md.id)), h('button.tr-arrow', { onclick: () => go(1), 'aria-label': '>' }, '▶')),
         h('div.small.center.tr-desc', t('trials.' + md.id + '.desc')),
-        h('div.btns', md.open ? h('button.btn.red', { onclick: () => { click(); m.close(); ui.openPit(); } }, t('trials.enter'))
-          : h('button.btn.ghost.off', t('trials.soon')))));
+        h('div.btns', md.open() ? h('button.btn.red', { onclick: () => { click(); m.close(); if (md.go) md.go(); else ui.openPit(); } }, t('trials.enter'))
+          : h('button.btn.ghost.off', md.lock ? md.lock() : t('trials.soon')))));
     };
     draw();
   };
@@ -202,26 +203,26 @@
 
   /** The Pit's Mastery: its level from the Pit's fights, the points it gives and the cards they buy (blue, purple, gold,
    *  red: from the plain to the rarest; a full card's name turns green). The Mastery Pass at the bottom (every Trial). */
-  ui.openPitMastery = () => {
-    const PM = E.PIT_MASTERY, ids = Object.keys(PM.perks);
-    const m = ui.modal({ title: t('pit.mastery'), cls: 'pitmast', body: () => h('div'), onClose: () => DH.events.off('meta', redraw) });
+  const masteryWindow = (X) => {
+    const PM = X.PM, ids = Object.keys(PM.perks);
+    const m = ui.modal({ title: X.title(), cls: 'pitmast', body: () => h('div'), onClose: () => DH.events.off('meta', redraw) });
     const redraw = () => { if (!m.closed) draw(); };
     DH.events.on('meta', redraw);
     // a card tapped opens its panel right over it (in its colour): name, level, what it gives (the number in green), the
     // price a level, and − / + under it at the card's top edge; a tap anywhere else closes it
     let openId = null, root = null;
     const draw = () => {
-      const ms = M.pitMastery(), free = M.pitPointsFree();
+      const ms = X.mastery(), free = X.free();
       root = h('div.pm-root', { onclick: (e) => { if (openId && !e.target.closest('.pm-pop') && !e.target.closest('.pm-card')) { openId = null; const o = root.querySelector('.pm-pop'); if (o) o.remove(); } } },
         h('div.pm-head', h('div.pm-lv', h('b', ms.lv), h('span.small', ' / ' + PM.max)),
           h('div.grow', h('div.pm-bar', h('i', { style: { width: (ms.next ? Math.round(ms.xp / ms.next * 100) : 100) + '%' } })), h('div.small.muted', ms.next ? t('pit.masteryXp', { x: U.fmt(ms.xp), m: U.fmt(ms.next) }) : t('common.max'))),
           h('div.pm-free', h('span.small', t('pit.points')), h('b', free)),
-          h('button.btn.small.ghost.infob', { 'aria-label': t('pit.mastery'), onclick: (e) => { e.stopPropagation(); click(); ui.modal({ title: t('pit.mastery'), cls: 'altarinfo', body: (im) => h('div', h('p.center', t('pit.masteryDesc', { n: String(PM.xpPerWave).replace('.', DH.i18n.current === 'bg' ? ',' : '.'), b: Math.round(PM.modeBonus * 100) }) + (M.masteryPass() ? ' ' + t('pit.masteryPass') : '')), h('div.btns', h('button.btn.gold', { onclick: () => im.close() }, t('common.close')))) }); } }, 'i')),
+          h('button.btn.small.ghost.infob', { 'aria-label': X.title(), onclick: (e) => { e.stopPropagation(); click(); ui.modal({ title: X.title(), cls: 'altarinfo', body: (im) => h('div', h('p.center', X.info()), h('div.btns', h('button.btn.gold', { onclick: () => im.close() }, t('common.close')))) }); } }, 'i')),
         h('div.pm-grid', ids.map((id) => {
-          const d = PM.perks[id], lv = M.pitPerk(id), full = lv >= d.max, open = M.pitPerkOpen(id), can = open && !full && free >= d.cost;
+          const d = PM.perks[id], lv = X.perk(id), full = lv >= d.max, open = X.open(id), can = open && !full && free >= d.cost;
           // a card the Mastery has not reached: in grey, a lock over it and the level it needs under the lock
           const el = h('div.pm-card.t-' + d.tier + (full ? '.full' : can ? '.can' : '') + (lv ? '' : '.zero') + (open ? '' : '.locked') + (openId === id ? '.sel' : ''), { 'data-id': id, onclick: () => { click(); openId = id; draw(); } },
-            h('div.pm-n', t('pit.pk.' + id)), h('div.pm-icw', A.img(d.icon, 'pm-ic')), h('div.pm-cost', d.cost), h('div.pm-lvl', lv + '/' + d.max),
+            h('div.pm-n', t(X.pk + id)), h('div.pm-icw', A.img(d.icon, 'pm-ic')), h('div.pm-cost', d.cost), h('div.pm-lvl', lv + '/' + d.max),
             open ? null : h('div.pm-lock', A.img('u_lock'), h('b', t('pit.lvNeed', { n: d.lv }))));
           el.style.setProperty('--art', ui.masteryCardArt(d.tier)); // its gothic ground
           return el;
@@ -234,38 +235,38 @@
       m.set(root);
       if (openId) requestAnimationFrame(() => showPop(openId));
     };
-    const num = (id, n) => { const d = PM.perks[id]; return id === 'time' || id === 'entry' ? d.per * n : id === 'sweep' ? Math.round(Math.min(1, E.PIT.sweep + d.per * n) * 100) : Math.round(d.per * n * 100); };
+    const num = (id, n) => X.num(id, n, PM.perks[id]);
     /** The card's text with its number picked out in green. */
-    const desc = (id, n) => { const parts = t('pit.pkd.' + id, { v: '\u0001' }).split('\u0001'); return [parts[0], h('b.good', String(num(id, n))), parts.slice(1).join('')]; };
+    const desc = (id, n) => { const raw = t(X.pkd + id, { v: '\u0001' }); if (!raw.includes('\u0001')) return [raw]; const parts = raw.split('\u0001'); return [parts[0], h('b.good', String(num(id, n))), parts.slice(1).join('')]; }; // (a card with no number: its text alone)
     const showPop = (id) => {
       const old = root.querySelector('.pm-pop'); if (old) old.remove();
       const cardEl = root.querySelector('.pm-card[data-id="' + id + '"]'); if (!cardEl) return;
-      const d = PM.perks[id], lv = M.pitPerk(id), full = lv >= d.max, open = M.pitPerkOpen(id), can = open && !full && M.pitPointsFree() >= d.cost;
+      const d = PM.perks[id], lv = X.perk(id), full = lv >= d.max, open = X.open(id), can = open && !full && X.free() >= d.cost;
       const up = async () => {
         if (full) return;
         if (!open) { ui.toast(t('pit.lockedAt', { n: d.lv }), 'bad'); return; }
-        if (M.pitPointsFree() < d.cost) { ui.toast(t('pit.noPoints'), 'bad'); return; }
-        const r = await ui.act('pitPerkUp', { id }); if (r) { DH.audio.play('buy'); draw(); }
+        if (X.free() < d.cost) { ui.toast(t('pit.noPoints'), 'bad'); return; }
+        const r = await ui.act(X.up, { id }); if (r) { DH.audio.play('buy'); draw(); }
       };
       const down = async () => {
         if (!lv) return;
-        if (id === 'entry') { // Extra Entry is taken back for gems only
-          if (!(await ui.confirm({ title: t('pit.pk.entry'), body: t('pit.entryRefund', { n: U.fmt(PM.entryRefund) }), ok: t('cons.sell1'), okCls: 'red' }))) return;
+        if (id === X.keep) { // Extra Entry (the Jailer's Key) is taken back for gems only
+          if (!(await ui.confirm({ title: t(X.pk + X.keep), body: t(X.refundTxt, { n: U.fmt(X.refund) }), ok: t('cons.sell1'), okCls: 'red' }))) return;
         }
-        const r = await ui.act('pitPerkDown', { id });
+        const r = await ui.act(X.down, { id });
         if (r === false) ui.toast(t('common.notEnough'), 'bad'); else if (r != null) { DH.audio.play('coin'); draw(); }
       };
       const pop = h('div.pm-pop.t-' + d.tier,
         h('div.pp-panel',
           h('button.x', { onclick: () => { click(); openId = null; pop.remove(); draw(); }, 'aria-label': t('common.close') }, A.img('u_close', 'ci')),
-          h('div.pp-t', t('pit.pk.' + id)),
+          h('div.pp-t', t(X.pk + id)),
           h('div.pp-lv', t('pit.lvOf', { n: lv, m: d.max })),
           h('div.pp-d', desc(id, lv || 1), lv ? null : h('span.muted', ' ' + t('pit.atLv1'))),
           !full && lv ? h('div.pp-next', t('pit.nextLv') + ': ', desc(id, lv + 1)) : null,
           !open ? h('div.pp-cost', A.img('u_lock', 'ci'), ' ', t('pit.lockedAt', { n: d.lv })) : h('div.pp-cost', full ? h('span.good', t('cons.full')) : t('pit.costPer', { n: d.cost })),
-          id === 'entry' ? h('div.small.muted', t('pit.entryKeep', { n: U.fmt(PM.entryRefund) })) : null),
+          id === X.keep ? h('div.small.muted', t(X.keepTxt, { n: U.fmt(X.refund) })) : null),
         h('div.pp-btns',
-          h('button.btn.red.pp-b' + (lv ? '' : '.off'), { onclick: down, 'aria-label': t('cons.sell1') }, '−', id === 'entry' && lv ? h('span.pp-gem', A.img('i_gem', 'ci'), U.fmt(PM.entryRefund)) : null),
+          h('button.btn.red.pp-b' + (lv ? '' : '.off'), { onclick: down, 'aria-label': t('cons.sell1') }, '−', id === X.keep && lv ? h('span.pp-gem', A.img('i_gem', 'ci'), U.fmt(X.refund)) : null),
           h('button.btn.green.pp-b' + (can ? '' : '.off'), { onclick: up, 'aria-label': t('cons.buy1') }, '+')));
       root.append(pop);
       const rr = root.getBoundingClientRect(), cr = cardEl.getBoundingClientRect(), z = rr.width / root.offsetWidth || 1; // (the window may be scaled)
@@ -276,12 +277,24 @@
     };
     async function reset() {
       click();
-      if (M.pitPointsUsed() - M.pitPerk('entry') * PM.perks.entry.cost <= 0) { ui.toast(t('cons.nothing')); return; }
-      if (!(await ui.confirm({ title: t('cons.reset'), body: t('pit.resetBody'), ok: t('cons.reset'), okCls: 'red' }))) return;
-      if (await ui.act('pitPerkReset')) { DH.audio.play('coin'); draw(); }
+      if (X.used() - X.perk(X.keep) * PM.perks[X.keep].cost <= 0) { ui.toast(t('cons.nothing')); return; }
+      if (!(await ui.confirm({ title: t('cons.reset'), body: t(X.resetTxt), ok: t('cons.reset'), okCls: 'red' }))) return;
+      if (await ui.act(X.reset)) { DH.audio.play('coin'); draw(); }
     }
     draw();
   };
+
+  /** The Pit's Mastery and the Dungeon's: the same window (masteryWindow), each with its own cards and rules. */
+  const comma = (v) => String(v).replace('.', DH.i18n.current === 'bg' ? ',' : '.');
+  ui.openPitMastery = () => masteryWindow({ PM: E.PIT_MASTERY, title: () => t('pit.mastery'), mastery: M.pitMastery, free: M.pitPointsFree, used: M.pitPointsUsed, perk: M.pitPerk, open: M.pitPerkOpen,
+    pk: 'pit.pk.', pkd: 'pit.pkd.', up: 'pitPerkUp', down: 'pitPerkDown', reset: 'pitPerkReset', keep: 'entry', refund: E.PIT_MASTERY.entryRefund, keepTxt: 'pit.entryKeep', refundTxt: 'pit.entryRefund', resetTxt: 'pit.resetBody',
+    num: (id, n, d) => (id === 'time' || id === 'entry' ? d.per * n : id === 'sweep' ? Math.round(Math.min(1, E.PIT.sweep + d.per * n) * 100) : Math.round(d.per * n * 100)),
+    info: () => t('pit.masteryDesc', { n: comma(E.PIT_MASTERY.xpPerWave), b: Math.round(E.PIT_MASTERY.modeBonus * 100) }) + (M.masteryPass() ? ' ' + t('pit.masteryPass') : '') });
+  ui.openDunMastery = () => masteryWindow({ PM: E.DUNGEON_MASTERY, title: () => t('dun.mastery'), mastery: M.dunMastery, free: M.dunPointsFree, used: M.dunPointsUsed, perk: M.dunPerk, open: M.dunPerkOpen,
+    pk: 'dun.pk.', pkd: 'dun.pkd.', up: 'dunPerkUp', down: 'dunPerkDown', reset: 'dunPerkReset', keep: 'key', refund: E.DUNGEON_MASTERY.keyRefund, keepTxt: 'dun.keyKeep', refundTxt: 'dun.keyRefund', resetTxt: 'dun.resetBody',
+    num: (id, n, d) => (id === 'key' ? d.per * n : id === 'leap' ? n + 1 : id === 'guide' ? Math.round(Math.min(1, E.DUNGEON.sweep + d.per * n) * 100) : id === 'nose' ? Math.round((E.DUNGEON.vaultChance + d.per * n) * 100)
+      : id === 'seeker' ? comma(Math.round(d.per * n * 1000) / 10) : id === 'stone' ? comma(Math.round(d.per * n * 1000) / 10) : Math.round(d.per * n * 100)),
+    info: () => t('dun.masteryDesc', { f: E.DUNGEON_MASTERY.xpFloor, l: comma(E.DUNGEON_MASTERY.xpLevel), m: E.DUNGEON_MASTERY.max }) + (M.masteryPass() ? ' ' + t('pit.masteryPass') : '') });
 
   /** The Pit's shop, as the Armory's Resource Store: today's free handful, then a few for an ad each (one card that turns
    *  over), and Essence packs for real money, bought as often as wanted. */

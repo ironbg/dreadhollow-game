@@ -2319,11 +2319,71 @@
       for (const [x, y, k] of [[13, 13.6, 1.4], [19.4, 18, 1.2]]) { P.glow(g, x, y, 4, '#ffd070', 0.6); g.save(); g.translate(x, y); g.scale(k, k); GL.starSmallAt(g, 0, 0); g.restore(); }
     }],
   };
+  // The Dungeon's Mastery cards: dark medals in the same manner (some share a Blessing's glyph, the rest their own)
+  const ingot = (g, x, y, k) => { g.save(); g.translate(x, y); g.scale(k, k); g.translate(-5, -4.2); G.painters.mat_iron.draw(g); g.restore(); };
+  const DM_ICON = {
+    fury: ['#8a1014', false, (g) => TRA.strength[1](g)],
+    lords: ['#6a1a2a', false, (g) => { // a crown run through by a sword
+      inkPath(g, () => { g.beginPath(); g.moveTo(8, 22); g.lineTo(8, 13); g.lineTo(11.6, 17); g.lineTo(16, 10.6); g.lineTo(20.4, 17); g.lineTo(24, 13); g.lineTo(24, 22); g.closePath(); }, P.lg(g, 8, 10, 24, 22, ['#fff0a8', '#d8a030', '#6a4a10']), 1);
+      for (const x of [11, 16, 21]) P.circle(g, x, 19.6, 1, '#c01828');
+      g.save(); g.translate(16, 16); g.rotate(-0.75);
+      inkPath(g, () => { g.beginPath(); g.moveTo(-1.2, -13); g.lineTo(1.2, -13); g.lineTo(1.2, 8); g.lineTo(0, 11); g.lineTo(-1.2, 8); g.closePath(); }, P.lg(g, -1, 0, 1, 0, IRONS), 0.8);
+      inkLine(g, -4.4, -9.6, 4.4, -9.6, 1, '#6a4a2a'); g.restore();
+    }],
+    crush: ['#7a1a10', false, (g) => TRA.brutality[1](g)],
+    seeker: ['#3a1a5a', false, (g) => inMedal(g, 0.74, () => MISC.i_quartz(g))],
+    stone: ['#5a5650', false, (g) => TRA.thickhide[1](g)],
+    guide: ['#5a4214', false, (g) => { // a lantern on a hook, its flame steady in the dark
+      inkLine(g, 16, 4, 16, 8, 0.8, '#4a453e'); g.strokeStyle = INK; g.lineWidth = 1.6; g.beginPath(); g.arc(16, 9.4, 2, Math.PI, 0); g.stroke();
+      P.glow(g, 16, 18, 9, '#ffb040', 0.6);
+      inkPath(g, () => { g.beginPath(); g.moveTo(10.6, 11); g.lineTo(21.4, 11); g.lineTo(20, 25); g.lineTo(12, 25); g.closePath(); }, 'rgba(255,200,110,0.45)', 1);
+      for (const x of [12.6, 16, 19.4]) inkLine(g, x, 11.4, x - (x - 16) * 0.12, 24.6, 0.6, '#3a3430');
+      inkPath(g, () => { P.rrect(g, 9.6, 9.4, 12.8, 2.4, 0.6); }, P.lg(g, 0, 9, 0, 12, IRONS), 0.8); inkPath(g, () => { P.rrect(g, 11, 24.6, 10, 2.4, 0.6); }, P.lg(g, 0, 24, 0, 27, IRONS), 0.8);
+      P.path(g, [16, 14, 18, 19, 16, 22, 14, 19]); P.fill(g, '#ffe08a');
+    }],
+    leap: ['#4a1414', false, (g) => { // stairs falling away into a red glow, an arrow plunging down them
+      P.glow(g, 20, 24, 8, '#ff4020', 0.6);
+      for (let k = 0; k < 4; k++) inkPath(g, () => { P.rect(g, 7 + k * 4, 10 + k * 4, 18 - k * 4, 3); }, P.lg(g, 0, 10 + k * 4, 0, 13 + k * 4, ['#a89a90', '#5a504c']), 0.7);
+      inkLine(g, 10, 6, 21, 21, 1.4, '#e8e2d6');
+      inkPath(g, () => { g.beginPath(); g.moveTo(23.6, 23.6); g.lineTo(17.4, 22.4); g.lineTo(22.4, 17.4); g.closePath(); }, '#e8e2d6', 0.8);
+    }],
+    nose: ['#6a4a10', false, (g) => { // a treasure chest, its lid lifting on a golden glow
+      P.glow(g, 16, 16, 11, '#ffd35a', 0.6);
+      inkPath(g, () => { P.rrect(g, 7, 15, 18, 10, 1.2); }, P.lg(g, 0, 15, 0, 25, ['#8a5a2a', '#4a2a14']), 1);
+      inkPath(g, () => { g.beginPath(); g.moveTo(7, 15); g.lineTo(9, 8.6); g.lineTo(25.6, 10.4); g.lineTo(25, 15); g.closePath(); }, P.lg(g, 0, 8, 0, 15, ['#a06a30', '#5a3418']), 1);
+      P.rect(g, 8, 13.6, 16, 2, '#ffe070'); for (const x of [10, 15, 20]) P.circle(g, x, 13.2, 1.1, '#fff0a0');
+      inkPath(g, () => { P.rect(g, 14.6, 17.6, 2.8, 3.6); }, '#d8a030', 0.6);
+    }],
+    step: ['#3a3a4a', false, (g) => { // a boot set on the top stair, the next one lit below
+      for (let k = 0; k < 3; k++) inkPath(g, () => { P.rect(g, 6 + k * 6, 17 + k * 3.4, 20 - k * 6, 3); }, P.lg(g, 0, 17, 0, 27, ['#a8a2b0', '#4a4652']), 0.7);
+      inkPath(g, () => { g.beginPath(); g.moveTo(9, 6); g.lineTo(14, 6); g.lineTo(14, 12.6); g.lineTo(20.4, 13.2); g.quadraticCurveTo(22.4, 14, 22, 16.4); g.lineTo(9, 16.4); g.closePath(); }, P.lg(g, 9, 6, 22, 16, ['#8a6040', '#3a2414']), 1);
+      P.line(g, 9.4, 15, 21.6, 15, 0.6, '#1a0e08');
+    }],
+    share: ['#4a4a52', false, (g) => { ingot(g, 12, 20, 1.6); ingot(g, 20, 20, 1.6); ingot(g, 16, 13.6, 1.6); }],
+    deal: ['#3a4252', false, (g) => { // iron and gold on a balance, the iron side heavy
+      inkLine(g, 16, 7, 16, 25, 1, '#6a645a'); inkLine(g, 7, 12.6, 25, 9.4, 1, '#8a8478'); inkPath(g, () => { P.rect(g, 12, 24, 8, 2.4); }, '#4a453e', 0.7);
+      ingot(g, 9.4, 16.4, 1.15); GL.coin && (g.save(), g.translate(22.6, 13.6), g.scale(0.32, 0.32), g.translate(-16, -16), GL.coin(g), g.restore());
+    }],
+    key: ['#5a4a2a', true, (g) => { // a great iron key, the jailer's
+      g.save(); g.translate(16, 16); g.rotate(-0.78);
+      inkPath(g, () => { g.beginPath(); g.arc(0, -7.6, 4.4, 0, Math.PI * 2); g.moveTo(1.8, -7.6); g.arc(0, -7.6, 1.8, 0, Math.PI * 2, true); }, P.lg(g, -4, -12, 4, -3, IRONS), 1);
+      inkPath(g, () => { P.rect(g, -1.1, -3.4, 2.2, 14); }, P.lg(g, -1, 0, 1, 0, IRONS), 0.8);
+      inkPath(g, () => { P.rect(g, 1, 6.6, 4, 1.8); P.rect(g, 1, 3.4, 3, 1.6); }, P.lg(g, 1, 3, 5, 8, IRONS), 0.7);
+      g.restore();
+    }],
+    seal: ['#5a1418', true, (g) => { // a wax seal stamped with a cross over a shade's hood
+      inkPath(g, () => { g.beginPath(); g.moveTo(10, 24); g.quadraticCurveTo(9, 12, 16, 7); g.quadraticCurveTo(23, 12, 22, 24); g.closePath(); }, P.lg(g, 10, 7, 22, 24, ['#3a2a40', '#0c0610']), 1);
+      P.rect(g, 13.4, 14, 1.6, 1.2, '#ff2848'); P.rect(g, 17, 14, 1.6, 1.2, '#ff2848');
+      inkPath(g, () => { g.beginPath(); g.arc(16, 19, 6.4, 0, Math.PI * 2); }, P.lg(g, 10, 13, 22, 25, ['#e05050', '#a01818', '#5a0808']), 1);
+      inkLine(g, 16, 15.4, 16, 22.6, 1, '#f0c0a0'); inkLine(g, 12.6, 19, 19.4, 19, 1, '#f0c0a0');
+    }],
+  };
   function draw(name) {
     const c = G.canvas(SIZE, SIZE), g = c.getContext('2d');
     g.scale(U2, U2); g.lineJoin = 'round'; g.lineCap = 'round';
     const [pre, ...rest] = name.split('_'); const id = rest.join('_');
     if (pre === 'cs') return draw('bl_' + (CS_MEDAL[id] || 'strength'));
+    if (pre === 'dm' && DM_ICON[id]) { const [col, elev, fn] = DM_ICON[id]; medal(g, col, elev); g.save(); g.beginPath(); g.arc(16, 16, 11.6, 0, Math.PI * 2); g.clip(); fn(g); g.restore(); return G.classicize(c, ICON_STYLE, U2).toDataURL(); }
     if (pre === 'pm' && PM_ICON[id]) { const [col, elev, fn] = PM_ICON[id]; medal(g, col, elev); g.save(); g.beginPath(); g.arc(16, 16, 11.6, 0, Math.PI * 2); g.clip(); fn(g); g.restore(); return G.classicize(c, ICON_STYLE, U2).toDataURL(); }
     if (MISC[name]) MISC[name](g);
     else if (name === 'i_gold') GL.coin(g);
