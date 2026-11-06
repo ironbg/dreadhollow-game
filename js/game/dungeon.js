@@ -15,7 +15,7 @@
   const TAU = Math.PI * 2;
   /** The chamber: W, H its floor's half width and height, wall the far wall's height as seen. */
   const AR = C.DUN_ARENA = { W: 190, H: 160, wall: 96, side: 26, lip: 22 };
-  AR.stairs = { x: 0, y: -AR.H + 18 }; AR.start = { x: 0, y: 24 }; // the hero comes in in the chamber's middle
+  AR.stairs = { x: 0, y: -AR.H + 18 }; AR.start = { x: 0, y: -40 }; // the hero comes in in the middle of what is seen (the chamber's floor and its far wall)
   const D = () => E.DUNGEON;
   const BOSS_FLOOR = () => D().floors; // floors 0..4, then the boss floor (5)
 
@@ -417,9 +417,9 @@
     for (const [x, y, sx] of [[-W, -H, 1], [W, -H, -1]]) { g.strokeStyle = 'rgba(200,200,210,0.18)'; g.lineWidth = 0.5; for (let k = 1; k <= 4; k++) { g.beginPath(); g.moveTo(x + sx * k * 6, y); g.quadraticCurveTo(x + sx * k * 3, y - k * 3, x, y - k * 6); g.stroke(); } for (let k = 0; k < 5; k++) { const a = k / 4 * Math.PI / 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x + sx * Math.cos(a) * 26, y - Math.sin(a) * 26); g.stroke(); } }
     G.grade && G.grade(g, c); // the game's palette, as every sprite
     c.lights = [];
-    // a candle on every other column (their flames are drawn live): on the far wall's piers the outer and the inner pair,
+    // a candle on the far wall's piers (their flames are drawn live), and
     // on the side walls every other half-column (a torch)
-    for (const x of [-W * 0.86, -W * 0.14, W * 0.14, W * 0.86]) c.lights.push({ x, y: -H - WH * 0.42, s: 1, pier: true });
+    for (const x of [-W * 0.86, -W * 0.46, -W * 0.14, W * 0.14, W * 0.46, W * 0.86]) c.lights.push({ x, y: -H - WH * 0.42, s: 1, pier: true }); // (the middle pair too: the ones in view on a phone)
     for (const sx of [-1, 1]) for (let y = -H + 50, i = 0; y < H - 10; y += 74, i++) if (i % 2 === 0) c.lights.push({ x: sx * (W - 2), y: y - 28, s: 1.1, torch: true });
     ARTS[key] = c; return c;
   }

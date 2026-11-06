@@ -158,6 +158,7 @@
       this.updateSpawns(dt);
       this.grid.reset();
       for (const e of this.enemies) this.grid.insert(e);
+      { let foes = false; for (const e of this.enemies) if (!e.dead && !e.def.prop) { foes = true; break; } this.noFoes = !foes; } // nothing to fight: the hero's attacks wait (abilities.js)
       for (const a of this.abilities) this.updateAbility(a, dt);
       this.updateAllies(dt);
       this.updateItems(dt);

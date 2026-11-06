@@ -708,12 +708,13 @@
       if (a.lastBeat == null) a.lastBeat = idx;
       if (idx !== a.lastBeat) {
         a.lastBeat = idx;
-        if (B.fire(this, a) !== false) { if (a.weapon) this.onWeaponFire(a); const n = this.detStacks(a, a.s.ms); for (let i = 0; i < n; i++) a.rep.push(0.1 * (i + 1)); }
+        if (!this.noFoes && B.fire(this, a) !== false) { if (a.weapon) this.onWeaponFire(a); const n = this.detStacks(a, a.s.ms); for (let i = 0; i < n; i++) a.rep.push(0.1 * (i + 1)); }
       }
       for (let i = a.rep.length - 1; i >= 0; i--) { a.rep[i] -= dt; if (a.rep[i] <= 0) { a.rep.splice(i, 1); B.fire(this, a); } }
       return;
     }
     a.t -= dt;
+    if (a.t <= 0 && this.noFoes) { a.t = 0; return; } // no foe anywhere: the attack waits, ready for the first one to appear
     if (a.t <= 0) {
       a.cdNext = 0;
       if (B.fire(this, a) === false) a.t = 0.2;

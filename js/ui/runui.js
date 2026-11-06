@@ -259,12 +259,40 @@
     s.fxLevel -= 1; s.lowFx = s.fxLevel < 2; s.minFx = s.fxLevel === 0; DH.save.persist();
     ui.toast(t('settings.autoFxDown', { q: t('settings.fxLevel' + s.fxLevel) }));
   };
+  /** A progress bar that lives: as it fills, small sparks fly off its glowing tip; full, it flares and throws a shower.
+   *  (Not with the lowest effects. The sparks are a few short-lived spans over the bar, at most two dozen at once.) */
+  const SPARK_C = ['#fff2c0', '#ffd35a', '#ff9a3a', '#ffb860'];
+  const spark = (bar, pct, big) => {
+    if (bar.childElementCount > 24) return;
+    const s = document.createElement('span'), d = (big ? 0.6 : 0.4) + Math.random() * 0.4;
+    s.className = 'pb-spark';
+    s.style.left = (big ? Math.random() * 100 : pct) + '%';
+    s.style.setProperty('--dx', ((Math.random() - (big ? 0.5 : 0.35)) * (big ? 40 : 22)).toFixed(1) + 'px');
+    s.style.setProperty('--dy', (-(6 + Math.random() * (big ? 22 : 14))).toFixed(1) + 'px');
+    s.style.setProperty('--d', d.toFixed(2) + 's'); s.style.setProperty('--c', SPARK_C[(Math.random() * SPARK_C.length) | 0]);
+    bar.appendChild(s); setTimeout(() => s.remove(), d * 1000 + 50);
+  };
+  const barFx = (fill, pct) => {
+    fill.style.width = pct + '%';
+    const bar = fill.parentNode, last = bar._p == null ? pct : bar._p; bar._p = pct;
+    bar.classList.toggle('empty', pct <= 0.5);
+    if (DH.save.data.settings.minFx || !(pct > last + 0.05)) return;
+    const now = performance.now();
+    if (pct >= 99.9 && last < 99.9) { // full: a flare and a shower
+      bar.classList.remove('full'); void bar.offsetWidth; bar.classList.add('full');
+      for (let i = 0; i < 12; i++) spark(bar, pct, true);
+      return;
+    }
+    if (now - (bar._t || 0) < 60) return; bar._t = now;
+    const n = pct - last > 4 ? 3 : 1 + (Math.random() < 0.5 ? 1 : 0);
+    for (let i = 0; i < n; i++) spark(bar, pct, false);
+  };
   /** The Pit's panel, every frame (its bars run smoothly). */
   const pitBar = (r, run) => {
     const P = run.pit, K = P.combo, EP = E.PIT;
     r.pbEss.textContent = U.fmt(Math.round((P.paid || 0) + P.cleared * (P.per || 0)));
     r.pbWave.textContent = t('hud.pitWave', { n: P.need ? P.wave : (P.coming || P.wave) });
-    r.pbFill.style.width = (P.need ? Math.min(100, P.got / P.need * 100) : 0) + '%';
+    barFx(r.pbFill, P.need ? Math.min(100, P.got / P.need * 100) : 0);
     const on = K && K.n >= 2; r.pbCombo.classList.toggle('hidden', !on);
     if (on) {
       const skip = Math.min(EP.combo.max, Math.floor(K.n / EP.combo.per));
@@ -278,7 +306,7 @@
     const Q = run.dun, V = Q.vault || null, boss = Q.floor === E.DUNGEON.floors;
     r.dbLv.textContent = t('dun.lvShort', { n: Q.lv + (Q.n > 1 ? '–' + (Q.lv + Q.n - 1) : '') });
     r.dbFloor.textContent = V ? t('hud.dunVaultLeft', { s: Math.ceil(V.t) }) : boss ? t('hud.dunBossShort') : t('hud.dunFloorShort', { n: Q.floor + 1, m: E.DUNGEON.floors + 1 });
-    r.dbFill.style.width = (V ? Math.max(0, V.t) / E.DUNGEON.vaultSecs * 100 : Q.need && Q.wq ? Math.min(100, Q.wgot / Q.wq * 100) : run.won ? 100 : 0) + '%';
+    barFx(r.dbFill, V ? Math.max(0, V.t) / E.DUNGEON.vaultSecs * 100 : Q.need && Q.wq ? Math.min(100, Q.wgot / Q.wq * 100) : run.won ? 100 : 0);
     if (r.dbWave) r.dbWave.textContent = !V && !Q.exit && Q.need && Q.wave ? t('hud.dunWaveShort', { n: Q.wave, m: E.DUNGEON.waves }) : '';
     r.dunL.classList.toggle('vault', !!V);
   };

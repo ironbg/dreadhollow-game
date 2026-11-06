@@ -2197,3 +2197,22 @@ body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inse
 .dun-where .dw { min-width: 0; flex: 0 1 auto; }
 .dun-where .dw > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .dun-where img.ic.ci { flex: none; }
+/* the Pit's and the Dungeon's progress bars, alive: a sheen runs along the fill, its tip glows and flickers, sparks fly off
+   it as it fills (runui.js barFx), and a full bar flares */
+#hud .pb-bar { position: relative; overflow: visible; }
+#hud .pb-bar > i { position: relative; box-shadow: 0 0 6px rgba(255,150,40,.45); }
+#hud .pb-bar > i::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(100deg, rgba(255,255,255,0) 0 38%, rgba(255,250,220,.6) 50%, rgba(255,255,255,0) 62% 100%) 0 0 / 220% 100% no-repeat;
+  animation: pbShine 1.8s linear infinite; }
+#hud .pb-bar > i::after { content: ''; position: absolute; right: -3px; top: -4px; bottom: -4px; width: 7px; pointer-events: none;
+  background: radial-gradient(ellipse at center, #fffbe6 0 22%, rgba(255,200,90,.85) 42%, rgba(255,120,30,0) 72%); animation: pbTip .35s ease-in-out infinite alternate; }
+#hud .pb-bar.empty > i::after, #hud .pb-bar.empty > i::before { display: none; }
+#hud .pb-spark { position: absolute; top: 50%; width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px; background: var(--c, #ffd35a); box-shadow: 0 0 4px var(--c, #ffd35a);
+  pointer-events: none; animation: pbSpark var(--d, .5s) cubic-bezier(.2,.7,.4,1) forwards; }
+#hud .pb-bar.full { animation: pbFull .7s ease-out; }
+#hud .dunbar.vault .pb-bar > i { box-shadow: 0 0 8px rgba(255,210,90,.6); }
+@keyframes pbShine { from { background-position: 160% 0; } to { background-position: -60% 0; } }
+@keyframes pbTip { from { opacity: .65; transform: scaleY(.85); } to { opacity: 1; transform: scaleY(1.15); } }
+@keyframes pbSpark { from { transform: translate(0, 0) scale(1); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; } }
+@keyframes pbFull { 0% { box-shadow: inset 0 0 0 1px #6a5030; } 25% { box-shadow: inset 0 0 0 1px #ffe08a, 0 0 14px rgba(255,200,80,.95); } 100% { box-shadow: inset 0 0 0 1px #6a5030, 0 0 0 rgba(255,200,80,0); } }
+#hud .pitbar .pb-bar { height: 11px; }
