@@ -453,12 +453,13 @@
    *  leads out. Levels grow evenly harder; from level 20 the Pit's hazards join them (affixAt). Any level up to the best
    *  cleared + 1 can be entered (so the ones between round numbers can be skipped). A few entries a day.
    *  Rewards (a cleared level): gold, metals (E.DUNGEON.mats), Dark Quartz (the stone that will strengthen relics), the Mastery's
-   *  experience, and chests: a Gold and two Wooden the first time, a Wooden after. A vault (a bonus floor of 30 s, the
+   *  experience, and chests by the depth (Wooden at first, a Silver from level 30, a Gold from 80; one Wooden again from level 10). A vault (a bonus floor of 30 s, the
    *  clock stopped) now and then, at most vaultsPerDay a day: gold or metal, kept even if the level is lost. Sweep pays a
    *  share of the best level's gold and quartz, without fighting (no relics, no chests, no vaults). */
   E.DUNGEON = {
     unlock: 'aqueduct',                                        // open once the third hall is cleared
     entries: 10, floors: 5,                                    // floors before the boss floor
+    waves: 3, wavePause: 1.6,                                  // a floor's foes come in three waves, a short breath between them
     secs: 120, floorSecs: 18, bonusSecs: 10, bonusPerFloor: 2, // the clock: 2 min, +18 s a floor cleared, +10 s pickups on the floor
     buySecs: 60, buyGems: 500, reviveGems: 500,                // out of time: +60 s for gems once; a revive for an ad and one for gems (one gem buy a fight)
     affixAt: [[100, 3], [50, 2], [20, 1]],                     // from level 100 three hazards, from 50 two, from 20 one
@@ -478,7 +479,8 @@
     },
     quartz: (lv) => 12 + 3 * lv,
     acctXp: (lv) => 40 + 4 * lv,                               // the account's experience
-    chestsFirst: { gold: 1, wood: 2 }, chestsAgain: { wood: 1 },
+    // the chests of a cleared level, by its depth: Wooden at first, a Silver from level 30, a Gold from 80 (first: the first clear)
+    chests: (lv, first) => (first ? (lv >= 80 ? { gold: 1, wood: 2 } : lv >= 30 ? { silver: 1, wood: 1 } : { wood: 2 }) : lv >= 10 ? { wood: 1 } : {}),
     bossLootWithin: 120,                                        // the boss drops its chest only within 120 levels of the best cleared
     bossHp: 0.35,                                               // the Lord's health against a hall's own (met at the tenth minute; here after a few)
     vaultChance: 0.10, vaultsPerDay: 5, vaultSecs: 30,          // a floor's chance to hide a vault (the boss floor too)

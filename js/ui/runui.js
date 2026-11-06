@@ -78,6 +78,8 @@
 
   /* ---------------- HUD ---------------- */
   const hud = { refs: null, sig: '' };
+  /** AUTO: level-ups and tomes chosen by themselves (every fight: the halls, the Pit, the Dungeon). */
+  const autoBtn = () => h('button.autobtn' + (DH.save.data.settings.autoPick ? '.on' : ''), { title: t('hud.autoHint'), onclick: () => { ui.setAutoPick(!DH.save.data.settings.autoPick); } }, h('i'), h('b', t('hud.auto')));
   hud.build = (run) => {
     const el = document.getElementById('hud');
     el.innerHTML = '';
@@ -99,11 +101,13 @@
       r.pitL = run.pit ? h('div.pitbar', // the Pit, top right: the Essence this fight has paid, the wave and how much of it is killed, the combo
         h('div.pb-top', h('span.pb-ess', A.img('i_essence', 'ci'), r.pbEss = h('b')), r.pbWave = h('b.pb-wave')),
         h('div.pb-bar', r.pbFill = h('i')),
-        h('div.pb-autorow', r.autoBtn = h('button.autobtn' + (DH.save.data.settings.autoPick ? '.on' : ''), { title: t('hud.autoHint'), onclick: () => { ui.setAutoPick(!DH.save.data.settings.autoPick); } }, h('i'), h('b', t('hud.auto')))), // AUTO: level-ups and tomes chosen by themselves
+        h('div.pb-autorow', r.autoBtn = autoBtn()), // AUTO: level-ups and tomes chosen by themselves
         r.pbCombo = h('div.pb-combo.hidden', h('div.pb-ct', t('hud.combo')), r.pbN = h('div.pb-n'), h('div.pb-cbar', r.pbCFill = h('i')), r.pbSkip = h('div.pb-skip'))) : null,
-      r.dunL = run.dun ? h('div.pitbar.dunbar', // the Dungeon, top right: the level and floor, how much of the floor is slain (or the vault's seconds)
+      r.dunL = run.dun ? h('div.pitbar.dunbar', // the Dungeon, right, under the abilities: the level and floor, the wave, how much of it is slain (or the vault's seconds)
         h('div.pb-top', h('span.pb-ess', A.img('n_dungeon', 'ci'), r.dbLv = h('b')), r.dbFloor = h('b.pb-wave')),
-        h('div.pb-bar', r.dbFill = h('i'))) : null].filter(Boolean)); // append() would print a null as text
+        h('div.pb-bar', r.dbFill = h('i')),
+        h('div.pb-autorow', r.dbWave = h('span.db-wave'), r.autoBtn = autoBtn())) : null,
+      r.autoH = !run.pit && !run.dun ? h('div.autohall', r.autoBtn = autoBtn()) : null].filter(Boolean)); // the halls: AUTO on its own, right, under the abilities // append() would print a null as text
     if (!DH.save.data.tutorialDone) { r.tut = h('div.tutorial', h('div', h('span.hand', A.img('u_hand', 'bigic')), t('tutorial.move'), h('br'), h('span.small.muted', t('tutorial.auto')))); el.append(r.tut); }
     hud.sig = ''; el.classList.remove('hidden');
   };
@@ -198,7 +202,7 @@
     const host = r.boss.parentElement; if (!host) return;
     const top0 = host.getBoundingClientRect().top;
     let low = 0;
-    for (const el of [r.build, r.buffs, r.agony, r.lordK, r.curse]) {
+    for (const el of [r.build, r.buffs, r.agony, r.lordK, r.curse, r.dunL, r.autoH]) {
       if (!el || el.classList.contains('hidden') || !el.childNodes.length) continue;
       const rc = el.getBoundingClientRect(); if (rc.height) low = Math.max(low, rc.bottom - top0);
     }
@@ -271,10 +275,11 @@
   };
   /** The Dungeon's panel, every frame. */
   const dunBar = (r, run) => {
-    const Q = run.dun, V = Q.vault && Q.vault.in ? Q.vault : null, boss = Q.floor === E.DUNGEON.floors;
+    const Q = run.dun, V = Q.vault || null, boss = Q.floor === E.DUNGEON.floors;
     r.dbLv.textContent = t('dun.lvShort', { n: Q.lv + (Q.n > 1 ? '–' + (Q.lv + Q.n - 1) : '') });
     r.dbFloor.textContent = V ? t('hud.dunVaultLeft', { s: Math.ceil(V.t) }) : boss ? t('hud.dunBossShort') : t('hud.dunFloorShort', { n: Q.floor + 1, m: E.DUNGEON.floors + 1 });
-    r.dbFill.style.width = (V ? V.t / E.DUNGEON.vaultSecs * 100 : Q.need ? Math.min(100, Q.got / Q.need * 100) : run.won ? 100 : 0) + '%';
+    r.dbFill.style.width = (V ? Math.max(0, V.t) / E.DUNGEON.vaultSecs * 100 : Q.need && Q.wq ? Math.min(100, Q.wgot / Q.wq * 100) : run.won ? 100 : 0) + '%';
+    if (r.dbWave) r.dbWave.textContent = !V && !Q.exit && Q.need && Q.wave ? t('hud.dunWaveShort', { n: Q.wave, m: E.DUNGEON.waves }) : '';
     r.dunL.classList.toggle('vault', !!V);
   };
   hud.update = (run) => {
@@ -288,7 +293,7 @@
     const now = performance.now(); if (now - lastTxt < 120) return; lastTxt = now;
     r.lvl.textContent = t('common.lv') + ' ' + run.level;
     if (run.pit) { const left = Math.max(0, (run.pit.secs || E.PIT.secs) - run.time); r.timer.textContent = U.fmtTime(left); r.timer.classList.toggle('boss', left <= 30); }
-    else if (run.dun) { const left = Math.max(0, run.dun.secs), V = run.dun.vault && run.dun.vault.in; r.timer.textContent = U.fmtTime(left); r.timer.classList.toggle('boss', left <= 20 && !V); r.timer.classList.toggle('paused', !!V || !!run.won); } // the clock stands in a vault and after the Lord
+    else if (run.dun) { const left = Math.max(0, run.dun.secs), V = run.dun.vault; r.timer.textContent = U.fmtTime(left); r.timer.classList.toggle('boss', left <= 20 && !V); r.timer.classList.toggle('paused', !!V || !!run.won); } // the clock stands in a vault and after the Lord
     else { r.timer.textContent = U.fmtTime(run.time); r.timer.classList.toggle('boss', run.time >= run.runLength); }
     r.kills.textContent = U.fmt(run.kills); r.gold.textContent = U.fmt(run.gold);
     r.bagN.textContent = run.bag.length ? run.bag.length + '/' + C.BAG_SIZE : ''; r.bagN.classList.toggle('full', run.bag.length >= C.BAG_SIZE);
@@ -312,7 +317,7 @@
     });
     // under the abilities, wherever their rows end; the curse's line under the buffs
     const bTop = r.build.offsetTop + r.build.offsetHeight + 6;
-    if (r.buffsTop !== bTop) { r.buffsTop = bTop; r.buffs.style.top = bTop + 'px'; }
+    if (r.buffsTop !== bTop) { r.buffsTop = bTop; r.buffs.style.top = bTop + 'px'; if (r.dunL) r.dunL.style.top = bTop + 'px'; if (r.autoH) r.autoH.style.top = bTop + 'px'; } // the Dungeon's bar and the halls' AUTO: under the abilities too, at the right
     const cTop = live.length ? bTop + r.buffs.offsetHeight + 6 : bTop;
     if (r.curseTop !== cTop) { r.curseTop = cTop; r.curse.style.top = cTop + 'px'; }
     r.curse.classList.toggle('hidden', !(run.curse > 0)); if (run.curse > 0) r.curseT.textContent = t('hud.curse', { n: Math.ceil(run.curse) });
@@ -380,14 +385,14 @@
       h('div.ai-sect', t('abinfo.traits')), taken.length || ups.length ? h('div', taken, ups) : h('div.small.muted', t('abinfo.none'))) });
   };
 
-  /** The Pit's AUTO: level-ups and tomes chosen by themselves (remembered). Turned on from a window, it takes that
+  /** AUTO: level-ups and tomes chosen by themselves (remembered; every fight). Turned on from a window, it takes that
    *  window's choice at once. */
   ui.setAutoPick = (on) => {
     click(); DH.save.data.settings.autoPick = !!on; DH.save.persist();
     const b = hud.refs && hud.refs.autoBtn; if (b) b.classList.toggle('on', !!on);
     ui.toast(t(on ? 'hud.autoOn' : 'hud.autoOff'));
   };
-  const autoRow = (run, take) => run.pit ? h('div.center', { style: { marginTop: '8px' } }, h('button.btn.small.ghost.autopick', { onclick: () => { ui.setAutoPick(true); take(); } }, h('b.autotag', t('hud.auto')), t('levelup.auto'))) : null;
+  const autoRow = (run, take) => run ? h('div.center', { style: { marginTop: '8px' } }, h('button.btn.small.ghost.autopick', { onclick: () => { ui.setAutoPick(true); take(); } }, h('b.autotag', t('hud.auto')), t('levelup.auto'))) : null;
 
   /* ---------------- Level up ---------------- */
   ui.openLevelUp = (run) => {

@@ -15,7 +15,7 @@
   const TAU = Math.PI * 2;
   /** The chamber: W, H its floor's half width and height, wall the far wall's height as seen. */
   const AR = C.DUN_ARENA = { W: 190, H: 160, wall: 96, side: 26, lip: 22 };
-  AR.stairs = { x: 0, y: -AR.H + 18 }; AR.door = { x: AR.W - 10, y: -24 }; AR.start = { x: 0, y: AR.H - 46 };
+  AR.stairs = { x: 0, y: -AR.H + 18 }; AR.start = { x: 0, y: 24 }; // the hero comes in in the chamber's middle
   const D = () => E.DUNGEON;
   const BOSS_FLOOR = () => D().floors; // floors 0..4, then the boss floor (5)
 
@@ -24,6 +24,7 @@
     const hall = D().halls[(Math.max(1, lv) - 1) % D().halls.length], base = C.stages.crypt, kh = 1 + D().hpPerLv * (lv - 1), kd = 1 + D().dmgPerLv * (lv - 1);
     const def = Object.assign({}, C.stages[hall], { hpMult: base.hpMult * kh, dmgMult: base.dmgMult * kd, dmgGrow: base.dmgGrow, index: 0, bossHp: base.bossHp,
       bosses: [], dissonator: false, vault: false, lordKills: 0, goldMult: base.goldMult * (1 + 0.04 * (lv - 1)), bridge: 0 });
+    def.theme = Object.assign({}, C.stages[hall].theme, { noCandles: true }); // the candles stand on the columns only, not on the floor
     const lord = (C.stages[hall].bosses || []).find((b) => b.final);
     return { id: hall, def, lord: lord ? lord.id : 'anguish' };
   };
@@ -43,17 +44,24 @@
     const p = this.player; this.drop('tome', p.x + 30, p.y - 14);
     this.resume();
   };
-  /** Floor f (0-based; the boss floor last): a fresh chamber, the hero at its south end, the quota, two hourglasses. */
+  /** Floor f (0-based; the boss floor last): a fresh chamber, the hero in its middle, three waves of the floor's quota,
+   *  two hourglasses. */
   R.dunFloor = function (f) {
     const Q = this.dun; Q.floor = f; Q.tm = f * 60; Q.exit = null; Q.got = 0; Q.bt = 0.6; Q.idle = 0; Q.st = 4; Q.bossT = f === BOSS_FLOOR() ? 2.5 : -1;
-    Q.need = f === BOSS_FLOOR() ? 0 : D().quota(Q.lv, f); Q.left = Q.need; Q.art = (Q.lv + f) % 3;
+    Q.need = f === BOSS_FLOOR() ? 0 : D().quota(Q.lv, f); Q.art = (Q.lv + f) % 3; Q.vault = null; Q.gather = 0;
     dunArt(this.stage, Q.art);
     this.clearChamber();
     const p = this.player; p.x = AR.start.x; p.y = AR.start.y; p.inv = Math.max(p.inv, 1.2);
     for (let i = 0; i < D().bonusPerFloor; i++) this.pickups.push({ type: 'time', x: U.rand(-AR.W + 30, AR.W - 30), y: U.rand(-AR.H + 50, AR.H - 70), val: D().bonusSecs, cluster: false, vx: 0, vy: 0, z: 0, vz: 0, mag: false, t: 1 });
     const real = this.time; this.time = Math.min(599, Q.tm + 30); Q.mix = this.spawnRate().mix; this.time = real; // the hall's mix of that moment
-    Q.elites = Math.floor(Q.need / 25);
+    if (Q.need) this.dunWave(1);
     DH.events.emit('run:warning', f === BOSS_FLOOR() ? t('hud.dunBossFloor') : t('hud.dunFloor', { n: f + 1, m: BOSS_FLOOR() + 1 }));
+  };
+  /** Wave w (1..waves) of the floor: its share of the quota, an elite in every 25 of it. */
+  R.dunWave = function (w) {
+    const Q = this.dun, n = D().waves; Q.wave = w; Q.wq = w < n ? Math.round(Q.need / n) : Q.need - Math.round(Q.need / n) * (n - 1);
+    Q.wgot = 0; Q.left = Q.wq; Q.bt = 0.4; Q.wpause = 0; Q.idle = 0; Q.elites = Math.floor(Q.wq / 25) + (w === n ? 1 : 0);
+    if (w > 1) DH.events.emit('run:warning', t('hud.dunWave', { n: w, m: n }));
   };
   /** Everything of the floor before goes (the hero's summons follow down the stairs). */
   R.clearChamber = function () {
@@ -62,34 +70,37 @@
     const p = this.player; for (const a of this.allies || []) { a.x = p.x + U.rand(-12, 12); a.y = p.y + U.rand(-8, 8); }
     this.dun.fx = {}; this.decals.length = 0;
   };
+  const alive = (run) => { let n = 0; for (const e of run.enemies) if (!e.dead && !e.def.prop && !e.boss) n++; return n; };
 
-  /** Each frame in place of the hall's spawning: the clock, the floor's batches, the boss, the exits, the vault, the hazards. */
+  /** Each frame in place of the hall's spawning: the clock, the waves' batches, the boss, the stairs, the vault, the hazards. */
   R.updateDun = function (dt) {
     const Q = this.dun; if (!Q.begun || Q.done) return;
-    const V = Q.vault && Q.vault.in ? Q.vault : null;
-    if (V) { this.updateVault(dt); return; }
+    if (Q.vault) { this.updateVault(dt); return; }
     if (!this.won) { // the clock runs until the boss falls
       Q.secs -= dt;
       if (Q.secs <= 0) { Q.secs = 0; this.dunOutOfTime(); return; }
     }
-    if (Q.left > 0 && (Q.bt -= dt) <= 0) {
-      Q.bt = 0.65;
-      let alive = 0; for (const e of this.enemies) if (!e.dead && !e.def.prop) alive++;
-      const n = Math.min(Q.left, 12, 70 - alive);
-      if (n > 0) { this.dunBatch(n); Q.left -= n; }
+    if (Q.need && !Q.exit) {
+      if (Q.wpause > 0) { if ((Q.wpause -= dt) <= 0) this.dunWave(Q.wave + 1); }
+      else {
+        if (Q.left > 0 && (Q.bt -= dt) <= 0) {
+          Q.bt = 0.65; const n = Math.min(Q.left, 12, 70 - alive(this));
+          if (n > 0) { this.dunBatch(n); Q.left -= n; }
+        }
+        if (Q.left <= 0) this.dunStragglers(dt);
+        if (Q.left <= 0 && (Q.wgot >= Q.wq || !alive(this))) { // the wave has fallen
+          if (Q.wave < D().waves) { Q.wpause = D().wavePause; this.text(this.player.x, this.player.y - 24, t('hud.dunWaveDone', { n: Q.wave, m: D().waves }), '#ffd35a', true); DH.audio.play('reward'); }
+          else this.dunCleared();
+        }
+      }
     }
-    if (Q.need > 0 && Q.left <= 0 && !Q.exit) this.dunStragglers(dt);
-    if (Q.need > 0 && Q.left <= 0 && !Q.exit && (Q.got >= Q.need || !this.enemies.some((e) => !e.dead && !e.def.prop))) this.dunCleared();
     if (Q.bossT > 0 && (Q.bossT -= dt) <= 0) this.dunBoss();
-    if (Q.floor === BOSS_FLOOR() && !this.won && Q.bossUp && (Q.bt -= dt) <= 0) { // a trickle of the hall's foes beside the Lord
-      Q.bt = 2.2; let alive = 0; for (const e of this.enemies) if (!e.dead && !e.def.prop && !e.boss) alive++;
-      if (alive < 14) this.dunBatch(3);
-    }
+    if (Q.floor === BOSS_FLOOR() && !this.won && Q.bossUp && (Q.bt -= dt) <= 0) { Q.bt = 2.2; if (alive(this) < 14) this.dunBatch(3); } // a trickle of the hall's foes beside the Lord
     if (Q.exit) this.updateExits(dt);
     if (Q.affixes.length) this.hazardsTick(dt, Q.affixes);
   };
-  /** The floor's last foes never hold it up: every 4 s the ones keeping their distance are drawn out of the dark close to
-   *  the hero; and if nothing has fallen for 20 s, what is left of the floor crumbles away (a caster kiting a melee hero
+  /** A wave's last foes never hold it up: every 4 s the ones keeping their distance are drawn out of the dark close to
+   *  the hero; and if nothing has fallen for 20 s, what is left of the wave crumbles away (a caster kiting a melee hero
    *  round a closed room could otherwise stall it for good). */
   R.dunStragglers = function (dt) {
     const Q = this.dun, p = this.player;
@@ -103,7 +114,7 @@
       }
     }
     if (Q.idle >= 20) {
-      for (const e of this.enemies) if (!e.dead && !e.def.prop && !e.boss) { e.dead = true; Q.got++; this.burst(e.x, e.y, 8, ['#000', '#2a1a20', '#6a4a50'], 40); }
+      for (const e of this.enemies) if (!e.dead && !e.def.prop && !e.boss) { e.dead = true; Q.got++; Q.wgot++; this.burst(e.x, e.y, 8, ['#000', '#2a1a20', '#6a4a50'], 40); }
       Q.idle = 0;
     }
   };
@@ -129,13 +140,14 @@
     }
     return { x: -Math.sign(p.x || 1) * (AR.W - 14), y: -Math.sign(p.y || 1) * (AR.H - 14) };
   };
-  /** A foe of the Dungeon fell (run.killEnemy): the floor's count; the Treasure Hunter's quartz now and then. */
+  /** A foe of the Dungeon fell (run.killEnemy): the wave's count; the Treasure Hunter's quartz now and then. */
   R.dunKill = function (e) {
     const Q = this.dun;
-    if (!e.def.prop) { Q.got++; Q.idle = 0; }
+    if (!e.def.prop && !e.boss) { Q.got++; Q.wgot = (Q.wgot || 0) + 1; Q.idle = 0; }
     const sk = Q.perks.seeker; if (sk && !e.def.prop && Math.random() < sk) this.drop('quartz', e.x, e.y, Q.perks.seekerN || 15);
   };
-  /** The floor is cleared: time won, the grate over the stairs rises (and the vault's door opens on its floor). */
+  /** The floor is cleared (its third wave fallen): time won, the grate over the stairs rises. A floor that hides a vault:
+   *  the stairs lead into the vault first (its 30 s in place of the way down), then on to the next floor. */
   R.dunCleared = function () {
     const Q = this.dun, p = this.player;
     Q.cleared = Q.floor + 1; Q.secs += D().floorSecs;
@@ -143,7 +155,7 @@
     Q.exit = { t: 0, vault, auto: Q.perks.step ? 1.4 : -1 };
     this.pickups.forEach((k) => { if (k.type === 'xp' || k.type === 'coin' || k.type === 'quartz') k.mag = true; });
     this.text(p.x, p.y - 26, t('hud.dunCleared', { s: D().floorSecs }), '#ffd35a', true); DH.audio.play('reward');
-    DH.events.emit('run:warning', vault ? t('hud.dunVaultOpen') : t('hud.dunStairs'));
+    DH.events.emit('run:warning', vault ? t('hud.dunVaultBelow.' + vault) : t('hud.dunStairs'));
   };
   /** The Lord of the hall rises (the boss floor). */
   R.dunBoss = function () {
@@ -154,20 +166,23 @@
     this.shake = 8; this.whiteFlash = 0.4; this.burst(e.x, e.y, 40, ['#000', '#3a0010', '#ff2040'], 120); DH.audio.play('roar', e.painter); DH.audio.vibrate(120);
     DH.events.emit('run:boss', { name: t('enemy.' + id), final: true });
   };
-  /** The ways on: the stairs (and the vault's door) once the grate is up; Sure Step goes down by itself. */
+  /** The way on: the stairs once the grate is up (down to the next floor, or into the vault); Sure Step goes by itself.
+   *  After the Lord the portal is the way out (run.js); a vault there still waits down the stairs. */
   R.updateExits = function (dt) {
     const Q = this.dun, X = Q.exit, p = this.player; X.t += dt;
     if (X.t < 0.8) return; // the grate is still rising
-    if (X.vault && !X.vaultDone && U.dist2(p.x, p.y, AR.door.x, AR.door.y) < 16 * 16) { this.dunEnterVault(X.vault); return; }
-    if (this.won) return; // after the Lord: the portal is the way out (run.js)
+    if (this.won && !X.vault) return;
     const onStairs = Math.abs(p.x - AR.stairs.x) < 16 && p.y < AR.stairs.y + 14;
-    if (onStairs || (X.auto > 0 && X.t >= 0.8 + X.auto && !X.vault)) this.dunDescend();
+    if (onStairs || (X.auto > 0 && X.t >= 0.8 + X.auto)) { if (X.vault) this.dunEnterVault(X.vault); else this.dunDescend(); }
   };
-  /** Down the stairs: what is left on the floor comes along (gems, coins, hourglasses; a tome or chest opens below), a fade. */
+  /** What lies on the floor comes along (gems, coins, quartz; a tome or chest opens below). */
+  R.dunGatherAll = function () {
+    for (const k of this.pickups.slice()) if (k.type === 'xp' || k.type === 'coin' || k.type === 'quartz' || k.type === 'tome' || k.type === 'food' || k.type.startsWith('chest')) { this.pickups.splice(this.pickups.indexOf(k), 1); this.collect(k); }
+  };
+  /** Down the stairs: a fade, the next floor. */
   R.dunDescend = function () {
     const Q = this.dun; if (Q.going) return; Q.going = true;
-    for (const k of this.pickups.slice()) if (k.type === 'xp' || k.type === 'coin' || k.type === 'quartz' || k.type === 'tome' || k.type.startsWith('chest')) { this.pickups.splice(this.pickups.indexOf(k), 1); this.collect(k); }
-    DH.audio.play('chest');
+    this.dunGatherAll(); DH.audio.play('chest');
     const run = this, next = Q.floor + 1;
     this.state = 'stairs';
     DH.ui.dunFade(t(next === BOSS_FLOOR() ? 'hud.dunDownBoss' : 'hud.dunDown', { n: next + 1, m: BOSS_FLOOR() + 1 }), () => {
@@ -177,43 +192,58 @@
   };
 
   /* ---------------- the vault ---------------- */
-  /** Into the vault: 30 s in a chamber heaped with gold (or iron), the clock stopped, foes pouring in, a Gilded Ooze. */
+  /** Down into the vault: a chamber heaped with gold (or metal) for 30 s, the clock stopped, foes pouring in, a Gilded
+   *  Ooze among them. */
   R.dunEnterVault = function (kind) {
     const Q = this.dun; if (Q.going) return; Q.going = true;
+    this.dunGatherAll();
     const run = this; this.state = 'stairs';
     DH.ui.dunFade(t('hud.dunVault.' + kind), () => {
       if (DH.game.run !== run || Q.done) return;
-      Q.going = false; Q.exit.vaultDone = true;
+      Q.going = false;
       if (run.portal) { run.portalKept = run.portal; run.portal = null; } // after the Lord: the portal waits for the hero's return
-      Q.vault = { in: true, kind, t: D().vaultSecs, floor: Q.floor, bt: 0.4 };
-      run.clearChamber(); const p = run.player; p.x = AR.start.x; p.y = AR.start.y; p.inv = Math.max(p.inv, 1.2);
-      const o = run.spawnEnemy('gildedooze', 0, -20); if (o) { o.hp = o.maxHp = o.def.hits; o.life = Infinity; o.dunVault = true; } // it stays the whole 30 s
+      run.clearChamber();
+      Q.vault = { kind, t: D().vaultSecs, floor: Q.floor, bt: 0.4, gather: 0 };
+      const p = run.player; p.x = AR.start.x; p.y = AR.start.y; p.inv = Math.max(p.inv, 1.2);
+      const o = run.spawnEnemy('gildedooze', 0, -40); if (o) { o.hp = o.maxHp = o.def.hits; o.life = Infinity; o.dunVault = true; } // it stays the whole 30 s
       DH.events.emit('run:warning', t('hud.dunVaultIn', { s: D().vaultSecs }));
       if (run.state === 'stairs') run.resume();
     });
   };
+  /** The vault's 30 s; then every foe in it falls (with what it drops), everything flies to the hero and is taken, the
+   *  vault pays (on the server), and the way leads on to the next floor (or back to the portal after the Lord). */
   R.updateVault = function (dt) {
-    const Q = this.dun, V = Q.vault;
+    const Q = this.dun, V = Q.vault, run = this;
+    if (V.gather > 0) { // gathering the spoils
+      if ((V.gather -= dt) > 0) return;
+      V.gather = -1; this.dunGatherAll();
+      this.state = 'stairs';
+      const next = V.floor + 1;
+      DH.ui.dunFade(V.floor >= BOSS_FLOOR() ? t('hud.dunVaultOut') : t(next === BOSS_FLOOR() ? 'hud.dunDownBoss' : 'hud.dunDown', { n: next + 1, m: BOSS_FLOOR() + 1 }), () => {
+        if (DH.game.run !== run || Q.done) return;
+        if (V.floor >= BOSS_FLOOR()) { // back where the Lord fell: the portal waits
+          run.clearChamber(); Q.vault = null; Q.exit.vault = null;
+          const p = run.player; p.x = AR.start.x; p.y = AR.start.y;
+          if (run.portalKept) { run.portal = run.portalKept; run.portalKept = null; run.portal.t = 1; }
+        } else run.dunFloor(next);
+        if (run.state === 'stairs') run.resume();
+      }, 0.5);
+      return;
+    }
+    if (V.gather < 0) return;
     V.t -= dt;
-    if ((V.bt -= dt) <= 0) { V.bt = 0.5; let alive = 0; for (const e of this.enemies) if (!e.dead && !e.def.prop) alive++; if (alive < 60) this.dunBatch(6); }
+    if ((V.bt -= dt) <= 0) { V.bt = 0.5; if (alive(this) < 60) this.dunBatch(6); }
     if (V.t > 0) return;
-    // over: the vault pays (on the server), its foes fade, back to the floor's stairs (or to the portal after the Lord)
-    V.in = false; const run = this, floor = V.floor;
-    for (const e of this.enemies) if (!e.dead && !e.def.prop) { e.dead = true; this.burst(e.x, e.y, 4, ['#fff', '#ffd35a'], 40); }
-    this.pickups.forEach((k) => { if (k.type === 'xp' || k.type === 'coin' || k.type === 'quartz') k.mag = true; });
-    DH.ui.act('dunVault', { floor }).then((r) => { if (r && r.items) { V.paid = r.items; if (DH.game.run === run) DH.events.emit('run:dunVault', r); } });
-    this.state = 'stairs';
-    DH.ui.dunFade(t('hud.dunVaultOut'), () => {
-      if (DH.game.run !== run || Q.done) return;
-      for (const k of run.pickups.slice()) if (k.type === 'xp' || k.type === 'coin' || k.type === 'quartz') { run.pickups.splice(run.pickups.indexOf(k), 1); run.collect(k); }
-      run.clearChamber(); const p = run.player; p.x = AR.door.x - 24; p.y = AR.door.y + 6;
-      if (run.won && run.portalKept) { run.portal = run.portalKept; run.portalKept = null; }
-      if (run.state === 'stairs') run.resume();
-    }, 0.6);
+    // over: its foes fall where they stand (and drop what they carry), everything is drawn to the hero
+    for (const e of this.enemies.slice()) if (!e.dead && !e.def.prop) { this.killEnemy(e); this.burst(e.x, e.y, 4, ['#fff', '#ffd35a'], 40); }
+    this.pickups.forEach((k) => { k.mag = true; });
+    V.gather = 1.8;
+    DH.ui.act('dunVault', { floor: V.floor }).then((r) => { if (r && r.items) { Q.vaultPaid = (Q.vaultPaid || []).concat(r.items); if (DH.game.run === run) DH.events.emit('run:dunVault', r); } });
+    DH.events.emit('run:warning', t('hud.dunVaultOver'));
   };
   /** The clock ran out: +60 s for gems once (if no gem revive was bought), else the level is lost. */
   R.dunOutOfTime = function () {
-    const Q = this.dun; if (this.state !== 'playing') return;
+    if (this.state !== 'playing') return;
     this.state = 'dunTime'; DH.audio.play('defeat');
     DH.events.emit('run:dunTime', this);
   };
@@ -235,9 +265,11 @@
     for (const k of this.pickups) keep(k, 6);
     const F = this.dun.fx, S = F && F.stalker; if (S && S.s) keep(S.s, 4);
     if (this.portal) { keep(this.portal, 26); if (this.portal.y < -AR.H + 70) this.portal.y = -AR.H + 70; }
-    if (this.won && this.dun.exit === null) { // the Lord fell: a vault on this floor opens its door beside the portal
+    if (this.won && this.dun.exit === null && !this.dun.vault) { // the Lord fell: a vault on this floor waits down the stairs
       const Q = this.dun, f = BOSS_FLOOR(); Q.cleared = f + 1;
-      Q.exit = { t: 0, vault: Q.vaults.includes(f) ? Q.kinds[Q.vaults.indexOf(f)] : null, auto: -1 };
+      const v = Q.vaults.includes(f) ? Q.kinds[Q.vaults.indexOf(f)] : null;
+      Q.exit = { t: 0, vault: v, auto: -1 };
+      if (v) DH.events.emit('run:warning', t('hud.dunVaultBelow.' + v));
     }
   };
 
@@ -379,14 +411,12 @@
     }
     // cobwebs in the corners
     for (const [x, y, sx] of [[-W, -H, 1], [W, -H, -1]]) { g.strokeStyle = 'rgba(200,200,210,0.18)'; g.lineWidth = 0.5; for (let k = 1; k <= 4; k++) { g.beginPath(); g.moveTo(x + sx * k * 6, y); g.quadraticCurveTo(x + sx * k * 3, y - k * 3, x, y - k * 6); g.stroke(); } for (let k = 0; k < 5; k++) { const a = k / 4 * Math.PI / 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x + sx * Math.cos(a) * 26, y - Math.sin(a) * 26); g.stroke(); } }
-    // the vault's door in the east wall: a low iron-bound doorway (shut and dark; it glows once open: drawDunArena)
-    { const x = AR.door.x + 6, y = AR.door.y; g.fillStyle = '#060404'; g.fillRect(x - 3, y - 18, 16, 26); g.fillStyle = '#2a1e18'; g.fillRect(x - 1, y - 16, 12, 22);
-      g.fillStyle = '#4a4448'; for (const yy of [y - 12, y - 2]) g.fillRect(x - 1, yy, 12, 1.6); g.fillStyle = '#8a7a60'; g.fillRect(x + 1, y - 6, 1.6, 2); }
     G.grade && G.grade(g, c); // the game's palette, as every sprite
     c.lights = [];
-    // candles on the ledges at the wall's foot, and in the niches (their flames are drawn live)
-    for (const x of [-W * 0.86, -W * 0.62, -W * 0.46, -W * 0.3, -W * 0.14, W * 0.14, W * 0.3, W * 0.46, W * 0.62, W * 0.86]) c.lights.push({ x: x + (r() - 0.5) * 4, y: -H - 2 - r() * 3, s: 0.8 + r() * 0.5 });
-    for (const sx of [-1, 1]) for (let y = -H + 50; y < H - 10; y += 74) c.lights.push({ x: sx * (W - 2), y: y - 28, s: 1.1, torch: true });
+    // a candle on every other column (their flames are drawn live): on the far wall's piers the outer and the inner pair,
+    // on the side walls every other half-column (a torch)
+    for (const x of [-W * 0.86, -W * 0.14, W * 0.14, W * 0.86]) c.lights.push({ x, y: -H - WH * 0.42, s: 1, pier: true });
+    for (const sx of [-1, 1]) for (let y = -H + 50, i = 0; y < H - 10; y += 74, i++) if (i % 2 === 0) c.lights.push({ x: sx * (W - 2), y: y - 28, s: 1.1, torch: true });
     ARTS[key] = c; return c;
   }
   R.dunArtWarm = function () { dunArt(this.stage, 0); dunArt(this.stage, 1); dunArt(this.stage, 2); };
@@ -405,6 +435,7 @@
       const x = ox + l.x, y = oy + l.y; if (x < -30 || y < -30 || x > W + 30 || y > H + 30) continue;
       const fl = 0.75 + 0.25 * Math.sin(now * (l.torch ? 9 : 13) + l.x * 1.7) + 0.08 * Math.sin(now * 31 + l.y);
       if (l.torch) { g.fillStyle = '#1a1210'; g.fillRect(x - 1.2, y, 2.4, 7); g.fillStyle = '#3a2a20'; g.fillRect(x - 2.5, y - 1, 5, 2); }
+      else if (l.pier) { g.fillStyle = '#1a1416'; g.fillRect(x - 3.5, y + 0.4, 7, 1.6); g.fillRect(x - 0.6, y + 2, 1.2, 3); g.fillStyle = '#4a4248'; g.fillRect(x - 3.5, y + 0.4, 7, 0.5); }
       else { g.fillStyle = '#d8ccb0'; g.fillRect(x - 0.8, y - 3 * l.s, 1.6, 3 * l.s); g.fillStyle = 'rgba(200,190,170,0.6)'; g.fillRect(x - 1.2, y - 0.6, 2.4, 0.8); }
       const fy = l.torch ? y - 1 : y - 3 * l.s, fh = (l.torch ? 8 : 3.6 * l.s) * fl;
       g.fillStyle = '#ff7a2a'; g.beginPath(); g.moveTo(x - (l.torch ? 2.6 : 1), fy); g.quadraticCurveTo(x, fy - fh * 1.6, x + (l.torch ? 2.6 : 1), fy); g.fill();
@@ -413,14 +444,15 @@
     }
     // the stairs: a red glow rising from below once the grate is up; the grate itself
     const X = Q.exit, up = X ? Math.min(1, X.t / 0.8) : 0, sx = ox + AR.stairs.x, sy = oy - AR.H;
-    if (!this.won && Q.floor < BOSS_FLOOR()) {
+    const vk = X && X.vault, vc = vk === 'gold' ? [255, 200, 70] : vk ? [150, 205, 255] : [255, 90, 40]; // a vault waiting below: its glow, gold or steel
+    if (!Q.vault && ((!this.won && Q.floor < BOSS_FLOOR()) || vk)) {
       if (up > 0) {
         g.save(); g.globalCompositeOperation = 'lighter';
         const pu = 0.7 + 0.3 * Math.sin(now * 3);
-        const gl = g.createRadialGradient(sx, sy - 10, 2, sx, sy - 10, 46); gl.addColorStop(0, 'rgba(255,90,40,' + 0.55 * up * pu + ')'); gl.addColorStop(1, 'rgba(255,40,20,0)');
-        g.fillStyle = gl; g.fillRect(sx - 50, sy - 60, 100, 76); g.restore();
-        lights.push({ x: AR.stairs.x, y: -AR.H - 10, r: 80 * up, kind: 'lava' });
-        if (Math.random() < 0.25) this.parts.push({ x: AR.stairs.x + U.rand(-14, 14), y: -AR.H - U.rand(0, 8), vx: U.rand(-3, 3), vy: -U.rand(10, 24), life: 1, max: 1, c: Math.random() < 0.5 ? '#ff8a40' : '#ffd0a0', s: 1 });
+        const gl = g.createRadialGradient(sx, sy - 10, 2, sx, sy - 10, vk ? 60 : 46); gl.addColorStop(0, 'rgba(' + vc.join(',') + ',' + (vk ? 0.75 : 0.55) * up * pu + ')'); gl.addColorStop(1, 'rgba(' + vc.join(',') + ',0)');
+        g.fillStyle = gl; g.fillRect(sx - 64, sy - 70, 128, 90); g.restore();
+        lights.push(vk ? { x: AR.stairs.x, y: -AR.H - 10, r: 100 * up, kind: 'tint', color: vk === 'gold' ? '#ffd35a' : '#8ac8ff', a: 0.9 } : { x: AR.stairs.x, y: -AR.H - 10, r: 80 * up, kind: 'lava' });
+        if (Math.random() < (vk ? 0.5 : 0.25)) this.parts.push({ x: AR.stairs.x + U.rand(-14, 14), y: -AR.H - U.rand(0, 8), vx: U.rand(-3, 3), vy: -U.rand(10, 24), life: 1, max: 1, c: vk === 'gold' ? (Math.random() < 0.5 ? '#ffe080' : '#fff6c0') : vk ? '#c8e4ff' : Math.random() < 0.5 ? '#ff8a40' : '#ffd0a0', s: 1 });
         // an arrow on the floor before the stairs, pulsing: the way down
         const ay = sy + 20 + Math.sin(now * 5) * 2; g.fillStyle = 'rgba(255,200,120,' + (0.5 + 0.3 * Math.sin(now * 5)) * up + ')'; g.beginPath(); g.moveTo(sx - 7, ay + 6); g.lineTo(sx, ay - 2); g.lineTo(sx + 7, ay + 6); g.lineTo(sx + 4, ay + 6); g.lineTo(sx, ay + 2); g.lineTo(sx - 4, ay + 6); g.closePath(); g.fill();
       }
@@ -432,23 +464,16 @@
       g.fillStyle = '#4a4248'; for (let k = -18; k <= 18; k += 6) { g.fillRect(sx + k - 0.4, gy - gh, 0.8, gh); g.beginPath(); g.moveTo(sx + k - 1.6, gy); g.lineTo(sx + k, gy + 3); g.lineTo(sx + k + 1.6, gy); g.fill(); }
       g.restore();
     }
-    // the vault's door: shut and dark, or open, blazing gold (or steel-blue for iron) with a beckoning glow
-    if (X && X.vault && !X.vaultDone) {
-      const vx = ox + AR.door.x, vy = oy + AR.door.y, col = X.vault === 'gold' ? [255, 200, 70] : [140, 200, 255], pu = 0.7 + 0.3 * Math.sin(now * 4);
-      g.save(); g.globalCompositeOperation = 'lighter';
-      const gl = g.createRadialGradient(vx, vy - 6, 2, vx, vy - 6, 40); gl.addColorStop(0, 'rgba(' + col.join(',') + ',' + 0.65 * up * pu + ')'); gl.addColorStop(1, 'rgba(' + col.join(',') + ',0)');
-      g.fillStyle = gl; g.fillRect(vx - 42, vy - 46, 84, 84);
-      g.fillStyle = 'rgba(' + col.join(',') + ',' + 0.8 * up + ')'; g.fillRect(vx + 5, vy - 16, 10, 22); g.restore();
-      lights.push({ x: AR.door.x, y: AR.door.y - 6, r: 70 * up, kind: 'tint', color: X.vault === 'gold' ? '#ffd35a' : '#8ac8ff', a: 0.8 });
-      if (Math.random() < 0.3 * up) this.parts.push({ x: AR.door.x + U.rand(-6, 6), y: AR.door.y - U.rand(0, 16), vx: -U.rand(4, 14), vy: -U.rand(4, 14), life: 1, max: 1, c: X.vault === 'gold' ? '#ffe080' : '#c0e4ff', s: 1 });
-    }
-    // in a vault: the chamber heaped with its treasure
-    if (Q.vault && Q.vault.in) {
-      const gold = Q.vault.kind === 'gold';
-      for (let i = 0; i < 14; i++) {
-        const x = ox + Math.sin(i * 2.7) * AR.W * 0.85, y = oy + Math.cos(i * 1.9) * AR.H * 0.8; if (x < -20 || y < -20 || x > W + 20 || y > H + 20) continue;
-        for (let k = 0; k < 6; k++) { const px = x + Math.sin(k * 1.3 + i) * 6, py = y + Math.cos(k * 2.1 + i) * 3 - k * 0.8; g.fillStyle = gold ? (k % 2 ? '#ffd35a' : '#c8902a') : (k % 2 ? '#a8b0bc' : '#5a6270'); g.fillRect(px - 2, py - 1, 4, 2); }
-        if (gold && Math.random() < 0.02) this.parts.push({ x: x - ox, y: y - oy - 4, vx: 0, vy: -8, life: 0.6, max: 0.6, c: '#fff6c0', s: 1 });
+    // in a vault: the whole chamber heaped with its treasure (gold, or ingots of the level's metals), lit by it
+    if (Q.vault) {
+      const gold = Q.vault.kind === 'gold', cols = gold ? ['#ffe070', '#ffc83a', '#c8902a', '#8a5a14'] : ['#e8eef6', '#a8b0bc', '#ffcf4a', '#8ab8ff'];
+      for (let i = 0; i < 26; i++) {
+        const ring = i < 16, a2 = i * 2.39996, rx = ring ? AR.W * 0.86 : AR.W * 0.45, ry = ring ? AR.H * 0.82 : AR.H * 0.4;
+        const wx = Math.cos(a2) * rx, wy = Math.sin(a2) * ry, x = ox + wx, y = oy + wy; if (x < -30 || y < -30 || x > W + 30 || y > H + 30) continue;
+        const sz = ring ? 1.4 : 0.9;
+        for (let k = 0; k < 12; k++) { const px = x + Math.sin(k * 1.7 + i) * 9 * sz * (1 - k / 14), py = y + Math.cos(k * 2.3 + i) * 3.4 * sz - k * 0.9 * sz; g.fillStyle = cols[(k + i) % cols.length]; g.fillRect(px - 2.4, py - 1.2, 4.8, 2.4); g.fillStyle = 'rgba(0,0,0,0.35)'; g.fillRect(px - 2.4, py + 0.8, 4.8, 0.6); }
+        if (i % 3 === 0) lights.push({ x: wx, y: wy - 4, r: 36, kind: 'tint', color: gold ? '#ffd35a' : '#c8dcff', a: 0.55 });
+        if (Math.random() < 0.03) this.parts.push({ x: wx + U.rand(-6, 6), y: wy - 6, vx: 0, vy: -10, life: 0.7, max: 0.7, c: gold ? '#fff6c0' : '#e8f4ff', s: 1 });
       }
     }
     g.restore();

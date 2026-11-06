@@ -60,7 +60,7 @@
   /** What a cleared level pays (first: the first time it is cleared). */
   M.dunReward = (lv, first) => ({
     gold: D().gold(lv), mats: M.dunMats(lv, 1 + M.dunPerkVal('share')), quartz: D().quartz(lv), accountXp: D().acctXp(lv),
-    chests: first ? D().chestsFirst : D().chestsAgain,
+    chests: D().chests(lv, first),
   });
   /** Does the boss of a level drop its chest? Only within E.DUNGEON.bossLootWithin levels of the best cleared. */
   M.dunBossLoot = (lv) => lv >= dunS().best - D().bossLootWithin;

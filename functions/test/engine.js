@@ -290,20 +290,20 @@ const live = require('../game/live.json');
     // a level cannot be won faster than its floors allow
     r = await withProfile(r.profile, live, (DH) => L(DH).dunEnd.run({ floors: 6, won: true, gold: 999999 }));
     assert.strictEqual(r.result.won, false, 'too fast: not won'); assert.strictEqual(r.result.floors, 0); assert.strictEqual(r.profile.dungeon.best, 0);
-    // won the first time: gold, iron, quartz, a Gold chest and two Wooden, the best level, the board, the Mastery
+    // won the first time: gold, iron, quartz, two Wooden chests (level 1), the best level, the board, the Mastery
     r = await withProfile(r.profile, live, (DH) => L(DH).dunStart.run({ lv: 1 }));
     const g0 = r.profile.gold, gear0 = r.profile.gear.length;
     r = await withProfile(back(r.profile, 300e3), live, (DH) => L(DH).dunEnd.run({ floors: 6, won: true, gold: 500 }));
     assert.strictEqual(r.result.won, true); assert.strictEqual(r.result.first, true); assert.strictEqual(r.result.record, true);
-    assert.strictEqual(r.profile.dungeon.best, 1); assert.strictEqual(r.result.gear.length, 3, 'a Gold chest and two Wooden');
-    assert.strictEqual(r.profile.gear.length - gear0, 3); assert.strictEqual(r.profile.gold - g0, 720 + 500);
+    assert.strictEqual(r.profile.dungeon.best, 1); assert.strictEqual(r.result.gear.length, 2, 'two Wooden chests');
+    assert.strictEqual(r.profile.gear.length - gear0, 2); assert.strictEqual(r.profile.gold - g0, 720 + 500);
     assert.strictEqual(r.profile.quartz, 15); assert.strictEqual(r.profile.mats.iron - p1.mats.iron, 4);
     assert.strictEqual(r.profile.dungeon.mxp, 25, '6 floors x 4 + level 1 x 1');
     assert.ok(r.profile.boards.best.dungeon__all && r.profile.boards.best.dungeon__all.score === 1, 'the Dungeon board');
-    // again: one Wooden chest
+    // again: no chest below level 10
     r = await withProfile(r.profile, live, (DH) => L(DH).dunStart.run({ lv: 1 }));
     r = await withProfile(back(r.profile, 300e3), live, (DH) => L(DH).dunEnd.run({ floors: 6, won: true, gold: 0 }));
-    assert.strictEqual(r.result.first, false); assert.strictEqual(r.result.gear.length, 1); assert.strictEqual(r.profile.dungeon.used, 3);
+    assert.strictEqual(r.result.first, false); assert.strictEqual(r.result.gear.length, 0); assert.strictEqual(r.profile.dungeon.used, 3);
     // the hazards: none below 20, one to 49, two to 99, three from 100; the same every time; the Seal keeps the Stalker out
     r = await withProfile(r.profile, live, (DH) => { const M = DH.meta; const a = [19, 20, 49, 50, 99, 100, 250].map((l) => M.dunAffixes(l).length);
       let stalker = 0; for (let l = 100; l < 400; l++) if (M.dunAffixes(l).includes('stalker')) stalker++;
@@ -330,7 +330,10 @@ const live = require('../game/live.json');
     r = await withProfile(Object.assign({}, r.profile, { dungeon: Object.assign({}, r.profile.dungeon, { used: 0, perks: { leap: 2 } }) }), live, (DH) => [DH.meta.dunLeapMax(1), DH.meta.dunLeapMax(2), L(DH).dunStart.run({ lv: 2, n: 3 })]);
     assert.strictEqual(r.result[0], 1); assert.strictEqual(r.result[1], 3); assert.strictEqual(r.result[2].n, 3); assert.strictEqual(r.profile.dungeon.used, 3);
     r = await withProfile(back(r.profile, 600e3), live, (DH) => L(DH).dunEnd.run({ floors: 6, won: true }));
-    assert.strictEqual(r.profile.dungeon.best, 4); assert.strictEqual(r.result.gear.length, 9, 'three first clears');
+    assert.strictEqual(r.profile.dungeon.best, 4); assert.strictEqual(r.result.gear.length, 6, 'three first clears');
+    // the chests by depth: Wooden, a Silver from 30, a Gold from 80; again, one Wooden from level 10
+    r = await withProfile(r.profile, live, (DH) => [[1, true], [9, false], [10, false], [30, true], [80, true], [200, false]].map(([l, f]) => JSON.stringify(DH.economy.DUNGEON.chests(l, f))));
+    assert.deepStrictEqual(r.result, ['{"wood":2}', '{}', '{"wood":1}', '{"silver":1,"wood":1}', '{"gold":1,"wood":2}', '{"wood":1}']);
     // the boss's chest only within 120 levels of the best; the Jailer's Key: two more entries, kept through a reset, taken back for gems
     r = await withProfile(Object.assign({}, r.profile, { gems: 100, dungeon: Object.assign({}, r.profile.dungeon, { best: 200, perks: { key: 1, fury: 3 } }) }), live, (DH) => {
       const M = DH.meta, a = [M.dunBossLoot(79), M.dunBossLoot(80), M.dunEntries()]; M.dunPerkReset(); a.push(JSON.stringify(DH.save.data.dungeon.perks), M.dunPerkDown('key')); return a; });

@@ -430,7 +430,7 @@
     this.recompute();
   };
   /** The Pit's AUTO button (remembered in the settings): level-ups and tomes are chosen without a window. */
-  R.autoPickOn = function () { return !!(this.pit && DH.save.data.settings.autoPick); };
+  R.autoPickOn = function () { return !!DH.save.data.settings.autoPick; }; // AUTO: in every fight (the halls, the Pit, the Dungeon)
   /** The card a sensible player would take: an evolution or a class trait first, then a new ability (of the weapon's own
    *  kind of damage first), the elevated traits that suit the hero (Elementalist for an element, Summoner with summons),
    *  the weapon's traits and the base traits the hero is strong in; gold and healing last (healing first when life is low). */

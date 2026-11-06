@@ -530,7 +530,7 @@
       else if (r < 0.57) drawDecal(g, 'skull', x, y, rng);
       else if (r < 0.8) { for (let j = 0; j < 6; j++) { const rx = x + rng() * 12, ry = y + rng() * 7, rr = 0.6 + rng() * 1.6; P.circle(g, rx, ry, rr, P.vol(g, rx, ry, rr, shade(A, -0.1))); } }
       else if (r < 0.9 && T.crystals) { drawDecal(g, 'crystal', x, y, rng, hex.apply(null, T.crystals)); lights.push({ x: cx * CHUNK + x, y: cy * CHUNK + y - 3, r: 22, kind: 'crystal', color: hex.apply(null, T.crystals) }); }
-      else { drawDecal(g, 'candle', x, y, rng); lights.push({ x: cx * CHUNK + x, y: cy * CHUNK + y - 5, r: 26, kind: 'candle' }); }
+      else if (!T.noCandles) { drawDecal(g, 'candle', x, y, rng); lights.push({ x: cx * CHUNK + x, y: cy * CHUNK + y - 5, r: 26, kind: 'candle' }); }
     }
     g.getImageData(0, 0, 1, 1);
     yield;

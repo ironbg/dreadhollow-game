@@ -30,7 +30,7 @@
   ui.openDunResults = (run, res) => {
     const hudEl = document.getElementById('hud'); if (hudEl) hudEl.classList.add('hidden');
     const Q = run.dun, won = !!res.won;
-    const extras = (res.items || []).concat((Q.vault && Q.vault.paid) || []);
+    const extras = (res.items || []).concat(Q.vaultPaid || []);
     (res.gear || []).forEach((g) => extras.push({ icon: 'g_' + g.type, text: t('gear.' + g.type), rarity: g.rarity }));
     ui.modal({ closable: false, cls: 'results pitres dunres', rays: won, body: (m) => h('div',
       h('div.big.' + (won ? 'win' : 'lose'), won ? (res.record ? t('dun.record') : t('dun.won')) : t('dun.lost')),

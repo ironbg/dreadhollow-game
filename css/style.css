@@ -2140,3 +2140,7 @@ body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inse
 .dun-rwi .n { font-size: 12px; font-weight: 800; color: #f4e6d0; margin-top: 2px; }
 .dun-rwi.first .slot { box-shadow: 0 0 0 2px #ffd35a, 0 0 8px rgba(255,211,90,.5); }
 .dun-leap { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+#hud .dunbar { top: calc(var(--safe-t) + 110px); }
+#hud .dunbar .pb-autorow { align-items: center; justify-content: space-between; }
+#hud .db-wave { font-family: var(--title); font-size: 12px; color: #e8d8c0; letter-spacing: .04em; }
+#hud .autohall { position: absolute; top: calc(var(--safe-t) + 110px); right: 8px; z-index: 3; }
