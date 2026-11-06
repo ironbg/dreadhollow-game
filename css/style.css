@@ -2173,3 +2173,21 @@ body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inse
 .dun-where { gap: 4px 14px; }
 .dunwin .dun-far { left: 8px; right: auto; }
 .dunwin .dun-fxi button { width: 26px; height: 26px; }
+/* the Pit's and the Dungeon's windows: one size, the same picture, and nothing moves when the level changes: the window is a
+   fixed column, its picture gives way first on a short screen, the rewards keep room for two rows */
+.modal.pitwin, .modal.dunwin { height: min(680px, 100%); display: flex; flex-direction: column; }
+.modal.pitwin > .mhead, .modal.dunwin > .mhead, .modal.pitwin > .mdock, .modal.dunwin > .mdock, .modal.pitwin > .mfoot, .modal.dunwin > .mfoot { flex: none; }
+.modal.pitwin > div:not(.mhead):not(.mdock):not(.mfoot), .modal.dunwin > .dun-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: space-between; }
+:where(.modal.pitwin > div:not(.mhead):not(.mdock):not(.mfoot), .modal.dunwin > .dun-body) > * { flex: none; }
+.modal.pitwin .pit-art, .modal.dunwin .dun-art { flex: 0 1 120px; height: auto; min-height: 60px; }
+.dunwin .dun-rw { min-height: 106px; align-content: flex-start; }
+.dunwin .dun-rwi { padding: 0; background: none; border: 0; cursor: pointer; color: inherit; font: inherit; }
+.pit-slide.hide { visibility: hidden; }
+.dunwin .pit-share { min-height: 2.6em; }
+@media (max-height: 700px) { .dunwin .dun-tile { height: 44px; } .dunwin .dun-tile b { padding-top: 13px; font-size: 16px; } }
+@media (max-height: 700px) {
+  .dunwin .dun-rwi { width: 36px; } .dunwin .dun-rwi .slot { width: 32px; height: 32px; } .dunwin .dun-rwi .n { font-size: 10px; }
+  .dunwin .dun-rw { min-height: 94px; } .dun-where { font-size: 12px; margin-top: 3px; padding-top: 3px; } .dun-rwh { margin-top: 3px; }
+  .dunwin .dun-leap { margin-top: 3px; } .dunwin .dun-leap .btn { min-height: 26px; padding: 2px 8px; }
+  .dunwin .pit-share { min-height: 1.4em; } .dunwin .pit-btns .btn { min-height: 38px; }
+}

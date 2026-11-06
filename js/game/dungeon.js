@@ -202,6 +202,7 @@
       if (DH.game.run !== run || Q.done) return;
       Q.going = false;
       if (run.portal) { run.portalKept = run.portal; run.portal = null; } // after the Lord: the portal waits for the hero's return
+      if (run.well) { run.wellKept = run.well; run.well = null; } // (and the Well)
       run.clearChamber();
       Q.vault = { kind, t: D().vaultSecs, floor: Q.floor, bt: 0.4, gather: 0 };
       const p = run.player; p.x = AR.start.x; p.y = AR.start.y; p.inv = Math.max(p.inv, 1.2);
@@ -225,6 +226,7 @@
           run.clearChamber(); Q.vault = null; Q.exit.vault = null;
           const p = run.player; p.x = AR.start.x; p.y = AR.start.y;
           if (run.portalKept) { run.portal = run.portalKept; run.portalKept = null; run.portal.t = 1; }
+          if (run.wellKept) { run.well = run.wellKept; run.wellKept = null; }
         } else run.dunFloor(next);
         if (run.state === 'stairs') run.resume();
       }, 0.5);
@@ -269,7 +271,9 @@
       const Q = this.dun, f = BOSS_FLOOR(); Q.cleared = f + 1;
       const v = Q.vaults.includes(f) ? Q.kinds[Q.vaults.indexOf(f)] : null;
       Q.exit = { t: 0, vault: v, auto: -1 };
-      if (v) DH.events.emit('run:warning', t('hud.dunVaultBelow.' + v));
+      // the Well rises beside the hero's way: a piece found on the floors can be sent to the Wellkeeper (as at a hall's end)
+      const px = this.portal ? this.portal.x : 0; this.well = { x: px > 0 ? -70 : 70, y: 20, used: false };
+      DH.events.emit('run:warning', v ? t('hud.dunVaultBelow.' + v) : t('hud.well'));
     }
   };
 

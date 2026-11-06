@@ -54,7 +54,7 @@
     dunStart: { run: (a) => M().dunStart(int(a.lv), int(a.n) || 1) },
     dunVault: { run: (a) => M().dunVault(int(a.floor)) },
     dunBuy: { run: (a) => M().dunBuy(a.what === 'time' ? 'time' : 'revive') },
-    dunEnd: { run: (a) => M().dunEnd(int(a.floors), a.won === true, int(a.gold), int(a.quartz)) },
+    dunEnd: { run: (a) => M().dunEnd(int(a.floors), a.won === true, int(a.gold), int(a.quartz), Array.isArray(a.well) ? a.well.slice(0, 8) : []) },
     dunSweep: { run: (a) => M().dunSweep(int(a.n) || 1, int(a.lv) > 0 ? int(a.lv) : 0) },
     dunPerkUp: { fast: true, run: (a) => M().dunPerkUp(str(a.id, 12)) },
     dunPerkDown: { fast: true, run: (a) => M().dunPerkDown(str(a.id, 12)) },

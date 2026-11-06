@@ -103,7 +103,7 @@
   /** The fight is over: floors cleared (the boss floor the last), won (the boss fell and the portal was taken), the gold
    *  picked up. A won level pays it (for each level of a Leap), the chests opened at once; the best level, the boards, the
    *  Mastery. { lv, n, floors, won, record, first, items, gear, best, mastery, deeds } */
-  M.dunEnd = (floors, won, gold, quartz) => {
+  M.dunEnd = (floors, won, gold, quartz, well) => {
     const d = dunS(), a = d.active; if (!a) return null;
     d.active = null;
     const secs = Math.max(0, (U.now() - a.at) / 1000), all = D().floors + 1, best0 = d.best;
@@ -124,6 +124,15 @@
       M.boardRecord({ dunLevel: d.best, hero: S().selectedHero, stage: null, victory: true }, {}); // the Dungeon's boards: the best level
     }
     if (gold || quartz) items.push(...M.grant({ gold, quartz }));
+    if (won) { // the Well after the Lord: pieces found on the floors, sent to the Wellkeeper (a few, never of the top rarity)
+      const s = S(); let sent = 0;
+      for (const w of well || []) {
+        if (sent >= D().wellMax || !w || typeof w !== 'object' || !E.gear[w.type]) continue;
+        const r = Math.floor(+w.rarity); if (!(r >= 0)) continue;
+        s.wellkeeper.push({ type: w.type, rarity: Math.min(r, D().wellRarity) }); if (s.wellkeeper.length > E.WELL_MAX) s.wellkeeper.shift();
+        s.stats.wellSent = (s.stats.wellSent || 0) + 1; s.discovered[w.type] = true; sent++;
+      }
+    }
     addXp(xp);
     const st = S().stats; st.dunFights = (st.dunFights || 0) + 1; if (won) st.dunWins = (st.dunWins || 0) + 1;
     const deeds = M.checkDeeds(null); changed();

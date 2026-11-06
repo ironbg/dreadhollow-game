@@ -460,7 +460,9 @@
     unlock: 'aqueduct',                                        // open once the third hall is cleared
     entries: 10, floors: 5,                                    // floors before the boss floor
     waves: 3, wavePause: 1.6,                                  // a floor's foes come in three waves, a short breath between them
-    secs: 120, floorSecs: 18, bonusSecs: 10, bonusPerFloor: 2, // the clock: 2 min, +18 s a floor cleared, +10 s pickups on the floor
+    secs: 240, floorSecs: 18, bonusSecs: 10, bonusPerFloor: 2, // the clock: 4 min, +18 s a floor cleared, +10 s pickups on the floor
+    foeXp: 0.7,                                                // the foes' experience: 30% less than in a hall (the floors are crowded)
+    wellMax: 2, wellRarity: 4,                                 // the Well after the Lord: pieces sent to the Wellkeeper (the server's check)
     buySecs: 60, buyGems: 500, reviveGems: 500,                // out of time: +60 s for gems once; a revive for an ad and one for gems (one gem buy a fight)
     affixAt: [[100, 3], [50, 2], [20, 1]],                     // from level 100 three hazards, from 50 two, from 20 one
     halls: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'discord', 'blightmire', 'reliquary'], // the catacombs of level n: halls[(n - 1) % 7]

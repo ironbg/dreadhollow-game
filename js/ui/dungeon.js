@@ -119,8 +119,8 @@
       n = Math.max(1, Math.min(n, lmax, Math.max(1, left)));
       const xp = (E.DUNGEON.floors + 1) * E.DUNGEON_MASTERY.xpFloor + lv * E.DUNGEON_MASTERY.xpLevel;
       const rewards = [{ icon: 'u_star', text: '×' + U.fmt(Math.round(xp * (M.masteryPass() ? 2 : 1))), tip: t('dun.rw.mastery') }, { icon: 'n_pass', text: '×' + U.fmt(rw.accountXp), tip: t('dun.rw.acct') },
-        { icon: 'i_gold', text: U.fmt(rw.gold) }].concat(Object.keys(rw.mats).map((k) => ({ icon: 'mat_' + k, text: U.fmt(rw.mats[k]) })), [{ icon: 'i_quartz', text: '1–' + U.fmt(rw.quartz), tip: t('res.quartz') }])
-        .concat(Object.keys(rw.chests).map((k) => ({ icon: E.chests[k].icon, text: '×' + rw.chests[k], first: first })))
+        { icon: 'i_gold', text: U.fmt(rw.gold), tip: (t('common.gold').charAt(0).toUpperCase() + t('common.gold').slice(1)) }].concat(Object.keys(rw.mats).map((k) => ({ icon: 'mat_' + k, text: U.fmt(rw.mats[k]), tip: t('mat.' + k) })), [{ icon: 'i_quartz', text: '1–' + U.fmt(rw.quartz), tip: t('res.quartz') }])
+        .concat(Object.keys(rw.chests).map((k) => ({ icon: E.chests[k].icon, text: '×' + rw.chests[k], first: first, tip: t('chest.' + k) })))
         .concat(M.dunBossLoot(lv) ? [{ icon: 'c_gold', text: t('dun.rw.lord'), tip: t('dun.rw.lordTip') }] : []);
       const lo = Math.max(1, Math.min(lv - 2, best + 1 - 4)), tiles = []; for (let k = lo; k < lo + 5; k++) tiles.push(tile(k));
       m.set(h('div.dun-body',
@@ -134,14 +134,14 @@
             cell('hourglass', t('dun.refresh'), h('span.dun-clock', U.fmtDuration(U.msToMidnight()))), cell('c_gold', t('dun.vaultsRow'), M.dunVaultsToday() + ' / ' + E.DUNGEON.vaultsPerDay)),
           h('div.dun-where', h('span.dw', A.img('u_agony', 'ci'), h('span.dun-map.m-' + hall, t('stage.' + hall + '.name'))), h('span.dw', A.img('n_skull', 'ci'), h('span', t('enemy.' + (C.stages[hall].bosses.find((x) => x.final) || {}).id)))),
           h('div.dun-rwh', A.img('u_star', 'ci'), h('span', first ? t('dun.rewardsFirst') : t('dun.rewards'))),
-          h('div.dun-rw', rewards.map((e) => h('div.dun-rwi' + (e.first ? '.first' : ''), { title: e.tip || '' }, h('div.slot', A.img(e.icon)), h('div.n', e.text))))),
-        lmax > 1 ? h('div.dun-leap', h('span.small', t('dun.leap')), [1, 2, 3, 4, 5].filter((k) => k <= lmax).map((k) => h('button.btn.small' + (k === n ? '.gold' : '.ghost') + (k > left ? '.off' : ''), { onclick: () => { if (k <= left) { click(); n = k; draw(); } } }, '×' + k))) : null,
+          h('div.dun-rw', rewards.map((e) => h('button.dun-rwi' + (e.first ? '.first' : ''), { title: e.tip || '', onclick: () => { click(); ui.toast(e.tip + ': ' + e.text); } }, h('div.slot', A.img(e.icon)), h('div.n', e.text))))), // a tap names the reward
+        M.dunPerk('leap') ? h('div.dun-leap', h('span.small', t('dun.leap')), [1, 2, 3, 4, 5].filter((k) => k <= 1 + M.dunPerk('leap')).map((k) => h('button.btn.small' + (k === n ? '.gold' : '.ghost') + (k > left || k > lmax ? '.off' : ''), { onclick: () => { if (k <= left && k <= lmax) { click(); n = k; draw(); } } }, '×' + k))) : null, // (the same row on every level: the window never jumps)
         h('div.mact',
           h('div.pit-btns',
             h('div.pit-sweep',
               h('button.btn.blue' + (left && lv <= best ? '' : '.off'), { onclick: sweep }, sweepN > 1 ? t('pit.sweepN', { n: sweepN }) : t('pit.sweep')),
-              left > 1 && lv <= best ? h('div.pit-slide', h('input', { type: 'range', min: 1, max: left, step: 1, value: Math.min(sweepN, left), 'aria-label': t('pit.sweep'),
-                oninput: (e) => { sweepN = +e.target.value; const b = e.target.closest('.pit-sweep').querySelector('.btn'); b.textContent = sweepN > 1 ? t('pit.sweepN', { n: sweepN }) : t('pit.sweep'); } }), h('b', null)) : null),
+              h('div.pit-slide' + (left > 1 && lv <= best ? '' : '.hide'), h('input', { type: 'range', min: 1, max: left, step: 1, value: Math.min(sweepN, left), 'aria-label': t('pit.sweep'),
+                oninput: (e) => { sweepN = +e.target.value; const b = e.target.closest('.pit-sweep').querySelector('.btn'); b.textContent = sweepN > 1 ? t('pit.sweepN', { n: sweepN }) : t('pit.sweep'); } }), h('b', null))),
             h('button.btn.green' + (left ? '' : '.off'), { onclick: () => { if (!left) { ui.toast(t('dun.noEntries'), 'bad'); return; } click(); m.close(); DH.game.startDungeon(lv, n); } }, n > 1 ? t('dun.enterN', { n }) : t('dun.enter'))),
           h('div.small.muted.center.pit-share', lv <= best ? t('dun.sweepShare', { v: Math.round(M.dunSweepShare() * 100), n: U.fmt(lv) }) : best ? t('dun.sweepOnly') : t('dun.sweepNone')),
           h('div.pit-more',

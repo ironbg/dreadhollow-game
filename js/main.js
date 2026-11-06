@@ -81,7 +81,7 @@
       run.finished = true; if (run.state !== 'victory') run.state = 'over'; run.dun.done = true;
       DH.input.enable(false);
       const Q = run.dun, won = !!run.won; // the Lord fell: the level is cleared, through the portal or not
-      const args = { floors: run.dunFloorsDone(), won, gold: Math.floor(run.gold), quartz: Q.quartz };
+      const args = { floors: run.dunFloorsDone(), won, gold: Math.floor(run.gold), quartz: Q.quartz, well: [run.wellSent].concat(run.wellExtra || []).filter(Boolean).map((w) => ({ type: w.type, rarity: w.rarity })) };
       ui.act('dunEnd', args).then((res) => this.safeShow(() => ui.openDunResults(run, res || { lv: Q.lv, n: Q.n, floors: args.floors, won: false, items: [], gear: [], best: M.dunBest(), failed: true }), 'dun'));
     },
     /** The Pit is over: the waves cleared are paid on the server, then the results. */

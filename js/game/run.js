@@ -94,7 +94,7 @@
     /** Experience multiplier now: Growth, Agony (per hall) and Torment. */
     // Agony's extra foes (+35% a rank) share the horde's usual XP between them: only the hall's Agony bonus raises it
     // Agony halves XP: the denser horde (below) hands out twice the kills, so leveling stays about the same pace.
-    xpMult() { return (1 + (this.trib.xp || 0)) * this.P.growth * (1 + this.agony * (this.stage.agonyXp || 0.15)) / (1 + this.agony * 0.35) * (this.tormentXp || 1) * (this.agonyOn ? 0.5 : 1) * (this.pit && this.time < DH.economy.PIT.earlyXp.secs ? DH.economy.PIT.earlyXp.mult : 1) * (this.dun && this.dun.floor === 0 ? DH.economy.PIT.earlyXp.mult : 1); } // the Dungeon: the first floor counts triple // the Pit: the first minute counts triple
+    xpMult() { return (1 + (this.trib.xp || 0)) * this.P.growth * (1 + this.agony * (this.stage.agonyXp || 0.15)) / (1 + this.agony * 0.35) * (this.tormentXp || 1) * (this.agonyOn ? 0.5 : 1) * (this.pit && this.time < DH.economy.PIT.earlyXp.secs ? DH.economy.PIT.earlyXp.mult : 1) * (this.dun ? DH.economy.DUNGEON.foeXp * (this.dun.floor === 0 ? DH.economy.PIT.earlyXp.mult : 1) : 1); } // the Dungeon: the first floor counts triple // the Pit: the first minute counts triple
     gainXp(v, mult) {
       this.xp += v * (mult == null ? this.xpMult() : mult); // a gem's worth is fixed when it drops
       if (!Number.isFinite(this.xp)) this.xp = 0; // never an endless climb on a broken number

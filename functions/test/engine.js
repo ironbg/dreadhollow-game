@@ -331,7 +331,10 @@ const live = require('../game/live.json');
     // the Leap: three entries clear three new levels at once (uncleared levels only)
     r = await withProfile(Object.assign({}, r.profile, { dungeon: Object.assign({}, r.profile.dungeon, { used: 0, perks: { leap: 2 } }) }), live, (DH) => [DH.meta.dunLeapMax(1), DH.meta.dunLeapMax(2), L(DH).dunStart.run({ lv: 2, n: 3 })]);
     assert.strictEqual(r.result[0], 1); assert.strictEqual(r.result[1], 3); assert.strictEqual(r.result[2].n, 3); assert.strictEqual(r.profile.dungeon.used, 3);
-    r = await withProfile(back(r.profile, 600e3), live, (DH) => L(DH).dunEnd.run({ floors: 6, won: true }));
+    const wk0 = (r.profile.wellkeeper || []).length;
+    r = await withProfile(back(r.profile, 600e3), live, (DH) => { const g = DH.economy.gearOrder[0]; return L(DH).dunEnd.run({ floors: 6, won: true, well: [{ type: g, rarity: 5 }, { type: 'nope', rarity: 1 }, { type: g, rarity: 1 }, { type: g, rarity: 2 }] }); });
+    assert.strictEqual(r.profile.wellkeeper.length - wk0, 2, 'the Well: two pieces at most, real ones only');
+    assert.strictEqual(r.profile.wellkeeper[wk0].rarity, 4, 'never of the top rarity');
     assert.strictEqual(r.profile.dungeon.best, 4); assert.strictEqual(r.result.gear.length, 6, 'three first clears');
     // the chests by depth: Wooden, a Silver from 30, a Gold from 80; again, one Wooden from level 10
     r = await withProfile(r.profile, live, (DH) => [[1, true], [9, false], [10, false], [30, true], [80, true], [200, false]].map(([l, f]) => JSON.stringify(DH.economy.DUNGEON.chests(l, f))));
