@@ -88,6 +88,8 @@
       // A newer build wrote this profile: keep its version so its migrations never run twice.
       this.newer = d.v > SAVE_VERSION;
       if (this.newer) return;
+      // 1.61.60 counted a metal picked up as a herb too (offline profiles kept it): only real herbs stay
+      if (d.herbs && DH.economy && DH.economy.herbs) for (const k in d.herbs) if (!DH.economy.herbs.includes(k) && k !== 'dust') delete d.herbs[k];
       if (d.v < 2) {
         // v1 had 4 gear slots and 8 item types
         const map = { amulet_wrath: 'wrath_amulet', amulet_blood: 'crimson_chalice', ring_haste: 'oak_band', ring_greed: 'greed_signet',

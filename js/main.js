@@ -61,7 +61,7 @@
       run.finished = true; run.state = 'over';
       DH.input.enable(false);
       const P = run.pit;
-      ui.act('pitEnd', { waves: P.cleared }).then((res) => ui.openPitResults(run, res || { waves: P.cleared, reached: P.from + P.cleared, paid: 0, best: DH.meta.pitCheckpoint(), record: false, from: P.from, failed: true }));
+      ui.act('pitEnd', { waves: P.cleared }).then((res) => this.safeShow(() => ui.openPitResults(run, res || { waves: P.cleared, reached: P.from + P.cleared, paid: 0, best: DH.meta.pitCheckpoint(), record: false, from: P.from, failed: true }), true));
     },
     pause() {
       const r = this.run; if (!r || r.state !== 'playing') return;
@@ -86,7 +86,16 @@
       if (run.state !== 'victory') run.state = 'over';
       DH.input.enable(false);
       const sum = run.summary();
-      DH.server.runEnd(sum).then((res) => ui.openResults(run, res), (e) => this.unsettled(run, e));
+      DH.server.runEnd(sum).then((res) => this.safeShow(() => ui.openResults(run, res)), (e) => this.unsettled(run, e));
+    },
+    /** The results window of a fight that is already paid: if it cannot be drawn, back to the menus (never a screen
+     *  stuck on the fight). */
+    safeShow(open, pit) {
+      try { open(); } catch (e) {
+        console.error(e);
+        ui.closeAll(); ui.toast(t('server.error'), 'bad'); this.toMenu(false, pit);
+        if (pit) ui.openPit();
+      }
     },
     /** The server did not settle the fight. Refused (not confirmed): back to the menus with the reason. No connection:
      *  the fight is kept on this device; try again now, or later (it is sent by itself when the connection is back). */

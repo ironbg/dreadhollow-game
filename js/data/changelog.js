@@ -6,9 +6,11 @@
     {
       v: '1.61.61',
       bg: [
+        'Поправено: в 1.61.60 битка, в която си взел метал, замръзваше в края (след „Откажи се“ или победа) вместо да покаже резултатите. Наградите от тези битки са записани. Ако прозорецът с резултатите някога не може да се покаже, играта се връща в менюто, а не остава на битката.',
         'По-ясно име: „Шанс за свитък“ вече е „Шанс за Тайнствен том от елитите“ – благословията „Учен“, Съзвездието, статистиките и Данъкът на учения. Това е томът, от който избираш ново умение.',
       ],
       en: [
+        'Fixed: in 1.61.60 a fight in which you picked up a metal froze at the end (after Give up or a victory) instead of showing the results. The rewards of those fights were kept. Should the results window ever fail to show, the game returns to the menus instead of staying on the fight.',
         'A clearer name: “Scroll drop chance” is now “Arcane Tome chance from Elites” (the Scholar blessing, the Constellation, the stats and the tribute of the Scholar). It is the tome you pick a new ability from.',
       ],
     },
