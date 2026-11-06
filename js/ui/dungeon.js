@@ -140,7 +140,7 @@
           h('div.pit-btns',
             h('div.pit-sweep',
               h('button.btn.blue' + (left && lv <= best ? '' : '.off'), { onclick: sweep }, sweepN > 1 ? t('pit.sweepN', { n: sweepN }) : t('pit.sweep')),
-              h('div.pit-slide' + (left > 1 && lv <= best ? '' : '.hide'), h('input', { type: 'range', min: 1, max: left, step: 1, value: Math.min(sweepN, left), 'aria-label': t('pit.sweep'),
+              h('div.pit-slide' + (left > 1 && lv <= best ? '' : '.hide'), h('input', { type: 'range', min: 1, max: Math.max(1, left), step: 1, value: Math.min(sweepN, Math.max(1, left)), 'aria-label': t('pit.sweep'),
                 oninput: (e) => { sweepN = +e.target.value; const b = e.target.closest('.pit-sweep').querySelector('.btn'); b.textContent = sweepN > 1 ? t('pit.sweepN', { n: sweepN }) : t('pit.sweep'); } }), h('b', null))),
             h('button.btn.green' + (left ? '' : '.off'), { onclick: () => { if (!left) { ui.toast(t('dun.noEntries'), 'bad'); return; } click(); m.close(); DH.game.startDungeon(lv, n); } }, n > 1 ? t('dun.enterN', { n }) : t('dun.enter'))),
           h('div.small.muted.center.pit-share', lv <= best ? t('dun.sweepShare', { v: Math.round(M.dunSweepShare() * 100), n: U.fmt(lv) }) : best ? t('dun.sweepOnly') : t('dun.sweepNone')),
