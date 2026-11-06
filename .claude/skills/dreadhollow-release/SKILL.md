@@ -18,8 +18,10 @@ model names in commits or files. Changes to `live.json` server flags need the us
    ```bash
    for f in <changed .js files>; do node --check "$f"; done
    node tools/check-i18n.js            # every t('...') key in both languages
-   npx --yes eslint@8 --no-eslintrc --env browser,es2022 --parser-options=ecmaVersion:2022 --rule 'no-undef: error' \
-     --global DH,t,click js/ui js/game js/meta js/services js/core js/data js/main.js   # no name used that is not there
+   npx --yes eslint@8 --no-eslintrc --env browser,es2022 --parser-options=ecmaVersion:2022 --global DH,t,click \
+     --rule '{"no-undef":"error","no-fallthrough":"error","no-duplicate-case":"error","no-unreachable":"error","no-dupe-else-if":"error","no-const-assign":"error"}' \
+     js/ui js/game js/meta js/services js/core js/data js/main.js
+   # no name used that is not there; no `case` running into the next (code swallowed by a `//` comment once did that)
    node tools/build-functions.js       # the server's copy of the game code
    node functions/test/engine.js && node functions/test/admin.js && node functions/test/pitpay.js
    ```
@@ -30,6 +32,9 @@ model names in commits or files. Changes to `live.json` server flags need the us
    node .claude/skills/dreadhollow-release/scripts/smoke.js
    node .claude/skills/dreadhollow-release/scripts/rewardaudit.js
    ```
+   Before an AAB, also play fights to their end in the browser (death + Give up, and a victory, with metals and herbs
+   picked up): the results window must open and Continue must lead back to the menus. A results window that fails
+   leaves the screen on the last frame of the fight, which players report as a freeze.
 4. Commit with the session trailer lines; push to the working branch **and** `HEAD:dreadhollow` (the deploy
    branch). The `Deploy web version` workflow publishes the web build and deploys Firestore rules and functions;
    check both jobs succeeded when a change touched `functions/`.

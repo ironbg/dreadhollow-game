@@ -263,5 +263,19 @@ const live = require('../game/live.json');
     const e0 = M.pitEntries(), a = L.buyPassTier.run({}), t1 = M.passTier(), g1 = DH.save.data.gems; L.buyPassTier.run({}); const g2 = DH.save.data.gems;
     DH.save.data.pass.premium = true; return [a, t1, 2000 - g1, g1 - g2, M.pitEntries() - e0, DH.economy.passTierCost(13), DH.economy.passRewards.free[6].essence > 0, DH.economy.passRewards.prem[6].essence > 0]; });
   assert.deepStrictEqual(r.result, [true, 1, 500, 520, 1, 740, true, true]);
+  // Shop → Free: gold for an ad, 1000 / 2000 / 3000 a day, then none
+  r = await withProfile(p0, live, async (DH) => { const L = DH.actions.list, g = []; for (let i = 0; i < 4; i++) { const g0 = DH.save.data.gold; await L.adGold.run({}); g.push(DH.save.data.gold - g0); } return g; });
+  assert.deepStrictEqual(r.result, [1000, 2000, 3000, 0], 'gold for ads');
+  // Daily deals: one for an ad (never the retired gold one), six bought ones (at least one for gold, two for gems, one per group)
+  r = await withProfile(Object.assign({}, p0, { gems: 5000, gold: 100000 }), live, async (DH) => { const E = DH.economy, d = DH.meta.ensureDaily();
+    const defs = d.deals.map((x) => E.dealPool[x.i]), paid = defs.filter((x) => !x.cost.ad), grps = paid.map((x) => x.grp).filter(Boolean);
+    const bought = []; for (let i = 0; i < d.deals.length; i++) bought.push(!!(await DH.actions.list.buyDeal.run({ idx: i })));
+    return [defs.filter((x) => x.cost.ad && !x.off).length, defs.some((x) => x.off), paid.length, paid.filter((x) => x.cost.gold).length >= 1, paid.filter((x) => x.cost.gems).length >= 2, new Set(grps).size === grps.length, bought.every(Boolean)];
+  });
+  assert.deepStrictEqual(r.result, [1, false, 6, true, true, true, true], 'daily deals');
+  // a day dealt before the second row (the gold-for-ad deal, three bought ones) gets three more, and the retired one cannot be bought
+  r = await withProfile(p0, live, async (DH) => { const d = DH.meta.ensureDaily(); d.deals = [{ i: 0, bought: false }, { i: 3, bought: false }, { i: 5, bought: false }, { i: 13, bought: false }];
+    const n = DH.meta.ensureDaily().deals.length, n2 = DH.meta.ensureDaily().deals.length; return [n, n2, await DH.actions.list.buyDeal.run({ idx: 0 })]; });
+  assert.deepStrictEqual(r.result, [7, 7, null], 'old day gets the second row');
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });
