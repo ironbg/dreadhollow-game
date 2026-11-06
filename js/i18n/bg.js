@@ -73,7 +73,7 @@ DH.i18n.register('bg', { name: 'Bulgarian', native: 'Български' }, {
   'shop.legendDesc': 'Легендарна реликва, Златен сандък, 2500 диаманта и 50K злато.', 'shop.noadsDesc': 'Премахни всички реклами завинаги. Бонусите срещу реклама се дават веднага.',
   'shop.deals': 'Дневни сделки', 'shop.soldOut': 'Купено', 'shop.chests': 'Сандъци', 'shop.epicChance': 'Епична или по-добра {v}%', 'shop.pity': 'Легендарна след {n}',
   'shop.rates': 'Шансове за награди', 'shop.gems': 'Диаманти на душата', 'shop.x2': 'x2 ПЪРВА', 'shop.tag.popular': 'ПОПУЛЯРНО', 'shop.tag.best': 'НАЙ-ИЗГОДНО',
-  'shop.bonus': '+{v}% бонус', 'shop.gold': 'Злато', 'shop.free': 'Безплатни награди', 'shop.freeGold': '{n} безплатно злато', 'shop.freeGems': '{n} безплатни диаманта', 'shop.leftToday': 'Още {n} днес',
+  'shop.bonus': '+{v}% бонус', 'shop.gold': 'Злато', 'shop.free': 'Безплатни награди', 'shop.freeGold': '{n} безплатно злато', 'shop.dealAd': 'Оферта за деня – за реклама', 'shop.freeGems': '{n} безплатни диаманта', 'shop.leftToday': 'Още {n} днес',
   'shop.freeEnergy': '{n} безплатни факли', 'shop.restore': 'Възстанови покупките', 'shop.testMode': 'Магазинът е в тестов режим — без реални плащания.',
   'shop.perDay': '/ден', 'shop.chestOpened': 'Сандъкът е отворен!', 'shop.pityRule': 'Гарантирана легендарна или по-добра реликва поне на всеки {n} сандъка.',
 

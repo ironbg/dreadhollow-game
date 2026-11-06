@@ -6,12 +6,14 @@
     {
       v: '1.61.61',
       bg: [
+        'Магазин → Дневни: златото за реклама е махнато (вече е в „Безплатно“). Офертата за реклама е отделен ред отгоре, а под нея има 6 оферти вместо 3 – поне една за злато и две за диаманти, всеки ден различни. Нови: желязо, билки, злато за диаманти, сребърен и златен сандък за диаманти, звездна стомана, пакет метали. Цените са с около 15–25% под тези в Ковачницата и при сандъците.',
         'Магазин → Безплатно: ново безплатно злато за реклама – 1000, после 2000, после 3000 злато на ден. Редът е злато, факли, диаманти.',
         'С „Без реклами“ или премиум Бойния пропуск бутоните за реклама пишат „Вземи“ (без знака AD) – наградата се взима направо.',
         'Поправено: в 1.61.60 битка, в която си взел метал, замръзваше в края (след „Откажи се“ или победа) вместо да покаже резултатите. Наградите от тези битки са записани. Ако прозорецът с резултатите някога не може да се покаже, играта се връща в менюто, а не остава на битката.',
         'По-ясно име: „Шанс за свитък“ вече е „Шанс за Тайнствен том от елитите“ – благословията „Учен“, Съзвездието, статистиките и Данъкът на учения. Това е томът, от който избираш ново умение.',
       ],
       en: [
+        'Shop → Daily: the gold for an ad is gone (it lives in Free now). The ad deal is a row of its own on top, with 6 deals under it instead of 3 – at least one for gold and two for gems, different every day. New ones: iron, herbs, gold for gems, the silver and gold chests for gems, starsteel and a pack of metals, priced some 15–25% under the Forge and the chests.',
         'Shop → Free: new free gold for an ad – 1000, then 2000, then 3000 gold a day. The order is gold, torches, gems.',
         'With No Ads or the premium Battle Pass the ad buttons read “Claim” (no AD tag): the reward comes straight away.',
         'Fixed: in 1.61.60 a fight in which you picked up a metal froze at the end (after Give up or a victory) instead of showing the results. The rewards of those fights were kept. Should the results window ever fail to show, the game returns to the menus instead of staying on the fight.',

@@ -808,6 +808,9 @@
     const s = S(), today = U.dayKey();
     if (s.daily && s.daily.day === today) {
       // a mission offered every day (the Pit) joins a day dealt before it existed
+      const dd = s.daily.deals || (s.daily.deals = []);
+      if (!dd.some((x) => !E.dealPool[x.i].cost.ad && x.extra) && dd.filter((x) => !E.dealPool[x.i].cost.ad).length < E.DEALS_ANY + E.DEALS_GOLD + E.DEALS_GEMS) // the second row joins a day dealt before it
+        meta.dealPicks(dd.map((x) => x.i), U.seeded(U.strSeed(today + 'deals' + (s.created % 997)))).forEach((i) => dd.push({ i, bought: false, extra: true }));
       E.missionPool.forEach((m) => { if (m.always && !s.daily.missions.some((x) => x.id === m.id)) s.daily.missions.push({ id: m.id, p: 0, done: false, claimed: false }); });
       return s.daily;
     }
@@ -816,8 +819,8 @@
     const always = E.missionPool.filter((m) => m.always);
     const avail = U.shuffle(E.missionPool.filter((m) => !m.always && meta.missionAvailable(m)), rng), pool = always.concat(avail.slice(0, E.MISSIONS_PER_DAY - always.length));
     for (let i = pool.length; i < avail.length && pool.reduce((n, m) => n + m.pts, 0) < E.MISSION_PTS_MIN; i++) pool.push(avail[i]);
-    const all = E.dealPool.map((d, i) => i), adIdx = all.filter((i) => E.dealPool[i].cost.ad);
-    const dealIdx = U.shuffle(all.filter((i) => !E.dealPool[i].cost.ad), rng).slice(0, 3);
+    const adIdx = E.dealPool.map((d, i) => i).filter((i) => E.dealPool[i].cost.ad && !E.dealPool[i].off);
+    const dealIdx = meta.dealPicks([], rng);
     s.daily = {
       day: today,
       missions: pool.map((m) => ({ id: m.id, p: 0, done: false, claimed: false })),
@@ -1071,9 +1074,24 @@
   };
 
   /* ---------------- Daily deals ---------------- */
+  /** The day's bought deals, by index into E.dealPool (none of `have`, never two of one group): E.DEALS_ANY of either kind
+   *  (only when `have` holds none yet), then enough for E.DEALS_GOLD for gold and E.DEALS_GEMS for gems among the new ones. */
+  meta.dealPicks = (have, rng) => {
+    const paid = U.shuffle(E.dealPool.map((d, i) => i).filter((i) => !E.dealPool[i].cost.ad && !E.dealPool[i].off), rng);
+    const out = [], grps = new Set(have.map((i) => E.dealPool[i].grp).filter(Boolean));
+    const ok = (i) => !have.includes(i) && !out.includes(i) && !(E.dealPool[i].grp && grps.has(E.dealPool[i].grp));
+    const take = (i) => { out.push(i); if (E.dealPool[i].grp) grps.add(E.dealPool[i].grp); };
+    const paidHave = have.filter((i) => !E.dealPool[i].cost.ad).length;
+    if (!paidHave) for (const i of paid) { if (out.length >= E.DEALS_ANY) break; if (ok(i)) take(i); }
+    for (const [kind, n] of [['gold', E.DEALS_GOLD], ['gems', E.DEALS_GEMS]]) {
+      let k = 0;
+      for (const i of paid) { if (k >= n) break; if (E.dealPool[i].cost[kind] && ok(i)) { take(i); k++; } }
+    }
+    return out;
+  };
   meta.buyDeal = async (idx) => {
     const d = meta.ensureDaily(), deal = d.deals[idx]; if (!deal || deal.bought) return null;
-    const def = E.dealPool[deal.i];
+    const def = E.dealPool[deal.i]; if (def.off) return null;
     if (def.cost.ad) { if (!(await DH.ads.rewarded('deal'))) return null; }
     else if (!meta.spend(def.cost)) return null;
     deal.bought = true;

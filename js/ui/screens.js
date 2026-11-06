@@ -609,15 +609,21 @@
       const deals = h('div.grid3');
       d.deals.forEach((deal, i) => {
         const def = E.dealPool[deal.i], pv = M.rewardPreview(def.grant)[0];
+        if (def.off) return; // no longer dealt (gold for an ad: Shop → Free)
+        if (def.cost.ad) { // the ad's deal: a row of its own above the bought ones
+          root.append(h('div.panel.item', h('div.ico', A.img(pv.icon)), h('div.grow', h('div.t', pv.text), h('div.d', t('shop.dealAd'))),
+            deal.bought ? h('button.btn.small.ghost.off', t('shop.soldOut'))
+              : h('button.btn.small.ad.shine', { onclick: async () => { const r = await ui.act('buyDeal', { idx: i }); if (r) ui.rewardPopup(t('shop.deals'), r); ui.refresh(); } }, ui.adTag(), ui.watchT())));
+          return;
+        }
         let btn;
         if (deal.bought) btn = h('button.btn.small.ghost.off', t('shop.soldOut'));
-        else if (def.cost.ad) btn = h('button.btn.small.ad', { onclick: async () => { const r = await ui.act('buyDeal', { idx: i }); if (r) ui.rewardPopup(t('shop.deals'), r); ui.refresh(); } }, ui.adTag(), t('common.free'));
         else btn = h('button.btn.small.' + (def.cost.gems ? 'gem' : 'gold'), { onclick: async () => { const r = await ui.act('buyDeal', { idx: i }); if (r) ui.rewardPopup(t('shop.deals'), r); else if (r !== undefined) ui.toast(t('common.notEnough'), 'bad'); ui.refresh(); } },
           A.img(def.cost.gems ? 'i_gem' : 'i_gold'), U.fmt(def.cost.gems || def.cost.gold));
         deals.append(h('div.panel.chest', h('div.slot' + (pv.rarity != null ? '.rar' + pv.rarity : ''), { style: { width: '56px' } }, A.img(pv.icon)), h('div.small', { style: { fontWeight: 800 } }, pv.text), btn));
       });
       root.append(deals);
-      if (d.deals.some((deal) => E.dealPool[deal.i].grant.gear || E.dealPool[deal.i].grant.chest)) root.append(ui.ratesLink());
+      if (d.deals.some((deal) => !E.dealPool[deal.i].off && (E.dealPool[deal.i].grant.gear || E.dealPool[deal.i].grant.chest))) root.append(ui.ratesLink());
 
       // ---- the Forge: forging metal, herbs, a few packs of each a day
       root = sec.forge = h('div.shop-sec');
@@ -702,7 +708,7 @@
       // the tab bar, the chosen section, then what belongs under every section
       const TABS = { offers: 'n_pass', deals: 'hourglass', forge: 'mat_silver', chests: 'c_gold', gems: 'i_gem', gold: 'i_gold', free: 'n_ad' };
       const dot = { // something free waits in that section
-        offers: M.soulCardClaimable(), deals: d.deals.some((x) => !x.bought && E.dealPool[x.i].cost.ad), chests: M.freeChestReadyIn() <= 0,
+        offers: M.soulCardClaimable(), deals: d.deals.some((x) => !x.bought && E.dealPool[x.i].cost.ad && !E.dealPool[x.i].off), chests: M.freeChestReadyIn() <= 0,
         free: E.FREE_GEM_ADS - d.ads.gems > 0 || E.ENERGY_AD_LIMIT - d.ads.energy > 0 || (d.ads.gold || 0) < E.GOLD_ADS.length,
       };
       const cur = TABS[ui.sub.shop] ? ui.sub.shop : 'offers';

@@ -516,22 +516,34 @@
     { id: 'p_forge',     cost: { gems: 300 },  grant: { mats: { iron: 30, silver: 20, gold: 10, starsteel: 5 } }, daily: 1 },
   ];
 
-  /* Daily deals: rotated every day. kind: ad (free with ad), gold, gems */
+  /* Daily deals: rotated every day — one for an ad, then E.DEALS_PAID bought ones: E.DEALS_ANY of either kind, then at least
+   * E.DEALS_GOLD for gold and E.DEALS_GEMS for gems. Priced some 15–25% under the same thing elsewhere in the shop (the Forge,
+   * the chests, the gold packs). grp: never two of a group on one day. off: no longer dealt (kept: saved days point at
+   * the pool by index, so entries are only ever added at the end). */
+  E.DEALS_ANY = 3; E.DEALS_GOLD = 1; E.DEALS_GEMS = 2;
   E.dealPool = [
-    { id: 'd_gold_ad',   cost: { ad: 1 },     grant: { gold: 1500 } },
+    { id: 'd_gold_ad',   cost: { ad: 1 },     grant: { gold: 1500 }, off: true }, // gold for an ad lives in Shop → Free now
     { id: 'd_gems_ad',   cost: { ad: 1 },     grant: { gems: 15 } },
     { id: 'd_energy_ad', cost: { ad: 1 },     grant: { energy: 15 } },
-    { id: 'd_gear_rare', cost: { gems: 90 },  grant: { gear: { rarity: 2 } } },
-    { id: 'd_gear_epic', cost: { gems: 280 }, grant: { gear: { rarity: 3 } } },
-    { id: 'd_silver',    cost: { gold: 9000 },grant: { chest: 'silver' } },
-    { id: 'd_gear_unc',  cost: { gold: 4000 },grant: { gear: { rarity: 1 } } },
+    { id: 'd_gear_rare', cost: { gems: 90 },  grant: { gear: { rarity: 2 } }, grp: 'gear' },
+    { id: 'd_gear_epic', cost: { gems: 280 }, grant: { gear: { rarity: 3 } }, grp: 'gear' },
+    { id: 'd_silver',    cost: { gold: 9000 },grant: { chest: 'silver' }, grp: 'silverchest' },
+    { id: 'd_gear_unc',  cost: { gold: 4000 },grant: { gear: { rarity: 1 } }, grp: 'gear' },
     { id: 'd_energy',    cost: { gems: 30 },  grant: { energy: 30 } },
-    { id: 'd_gold_big',  cost: { gems: 120 }, grant: { gold: 12000 } },
+    { id: 'd_gold_big',  cost: { gems: 120 }, grant: { gold: 12000 }, grp: 'gold' },
     { id: 'd_iron_ad',   cost: { ad: 1 },     grant: { mats: { iron: 12 } } },
     { id: 'd_silver_mat',cost: { gold: 4500 },grant: { mats: { silver: 12 } } },
     { id: 'd_gold_mat',  cost: { gems: 70 },  grant: { mats: { gold: 12 } } },
-    { id: 'd_star_mat',  cost: { gems: 150 }, grant: { mats: { starsteel: 10 } } },
+    { id: 'd_star_mat',  cost: { gems: 150 }, grant: { mats: { starsteel: 10 } }, grp: 'star' },
     { id: 'd_potion',    cost: { gold: 5000 },grant: { potions: { remembrance: 1 } } },
+    // added with the second row of deals (the Forge's price in brackets)
+    { id: 'd_iron_mat',  cost: { gold: 2500 },grant: { mats: { iron: 25 } } },                                          // 20 for 2500
+    { id: 'd_herbs',     cost: { gold: 2500 },grant: { herbs: { moss: 3, ember: 3, lily: 3, frostcap: 3, nightshade: 3 } } }, // 3000
+    { id: 'd_gold_mid',  cost: { gems: 60 },  grant: { gold: 6000 }, grp: 'gold' },                                     // the packs: ~75 gold a gem
+    { id: 'd_silver_g',  cost: { gems: 120 }, grant: { chest: 'silver' }, grp: 'silverchest' },                        // 150
+    { id: 'd_gold_chest',cost: { gems: 340 }, grant: { chest: 'gold' } },                                              // 400
+    { id: 'd_star_small',cost: { gems: 80 },  grant: { mats: { starsteel: 5 } }, grp: 'star' },                         // 100 (10 for 200)
+    { id: 'd_forge_mix', cost: { gems: 240 }, grant: { mats: { iron: 30, silver: 20, gold: 10, starsteel: 5 } } },      // 300
   ];
 
   /* Ads */
