@@ -110,8 +110,9 @@
     const pick = (v) => { click(); lv = Math.max(1, Math.min(M.dunBest() + 1, v)); n = 1; draw(); };
     const tile = (k) => {
       const best = M.dunBest(), open = k <= best + 1, done = k <= best;
+      // a small lancet of carved stone in a bronze frame (dun-frame, dun-face: both cut to the pointed arch)
       return h('button.dun-tile' + (k === lv ? '.on' : '') + (done ? '.done' : '') + (k === best + 1 ? '.next' : '') + (open ? '' : '.shut'), { onclick: () => { if (open) pick(k); } },
-        h('b', U.fmt(k)), done ? h('i.dun-tick', '✓') : null, k === best && best ? A.img('n_trophy', 'dun-cup') : null);
+        h('i.dun-frame'), h('i.dun-face'), h('b', U.fmt(k)), done ? h('i.dun-tick', '✓') : null, k === best && best ? A.img('n_trophy', 'dun-cup') : null);
     };
     const draw = () => {
       const left = M.dunLeft(), all = M.dunEntries(), best = M.dunBest(), hall = M.dunHall(lv), fx = M.dunAffixes(lv), first = lv > best, rw = M.dunReward(lv, first), lmax = M.dunLeapMax(lv), mst = M.dunMastery();
@@ -125,8 +126,8 @@
       m.set(h('div.dun-body',
         h('div.pit-art.dun-art', h('img', { src: pic(), alt: '' }),
           fx.length ? h('div.dun-fx', h('div.small', t('pit.affixes')), h('div.dun-fxi', fx.map((k) => h('button', { 'aria-label': t('pit.fx.' + k), onclick: () => { click(); ui.fxOne(k); } }, A.img(ui.fxIcon(k)))))) : null,
-          h('button.dun-far', { 'aria-label': t('dun.toBest'), onclick: () => pick(best + 1) }, '»')),
-        h('div.dun-strip', h('button.dun-arr', { onclick: () => pick(lv - 1), 'aria-label': '<' }, '‹'), h('div.dun-tiles', tiles), h('button.dun-arr', { onclick: () => pick(lv + 1), 'aria-label': '>' }, '›')),
+          h('button.dun-far', { 'aria-label': t('dun.toBest'), onclick: () => pick(best + 1) }, A.img('u_right', 'ci'), A.img('u_right', 'ci'))),
+        h('div.dun-strip', h('button.dun-arr', { onclick: () => pick(lv - 1), 'aria-label': '<' }, A.img('u_left', 'ci')), h('div.dun-tiles', tiles), h('button.dun-arr', { onclick: () => pick(lv + 1), 'aria-label': '>' }, A.img('u_right', 'ci'))),
         h('div.pit-card.dun-card',
           row('n_trophy', t('dun.best'), U.fmt(best)),
           row('n_dungeon', t('dun.today'), (all - left) + ' / ' + all, left ? '' : '.bad'),

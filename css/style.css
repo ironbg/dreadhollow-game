@@ -2087,8 +2087,6 @@ body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inse
 .dun-fade.on { opacity: 1; }
 .dun-fade-t { font-family: var(--title); font-size: 24px; color: #d8c8b0; text-shadow: 0 2px 0 #000, 0 0 18px rgba(200,40,30,.6); letter-spacing: 1px; text-align: center; padding: 0 20px; }
 .dun-rule { margin: 8px 0 4px; color: #c8b898; }
-.dun-strip { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 6px 0; }
-.dun-lv { font-family: var(--title); font-size: 26px; color: var(--gold); }
 #hud .dunbar { width: 176px; }
 /* the Dungeon's window */
 .dun-art { height: 132px; }
@@ -2097,19 +2095,41 @@ body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inse
 .dun-fxi { display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px; }
 .dun-fxi button { width: 30px; height: 30px; padding: 2px; background: #1a0608; border: 2px solid #b02a2a; cursor: pointer; }
 .dun-fxi img { width: 100%; height: 100%; image-rendering: pixelated; }
-.dun-far { position: absolute; right: 8px; bottom: 6px; z-index: 2; width: 40px; height: 28px; font: 700 20px/1 var(--title); color: #e8e0f0; background: #2a3448; border: 2px solid #0a0c12; box-shadow: inset 0 1px 0 rgba(255,255,255,.2); cursor: pointer; }
-.dun-strip { display: flex; align-items: center; gap: 4px; margin: 8px 0 0; padding: 6px 4px; background: #0e1416; border: 2px solid #050708; box-shadow: inset 0 0 0 1px #2a3a3a; }
-.dun-arr { width: 26px; height: 44px; flex: none; font: 700 26px/1 var(--title); color: #f0e6d0; background: none; border: 0; cursor: pointer; }
-.dun-tiles { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
-.dun-tile { position: relative; height: 46px; background: linear-gradient(#1e3436, #142426); border: 2px solid #0a1012; color: #7ae08a; cursor: pointer; padding: 0; }
-.dun-tile b { font: 700 20px/1 var(--title); text-shadow: 0 2px 0 #000; }
-.dun-tile.shut { opacity: .35; cursor: default; color: #a0a8a8; }
-.dun-tile.next { color: #f4f0e8; }
-.dun-tile.on { border-color: #ff8a5a; box-shadow: 0 0 0 2px #ff5a3a, 0 0 12px rgba(255,90,58,.6); }
-.dun-tick { position: absolute; left: 50%; bottom: -4px; transform: translateX(-50%); font: 900 16px/1 sans-serif; font-style: normal; color: #4ad860; text-shadow: 0 1px 0 #000, 0 0 2px #000; }
-.dun-cup { position: absolute; right: -2px; bottom: -4px; width: 18px; height: 18px; image-rendering: pixelated; }
-.dun-tile.done.on b, .dun-tile:not(.done):not(.shut) b { color: #ffd35a; }
-.dun-tile.done b { color: #7ae08a; }
+.dun-far { position: absolute; right: 8px; bottom: 6px; z-index: 2; width: 44px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;
+  border: 2px solid #050308; background: linear-gradient(rgba(255,230,200,.06), rgba(0,0,0,.45)), var(--tex-stone, none) center / 40px 40px, #3a3036;
+  box-shadow: inset 0 0 0 1px var(--ring-gold), inset 2px 2px 0 var(--hi), inset -2px -2px 0 var(--lo), 0 2px 0 #000; }
+.dun-far img.ic.ci { width: 16px; height: 16px; margin: 0 -3px; }
+/* the levels' strip: a slab of dark stone in a gold ring with the corner pieces; each level a small lancet of carved stone
+   in a bronze frame, the chosen one glowing like an ember, the next to enter with a gold number, the shut ones sunk in shadow */
+.dun-strip { position: relative; display: flex; align-items: center; gap: 4px; margin: 8px 0 0; padding: 8px 6px 7px;
+  border: 2px solid #050308; background: radial-gradient(ellipse at 50% 0%, rgba(160,40,30,.16), rgba(0,0,0,0) 70%), var(--tex-dark, none) 0 0 / 64px 64px, #120c14;
+  box-shadow: inset 0 0 0 2px var(--ring-gold), inset 4px 4px 0 0 var(--hi), inset -4px -4px 0 0 var(--lo), 0 3px 0 #000; }
+.dun-strip::after { content: ''; position: absolute; inset: -3px; pointer-events: none; image-rendering: pixelated;
+  background: var(--corner-tl, none) 0 0 / 18px 18px no-repeat, var(--corner-tr, none) 100% 0 / 18px 18px no-repeat, var(--corner-bl, none) 0 100% / 18px 18px no-repeat, var(--corner-br, none) 100% 100% / 18px 18px no-repeat; }
+.dun-arr { width: 28px; height: 40px; flex: none; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1;
+  border: 2px solid #050308; background: linear-gradient(rgba(255,230,200,.06), rgba(0,0,0,.45)), var(--tex-stone, none) center / 40px 40px, #3a3036;
+  box-shadow: inset 0 0 0 1px var(--ring-gold), inset 2px 2px 0 var(--hi), inset -2px -2px 0 var(--lo), 0 2px 0 #000; }
+.dun-arr img.ic.ci { width: 16px; height: 16px; margin: 0; }
+.dun-arr:active, .dun-far:active { transform: translateY(1px); filter: brightness(1.2); }
+.dun-tiles { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; z-index: 1; }
+.dun-tile { position: relative; height: 58px; padding: 0; background: none; border: 0; cursor: pointer; color: #e8dcc4; }
+.dun-tile .dun-frame, .dun-tile .dun-face { position: absolute; clip-path: polygon(0 100%, 0 36%, 7% 22%, 20% 10%, 50% 0, 80% 10%, 93% 22%, 100% 36%, 100% 100%); }
+.dun-tile .dun-frame { inset: 0; background: linear-gradient(#e8c478, #9a7030 45%, #4a3014 100%); }
+.dun-tile .dun-face { inset: 2px 2px 2px; background: radial-gradient(ellipse at 50% 22%, rgba(255,226,180,.14), rgba(0,0,0,0) 60%), linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.6)), var(--tex-stone, none) center / 36px 36px, #3e343a; }
+.dun-tile .dun-face::after { content: ''; position: absolute; inset: 0; box-shadow: inset 2px 2px 0 rgba(255,236,210,.14), inset -2px -2px 0 rgba(0,0,0,.5); }
+.dun-tile b { position: relative; z-index: 1; display: block; padding-top: 18px; font: 700 20px/1 var(--title); color: #e8dcc4; text-shadow: 0 2px 0 #000, 0 0 6px rgba(0,0,0,.8); }
+.dun-tile.next b { color: #ffd35a; }
+.dun-tile.done b { color: #d8ccb4; }
+.dun-tile.on { filter: drop-shadow(0 0 5px rgba(255,70,40,.85)); }
+.dun-tile.on .dun-frame { background: linear-gradient(#ffb07a, #d0381e 45%, #5a0a06 100%); }
+.dun-tile.on .dun-face { background: radial-gradient(ellipse at 50% 30%, rgba(255,110,60,.32), rgba(0,0,0,0) 65%), linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.55)), var(--tex-stone, none) center / 36px 36px, #4a2a26; }
+.dun-tile.on b { color: #fff0d0; }
+.dun-tile.shut { cursor: default; }
+.dun-tile.shut .dun-frame { background: linear-gradient(#5a4a3a, #2a2018); }
+.dun-tile.shut .dun-face { filter: brightness(.42) saturate(.5); }
+.dun-tile.shut b { color: #6a6068; }
+.dun-tick { position: absolute; z-index: 1; left: 50%; bottom: 2px; transform: translateX(-50%); font: 900 15px/1 sans-serif; font-style: normal; color: #5ae070; text-shadow: 0 1px 0 #000, 1px 0 0 #000, -1px 0 0 #000, 0 0 3px #000; }
+.dun-cup { position: absolute; z-index: 2; right: -3px; bottom: -3px; width: 18px; height: 18px; image-rendering: pixelated; filter: drop-shadow(0 1px 0 #000); }
 .dun-card { margin-top: 8px; }
 .dun-map { font-weight: 800; }
 .dun-map.m-crypt { color: #c8b8e8; } .dun-map.m-abyss { color: #ff8a5a; } .dun-map.m-aqueduct { color: #7ae0c8; } .dun-map.m-catacombs { color: #8ac8ff; }
