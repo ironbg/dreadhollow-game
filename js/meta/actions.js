@@ -54,7 +54,7 @@
     dunStart: { run: (a) => M().dunStart(int(a.lv), int(a.n) || 1) },
     dunVault: { run: (a) => M().dunVault(int(a.floor)) },
     dunBuy: { run: (a) => M().dunBuy(a.what === 'time' ? 'time' : 'revive') },
-    dunEnd: { run: (a) => M().dunEnd(int(a.floors), a.won === true, int(a.gold)) },
+    dunEnd: { run: (a) => M().dunEnd(int(a.floors), a.won === true, int(a.gold), int(a.quartz)) },
     dunSweep: { run: (a) => M().dunSweep(int(a.n) || 1) },
     dunPerkUp: { fast: true, run: (a) => M().dunPerkUp(str(a.id, 12)) },
     dunPerkDown: { fast: true, run: (a) => M().dunPerkDown(str(a.id, 12)) },

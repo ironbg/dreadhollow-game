@@ -100,7 +100,10 @@
         h('div.pb-top', h('span.pb-ess', A.img('i_essence', 'ci'), r.pbEss = h('b')), r.pbWave = h('b.pb-wave')),
         h('div.pb-bar', r.pbFill = h('i')),
         h('div.pb-autorow', r.autoBtn = h('button.autobtn' + (DH.save.data.settings.autoPick ? '.on' : ''), { title: t('hud.autoHint'), onclick: () => { ui.setAutoPick(!DH.save.data.settings.autoPick); } }, h('i'), h('b', t('hud.auto')))), // AUTO: level-ups and tomes chosen by themselves
-        r.pbCombo = h('div.pb-combo.hidden', h('div.pb-ct', t('hud.combo')), r.pbN = h('div.pb-n'), h('div.pb-cbar', r.pbCFill = h('i')), r.pbSkip = h('div.pb-skip'))) : null].filter(Boolean)); // append() would print a null as text
+        r.pbCombo = h('div.pb-combo.hidden', h('div.pb-ct', t('hud.combo')), r.pbN = h('div.pb-n'), h('div.pb-cbar', r.pbCFill = h('i')), r.pbSkip = h('div.pb-skip'))) : null,
+      r.dunL = run.dun ? h('div.pitbar.dunbar', // the Dungeon, top right: the level and floor, how much of the floor is slain (or the vault's seconds)
+        h('div.pb-top', h('span.pb-ess', A.img('n_dungeon', 'ci'), r.dbLv = h('b')), r.dbFloor = h('b.pb-wave')),
+        h('div.pb-bar', r.dbFill = h('i'))) : null].filter(Boolean)); // append() would print a null as text
     if (!DH.save.data.tutorialDone) { r.tut = h('div.tutorial', h('div', h('span.hand', A.img('u_hand', 'bigic')), t('tutorial.move'), h('br'), h('span.small.muted', t('tutorial.auto')))); el.append(r.tut); }
     hud.sig = ''; el.classList.remove('hidden');
   };
@@ -266,6 +269,14 @@
       r.pbSkip.classList.toggle('on', skip > 0);
     }
   };
+  /** The Dungeon's panel, every frame. */
+  const dunBar = (r, run) => {
+    const Q = run.dun, V = Q.vault && Q.vault.in ? Q.vault : null, boss = Q.floor === E.DUNGEON.floors;
+    r.dbLv.textContent = t('dun.lvShort', { n: Q.lv + (Q.n > 1 ? '–' + (Q.lv + Q.n - 1) : '') });
+    r.dbFloor.textContent = V ? t('hud.dunVaultLeft', { s: Math.ceil(V.t) }) : boss ? t('hud.dunBossShort') : t('hud.dunFloorShort', { n: Q.floor + 1, m: E.DUNGEON.floors + 1 });
+    r.dbFill.style.width = (V ? V.t / E.DUNGEON.vaultSecs * 100 : Q.need ? Math.min(100, Q.got / Q.need * 100) : run.won ? 100 : 0) + '%';
+    r.dunL.classList.toggle('vault', !!V);
+  };
   hud.update = (run) => {
     const r = hud.refs; if (!r) return;
     autoQuality(run);
@@ -273,9 +284,11 @@
     r.xpFill.style.width = Math.min(100, run.xp / run.xpNext * 100) + '%';
     drawBossBar(r, run.bosses[0]); // every frame: the trail behind a blow eases down smoothly
     if (run.pit && r.pitL) pitBar(r, run);
+    if (run.dun && r.dunL) dunBar(r, run);
     const now = performance.now(); if (now - lastTxt < 120) return; lastTxt = now;
     r.lvl.textContent = t('common.lv') + ' ' + run.level;
     if (run.pit) { const left = Math.max(0, (run.pit.secs || E.PIT.secs) - run.time); r.timer.textContent = U.fmtTime(left); r.timer.classList.toggle('boss', left <= 30); }
+    else if (run.dun) { const left = Math.max(0, run.dun.secs), V = run.dun.vault && run.dun.vault.in; r.timer.textContent = U.fmtTime(left); r.timer.classList.toggle('boss', left <= 20 && !V); r.timer.classList.toggle('paused', !!V || !!run.won); } // the clock stands in a vault and after the Lord
     else { r.timer.textContent = U.fmtTime(run.time); r.timer.classList.toggle('boss', run.time >= run.runLength); }
     r.kills.textContent = U.fmt(run.kills); r.gold.textContent = U.fmt(run.gold);
     r.bagN.textContent = run.bag.length ? run.bag.length + '/' + C.BAG_SIZE : ''; r.bagN.classList.toggle('full', run.bag.length >= C.BAG_SIZE);
@@ -699,12 +712,38 @@
     requestAnimationFrame(() => fade(grid));
   };
 
+  /* ---------------- the Dungeon, during a fight ---------------- */
+  /** Down the stairs: the screen goes black, a line of text, then the next chamber fades in (then() at the black). */
+  ui.dunFade = (text, then, hold) => {
+    const el = h('div.dun-fade', h('div.dun-fade-t', text)), root = document.getElementById('hud') || document.body; root.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('on'));
+    setTimeout(() => { try { then(); } finally { setTimeout(() => { el.classList.remove('on'); setTimeout(() => el.remove(), 450); }, (hold || 0.35) * 1000); } }, 420);
+  };
+  /** The clock ran out: +60 s for gems (once a fight, and not after a gem revive), or the level is lost. */
+  ui.openDunTime = (run) => {
+    DH.input.enable(false);
+    const Q = run.dun, can = !Q.gems; let busy = false, m = null;
+    const end = () => { if (m) m.close(); run.dunOver(); };
+    m = ui.modal({ title: t('dun.timeTitle'), closable: false, cls: 'dun-time', body: h('div',
+      h('div.center.muted', can ? t('dun.timeDesc', { s: E.DUNGEON.buySecs }) : t('dun.timeNoMore')),
+      h('div.col',
+        can ? h('button.btn.gem.block', { onclick: async () => {
+          if (busy) return; busy = true; const ok = await ui.act('dunBuy', { what: 'time' }); busy = false;
+          if (ok) { Q.gems = 'time'; Q.secs += E.DUNGEON.buySecs; DH.audio.play('buy'); m.close(); DH.input.enable(true); run.resume(); }
+          else if (ok === false) ui.toast(t('common.notEnough'), 'bad');
+        } }, t('dun.timeBuy', { s: E.DUNGEON.buySecs }), A.img('i_gem'), E.DUNGEON.buyGems) : null,
+        h('button.btn.ghost.block', { onclick: () => { click(); end(); } }, t('dun.timeEnd')))) });
+  };
+  /** A vault's reward has come in from the server: what it paid, over the fight. */
+  ui.dunVaultToast = (r) => { const it = (r.items || [])[0]; if (it) ui.toast(t('hud.dunVaultPaid', { v: it.text }), 'good'); };
+
   /* ---------------- Revive ---------------- */
   ui.openRevive = (run) => {
     DH.input.enable(false);
     let left = 10, done = false, iv;
     const cnt = h('div.num', { style: { fontSize: '26px', color: 'var(--blood-hi)', textAlign: 'center', margin: '8px 0' } }, left);
-    const cost = E.REVIVE_GEMS[run.usedGemRevive], gemsLeft = E.REVIVE_GEMS.length - run.usedGemRevive;
+    const Q = run.dun; // the Dungeon: one revive for an ad, one for gems (if no time was bought for them)
+    const cost = Q ? (Q.gems ? null : E.DUNGEON.reviveGems) : E.REVIVE_GEMS[run.usedGemRevive], gemsLeft = Q ? (Q.gems ? 0 : 1) : E.REVIVE_GEMS.length - run.usedGemRevive;
     const giveUp = () => { if (done) return; done = true; clearInterval(iv); m.close(); DH.game.finishRun(run); };
     const revived = () => { done = true; clearInterval(iv); m.close(); run.revive(false); DH.input.enable(true); };
     const startTimer = () => { clearInterval(iv); iv = setInterval(() => { left--; cnt.textContent = Math.max(0, left); if (left <= 0) giveUp(); }, 1000); };
@@ -712,7 +751,7 @@
       h('div.center.muted', t('revive.desc')), cnt,
       h('div.col',
         !run.usedAdRevive ? h('button.btn.ad.block.shine', { onclick: async () => { clearInterval(iv); if (await DH.ads.rewarded('revive')) { run.usedAdRevive = true; revived(); } else startTimer(); } }, ui.adTag(), t('revive.free')) : null,
-        cost == null ? h('div.center.small.muted', t('revive.noMore')) : h('button.btn.gem.block', { onclick: async () => { clearInterval(iv); const ok = await ui.act('reviveGems', { n: run.usedGemRevive }); if (ok) { run.usedGemRevive++; DH.audio.play('buy'); revived(); } else { if (ok === false) ui.toast(t('common.notEnough'), 'bad'); startTimer(); } } }, t('revive.gems'), A.img('i_gem'), cost, h('small', { style: { opacity: 0.75, marginLeft: '6px' } }, t('revive.left', { n: gemsLeft }))),
+        cost == null ? h('div.center.small.muted', t('revive.noMore')) : h('button.btn.gem.block', { onclick: async () => { clearInterval(iv); const ok = Q ? await ui.act('dunBuy', { what: 'revive' }) : await ui.act('reviveGems', { n: run.usedGemRevive }); if (ok) { if (Q) Q.gems = 'revive'; else run.usedGemRevive++; DH.audio.play('buy'); revived(); } else { if (ok === false) ui.toast(t('common.notEnough'), 'bad'); startTimer(); } } }, t('revive.gems'), A.img('i_gem'), cost, h('small', { style: { opacity: 0.75, marginLeft: '6px' } }, t('revive.left', { n: gemsLeft }))),
         h('button.btn.ghost.block', { onclick: () => { click(); giveUp(); } }, t('revive.giveUp')))) });
     startTimer();
   };

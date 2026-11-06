@@ -59,6 +59,18 @@
     for (const x of [0.7, 6.2]) { P.rect(g, x, 1.4, 2.1, 3, P.lg(g, x, 0, x + 2.1, 0, ['#e02838', '#801018'])); P.rect(g, x, 0.2, 2.1, 1.3, P.lg(g, x, 0, x + 2.1, 0, ['#ffffff', '#9aa4b4'])); }
     for (const [x, y] of [[4.5, 0.6], [3.4, 1.2], [5.6, 1.1]]) P.circle(g, x, y, 0.3, '#8ad8ff'); P.glow(g, 4.5, 1, 2.2, '#6ac8ff', 0.5);
   } });
+  def('time', { w: 8, h: 11, draw(g) { // the Dungeon's hourglass (+10 s): dark wooden ends, a glass of pale sand running down, a gold glint
+    P.rect(g, 0.6, 0.4, 6.8, 1.4, P.lg(g, 0, 0, 8, 0, ['#6a4020', '#b07a40', '#4a2a14'])); P.rect(g, 0.6, 9.2, 6.8, 1.4, P.lg(g, 0, 0, 8, 0, ['#6a4020', '#b07a40', '#4a2a14']));
+    P.rect(g, 1, 1.8, 0.8, 7.4, '#3a2410'); P.rect(g, 6.2, 1.8, 0.8, 7.4, '#3a2410');
+    P.path(g, [2, 1.8, 6, 1.8, 4.4, 5.5, 6, 9.2, 2, 9.2, 3.6, 5.5]); P.fill(g, 'rgba(210,230,255,0.45)');
+    P.path(g, [2.6, 2.6, 5.4, 2.6, 4.2, 4.8, 3.8, 4.8]); P.fill(g, '#ffe08a'); P.path(g, [2.4, 9.2, 5.6, 9.2, 4, 7.4]); P.fill(g, '#f0c860'); P.rect(g, 3.85, 4.8, 0.3, 2.8, '#ffe08a');
+    P.glow(g, 4, 5.5, 5, '#ffd35a', 0.45); P.circle(g, 2.8, 3, 0.4, '#ffffff');
+  } });
+  def('quartz', { w: 9, h: 10, draw(g) { // Dark Quartz (the Treasure Hunter's): three violet shards on a black stone
+    P.glow(g, 4.5, 6, 5, '#a04aff', 0.5);
+    crystal(g, 2.6, 9, 5, '#7a3ac8', -0.8); crystal(g, 6.6, 9, 5.6, '#7a3ac8', 0.8); crystal(g, 4.5, 9.3, 8.4, '#a060f0', 0);
+    P.ell(g, 4.5, 9.4, 4, 0.9, '#140a1c');
+  } });
   def('bomb', { w: 9, h: 10, draw(g) { // an iron bomb: a riveted band, a skull daubed on it, a fuse spitting sparks
     P.circle(g, 4.5, 6.2, 3.4, P.vol(g, 3.8, 5.2, 3.6, '#4a4450'));
     P.line(g, 1.2, 6.8, 7.8, 6.4, 0.7, '#6a6470'); for (const x of [2, 4.4, 6.8]) P.circle(g, x, 6.6, 0.3, '#9a94a0');

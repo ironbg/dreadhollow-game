@@ -471,6 +471,7 @@
     acctXp: (lv) => 40 + 4 * lv,                               // the account's experience
     chestsFirst: { gold: 1, wood: 2 }, chestsAgain: { wood: 1 },
     bossLootWithin: 120,                                        // the boss drops its chest only within 120 levels of the best cleared
+    bossHp: 0.35,                                               // the Lord's health against a hall's own (met at the tenth minute; here after a few)
     vaultChance: 0.10, vaultsPerDay: 5, vaultSecs: 30,          // a floor's chance to hide a vault (the boss floor too)
     vaultGold: (lv) => Math.round(1500 + 200 * lv), vaultIron: (lv) => 15 + Math.floor(lv / 2),
     sweep: 0.5,                                                 // a sweep pays half the best level (the Guide card raises it to all)

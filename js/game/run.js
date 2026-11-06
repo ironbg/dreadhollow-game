@@ -21,6 +21,7 @@
   const tmp = [];
 
   const PIT_DROPS = ['xp', 'tome', 'food', 'magnet'];
+  const DUN_DROPS = ['xp', 'tome', 'food', 'magnet', 'coin', 'potion', 'chest_red', 'chest_wood', 'time', 'quartz']; // the Dungeon: no hall loot (metals, herbs, shards); the boss's chest by dun.loot
   const URN = { painter: 'urn', hp: 1, spd: 0, dmg: 0, xp: 0, r: 5, mass: 99, ai: 'static', prop: true, touch: true };
 
   class Run {
@@ -29,6 +30,7 @@
       this.heroId = opts.hero; this.stageId = opts.stage;
       this.hero = C.heroes[this.heroId]; this.stage = opts.stageDef || C.stages[this.stageId]; // the Pit brings its own copy of a hall
       this.pit = opts.pit || null;
+      this.dun = opts.dun || null; // the Dungeon (js/game/dungeon.js)
       this.cs = DH.meta.consSpecials ? DH.meta.consSpecials() : {}; // the Constellation's Specialties unlocked (js/game/constellation.js)
       this.settings = S.settings;
       this.artifacts = DH.meta.activeArtifacts();
@@ -65,9 +67,9 @@
       this.oozeT = U.rand(C.OOZE_EVERY[0], C.OOZE_EVERY[1]);
       this.initHall();
       // Starting Ability: once the hall's quest is done, an Arcane Tome waits next to the hero
-      if (!this.pit && C.START_TOME_DEED[this.stageId] && DH.meta.deedDone(C.START_TOME_DEED[this.stageId])) this.drop('tome', 34, -10);
+      if (!this.pit && !this.dun && C.START_TOME_DEED[this.stageId] && DH.meta.deedDone(C.START_TOME_DEED[this.stageId])) this.drop('tome', 34, -10);
       { // the hall's starting items, spread around the spawn
-        const items = this.pit ? [] : C.STAGE_START[this.stageId] || [], a0 = Math.random() * TAU, DR = (C.START_DIST_HALL || {})[this.stageId] || C.START_DIST;
+        const items = this.pit || this.dun ? [] : C.STAGE_START[this.stageId] || [], a0 = Math.random() * TAU, DR = (C.START_DIST_HALL || {})[this.stageId] || C.START_DIST;
         items.forEach((type, i) => {
           const a = a0 + (i / items.length) * TAU + U.rand(-0.25, 0.25), d = U.rand(DR[0], DR[1]);
           const x = this.bridge ? (i % 2 ? 1 : -1) * d * (1 + Math.floor(i / 2) * 0.12) : Math.cos(a) * d, y = this.bridge ? U.rand(-this.bridge * 0.5, this.bridge * 0.5) : Math.sin(a) * d;
@@ -85,13 +87,14 @@
       this.addAbility(this.hero.weapon);
       this.cam = { x: 0, y: 0 };
       if (this.pit) this.initPit();
+      if (this.dun) this.initDun();
     }
 
     /* ---------------- level & xp ---------------- */
     /** Experience multiplier now: Growth, Agony (per hall) and Torment. */
     // Agony's extra foes (+35% a rank) share the horde's usual XP between them: only the hall's Agony bonus raises it
     // Agony halves XP: the denser horde (below) hands out twice the kills, so leveling stays about the same pace.
-    xpMult() { return (1 + (this.trib.xp || 0)) * this.P.growth * (1 + this.agony * (this.stage.agonyXp || 0.15)) / (1 + this.agony * 0.35) * (this.tormentXp || 1) * (this.agonyOn ? 0.5 : 1) * (this.pit && this.time < DH.economy.PIT.earlyXp.secs ? DH.economy.PIT.earlyXp.mult : 1); } // the Pit: the first minute counts triple
+    xpMult() { return (1 + (this.trib.xp || 0)) * this.P.growth * (1 + this.agony * (this.stage.agonyXp || 0.15)) / (1 + this.agony * 0.35) * (this.tormentXp || 1) * (this.agonyOn ? 0.5 : 1) * (this.pit && this.time < DH.economy.PIT.earlyXp.secs ? DH.economy.PIT.earlyXp.mult : 1) * (this.dun && this.dun.floor === 0 ? DH.economy.PIT.earlyXp.mult : 1); } // the Dungeon: the first floor counts triple // the Pit: the first minute counts triple
     gainXp(v, mult) {
       this.xp += v * (mult == null ? this.xpMult() : mult); // a gem's worth is fixed when it drops
       if (!Number.isFinite(this.xp)) this.xp = 0; // never an endless climb on a broken number
@@ -223,6 +226,7 @@
     }
     updateSpawns(dt) {
       if (this.pit) { this.updatePit(dt); return; } // the Pit: its waves (js/game/pit.js)
+      if (this.dun) { this.updateDun(dt); return; } // the Dungeon: its floors (js/game/dungeon.js)
       if (this.victoryT > 0 || this.won) return; // the hall is cleared once the Lord falls; nothing new pours in while the hero gathers spoils
       const { rate, mix } = this.spawnRate();
       // a squad in ranks every minute and a bit, from the third minute
@@ -369,7 +373,8 @@
       const id = type === 'urn' ? 'urn' : (o.boss || type === 'gildedooze' ? type : this.remap(type));
       const def = id === 'urn' ? URN : C.enemies[id];
       if (!def) return null;
-      const ts = 1 + this.time / 60 * 0.22 * (C.RUN_LENGTH / this.runLength);
+      const tm = this.dun ? this.dun.tm : this.time; // the Dungeon: its floor, not the clock, hardens the foes
+      const ts = 1 + tm / 60 * 0.22 * (C.RUN_LENGTH / this.runLength);
       const rank = o.champion ? C.CHAMPION : o.elite ? C.ELITE : null;
       const T = E.TORMENT, tr = def.prop ? 0 : this.dread, fx = this.fx_;
       const hpMult = def.prop ? 1 : this.stage.hpMult * (def.boss ? (1 + this.stage.index * 0.1) * (this.stage.bossHp || 1) : ts) * (rank ? rank.hp : 1) * Math.pow(T.hp, tr) * (fx.giants && !def.boss ? 2 : 1)
@@ -383,7 +388,7 @@
       const e = {
         id, def, x, y, kx: 0, ky: 0, hp: def.hp * hpMult * fH, maxHp: def.hp * hpMult * fH,
         r: def.r * (rank ? rank.scale * 0.85 : 1), spd: def.spd * (rank ? 0.9 : 1) * U.rand(0.92, 1.08) * (fx.enemySpeed || 1) * (fx.allSpeed || 1) * (1 + T.speed * tr) * (fx.giants && !def.boss ? 0.8 : 1),
-        dmg: def.dmg * fD * this.stage.dmgMult * (1 + this.time / 60 * (this.stage.dmgGrow || 0.07)) * (rank ? rank.dmg : 1) * (1 + this.agony * C.AGONY.dmg) * (1 + T.dmg * tr) * (fx.enemyDmg || 1) * (this.agonyOn ? C.AGONY.soft : 1), // Agony: foes hit 15% softer, the denser horde stays survivable
+        dmg: def.dmg * fD * this.stage.dmgMult * (1 + (this.dun ? this.dun.tm : this.time) / 60 * (this.stage.dmgGrow || 0.07)) * (rank ? rank.dmg : 1) * (1 + this.agony * C.AGONY.dmg) * (1 + T.dmg * tr) * (fx.enemyDmg || 1) * (this.agonyOn ? C.AGONY.soft : 1), // Agony: foes hit 15% softer, the denser horde stays survivable
         xp: def.xp * (o.champion ? 30 : o.elite ? 12 : 1) * (fx.giants && !def.boss ? 1.8 : 1), scale: (rank ? rank.scale : 1) * (fx.giants && !def.boss && !def.prop ? 1.35 : 1),
         mass: (def.mass || 1) * (rank ? 4 : 1), armor: Math.min(0.75, (def.def || 0) * Math.pow(1.1, tr) + (rank ? rank.def : 0) + T.armor * tr), // Torment: base defense x1.10 per rank
         elite: !!o.elite, champion: !!o.champion, boss: !!def.boss, final: !!o.final, flash: 0, anim: Math.random() * 10,
@@ -464,7 +469,7 @@
           const a = e.zz * 0.6, ca = Math.cos(a), sa = Math.sin(a); mx = dx * ca - dy * sa; my = dx * sa + dy * ca; spd *= c < 0.45 ? 2.5 : 0.3;
         } else if (ai === 'lobber') { // keeps back and lobs fire onto the ground where you stand (a marked circle)
           if (dist < 90) { mx = -dx; my = -dy; } else if (dist < 140) { mx = -dy; my = dx; spd *= 0.4; }
-          if (e.t > e.def.shot.cd && dist < 210) { e.t = 0; this.enemyAttackAnim(e); this.hazard({ kind: 'circle', x: p.x, y: p.y, r: 16, delay: 1.1, dmg: e.def.shot.dmg * this.stage.dmgMult * (1 + this.time / 60 * (this.stage.dmgGrow || 0.07)), color: '#ff7a20', src: e, sound: 'fire', fire: true }); DH.audio.play('throw'); }
+          if (e.t > e.def.shot.cd && dist < 210) { e.t = 0; this.enemyAttackAnim(e); this.hazard({ kind: 'circle', x: p.x, y: p.y, r: 16, delay: 1.1, dmg: e.def.shot.dmg * this.stage.dmgMult * (1 + (this.dun ? this.dun.tm : this.time) / 60 * (this.stage.dmgGrow || 0.07)), color: '#ff7a20', src: e, sound: 'fire', fire: true }); DH.audio.play('throw'); }
         } else if (ai === 'clone') { // the Ashen Warlord's cast shadow: waits, then dashes along its line
           e.cw = (e.cw || 0) + dt; if (e.cw < 0.8) { mx = 0; my = 0; spd = 0; } else { mx = e.mdx; my = e.mdy; spd = 300; } e.kx = e.ky = 0;
         } else if (ai === 'frenzy') { // rats: the more of them close by, the faster they scurry
@@ -755,7 +760,7 @@
       const B = e.def.boom, p = this.player, R = B.R * (e.scale > 1 ? 1.4 : 1);
       e.dead = true;
       for (let v = Math.ceil(e.xp / 2); v > 0; v--) this.drop('xp', e.x + U.rand(-5, 5), e.y + U.rand(-5, 5), 1); // half its worth, scattered
-      if (U.dist2(e.x, e.y, p.x, p.y) < (R + p.r) * (R + p.r)) this.hurtPlayer(B.dmg * this.stage.dmgMult * (1 + this.time / 60 * (this.stage.dmgGrow || 0.07)) * (e.champion ? 1.7 : 1), e);
+      if (U.dist2(e.x, e.y, p.x, p.y) < (R + p.r) * (R + p.r)) this.hurtPlayer(B.dmg * this.stage.dmgMult * (1 + (this.dun ? this.dun.tm : this.time) / 60 * (this.stage.dmgGrow || 0.07)) * (e.champion ? 1.7 : 1), e);
       for (const o of this.enemies) if (o !== e && !o.dead && !o.boss && !o.def.prop && U.dist2(e.x, e.y, o.x, o.y) < R * R) this.rawDamage(o, o.maxHp * 0.4, '#ff9040');
       this.fx.push({ k: 'explosion', x: e.x, y: e.y, R, life: 0.45, max: 0.45 });
       this.burst(e.x, e.y, 22, ['#ff7030', '#ffd060', '#401008'], 120); this.shake = Math.max(this.shake, 5); DH.audio.play('boom');
@@ -892,6 +897,7 @@
       }
       this.kills++;
       if (this.pit) this.pitKill(e); // the Pit's wave and combo (pit.js)
+      if (this.dun) this.dunKill(e); // the Dungeon's floor (dungeon.js)
       if (this.agonyOn) this.agony = Math.min(C.AGONY_MAX, this.agony + C.AGONY.kill * (e.elite || e.champion ? C.AGONY.eliteKill : 1) * (this.fx_.agonyGain || 1));
       if (this.fx_.regret && this.kills % 100 === 0) this.recompute(); // Mask of Regret grows heavier
       if (e.ttl != null) return; // vengeful ghosts leave nothing behind
@@ -998,6 +1004,7 @@
     drop(type, x, y, val, sub, cluster) {
       const k = { type, x, y, val: val || 1, sub, cluster: !!cluster, vx: U.rand(-40, 40), vy: U.rand(-60, -10), z: 0, vz: type === 'xp' ? 0 : 60, mag: false, t: 0 };
       if (this.pit && !PIT_DROPS.includes(type)) return k; // the Pit: no loot (experience, tomes, food and magnets only)
+      if (this.dun && !DUN_DROPS.includes(type) && !(type === 'chest_gold' && this.dun.loot)) return k;
       if (type === 'xp') k.xm = this.xpMult();
       this.pickups.push(k);
       return k;
@@ -1049,6 +1056,8 @@
         case 'bucket': DH.audio.play('reward'); if (this.well && this.well.used) this.well.used = false; else this.buckets++; this.text(this.player.x, this.player.y - 14, t('hud.bucket'), '#5ab8ff', true); break;
         case 'rune_fury': case 'rune_haste': case 'rune_wraith': this.buff(k.type.slice(5)); break;
         case 'shard': DH.audio.play('reward'); this.shards++; this.text(this.player.x, this.player.y - 16, t('hud.shard'), '#ff70c0', true); break;
+        case 'time': DH.audio.play('reward'); this.dun.secs += k.val; this.text(this.player.x, this.player.y - 16, t('hud.dunTime', { s: k.val }), '#ffe08a', true); break; // the Dungeon's hourglass
+        case 'quartz': DH.audio.play('reward'); this.dun.quartz += k.val; this.text(this.player.x, this.player.y - 16, '+' + k.val + ' ' + t('res.quartz'), '#c890ff', true); break; // Dark Quartz (the Treasure Hunter)
         case 'magnet': DH.audio.play('reward'); this.pickups.forEach((o) => { if (o.type === 'xp' || o.type === 'coin' || o.type === 'herb' || o.type === 'mat') o.mag = true; }); break;
         case 'bomb': this.nova(this.player.x, this.player.y, 200 * this.stage.hpMult, Math.hypot(DH.view.w, DH.view.h) / 2, 'bomb'); break;
         case 'tome': this.tomes++; DH.audio.play('chest'); this.queue.push({ state: 'tome', ev: 'run:tome', data: Object.assign(this.tomeChoices(k.sub === 'mastery' ? 99 : 3), { mastery: k.sub === 'mastery' }) }); this.pump(); break; // a Tome of Mastery offers everything

@@ -99,13 +99,14 @@
   /** The fight is over: floors cleared (the boss floor the last), won (the boss fell and the portal was taken), the gold
    *  picked up. A won level pays it (for each level of a Leap), the chests opened at once; the best level, the boards, the
    *  Mastery. { lv, n, floors, won, record, first, items, gear, best, mastery, deeds } */
-  M.dunEnd = (floors, won, gold) => {
+  M.dunEnd = (floors, won, gold, quartz) => {
     const d = dunS(), a = d.active; if (!a) return null;
     d.active = null;
     const secs = Math.max(0, (U.now() - a.at) / 1000), all = D().floors + 1, best0 = d.best;
     floors = Math.max(0, Math.min(all, floors | 0, Math.floor(secs / D().minFloorSecs)));
     won = !!won && floors >= all;
     gold = Math.max(0, Math.min(Math.floor(+gold || 0), M.dunRunGoldCap(a.lv, secs)));
+    quartz = M.dunPerk('seeker') ? Math.max(0, Math.min(Math.floor(+quartz || 0), Math.round(secs * 1.5))) : 0; // the Treasure Hunter's: only with its card, as much as the time allows
     const lv0 = M.dunMastery().lv, items = [], gear = [];
     let xp = floors * DM().xpFloor, first = false;
     if (won) {
@@ -118,7 +119,7 @@
       d.best = Math.max(d.best, a.lv + a.n - 1);
       M.boardRecord({ dunLevel: d.best, hero: S().selectedHero, stage: null, victory: true }, {}); // the Dungeon's boards: the best level
     }
-    if (gold) items.push(...M.grant({ gold }));
+    if (gold || quartz) items.push(...M.grant({ gold, quartz }));
     addXp(xp);
     const st = S().stats; st.dunFights = (st.dunFights || 0) + 1; if (won) st.dunWins = (st.dunWins || 0) + 1;
     const deeds = M.checkDeeds(null); changed();

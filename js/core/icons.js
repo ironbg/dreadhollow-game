@@ -2075,6 +2075,15 @@
       g.strokeStyle = 'rgba(80,0,20,0.55)'; g.lineWidth = 0.5; g.beginPath(); g.moveTo(16, 3); g.lineTo(16, 29.5); g.moveTo(7, 17); g.lineTo(25, 17); g.stroke();
       glint(g, 14, 9, 2, '#ffffff');
     },
+    n_dungeon(g) { // the Dungeon: a pointed arch of black stone, stairs going down into a red glow, a skull keystone
+      P.glow(g, 16, 22, 12, '#ff3a20', 0.45);
+      sil(g, [5, 30, 5, 12, 9, 5, 16, 1.5, 23, 5, 27, 12, 27, 30], P.lg(g, 5, 2, 27, 30, ['#7a6a70', '#3a3036', '#16101a']), 1.3);
+      P.path(g, [9, 30, 9, 13, 12, 8, 16, 6, 20, 8, 23, 13, 23, 30]); P.fill(g, '#060203');
+      for (let k = 0; k < 5; k++) { const y = 29 - k * 3.2, w = 13 - k * 1.8, l = 0.55 - k * 0.1; P.rect(g, 16 - w / 2, y, w, 1.6, 'rgba(255,' + (110 - k * 15) + ',60,' + l + ')'); }
+      const gr = g.createLinearGradient(0, 30, 0, 14); gr.addColorStop(0, 'rgba(255,80,30,0.55)'); gr.addColorStop(1, 'rgba(255,40,20,0)'); g.fillStyle = gr; g.fillRect(9.5, 14, 13, 16);
+      P.circle(g, 16, 4.6, 2.6, '#d8ccb4'); P.rect(g, 14.6, 5.6, 2.8, 1.8, '#d8ccb4'); P.rect(g, 14.8, 4.2, 0.9, 0.9, '#2a1a14'); P.rect(g, 16.3, 4.2, 0.9, 0.9, '#2a1a14');
+      glint(g, 8, 9, 1.4, '#ffffff');
+    },
     i_quartz(g) { // Dark Quartz (the Dungeon's): a cluster of dark violet crystal, lit from within
       P.glow(g, 16, 19, 13, '#a04aff', 0.45);
       const shard = (pts, lit) => sil(g, pts, P.lg(g, pts[0], pts[1], pts[4], pts[5], lit ? ['#f0d8ff', '#a060f0', '#3a1070', '#14052a'] : ['#c8a0f8', '#6a30b8', '#22084a']), 1.1);

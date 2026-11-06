@@ -16,7 +16,12 @@
     // magnitude is the same `shake` value every event already sets, so each punch keeps its weight.
     let shx = 0, shy = 0;
     if (sh) { const tt = this.time; shx = sh * (Math.sin(tt * 55) * 0.6 + Math.sin(tt * 88) * 0.4); shy = sh * (Math.sin(tt * 67) * 0.6 + Math.sin(tt * 104) * 0.4); }
-    const cx = rd(p.x - W / 2 + shx), cy = rd(p.y - H / 2 + shy);
+    let cx = rd(p.x - W / 2 + shx), cy = rd(p.y - H / 2 + shy);
+    if (this.dun) { // the Dungeon's chamber stays in view: held up and down (its far wall under the bars), followed sideways within its walls
+      const A = C.DUN_ARENA, top = -A.H - A.wall - 46, bot = A.H + A.lip + 6, l = -A.W - A.side, r = A.W + A.side;
+      cy = rd(H >= bot - top ? (top + bot) / 2 - H / 2 + shy : U.clamp(p.y - H / 2, top, bot - H) + shy);
+      cx = rd(W >= r - l ? -W / 2 + shx : U.clamp(p.x - W / 2, l, r - W) + shx);
+    }
     this.cam.x = cx; this.cam.y = cy;
     const now = this.time, lights = [];
     g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
@@ -27,7 +32,7 @@
     for (let ky = Math.floor(cy / CH); ky <= Math.floor((cy + H) / CH); ky++) for (let kx = Math.floor(cx / CH); kx <= Math.floor((cx + W) / CH); kx++) {
       const ch = this.floor.chunk(kx, ky);
       g.drawImage(ch.canvas, kx * CH - cx, ky * CH - cy, CH, CH);
-      for (const l of ch.lights) if ((!this.bridge || Math.abs(l.y) < this.bridge + 10) && (!this.pit || l.x * l.x + l.y * l.y < C.PIT_ARENA.R * C.PIT_ARENA.R)) lights.push(l);
+      for (const l of ch.lights) if ((!this.bridge || Math.abs(l.y) < this.bridge + 10) && (!this.pit || l.x * l.x + l.y * l.y < C.PIT_ARENA.R * C.PIT_ARENA.R) && (!this.dun || (Math.abs(l.x) < C.DUN_ARENA.W && Math.abs(l.y) < C.DUN_ARENA.H))) lights.push(l);
     }
     { // the ring of chunks just off screen is painted ahead, a little each frame, nearest to where the hero is heading first
       const kx0 = Math.floor(cx / CH) - 1, kx1 = Math.floor((cx + W) / CH) + 1, ky0 = Math.floor(cy / CH) - 1, ky1 = Math.floor((cy + H) / CH) + 1;
@@ -111,7 +116,7 @@
       this.sprite(g, 'well', null, 0, w.x - cx, w.y - cy, false, 1, false, w.used ? 0.6 : 1);
       lights.push({ x: w.x, y: w.y, r: w.used ? 30 : 55, kind: 'magic' });
     }
-    // the exit rift: a big red town-portal-style gateway that opens where the final Lord fell; the hero steps in to leave
+    // the exit rift: a big red gateway that opens where the final Lord fell; the hero steps in to leave
     if (this.portal) this.drawPortal(g, cx, cy, now, lights);
     // the Lord's Hex obelisk (secret)
     const hxo = this.hex;
@@ -181,7 +186,7 @@
       g.fillStyle = 'rgba(255,90,30,' + (0.12 + 0.2 * k) + ')'; g.beginPath(); g.ellipse(x, y, w.R, w.R * 0.6, 0, 0, TAU); g.fill();
       g.strokeStyle = 'rgba(255,170,60,0.85)'; g.lineWidth = 1; g.beginPath(); g.ellipse(x, y, w.R * k, w.R * 0.6 * k, 0, 0, TAU); g.stroke();
     }
-    if (this.pit) this.drawPit(g, cx, cy, now, lights); // the Pit's hazards
+    if (this.pit || this.dun) this.drawPit(g, cx, cy, now, lights); // the Pit's hazards (and the Dungeon's)
     // a Bloater's fuse: the ground it will tear apart glows, filling as it burns
     for (const e of this.enemies) if (e.fuse != null && !e.dead) {
       const B = e.def.boom, R = B.R * (e.scale > 1 ? 1.4 : 1), k = 1 - Math.max(0, e.fuse) / B.fuse, x = e.x - cx, y = e.y - cy;
@@ -467,7 +472,7 @@
     }
     g.restore();
   };
-  /** The exit rift: a tall red gateway in the Diablo town-portal mould — a white-hot fiery rim around a dark,
+  /** The exit rift: a tall red gateway — a white-hot fiery rim around a dark,
    *  swirling crimson core, rising from the ground where the final Lord fell. Grows in as it opens. */
   R.drawPortal = function (g, cx, cy, now, lights) {
     const pr = this.portal, x = pr.x - cx, by = pr.y - cy; // base (ground) point, on screen

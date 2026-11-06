@@ -150,7 +150,7 @@
     for (const e of this.enemies) keep(e, Math.min(14, (e.r || 6) * 0.6));
     for (const a of this.allies || []) keep(a, 6);
     for (const k of this.pickups) keep(k, 6);
-    const S = this.pit.fx.stalker; if (S && S.s) keep(S.s, 4);
+    const S = (this.pit || this.dun).fx.stalker; if (S && S.s) keep(S.s, 4);
   };
 
   /** The Pit is over (time or death): the game settles it (main.js). */
@@ -161,9 +161,11 @@
   };
 
   const hit = (run, frac) => run.hurtPlayer(run.P.maxHp * frac, null);
+  /** The hazards' turn (the Pit's, or the Dungeon's level: js/game/dungeon.js). */
+  R.hazardsTick = function (dt, list) { for (const k of list) if (FX[k]) FX[k].call(this, dt); };
   const FX = {
     blades(dt) {
-      const B = PF.blades, F = this.pit.fx, p = this.player;
+      const B = PF.blades, F = (this.pit || this.dun).fx, p = this.player;
       const S = F.blades || (F.blades = { t: 5, list: [] });
       if ((S.t -= dt) <= 0) {
         S.t = U.rand(B.every[0], B.every[1]);
@@ -182,7 +184,7 @@
       }
     },
     stalker(dt) {
-      const Q = PF.stalker, F = this.pit.fx, p = this.player;
+      const Q = PF.stalker, F = (this.pit || this.dun).fx, p = this.player;
       const S = F.stalker || (F.stalker = { t: Q.first, s: null, rec: null });
       if (!S.s) {
         if ((S.t -= dt) > 0) return;
@@ -197,7 +199,7 @@
       if (d < Q.r + p.r) hit(this, 99); // its touch is death (a wraith's veil or a fresh hit's grace still guard)
     },
     stars(dt) {
-      const Q = PF.stars, F = this.pit.fx, p = this.player;
+      const Q = PF.stars, F = (this.pit || this.dun).fx, p = this.player;
       const S = F.stars || (F.stars = { t: 4 });
       if ((S.t -= dt) > 0) return;
       S.t = U.rand(Q.every[0], Q.every[1]);
@@ -208,7 +210,7 @@
       }
     },
     beams(dt) {
-      const Q = PF.beams, F = this.pit.fx, p = this.player;
+      const Q = PF.beams, F = (this.pit || this.dun).fx, p = this.player;
       const S = F.beams || (F.beams = { t: 7, cur: null });
       if (S.last) S.last.t -= dt;
       if (!S.cur) {
@@ -225,7 +227,7 @@
       if (B.set === 0) { B.set = 1; B.t = Q.warnB; } else { S.cur = null; S.t = U.rand(Q.every[0], Q.every[1]); S.last = { b: B, t: 0.25 }; }
     },
     mist(dt) {
-      const Q = PF.mist, F = this.pit.fx, p = this.player;
+      const Q = PF.mist, F = (this.pit || this.dun).fx, p = this.player;
       const S = F.mist || (F.mist = { t: 3, life: 0, list: [], tick: 0 });
       if (!S.list.length) {
         if ((S.t -= dt) > 0) return;
@@ -515,7 +517,7 @@
   };
 
   R.drawPit = function (g, cx, cy, now, lights) {
-    const F = this.pit.fx, v = DH.view;
+    const F = (this.pit || this.dun).fx, v = DH.view;
     const B = F.blades;
     if (B) for (const X of B.list) {
       const L = PF.blades.len, warn = X.t < 0, k = warn ? 1 + X.t / PF.blades.warn : 1;

@@ -2079,3 +2079,14 @@ body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inse
 #hud .buffs .bf.fury { --bfc: #ff3a30; } #hud .buffs .bf.haste { --bfc: #ffd040; } #hud .buffs .bf.wraith { --bfc: #80e8ff; }
 .modal.startbonus .sb-no { margin-top: 8px; }
 .sb-art img { image-rendering: auto; }
+/* the Dungeon, during a fight: its bar (a vault turns it gold), the clock standing still, the fade down the stairs */
+#hud .dunbar.vault .pb-bar i { background: linear-gradient(90deg, #8a5a10, #ffd35a); }
+#hud .dunbar.vault .pb-wave { color: #ffd35a; }
+#hud .timer.paused { color: #b8c4d8; opacity: .8; }
+.dun-fade { position: absolute; inset: 0; z-index: 45; background: #000; opacity: 0; transition: opacity .4s ease; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+.dun-fade.on { opacity: 1; }
+.dun-fade-t { font-family: var(--title); font-size: 24px; color: #d8c8b0; text-shadow: 0 2px 0 #000, 0 0 18px rgba(200,40,30,.6); letter-spacing: 1px; text-align: center; padding: 0 20px; }
+.dun-rule { margin: 8px 0 4px; color: #c8b898; }
+.dun-strip { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 6px 0; }
+.dun-lv { font-family: var(--title); font-size: 26px; color: var(--gold); }
+#hud .dunbar { width: 176px; }

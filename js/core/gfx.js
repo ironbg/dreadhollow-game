@@ -1,4 +1,4 @@
-/* Graphics pipeline: detailed dark pixel art in the spirit of pre-rendered Diablo II
+/* Graphics pipeline: detailed dark pixel art in the spirit of pre-rendered
  * sprites. Vector painters are rasterized at CPX pixels per world unit, graded (key light, bevelled
  * edges), quantized to a gritty dungeon palette with ordered dithering and given hard 1px outlines.
  * The world is drawn into a low-res buffer and scaled up with nearest-neighbour (see view.js). */

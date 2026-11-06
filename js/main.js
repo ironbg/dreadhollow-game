@@ -55,6 +55,35 @@
       DH.audio.music('battle'); DH.audio.ambience(st.id);
       this.run.state = 'intro'; ui.openPitIntro(this.run); // the start screen: the wave, the hazards; Ready begins it
     },
+    /** The Dungeon: a level entered (n entries with the Leap) where the profile lives (the vaults rolled there), then its
+     *  start screen; Ready offers the ad's reward, counts 3, 2, 1 and the first floor begins (dungeon.js dunBegin). */
+    async startDungeon(lv, n) {
+      if (this.starting) return;
+      const s = DH.save.data;
+      this.starting = true;
+      let r = null; try { r = await ui.act('dunStart', { lv, n: n || 1 }); } finally { this.starting = false; }
+      if (r === undefined) return;
+      if (!r) { ui.toast(t('dun.noEntries'), 'bad'); return; }
+      DH.audio.play('click');
+      ui.closeAll(); ui.show(false);
+      const st = DH.Run.dunStage(r.lv);
+      const perks = { fury: M.dunPerkVal('fury'), lords: M.dunPerkVal('lords'), crush: M.dunPerkVal('crush'), seeker: M.dunPerkVal('seeker'), seekerN: E.DUNGEON_MASTERY.perks.seeker.n, stone: M.dunPerkVal('stone'), step: M.dunPerk('step') };
+      this.run = new DH.Run({ hero: s.selectedHero, stage: st.id, stageDef: st.def, dun: { lv: r.lv, n: r.n, hall: st.id, lord: st.lord, affixes: r.affixes, vaults: r.vaults, kinds: r.kinds, loot: r.loot, perks } });
+      this.mode = 'run';
+      ui.hud.build(this.run);
+      DH.input.enable(true);
+      DH.audio.music('battle'); DH.audio.ambience(st.id);
+      this.run.state = 'intro'; ui.openDunIntro(this.run);
+    },
+    /** The Dungeon's level is over (won through the portal, lost, or left): settled on the server, then the results. */
+    finishDun(run) {
+      if (!run || run.finished) return;
+      run.finished = true; if (run.state !== 'victory') run.state = 'over'; run.dun.done = true;
+      DH.input.enable(false);
+      const Q = run.dun, won = !!run.won; // the Lord fell: the level is cleared, through the portal or not
+      const args = { floors: run.dunFloorsDone(), won, gold: Math.floor(run.gold), quartz: Q.quartz };
+      ui.act('dunEnd', args).then((res) => this.safeShow(() => ui.openDunResults(run, res || { lv: Q.lv, n: Q.n, floors: args.floors, won: false, items: [], gear: [], best: M.dunBest(), failed: true }), 'dun'));
+    },
     /** The Pit is over: the waves cleared are paid on the server, then the results. */
     finishPit(run) {
       if (!run || run.finished) return;
@@ -80,6 +109,7 @@
     resume() { const r = this.run; if (r && r.state === 'paused') { r.state = 'playing'; DH.input.enable(true); r.pump(); } },
     finishRun(run) {
       if (run && run.pit) { this.finishPit(run); return; } // left from the pause menu
+      if (run && run.dun) { this.finishDun(run); return; } // the Dungeon: through its portal, given up, or left
       if (!run || run.finished) return;
       run.finished = true;
       if (run.won && run.state !== 'victory') { run.portal = null; run.lateLoot(); run.state = 'victory'; } // left from the pause menu after the Lord fell: still a victory
@@ -93,8 +123,8 @@
     safeShow(open, pit) {
       try { open(); } catch (e) {
         console.error(e);
-        ui.closeAll(); ui.toast(t('server.error'), 'bad'); this.toMenu(false, pit);
-        if (pit) ui.openPit();
+        ui.closeAll(); ui.toast(t('server.error'), 'bad'); this.toMenu(false, !!pit);
+        if (pit === 'dun') ui.openDungeon(); else if (pit) ui.openPit();
       }
     },
     /** The server did not settle the fight. Refused (not confirmed): back to the menus with the reason. No connection:
@@ -138,6 +168,9 @@
   DH.events.on('run:dead', (run) => ui.openRevive(run));
   DH.events.on('run:victory', (run) => game.finishRun(run));
   DH.events.on('run:pitEnd', (run) => game.finishPit(run));
+  DH.events.on('run:dunEnd', (run) => game.finishDun(run));
+  DH.events.on('run:dunTime', (run) => ui.openDunTime(run));
+  DH.events.on('run:dunVault', (r) => ui.dunVaultToast(r));
   DH.events.on('run:boss', (b) => ui.hud.banner(b.name, b.sub ? b.sub : b.artifact ? t('hud.artifactSub') : b.hex ? t('hud.hexSub') : b.final ? t('hud.finalBoss') : t('hud.boss')));
   DH.events.on('run:warning', (txt) => ui.hud.banner(txt, null, true));
   DH.events.on('pauseKey', () => {

@@ -1,5 +1,5 @@
 /* Atmosphere and spell VFX (mixed into DH.Run.prototype):
- *   - projected silhouette shadows cast away from nearby braziers / candles / crystals (Diablo II style)
+ *   - projected silhouette shadows cast away from nearby braziers / candles / crystals
  *   - drifting ground fog and per-hall ambient particles (dust, embers, drips, snow, arcane motes, spores, gold dust)
  *   - light shafts falling from cracks in the ceiling, with dust dancing inside them
  *   - glowing (additive) particles: spell trails, elemental hit sparks, level-up pillar, elite auras
@@ -98,6 +98,7 @@
       if (U.hash2(gx, gy, 77) > 0.2) continue;
       const x = (gx + 0.2 + U.hash2(gx, gy, 5) * 0.6) * SHAFT, y = (gy + 0.2 + U.hash2(gx, gy, 9) * 0.6) * SHAFT, w = 14 + U.hash2(gx, gy, 3) * 16;
       if (this.pit && x * x + y * y > (DH.content.PIT_ARENA.R - 40) ** 2) continue; // no moonlight beyond the Pit's floor
+      if (this.dun) continue; // nor in the Dungeon's catacombs
       out.push({ x, y, w, ph: U.hash2(gx, gy, 11) * TAU });
       lights.push({ x, y, r: w * 1.6, kind: 'shaft' });
     }

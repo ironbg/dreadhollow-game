@@ -314,9 +314,11 @@
 
   /** Each hazard's sign. */
   const FX_ICON = { blades: 'bl_multistrike', stalker: 'n_skull', stars: 'bl_storm', beams: 'bl_pyre', chains: 'pm_combo', stone: 'bl_thickhide', mist: 'bl_afflictor' };
+  ui.fxIcon = (k) => FX_ICON[k] || 'u_agony'; // (the Dungeon's levels show the same hazards: js/ui/dungeon.js)
   const fxOne = (k) => ui.modal({ title: t('pit.fx.' + k), cls: 'pitfx', body: (m) => h('div',
     h('div.cons-ico', A.img(FX_ICON[k] || 'u_agony')), h('p.center', t('pit.fxd.' + k)),
     h('div.btns', h('button.btn.gold', { onclick: () => m.close() }, t('common.close')))) });
+  ui.fxOne = fxOne;
 
   /** The Pit's start screen: its picture in the lancet, the wave it begins at, the two hazards rolled (tap one to read
    *  it), and Ready. The fight waits under it (run.state 'intro'); Ready offers the ad's tome, counts 3, 2, 1 and begins (pit.js pitBegin). */

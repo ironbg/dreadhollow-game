@@ -59,6 +59,7 @@
       if (this.hex) this.hex.y = U.clamp(this.hex.y, -B + 20, B - 20);
     }
     if (this.pit) this.pitClamp(); // the Pit's walls (pit.js)
+    if (this.dun) this.dunClamp(); // the Dungeon's chamber (dungeon.js)
     if (this.stage.vault) {
       // the Reliquary: every few minutes the torment deepens and new foes come harder-skinned
       const lvl = Math.min(C.VAULT.max, Math.floor(this.time / (C.VAULT.every * this.runLength / C.RUN_LENGTH)));
@@ -99,6 +100,7 @@
   /** World-space layer drawn right after the floor: the chasm around the bridge, the seal's chains of light. */
   R.drawHall = function (g, cx, cy, W, H, now, lights) {
     if (this.pit) this.drawPitArena(g, cx, cy, W, H, now, lights); // the Pit's round arena (pit.js)
+    if (this.dun) this.drawDunArena(g, cx, cy, W, H, now, lights); // the Dungeon's chamber (dungeon.js)
     if (this.bridge) {
       const B = this.bridge, T = this.stage.theme;
       const top = -B - cy, bot = B - cy;
