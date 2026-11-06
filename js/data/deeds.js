@@ -66,6 +66,14 @@
   add('d_pit_run_50', 'pit', { type: 'pitRun', n: 50 }, { args: { n: 50 }, gold: 2500 });
   [[25, 2000], [100, 6000]].forEach(([n, g]) => add('d_pit_mastery_' + n, 'pit', { type: 'pitMastery', n }, { args: { n }, gold: g }));
   add('d_pit_essence', 'pit', { type: 'stat', stat: 'essence', n: 100000 }, { args: { n: 100000 }, gold: 3000 });
+  // the Dungeon (Trials): checked when a level ends or a sweep is made (DH.meta.dunEnd / dunSweep)
+  const dun = { icon: 'n_dungeon' };
+  add('d_dun_first', 'pit', { type: 'stat', stat: 'dunWins', n: 1 }, Object.assign({ args: { n: 1 }, gold: 500 }, dun));
+  [[10, 1500], [50, 4000], [100, 8000], [250, 15000]].forEach(([n, g]) => add('d_dun_lv_' + n, 'pit', { type: 'dunBest', n }, Object.assign({ args: { n }, gold: g }, dun)));
+  add('d_dun_fights_100', 'pit', { type: 'stat', stat: 'dunFights', n: 100 }, Object.assign({ args: { n: 100 }, gold: 2500 }, dun));
+  add('d_dun_vaults_10', 'pit', { type: 'stat', stat: 'dunVaults', n: 10 }, Object.assign({ args: { n: 10 }, gold: 2000 }, dun));
+  [[25, 2000], [100, 6000]].forEach(([n, g]) => add('d_dun_mastery_' + n, 'pit', { type: 'dunMastery', n }, Object.assign({ args: { n }, gold: g }, dun)));
+  add('d_dun_quartz', 'pit', { type: 'stat', stat: 'quartzEarned', n: 5000 }, Object.assign({ args: { n: 5000 }, gold: 3000 }, dun));
 
   DH.deeds = { list: D, byId: Object.fromEntries(D.map((d) => [d.id, d])), XP_PER_DEED: 0.003 }; // +0.3% XP per completed quest
 })(window.DH);

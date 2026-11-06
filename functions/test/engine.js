@@ -113,6 +113,12 @@ const live = require('../game/live.json');
   assert.deepStrictEqual(dm.result, [true, true, true]);
   dm = await withProfile(p0, live, (DHp) => DHp.meta.ensureDaily().missions.some((m) => m.id === 'agony'));
   assert.strictEqual(dm.result, false);
+  // the Dungeon's mission: only once the Dungeon is open (the third hall won), then every day; a level or a sweep counts
+  dm = await withProfile(p0, live, (DHp) => DHp.meta.ensureDaily().missions.some((m) => m.id === 'dungeon'));
+  assert.strictEqual(dm.result, false, 'no Dungeon mission before it opens');
+  dm = await withProfile(Object.assign({}, p0, { cleared: { crypt: true, abyss: true, aqueduct: true } }), live, (DHp) => { const has = DHp.meta.ensureDaily().missions.some((m) => m.id === 'dungeon');
+    DHp.meta.dunStart(1, 1); return [has, DHp.meta.ensureDaily().missions.find((m) => m.id === 'dungeon').done]; });
+  assert.deepStrictEqual(dm.result, [true, true], 'the Dungeon mission joins the day and an entry counts');
   // the account's reward track: once per milestone, only when reached
   r = await withProfile(Object.assign({}, p0, { accountLevel: 22 }), live, (DH) => DH.actions.list.claimAcct.run({ lvl: 20 }));
   assert.ok(Array.isArray(r.result) && r.result.some((x) => x.kind === 'gear'), 'level 20 gives a sure relic');
@@ -296,7 +302,7 @@ const live = require('../game/live.json');
     r = await withProfile(back(r.profile, 300e3), live, (DH) => L(DH).dunEnd.run({ floors: 6, won: true, gold: 500 }));
     assert.strictEqual(r.result.won, true); assert.strictEqual(r.result.first, true); assert.strictEqual(r.result.record, true);
     assert.strictEqual(r.profile.dungeon.best, 1); assert.strictEqual(r.result.gear.length, 2, 'two Wooden chests');
-    assert.strictEqual(r.profile.gear.length - gear0, 2); assert.strictEqual(r.profile.gold - g0, 500 + 500);
+    assert.strictEqual(r.profile.gear.length - gear0, 2); assert.strictEqual(r.profile.gold - g0, 500 + 500 + 500, 'the level, the gold picked up, the deed of the first level');
     assert.ok(r.profile.quartz >= 1 && r.profile.quartz <= 10, 'quartz 1-10 at random'); assert.strictEqual(r.profile.mats.iron - p1.mats.iron, 4);
     assert.strictEqual(r.profile.dungeon.mxp, 25, '6 floors x 4 + level 1 x 1');
     assert.ok(r.profile.boards.best.dungeon__all && r.profile.boards.best.dungeon__all.score === 1, 'the Dungeon board');
@@ -349,6 +355,12 @@ const live = require('../game/live.json');
     // the gold picked up on the floors is capped by the level and the time
     r = await withProfile(r.profile, live, (DH) => DH.meta.dunRunGoldCap(10, 300));
     assert.strictEqual(r.result, 7000);
+    // the Dungeon's deeds (Trials) and achievements: the first level cleared, the vaults, the quartz, the best level
+    r = await withProfile(r.profile, live, (DH) => { const M = DH.meta, A = (id) => DH.economy.achievements.find((x) => x.id === id), S = DH.save.data;
+      return [!!S.deeds.d_dun_first, S.stats.dunVaults, S.stats.quartzEarned > 0, M.achValue(A('dundepth')), M.achValue(A('dunvaults')), M.achClaimable(A('dundepth')), DH.deeds.list.filter((d) => d.id.startsWith('d_dun_')).length]; });
+    assert.deepStrictEqual(r.result, [true, 5, true, 200, 5, true, 10]);
+    r = await withProfile(r.profile, live, (DH) => { DH.meta.dunSweep(1, 1); return ['d_dun_lv_10', 'd_dun_lv_50', 'd_dun_lv_100', 'd_dun_lv_250'].map((id) => !!DH.save.data.deeds[id]); });
+    assert.deepStrictEqual(r.result, [true, true, true, false], 'the level deeds, checked on a sweep');
   }
   console.log('engine tests: all passed');
 })().catch((e) => { console.error(e); process.exit(1); });

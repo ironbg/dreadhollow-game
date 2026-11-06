@@ -691,6 +691,8 @@
     if (c.type === 'stat') return { v: s.stats[c.stat] || 0, n: c.n };
     if (c.type === 'pitBest') return { v: (s.pit && s.pit.best) || 0, n: c.n };
     if (c.type === 'pitMastery') return { v: meta.pitMastery().lv, n: c.n };
+    if (c.type === 'dunBest') return { v: meta.dunBest(), n: c.n };
+    if (c.type === 'dunMastery') return { v: meta.dunMastery().lv, n: c.n };
     return null;
   };
   /** Live progress of a deed during a run (the pinned quest on the HUD): { v, n, time, here }.
@@ -721,6 +723,8 @@
       case 'pitBest': here = !!R.pit; o = { v: R.pit ? R.pit.from + R.pit.cleared : (s.pit && s.pit.best) || 0, n: c.n }; break;
       case 'pitRun': here = !!R.pit; o = { v: R.pit ? R.pit.cleared : 0, n: c.n }; break;
       case 'pitMastery': here = false; o = { v: meta.pitMastery().lv, n: c.n }; break;
+      case 'dunBest': here = !!R.dun; o = { v: meta.dunBest(), n: c.n }; break;
+      case 'dunMastery': here = false; o = { v: meta.dunMastery().lv, n: c.n }; break;
       default: o = yes(false);
     }
     o.here = here; return o;
@@ -766,6 +770,8 @@
         case 'pitBest': ok = ((s.pit && s.pit.best) || 0) >= c.n; break;
         case 'pitMastery': ok = meta.pitMastery().lv >= c.n; break;
         case 'pitRun': ok = !!x && (x.pitWaves || 0) >= c.n; break;
+        case 'dunBest': ok = meta.dunBest() >= c.n; break;
+        case 'dunMastery': ok = meta.dunMastery().lv >= c.n; break;
         default: break;
       }
       if (ok && c.hero && (!r || r.hero !== c.hero)) ok = false; // done in that hero's run only
@@ -813,12 +819,12 @@
       const dd = s.daily.deals || (s.daily.deals = []);
       if (!dd.some((x) => !E.dealPool[x.i].cost.ad && x.extra) && dd.filter((x) => !E.dealPool[x.i].cost.ad).length < E.DEALS_ANY + E.DEALS_GOLD + E.DEALS_GEMS) // the second row joins a day dealt before it
         meta.dealPicks(dd.map((x) => x.i), U.seeded(U.strSeed(today + 'deals' + (s.created % 997)))).forEach((i) => dd.push({ i, bought: false, extra: true }));
-      E.missionPool.forEach((m) => { if (m.always && !s.daily.missions.some((x) => x.id === m.id)) s.daily.missions.push({ id: m.id, p: 0, done: false, claimed: false }); });
+      E.missionPool.forEach((m) => { if (m.always && meta.missionAvailable(m) && !s.daily.missions.some((x) => x.id === m.id)) s.daily.missions.push({ id: m.id, p: 0, done: false, claimed: false }); });
       return s.daily;
     }
     const rng = U.seeded(U.strSeed(today + (s.created % 997)));
     // the day's missions: those offered every day, then those that can be done, enough that the last chest can be reached
-    const always = E.missionPool.filter((m) => m.always);
+    const always = E.missionPool.filter((m) => m.always && meta.missionAvailable(m));
     const avail = U.shuffle(E.missionPool.filter((m) => !m.always && meta.missionAvailable(m)), rng), pool = always.concat(avail.slice(0, E.MISSIONS_PER_DAY - always.length));
     for (let i = pool.length; i < avail.length && pool.reduce((n, m) => n + m.pts, 0) < E.MISSION_PTS_MIN; i++) pool.push(avail[i]);
     const adIdx = E.dealPool.map((d, i) => i).filter((i) => E.dealPool[i].cost.ad && !E.dealPool[i].off);
@@ -856,7 +862,7 @@
     return meta.grant(meta.missionDef(m.id).reward);
   };
   /** A mission is offered only once it can be done (need: 'agony' asks for a hall won, where Agony can be switched on). */
-  meta.missionAvailable = (def) => !def.need || (def.need === 'agony' && meta.vigilOpen());
+  meta.missionAvailable = (def) => !def.need || (def.need === 'agony' && meta.vigilOpen()) || (def.need === 'dungeon' && meta.dunUnlocked());
   /** Today's activity points: those of the missions claimed. */
   meta.activityPts = () => meta.ensureDaily().missions.reduce((n, m) => n + (m.claimed ? (meta.missionDef(m.id).pts || 0) : 0), 0);
   meta.activityOpened = (i) => { const d = meta.ensureDaily(); return !!(d.chests && d.chests[i]); };
@@ -880,6 +886,8 @@
       case 'stagesCleared': return Object.keys(s.cleared).length;
       case 'pitBest': return (s.pit && s.pit.best) || 0;
       case 'pitMastery': return meta.pitMastery().lv;
+      case 'dunBest': return meta.dunBest();
+      case 'dunMastery': return meta.dunMastery().lv;
       case 'consStars': return Object.keys(E.CONST.branches).reduce((n, b) => n + meta.consPoints(b), 0); // ranks bought in the Constellation
       default: return s.stats[a.stat] || 0;
     }

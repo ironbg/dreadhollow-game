@@ -88,10 +88,10 @@
     const d = dunS(), a = d.active; floor = floor | 0;
     if (!a || !a.vaults.includes(floor) || a.paid.includes(floor) || d.vaults >= D().vaultsPerDay) return null;
     if ((U.now() - a.at) / 1000 < floor * D().minFloorSecs) return null; // that floor cannot have been reached yet
-    a.paid.push(floor); d.vaults++;
+    a.paid.push(floor); d.vaults++; S().stats.dunVaults = (S().stats.dunVaults || 0) + 1;
     const kind = a.kinds[a.vaults.indexOf(floor)], rw = kind === 'iron' ? { mats: M.dunMats(a.lv, D().vaultMats) } : { gold: D().vaultGold(a.lv) };
-    const items = M.grant(rw); changed();
-    return { kind, items };
+    const items = M.grant(rw); const deeds = M.checkDeeds(null); changed();
+    return { kind, items, deeds };
   };
   /** One gem purchase a fight: a revive, or +60 s once the time is out (not both). */
   M.dunBuy = (what) => {
@@ -105,7 +105,7 @@
    *  Mastery. { lv, n, floors, won, record, first, items, gear, best, mastery, deeds } */
   M.dunEnd = (floors, won, gold, quartz, well) => {
     const d = dunS(), a = d.active; if (!a) return null;
-    d.active = null;
+    d.active = null; const q0 = S().quartz || 0;
     const secs = Math.max(0, (U.now() - a.at) / 1000), all = D().floors + 1, best0 = d.best;
     floors = Math.max(0, Math.min(all, floors | 0, Math.floor(secs / D().minFloorSecs)));
     won = !!won && floors >= all;
@@ -135,6 +135,7 @@
     }
     addXp(xp);
     const st = S().stats; st.dunFights = (st.dunFights || 0) + 1; if (won) st.dunWins = (st.dunWins || 0) + 1;
+    st.quartzEarned = (st.quartzEarned || 0) + Math.max(0, (S().quartz || 0) - q0); // all the Dark Quartz the Dungeon has paid
     const deeds = M.checkDeeds(null); changed();
     return { lv: a.lv, n: a.n, floors, won, record: d.best > best0, first, items, gear, best: d.best, mastery: M.dunMastery().lv - lv0, deeds };
   };
@@ -148,7 +149,7 @@
     const lv0 = M.dunMastery().lv;
     d.used += n;
     let quartz = 0; for (let i = 0; i < n; i++) quartz += M.dunQuartzRoll(pay.lv, M.dunSweepShare());
-    const items = M.grant({ gold: pay.gold * n, quartz });
+    const items = M.grant({ gold: pay.gold * n, quartz }); S().stats.quartzEarned = (S().stats.quartzEarned || 0) + quartz;
     addXp(n * ((D().floors + 1) * DM().xpFloor + pay.lv * DM().xpLevel) * DM().sweepXp);
     M.track('dungeon', n); const deeds = M.checkDeeds(null); changed();
     return { items, n, lv: pay.lv, mastery: M.dunMastery().lv - lv0, deeds };

@@ -768,7 +768,7 @@
         h('button.btn.ghost.block', { onclick: () => { click(); end(); } }, t('dun.timeEnd')))) });
   };
   /** A vault's reward has come in from the server: what it paid, over the fight. */
-  ui.dunVaultToast = (r) => { const it = (r.items || [])[0]; if (it) ui.toast(t('hud.dunVaultPaid', { v: it.text }), 'good'); };
+  ui.dunVaultToast = (r) => { const it = (r.items || [])[0]; if (it) ui.toast(t('hud.dunVaultPaid', { v: it.text }), 'good'); (r.deeds || []).forEach((d, i) => setTimeout(() => ui.toast(t('pit.deedDone', { d: ui.deedText(d) }), 'good'), 900 + i * 900)); };
 
   /* ---------------- Revive ---------------- */
   ui.openRevive = (run) => {

@@ -279,6 +279,7 @@
     { id: 'herbs',     target: 3,    pts: 5,  reward: { gold: 200, passXp: 60 } },
     { id: 'agony',     target: 1,    pts: 10, reward: { gold: 500, passXp: 100 }, need: 'agony' },
     { id: 'pit',       target: 1,    pts: 10, reward: { gold: 400, passXp: 80 }, always: true }, // every day: enter the Pit (a fight or a sweep)
+    { id: 'dungeon',   target: 1,    pts: 10, reward: { gold: 500, mats: { iron: 5 }, passXp: 80 }, always: true, need: 'dungeon' }, // every day once it is open: enter the Dungeon (a level or a sweep)
   ];
   E.MISSIONS_PER_DAY = 8;
   E.MISSION_PTS_MIN = 55; // a day's missions always add up to at least this (the last chest asks for 50): one more is offered if not
@@ -314,6 +315,11 @@
     { id: 'pitmastery',stat: 'pitMastery',   tiers: [10, 50, 100, 150, 200],             gems: [20, 50, 100, 200, 500], icon: 'i_essence' },
     { id: 'pitessence',stat: 'essence',      tiers: [10000, 100000, 500000, 2000000],    gems: [20, 50, 120, 300], icon: 'i_essence' },
     { id: 'stargazer', stat: 'consStars',    tiers: [10, 50, 150, 400],                  gems: [20, 50, 120, 300], icon: 'i_essence' },
+    // the Trials (the Dungeon)
+    { id: 'dundepth',  stat: 'dunBest',      tiers: [10, 50, 100, 200, 300],             gems: [20, 50, 100, 200, 400], icon: 'n_dungeon' },
+    { id: 'dunfights', stat: 'dunFights',    tiers: [5, 25, 100, 300, 1000],             gems: [15, 30, 60, 120, 250], icon: 'n_dungeon' },
+    { id: 'dunvaults', stat: 'dunVaults',    tiers: [5, 25, 100, 300],                   gems: [15, 40, 90, 200], icon: 'n_dungeon' },
+    { id: 'dunmastery',stat: 'dunMastery',   tiers: [10, 50, 100, 150, 250],             gems: [20, 50, 100, 200, 500], icon: 'n_dungeon' },
   ];
 
   /* ---------- Season pass ---------- */
