@@ -461,6 +461,7 @@
     entries: 10, floors: 5,                                    // floors before the boss floor
     waves: 3, wavePause: 1.6,                                  // a floor's foes come in three waves, a short breath between them
     secs: 240, floorSecs: 18, bonusSecs: 10, bonusPerFloor: 2, // the clock: 4 min, +18 s a floor cleared, +10 s pickups on the floor
+    foeHp: 1.5, foeDmg: 1.5, lordHp: 1.2, lordDmg: 1.2,        // the foes: +50% health and damage over a hall's at the same strength; the Lords +20%
     foeXp: 0.7,                                                // the foes' experience: 30% less than in a hall (the floors are crowded)
     wellMax: 2, wellRarity: 4,                                 // the Well after the Lord: pieces sent to the Wellkeeper (the server's check)
     buySecs: 60, buyGems: 500, reviveGems: 500,                // out of time: +60 s for gems once; a revive for an ad and one for gems (one gem buy a fight)

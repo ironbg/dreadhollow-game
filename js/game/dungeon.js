@@ -22,7 +22,7 @@
   /** A copy of a level's hall: its floor and foes, the Crypt's strength grown by the level, none of its own rules. */
   R.constructor.dunStage = function (lv) {
     const hall = D().halls[(Math.max(1, lv) - 1) % D().halls.length], base = C.stages.crypt, kh = 1 + D().hpPerLv * (lv - 1), kd = 1 + D().dmgPerLv * (lv - 1);
-    const def = Object.assign({}, C.stages[hall], { hpMult: base.hpMult * kh, dmgMult: base.dmgMult * kd, dmgGrow: base.dmgGrow, index: 0, bossHp: base.bossHp,
+    const def = Object.assign({}, C.stages[hall], { hpMult: base.hpMult * kh, dmgMult: base.dmgMult * kd * D().foeDmg, foeHp: D().foeHp, // (health apart: the hero's items scale by hpMult) dmgGrow: base.dmgGrow, index: 0, bossHp: base.bossHp,
       bosses: [], dissonator: false, vault: false, lordKills: 0, goldMult: base.goldMult * (1 + 0.04 * (lv - 1)), bridge: 0 });
     def.theme = Object.assign({}, C.stages[hall].theme, { noCandles: true }); // the candles stand on the columns only, not on the floor
     const lord = (C.stages[hall].bosses || []).find((b) => b.final);
@@ -161,7 +161,7 @@
   R.dunBoss = function () {
     const Q = this.dun, id = Q.lord;
     const e = this.spawnEnemy(id, 0, -AR.H + 60, { boss: true, final: true }); if (!e) return;
-    e.hp *= D().bossHp; e.maxHp *= D().bossHp;
+    const kh = D().bossHp * D().lordHp / D().foeHp; e.hp *= kh; e.maxHp *= kh; e.dmg *= D().lordDmg / D().foeDmg; // the Lord: +20%, not the foes' +50%
     this.bosses.push(e); Q.bossUp = true; Q.bt = 3;
     this.shake = 8; this.whiteFlash = 0.4; this.burst(e.x, e.y, 40, ['#000', '#3a0010', '#ff2040'], 120); DH.audio.play('roar', e.painter); DH.audio.vibrate(120);
     DH.events.emit('run:boss', { name: t('enemy.' + id), final: true });

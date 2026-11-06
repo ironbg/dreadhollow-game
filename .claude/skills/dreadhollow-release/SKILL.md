@@ -32,6 +32,11 @@ model names in commits or files. Changes to `live.json` server flags need the us
    node .claude/skills/dreadhollow-release/scripts/smoke.js
    node .claude/skills/dreadhollow-release/scripts/rewardaudit.js
    ```
+   If the Trials changed (the Dungeon's fights, strength, waves, vaults, the Well), the Dungeon's tests too (every
+   line PASS; exit code 1 on a failure):
+   ```bash
+   node .claude/skills/dreadhollow-release/scripts/dungeon.js
+   ```
    Before an AAB, also play fights to their end in the browser (death + Give up, and a victory, with metals and herbs
    picked up): the results window must open and Continue must lead back to the menus. A results window that fails
    leaves the screen on the last frame of the fight, which players report as a freeze.

@@ -379,7 +379,7 @@
       const rank = o.champion ? C.CHAMPION : o.elite ? C.ELITE : null;
       const T = E.TORMENT, tr = def.prop ? 0 : this.dread, fx = this.fx_;
       const hpMult = def.prop ? 1 : this.stage.hpMult * (def.boss ? (1 + this.stage.index * 0.1) * (this.stage.bossHp || 1) : ts) * (rank ? rank.hp : 1) * Math.pow(T.hp, tr) * (fx.giants && !def.boss ? 2 : 1)
-        * (1 + this.agony * C.AGONY.hp) * (def.boss && this.agonyOn ? C.AGONY.bossHp : 1) * (this.fx_.enemyHp || 1); // Agony: bosses carry 2.5x health
+        * (1 + this.agony * C.AGONY.hp) * (def.boss && this.agonyOn ? C.AGONY.bossHp : 1) * (this.fx_.enemyHp || 1) * (this.stage.foeHp || 1); // Agony: bosses carry 2.5x health; the Dungeon: its foes' own health (E.DUNGEON.foeHp)
       const fv = !def.variant && (C.HALL_FOES[this.stageId] || []).find((f) => f[0] === id && f[3]);
       const variant = (o.variant || def.variant || (fv && fv[3])) || (this.stage.variant && this.stage.foeVariant !== false && DH.gfx.painters[def.painter] && DH.gfx.painters[def.painter].variants && DH.gfx.painters[def.painter].variants[this.stage.variant] ? this.stage.variant : null);
       // a hall's own foe takes the strength of the foe it stands in for (within 8%): its look, pace and way of fighting
