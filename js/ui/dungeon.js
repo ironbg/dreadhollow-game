@@ -146,6 +146,7 @@
           h('div.small.muted.center.pit-share', lv <= best ? t('dun.sweepShare', { v: Math.round(M.dunSweepShare() * 100), n: U.fmt(lv) }) : best ? t('dun.sweepOnly') : t('dun.sweepNone')),
           h('div.pit-more',
             h('button.btn.small.gold', { onclick: () => { click(); ui.openDunMastery(); } }, A.img('u_star', 'ci'), ' ', t('dun.masteryLv', { n: mst.lv }), M.dunCanRaise() ? h('span.badge', M.dunPointsFree()) : null),
+            h('i'), // (the Pit's Constellation stands here: Mastery and Ranks in the same places in both windows)
             h('button.btn.small.gold', { onclick: () => { click(); ui.openBoards(M.boardKey(M.dunBoards()[0])); } }, A.img('n_trophy', 'ci'), ' ', t('lb.short'))))));
       const sl = m.el && m.el.querySelector('.pit-slide input'); if (sl) { const upd = () => { sl.nextSibling.textContent = sl.value; sl.style.setProperty('--f', ((sl.value - 1) / Math.max(1, sl.max - 1) * 100) + '%'); }; sl.addEventListener('input', upd); upd(); }
     };

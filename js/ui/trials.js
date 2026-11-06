@@ -134,10 +134,6 @@
           row('i_essence', t('pit.entryPay'), U.fmt(Math.round(cp * per))),
           row('i_essence', t('pit.perWave'), per % 1 ? per.toFixed(1) : U.fmt(per)),
           h('div.pit-fx', A.img('u_agony', 'ci'), h('span', t('pit.randomFx', { n: E.PIT.roll })), h('button.btn.small.ghost.infob', { 'aria-label': t('pit.fxTitle'), onclick: () => { click(); fxInfo(); } }, 'i'))),
-        h('div.pit-more',
-          h('button.btn.small.gold', { onclick: () => { click(); ui.openPitMastery(); } }, A.img('u_star', 'ci'), ' ', t('pit.mastery'), M.pitCanRaise() ? h('span.badge', M.pitPointsFree()) : null),
-          h('button.btn.small.gold', { onclick: () => { click(); ui.openConstellation(); } }, A.img('i_essence', 'ci'), ' ', t('pit.constellation')),
-          h('button.btn.small.gold', { onclick: () => { click(); ui.openBoards(M.boardKey(M.pitBoards()[0])); } }, A.img('n_trophy', 'ci'), ' ', t('lb.short'))),
         h('div.mact', h('div.small.center.pit-left' + (left ? '' : '.bad'), t('pit.entries', { n: all - left, m: all })),
         h('div.pit-btns',
           h('div.pit-sweep',
@@ -145,7 +141,11 @@
             left > 1 && best ? h('div.pit-slide', h('input', { type: 'range', min: 1, max: left, step: 1, value: sweepN, 'aria-label': t('pit.sweep'),
               oninput: (e) => { sweepN = +e.target.value; const b = e.target.closest('.pit-sweep').querySelector('.btn'); b.textContent = sweepN > 1 ? t('pit.sweepN', { n: sweepN }) : t('pit.sweep'); } }), h('b', null)) : null),
           h('button.btn.green' + (left ? '' : '.off'), { onclick: () => { if (!left) { ui.toast(t('pit.noEntries'), 'bad'); return; } m.close(); DH.game.startPit(); } }, t('pit.enter'))),
-        best ? h('div.small.muted.center.pit-share', t('pit.sweepShare', { v: Math.round(M.pitSweepShare() * 100) })) : null)));
+        h('div.small.muted.center.pit-share', best ? t('pit.sweepShare', { v: Math.round(M.pitSweepShare() * 100) }) : ''),
+        h('div.pit-more',
+          h('button.btn.small.gold', { onclick: () => { click(); ui.openPitMastery(); } }, A.img('u_star', 'ci'), ' ', t('pit.mastery'), M.pitCanRaise() ? h('span.badge', M.pitPointsFree()) : null),
+          h('button.btn.small.gold', { onclick: () => { click(); ui.openConstellation(); } }, A.img('i_essence', 'ci'), ' ', t('pit.constellation')),
+          h('button.btn.small.gold', { onclick: () => { click(); ui.openBoards(M.boardKey(M.pitBoards()[0])); } }, A.img('n_trophy', 'ci'), ' ', t('lb.short'))))));
       const sl = m.el && m.el.querySelector('.pit-slide input'); if (sl) { const upd = () => { sl.nextSibling.textContent = sl.value; sl.style.setProperty('--f', ((sl.value - 1) / Math.max(1, sl.max - 1) * 100) + '%'); }; sl.addEventListener('input', upd); upd(); }
     };
     let sweepN = 1;

@@ -2166,9 +2166,6 @@ body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inse
 .dunwin .dun-rwi .n { font-size: 11px; white-space: nowrap; }
 .dunwin .dun-leap { margin-top: 5px; }
 .dunwin .mact { margin-top: 6px; }
-.dunwin .pit-btns .btn { min-height: 42px; }
-.dunwin .pit-more { margin-top: 6px; }
-.dunwin .pit-share { margin-top: 2px; font-size: 11px; }
 .dun-where .dw { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
 .dun-where { gap: 4px 14px; }
 .dunwin .dun-far { left: 8px; right: auto; }
@@ -2183,11 +2180,15 @@ body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inse
 .dunwin .dun-rw { min-height: 106px; align-content: flex-start; }
 .dunwin .dun-rwi { padding: 0; background: none; border: 0; cursor: pointer; color: inherit; font: inherit; }
 .pit-slide.hide { visibility: hidden; }
-.dunwin .pit-share { min-height: 2.6em; }
 @media (max-height: 700px) { .dunwin .dun-tile { height: 44px; } .dunwin .dun-tile b { padding-top: 13px; font-size: 16px; } }
 @media (max-height: 700px) {
   .dunwin .dun-rwi { width: 36px; } .dunwin .dun-rwi .slot { width: 32px; height: 32px; } .dunwin .dun-rwi .n { font-size: 10px; }
   .dunwin .dun-rw { min-height: 94px; } .dun-where { font-size: 12px; margin-top: 3px; padding-top: 3px; } .dun-rwh { margin-top: 3px; }
   .dunwin .dun-leap { margin-top: 3px; } .dunwin .dun-leap .btn { min-height: 26px; padding: 2px 8px; }
-  .dunwin .pit-share { min-height: 1.4em; } .dunwin .pit-btns .btn { min-height: 38px; }
+  .dunwin .pit-share { min-height: 1.4em; }
 }
+/* the Pit's and the Dungeon's foot: the same buttons in the same places (Sweep, Enter; the share line; Mastery, ·, Ranks) */
+.pitwin .pit-share, .dunwin .pit-share { min-height: 2.6em; margin-top: 2px; font-size: 11px; }
+.pitwin .pit-more, .dunwin .pit-more { margin-top: 6px; }
+.pitwin .pit-shopbtn { top: 12px; right: 12px; } /* its badge inside the picture, not on the frame */
+.pitwin .pit-shopbtn .badge { top: -6px; right: -6px; }
