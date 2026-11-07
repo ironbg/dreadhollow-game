@@ -361,13 +361,13 @@
     for (const k in mods) acc[k] = (acc[k] || 0) + mods[k] * (mult == null ? 1 : mult);
     return acc;
   };
-  meta.baseStats = (heroId, runGear) => {
+  meta.baseStats = (heroId, runGear, trial) => { // trial: a fight of the Trials (the Pit, the Dungeon), where the Altar's Artifacts do not work
     const s = S(), hero = C.heroes[heroId];
     const st = { baseHp: hero.hp, baseSpeed: hero.speed, regen: hero.regen || 0, defense: hero.defense || 0, block: hero.block || 0,
       critBonus: 0.5, rerolls: 1, revives: 0 };
     meta.addStats(st, hero.bonus || {});
     const shr = meta.shrineOf(heroId); for (const id in shr) if (E.shrine[id]) meta.addStats(st, E.shrine[id].per, shr[id]); // this hero's own Blessings
-    const sup = (meta.artifactFx().suppress || 1); // Torment Suppressor weakens the Archive
+    const sup = trial ? 1 : (meta.artifactFx().suppress || 1); // Torment Suppressor weakens the Archive (not in the Trials)
     const arc = (s.archiveBy && s.archiveBy[heroId]) || {}, eqp = meta.eq(heroId); // this hero's own Archive and loadout
     for (const id in arc) if (E.archive[id]) { const n = arc[id], whole = 'count' in E.archive[id].per || 'rerolls' in E.archive[id].per; meta.addStats(st, E.archive[id].per, whole ? Math.floor(n * sup) : n * sup); }
     let ring = null;

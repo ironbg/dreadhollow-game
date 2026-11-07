@@ -21,7 +21,7 @@
 
   /** A copy of a level's hall: its floor and foes, the Crypt's strength grown by the level, none of its own rules. */
   R.constructor.dunStage = function (lv) {
-    const hall = D().halls[(Math.max(1, lv) - 1) % D().halls.length], base = C.stages.crypt, kh = 1 + D().hpPerLv * (lv - 1), kd = 1 + D().dmgPerLv * (lv - 1);
+    const hall = D().halls[(Math.max(1, lv) - 1) % D().halls.length], base = C.stages.crypt, sl = lv - 1 + D().lvShift, kh = 1 + D().hpPerLv * sl, kd = 1 + D().dmgPerLv * sl; // level 1 as strong as the tenth was
     const def = Object.assign({}, C.stages[hall], { hpMult: base.hpMult * kh, dmgMult: base.dmgMult * kd * D().foeDmg, foeHp: D().foeHp, // (health apart: the hero's items scale by hpMult) dmgGrow: base.dmgGrow, index: 0, bossHp: base.bossHp,
       bosses: [], dissonator: false, vault: false, lordKills: 0, goldMult: base.goldMult * (1 + 0.04 * (lv - 1)), bridge: 0 });
     def.theme = Object.assign({}, C.stages[hall].theme, { noCandles: true }); // the candles stand on the columns only, not on the floor

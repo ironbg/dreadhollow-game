@@ -93,22 +93,38 @@
   ui.openTrials = (start) => {
     let i = Math.max(0, MODES.findIndex((m) => m.id === start));
     const m = ui.modal({ title: t('trials.title'), cls: 'trials wide', body: () => h('div') });
-    const go = (d) => { click(); i = (i + d + MODES.length) % MODES.length; draw(); };
+    let dir = 0; // the last turn (for the slide)
+    const go = (d) => { click(); i = (i + d + MODES.length) % MODES.length; dir = d; draw(); };
+    const enter = (md) => { if (!md.open()) return; click(); m.close(); if (md.go) md.go(); else ui.openPit(); };
     const arch = (k, side) => {
       const md = MODES[(i + k + MODES.length) % MODES.length];
       const open = md.open();
-      return h('div.tr-arch' + (side ? '.side' : '.mid') + (open ? '' : '.soon'), { onclick: () => { if (side) go(k); } },
+      return h('div.tr-arch' + (side ? '.side' : '.mid') + (open ? '' : '.soon'), { 'data-k': k },
         h('img', { src: art(md), alt: '' }), open ? null : h('div.tr-soon', A.img('u_lock', 'ci'), h('span', md.lock ? md.lock() : t('trials.soon'))));
     };
     const draw = () => {
       const md = MODES[i];
       m.set(h('div',
         h('div.center.small.muted', t('trials.sub')),
-        h('div.tr-hall', arch(-1, true), arch(0, false), arch(1, true)),
+        h('div.tr-hall' + (dir ? (dir > 0 ? '.slide-l' : '.slide-r') : ''), arch(-1, true), arch(0, false), arch(1, true)),
         h('div.tr-name', h('button.tr-arrow', { onclick: () => go(-1), 'aria-label': '<' }, '◀'), h('span', t('trials.' + md.id)), h('button.tr-arrow', { onclick: () => go(1), 'aria-label': '>' }, '▶')),
         h('div.small.center.tr-desc', t('trials.' + md.id + '.desc')),
-        h('div.btns', md.open() ? h('button.btn.red', { onclick: () => { click(); m.close(); if (md.go) md.go(); else ui.openPit(); } }, t('trials.enter'))
+        h('div.btns', md.open() ? h('button.btn.red', { onclick: () => enter(md) }, t('trials.enter'))
           : h('button.btn.ghost.off', md.lock ? md.lock() : t('trials.soon')))));
+      dir = 0;
+      // a finger turns the arches (a swipe to either side); a tap on the middle one goes in, on a side one turns to it
+      const hall = m.el && m.el.querySelector('.tr-hall'); if (!hall) return;
+      let x0 = null, y0 = 0, moved = false;
+      hall.addEventListener('pointerdown', (e) => { x0 = e.clientX; y0 = e.clientY; moved = false; });
+      hall.addEventListener('pointermove', (e) => { if (x0 != null && Math.abs(e.clientX - x0) > 10) moved = true; });
+      hall.addEventListener('pointerup', (e) => {
+        if (x0 == null) return; const dx = e.clientX - x0, dy = e.clientY - y0; x0 = null;
+        if (Math.abs(dx) > 36 && Math.abs(dx) > Math.abs(dy)) { go(dx < 0 ? 1 : -1); return; }
+        if (moved) return;
+        const a = e.target.closest('.tr-arch'); if (!a) return; const k = +a.dataset.k;
+        if (k) go(k); else enter(MODES[i]);
+      });
+      hall.addEventListener('pointercancel', () => { x0 = null; });
     };
     draw();
   };

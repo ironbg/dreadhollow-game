@@ -666,7 +666,7 @@
   /** The hero's stats in four groups (attack, effects, defence, utility), two columns of "name: value".
    *  A value above the hero's own base is green, below it red; every stat opens its details when tapped.
    *  Rare stats appear only when something gives them. */
-  ui.statSheet = (run) => sheet(run.P, DH.meta.baseStats(run.heroId, {}), () => Math.round(run.player.hp) + '/' + run.P.maxHp);
+  ui.statSheet = (run) => sheet(run.P, DH.meta.baseStats(run.heroId, {}, !!(run.pit || run.dun)), () => Math.round(run.player.hp) + '/' + run.P.maxHp);
   /** The same sheet out of a fight: what the hero brings into one (relics, Blessings, Archive, Mark). Green is what
    *  all that adds to the hero's own stats. */
   ui.openHeroStats = (heroId) => {

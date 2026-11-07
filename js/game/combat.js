@@ -15,7 +15,7 @@
   const EDGE = { dmgPct: 0.04, as: 0.03, area: 0.04, maxHpPct: 0.05, critPct: 0.04, speedPct: 0.03 }; // Master's Edge picks
 
   R.recompute = function (fill) {
-    const st = DH.meta.baseStats(this.heroId, this.runGear);
+    const st = DH.meta.baseStats(this.heroId, this.runGear, !!(this.pit || this.dun));
     const add = (mods, k) => { for (const x in mods) st[x] = (st[x] || 0) + mods[x] * k; };
     const aff = this.hero.affinity || {};
     for (const id in this.traits.base) add(C.baseTraits[id].per, this.traits.base[id] * C.AFFINITY[aff[id] == null ? 1 : aff[id]]);

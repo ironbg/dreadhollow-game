@@ -473,6 +473,7 @@
     buySecs: 60, buyGems: 500, reviveGems: 500,                // out of time: +60 s for gems once; a revive for an ad and one for gems (one gem buy a fight)
     affixAt: [[100, 3], [50, 2], [20, 1]],                     // from level 100 three hazards, from 50 two, from 20 one
     halls: ['crypt', 'abyss', 'aqueduct', 'catacombs', 'discord', 'blightmire', 'reliquary'], // the catacombs of level n: halls[(n - 1) % 7]
+    lvShift: 9,                                                // the foes' strength starts where level 10 was: level n is as strong as n + 9
     hpPerLv: 0.12, dmgPerLv: 0.05,                             // the foes: +12% health and +5% damage a level over the first (even growth)
     quota: (lv, floor) => 2 * (Math.min(120, 40 + Math.floor(lv / 4)) + floor * 4), // foes to slay on a floor (floor 0..4), in its three waves
     // what a cleared level pays (a level takes 1.5-3 minutes; a hall's ten minutes pay some 3 000-25 000 gold by the hall)

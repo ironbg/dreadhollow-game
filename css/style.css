@@ -2216,3 +2216,11 @@ body.srvbusy::after { content: ''; position: fixed; top: calc(env(safe-area-inse
 @keyframes pbSpark { from { transform: translate(0, 0) scale(1); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; } }
 @keyframes pbFull { 0% { box-shadow: inset 0 0 0 1px #6a5030; } 25% { box-shadow: inset 0 0 0 1px #ffe08a, 0 0 14px rgba(255,200,80,.95); } 100% { box-shadow: inset 0 0 0 1px #6a5030, 0 0 0 rgba(255,200,80,0); } }
 #hud .pitbar .pb-bar { height: 11px; }
+/* the Trials' arches turn under a finger: a swipe to either side slides them along; a tap on the middle one goes in */
+.tr-hall { touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
+.tr-hall img { pointer-events: none; -webkit-user-drag: none; }
+.tr-arch.mid:not(.soon) { cursor: pointer; }
+.tr-hall.slide-l > .tr-arch { animation: trSlideL .28s cubic-bezier(.2,.8,.3,1); }
+.tr-hall.slide-r > .tr-arch { animation: trSlideR .28s cubic-bezier(.2,.8,.3,1); }
+@keyframes trSlideL { from { transform: translateX(40%); opacity: .4; } to { transform: none; opacity: 1; } }
+@keyframes trSlideR { from { transform: translateX(-40%); opacity: .4; } to { transform: none; opacity: 1; } }

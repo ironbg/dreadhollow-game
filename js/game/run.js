@@ -33,9 +33,11 @@
       this.dun = opts.dun || null; // the Dungeon (js/game/dungeon.js)
       this.cs = DH.meta.consSpecials ? DH.meta.consSpecials() : {}; // the Constellation's Specialties unlocked (js/game/constellation.js)
       this.settings = S.settings;
-      this.artifacts = DH.meta.activeArtifacts();
-      this.dread = DH.meta.dreadRank();
-      this.fx_ = DH.meta.artifactFx();
+      // the Altar's Artifacts (their Torment Rank, curses and boons) belong to the halls: none of them in the Trials
+      const trial = !!(opts.pit || opts.dun);
+      this.artifacts = trial ? [] : DH.meta.activeArtifacts();
+      this.dread = trial ? 0 : DH.meta.dreadRank();
+      this.fx_ = trial ? {} : DH.meta.artifactFx();
       // the Reliquary's tributes, paid at the start: their hardships join the Artifacts' curses, their boons are this.trib
       this.tributes = this.stageId === E.TRIBUTE_STAGE ? (S.runTributes || []).filter((id) => E.tributes[id]) : [];
       this.trib = {};

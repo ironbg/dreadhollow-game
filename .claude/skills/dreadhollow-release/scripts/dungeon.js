@@ -32,7 +32,8 @@ const { chromium } = require('playwright');
       r.stage.foeHp = 1; r.stage.dmgMult = dm / D.foeDmg; const z = r.spawnEnemy(id, 0, 0); r.stage.foeHp = fh; r.stage.dmgMult = dm;
       ok('foes +50% health', near(a.maxHp / z.maxHp, D.foeHp), (a.maxHp / z.maxHp).toFixed(3) + ' ' + id + ' in ' + st.id);
       ok('foes +50% damage', near(a.dmg / z.dmg, D.foeDmg), (a.dmg / z.dmg).toFixed(3));
-      ok('the hero\'s items not scaled by it', r.stage.hpMult === C.stages.crypt.hpMult * (1 + D.hpPerLv * 9));
+      ok('the hero\'s items not scaled by it', near(r.stage.hpMult, C.stages.crypt.hpMult * (1 + D.hpPerLv * (9 + D.lvShift)), 1e-9));
+      ok('level 1 as strong as level ' + (1 + D.lvShift) + ' was', near(DH.Run.dunStage(1).def.hpMult, C.stages.crypt.hpMult * (1 + D.hpPerLv * D.lvShift), 1e-9) && near(DH.Run.dunStage(1).def.dmgMult, C.stages.crypt.dmgMult * (1 + D.dmgPerLv * D.lvShift) * D.foeDmg, 1e-9));
       // 2. the Lord: its health x bossHp x 1.2, its damage x 1.2 (not the foes' x1.5)
       r.dunFloor(D.floors); r.dunBoss(); const L = r.bosses[0];
       r.stage.foeHp = 1; r.stage.dmgMult = dm / D.foeDmg; const L0 = r.spawnEnemy(r.dun.lord, 0, 0, { boss: true, final: true }); r.stage.foeHp = fh; r.stage.dmgMult = dm;
@@ -60,8 +61,20 @@ const { chromium } = require('playwright');
       for (let i = 0; i < 90 && !fired; i++) { r.update(1 / 30); if (!r.noFoes && r.abilities.some((a) => a.t > 0.05)) fired = true; }
       ok('attacks start again with a foe', fired);
     }
-    // 6. a whole level by a new hero (a vault on floor 1): floors, the vault, the Lord, the Well, the portal; no stall
+    // 6. the Altar's Artifacts do not work in the Trials (no Torment Rank, no curses or boons, the Archive whole)
     {
+      const keep = M.activeArtifacts; M.activeArtifacts = () => Object.keys(E.artifacts).slice(0, 3);
+      const { r } = mk(2), hall = new DH.Run({ hero: S.selectedHero, stage: 'crypt' });
+      ok('no Artifacts in the Dungeon', r.dread === 0 && r.artifacts.length === 0 && !Object.keys(r.fx_).length && hall.dread === 3, 'dungeon ' + r.dread + ', hall ' + hall.dread);
+      const pst = DH.Run.pitStage ? DH.Run.pitStage(1) : null;
+      if (pst) { const pr = new DH.Run({ hero: S.selectedHero, stage: pst.id, stageDef: pst.def, pit: { from: 1, affixes: [], paid: 0, secs: 180, per: 1 } }); ok('no Artifacts in the Pit', pr.dread === 0 && !Object.keys(pr.fx_).length); }
+      M.activeArtifacts = keep; DH.game.run = null;
+    }
+    // 7. a whole level by a hero who has just opened the Dungeon (the third hall won: Rare gear at level 20, Blessings 3)
+    //    with a vault on floor 1: floors, the vault, the Lord, the Well, the portal; in time and without a stall
+    {
+      S.gear = []; S.loadouts = {}; for (let i = 0; i < 60; i++) M.createGear(2); S.gear.forEach((g) => { g.level = 20; });
+      const sh = M.shrineOf(S.selectedHero); for (const id of E.shrineOrder) sh[id] = Math.min(E.shrine[id].max, 3);
       const { r } = mk(1, [1], ['gold']); let tome = null; const off = DH.events.on('run:tome', (d) => { tome = d; });
       DH.input.axis = () => { const p = r.player; let best = null, bd = 1e12; for (const e of r.enemies) { if (e.dead || e.def.prop) continue; const d = (e.x - p.x) ** 2 + (e.y - p.y) ** 2; if (d < bd) { bd = d; best = e; } }
         if (!best) return { x: 0, y: 0 }; const dx = best.x - p.x, dy = best.y - p.y, d = Math.sqrt(bd) || 1, k = d > 40 ? 1 : -0.4; return { x: dx / d * k, y: dy / d * k }; };
@@ -84,7 +97,7 @@ const { chromium } = require('playwright');
       }
       off && off();
       ok('level 1 played to the end', r.state === 'victory' && r.won && !stuck, 'state ' + r.state + (stuck ? ' stuck at ' + stuck : '') + ', ' + Math.round(r.time) + ' s, ' + Math.round(r.dun.secs) + ' s left, deaths ' + deaths);
-      ok('level 1 in time for a new hero', !outOfTime);
+      ok('level 1 in time for a hero who has just opened it', !outOfTime);
       ok('the vault through the stairs', vault);
       ok('the Well after the Lord', well);
     }
