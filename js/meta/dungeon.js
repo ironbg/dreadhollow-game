@@ -76,7 +76,7 @@
     const d = dunS(); lv = lv | 0; n = Math.max(1, Math.min(M.dunLeapMax(lv), n | 0 || 1));
     if (!M.dunUnlocked() || lv < 1 || lv > d.best + 1 || M.dunLeft() < n) return null;
     d.used += n;
-    const floors = D().floors + 1, chance = M.dunVaultChance(), room = Math.max(0, D().vaultsPerDay - d.vaults), vaults = [];
+    const floors = D().floors, chance = M.dunVaultChance(), room = Math.max(0, D().vaultsPerDay - d.vaults), vaults = []; // never on the Lord's floor
     for (let f = 0; f < floors && vaults.length < room; f++) if (Math.random() < chance) vaults.push(f);
     const kinds = vaults.map(() => (M.dunPerk('deal') || Math.random() < 0.5 ? 'iron' : 'gold'));
     d.active = { at: U.now(), lv, n, affixes: M.dunAffixes(lv), vaults, kinds, paid: [], gems: null };

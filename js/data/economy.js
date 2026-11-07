@@ -493,7 +493,7 @@
     chests: (lv, first) => (first ? (lv >= 80 ? { gold: 1, wood: 2 } : lv >= 30 ? { silver: 1, wood: 1 } : { wood: 2 }) : lv >= 10 ? { wood: 1 } : {}),
     bossLootWithin: 120,                                        // the boss drops its chest only within 120 levels of the best cleared
     bossHp: 0.35,                                               // the Lord's health against a hall's own (met at the tenth minute; here after a few)
-    vaultChance: 0.10, vaultsPerDay: 5, vaultSecs: 30,          // a floor's chance to hide a vault (the boss floor too)
+    vaultChance: 0.10, vaultsPerDay: 5, vaultSecs: 30,          // a floor's chance to hide a vault (not the Lord's floor)
     vaultGold: (lv) => Math.round(1000 + 150 * lv), vaultMats: 2.5,  // a vault of metal: the level's metals x2.5
     sweep: 0.5,                                                 // a sweep pays half the best level (the Guide card raises it to all)
     minFloorSecs: 8,                                            // the server's check: a floor cannot fall faster than this

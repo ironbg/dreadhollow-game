@@ -318,7 +318,7 @@ const live = require('../game/live.json');
     assert.deepStrictEqual(r.result, [[0, 1, 1, 2, 2, 3, 3], true, true, 0, 'crypt', 'reliquary']);
     // vaults: rolled at the start, paid once each, five a day at most, kept even if the level is lost
     r = await withProfile(Object.assign({}, r.profile, { dungeon: Object.assign({}, r.profile.dungeon, { perks: {} }) }), live, (DH) => { DH.economy.DUNGEON.vaultChance = 1; return L(DH).dunStart.run({ lv: 2 }); });
-    assert.strictEqual(r.result.vaults.length, 5, 'five a day'); assert.ok(r.result.kinds.every((k) => k === 'gold' || k === 'iron'));
+    assert.strictEqual(r.result.vaults.length, 5, 'five a day'); assert.ok(!r.result.vaults.includes(5), 'never on the Lord\'s floor'); assert.ok(r.result.kinds.every((k) => k === 'gold' || k === 'iron'));
     r = await withProfile(back(r.profile, 300e3), live, (DH) => { const out = []; for (const f of [0, 0, 1, 2, 3, 4, 5]) out.push(L(DH).dunVault.run({ floor: f })); return out.map((x) => (x ? x.kind : null)); });
     assert.strictEqual(r.result.filter(Boolean).length, 5); assert.strictEqual(r.result[1], null, 'once each'); assert.strictEqual(r.profile.dungeon.vaults, 5);
     r = await withProfile(r.profile, live, (DH) => [L(DH).dunEnd.run({ floors: 2, won: false, gold: 0 }), DH.economy.DUNGEON.vaultChance = 1, L(DH).dunStart.run({ lv: 2 })]);

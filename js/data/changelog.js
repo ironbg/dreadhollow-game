@@ -8,11 +8,13 @@
       bg: [
         'Тъмницата е по-трудна: ниво 1 е толкова силно, колкото беше ниво 10, и всяко следващо ниво е с толкова по-силно.',
         'Артефактите от Олтара (Рангът на мъчението, проклятията и даровете им) вече не действат в Ямата и Тъмницата – само в залите.',
+        'Тъмницата: трезор вече не може да се появи на последния етаж – този с Владетеля.',
         'Изпитания: арките се въртят и с плъзгане на пръст, а докосване на средната картина влиза в изпитанието.',
       ],
       en: [
         'The Dungeon is harder: level 1 is as strong as level 10 was, and every level after it as much stronger.',
         'The Altar\'s Artifacts (the Torment Rank, their curses and boons) no longer work in the Pit and the Dungeon – only in the halls.',
+        'The Dungeon: a vault can no longer appear on the last floor – the Lord\'s.',
         'Trials: the arches turn with a swipe of the finger too, and a tap on the middle picture goes in.',
       ],
     },
